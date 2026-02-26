@@ -1,0 +1,74 @@
+Let's start with an example. 
+Amanda is a marine scientist investigating how protected areas affect the population of elephant seals in Calfiornia. 
+
+<!--Image 1: field person -->
+
+<!--Image 2: elephant seals -->
+
+Specifically, she wants to understand: how does elephant seal population change in a protected rookery that has just been protected?
+
+She identifies the **predictor** as time since the rookery was protected and the **response variable** as elephant seal population (since elephant seal population *depends* on time). 
+
+<!-- Image 3: x and y axes with time and elephant seal population -->
+
+What if Amanda was given the true, real relationship between time and population? 
+In mathematical terms, this would mean Amanda would have a **function $f$** such that $f(time) = true population$. 
+
+<!-- Image 4: x and y axes with f as sigmoidal-->
+
+Q: What does $f(0)$ represent? What does $f(10)=200$ mean?
+
+Q: What could Amanda do if she had this function $f$?
+
+She could understand whether and how population and time are related: is there not relation, does it increase, decrease, varies, etc? She could also understand the mathematical form of this relationship: for example, is it linear?
+These are examples of using the function $f$ for **inference**. Or she could also use the function $f$ to know the elephant seal population in the future, i.e. using the funciton for **prediction**. In addtion, she could probably save resources spent in going out into the field for data collection. 
+
+Clearly Amanda has no access to this true, ideal function! So her next best option is to try to **estimate $f$** using data.
+
+Fortunately, she found some long-term ecological data that measures the elephant seal population since the protection for the rookery was established:
+
+<!-- Image 5: x and y axes with the measured data -->
+
+These are the **observed values** for the response variable . 
+
+Q: Are the observed values the "true values" for the response variable?
+No: there's error that can be introduced during measurement. In this case we have
+
+$f(time) = true population = observerd population + error$
+
+<!-- Image 6: x and y axes with the measured data, the sigmoidal f, and the vertical errors from the measured data to the sigmoidal (similar to figure 2.2)-->
+
+With these observed population values at a given time, Amanda can try to estimate the real function $f$ with another **function $f^\hat$**. 
+
+Some estimates of $f$:
+
+<!-- Image 7: four functions fitting the observed data, a constant average, a linear function, a logistic one, and one that is clearly overfitting -->
+
+Q: What considerations may Amanda take into account when choosing an estimate $f^\hat$?
+Many: preliminary understanding of the data, the application (prediction or inference?), volume of availale data, minimizing error, even computing power. 
+
+Selecting any comes with tradeoffs!
+
+Roughly, this is the setup in which we will be working in. Let's see it more abstractly:
+
+We have a set of $p$ **predictors** $X_1, ..., X_p$ and a **dependent variable** $Y$. 
+
+We assume there is a relationship between $Y$ and $X = (X_1, ..., X_p)$ that can be written as 
+$$Y = f(X) + \epsilon.$$
+
+Here $f$ is some fixed but *unknown* function of the predictors $X_1, . . ., X_p$ and $\epsilon$ represents an error term (independent of $X$ and with mean zero). 
+
+
+Our objective is to estimate $f$ well enough with another function $f^\hat(X)$. 
+
+Why bother to estimate $f$? 
+
+1. do inference: 
+
+
+We want to approximate the relationship between a dependent variable and its independent or predictor variable, and wrap that approximation in the form of a function $f^\hat$ that we can use for inference or prediction. 
+
+Let's see this workflow a bit more abstractly and introduce notation we will be using throughout:
+
+
+
