@@ -1,4 +1,7 @@
+## Motivation
+
 Let's start with an example. 
+
 Amanda is a marine scientist investigating how protected areas affect the population of elephant seals in Calfiornia. 
 
 <!--Image 1: field person -->
@@ -12,7 +15,7 @@ She identifies the **predictor** as time since the rookery was protected and the
 <!-- Image 3: x and y axes with time and elephant seal population -->
 
 What if Amanda was given the true, real relationship between time and population? 
-In mathematical terms, this would mean Amanda would have a **function $f$** such that $f(time) = true population$. 
+In mathematical terms, this would mean Amanda would have a **function $f$** such that $f(time since protection) = true population$. 
 
 <!-- Image 4: x and y axes with f as sigmoidal-->
 
@@ -20,8 +23,11 @@ Q: What does $f(0)$ represent? What does $f(10)=200$ mean?
 
 Q: What could Amanda do if she had this function $f$?
 
-She could understand whether and how population and time are related: is there not relation, does it increase, decrease, varies, etc? She could also understand the mathematical form of this relationship: for example, is it linear?
-These are examples of using the function $f$ for **inference**. Or she could also use the function $f$ to know the elephant seal population in the future, i.e. using the funciton for **prediction**. In addtion, she could probably save resources spent in going out into the field for data collection. 
+- She could understand whether and how population and time are related: is there no relation, does it increase, decrease, varies, etc? 
+- She could also understand the mathematical form of this relationship: for example, is it linear?
+These are examples of using the function $f$ for **inference**.
+
+- She could also use the function $f$ to know the elephant seal population in the future, i.e. using the funciton for **prediction**. In addtion, she could probably save resources spent in going out into the field for data collection. 
 
 Clearly Amanda has no access to this true, ideal function! So her next best option is to try to **estimate $f$** using data.
 
@@ -29,7 +35,7 @@ Fortunately, she found some long-term ecological data that measures the elephant
 
 <!-- Image 5: x and y axes with the measured data -->
 
-These are the **observed values** for the response variable . 
+These are the **observed values** for the response variable. 
 
 Q: Are the observed values the "true values" for the response variable?
 No: there's error that can be introduced during measurement. In this case we have
@@ -44,10 +50,12 @@ Some estimates of $f$:
 
 <!-- Image 7: four functions fitting the observed data, a constant average, a linear function, a logistic one, and one that is clearly overfitting -->
 
-Q: What considerations may Amanda take into account when choosing an estimate $f^\hat$?
+Q: What considerations can Amanda take into account when choosing an estimate $f^\hat$?
 Many: preliminary understanding of the data, the application (prediction or inference?), volume of availale data, minimizing error, even computing power. 
 
-Selecting any comes with tradeoffs!
+Selecting any $f^\hat$ comes with tradeoffs!
+
+## Abstract setup
 
 Roughly, this is the setup in which we will be working in. Let's see it more abstractly:
 
@@ -58,17 +66,94 @@ $$Y = f(X) + \epsilon.$$
 
 Here $f$ is some fixed but *unknown* function of the predictors $X_1, . . ., X_p$ and $\epsilon$ represents an error term (independent of $X$ and with mean zero). 
 
-
 Our objective is to estimate $f$ well enough with another function $f^\hat(X)$. 
 
 Why bother to estimate $f$? 
 
-1. do inference: 
+1. Do **inference**: use $f^\hat$ to understand which predictors are associated with the response and understand the form of this relationship. 
+
+2. Do **predictions**: this means calculating $f^\hat(X) = Y^\hat$ to predict what the value of $Y$ will be with at $X$. 
+
+Depending whether our goal is prediction, inference, or a combination of the two, we may select different methods for estiamting $f$. 
+
+Generally: 
+- models for $f$ that are interpretable enough to allow inference may not be have as accurate prediction results as other approaches. 
+- models for $f$ that can give excellent predictions, may not be as interpretable and make inference more challenging.
+
+There's a tradeoff. 
+
+Generally **machine learning** may prioritize predictions over interpretability (we want the best prediction, even if we got it out of a black box), while **statistical modeling** may prioritize interpretability over prediction.
+
+Q: What are some examples where inference may be more important than prediction? What about an example where prediction is the priority?
 
 
-We want to approximate the relationship between a dependent variable and its independent or predictor variable, and wrap that approximation in the form of a function $f^\hat$ that we can use for inference or prediction. 
+## How do we estimate $f$?
 
-Let's see this workflow a bit more abstractly and introduce notation we will be using throughout:
+<!-- Make this into an example where the data comes from a table and then is represented visually, and then it is represented in vector format -->
+
+
+We start with a set of $n$ observed data points:
+
+$$ \{ (x_1, y_1) , ..., (x_n, y_n)\}, $$
+
+where 
+
+- $x_i$ = a *vector* with with the **predictor information**, and 
+- $y_i$ = the **response variable** for the $i$-th observation.
+
+These data points are the **training set** or **training data** because we will use them to **train** (or **fit**) our method and obtain an estimate $f^\hat$ of $f$. 
+
+If we have $p$ predictors, then each $x_i$ has the form:
+
+$$x_i = (x_{i1}, ..., x_{ip}).$$
+
+The response variable is just a single number or category.
+
+Our goal is to apply methods to the training data to estimate the unknown function $f$ that links predictors with the response. 
+
+Broadly, most methods for this task can be characterized as parametric or non-parametric. 
+
+## Parametric methods estimate $f$ in two steps
+
+1. Make an assumption about the *functional form* or shape of $f$.
+
+2. Use the training data to **train** or **fit** the model and get those parameters that will define the estimate $f^\hat$. 
+
+Considerations:
+
+- May be used with small training sets
+- May be asier to estimate a few parameters
+- Simpler functional forms for $f^\hat$ can make inference easier
+- Assumed functional form for $f^\hat$ may be far from true $f$
+
+
+Example:
+
+<!--TODO: update ? with another variable -->
+
+
+1. Amanda *decides* to model the population with a linear model on the predictors $X_1=time$ and $X_2= ?$. This means she assumes the function $f(time, ?) = population$ has the form
+
+$$ f(x_1, x_2) = \beta_0 + \beta_1 x_1 + \beta_2 x_2. $$
+
+2. She trains the model to get an estimate for $f$, by finding *parameters* $beta_0, \beta_1$, and $\beta_2$ such that
+
+$$ observed data \approx \beta_0 + \beta_1 time + \beta_2 ? .$$
+
+This is great! She only needs to find three numbers to get a model for the population.
+
+<!-- Add graphs about fitting the model -->
+
+## Non-paremetric methods do not make explicit assumptions about the functional form of $f$
+
+Instead, they seek an estimate of $f$ that gets as close to the training set as possible without being "being too rough or wiggly". 
+
+Considerations:
+
+- May need a lot of data to fit the model
+- May be prone to **overfitting**: they follow errors or noise in the data too closely. 
+- May be less interpretable than more restrictive models
+
 
 
 
