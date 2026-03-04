@@ -40,20 +40,20 @@ These are the **observed values** for the response variable.
 Q: Are the observed values the "true values" for the response variable?
 No: there's error that can be introduced during measurement. In this case we have
 
-$f(time) = true population = observerd population + error$
+$f(\text{time}) = \text{true population} = \text{observerd population} + \text{error}$
 
 <!-- Image 6: x and y axes with the measured data, the sigmoidal f, and the vertical errors from the measured data to the sigmoidal (similar to figure 2.2)-->
 
-With these observed population values at a given time, Amanda can try to estimate the real function $f$ with another **function $f^\hat$**. 
+With these observed population values at a given time, Amanda can try to estimate the real function $f$ with another **function $\hat{f}$**. 
 
 Some estimates of $f$:
 
 <!-- Image 7: four functions fitting the observed data, a constant average, a linear function, a logistic one, and one that is clearly overfitting -->
 
-Q: What considerations can Amanda take into account when choosing an estimate $f^\hat$?
+Q: What considerations can Amanda take into account when choosing an estimate $\hat{f}$?
 Many: preliminary understanding of the data, the application (prediction or inference?), volume of availale data, minimizing error, even computing power. 
 
-Selecting any $f^\hat$ comes with tradeoffs!
+Selecting any $\hat{f}$ comes with tradeoffs!
 
 ## Abstract setup
 
@@ -66,13 +66,13 @@ $$Y = f(X) + \epsilon.$$
 
 Here $f$ is some fixed but *unknown* function of the predictors $X_1, . . ., X_p$ and $\epsilon$ represents an error term (independent of $X$ and with mean zero). 
 
-Our objective is to estimate $f$ well enough with another function $f^\hat(X)$. 
+Our objective is to estimate $f$ well enough with another function $\hat{f}(X)$. 
 
 Why bother to estimate $f$? 
 
-1. Do **inference**: use $f^\hat$ to understand which predictors are associated with the response and understand the form of this relationship. 
+1. Do **inference**: use $\hat{f}$ to understand which predictors are associated with the response and understand the form of this relationship. 
 
-2. Do **predictions**: this means calculating $f^\hat(X) = Y^\hat$ to predict what the value of $Y$ will be with at $X$. 
+2. Do **predictions**: this means calculating $\hat{f}(X) = Y^\hat$ to predict what the value of $Y$ will be with at $X$. 
 
 Depending whether our goal is prediction, inference, or a combination of the two, we may select different methods for estiamting $f$. 
 
@@ -101,7 +101,7 @@ where
 - $x_i$ = a *vector* with with the **predictor information**, and 
 - $y_i$ = the **response variable** for the $i$-th observation.
 
-These data points are the **training set** or **training data** because we will use them to **train** (or **fit**) our method and obtain an estimate $f^\hat$ of $f$. 
+These data points are the **training set** or **training data** because we will use them to **train** (or **fit**) our method and obtain an estimate $\hat{f}$ of $f$. 
 
 If we have $p$ predictors, then each $x_i$ has the form:
 
@@ -117,14 +117,14 @@ Broadly, most methods for this task can be characterized as parametric or non-pa
 
 1. Make an assumption about the *functional form* or shape of $f$.
 
-2. Use the training data to **train** or **fit** the model and get those parameters that will define the estimate $f^\hat$. 
+2. Use the training data to **train** or **fit** the model and get those parameters that will define the estimate $\hat{f}$. 
 
 Considerations:
 
 - May be used with small training sets
 - May be asier to estimate a few parameters
-- Simpler functional forms for $f^\hat$ can make inference easier
-- Assumed functional form for $f^\hat$ may be far from true $f$
+- Simpler functional forms for $\hat{f}$ can make inference easier
+- Assumed functional form for $\hat{f}$ may be far from true $f$
 
 
 Example:

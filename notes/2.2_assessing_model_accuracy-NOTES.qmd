@@ -1,0 +1,56 @@
+## Recap
+
+<!-- Include a diagram showing a graph with the known function, the estimated function, an observation, and the observation's predicted response and true response -->
+
+We start with a set of $n$ observed data points:
+
+$$ \{ (x_1, y_1) , ..., (x_n, y_n)\}, $$
+
+where 
+
+- $x_i$ =  **predictor information**, and 
+- $y_i$ = the **response variable** for the $i$-th observation.
+
+These data points are the **training set**. 
+
+We assume the relationship between $x_i$ and $y_i$ is perfectly captured by an unknown function $f$, this means $f(x_i)= y_i$. 
+
+Our goal is to obtain a good enough estimate $\hat{f}$ of $f$. We do this by:
+
+1. selecting a general model for $f$ (linear regression, random forest, CNN)
+
+2. using the training set to **train** the model and obtain the estimate $\hat{f}$
+
+*How do we do step 1: selecting which model to use for our data?*
+
+
+## There is no single "best" model to apply across all problems
+
+It's always about evaluating tradeoffs and selecting the best model to work in a given problem for a specific dataset.
+
+To evaluate the performance of a model on a given data set, we need some way to measure how well its predictions match the observed data. 
+
+Remember we want: $f^\hat(x_i)$ (the prediction on $x_i$) is close enough to $y_i = f(x)_i$ (the true value).
+
+## Mean Squared Error: A popular way of measuring how close $f^\hat$ is to $f$
+
+For regression, the most commonly used measure is the **mean squared error (MSE)**:
+
+$$ MSE = \frac{1}{n} \sum_{i=1}^n(y_i - f^\hat(x_i))^2. $$
+
+Check-in:
+
+<!-- Exercise 1:
+- calculating the MSE on a set of data points by hand. 
+- visual interpretation of what is y_i - f\hat(x_i)
+-->
+
+<!-- Exercise 2:
+
+
+-->
+
+<!-- Exercise 3:
+- Remember all the data (x_i, y_i) was in the training set, which was used to train $\hat{f}$. Now you have a new data point $(x_0,y_0)$ that was not in the training set. Would you expect $|\hat{f}(x_i) - y_i|^2$ be smaller or larger for a point (x_i, y_i) in the training set -->
+
+## The training MSE
