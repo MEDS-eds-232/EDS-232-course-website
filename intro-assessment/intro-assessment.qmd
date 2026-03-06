@@ -1,0 +1,106 @@
+---
+format:
+  pdf:
+    geometry:
+      - margin=2.5cm
+    fontsize: 11pt
+    linestretch: 1.3
+    include-in-header: 
+      text: |
+        \usepackage{scrlayer-scrpage}
+        \lohead{EDS 232: Intro assessment \hspace{5 cm} NAME}
+---
+
+
+This evaluation is to help your instructors understand your familiarity with core math, statistics, and Python concepts. **It will not contribute to your grade.** Please **write your answers in the box** provided for each question.
+
+**1.** Write the equation of the line that goes through $(0, -10)$ and $(2, 4)$.
+
+\vspace{3cm}
+
+**2.** In the following graph of $f(x)$, what is the value of $x$ at which $f$ attains its minimum value?
+
+```{python}
+#| echo: false
+#| fig-align: left
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+
+fig, ax = plt.subplots(figsize=(4, 3))
+
+x = np.linspace(-3, 5, 400)
+y = (x - 1)**2 - 5
+
+# Plot curve
+ax.plot(x, y, color='#2c5f8a', linewidth=2)
+
+# Axes through origin
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_visible(False)
+ax.spines['top'].set_visible(False)
+
+# Arrows on axes
+ax.plot(1, 0, ">k", transform=ax.get_yaxis_transform(), clip_on=False, markersize=5)
+ax.plot(0, 1, "^k", transform=ax.get_xaxis_transform(), clip_on=False, markersize=5)
+
+# Axis labels
+ax.set_xlabel('$x$', labelpad=2, fontsize=11)
+ax.set_ylabel('$f(x)$', labelpad=2, fontsize=11, rotation=0)
+ax.yaxis.set_label_coords(-0.08, 1.02)
+
+# Ticks
+ax.set_xlim(-3, 5.2)
+ax.set_ylim(-6, 14)
+ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(2))
+
+ax.grid(True, linestyle=':', linewidth=0.5, alpha=0.4)
+plt.tight_layout()
+plt.show()
+```
+
+**3.** Complete the following formula using sigma notation:
+
+$$x_1 - y_1 + x_2 - y_2 + x_3 - y_3 = \sum$$
+
+\vspace{3cm}
+
+**4.** A dataset has values $[2, 3, 7]$. Calculate the sample variance using the formula 
+$$s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(y_i - \bar{y})^2,$$ 
+where $y_i$ are the values in the dataset and $\bar{y}$ is their mean.
+
+\vspace{4cm}
+
+
+**5.** A dataset has 200 samples and 5 features. If you represent this as a matrix $\mathbf{X}$, what are its dimensions?
+
+\vspace{1cm}
+
+
+**6.** What does the following code output?
+
+```python
+import pandas as pd
+df = pd.DataFrame({'x': [1, 2, 3, 4], 'y': [10, 20, 30, 40]})
+print(df[df['x'] > 2]['y'].mean())
+```
+
+\vspace{3cm}
+
+
+**7.** Given the following DataFrame, write one line of code to create a new column `z` in the same DataFrame equal to `y` divided by `x`.
+
+```python
+df = pd.DataFrame({'x': [1, 2, 4], 'y': [3, 6, 12]})
+```
+
+\vspace{3cm}
+
+
+**8.** In a dataset of 1000 patients, 50 have a rare disease. A model predicts "no disease" for every single patient. What is its accuracy (as a percentage), and why might accuracy be a misleading metric here?
+
+\vspace{4cm}
