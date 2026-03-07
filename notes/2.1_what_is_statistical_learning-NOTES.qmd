@@ -1,27 +1,45 @@
-## Motivation
+# Introduction
 
-Let's start with an example. 
+In this lesson we introduce ...
 
-Amanda is a marine scientist investigating how protected areas affect the population of elephant seals in Calfiornia. 
+- The idea of estimating a function $f$ using observed data
+- Inference and prediction
+- Training set = observations used to fit/train a model
+- Predictors + response variable & their math notation
+- Parametric vs. non parametric
+- Regression vs. classification
+- Unsupervised vs. supervised learning
+
+## Investigating elephan seal population
+
+Amanda is a marine scientist investigating how protected areas affect the population of elephant seals in Calfiornia. Specifically, she wants to understand: *how does elephant seal population change in a protected rookery that has just been protected?*
 
 <!--Image 1: field person -->
 
-<!--Image 2: elephant seals -->
+![(Northern Elephant Seals (M. angustirostris) at sunrise early light at Piedras Blancas, San Simeon, CA 03 Feb 2012. Photo by [Mike Baird](https://commons.wikimedia.org/wiki/File:Northern_Elephant_Seals_%28M._angustirostris%29_at_sunrise_early_light_at_Piedras_Blancas,_San_Simeon,_CA.jpg).](/notes/images/elephant_seals.jpg)
 
-Specifically, she wants to understand: how does elephant seal population change in a protected rookery that has just been protected?
+## An ideal function $f$ exists somewhere, we just can't access it
 
-She identifies the **predictor** as time since the rookery was protected and the **response variable** as elephant seal population (since elephant seal population *depends* on time). 
+She identifies the **predictor variable** as time since the rookery was protected and the **response variable** as elephant seal population (since elephant seal population *responds* on time). 
 
-<!-- Image 3: x and y axes with time and elephant seal population -->
+<!-- GRAPH 1: x and y axes with time and elephant seal population -->
+
 
 What if Amanda was given the true, real relationship between time and population? 
-In mathematical terms, this would mean Amanda would have a **function $f$** such that $f(time since protection) = true population$. 
 
-<!-- Image 4: x and y axes with f as sigmoidal-->
+In mathematical terms, this would mean Amanda would have a **function $f$** such that
 
-Q: What does $f(0)$ represent? What does $f(10)=200$ mean?
+ $$f(\text{time since protection}) = \text{true population}.$$
 
-Q: What could Amanda do if she had this function $f$?
+<!-- GRAPH 2: x and y axes with f as sigmoidal-->
+
+::: {.callout-tip}
+## Check-in
+
+1. What does $f(0)$ represent? What does $f(10)=200$ mean?
+
+2. What could Amanda do if she had this function $f$?
+:::
 
 - She could understand whether and how population and time are related: is there no relation, does it increase, decrease, varies, etc? 
 - She could also understand the mathematical form of this relationship: for example, is it linear?
@@ -29,31 +47,40 @@ These are examples of using the function $f$ for **inference**.
 
 - She could also use the function $f$ to know the elephant seal population in the future, i.e. using the funciton for **prediction**. In addtion, she could probably save resources spent in going out into the field for data collection. 
 
+## Our next best option is to estimate $f$ using data
+
 Clearly Amanda has no access to this true, ideal function! So her next best option is to try to **estimate $f$** using data.
 
 Fortunately, she found some long-term ecological data that measures the elephant seal population since the protection for the rookery was established:
 
-<!-- Image 5: x and y axes with the measured data -->
+<!-- GRAPH 3: x and y axes with the measured data -->
 
 These are the **observed values** for the response variable. 
 
-Q: Are the observed values the "true values" for the response variable?
-No: there's error that can be introduced during measurement. In this case we have
+::: {.callout-tip}
+## Check-in
 
-$f(\text{time}) = \text{true population} = \text{observerd population} + \text{error}$
+Are the observed values the "true values" for the response variable?
+:::
 
-<!-- Image 6: x and y axes with the measured data, the sigmoidal f, and the vertical errors from the measured data to the sigmoidal (similar to figure 2.2)-->
+No, there's error that can be introduced during measurement. In this case we have
+
+$$f(\text{time}) = \text{true population} = \text{observerd population} + \text{error}$$
+
+<!-- GRAPH 4: x and y axes with the measured data, the sigmoidal f, and the vertical errors from the measured data to the sigmoidal (similar to figure 2.2)-->
 
 With these observed population values at a given time, Amanda can try to estimate the real function $f$ with another **function $\hat{f}$**. 
 
 Some estimates of $f$:
 
-<!-- Image 7: four functions fitting the observed data, a constant average, a linear function, a logistic one, and one that is clearly overfitting -->
+<!-- GRAPH 5: four functions fitting the observed data, a constant average, a linear function, a logistic one, and one that is clearly overfitting -->
 
-Q: What considerations can Amanda take into account when choosing an estimate $\hat{f}$?
-Many: preliminary understanding of the data, the application (prediction or inference?), volume of availale data, minimizing error, even computing power. 
+::: {.callout-tip}
+## Check-in
+What considerations can Amanda take into account when choosing an estimate $\hat{f}$?
+:::
 
-Selecting any $\hat{f}$ comes with tradeoffs!
+Many! Preliminary understanding of the data, the application (prediction or inference?), volume of availale data, minimizing error, even computing power. Selecting any $\hat{f}$ comes with tradeoffs!
 
 ## Abstract setup
 
@@ -68,29 +95,34 @@ Here $f$ is some fixed but *unknown* function of the predictors $X_1, . . ., X_p
 
 Our objective is to estimate $f$ well enough with another function $\hat{f}(X)$. 
 
-Why bother to estimate $f$? 
+## Why bother to estimate $f$? 
 
 1. Do **inference**: use $\hat{f}$ to understand which predictors are associated with the response and understand the form of this relationship. 
 
-2. Do **predictions**: this means calculating $\hat{f}(X) = Y^\hat$ to predict what the value of $Y$ will be with at $X$. 
+2. Do **predictions**: this means calculating $\hat{f}(X) = \hat{Y}$ to predict what the value of $Y$ will be with at $X$. 
 
 Depending whether our goal is prediction, inference, or a combination of the two, we may select different methods for estiamting $f$. 
 
 Generally: 
+
 - models for $f$ that are interpretable enough to allow inference may not be have as accurate prediction results as other approaches. 
 - models for $f$ that can give excellent predictions, may not be as interpretable and make inference more challenging.
 
 There's a tradeoff. 
 
-Generally **machine learning** may prioritize predictions over interpretability (we want the best prediction, even if we got it out of a black box), while **statistical modeling** may prioritize interpretability over prediction.
+Generally, **machine learning** may prioritize predictions over interpretability (we want the best prediction, even if we got it out of a black box), while **statistical modeling** may prioritize interpretability over prediction.
 
-Q: What are some examples where inference may be more important than prediction? What about an example where prediction is the priority?
+
+:::{.callout-tip}
+## Check-in
+
+What are some examples where inference may be more important than prediction? What about an example where prediction is the priority?
+:::
 
 
 ## How do we estimate $f$?
 
 <!-- Make this into an example where the data comes from a table and then is represented visually, and then it is represented in vector format -->
-
 
 We start with a set of $n$ observed data points:
 
@@ -101,19 +133,28 @@ where
 - $x_i$ = a *vector* with with the **predictor information**, and 
 - $y_i$ = the **response variable** for the $i$-th observation.
 
-These data points are the **training set** or **training data** because we will use them to **train** (or **fit**) our method and obtain an estimate $\hat{f}$ of $f$. 
-
-If we have $p$ predictors, then each $x_i$ has the form:
-
-$$x_i = (x_{i1}, ..., x_{ip}).$$
-
-The response variable is just a single number or category.
+These data points are the **training set** or **training data** because we will use them to **train** (or **fit**) our method and obtain an estimate $\hat{f}$ of the "true" function $f$. 
 
 Our goal is to apply methods to the training data to estimate the unknown function $f$ that links predictors with the response. 
 
-Broadly, most methods for this task can be characterized as parametric or non-parametric. 
+## Notation 
+Our training set has $n$ observed data points: 
 
-## Parametric methods estimate $f$ in two steps
+$$ \{ (x_1, y_1) , ..., (x_n, y_n)\}.$$
+
+If we have $p$ predictors, then each $x_i$ is a **vector** of the form:
+$$x_i = (x_{i1}, ..., x_{ip}).$$
+The response variable $y_i$ is just a single number or category.
+
+For example, if we have 
+
+<!-- table with 4 values of time, population, and something else and then these values represented as vectors x_i and their corresponding value y_i-->
+
+## Parametric methods
+
+Broadly, most methods for estimating $f$ can be characterized as parametric or non-parametric. 
+
+Parametric methods estimate $f$ in two steps:
 
 1. Make an assumption about the *functional form* or shape of $f$.
 
@@ -122,47 +163,48 @@ Broadly, most methods for this task can be characterized as parametric or non-pa
 Considerations:
 
 - May be used with small training sets
-- May be asier to estimate a few parameters
+- May be computationally easier to estimate a few parameters
 - Simpler functional forms for $\hat{f}$ can make inference easier
-- Assumed functional form for $\hat{f}$ may be far from true $f$
+- Assumed functional form for $\hat{f}$ may be far from true $f$, making predictions inaccurate
+- Predictions could not be as good
 
 
-Example:
+## Example
 
 <!--TODO: update ? with another variable -->
 
-
-1. Amanda *decides* to model the population with a linear model on the predictors $X_1=time$ and $X_2= ?$. This means she assumes the function $f(time, ?) = population$ has the form
+1. Amanda *decides* to model the population with a linear model on the predictors $X_1=\text{time}$ and $X_2= ?$. This means she assumes the function $f(\text{time}, ?) = \text{population}$ has the form
 
 $$ f(x_1, x_2) = \beta_0 + \beta_1 x_1 + \beta_2 x_2. $$
 
-2. She trains the model to get an estimate for $f$, by finding *parameters* $beta_0, \beta_1$, and $\beta_2$ such that
+2. She trains the model to get an estimate for $f$, by finding *parameters* $\beta_0, \beta_1$, and $\beta_2$ such that
 
-$$ observed data \approx \beta_0 + \beta_1 time + \beta_2 ? .$$
+$$ \text{observed data} \approx \beta_0 + \beta_1 \text{time} + \beta_2 ? .$$
 
 This is great! She only needs to find three numbers to get a model for the population.
 
 <!-- Add graphs about fitting the model -->
 
-## Non-paremetric methods do not make explicit assumptions about the functional form of $f$
+## Non-paremetric methods
 
-Instead, they seek an estimate of $f$ that gets as close to the training set as possible without being "being too rough or wiggly". 
+Non-paremetric methods do not make explicit assumptions about the functional form of $f$. Instead, they seek an estimate of $f$ that gets as close to the training set as possible without being "being too rough or wiggly". 
 
 Considerations:
 
+- May be better at prediction
 - May need a lot of data to fit the model
-- May be prone to **overfitting**: they follow errors or noise in the data too closely. 
+- May be prone to **overfitting**: they follow errors or noise in the data too closely 
 - May be less interpretable than more restrictive models
 
 ## Regression vs. Classification 
 
-<!-- Example about elephant seals but now in an unsupervised way -->
+<!-- Example about elephant seals but now classification -->
 
 ## Regression vs. Classification 
 
 Variables can be either:
 
--  **quantitative**: continuous numerical values, or 
+- **quantitative**: continuous numerical values, or 
 
 - **qualitative** or **categorical**: values in one of $K$ different classes or categories. 
 
@@ -170,7 +212,7 @@ Problems having a quantitative response are **regression problems**.
 
 Problems having a qualitative response are **classification problems**. 
 
-We tend to select methods to machine learning methods based on whether the response is quantitative or qualitative. 
+We tend to select machine learning methods based on whether the response is quantitative or qualitative. 
 
 What about the predictors being quantitative or categorical? Not as important, often possible to *code* qualitative predictors before the analysis.  
 
@@ -182,7 +224,7 @@ What about the predictors being quantitative or categorical? Not as important, o
 ## Unsupervised vs. Supervised Learning
 
 **Supervised learning:** each observation has predictors associated to a response variable:
-$$training set = \{(x_1, y_1), ..., (x_n, y_n)\}$$
+$$\text{training set} = \{(x_1, y_1), ..., (x_n, y_n)\}$$
 
 where each $x_i = (x_{i1}, ..., x_{ip})$ is a vector with $p$ predictors and $y_i$ is the response to $x_i$. 
 
@@ -190,9 +232,9 @@ where each $x_i = (x_{i1}, ..., x_{ip})$ is a vector with $p$ predictors and $y_
 **Unsupervised learning:** each observation only has **features**, no response variable.
 
 Our training set only has observations of $p$ different features:
-$$ training set = \{ x_1, ..., x_p\},$$
+$$ \text{training set} = \{ x_1, ..., x_n\},$$
 
-there's no reponse variable $Y$. 
+where each $x_i = (x_{i1}, ..., x_{ip})$ is a vector with $p$ features. There's no reponse variable $Y$. 
 
 In unsupervised learning problems, we seek to understand the relationships between the variables or between the observations. 
 
