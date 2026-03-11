@@ -1,14 +1,15 @@
 ---
-title: 2.1 What is statistical learning? - Notes
+title: Introduction
 ---
 
 ```{python}
 #| echo: false
-
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-import os
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.linear_model import LinearRegression
 
 # Set consistent style
 plt.style.use('default')
@@ -30,6 +31,10 @@ np.random.seed(42)  # For reproducibility
 observed_time = np.array([2, 4,  6, 8,  10, 12, 14, 16, 18])
 observed_population = logistic_function(observed_time, L=500, k=0.5, x0=8) + np.random.normal(0, 50, len(observed_time))
 
+# Synthetic SST data (Sea Surface Temperature)  
+# SST varies with time, simulating seasonal and long-term patterns
+observed_sst = 15 + 2 * np.sin(observed_time / 5) + 0.5 * observed_time + np.random.normal(0, 0.5, len(observed_time))
+
 ```
 
 
@@ -46,13 +51,15 @@ In this lesson we introduce ...
 - Regression vs. classification
 - Unsupervised vs. supervised learning
 
-## Investigating elephan seal population
+These notes are based on chapter 2.1 of the book *An Introduction to Statistical Learning with Applications in Python* (James et al., 2023). 
+
+## Investigating elephant seal population
 
 Amanda is a marine scientist investigating how protected areas affect the population of elephant seals in Calfiornia. Specifically, she wants to understand: *how does elephant seal population change in a protected rookery that has just been protected?*
 
 ![(Northern Elephant Seals (M. angustirostris) at sunrise early light at Piedras Blancas, San Simeon, CA 03 Feb 2012. Photo by [Mike Baird](https://commons.wikimedia.org/wiki/File:Northern_Elephant_Seals_%28M._angustirostris%29_at_sunrise_early_light_at_Piedras_Blancas,_San_Simeon,_CA.jpg).](/notes/images/elephant_seals.jpg)
 
-## An ideal function $f$ exists somewhere, we just can't access it
+### An ideal function $f$ exists somewhere, we just can't access it
 
 She identifies the **predictor variable** as time since the rookery was protected and the **response variable** as elephant seal population (since elephant seal population *responds* on time). 
 
@@ -111,7 +118,7 @@ These are examples of using the function $f$ for **inference**.
 - She could also use the function $f$ to know the elephant seal population in the future, i.e. using the funciton for **prediction**. In addtion, she could probably save resources spent in going out into the field for data collection. 
 :::
 
-## Our next best option is to estimate $f$ using data
+### Our next best option is to estimate $f$ using data
 
 Clearly Amanda has no access to this true, ideal function! So her next best option is to try to **estimate $f$** using data.
 
@@ -176,9 +183,7 @@ plt.close()
 ```
 
 
-With these observed population values at a given time, Amanda can try to estimate the real function $f$ with another **function $\hat{f}$**. 
-
-Some estimates of $f$:
+With these observed population values at a given time, Amanda can try to estimate the real function $f$ with another **function $\hat{f}$**. Some estimates of $f$ are shown in the graph below.
 
 ```{python}
 #| echo: false
@@ -238,7 +243,7 @@ Here $f$ is some fixed but *unknown* function of the predictors $X_1, . . ., X_p
 
 Our objective is to estimate $f$ well enough with another function $\hat{f}(X)$. 
 
-## Why bother to estimate $f$? 
+### Why bother to estimate $f$? 
 
 1. Do **inference**: use $\hat{f}$ to understand which predictors are associated with the response and understand the form of this relationship. 
 
@@ -262,7 +267,7 @@ Generally, **machine learning** may prioritize predictions over interpretability
 What are some examples where inference may be more important than prediction? What about an example where prediction is the priority?
 :::
 
-## How do we estimate $f$?
+### How do we estimate $f$?
 
 We start with a set of $n$ observed data points:
 
@@ -277,7 +282,7 @@ These data points are the **training set** or **training data** because we will 
 
 Our goal is to apply methods to the training data to estimate the unknown function $f$ that links predictors with the response. 
 
-## Notation 
+### Notation 
 Our training set has $n$ observed data points: 
 
 $$ \{ (x_1, y_1) , ..., (x_n, y_n)\}.$$
@@ -339,11 +344,11 @@ If we were to add average annual sea surface temperature (SST) as a second predi
 ::: {.column width="55%"}
 | Obs. | Time (Predictor 1) | SST (Predictor 2) | Population (Response)|
 |-------------|------|------|------------|
-| 1 | 2 | x| 53 |
+| 1 | 2 | 17.05| 53 |
 | $\vdots$ | $\vdots$ |  $\vdots$ | $\vdots$ |
-| 5 | 10 | x | 353 |
+| 5 | 10 | 20.86 | 353 |
 | $\vdots$ | $\vdots$ | $\vdots$ |  $\vdots$ |
-| 9  | 18 | x| 473 |
+| 9  | 18 | 23.27| 473 |
 :::
 
 ::: {.column width="10%"}
@@ -360,19 +365,19 @@ If we were to add average annual sea surface temperature (SST) as a second predi
 
 ::: {.column width="35%"}
 
-$x_1 = (x_{11}, x_{12}) = (2, X)$  
+$x_1 = (x_{11}, x_{12}) = (2, 17.05)$  
 
 $y_1 = 53$
 
 $\vdots$
 
-$x_5 = (x_{51}, x_{52}) = (10, X)$  
+$x_5 = (x_{51}, x_{52}) = (10, 20.86)$  
 
 $y_5 = 353$
 
 $\vdots$
 
-$x_9 = (x_{91}, x_{92}) = (18, X)$ 
+$x_9 = (x_{91}, x_{92}) = (18, 23.27)$ 
 
 $y_1 = 473$
 
@@ -399,7 +404,7 @@ Considerations:
 - Predictions could not be as good
 
 
-## Example
+### Example
 
 1. Amanda *decides* to model the population with a linear model on the predictors $X_1 =$ *time* and $X_2=$ *average annual sea surface temperature (SST)*. This means she assumes the function 
 
@@ -415,8 +420,52 @@ $$ \text{observed data} \approx \beta_0 + \beta_1 \text{time} + \beta_2 \text{SS
 
 This is great! She only needs to find three numbers to get a model for the population.
 
-<!-- Add graphs about fitting the model -->
+```{python}
+#| echo: false
+    #| eval: false
 
+# Linear model fitting with two predictors: time and SST
+
+# Prepare data for linear regression
+X = np.column_stack([observed_time, observed_sst])  # Predictors
+y = observed_population  # Response
+
+# Fit linear model
+model = LinearRegression()
+model.fit(X, y)
+
+# Get model parameters
+beta_0 = model.intercept_
+beta_1, beta_2 = model.coef_
+
+print(f"Linear Model: Population = {beta_0:.2f} + {beta_1:.2f}*Time + {beta_2:.2f}*SST")
+
+# Create prediction surface for visualization
+time_range = np.linspace(observed_time.min(), observed_time.max(), 20)
+sst_range = np.linspace(observed_sst.min(), observed_sst.max(), 20)
+time_mesh, sst_mesh = np.meshgrid(time_range, sst_range)
+population_mesh = beta_0 + beta_1 * time_mesh + beta_2 * sst_mesh
+
+# 3D visualization
+fig = plt.figure(figsize=(10, 6))
+ax = fig.add_subplot(111, projection='3d')
+
+# Plot the fitted plane
+ax.plot_surface(time_mesh, sst_mesh, population_mesh, alpha=0.6, color='blue', label='Fitted plane')
+
+# Plot the observed data points
+ax.scatter(observed_time, observed_sst, observed_population, color='red', s=80, label='Observed data')
+
+ax.set_xlabel('Time since protection (years)')
+ax.set_ylabel('Sea Surface Temperature (°C)')
+ax.set_zlabel('Elephant seal population')
+#ax.set_title('Linear Model: Population ~ Time + SST')
+#ax.legend()
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 ## Non-paremetric methods
 
 Non-paremetric methods do not make explicit assumptions about the functional form of $f$. Instead, they seek an estimate of $f$ that gets as close to the training set as possible without being "being too rough or wiggly". 
@@ -427,10 +476,6 @@ Considerations:
 - May need a lot of data to fit the model
 - May be prone to **overfitting**: they follow errors or noise in the data too closely 
 - May be less interpretable than more restrictive models
-
-## Regression vs. Classification 
-
-<!-- Example about elephant seals but now classification -->
 
 ## Regression vs. Classification 
 
@@ -448,9 +493,92 @@ We tend to select machine learning methods based on whether the response is quan
 
 What about the predictors being quantitative or categorical? Not as important, often possible to *code* qualitative predictors before the analysis.  
 
-## Supervised and Unserpervised Learning Example
+### Example
 
-<!-- Example about elephant seals but now in an unsupervised way -->
+Amanda wants to predict the **health status** of individual adult seals. A veterinarian has assessed a sample of seals and labeled each one as *healthy*, *malnourished*, or *injured*. Amanda wants to train a classifier using weight and length as predictors:
+
+$$f(\text{weight, length}) = \text{health status} \in \{\text{healthy, malnourished, injured}\}.$$
+
+Her **labeled training data** looks like this:
+
+:::: {.columns}
+
+::: {.column width="55%"}
+| Obs. | Length (Predictor 1) | Weight (Predictor 2) | Health status (Response)|
+|-------------|------|------|------------|
+| 1 | 173.58 | 200.14| healthy |
+| $\vdots$ | $\vdots$ |  $\vdots$ | $\vdots$ |
+| 44 | 157.06 | 122.96 | malnourished |
+| $\vdots$ | $\vdots$ | $\vdots$ |  $\vdots$ |
+| 90  |  163.48 | 164.98 | injured|
+
+: {tbl-colwidths="[20,40,40]"}
+
+:::
+
+::: {.column width="10%"}
+\
+
+\
+
+\
+
+\
+
+\ \ \ \ \ \ \ \ \ **→**
+:::
+
+::: {.column width="35%"}
+
+$x_1 = (x_{1,1}, x_{1,2}) = (173.58 ,200.14|)$  
+
+$y_1 =$ healthy
+
+$\vdots$
+
+$x_{44} = (x_{44,1}, x_{44,2}) = (157.06, 122.96)$  
+
+$y_{44} =$ malnourished
+
+$\vdots$
+
+$x_{90} = (x_{90,1}, x_{90,2}) = (163.48, 164.98)$ 
+
+$y_{90} =$ injured
+
+:::
+
+::::
+
+She can use this data to train a classifier, and then use it to predict the health status of new, unlabeled seals given their weight and length. 
+
+```{python}
+#| echo: false
+
+healthy    = np.random.multivariate_normal([200, 180], [[300, 50], [50, 40]], 30)
+malnourish = np.random.multivariate_normal([130, 155], [[200, 40], [40, 30]], 30)
+injured    = np.random.multivariate_normal([170, 165], [[250, 40], [40, 30]], 30)
+
+fig, axes = plt.subplots(figsize=(fig_size_x, fig_size_y))
+
+# Right: labeled by veterinarian
+for color, label, subset in zip(['green', 'orange', 'red'],
+                                 ['Healthy', 'Malnourished', 'Injured'],
+                                 [healthy, malnourish, injured]):
+    axes.scatter(subset[:, 0], subset[:, 1], c=color, alpha=0.6, s=40, label=label)
+
+axes.set_xlabel('Weight (kg)')
+axes.set_ylabel('Length (cm)')
+axes.set_title('Training data (labeled by veterinarian)')
+axes.grid(True, alpha=0.3)
+axes.legend()
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The left plot shows the raw measurements. The right plot shows the same data with veterinarian-assigned labels — this is the **training set** Amanda uses to fit her classifier.
 
 
 ## Unsupervised vs. Supervised Learning
@@ -459,7 +587,6 @@ What about the predictors being quantitative or categorical? Not as important, o
 $$\text{training set} = \{(x_1, y_1), ..., (x_n, y_n)\}$$
 
 where each $x_i = (x_{i1}, ..., x_{ip})$ is a vector with $p$ predictors and $y_i$ is the response to $x_i$. 
-
 
 **Unsupervised learning:** each observation only has **features**, no response variable.
 
@@ -470,7 +597,97 @@ where each $x_i = (x_{i1}, ..., x_{ip})$ is a vector with $p$ features. There's 
 
 In unsupervised learning problems, we seek to understand the relationships between the variables or between the observations. 
 
-The example showed how **cluster analysis** can be used to extract clusters from the data that can then be used to classify new observations. 
+### Example
+
+
+Amanda records **dive depth** and **dive duration** for a large number of seals, but has no prior labels or categories in mind. She wants to know: *are there distinct foraging strategies among these seals?* Her data looks like this:
+
+:::: {.columns}
+
+::: {.column width="55%"}
+| Obs. | Depth (Feature 1) | Duration (Feature 2) | 
+|-------------|------|------|
+| 1 | 585.29 | 39.39| 
+| $\vdots$ | $\vdots$ |  $\vdots$ |
+| 23 | 108.23 | 9.52 |
+| $\vdots$ | $\vdots$ | $\vdots$ | 
+| 41 | 324.37 | 23.2 |
+:::
+
+::: {.column width="10%"}
+\
+
+\
+
+\
+
+\
+
+\ \ \ \ \ \ \ \ \ **→**
+:::
+
+::: {.column width="35%"}
+
+\
+
+$x_1 = (x_{1,1}, x_{1,2}) = (585.29, 39.39)$  
+
+$\vdots$
+
+$x_{23} = (x_{23,1}, x_{23,2}) = (108.23, 9.52)$  
+
+$\vdots$
+
+$x_{41} = (x_{41,1}, x_{41,2}) = (324.37, 23.2)$ 
+
+:::
+
+::::
+
+In this case, there is no response variable $y$, Amanda lets the algorithm find structure in the data on its own.
+```{python}
+#| echo: false
+
+# Three foraging strategies
+deep_long    = np.random.multivariate_normal([550, 45], [[1500, 30], [30, 20]], 30)
+shallow_freq = np.random.multivariate_normal([150, 12], [[800, 20], [20, 8]],  30)
+medium       = np.random.multivariate_normal([350, 28], [[1000, 25], [25, 12]], 30)
+
+data_dive = np.vstack([deep_long, shallow_freq, medium])
+
+fig, axes = plt.subplots(2, 1, figsize=(fig_size_x, fig_size_y*2))
+
+# Top: no labels
+axes[0].scatter(data_dive[:, 0], data_dive[:, 1], c='steelblue', alpha=0.6, s=40)
+axes[0].set_xlabel('Dive depth (m)')
+axes[0].set_ylabel('Dive duration (min)')
+axes[0].set_title('Observed data (no labels)')
+axes[0].grid(True, alpha=0.3)
+
+# Bottom: clusters discovered
+for color, label, subset in zip(['royalblue', 'coral', 'mediumpurple'],
+                                  ['Deep & long', 'Shallow & frequent', 'Medium'],
+                                  [deep_long, shallow_freq, medium]):
+    axes[1].scatter(subset[:, 0], subset[:, 1], c=color, alpha=0.6, s=40, label=label)
+
+axes[1].set_xlabel('Dive depth (m)')
+axes[1].set_ylabel('Dive duration (min)')
+axes[1].set_title('Clusters discovered')
+axes[1].grid(True, alpha=0.3)
+axes[1].legend()
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The top plot shows what Amanda starts with: just measurements, no categories. The bottom plot shows the structure the algorithm uncovers, which Amanda interprets as distinct **foraging strategies**.
+
+::: {.callout-tip}
+## Check-in
+What is the key difference between the classification and clustering examples above?
+:::
+
 
 ## Recap
 
