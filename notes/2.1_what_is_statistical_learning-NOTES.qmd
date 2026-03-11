@@ -1,3 +1,39 @@
+---
+title: What is statistical learning - Notes
+---
+
+```{python}
+#| echo: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+import os
+
+# Set consistent style
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+# Generate synthetic data for elephant seal population
+# Using a logistic growth curve as the "true" relationship
+def logistic_function(x, L, k, x0):
+    return L / (1 + np.exp(-k * (x - x0)))
+
+# Time points (years since protection)
+time = np.linspace(0, 20, 100)
+true_population = logistic_function(time, L=500, k=0.5, x0=8)
+
+# Observed data points (with some noise)
+np.random.seed(42)  # For reproducibility
+observed_time = np.array([2, 4,  6, 8,  10, 12, 14, 16, 18])
+observed_population = logistic_function(observed_time, L=500, k=0.5, x0=8) + np.random.normal(0, 50, len(observed_time))
+
+```
+
+
+
 # Introduction
 
 In this lesson we introduce ...
@@ -20,8 +56,19 @@ Amanda is a marine scientist investigating how protected areas affect the popula
 
 She identifies the **predictor variable** as time since the rookery was protected and the **response variable** as elephant seal population (since elephant seal population *responds* on time). 
 
-<!-- GRAPH 1: A simple graph that only has the axes labelled. The x axis is time and the y axis is elephant seal population. -->
+```{python}
+#| echo: false
+# GRAPH 1: A simple graph that only has the axes labelled. The x axis is time and the y axis is elephant seal population.
 
+plt.figure(figsize=( fig_size_x,  fig_size_y))
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.show()
+plt.close()
+```
 
 What if Amanda was given the true, real relationship between time and population? 
 
@@ -29,12 +76,28 @@ In mathematical terms, this would mean Amanda would have a **function $f$** such
 
  $$f(\text{time since protection}) = \text{true population}.$$
 
-<!-- GRAPH 2: The same axes as in GRAPH 1, but this time that graph has the "real relationship" between time and population as a sigmoidal labelled f-->
+
+```{python}
+#| echo: false
+# GRAPH 2: The same axes as in GRAPH 1, but this time that graph has the "real relationship" between time and population as a sigmoidal labelled f
+
+plt.figure(figsize=( fig_size_x,  fig_size_y)) 
+plt.plot(time, true_population, 'b-', linewidth=3, label='f (true relationship)')
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend()
+plt.show()
+plt.close()
+
+```
 
 ::: {.callout-tip}
 ## Check-in
 
-1. What does $f(0)$ represent? What does $f(10)=200$ mean?
+1. What does $f(0)$ represent? What does $f( fig_size_x)=200$ mean?
 
 2. What could Amanda do if she had this function $f$?
 :::
@@ -51,7 +114,22 @@ Clearly Amanda has no access to this true, ideal function! So her next best opti
 
 Fortunately, she found some long-term ecological data that measures the elephant seal population since the protection for the rookery was established:
 
-<!-- GRAPH 3: The same axes as in GRAPH 1, but this time there are some "observation data" that approximate the sigmoidal function. The sigmoidal is not part of the graph, only the observation data. -->
+```{python}
+#| echo: false
+# GRAPH 3: The same axes as in GRAPH 1, but this time there are some "observation data" that approximate the sigmoidal function. The sigmoidal is not part of the graph, only the observation data. 
+
+plt.figure(figsize=( fig_size_x,  fig_size_y))
+plt.scatter(observed_time, observed_population, s=50, c='red', alpha=0.7)
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.title('Observed Data Points')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.show()
+plt.close()
+
+```
 
 These are the **observed values** for the response variable. 
 
@@ -65,13 +143,74 @@ No, there's error that can be introduced during measurement. In this case we hav
 
 $$f(\text{time}) = \text{true population} = \text{observerd population} + \text{error}$$
 
-<!-- GRAPH 4: GRAPH 3, this time with the sigmoidal function f added to it. We can also see the vertical errors from the measured data to the sigmoidal (similar to figure 2.2 in the ISLP book)-->
+```{python}
+#| echo: false
+# GRAPH 4: GRAPH 3, this time with the sigmoidal function f added to it. We can also see the vertical errors from the measured data to the sigmoidal (similar to figure 2.2 in the ISLP book)
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(time, true_population, 'b-', linewidth=3, label='f (true relationship)')
+plt.scatter(observed_time, observed_population, s=50, c='red', alpha=0.7, label='Observed data')
+
+# Add error lines
+i=0
+for t, obs_pop in zip(observed_time, observed_population):
+    true_pop = logistic_function(t, L=500, k=0.5, x0=8)
+    if i==0:
+        plt.plot([t, t], [obs_pop, true_pop], 'g--', linewidth=1, label="Observation error")
+        i+=1
+    else:
+        plt.plot([t, t], [obs_pop, true_pop], 'g--', linewidth=1)
+
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend(loc='upper left')
+plt.show()
+plt.close()
+
+```
+
 
 With these observed population values at a given time, Amanda can try to estimate the real function $f$ with another **function $\hat{f}$**. 
 
 Some estimates of $f$:
 
-<!-- GRAPH 5: the observed data together with four functions fitting the observed data: a constant average, a linear function, a logistic one, and one that is clearly overfitting -->
+```{python}
+#| echo: false
+
+# GRAPH 5: the observed data together with three functions fitting the observed data: 
+#  a linear function, a logistic one, and one that is clearly overfitting 
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(observed_time, observed_population, s=50, c='red', alpha=0.7, label='Observed data')
+
+# Linear fit
+linear_coeffs = np.polyfit(observed_time, observed_population, 1)
+plt.plot(time, np.polyval(linear_coeffs, time), 'orange', linewidth=2, label='Linear fit')
+
+# Logistic fit
+def logistic_simple(x, L, k, x0):
+    return L / (1 + np.exp(-k * (x - x0)))
+
+popt, _ = curve_fit(logistic_simple, observed_time, observed_population, p0=[500, 0.5, 8])
+plt.plot(time, logistic_simple(time, *popt), 'green', linewidth=2, label='Logistic fit')
+
+# Overfitting (high degree polynomial)
+poly_coeffs = np.polyfit(observed_time, observed_population, 8)
+plt.plot(time, np.polyval(poly_coeffs, time), 'purple', linewidth=2, label='Degree 8 polynomial fit')
+
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.title('Different function estimates')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend()
+plt.show()
+plt.close()
+```
 
 ::: {.callout-tip}
 ## Check-in
