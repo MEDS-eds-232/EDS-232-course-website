@@ -1,5 +1,5 @@
 ---
-title: What is statistical learning - Notes
+title: 2.1 What is statistical learning? - Notes
 ---
 
 ```{python}
@@ -101,12 +101,15 @@ plt.close()
 
 2. What could Amanda do if she had this function $f$?
 :::
+:::{.callout-tip  collapse="true" }
+# Discussion
 
 - She could understand whether and how population and time are related: is there no relation, does it increase, decrease, varies, etc? 
 - She could also understand the mathematical form of this relationship: for example, is it linear?
 These are examples of using the function $f$ for **inference**.
 
 - She could also use the function $f$ to know the elephant seal population in the future, i.e. using the funciton for **prediction**. In addtion, she could probably save resources spent in going out into the field for data collection. 
+:::
 
 ## Our next best option is to estimate $f$ using data
 
@@ -139,7 +142,7 @@ These are the **observed values** for the response variable.
 Are the observed values the "true values" for the response variable?
 :::
 
-No, there's error that can be introduced during measurement. In this case we have
+Error can be introduced during measurement. In this case we have
 
 $$f(\text{time}) = \text{true population} = \text{observerd population} + \text{error}$$
 
@@ -216,8 +219,11 @@ plt.close()
 ## Check-in
 What considerations can Amanda take into account when choosing an estimate $\hat{f}$?
 :::
+:::{.callout-tip  collapse="true" }
+# Discussion
 
 Many! Preliminary understanding of the data, the application (prediction or inference?), volume of availale data, minimizing error, even computing power. Selecting any $\hat{f}$ comes with tradeoffs!
+:::
 
 ## Abstract setup
 
@@ -256,10 +262,7 @@ Generally, **machine learning** may prioritize predictions over interpretability
 What are some examples where inference may be more important than prediction? What about an example where prediction is the priority?
 :::
 
-
 ## How do we estimate $f$?
-
-<!-- Make this into an example where the data comes from a table and then is represented visually, and then it is represented in vector format -->
 
 We start with a set of $n$ observed data points:
 
@@ -283,9 +286,99 @@ If we have $p$ predictors, then each $x_i$ is a **vector** of the form:
 $$x_i = (x_{i1}, ..., x_{ip}).$$
 The response variable $y_i$ is just a single number or category.
 
-For example, if we have 
+For example, for our previous data we would transfor the data table into the corresponding notation as shown below. 
 
 <!-- table with 4 values of time, population, and something else and then these values represented as vectors x_i and their corresponding value y_i-->
+
+:::: {.columns}
+
+::: {.column width="55%"}
+| Obs. | Time (Predictor) |  Population (Response)|
+|-------------|------|------------|
+| 1 | 2 | 53 |
+| $\vdots$ | $\vdots$ | $\vdots$ |
+| 5 | 10 | 353 |
+| $\vdots$ | $\vdots$ | $\vdots$ |
+| 9  | 18 | 473 |
+:::
+
+::: {.column width="10%"}
+\
+
+\
+
+\
+
+\
+
+\ \ \ \ \ \ \ \ \ **→**
+:::
+
+::: {.column width="35%"}
+\
+\
+
+$(x_1,y_1) = (2,53)$
+
+$\vdots$
+
+$(x_5,y_5) = (10,353)$
+
+$\vdots$
+
+$(x_9,y_9) = (18,473)$
+
+:::
+
+::::
+
+If we were to add average annual sea surface temperature (SST) as a second predictor variable, then our notation would update accordingly:
+
+:::: {.columns}
+
+::: {.column width="55%"}
+| Obs. | Time (Predictor 1) | SST (Predictor 2) | Population (Response)|
+|-------------|------|------|------------|
+| 1 | 2 | x| 53 |
+| $\vdots$ | $\vdots$ |  $\vdots$ | $\vdots$ |
+| 5 | 10 | x | 353 |
+| $\vdots$ | $\vdots$ | $\vdots$ |  $\vdots$ |
+| 9  | 18 | x| 473 |
+:::
+
+::: {.column width="10%"}
+\
+
+\
+
+\
+
+\
+
+\ \ \ \ \ \ \ \ \ **→**
+:::
+
+::: {.column width="35%"}
+
+$x_1 = (x_{11}, x_{12}) = (2, X)$  
+
+$y_1 = 53$
+
+$\vdots$
+
+$x_5 = (x_{51}, x_{52}) = (10, X)$  
+
+$y_5 = 353$
+
+$\vdots$
+
+$x_9 = (x_{91}, x_{92}) = (18, X)$ 
+
+$y_1 = 473$
+
+:::
+
+::::
 
 ## Parametric methods
 
@@ -308,15 +401,17 @@ Considerations:
 
 ## Example
 
-<!--TODO: update ? with another variable -->
+1. Amanda *decides* to model the population with a linear model on the predictors $X_1 =$ *time* and $X_2=$ *average annual sea surface temperature (SST)*. This means she assumes the function 
 
-1. Amanda *decides* to model the population with a linear model on the predictors $X_1=\text{time}$ and $X_2= ?$. This means she assumes the function $f(\text{time}, ?) = \text{population}$ has the form
+$$f(\text{time}, \text{SST}) = \text{population}$$ 
+
+has the form
 
 $$ f(x_1, x_2) = \beta_0 + \beta_1 x_1 + \beta_2 x_2. $$
 
 2. She trains the model to get an estimate for $f$, by finding *parameters* $\beta_0, \beta_1$, and $\beta_2$ such that
 
-$$ \text{observed data} \approx \beta_0 + \beta_1 \text{time} + \beta_2 ? .$$
+$$ \text{observed data} \approx \beta_0 + \beta_1 \text{time} + \beta_2 \text{SST} .$$
 
 This is great! She only needs to find three numbers to get a model for the population.
 
