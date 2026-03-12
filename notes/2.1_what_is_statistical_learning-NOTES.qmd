@@ -1,10 +1,8 @@
 ---
 title: Introduction
 ---
-
 ```{python}
 #| echo: false
-import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -39,7 +37,7 @@ observed_sst = 15 + 2 * np.sin(observed_time / 5) + 0.5 * observed_time + np.ran
 ```
 
 
-In this lesson we introduce ...
+In this lesson we introduce:
 
 - The idea of estimating a function $f$ using observed data
 - Inference and prediction
@@ -450,7 +448,7 @@ fig = plt.figure(figsize=(10, 6))
 ax = fig.add_subplot(111, projection='3d')
 
 # Plot the fitted plane
-ax.plot_surface(time_mesh, sst_mesh, population_mesh, alpha=0.6, color='blue', label='Fitted plane')
+ax.plot_surface(time_mesh, sst_mesh, population_mesh, alpha=0.5, color='orange', label='Fitted plane')
 
 # Plot the observed data points
 ax.scatter(observed_time, observed_sst, observed_population, color='red', s=80, label='Observed data')
@@ -473,7 +471,7 @@ Considerations:
 
 - May be better at prediction
 - May need a lot of data to fit the model
-- May be prone to **overfitting**: they follow errors or noise in the data too closely 
+- May follow errors or noise in the data too closely 
 - May be less interpretable than more restrictive models
 
 ### Example
@@ -495,7 +493,7 @@ population_mesh_knn = knn.predict(
 fig = plt.figure(figsize=(10, 6))
 ax = fig.add_subplot(111, projection='3d')
 
-ax.plot_surface(time_mesh, sst_mesh, population_mesh_knn, alpha=0.6, color='green')
+ax.plot_surface(time_mesh, sst_mesh, population_mesh_knn, alpha=0.4, color='green')
 ax.scatter(observed_time, observed_sst, observed_population, color='red', s=80, label='Observed data')
 
 ax.set_xlabel('Time since protection (years)')
