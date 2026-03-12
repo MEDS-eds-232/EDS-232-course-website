@@ -62,51 +62,49 @@ When we calculate this MSE using the training data, we obtain the **training MSE
 
 <!-- GRAPH 1: with the known function, the estimated function, a few observations, and the observation's predicted response and true response. The data point with the biggest difference between y_i and f^\hat(x_i) has the corresponding labels. -->
 
+::: {.callout-tip}
+## Exercise
+
+The training data are the points $(1,2), (2,5), (3,6), (4,9),$ and $(5,9)$. These are shown in the graph below together with the fitted model $\hat{f}(x)$. Use $\hat{f}(x) = 1.8x + 0.8$ to compute the training MSE.
+
+
 ```{python}
 #| echo: false
 
-#| echo: false
-
+# Small dataset - easy numbers for hand calculation
 x_train = np.array([1, 2, 3, 4, 5])
-y_train = np.array([1, 4, 8, 5, 2])
+y_train = np.array([2, 5, 6, 9, 9])
 
-# Quadratic fit as f_hat
-coeffs = np.polyfit(x_train, y_train, 2)
+# A simple linear fit as f_hat
+coeffs = np.polyfit(x_train, y_train, 1)
 x_line = np.linspace(0, 6, 100)
 y_hat_line = np.polyval(coeffs, x_line)
 y_hat_train = np.polyval(coeffs, x_train)
 
+# Find the point with biggest residual
 residuals = np.abs(y_train - y_hat_train)
 big_i = np.argmax(residuals)
 
 fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
 
 ax.plot(x_line, y_hat_line, color='orange', linewidth=2, label=r'$\hat{f}$')
-ax.scatter(x_train, y_train, s=60, c='red', zorder=5, label='Training data')
+ax.scatter(x_train, y_train, s=40, c='red', zorder=5, label='Training data')
 
+# Residual lines (all, thin)
 for xi, yi, yhi in zip(x_train, y_train, y_hat_train):
     ax.plot([xi, xi], [yi, yhi], 'g--', linewidth=1)
 
 
 ax.set_xlabel('x')
 ax.set_ylabel('y')
-ax.set_xlim(0, 6)
-ax.set_ylim(0, 10)
 ax.grid(True, alpha=0.3)
-plt.legend(loc='upper left')
+ax.legend()
 plt.tight_layout()
 plt.show()
 plt.close()
 
-#print(f"f_hat(x) = {coeffs[0]:.1f}x² + {coeffs[1]:.1f}x + {coeffs[2]:.1f}")
-
 ```
 
-
-::: {.callout-tip}
-## Exercise
-
-The training data are the points $(1,1), (2,4), (3,8), (4,5),$ and $(5,2)$. These are shown in the graph above together with the fitted model $\hat{f}(x)$. Use $\hat{f}(x) = -1.4x^2 + 8.4x - 6.4$ to compute the training MSE.
 :::
 
 
@@ -150,6 +148,9 @@ We say a model is **overfitting** the data when the model has a small training M
 ::: {.callout-tip}
 ## Exercise
 
+```{python}
+
+```
 :::
 
 <!-- 
@@ -165,4 +166,7 @@ It is important to have in mind that as model flexibility increases, the trainin
 
 <!-- 
 ## Bias-Variance trade off
+
+## Classification setting
  -->
+

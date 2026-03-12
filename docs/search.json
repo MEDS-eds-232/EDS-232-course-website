@@ -1,10 +1,83 @@
 [
   {
+    "objectID": "interactive_graphs.html",
+    "href": "interactive_graphs.html",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "import os\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom scipy.optimize import curve_fit\nfrom mpl_toolkits.mplot3d import Axes3D\nfrom sklearn.linear_model import LinearRegression\n\n# Set consistent style\nplt.style.use('default')\nfig_size_x = 8\nfig_size_y = 4\nplt.rcParams['font.size'] = 10\n\n# Generate synthetic data for elephant seal population\n# Using a logistic growth curve as the \"true\" relationship\ndef logistic_function(x, L, k, x0):\n    return L / (1 + np.exp(-k * (x - x0)))\n\n# Time points (years since protection)\ntime = np.linspace(0, 20, 100)\ntrue_population = logistic_function(time, L=500, k=0.5, x0=8)\n\n# Observed data points (with some noise)\nnp.random.seed(42)  # For reproducibility\nobserved_time = np.array([2, 4,  6, 8,  10, 12, 14, 16, 18])\nobserved_population = logistic_function(observed_time, L=500, k=0.5, x0=8) + np.random.normal(0, 50, len(observed_time))\n\n# Synthetic SST data (Sea Surface Temperature)  \n# SST varies with time, simulating seasonal and long-term patterns\nobserved_sst = 15 + 2 * np.sin(observed_time / 5) + 0.5 * observed_time + np.random.normal(0, 0.5, len(observed_time))\n\n\n\n# GRAPH 1: Empty axes\nplt.figure(figsize=(10, 6))\nplt.xlabel('Time since rookery was protected (years)')\nplt.ylabel('Elephant seal population')\nplt.grid(True, alpha=0.3)\nplt.xlim(0, 20)\nplt.ylim(0, 600)\nplt.savefig(f'{image_dir}/graph1_empty_axes.png', dpi=150, bbox_inches='tight')\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\n# GRAPH 2: True relationship (sigmoidal function f)\nplt.figure(figsize=(10, 6)) \nplt.plot(time, true_population, 'b-', linewidth=3, label='f (true relationship)')\nplt.xlabel('Time since rookery was protected (years)')\nplt.ylabel('Elephant seal population')\n#plt.title('\"True Relationship\" of elephant se')\nplt.grid(True, alpha=0.3)\nplt.xlim(0, 20)\nplt.ylim(0, 600)\nplt.legend()\nplt.savefig(f'{image_dir}/graph2_true_relationship.png', dpi=150, bbox_inches='tight')\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n# GRAPH 3: Observed data points only\nplt.figure(figsize=(10, 6))\nplt.scatter(observed_time, observed_population, s=80, c='red', alpha=0.7)\nplt.xlabel('Time since rookery was protected (years)')\nplt.ylabel('Elephant seal population')\nplt.title('Observed Data Points')\nplt.grid(True, alpha=0.3)\nplt.xlim(0, 20)\nplt.ylim(0, 600)\nplt.savefig(f'{image_dir}/graph3_observed_data.png', dpi=150, bbox_inches='tight')\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n# GRAPH 4: Observed data with true function and error lines\nplt.figure(figsize=(10, 6))\nplt.plot(time, true_population, 'b-', linewidth=3, label='f (true relationship)')\nplt.scatter(observed_time, observed_population, s=80, c='red', alpha=0.7, label='Observed data')\n\n# Add error lines\ni=0\nfor t, obs_pop in zip(observed_time, observed_population):\n    true_pop = logistic_function(t, L=500, k=0.5, x0=8)\n    if i==0:\n        plt.plot([t, t], [obs_pop, true_pop], 'g--', linewidth=1, label=\"Observation error\")\n        i+=1\n    else:\n        plt.plot([t, t], [obs_pop, true_pop], 'g--', linewidth=1)\n\nplt.xlabel('Time since rookery was protected (years)')\nplt.ylabel('Elephant seal population')\n#plt.title('GRAPH 4: Observed Data with True Function and Errors')\nplt.grid(True, alpha=0.3)\nplt.xlim(0, 20)\nplt.ylim(0, 600)\nplt.legend(loc='upper left')\nplt.savefig(f'{image_dir}/graph4_with_errors.png', dpi=150, bbox_inches='tight')\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n# GRAPH 5: Different function estimates\nplt.figure(figsize=(10, 6))\n\nplt.scatter(observed_time, observed_population, s=80, c='red', alpha=0.7, label='Observed data')\n\n# Linear fit\nlinear_coeffs = np.polyfit(observed_time, observed_population, 1)\nlinear_fit = np.polyval(linear_coeffs, time)\nplt.plot(time, linear_fit, 'orange', linewidth=2, label='Linear fit')\n\n# Logistic fit (using curve_fit)\ndef logistic_simple(x, L, k, x0):\n    return L / (1 + np.exp(-k * (x - x0)))\n\npopt, _ = curve_fit(logistic_simple, observed_time, observed_population, p0=[500, 0.5, 8])\nlogistic_fit = logistic_simple(time, *popt)\nplt.plot(time, logistic_fit, 'green', linewidth=2, label='Logistic fit')\n\n# Overfitting (high degree polynomial)\npoly_coeffs = np.polyfit(observed_time, observed_population, 8)\noverfit = np.polyval(poly_coeffs, time)\nplt.plot(time, overfit, 'blue', linewidth=2, label='Degree 8 polynomial fit')\n\nplt.xlabel('Time since rookery was protected (years)')\nplt.ylabel('Elephant seal population')\nplt.title('Different function estimates')\nplt.grid(True, alpha=0.3)\nplt.xlim(0, 20)\nplt.ylim(0, 600)\nplt.legend()\nplt.savefig(f'{image_dir}/graph5_function_estimates.png', dpi=150, bbox_inches='tight')\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\nobserved_time\n\narray([ 2,  4,  6,  8, 10, 12, 14, 16, 18])\n\n\n\nobserved_population\n\narray([ 48.54864424,  52.68824595, 166.85513759, 326.15149282,\n       353.82162058, 428.69169114, 555.24770419, 529.37863148,\n       473.17985524])\n\n\n\n# Linear model fitting with two predictors: time and SST\n\n# Prepare data for linear regression\nX = np.column_stack([observed_time, observed_sst])  # Predictors\ny = observed_population  # Response\n\n# Fit linear model\nmodel = LinearRegression()\nmodel.fit(X, y)\n\n# Get model parameters\nbeta_0 = model.intercept_\nbeta_1, beta_2 = model.coef_\n\nprint(f\"Linear Model: Population = {beta_0:.2f} + {beta_1:.2f}*Time + {beta_2:.2f}*SST\")\n\n# Create prediction surface for visualization\ntime_range = np.linspace(observed_time.min(), observed_time.max(), 20)\nsst_range = np.linspace(observed_sst.min(), observed_sst.max(), 20)\ntime_mesh, sst_mesh = np.meshgrid(time_range, sst_range)\npopulation_mesh = beta_0 + beta_1 * time_mesh + beta_2 * sst_mesh\n\n# 3D visualization\nfig = plt.figure(figsize=(10, 6))\nax = fig.add_subplot(111, projection='3d')\n\n# Plot the fitted plane\nax.plot_surface(time_mesh, sst_mesh, population_mesh, alpha=0.6, color='blue', label='Fitted plane')\n\n# Plot the observed data points\nax.scatter(observed_time, observed_sst, observed_population, color='red', s=80, label='Observed data')\n\nax.set_xlabel('Time since protection (years)')\nax.set_ylabel('Sea Surface Temperature (°C)')\nax.set_zlabel('Elephant seal population')\n#ax.set_title('Linear Model: Population ~ Time + SST')\n#ax.legend()\n\nplt.tight_layout()\nplt.show()\nplt.close()\n\nLinear Model: Population = -1112.46 + 10.10*Time + 64.58*SST\n\n\n\n\n\n\n\n\n\n\nobserved_sst\n\narray([17.05011671, 18.20300334, 19.6312133 , 21.12012834, 20.86195473,\n       21.48846744, 22.38883254, 22.37683615, 23.27208278])\n\n\n\n\ndeep_long    = np.random.multivariate_normal([550, 45], [[1500, 30], [30, 20]], 30)\nshallow_freq = np.random.multivariate_normal([150, 12], [[800, 20], [20, 8]],  30)\nmedium       = np.random.multivariate_normal([350, 28], [[1000, 25], [25, 12]], 30)\n\n\ndeep_long\n\narray([[585.29351706,  39.49454638],\n       [493.25595895,  42.85581108],\n       [547.51175009,  38.67420176],\n       [571.07390112,  45.91556292],\n       [594.54415596,  47.5573339 ],\n       [573.28859621,  44.18709123],\n       [573.13869659,  53.62729583],\n       [550.61710041,  40.35375791],\n       [518.25196636,  38.97945023],\n       [542.08558793,  36.20816415],\n       [601.42272638,  46.90901073],\n       [521.38410075,  45.17498711],\n       [554.50588777,  43.76507034],\n       [607.32697459,  42.99096294],\n       [567.74611155,  50.01572356],\n       [536.84903388,  36.96812884],\n       [537.48266765,  43.05025845],\n       [576.16244023,  48.22426374],\n       [509.98658826,  48.29112463],\n       [582.53025298,  44.29718345],\n       [537.08322984,  49.03512304],\n       [568.57485151,  44.55861755],\n       [592.95476712,  40.60158965],\n       [518.41010591,  50.33356072],\n       [552.69940922,  49.47481093],\n       [536.05148413,  41.87591058],\n       [535.86603998,  51.48798476],\n       [551.24795374,  51.91684469],\n       [651.38870197,  50.67444726],\n       [546.65536441,  43.61523691]])\n\n\n\nshallow_freq\n\narray([[147.54190056,   6.49476844],\n       [156.18857531,  13.1341736 ],\n       [108.23476504,   9.52664837],\n       [172.90224007,  11.20384871],\n       [124.08588887,  12.2463447 ],\n       [164.94838572,  13.78288902],\n       [147.18733705,  14.58176986],\n       [169.87963225,  11.60434878],\n       [161.1915439 ,   8.27442205],\n       [141.60644789,  12.50310804],\n       [149.87157275,  11.35431371],\n       [190.0616642 ,  11.85902579],\n       [159.74881398,  10.04889204],\n       [154.5339278 ,  13.22096235],\n       [ 96.63870749,  11.13145327],\n       [142.72053852,  11.61241314],\n       [204.27271499,  13.29703879],\n       [148.12630366,  18.69860103],\n       [155.41994589,  12.96260402],\n       [151.06251368,   8.8262479 ],\n       [117.62425059,  13.24221082],\n       [127.68911509,   8.9464851 ],\n       [110.41992804,   7.1620011 ],\n       [133.24993155,  17.57611553],\n       [178.05562822,  11.15714942],\n       [147.21621675,  10.55091824],\n       [193.85451875,  13.29450004],\n       [180.01368622,  14.05442882],\n       [175.89811438,  16.89825911],\n       [172.17592701,  11.67763709]])\n\n\n\nhealthy    = np.random.multivariate_normal([200, 180], [[300, 50], [50, 40]], 30)\nmalnourish = np.random.multivariate_normal([130, 155], [[200, 40], [40, 30]], 30)\ninjured    = np.random.multivariate_normal([170, 165], [[250, 40], [40, 30]], 30)\n\n\ninjured \n\narray([[164.98974807, 163.48421071],\n       [167.97376134, 167.53829403],\n       [181.18003728, 177.148501  ],\n       [186.89381744, 162.06959191],\n       [151.05591952, 165.5137368 ],\n       [159.62313949, 166.22857578],\n       [170.93920489, 160.80058171],\n       [169.36596643, 161.59410352],\n       [154.72556451, 161.59363509],\n       [183.30135598, 165.77991704],\n       [163.94859996, 161.19153803],\n       [182.77990523, 168.43696724],\n       [166.55348638, 161.92667879],\n       [177.24458089, 167.40516962],\n       [194.03450206, 162.38737417],\n       [181.52131754, 165.99140928],\n       [163.86454195, 171.09626658],\n       [156.59091097, 161.85959941],\n       [171.13359988, 160.32269689],\n       [170.53225835, 163.68952991],\n       [165.59205572, 160.19919152],\n       [160.52569153, 170.78719488],\n       [171.38335181, 167.19792318],\n       [159.43646623, 161.18714826],\n       [166.45121927, 164.43605202],\n       [169.10029804, 161.08102628],\n       [169.19903968, 167.28150831],\n       [146.28974973, 165.48942197],\n       [136.64012627, 155.38990131],\n       [156.07407187, 163.43850569]])"
+  },
+  {
+    "objectID": "notes/2.2_assessing_model_accuracy-NOTES.html",
+    "href": "notes/2.2_assessing_model_accuracy-NOTES.html",
+    "title": "Assessing model accuracy",
+    "section": "",
+    "text": "In this lesson we introduce:\nThese notes are based on chapter 2.2 of the book An Introduction to Statistical Learning with Applications in Python (James et al., 2023).",
+    "crumbs": [
+      "notes",
+      "Assessing model accuracy"
+    ]
+  },
+  {
+    "objectID": "notes/2.2_assessing_model_accuracy-NOTES.html#notation-recap",
+    "href": "notes/2.2_assessing_model_accuracy-NOTES.html#notation-recap",
+    "title": "Assessing model accuracy",
+    "section": "Notation recap",
+    "text": "Notation recap\nWe start with a set of \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}, \\]\nwhere\n\n\\(x_i\\) = predictor information, and\n\\(y_i\\) = the response variable for the \\(i\\)-th observation.\n\nThese data points are the training set.\nWe assume the relationship between \\(x_i\\) and \\(y_i\\) is perfectly captured by an unknown function \\(f\\), this means \\(f(x_i)= y_i\\).\nOur goal is to obtain a good enough estimate \\(\\hat{f}\\) of \\(f\\). We do this by:\n\nselecting a general model for \\(f\\) (linear regression, KNN, …)\nusing the training set to train the model and obtain the estimate \\(\\hat{f}\\)",
+    "crumbs": [
+      "notes",
+      "Assessing model accuracy"
+    ]
+  },
+  {
+    "objectID": "notes/2.2_assessing_model_accuracy-NOTES.html#selecting-a-model-to-use-for-our-data",
+    "href": "notes/2.2_assessing_model_accuracy-NOTES.html#selecting-a-model-to-use-for-our-data",
+    "title": "Assessing model accuracy",
+    "section": "Selecting a model to use for our data",
+    "text": "Selecting a model to use for our data\nThe question now is: How do we do step 1: selecting which model to use for our data?\nThere is no single “best” model to apply across all problems. It’s always about evaluating tradeoffs and selecting the best model to work in a given problem for a specific dataset.\nTo evaluate the performance of a model on a given data set, we need some way to measure how well its predictions match the observed data.\nRemember we want: \\(\\hat{f}(x_i)\\) (the prediction on \\(x_i\\)) is close enough to \\(y_i = f(x_i)\\) (the true value).",
+    "crumbs": [
+      "notes",
+      "Assessing model accuracy"
+    ]
+  },
+  {
+    "objectID": "notes/2.2_assessing_model_accuracy-NOTES.html#mean-squared-error",
+    "href": "notes/2.2_assessing_model_accuracy-NOTES.html#mean-squared-error",
+    "title": "Assessing model accuracy",
+    "section": "Mean Squared Error",
+    "text": "Mean Squared Error\nFor regression, the most commonly used way to measure how close \\(\\hat{f}\\) is to \\(f\\) is the mean squared error (MSE):\n\\[ MSE = \\frac{1}{n} \\sum_{i=1}^n(y_i - \\hat{f}(x_i))^2. \\]\nWhen we calculate this MSE using the training data, we obtain the training MSE. Many models are created by estimating coefficients that minimize the training MSE.\n\n\n\n\n\n\n\nExercise\n\n\n\nThe training data are the points \\((1,2), (2,5), (3,6), (4,9),\\) and \\((5,9)\\). These are shown in the graph below together with the fitted model \\(\\hat{f}(x)\\). Use \\(\\hat{f}(x) = 1.8x + 0.8\\) to compute the training MSE.",
+    "crumbs": [
+      "notes",
+      "Assessing model accuracy"
+    ]
+  },
+  {
+    "objectID": "notes/2.2_assessing_model_accuracy-NOTES.html#test-data",
+    "href": "notes/2.2_assessing_model_accuracy-NOTES.html#test-data",
+    "title": "Assessing model accuracy",
+    "section": "Test data",
+    "text": "Test data\n\n\n\n\n\n\nCheck-in\n\n\n\nIf you were going to take a big final exam in this class, how would you prefer the instructor to come up with exam questions:\n\nTake the questions from assignments questions that you completed this quarter.\nCome up with new questions to test on the material that we covered this quarter.\n\nOn which questions would you expect to do better?\n\n\nMuch like this thought exercise, a model will perform better if we evaluate it on the training set, instead of evaluating it on previously unseen data.\nGenerally, we are interested in the accuracy of the predictions that we obtain when we apply our model to previously unseen data.\nTest data is data that is not part of the training dataset and is used for the purpose of evaluating our model’s performance.\nTo estimate how well our model will perform, we calculate the MSE (or any other accuracy metric) on the test data to obtain a test MSE.\nIf enough observations are available, we create our training and test datasets by dividing the observations into the ones that will be usef for training, and the ones that will be used for testing.\n\n\n\n\n\n\nCheck-in\n\n\n\nGenerally, what do you expect to be larger, the training MSE or the test MSE?",
+    "crumbs": [
+      "notes",
+      "Assessing model accuracy"
+    ]
+  },
+  {
+    "objectID": "notes/2.2_assessing_model_accuracy-NOTES.html#overfitting",
+    "href": "notes/2.2_assessing_model_accuracy-NOTES.html#overfitting",
+    "title": "Assessing model accuracy",
+    "section": "Overfitting",
+    "text": "Overfitting\nOne instance in which it is useful to calcualte both the train MSE and the test MSE is to understand when a model is overfitting.\nWe say a model is overfitting the data when the model has a small training MSE but a large test MSE. As stated by the notes\n\nThis happens because our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by randm chance rather than by true properties of the unknown function \\(f\\).\n\n\n\n\n\n\n\nExercise\n\n\n\n\n\n\n\nIt is important to have in mind that as model flexibility increases, the training MSE will decrease, but the test MSE may not!",
+    "crumbs": [
+      "notes",
+      "Assessing model accuracy"
+    ]
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Welcome!",
     "section": "",
-    "text": "Welcome to the course materials for EDS 232 - Machine Learning for Environmental Science! In this website you will find all the materials for the Spring 2026 term. This course is part of the UCSB Masters in Environmental Data Science.\n\n\nMachine learning can help process big/complex data and extract knowledge. It forms one of the foundations in data science. This course provides a broad introduction to machine learning and statistical pattern recognition. Topics include supervised learning (decision tree, random forest, support vector machines, neural networks) and unsupervised learning (clustering, dimensionality reduction, deep learning). Problems and exercises are framed within environmental science applications. The course will be taught using Python.\n\n\n\n\n\n\nCarmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm -3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 2 pm - 3 pm @ Bren Hall 3418\n\n\n\n\n\n\nClick here to see the syllabus.\n\n\n\nThe following is our tentative calendar. The course content and calendar may be subject to change as the course progresses.\n\n\n\n\n📝 If you have suggestions on how to correct, improve, or expand these course materials, please feel free to email the course instructor at c_galazgarcia@ucsb.edu or file a GitHub issue.\n🌟 If these materials have been useful to you, consider adding a star to the project’s repository!"
+    "text": "Welcome to the course materials for EDS 232 - Machine Learning for Environmental Science! In this website you will find all the materials for the Spring 2026 term. This course is part of the UCSB Masters in Environmental Data Science.\n\n\nMachine learning can help process big/complex data and extract knowledge. It forms one of the foundations in data science. This course provides a broad introduction to machine learning and statistical pattern recognition. Topics include supervised learning (decision tree, random forest, support vector machines, neural networks) and unsupervised learning (clustering, dimensionality reduction, deep learning). Problems and exercises are framed within environmental science applications. The course will be taught using Python.\n\n\n\n\n\n\nCarmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm - 3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 11 am - 2 pm @ Bren Hall 3418\n\n\n\n\n\n\nClick here to see the syllabus.\n\n\n\nThe following is our tentative calendar. The course content and calendar may be subject to change as the course progresses.\n\n\n\n\n📝 If you have suggestions on how to correct, improve, or expand these course materials, please feel free to email the course instructor at c_galazgarcia@ucsb.edu or file a GitHub issue.\n🌟 If these materials have been useful to you, consider adding a star to the project’s repository!"
   },
   {
     "objectID": "index.html#course-description",
@@ -18,7 +91,7 @@
     "href": "index.html#teaching-team",
     "title": "Welcome!",
     "section": "",
-    "text": "Carmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm -3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 2 pm - 3 pm @ Bren Hall 3418"
+    "text": "Carmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm - 3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 11 am - 2 pm @ Bren Hall 3418"
   },
   {
     "objectID": "index.html#syllabus",
@@ -40,5 +113,93 @@
     "title": "Welcome!",
     "section": "",
     "text": "📝 If you have suggestions on how to correct, improve, or expand these course materials, please feel free to email the course instructor at c_galazgarcia@ucsb.edu or file a GitHub issue.\n🌟 If these materials have been useful to you, consider adding a star to the project’s repository!"
+  },
+  {
+    "objectID": "notes/2.1_what_is_statistical_learning-NOTES.html",
+    "href": "notes/2.1_what_is_statistical_learning-NOTES.html",
+    "title": "Introduction",
+    "section": "",
+    "text": "In this lesson we introduce:\nThese notes are based on chapter 2.1 of the book An Introduction to Statistical Learning with Applications in Python (James et al., 2023).",
+    "crumbs": [
+      "notes",
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "notes/2.1_what_is_statistical_learning-NOTES.html#investigating-elephant-seal-population",
+    "href": "notes/2.1_what_is_statistical_learning-NOTES.html#investigating-elephant-seal-population",
+    "title": "Introduction",
+    "section": "Investigating elephant seal population",
+    "text": "Investigating elephant seal population\nAmanda is a marine scientist investigating how protected areas affect the population of elephant seals in California. Specifically, she wants to understand: how does elephant seal population change in a protected rookery that has just been protected?\n\n\n\n(Northern Elephant Seals (M. angustirostris) at sunrise early light at Piedras Blancas, San Simeon, CA 03 Feb 2012. Photo by Mike Baird.\n\n\n\nAn ideal function \\(f\\) exists somewhere, we just can’t access it\nShe identifies the predictor variable as time since the rookery was protected and the response variable as elephant seal population (since elephant seal population responds on time).\n\n\n\n\n\n\n\n\n\nWhat if Amanda was given the true, real relationship between time and population?\nIn mathematical terms, this would mean Amanda would have a function \\(f\\) such that\n\\[f(\\text{time since protection}) = \\text{true population}.\\]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\n\nWhat does \\(f(0)\\) represent? What does \\(f( fig_size_x)=200\\) mean?\nWhat could Amanda do if she had this function \\(f\\)?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\nShe could understand whether and how population and time are related: is there no relation, does it increase, decrease, varies, etc?\nShe could also understand the mathematical form of this relationship: for example, is it linear? These are examples of using the function \\(f\\) for inference.\nShe could also use the function \\(f\\) to know the elephant seal population in the future, i.e. using the function for prediction. In addtion, she could probably save resources spent in going out into the field for data collection.\n\n\n\n\n\n\nOur next best option is to estimate \\(f\\) using data\nClearly Amanda has no access to this true, ideal function! So her next best option is to try to estimate \\(f\\) using data.\nFortunately, she found some long-term ecological data that measures the elephant seal population since the protection for the rookery was established:\n\n\n\n\n\n\n\n\n\nThese are the observed values for the response variable.\n\n\n\n\n\n\nCheck-in\n\n\n\nAre the observed values the “true values” for the response variable?\n\n\nError can be introduced during measurement. In this case we have\n\\[f(\\text{time}) = \\text{true population} = \\text{observed population} + \\text{error}\\]\n\n\n\n\n\n\n\n\n\nWith these observed population values at a given time, Amanda can try to estimate the real function \\(f\\) with another function \\(\\hat{f}\\). Some estimates of \\(f\\) are shown in the graph below.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat considerations can Amanda take into account when choosing an estimate \\(\\hat{f}\\)?\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\nMany! Preliminary understanding of the data, the application (prediction or inference?), volume of available data, minimizing error, even computing power. Selecting any \\(\\hat{f}\\) comes with tradeoffs!",
+    "crumbs": [
+      "notes",
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "notes/2.1_what_is_statistical_learning-NOTES.html#abstract-setup",
+    "href": "notes/2.1_what_is_statistical_learning-NOTES.html#abstract-setup",
+    "title": "Introduction",
+    "section": "Abstract setup",
+    "text": "Abstract setup\nRoughly, this is the setup in which we will be working in. Let’s see it more abstractly:\nWe have a set of \\(p\\) predictors \\(X_1, ..., X_p\\) and a dependent variable \\(Y\\).\nWe assume there is a relationship between \\(Y\\) and \\(X = (X_1, ..., X_p)\\) that can be written as \\[Y = f(X) + \\epsilon.\\]\nHere \\(f\\) is some fixed but unknown function of the predictors \\(X_1, . . ., X_p\\) and \\(\\epsilon\\) represents an error term (independent of \\(X\\) and with mean zero).\nOur objective is to estimate \\(f\\) well enough with another function \\(\\hat{f}(X)\\).\n\nWhy bother to estimate \\(f\\)?\n\nDo inference: use \\(\\hat{f}\\) to understand which predictors are associated with the response and understand the form of this relationship.\nDo predictions: this means calculating \\(\\hat{f}(X) = \\hat{Y}\\) to predict what the value of \\(Y\\) will be with at \\(X\\).\n\nDepending whether our goal is prediction, inference, or a combination of the two, we may select different methods for estiamting \\(f\\).\nGenerally:\n\nmodels for \\(f\\) that are interpretable enough to allow inference may not be have as accurate prediction results as other approaches.\nmodels for \\(f\\) that can give excellent predictions, may not be as interpretable and make inference more challenging.\n\nThere’s a tradeoff.\nGenerally, machine learning may prioritize predictions over interpretability (we want the best prediction, even if we got it out of a black box), while statistical modeling may prioritize interpretability over prediction.\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat are some examples where inference may be more important than prediction? What about an example where prediction is the priority?\n\n\n\n\nHow do we estimate \\(f\\)?\nWe start with a set of \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}, \\]\nwhere\n\n\\(x_i\\) = a vector with with the predictor information, and\n\\(y_i\\) = the response variable for the \\(i\\)-th observation.\n\nThese data points are the training set or training data because we will use them to train (or fit) our method and obtain an estimate \\(\\hat{f}\\) of the “true” function \\(f\\).\nOur goal is to apply methods to the training data to estimate the unknown function \\(f\\) that links predictors with the response.\n\n\nNotation\nOur training set has \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}.\\]\nIf we have \\(p\\) predictors, then each \\(x_i\\) is a vector of the form: \\[x_i = (x_{i1}, ..., x_{ip}).\\] The response variable \\(y_i\\) is just a single number or category.\nFor example, for our previous data we would transfor the data table into the corresponding notation as shown below.\n\n\n\n\n\n\nObs.\nTime (Predictor)\nPopulation (Response)\n\n\n\n\n1\n2\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\n\n\n\\((x_1,y_1) = (2,53)\\)\n\\(\\vdots\\)\n\\((x_5,y_5) = (10,353)\\)\n\\(\\vdots\\)\n\\((x_9,y_9) = (18,473)\\)\n\n\nIf we were to add average annual sea surface temperature (SST) as a second predictor variable, then our notation would update accordingly:\n\n\n\n\n\nObs.\nTime (Predictor 1)\nSST (Predictor 2)\nPopulation (Response)\n\n\n\n\n1\n2\n17.05\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n20.86\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n23.27\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (2, 17.05)\\)\n\\(y_1 = 53\\)\n\\(\\vdots\\)\n\\(x_5 = (x_{5,1}, x_{5,2}) = (10, 20.86)\\)\n\\(y_5 = 353\\)\n\\(\\vdots\\)\n\\(x_9 = (x_{9,1}, x_{9,2}) = (18, 23.27)\\)\n\\(y_9 = 473\\)",
+    "crumbs": [
+      "notes",
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "notes/2.1_what_is_statistical_learning-NOTES.html#parametric-methods",
+    "href": "notes/2.1_what_is_statistical_learning-NOTES.html#parametric-methods",
+    "title": "Introduction",
+    "section": "Parametric methods",
+    "text": "Parametric methods\nBroadly, most methods for estimating \\(f\\) can be characterized as parametric or non-parametric.\nParametric methods estimate \\(f\\) in two steps:\n\nMake an assumption about the functional form or shape of \\(f\\).\nUse the training data to train or fit the model and get those parameters that will define the estimate \\(\\hat{f}\\).\n\nConsiderations:\n\nMay be used with small training sets\nMay be computationally easier to estimate a few parameters\nSimpler functional forms for \\(\\hat{f}\\) can make inference easier\nAssumed functional form for \\(\\hat{f}\\) may be far from true \\(f\\), making predictions inaccurate\nPredictions could not be as good\n\n\nExample\n\nAmanda decides to model the population with a linear model on the predictors \\(X_1 =\\) time and \\(X_2=\\) average annual sea surface temperature (SST). This means she assumes the function\n\n\\[f(\\text{time}, \\text{SST}) = \\text{population}\\]\nhas the form\n\\[ f(x_1, x_2) = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2. \\]\n\nShe trains the model to get an estimate for \\(f\\), by finding parameters \\(\\beta_0, \\beta_1\\), and \\(\\beta_2\\) such that\n\n\\[ \\text{observed data} \\approx \\beta_0 + \\beta_1 \\text{time} + \\beta_2 \\text{SST} .\\]\nThis is great! She only needs to find three numbers to get a model for the population.\n\n\nLinear Model: Population = -1112.46 + 10.10*Time + 64.58*SST",
+    "crumbs": [
+      "notes",
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "notes/2.1_what_is_statistical_learning-NOTES.html#non-parametric-methods",
+    "href": "notes/2.1_what_is_statistical_learning-NOTES.html#non-parametric-methods",
+    "title": "Introduction",
+    "section": "Non-parametric methods",
+    "text": "Non-parametric methods\nNon-parametric methods do not make explicit assumptions about the functional form of \\(f\\). Instead, they seek an estimate of \\(f\\) that gets as close to the training set as possible without being “being too rough or wiggly”.\nConsiderations:\n\nMay be better at prediction\nMay need a lot of data to fit the model\nMay follow errors or noise in the data too closely\nMay be less interpretable than more restrictive models\n\n\nExample\nInstead of assuming a linear form, Amanda uses K-nearest neighbors (KNN) to estimate \\(f(\\text{time}, \\text{SST})\\). For any new combination of time and SST, the model predicts population as the average of the \\(K\\) most similar observations in the training set. No assumptions about the shape of \\(f\\) required.\n\n\n\n\n\n\n\n\n\nNotice the fitted surface is no longer a flat plane, but it bends and curves to follow the data. Amanda did not specify any functional form; the shape of \\(\\hat{f}\\) emerges entirely from the training observations.",
+    "crumbs": [
+      "notes",
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "notes/2.1_what_is_statistical_learning-NOTES.html#regression-vs.-classification",
+    "href": "notes/2.1_what_is_statistical_learning-NOTES.html#regression-vs.-classification",
+    "title": "Introduction",
+    "section": "Regression vs. Classification",
+    "text": "Regression vs. Classification\nVariables can be either:\n\nquantitative: continuous numerical values, or\nqualitative or categorical: values in one of \\(K\\) different classes or categories.\n\nProblems having a quantitative response are regression problems.\nProblems having a qualitative response are classification problems.\nWe tend to select machine learning methods based on whether the response is quantitative or qualitative.\nWhat about the predictors being quantitative or categorical? Not as important, often possible to code qualitative predictors before the analysis.\n\nExample\nAmanda wants to predict the health status of individual adult seals. A veterinarian has assessed a sample of seals and labeled each one as healthy, malnourished, or injured. Amanda wants to train a classifier using weight and length as predictors:\n\\[f(\\text{weight, length}) = \\text{health status} \\in \\{\\text{healthy, malnourished, injured}\\}.\\]\nHer labeled training data looks like this:\n\n\n\n\n\n\n\n\n\n\n\nObs.\nLength (Predictor 1)\nWeight (Predictor 2)\nHealth status (Response)\n\n\n\n\n1\n173.58\n200.14\nhealthy\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n44\n157.06\n122.96\nmalnourished\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n90\n163.48\n164.98\ninjured\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (173.58 ,200.14)\\)\n\\(y_1 =\\) healthy\n\\(\\vdots\\)\n\\(x_{44} = (x_{44,1}, x_{44,2}) = (157.06, 122.96)\\)\n\\(y_{44} =\\) malnourished\n\\(\\vdots\\)\n\\(x_{90} = (x_{90,1}, x_{90,2}) = (163.48, 164.98)\\)\n\\(y_{90} =\\) injured\n\n\nShe can use this data to train a classifier, and then use it to predict the health status of new, unlabeled seals given their weight and length.",
+    "crumbs": [
+      "notes",
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "notes/2.1_what_is_statistical_learning-NOTES.html#unsupervised-vs.-supervised-learning",
+    "href": "notes/2.1_what_is_statistical_learning-NOTES.html#unsupervised-vs.-supervised-learning",
+    "title": "Introduction",
+    "section": "Unsupervised vs. Supervised Learning",
+    "text": "Unsupervised vs. Supervised Learning\nSupervised learning: each observation has predictors associated to a response variable: \\[\\text{training set} = \\{(x_1, y_1), ..., (x_n, y_n)\\}\\]\nwhere each \\(x_i = (x_{i1}, ..., x_{ip})\\) is a vector with \\(p\\) predictors and \\(y_i\\) is the response to \\(x_i\\).\nUnsupervised learning: each observation only has features, no response variable.\nOur training set only has observations of \\(p\\) different features: \\[ \\text{training set} = \\{ x_1, ..., x_n\\},\\]\nwhere each \\(x_i = (x_{i1}, ..., x_{ip})\\) is a vector with \\(p\\) features. There’s no reponse variable \\(Y\\).\nIn unsupervised learning problems, we seek to understand the relationships between the variables or between the observations.\n\nExample\nAmanda records dive depth and dive duration for a large number of seals, but has no prior labels or categories in mind. She wants to know: are there distinct foraging strategies among these seals? Her data looks like this:\n\n\n\n\n\nObs.\nDepth (Feature 1)\nDuration (Feature 2)\n\n\n\n\n1\n585.29\n39.39\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n23\n108.23\n9.52\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n41\n324.37\n23.2\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (585.29, 39.39)\\)\n\\(\\vdots\\)\n\\(x_{23} = (x_{23,1}, x_{23,2}) = (108.23, 9.52)\\)\n\\(\\vdots\\)\n\\(x_{41} = (x_{41,1}, x_{41,2}) = (324.37, 23.2)\\)\n\n\nIn this case, there is no response variable \\(y\\), Amanda lets the algorithm find structure in the data on its own.\n\n\n\n\n\n\n\n\n\nThe top plot shows what Amanda starts with: just measurements, no categories. The bottom plot shows the structure the algorithm uncovers, which Amanda interprets as distinct foraging strategies.\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat is the key difference between the classification and clustering examples above?",
+    "crumbs": [
+      "notes",
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "notes/2.1_what_is_statistical_learning-NOTES.html#recap",
+    "href": "notes/2.1_what_is_statistical_learning-NOTES.html#recap",
+    "title": "Introduction",
+    "section": "Recap",
+    "text": "Recap\nWhat we covered today:\n\nThe idea of estimating a function \\(f\\) using observed data\nInference and prediction\nTraining set = observations used to fit/train a model\nPredictors + response variable & their math notation\nParametric vs. non parametric\nRegression vs. classification\nSupervised vs. unsupervised learning\n\nNext class: assessing model accuracy",
+    "crumbs": [
+      "notes",
+      "Introduction"
+    ]
   }
 ]
