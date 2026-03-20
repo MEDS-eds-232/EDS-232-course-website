@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Assessing model accuracy – EDS 232 - Machine Learning for Environmental Science</title>
+<title>overfitting – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,26 +20,61 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -68,47 +103,18 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar floating nav-fixed quarto-light">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
     </a>
   </div>
@@ -119,11 +125,11 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
+    <a class="nav-link" href="./index.html"> 
 <span class="menu-text">home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../notes/2.1_what_is_statistical_learning-NOTES.html" aria-current="page"> 
+    <a class="nav-link" href="./notes/2.1_what_is_statistical_learning-NOTES.html"> 
 <span class="menu-text">notes</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -149,16 +155,6 @@ window.Quarto = {
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../notes/2.2_assessing_model_accuracy-NOTES.html">Assessing model accuracy</a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-        </a>
-    </div>
-  </nav>
   <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
 <p>This wesbite is under construction.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
@@ -166,198 +162,49 @@ window.Quarto = {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../notes/setup.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Setup</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../notes/2.1_what_is_statistical_learning-NOTES.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Introduction</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../notes/2.2_assessing_model_accuracy-NOTES.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Assessing model accuracy</span></a>
-  </div>
-</li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#notation-recap" id="toc-notation-recap" class="nav-link active" data-scroll-target="#notation-recap">Notation recap</a></li>
-  <li><a href="#selecting-a-model-to-use-for-our-data" id="toc-selecting-a-model-to-use-for-our-data" class="nav-link" data-scroll-target="#selecting-a-model-to-use-for-our-data">Selecting a model to use for our data</a></li>
-  <li><a href="#mean-squared-error" id="toc-mean-squared-error" class="nav-link" data-scroll-target="#mean-squared-error">Mean Squared Error</a></li>
-  <li><a href="#test-data" id="toc-test-data" class="nav-link" data-scroll-target="#test-data">Test data</a></li>
-  <li><a href="#overfitting" id="toc-overfitting" class="nav-link" data-scroll-target="#overfitting">Overfitting</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Assessing model accuracy</h1>
+
+
+
+<div id="097a73c3" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.interpolate <span class="im">import</span> UnivariateSpline</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Set consistent style</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'default'</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>fig_size_x <span class="op">=</span> <span class="dv">7</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>fig_size_y <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'font.size'</span>] <span class="op">=</span> <span class="dv">10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-
-
-
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<p>In this lesson we introduce:</p>
-<p>These notes are based on chapter 2.2 of the book <em>An Introduction to Statistical Learning with Applications in Python</em> (James et al., 2023).</p>
-<section id="notation-recap" class="level2">
-<h2 class="anchored" data-anchor-id="notation-recap">Notation recap</h2>
-<p>We start with a set of <span class="math inline">\(n\)</span> observed data points:</p>
-<p><span class="math display">\[ \{ (x_1, y_1) , ..., (x_n, y_n)\}, \]</span></p>
-<p>where</p>
-<ul>
-<li><span class="math inline">\(x_i\)</span> = <strong>predictor information</strong>, and</li>
-<li><span class="math inline">\(y_i\)</span> = the <strong>response variable</strong> for the <span class="math inline">\(i\)</span>-th observation.</li>
-</ul>
-<p>These data points are the <strong>training set</strong>.</p>
-<p>We assume the relationship between <span class="math inline">\(x_i\)</span> and <span class="math inline">\(y_i\)</span> is perfectly captured by an unknown function <span class="math inline">\(f\)</span>, this means <span class="math inline">\(f(x_i)= y_i\)</span>.</p>
-<p>Our goal is to obtain a good enough estimate <span class="math inline">\(\hat{f}\)</span> of <span class="math inline">\(f\)</span>. We do this by:</p>
-<ol type="1">
-<li><p>selecting a general model for <span class="math inline">\(f\)</span> (linear regression, KNN, …)</p></li>
-<li><p>using the training set to <strong>train</strong> the model and obtain the estimate <span class="math inline">\(\hat{f}\)</span></p></li>
-</ol>
-</section>
-<section id="selecting-a-model-to-use-for-our-data" class="level2">
-<h2 class="anchored" data-anchor-id="selecting-a-model-to-use-for-our-data">Selecting a model to use for our data</h2>
-<p>The question now is: <em>How do we do step 1: selecting which model to use for our data?</em></p>
-<p>There is no single “best” model to apply across all problems. It’s always about evaluating tradeoffs and selecting the best model to work in a given problem for a specific dataset.</p>
-<p>To evaluate the performance of a model on a given data set, we need some way to measure how well its predictions match the observed data.</p>
-<p>Remember we want: <span class="math inline">\(\hat{f}(x_i)\)</span> (the prediction on <span class="math inline">\(x_i\)</span>) is close enough to <span class="math inline">\(y_i = f(x_i)\)</span> (the true value).</p>
-</section>
-<section id="mean-squared-error" class="level2">
-<h2 class="anchored" data-anchor-id="mean-squared-error">Mean Squared Error</h2>
-<p>For regression, the most commonly used way to measure how close <span class="math inline">\(\hat{f}\)</span> is to <span class="math inline">\(f\)</span> is the <strong>mean squared error (MSE)</strong>:</p>
-<p><span class="math display">\[ MSE = \frac{1}{n} \sum_{i=1}^n(y_i - \hat{f}(x_i))^2. \]</span></p>
-<p>When we calculate this MSE using the training data, we obtain the <strong>training MSE</strong>. Many models are created by estimating coefficients that minimize the training MSE.</p>
-<!-- GRAPH 1: with the known function, the estimated function, a few observations, and the observation's predicted response and true response. The data point with the biggest difference between y_i and f^\hat(x_i) has the corresponding labels. -->
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Exercise
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The training data are the points <span class="math inline">\((1,2), (2,5), (3,6), (4,9),\)</span> and <span class="math inline">\((5,9)\)</span>. These are shown in the graph below together with the fitted model <span class="math inline">\(\hat{f}(x)\)</span>. Use <span class="math inline">\(\hat{f}(x) = 1.8x + 0.8\)</span> to compute the training MSE.</p>
-<div id="eb97ddc5" class="cell" data-execution_count="2">
+<div id="fdf42b84" class="cell" data-execution_count="41">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="2.2_assessing_model_accuracy-NOTES_files/figure-html/cell-3-output-1.png" width="689" height="389" class="figure-img"></p>
+<p><img src="overfitting_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
+<div id="80d32ef6" class="cell" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(y_poly15.<span class="bu">min</span>(), y_poly15.<span class="bu">max</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>-1577.2976060710491 4315.283636478209</code></pre>
 </div>
 </div>
-</section>
-<section id="test-data" class="level2">
-<h2 class="anchored" data-anchor-id="test-data">Test data</h2>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Check-in
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>If you were going to take a big final exam in this class, how would you prefer the instructor to come up with exam questions:</p>
-<ol type="1">
-<li>Take the questions from assignments questions that you completed this quarter.</li>
-<li>Come up with new questions to test on the material that we covered this quarter.</li>
-</ol>
-<p>On which questions would you expect to do better?</p>
-</div>
-</div>
-<p>Much like this thought exercise, a model will perform better if we evaluate it on the training set, instead of evaluating it on previously unseen data.</p>
-<p>Generally, we are interested in the accuracy of the predictions that we obtain when we apply our model to previously unseen data.</p>
-<p><strong>Test data</strong> is data that is <em>not part of the training dataset</em> and is used for the purpose of evaluating our model’s performance.</p>
-<p>To estimate how well our model will perform, we calculate the MSE (or any other accuracy metric) on the test data to obtain a <strong>test MSE</strong>.</p>
-<p>If enough observations are available, we create our training and test datasets by dividing the observations into the ones that will be usef for training, and the ones that will be used for testing.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Check-in
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Generally, what do you expect to be larger, the training MSE or the test MSE?</p>
-</div>
-</div>
-</section>
-<section id="overfitting" class="level2">
-<h2 class="anchored" data-anchor-id="overfitting">Overfitting</h2>
-<p>One instance in which it is useful to calcualte both the <em>train MSE</em> and the <em>test MSE</em> is to understand when a model is overfitting.</p>
-<p>We say a model is <strong>overfitting</strong> the data when the model has a small training MSE but a large test MSE. As stated by the notes</p>
-<blockquote class="blockquote">
-<p>This happens because our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by randm chance rather than by true properties of the unknown function <span class="math inline">\(f\)</span>.</p>
-</blockquote>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Exercise
-</div>
-</div>
-<div class="callout-body-container callout-body">
-
-</div>
-</div>
-<!-- 
-EXERCISE 2: 
-
-This has the two plots from figures 2.9, but the right hand panel doesn't have flexibility, just has the three names for the different approximations. 
-
-The question is, which of these would you say is a good fit, a bad fit, and an overfit?
-
--->
-<p>It is important to have in mind that as model flexibility increases, the training MSE will decrease, but the test MSE may not!</p>
-<!-- 
-## Bias-Variance trade off
-
-## Classification setting
- -->
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

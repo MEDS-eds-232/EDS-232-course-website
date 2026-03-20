@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Assessing model accuracy – EDS 232 - Machine Learning for Environmental Science</title>
+<title>Setup – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -68,35 +103,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -154,7 +160,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../notes/2.2_assessing_model_accuracy-NOTES.html">Assessing model accuracy</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../notes/setup.html">Setup</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -171,7 +177,7 @@ window.Quarto = {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../notes/setup.html" class="sidebar-item-text sidebar-link">
+  <a href="../notes/setup.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Setup</span></a>
   </div>
 </li>
@@ -183,7 +189,7 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../notes/2.2_assessing_model_accuracy-NOTES.html" class="sidebar-item-text sidebar-link active">
+  <a href="../notes/2.2_assessing_model_accuracy-NOTES.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Assessing model accuracy</span></a>
   </div>
 </li>
@@ -197,11 +203,10 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#notation-recap" id="toc-notation-recap" class="nav-link active" data-scroll-target="#notation-recap">Notation recap</a></li>
-  <li><a href="#selecting-a-model-to-use-for-our-data" id="toc-selecting-a-model-to-use-for-our-data" class="nav-link" data-scroll-target="#selecting-a-model-to-use-for-our-data">Selecting a model to use for our data</a></li>
-  <li><a href="#mean-squared-error" id="toc-mean-squared-error" class="nav-link" data-scroll-target="#mean-squared-error">Mean Squared Error</a></li>
-  <li><a href="#test-data" id="toc-test-data" class="nav-link" data-scroll-target="#test-data">Test data</a></li>
-  <li><a href="#overfitting" id="toc-overfitting" class="nav-link" data-scroll-target="#overfitting">Overfitting</a></li>
+  <li><a href="#step-1-create-and-clone-course-repositories" id="toc-step-1-create-and-clone-course-repositories" class="nav-link active" data-scroll-target="#step-1-create-and-clone-course-repositories">Step 1: Create and clone course repositories</a></li>
+  <li><a href="#step-2-vscode-set-up" id="toc-step-2-vscode-set-up" class="nav-link" data-scroll-target="#step-2-vscode-set-up">Step 2: VSCode set-up</a></li>
+  <li><a href="#step-3-build-conda-environment-for-the-course" id="toc-step-3-build-conda-environment-for-the-course" class="nav-link" data-scroll-target="#step-3-build-conda-environment-for-the-course">Step 3: Build conda environment for the course</a></li>
+  <li><a href="#step-4-add-jupyter-kernel-for-the-course-environment" id="toc-step-4-add-jupyter-kernel-for-the-course-environment" class="nav-link" data-scroll-target="#step-4-add-jupyter-kernel-for-the-course-environment">Step 4: Add Jupyter kernel for the course environment</a></li>
   </ul>
 </nav>
     </div>
@@ -210,7 +215,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Assessing model accuracy</h1>
+<h1 class="title">Setup</h1>
 </div>
 
 
@@ -227,134 +232,107 @@ window.Quarto = {
 </header>
 
 
-<p>In this lesson we introduce:</p>
-<p>These notes are based on chapter 2.2 of the book <em>An Introduction to Statistical Learning with Applications in Python</em> (James et al., 2023).</p>
-<section id="notation-recap" class="level2">
-<h2 class="anchored" data-anchor-id="notation-recap">Notation recap</h2>
-<p>We start with a set of <span class="math inline">\(n\)</span> observed data points:</p>
-<p><span class="math display">\[ \{ (x_1, y_1) , ..., (x_n, y_n)\}, \]</span></p>
-<p>where</p>
-<ul>
-<li><span class="math inline">\(x_i\)</span> = <strong>predictor information</strong>, and</li>
-<li><span class="math inline">\(y_i\)</span> = the <strong>response variable</strong> for the <span class="math inline">\(i\)</span>-th observation.</li>
-</ul>
-<p>These data points are the <strong>training set</strong>.</p>
-<p>We assume the relationship between <span class="math inline">\(x_i\)</span> and <span class="math inline">\(y_i\)</span> is perfectly captured by an unknown function <span class="math inline">\(f\)</span>, this means <span class="math inline">\(f(x_i)= y_i\)</span>.</p>
-<p>Our goal is to obtain a good enough estimate <span class="math inline">\(\hat{f}\)</span> of <span class="math inline">\(f\)</span>. We do this by:</p>
+<section id="step-1-create-and-clone-course-repositories" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-create-and-clone-course-repositories">Step 1: Create and clone course repositories</h2>
 <ol type="1">
-<li><p>selecting a general model for <span class="math inline">\(f\)</span> (linear regression, KNN, …)</p></li>
-<li><p>using the training set to <strong>train</strong> the model and obtain the estimate <span class="math inline">\(\hat{f}\)</span></p></li>
+<li><p>Create a <code>MEDS/EDS-232</code> directory in your personal computer.</p></li>
+<li><p>Create two GitHub repositores named <code>eds232-in-class</code> and <code>eds232-labs</code>.</p></li>
+<li><p>Open a terminal in your personal computer.</p></li>
+<li><p>Confirm git is installed by running <code>git version</code> in the terminal. If git is installed you will get something similar to</p></li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> version 2.33.1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ol start="5" type="1">
+<li><p><em>If you don’t get a similar output, install git by following the <a href="https://ucsb-meds.github.io/MEDS-installation-guide/#check-git">MEDS installation guide</a>.</em></p></li>
+<li><p>Clone your <code>eds232-in-class</code> and <code>eds232-labs</code> repositories inside the <code>MEDS/EDS-232</code> directory. Make sure you don’t end up cloning one inside the other!</p></li>
 </ol>
 </section>
-<section id="selecting-a-model-to-use-for-our-data" class="level2">
-<h2 class="anchored" data-anchor-id="selecting-a-model-to-use-for-our-data">Selecting a model to use for our data</h2>
-<p>The question now is: <em>How do we do step 1: selecting which model to use for our data?</em></p>
-<p>There is no single “best” model to apply across all problems. It’s always about evaluating tradeoffs and selecting the best model to work in a given problem for a specific dataset.</p>
-<p>To evaluate the performance of a model on a given data set, we need some way to measure how well its predictions match the observed data.</p>
-<p>Remember we want: <span class="math inline">\(\hat{f}(x_i)\)</span> (the prediction on <span class="math inline">\(x_i\)</span>) is close enough to <span class="math inline">\(y_i = f(x_i)\)</span> (the true value).</p>
-</section>
-<section id="mean-squared-error" class="level2">
-<h2 class="anchored" data-anchor-id="mean-squared-error">Mean Squared Error</h2>
-<p>For regression, the most commonly used way to measure how close <span class="math inline">\(\hat{f}\)</span> is to <span class="math inline">\(f\)</span> is the <strong>mean squared error (MSE)</strong>:</p>
-<p><span class="math display">\[ MSE = \frac{1}{n} \sum_{i=1}^n(y_i - \hat{f}(x_i))^2. \]</span></p>
-<p>When we calculate this MSE using the training data, we obtain the <strong>training MSE</strong>. Many models are created by estimating coefficients that minimize the training MSE.</p>
-<!-- GRAPH 1: with the known function, the estimated function, a few observations, and the observation's predicted response and true response. The data point with the biggest difference between y_i and f^\hat(x_i) has the corresponding labels. -->
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Exercise
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The training data are the points <span class="math inline">\((1,2), (2,5), (3,6), (4,9),\)</span> and <span class="math inline">\((5,9)\)</span>. These are shown in the graph below together with the fitted model <span class="math inline">\(\hat{f}(x)\)</span>. Use <span class="math inline">\(\hat{f}(x) = 1.8x + 0.8\)</span> to compute the training MSE.</p>
-<div id="eb97ddc5" class="cell" data-execution_count="2">
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="2.2_assessing_model_accuracy-NOTES_files/figure-html/cell-3-output-1.png" width="689" height="389" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="test-data" class="level2">
-<h2 class="anchored" data-anchor-id="test-data">Test data</h2>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Check-in
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>If you were going to take a big final exam in this class, how would you prefer the instructor to come up with exam questions:</p>
+<section id="step-2-vscode-set-up" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-vscode-set-up">Step 2: VSCode set-up</h2>
+<p><em>Make sure you have created and cloned the course repositories before doing the VSCode set-up.</em></p>
 <ol type="1">
-<li>Take the questions from assignments questions that you completed this quarter.</li>
-<li>Come up with new questions to test on the material that we covered this quarter.</li>
+<li><p>Open Visual Studio Code (VSCode). If you don’t have this IDE in your computer, now is the moment to install it: <a href="https://code.visualstudio.com/download">https://code.visualstudio.com/download</a>.</p></li>
+<li><p>Open a new <strong>bash terminal</strong> in VSCode.</p></li>
+<li><p>Confirm your conda installation by running <code>conda info</code> in the terminal. If conda is active you will get something similar to</p></li>
 </ol>
-<p>On which questions would you expect to do better?</p>
-</div>
-</div>
-<p>Much like this thought exercise, a model will perform better if we evaluate it on the training set, instead of evaluating it on previously unseen data.</p>
-<p>Generally, we are interested in the accuracy of the predictions that we obtain when we apply our model to previously unseen data.</p>
-<p><strong>Test data</strong> is data that is <em>not part of the training dataset</em> and is used for the purpose of evaluating our model’s performance.</p>
-<p>To estimate how well our model will perform, we calculate the MSE (or any other accuracy metric) on the test data to obtain a <strong>test MSE</strong>.</p>
-<p>If enough observations are available, we create our training and test datasets by dividing the observations into the ones that will be usef for training, and the ones that will be used for testing.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">active</span> environment : base</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">active</span> env location : /Users/galaz-garcia/opt/anaconda3</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">shell</span> level : 1</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">[...]</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ex">UID:GID</span> : 502:20</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">netrc</span> file : None</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="ex">offline</span> mode : False</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ol start="4" type="1">
+<li><p><em>If conda needs to be added to the shell profile, follow the <a href="https://ucsb-meds.github.io/MEDS-installation-guide/#install-Anaconda">troubleshooting steps</a> in the MEDS installation guide within a <strong>bash terminal</strong> (not Powershell if you are on Windows).</em></p></li>
+<li><p>Install the Python extension to VSCode:</p></li>
+</ol>
+<p><img src="images/setup/extensions-1.png" class="img-fluid" style="width:80.0%"></p>
+<p><img src="images/setup/extensions-2.png" class="img-fluid" style="width:80.0%"></p>
+<p><img src="images/setup/extensions-3.png" class="img-fluid" style="width:80.0%"></p>
+</section>
+<section id="step-3-build-conda-environment-for-the-course" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-build-conda-environment-for-the-course">Step 3: Build conda environment for the course</h2>
+<p><em>Make sure you have completed the VSCode set-up before creating the environment.</em></p>
+<ol type="1">
+<li><p>Open VSCode on your computer.</p></li>
+<li><p>Download the following YAML file and move it into your <code>eds232-in-class</code> directory: <a href="https://github.com/MEDS-eds-232/EDS-232-course-website/blob/main/eds232-env.yml">https://github.com/MEDS-eds-232/EDS-232-course-website/blob/main/eds232-env.yml</a></p></li>
+<li><p>Open a bash terminal inside VSCode and in it:</p></li>
+</ol>
+<ol type="a">
+<li>Verify you are in the <code>eds232-in-class</code> directory.</li>
+<li>Verify that the <code>eds232-env.yml</code> file is in the directory.</li>
+<li>Run the following conda command to build the environment we will use for the course:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>conda env create --name eds232-env --file eds232-env.yml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>It may take a moment to build the environment. Once conda has finished, verify that the environment was created by running <code>conda env list</code>.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Check-in
+Tip
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Generally, what do you expect to be larger, the training MSE or the test MSE?</p>
+<p>If you need a refresher on basic conda commands, check out the <a href="https://meds-eds-220.github.io/MEDS-eds-220-course/book/appendices/A-python-environments.html#conda-commands">table on the EDS 220 website</a>.</p>
 </div>
 </div>
 </section>
-<section id="overfitting" class="level2">
-<h2 class="anchored" data-anchor-id="overfitting">Overfitting</h2>
-<p>One instance in which it is useful to calcualte both the <em>train MSE</em> and the <em>test MSE</em> is to understand when a model is overfitting.</p>
-<p>We say a model is <strong>overfitting</strong> the data when the model has a small training MSE but a large test MSE. As stated by the notes</p>
-<blockquote class="blockquote">
-<p>This happens because our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by randm chance rather than by true properties of the unknown function <span class="math inline">\(f\)</span>.</p>
-</blockquote>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Exercise
-</div>
-</div>
-<div class="callout-body-container callout-body">
-
-</div>
-</div>
-<!-- 
-EXERCISE 2: 
-
-This has the two plots from figures 2.9, but the right hand panel doesn't have flexibility, just has the three names for the different approximations. 
-
-The question is, which of these would you say is a good fit, a bad fit, and an overfit?
-
--->
-<p>It is important to have in mind that as model flexibility increases, the training MSE will decrease, but the test MSE may not!</p>
-<!-- 
-## Bias-Variance trade off
-
-## Classification setting
- -->
+<section id="step-4-add-jupyter-kernel-for-the-course-environment" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-add-jupyter-kernel-for-the-course-environment">Step 4: Add Jupyter kernel for the course environment</h2>
+<p><em>Make sure you have built the eds232-env before creating the kernel.</em></p>
+<ol type="1">
+<li><p>Open VSCode on your computer.</p></li>
+<li><p>Add a new bash terminal in it.</p></li>
+<li><p>Verify you have the <code>eds232-env</code> conda environment available by running</p></li>
+</ol>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ol start="4" type="1">
+<li>Activate the <code>eds232-env</code> by running</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate eds232-env</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ol start="5" type="1">
+<li><p>Verify the environment has been activated.</p></li>
+<li><p>Run</p></li>
+</ol>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> ipykernel install <span class="at">--user</span> <span class="at">--name</span> eds232-env <span class="at">--display-name</span> <span class="st">"eds232-env"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ol start="7" type="1">
+<li>Verify that the kernel has been created by running</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> kernelspec list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The output should look similar to this:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Available</span> kernels:</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="ex">eds232-env</span>        /Users/galaz-garcia/Library/Jupyter/kernels/eds220-env</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">python3</span>           /Users/galaz-garcia/opt/anaconda3/share/jupyter/kernels/python3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ol start="8" type="1">
+<li><p>Close and reopen VSCode.</p></li>
+<li><p>To use the new kernel, open a Jupyter notebook on VSCode and…</p></li>
+</ol>
+<p><img src="images/setup/kernel-1.png" class="img-fluid" style="width:90.0%"></p>
+<p><img src="images/setup/kernel-2.png" class="img-fluid" style="width:90.0%"></p>
+<p><img src="images/setup/kernel-4.png" class="img-fluid" style="width:90.0%"></p>
 
 
 </section>
