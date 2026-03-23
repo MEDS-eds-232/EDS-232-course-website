@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Introduction – EDS 232 - Machine Learning for Environmental Science</title>
+<title>Learning from data – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -154,7 +154,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../notes/2.1_what_is_statistical_learning-NOTES.html">Introduction</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../notes/2.1_what_is_statistical_learning-NOTES.html">Learning from data</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -177,8 +177,14 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What is machine learning?</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../notes/2.1_what_is_statistical_learning-NOTES.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Introduction</span></a>
+ <span class="menu-text">Learning from data</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -233,7 +239,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Introduction</h1>
+<h1 class="title">Learning from data</h1>
 </div>
 
 
@@ -273,7 +279,7 @@ window.Quarto = {
 <section id="an-ideal-function-f-exists-somewhere-we-just-cant-access-it" class="level3">
 <h3 class="anchored" data-anchor-id="an-ideal-function-f-exists-somewhere-we-just-cant-access-it">An ideal function <span class="math inline">\(f\)</span> exists somewhere, we just can’t access it</h3>
 <p>She identifies the <strong>predictor variable</strong> as time since the rookery was protected and the <strong>response variable</strong> as elephant seal population (since elephant seal population <em>responds</em> on time).</p>
-<div id="b1720442" class="cell" data-execution_count="2">
+<div id="0c96b573" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -285,7 +291,7 @@ window.Quarto = {
 <p>What if Amanda was given the true, real relationship between time and population?</p>
 <p>In mathematical terms, this would mean Amanda would have a <strong>function <span class="math inline">\(f\)</span></strong> such that</p>
 <p><span class="math display">\[f(\text{time since protection}) = \text{true population}.\]</span></p>
-<div id="53166d94" class="cell" data-execution_count="3">
+<div id="358da80b" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -305,7 +311,7 @@ Check-in
 </div>
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p>What does <span class="math inline">\(f(0)\)</span> represent? What does <span class="math inline">\(f( fig_size_x)=200\)</span> mean?</p></li>
+<li><p>What does <span class="math inline">\(f(0)\)</span> represent? What does <span class="math inline">\(f(5)=100\)</span> mean?</p></li>
 <li><p>What could Amanda do if she had this function <span class="math inline">\(f\)</span>?</p></li>
 </ol>
 </div>
@@ -335,7 +341,7 @@ Discussion
 <h3 class="anchored" data-anchor-id="our-next-best-option-is-to-estimate-f-using-data">Our next best option is to estimate <span class="math inline">\(f\)</span> using data</h3>
 <p>Clearly Amanda has no access to this true, ideal function! So her next best option is to try to <strong>estimate <span class="math inline">\(f\)</span></strong> using data.</p>
 <p>Fortunately, she found some long-term ecological data that measures the elephant seal population since the protection for the rookery was established:</p>
-<div id="682561e9" class="cell" data-execution_count="4">
+<div id="17172cd6" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -360,7 +366,7 @@ Check-in
 </div>
 <p>Error can be introduced during measurement. In this case we have</p>
 <p><span class="math display">\[f(\text{time}) = \text{true population} = \text{observed population} + \text{error}\]</span></p>
-<div id="684829a9" class="cell" data-execution_count="5">
+<div id="c3ce8ca3" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -370,7 +376,7 @@ Check-in
 </div>
 </div>
 <p>With these observed population values at a given time, Amanda can try to estimate the real function <span class="math inline">\(f\)</span> with another <strong>function <span class="math inline">\(\hat{f}\)</span></strong>. Some estimates of <span class="math inline">\(f\)</span> are shown in the graph below.</p>
-<div id="d2b1694c" class="cell" data-execution_count="6">
+<div id="5511658c" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -416,7 +422,7 @@ Discussion
 <p>We have a set of <span class="math inline">\(p\)</span> <strong>predictors</strong> <span class="math inline">\(X_1, ..., X_p\)</span> and a <strong>dependent variable</strong> <span class="math inline">\(Y\)</span>.</p>
 <p>We assume there is a relationship between <span class="math inline">\(Y\)</span> and <span class="math inline">\(X = (X_1, ..., X_p)\)</span> that can be written as <span class="math display">\[Y = f(X) + \epsilon.\]</span></p>
 <p>Here <span class="math inline">\(f\)</span> is some fixed but <em>unknown</em> function of the predictors <span class="math inline">\(X_1, . . ., X_p\)</span> and <span class="math inline">\(\epsilon\)</span> represents an error term (independent of <span class="math inline">\(X\)</span> and with mean zero).</p>
-<p>Our objective is to estimate <span class="math inline">\(f\)</span> well enough with another function <span class="math inline">\(\hat{f}(X)\)</span>.</p>
+<p>Our objective is to estimate <span class="math inline">\(f\)</span> well enough with another function <span class="math inline">\(\hat{f}(X)\)</span>. .</p>
 <section id="why-bother-to-estimate-f" class="level3">
 <h3 class="anchored" data-anchor-id="why-bother-to-estimate-f">Why bother to estimate <span class="math inline">\(f\)</span>?</h3>
 <ol type="1">
@@ -456,6 +462,7 @@ Check-in
 </ul>
 <p>These data points are the <strong>training set</strong> or <strong>training data</strong> because we will use them to <strong>train</strong> (or <strong>fit</strong>) our method and obtain an estimate <span class="math inline">\(\hat{f}\)</span> of the “true” function <span class="math inline">\(f\)</span>.</p>
 <p>Our goal is to apply methods to the training data to estimate the unknown function <span class="math inline">\(f\)</span> that links predictors with the response.</p>
+<p>The “learning” part in <em>machine learning</em> is precisely the process of adjusting <span class="math inline">\(\hat{f}\)</span> to minimize error on the training data.</p>
 </section>
 <section id="notation" class="level3">
 <h3 class="anchored" data-anchor-id="notation">Notation</h3>
@@ -620,7 +627,7 @@ Check-in
 </ol>
 <p><span class="math display">\[ \text{observed data} \approx \beta_0 + \beta_1 \text{time} + \beta_2 \text{SST} .\]</span></p>
 <p>This is great! She only needs to find three numbers to get a model for the population.</p>
-<div id="a72e7793" class="cell" data-execution_count="7">
+<div id="ae3754c0" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear Model: Population = -1112.46 + 10.10*Time + 64.58*SST</code></pre>
 </div>
@@ -647,7 +654,7 @@ Check-in
 <section id="example-1" class="level3">
 <h3 class="anchored" data-anchor-id="example-1">Example</h3>
 <p>Instead of assuming a linear form, Amanda uses <strong>K-nearest neighbors (KNN)</strong> to estimate <span class="math inline">\(f(\text{time}, \text{SST})\)</span>. For any new combination of time and SST, the model predicts population as the average of the <span class="math inline">\(K\)</span> most similar observations in the training set. No assumptions about the shape of <span class="math inline">\(f\)</span> required.</p>
-<div id="c9839e52" class="cell" data-execution_count="8">
+<div id="3e6a2411" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -747,7 +754,7 @@ Check-in
 </div>
 </div>
 <p>She can use this data to train a classifier, and then use it to predict the health status of new, unlabeled seals given their weight and length.</p>
-<div id="1d5ee7af" class="cell" data-execution_count="9">
+<div id="a0f8ca62" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -828,7 +835,7 @@ Check-in
 </div>
 </div>
 <p>In this case, there is no response variable <span class="math inline">\(y\)</span>, Amanda lets the algorithm find structure in the data on its own.</p>
-<div id="b2f4a390" class="cell" data-execution_count="10">
+<div id="c8ef0b24" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
