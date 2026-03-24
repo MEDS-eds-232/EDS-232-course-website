@@ -1,25 +1,79 @@
 ---
-title: What is Machine Learning?
 format: revealjs
 ---
 
-## In this lesson
+## {#title-slide data-menu-title="Title Slide" background="#053660"}
+
+[EDS 232]{.custom-title}
+
+<hr class="hr-teal">
+
+[Lesson 1]{.custom-subtitle}
+
+[*What is Machine Learning?*]{.custom-subtitle}
+
+---
+
+## {#in-this-lesson data-menu-title="In this lesson"}
+
+[In this lesson]{.slide-title}
+
+<hr>
 
 - What machine learning is and how it differs from traditional programming
+
+<br>
+
 - The relationship between AI, machine learning, and deep learning
+
+<br>
+
 - Examples and limitations of machine learning applied to environmental problems
 
-# What is machine learning?
 
-## What is machine learning?
+---
 
+## {#section-what-is-ml data-menu-title="# What is machine learning? #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">What is machine learning?</p>
+</div>
+
+---
+
+## {#what-is-ml data-menu-title="What is machine learning?"}
+
+[What is machine learning?]{.slide-title}
+
+<hr>
+
+<br>
+
+::: {.body-text-m}
 **Machine learning (ML)** is a branch of computer science focused on building systems that can *learn from data* to make predictions or decisions, without being explicitly programmed with rules.
+:::
 
-The key idea: instead of a human writing down rules, an algorithm *discovers* the rules from examples.
+<br>
 
-## Two approaches to the same problem
+::: {.center-text .body-text-m .teal-text}
+Instead of a human writing down rules, 
 
+an algorithm *discovers* the rules from examples.
+:::
+
+---
+
+## {#two-approaches data-menu-title="Two approaches"}
+
+[Two approaches to the same problem]{.slide-title}
+
+<hr>
+
+::: {.body-text-m .gray-text}
 Predicting whether a kelp forest has been degraded based on water temperature and sea urchin density.
+:::
+
+<br>
 
 . . .
 
@@ -27,90 +81,220 @@ Predicting whether a kelp forest has been degraded based on water temperature an
 
 > *If temperature > 18°C and urchin density > 50/m², then: degraded*
 
+<br>
+
 . . .
 
 **Machine learning**
 
 > *Give the algorithm many examples and let it figure out the rules itself.*
 
-## How does a machine learn?
+---
 
-1. Take a set of training examples
+## {#how-machines-learn data-menu-title="How does a machine learn?"}
+
+[How does a machine learn?]{.slide-title}
+
+<hr>
+
+<br>
+
+At its core, a machine learning algorithm does the following:
+
+<br>
+
+1. Take a set of data examples that is used to *train* the model
 2. Find a function $\hat{f}$ that maps inputs to outputs well on those examples
 3. Use $\hat{f}$ to make predictions on new, unseen data
 
-"Learning" means adjusting $\hat{f}$ to minimize error on the training data.
+<br>
 
-## Check-in {background-color="#e8f4f8"}
+::: {.center-text .body-text-m .teal-text}
+"Learning" means adjusting $\hat{f}$ to minimize error on the *training data*.
+:::
 
-Think of a task in environmental science that would be very hard to solve with hand-written rules, but where you might have a lot of labeled data.
+---
 
-**What are the inputs and outputs?**
+## {#checkin-1 data-menu-title="Check-in 1" background="#053660"}
 
-# AI, Machine Learning, and Deep Learning
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr"> Check-in</p>
+<p class="custom-subtitle3">Think of a task in environmental science that would be very hard to solve with hand-written rules, but where you might have a lot of labeled data. </p>
+<p class="custom-subtitle3"> What are the inputs and outputs?</p>
+</div>
 
-## Three related terms
+---
 
+## {#section-ai-ml-dl data-menu-title="# AI, ML, and Deep Learning #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">AI, Machine Learning, and Deep Learning</p>
+</div>
+
+---
+
+## {#three-terms data-menu-title="Three related terms"}
+
+[Three related terms]{.slide-title}
+
+<hr>
+
+<br>
+
+::: {.teal-text .body-text-m}
 **Artificial intelligence (AI)**
-: The broadest term — any technique enabling machines to mimic human intelligence, including rule-based systems and search algorithms.
+:::
+The broadest term — any technique enabling machines to mimic human intelligence, including rule-based systems and search algorithms.
 
-**Machine learning**
-: A *subset* of AI — systems that learn from data rather than hand-coded rules.
-
-**Deep learning**
-: A *subset* of ML — methods based on neural networks with many layers, behind breakthroughs like image recognition and large language models.
-
-## {background-image="images/The-Core-Technical-Hierarchy-Deconstructing-AI--Machine-Learning--and-Deep-Learning.png" background-size="contain" background-position="center"}
-
-## This course
-
-We will focus on **machine learning** — primarily the classical methods:
-
-- Regression
-- Support vector machines
-- Decision trees
-- Clustering
-
-# Machine Learning in Environmental Science
-
-## Species distribution modeling
-
-Algorithms like MaxEnt and random forests use occurrence records and environmental covariates to predict where species are likely to be found — including under future climate scenarios [@elith2011; @phillips2017].
-
-## Remote sensing and land cover classification
-
-Satellite imagery is classified into land cover types (forest, wetland, urban, etc.) using supervised classifiers — used to track deforestation, wetland loss, and wildfire burn severity [@kattenborn2021].
-
-## Climate downscaling
-
-ML methods "downscale" coarse global climate model outputs to finer local scales — for example, predicting local precipitation from large-scale atmospheric patterns [@banomedina2020].
-
-## Whale detection from acoustics
-
-Deep learning models trained on underwater recordings detect and classify marine mammal calls, enabling large-scale passive acoustic monitoring [@shiu2020].
-
-## Harmful algal bloom prediction
-
-ML models trained on water quality sensors, satellite data, and weather forecasts predict the timing and location of algal blooms in lakes and coastal waters [@rousso2020].
-
-# Limitations and Considerations
-
-## Limitations
-
-- **Data hungry** — many methods need large training sets, scarce for rare species or remote locations
-
-- **Extrapolation risk** — a model trained in one region or time period may fail under novel conditions
-
-- **Interpretability** — flexible models may predict well but be hard to interpret
-
-- **Bias in training data** — unrepresentative data produces biased models
+<br>
 
 . . .
 
-These are not reasons to avoid ML — they are reasons to use it carefully.
+::: {.teal-text .body-text-m}
+**Machine learning**
+:::
+A *subset* of AI — systems that learn from data rather than hand-coded rules.
 
-## Check-in {background-color="#e8f4f8"}
+<br>
 
-Construct a scenario in which developing and using a machine learning model with one or more of these limitations would be particularly consequential.
+. . .
 
-## References
+::: {.teal-text .body-text-m}
+**Deep learning**
+:::
+A *subset* of ML — methods based on neural networks with many layers, behind breakthroughs like image recognition and large language models.
+
+---
+
+## {#ai-diagram data-menu-title="AI hierarchy diagram" background-image="images/The-Core-Technical-Hierarchy-Deconstructing-AI--Machine-Learning--and-Deep-Learning.png" background-size="contain" background-position="center"}
+
+---
+
+## {#this-course data-menu-title="This course"}
+
+[This course]{.slide-title}
+
+<hr>
+
+<br>
+
+::: {.center-text .body-text-m}
+We will focus on **machine learning**, primarily the classical methods:
+:::
+
+<br>
+
+::: {.center-text .body-text-m .teal-text}
+Regression · Support vector machines · Decision trees · Clustering · Dimension reduction
+:::
+
+<br>
+
+Probably some deep learning in the last two weeks.
+
+---
+
+## {#env-apps-1 data-menu-title="Applications (1)"}
+
+[ML in environmental science]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+::: {.teal-text .body-text-m}
+**Species distribution modeling**
+:::
+Algorithms like MaxEnt and random forests predict where species are likely to be found using occurrence records and environmental covariates.
+
+![Adapted from [Helgen et al., 2013](https://commons.wikimedia.org/wiki/File:Bioclimatic_and_geographic_distribution_models_and_localities_for_Bassaricyon_species_-_ZooKeys-324-001-g011.jpg) for illustration purposes.](images/maxent.png){fig-align="center" width="90%"}
+:::
+
+::: {.column width="50%"}
+::: {.teal-text .body-text-m}
+**Remote sensing & land cover**
+:::
+Satellite imagery is classified into land cover types (forest, wetland, urban) to track deforestation, wetland loss, and wildfire burn severity at continental scales.
+
+![](images/deforestation.jpeg){fig-align="center" width="90%"}
+:::
+
+::::
+
+---
+
+## {#env-apps-2 data-menu-title="Applications (2)"}
+
+[ML in environmental science]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+::: {.teal-text .body-text-m}
+**Climate downscaling**
+:::
+Deep learning methods trained on high-resolution commercial satellite imagery have been used to map and track permafrost covered in the Arctic at sub-meter scale. 
+
+![[C. Witharana et al., 2021](https://www.mdpi.com/2072-4292/13/4/558)](images/permafrost.jpg){fig-align="center" width="90%"}
+:::
+
+::: {.column width="50%"}
+::: {.teal-text .body-text-m}
+**Whale detection from acoustics**
+:::
+Deep learning models trained on underwater recordings detect and classify marine mammal calls, enabling passive acoustic monitoring at scale.
+
+![](images/whales.jpg){fig-align="center" width="90%"}
+:::
+
+::::
+
+---
+
+## {#section-limitations data-menu-title="# Limitations #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">We need to be aware of ML limitations</p>
+</div>
+
+---
+
+## {#limitations data-menu-title="Limitations"}
+
+[Limitations]{.slide-title}
+
+<hr>
+
+- [**Data hungry**]{.teal-text} — many methods need large amounts of data to "learn" 
+
+<br>
+
+- [**Extrapolation risk**]{.teal-text} — a model trained in one region or time period may fail under novel conditions
+
+<br>
+
+- [**Interpretability**]{.teal-text} — flexible models may predict well but be hard to interpret
+
+<br>
+
+- [**Bias in training data**]{.teal-text} — unrepresentative data produces biased models
+
+. . .
+
+<br>
+
+::: {.center-text}
+These are not reasons to avoid ML — they are reasons to use it carefully!
+:::
+
+---
+
+## {#checkin-2 data-menu-title="Check-in 2" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">Construct a scenario in which developing and using a machine learning model with one or more of these limitations would be particularly consequential.</p>
+</div>
