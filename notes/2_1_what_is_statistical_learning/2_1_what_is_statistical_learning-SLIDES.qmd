@@ -76,7 +76,6 @@ observed_sst = 15 + 2 * np.sin(observed_time / 5) + 0.5 * observed_time + np.ran
 
 <hr>
 
-<br>
 
 ::: {.body-text-m}
 Amanda is a marine scientist investigating how protected areas affect elephant seal populations in California. She wants to understand:
@@ -89,6 +88,9 @@ Amanda is a marine scientist investigating how protected areas affect elephant s
 
 *in a rookery that has just been protected?*
 :::
+
+
+![](images/elephant_seals.jpg){fig-align="center" width="100%"}
 
 ---
 
@@ -105,6 +107,8 @@ Amanda is a marine scientist investigating how protected areas affect elephant s
 
 ```{python}
 #| echo: false
+#| fig-align: center
+#| out-width: "100%"
 # GRAPH 1: A simple graph that only has the axes labelled. The x axis is time and the y axis is elephant seal population.
 
 plt.figure(figsize=( fig_size_x,  fig_size_y))
@@ -139,6 +143,8 @@ $$f(\text{time since protection}) = \text{true population}$$
 ```{python}
 #| echo: false
 #| fig-height: 3.5
+#| fig-align: center
+#| out-width: "100%"
 plt.figure(figsize=(fig_size_x, fig_size_y))
 plt.plot(time, true_population, 'b-', linewidth=3, label='f (true relationship)')
 plt.xlabel('Time since rookery was protected (years)')
@@ -184,6 +190,8 @@ Amanda has no access to the true $f$. Her next best option:
 ```{python}
 #| echo: false
 #| fig-height: 3.5
+#| fig-align: center
+#| out-width: "100%"
 plt.figure(figsize=(fig_size_x, fig_size_y))
 plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
 plt.xlabel('Time since rookery was protected (years)')
@@ -214,6 +222,8 @@ $$f(\text{time}) = \text{true population} = \text{observed population} + \epsilo
 ```{python}
 #| echo: false
 #| fig-height: 3.2
+#| fig-align: center
+#| out-width: "100%"
 plt.figure(figsize=(fig_size_x, fig_size_y - 0.5))
 plt.plot(time, true_population, 'b-', linewidth=3, label='f (true relationship)')
 plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
@@ -253,23 +263,47 @@ estimate the real function $f$ with another **function $\hat{f}$**.
 ```{python}
 #| echo: false
 #| fig-height: 4
-
+#| fig-align: center
+#| out-width: "100%"
 
 plt.figure(figsize=(fig_size_x, fig_size_y))
 plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#estimates-f-linear data-menu-title="Choosing an estimate: linear"}
+
+[Many possible estimates for $f$]{.slide-title}
+
+<hr>
+
+With these observed population values at a given time, Amanda can try to
+
+::: {.center-text .body-text-m .teal-text}
+estimate the real function $f$ with another **function $\hat{f}$**.
+:::
+
+```{python}
+#| echo: false
+#| fig-height: 4
+#| fig-align: center
+#| out-width: "100%"
 
 linear_coeffs = np.polyfit(observed_time, observed_population, 1)
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
 plt.plot(time, np.polyval(linear_coeffs, time), 'orange', linewidth=2, label='Linear fit')
-
-def logistic_simple(x, L, k, x0):
-    return L / (1 + np.exp(-k * (x - x0)))
-
-popt, _ = curve_fit(logistic_simple, observed_time, observed_population, p0=[500, 0.5, 8])
-plt.plot(time, logistic_simple(time, *popt), 'green', linewidth=2, label='Logistic fit')
-
-poly_coeffs = np.polyfit(observed_time, observed_population, 8)
-plt.plot(time, np.polyval(poly_coeffs, time), 'purple', linewidth=2, label='Degree 8 polynomial')
-
 plt.xlabel('Time since rookery was protected (years)')
 plt.ylabel('Elephant seal population')
 plt.grid(True, alpha=0.3)
@@ -281,11 +315,101 @@ plt.show()
 plt.close()
 ```
 
-. . .
+---
 
-::: {.center-text .body-text-m}
-How do we choose? Preliminary knowledge of the data, the goal (prediction or inference?), available data volume, error — every choice involves **tradeoffs**.
+## {#estimates-f-logistic data-menu-title="Choosing an estimate: logistic"}
+
+[Many possible estimates for $f$]{.slide-title}
+
+<hr>
+
+With these observed population values at a given time, Amanda can try to
+
+::: {.center-text .body-text-m .teal-text}
+estimate the real function $f$ with another **function $\hat{f}$**.
 :::
+
+```{python}
+#| echo: false
+#| fig-height: 4
+#| fig-align: center
+#| out-width: "100%"
+
+linear_coeffs = np.polyfit(observed_time, observed_population, 1)
+
+def logistic_simple(x, L, k, x0):
+    return L / (1 + np.exp(-k * (x - x0)))
+
+popt, _ = curve_fit(logistic_simple, observed_time, observed_population, p0=[500, 0.5, 8])
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
+plt.plot(time, np.polyval(linear_coeffs, time), 'orange', linewidth=2, label='Linear fit')
+plt.plot(time, logistic_simple(time, *popt), 'green', linewidth=2, label='Logistic fit')
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend()
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#estimates-f-poly data-menu-title="Choosing an estimate: polynomial"}
+
+[Many possible estimates for $f$]{.slide-title}
+
+<hr>
+
+With these observed population values at a given time, Amanda can try to
+
+::: {.center-text .body-text-m .teal-text}
+estimate the real function $f$ with another **function $\hat{f}$**.
+:::
+
+```{python}
+#| echo: false
+#| fig-height: 4
+#| fig-align: center
+#| out-width: "100%"
+
+linear_coeffs = np.polyfit(observed_time, observed_population, 1)
+
+def logistic_simple(x, L, k, x0):
+    return L / (1 + np.exp(-k * (x - x0)))
+
+popt, _ = curve_fit(logistic_simple, observed_time, observed_population, p0=[500, 0.5, 8])
+poly_coeffs = np.polyfit(observed_time, observed_population, 8)
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
+plt.plot(time, np.polyval(linear_coeffs, time), 'orange', linewidth=2, label='Linear fit')
+plt.plot(time, logistic_simple(time, *popt), 'green', linewidth=2, label='Logistic fit')
+plt.plot(time, np.polyval(poly_coeffs, time), 'purple', linewidth=2, label='Degree 8 polynomial')
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend()
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#checkin-estimates data-menu-title="Check-in: Choosing f̂" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">What considerations can Amanda take into account </p>
+<p class="custom-subtitle3">when choosing an estimate $\hat{f}$?</p>
+</div>
 
 ---
 
@@ -555,15 +679,28 @@ Parametric methods estimate $f$ in two steps:
 
 <hr>
 
+:::: {.columns}
+
+::: {.column width="42%"}
+
 Amanda decides to model elephant seal population as **linear in time and SST**:
 
 $$f(x_1, x_2) = \beta_0 + \beta_1\, \text{time} + \beta_2\, \text{SST}$$
 
-Training the model finds $\beta_0, \beta_1, \beta_2$ that best fit the observed data. The  graph of the fitted $\hat{f}$ is a plane:
+Training the model finds $\beta_0, \beta_1, \beta_2$ that best fit the observed data. The graph of the fitted $\hat{f}$ is a plane.
+
+::: {.center-text .body-text-s .teal-text}
+The shape of $\hat{f}$ was decided *before* seeing the data.
+:::
+
+:::
+
+::: {.column width="58%"}
 
 ```{python}
 #| echo: false
-#| fig-height: 3.5
+#| fig-align: center
+#| out-width: "100%"
 X = np.column_stack([observed_time, observed_sst])
 y = observed_population
 model = LinearRegression()
@@ -588,9 +725,9 @@ plt.show()
 plt.close()
 ```
 
-::: {.center-text .body-text-s .teal-text}
-The shape of $\hat{f}$ was decided *before* seeing the data. 
 :::
+
+::::
 
 ---
 
@@ -620,13 +757,26 @@ Non-parametric methods make **no assumptions** about the functional form of $f$.
 
 <hr>
 
-Instead of assuming a linear form, Amanda uses **K-nearest neighbors (KNN)**. 
+:::: {.columns}
+
+::: {.column width="42%"}
+
+Instead of assuming a linear form, Amanda uses **K-nearest neighbors (KNN)**.
 
 For any new (time, SST) pair, the model predicts population as the average of the $K$ closest training observations.
 
+::: {.center-text .body-text-s .teal-text}
+The shape of $\hat{f}$ emerges entirely from the training observations, no functional form was specified.
+:::
+
+:::
+
+::: {.column width="58%"}
+
 ```{python}
 #| echo: false
-#| fig-height: 3.5
+#| fig-align: center
+#| out-width: "100%"
 X = np.column_stack([observed_time, observed_sst])
 y = observed_population
 
@@ -652,9 +802,9 @@ plt.show()
 plt.close()
 ```
 
-::: {.center-text .body-text-s .teal-text}
-The shape of $\hat{f}$ emerges entirely from the training observations, no functional form was specified.
 :::
+
+::::
 
 ---
 
@@ -714,6 +864,8 @@ $$f(\text{weight, length}) = \text{health status} \in \{\text{healthy, malnouris
 ```{python}
 #| echo: false
 #| fig-height: 3.5
+#| fig-align: center
+#| out-width: "100%"
 np.random.seed(7)
 healthy    = np.random.multivariate_normal([200, 180], [[300, 50], [50, 40]], 30)
 malnourish = np.random.multivariate_normal([130, 155], [[200, 40], [40, 30]], 30)
@@ -794,6 +946,8 @@ Amanda records dive depth and duration for many seals, with no labels. She asks:
 ```{python}
 #| echo: false
 #| fig-height: 3.2
+#| fig-align: center
+#| out-width: "100%"
 np.random.seed(9)
 deep_long    = np.random.multivariate_normal([550, 45], [[1500, 30], [30, 20]], 30)
 shallow_freq = np.random.multivariate_normal([150, 12], [[800,  20], [20,  8]], 30)

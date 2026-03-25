@@ -403,7 +403,7 @@
     "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#researching-elephant-seals",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Researching elephant seals\n\n\n\nAmanda is a marine scientist investigating how protected areas affect elephant seal populations in California. She wants to understand:\n\n\n\nHow does elephant seal population change\nin a rookery that has just been protected?"
+    "text": "Researching elephant seals\n\n\nAmanda is a marine scientist investigating how protected areas affect elephant seal populations in California. She wants to understand:\n\n\n\nHow does elephant seal population change\nin a rookery that has just been protected?"
   },
   {
     "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#predictor-response",
@@ -445,7 +445,35 @@
     "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#estimates-f",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Many possible estimates for \\(f\\)\n\nWith these observed population values at a given time, Amanda can try to\n\nestimate the real function \\(f\\) with another function \\(\\hat{f}\\).\n\n\n\n\n\n\n\n\n\n\n\n\nHow do we choose? Preliminary knowledge of the data, the goal (prediction or inference?), available data volume, error — every choice involves tradeoffs."
+    "text": "Many possible estimates for \\(f\\)\n\nWith these observed population values at a given time, Amanda can try to\n\nestimate the real function \\(f\\) with another function \\(\\hat{f}\\)."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#estimates-f-linear",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#estimates-f-linear",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Many possible estimates for \\(f\\)\n\nWith these observed population values at a given time, Amanda can try to\n\nestimate the real function \\(f\\) with another function \\(\\hat{f}\\)."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#estimates-f-logistic",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#estimates-f-logistic",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Many possible estimates for \\(f\\)\n\nWith these observed population values at a given time, Amanda can try to\n\nestimate the real function \\(f\\) with another function \\(\\hat{f}\\)."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#estimates-f-poly",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#estimates-f-poly",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Many possible estimates for \\(f\\)\n\nWith these observed population values at a given time, Amanda can try to\n\nestimate the real function \\(f\\) with another function \\(\\hat{f}\\)."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#checkin-estimates",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#checkin-estimates",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Check-in\n\n\nWhat considerations can Amanda take into account\n\n\nwhen choosing an estimate \\(\\hat{f}\\)?"
   },
   {
     "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#section-abstract-setup",
@@ -515,7 +543,7 @@
     "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#parametric-example",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Parametric example: linear model\n\nAmanda decides to model elephant seal population as linear in time and SST:\n\\[f(x_1, x_2) = \\beta_0 + \\beta_1\\, \\text{time} + \\beta_2\\, \\text{SST}\\]\nTraining the model finds \\(\\beta_0, \\beta_1, \\beta_2\\) that best fit the observed data. The graph of the fitted \\(\\hat{f}\\) is a plane:\n\n\n\n\n\n\n\n\n\n\nThe shape of \\(\\hat{f}\\) was decided before seeing the data."
+    "text": "Parametric example: linear model\n\n\n\nAmanda decides to model elephant seal population as linear in time and SST:\n\\[f(x_1, x_2) = \\beta_0 + \\beta_1\\, \\text{time} + \\beta_2\\, \\text{SST}\\]\nTraining the model finds \\(\\beta_0, \\beta_1, \\beta_2\\) that best fit the observed data. The graph of the fitted \\(\\hat{f}\\) is a plane.\n\nThe shape of \\(\\hat{f}\\) was decided before seeing the data."
   },
   {
     "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#nonparametric",
@@ -529,7 +557,7 @@
     "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#nonparametric-example",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Non-parametric example: K-nearest neighbors\n\nInstead of assuming a linear form, Amanda uses K-nearest neighbors (KNN).\nFor any new (time, SST) pair, the model predicts population as the average of the \\(K\\) closest training observations.\n\n\n\n\n\n\n\n\n\n\nThe shape of \\(\\hat{f}\\) emerges entirely from the training observations, no functional form was specified."
+    "text": "Non-parametric example: K-nearest neighbors\n\n\n\nInstead of assuming a linear form, Amanda uses K-nearest neighbors (KNN).\nFor any new (time, SST) pair, the model predicts population as the average of the \\(K\\) closest training observations.\n\nThe shape of \\(\\hat{f}\\) emerges entirely from the training observations, no functional form was specified."
   },
   {
     "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#section-reg-class",
