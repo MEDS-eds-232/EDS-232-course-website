@@ -94,13 +94,11 @@ Amanda is a marine scientist investigating how protected areas affect elephant s
 
 ## {#predictor-response data-menu-title="Predictor and response variables"}
 
-[Identifying the variables]{.slide-title}
+[Amanda identifies the following variables]{.slide-title}
 
 <hr>
 
 ::: {.body-text-m}
-She identifies the following variables:
-
 - **Predictor variable:** time since the rookery was protected
 - **Response variable:** elephant seal population
 :::
@@ -127,13 +125,16 @@ plt.close()
 
 <hr>
 
+::: {.center-text .body-text-m .teal-text}
+What if Amanda had the *true* relationship between time and population?
+:::
+
 ::: {.body-text-m}
-What if Amanda had the *true* relationship between time and population — a function $f$ such that
+In mathematical terms this means having a function $f$ such that
 :::
 
 $$f(\text{time since protection}) = \text{true population}$$
 
-. . .
 
 ```{python}
 #| echo: false
@@ -157,20 +158,27 @@ plt.close()
 
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">What does $f(0)$ represent? What does $f(5) = 100$ mean?</p>
-<p class="custom-subtitle3">What could Amanda do if she had this function $f$?</p>
+
+
+$$f(\text{time since protection}) = \text{true population}$$
+
+<p class="custom-subtitle3">What information could Amanda acquire if she had this function $f$?</p>
 </div>
 
 ---
 
 ## {#observed-data data-menu-title="Estimating f from data"}
 
-[...but we have to estimate it from data]{.slide-title}
+[...but we have to estimate $f$ from data]{.slide-title}
 
 <hr>
 
 ::: {.body-text-m}
-Amanda has no access to the true $f$. Her next best option: **estimate $f$ using observed data**.
+Amanda has no access to the true $f$. Her next best option:
+:::
+
+::: {.center-text .body-text-m .teal-text}
+ **estimate $f$ using observed data**.
 :::
 
 ```{python}
@@ -232,13 +240,21 @@ plt.close()
 
 ## {#estimates-f data-menu-title="Choosing an estimate"}
 
-[Many possible estimates $\hat{f}$]{.slide-title}
+[Many possible estimates for $f$]{.slide-title}
 
 <hr>
+
+With these observed population values at a given time, Amanda can try to
+
+::: {.center-text .body-text-m .teal-text}
+estimate the real function $f$ with another **function $\hat{f}$**.
+:::
 
 ```{python}
 #| echo: false
 #| fig-height: 4
+
+
 plt.figure(figsize=(fig_size_x, fig_size_y))
 plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
 
@@ -299,14 +315,14 @@ We assume there is a relationship:
 
 $$Y = f(X) + \epsilon$$
 
-where $f$ is an *unknown* function and $\epsilon$ is an error term (independent of $X$, mean zero).
+where $f$ is a fixed but *unknown* function of the predictors $X_1, ..., X_p$ and $\epsilon$ is an error term (independent of $X$, mean zero).
 
 <br>
 
 . . .
 
 ::: {.center-text .body-text-m .teal-text}
-Our goal: find an estimate $\hat{f}(X)$ that approximates $f$ well.
+Our goal: find an estimate $\hat{f}(X)$ that approximates $f(X)$ well.
 :::
 
 ---
@@ -322,7 +338,7 @@ Our goal: find an estimate $\hat{f}(X)$ that approximates $f$ well.
 ::: {.teal-text .body-text-m}
 **1. Inference**
 :::
-Use $\hat{f}$ to understand *which* predictors are associated with the response and *how*.
+Use $\hat{f}$ to understand *which* predictors are associated with the response and understand the form of this relationship.
 
 <br>
 
@@ -338,7 +354,9 @@ Calculate $\hat{Y} = \hat{f}(X)$ to predict the value of $Y$ for new inputs $X$.
 . . .
 
 ::: {.body-text-m}
-The method we choose often depends on whether our goal is inference, prediction, or both — interpretable models may not predict as well, and vice versa.
+The method we choose often depends on whether our goal is inference, prediction, or both. 
+
+Interpretable models may not predict as well, and vice versa.
 :::
 
 ---
@@ -347,23 +365,21 @@ The method we choose often depends on whether our goal is inference, prediction,
 
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">What are some examples where **inference** may be more important than prediction?</p>
-<p class="custom-subtitle3">What about an example where **prediction** is the priority?</p>
+<p class="custom-subtitle3">What are some problems or scenarios where **inference** may be more important than prediction?</p>
+<p class="custom-subtitle3">What about problems or scenarios where **prediction** is the priority?</p>
 </div>
 
 ---
 
 ## {#training-data data-menu-title="Training data and notation"}
 
-[Training data]{.slide-title}
+[The ML approach]{.slide-title}
 
 <hr>
 
-We start with a set of $n$ **observed data points** — the **training set**:
+We start with a set of $n$ **observed data points**. These are called the **training set**:
 
 $$\{(x_1, y_1),\, \ldots,\, (x_n, y_n)\}$$
-
-. . .
 
 <br>
 
@@ -375,54 +391,119 @@ $$\{(x_1, y_1),\, \ldots,\, (x_n, y_n)\}$$
 . . .
 
 ::: {.center-text .body-text-m .teal-text}
-"Training" means using these data points to fit $\hat{f}$.
+"Training" means using these data points to find an estimate $\hat{f}$.
 
 The "learning" in *machine learning* is precisely adjusting $\hat{f}$ to minimize error on this data.
 :::
 
 ---
 
-## {#notation-example data-menu-title="Notation example"}
+## {#notation-example-1 data-menu-title="One variable notation example"}
 
-[Notation example]{.slide-title}
+[Example: One variable notation]{.slide-title}
 
 <hr>
 
 ::: {.body-text-m}
-With **one predictor** (time), Amanda's data maps to:
+With **one predictor variable** (time), Amanda's data maps to the following vectors:
 :::
 
 :::: {.columns}
 
-::: {.column width="50%"}
-| Obs. | Time | Population |
-|------|------|------------|
+::: {.column width="55%"}
+| Obs. | Time (Predictor) |  Population (Response)|
+|-------------|------|------------|
 | 1 | 2 | 53 |
+| $\vdots$ | $\vdots$ | $\vdots$ |
 | 5 | 10 | 353 |
-| 9 | 18 | 473 |
+| $\vdots$ | $\vdots$ | $\vdots$ |
+| 9  | 18 | 473 |
 :::
 
-::: {.column width="50%"}
-$(x_1, y_1) = (2,\; 53)$
+::: {.column width="10%"}
+\
 
-$(x_5, y_5) = (10,\; 353)$
+\
 
-$(x_9, y_9) = (18,\; 473)$
+\
+
+\
+
+\ \ \ \ \ \ \ \ \ **→**
+:::
+
+::: {.column width="35%"}
+\
+
+$(x_1,y_1) = (2,53)$
+
+$\vdots$
+
+$(x_5,y_5) = (10,353)$
+
+$\vdots$
+
+$(x_9,y_9) = (18,473)$
+
 :::
 
 ::::
 
-. . .
+## {#notation-example-2 data-menu-title="Multiple variables notation example"}
 
-<br>
+[Example: Multi-variable notation]{.slide-title}
+
+<hr>
 
 ::: {.body-text-m}
-With **two predictors** (time + SST), each $x_i$ becomes a vector:
+If we were to add average annual sea surface temperature (SST) as a second predictor variable, then each $x_i$ becomes a vector:
 :::
 
-$x_1 = (x_{1,1},\; x_{1,2}) = (2,\; 17.05), \quad y_1 = 53$
+:::: {.columns}
 
-$x_5 = (x_{5,1},\; x_{5,2}) = (10,\; 20.86), \quad y_5 = 353$
+::: {.column width="55%"}
+| Obs. | Time (Predictor 1) | SST (Predictor 2) | Population (Response)|
+|-------------|------|------|------------|
+| 1 | 2 | 17.05| 53 |
+| $\vdots$ | $\vdots$ |  $\vdots$ | $\vdots$ |
+| 5 | 10 | 20.86 | 353 |
+| $\vdots$ | $\vdots$ | $\vdots$ |  $\vdots$ |
+| 9  | 18 | 23.27| 473 |
+:::
+
+::: {.column width="10%"}
+\
+
+\
+
+\
+
+\
+
+\ \ \ \ \ \ \ \ \ **→**
+:::
+
+::: {.column width="35%"}
+
+$x_1 = (x_{1,1}, x_{1,2}) = (2, 17.05)$  
+
+$y_1 = 53$
+
+$\vdots$
+
+$x_5 = (x_{5,1}, x_{5,2}) = (10, 20.86)$  
+
+$y_5 = 353$
+
+$\vdots$
+
+$x_9 = (x_{9,1}, x_{9,2}) = (18, 23.27)$ 
+
+$y_9 = 473$
+
+:::
+
+::::
 
 ---
 
