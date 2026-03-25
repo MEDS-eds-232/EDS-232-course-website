@@ -555,11 +555,11 @@ Parametric methods estimate $f$ in two steps:
 
 <hr>
 
-Amanda models elephant seal population as **linear in time and SST**:
+Amanda decides to model elephant seal population as **linear in time and SST**:
 
 $$f(x_1, x_2) = \beta_0 + \beta_1\, \text{time} + \beta_2\, \text{SST}$$
 
-Training the model finds $\beta_0, \beta_1, \beta_2$ that best fit the observed data — the fitted $\hat{f}$ is a flat plane:
+Training the model finds $\beta_0, \beta_1, \beta_2$ that best fit the observed data. The  graph of the fitted $\hat{f}$ is a plane:
 
 ```{python}
 #| echo: false
@@ -589,7 +589,7 @@ plt.close()
 ```
 
 ::: {.center-text .body-text-s .teal-text}
-The shape of $\hat{f}$ was decided *before* seeing the data. Is a flat plane a good assumption here?
+The shape of $\hat{f}$ was decided *before* seeing the data. 
 :::
 
 ---
@@ -620,7 +620,9 @@ Non-parametric methods make **no assumptions** about the functional form of $f$.
 
 <hr>
 
-Instead of assuming a linear form, Amanda uses **K-nearest neighbors (KNN)**. For any new (time, SST) pair, the model predicts population as the average of the $K$ most similar training observations.
+Instead of assuming a linear form, Amanda uses **K-nearest neighbors (KNN)**. 
+
+For any new (time, SST) pair, the model predicts population as the average of the $K$ closest training observations.
 
 ```{python}
 #| echo: false
@@ -650,8 +652,8 @@ plt.show()
 plt.close()
 ```
 
-::: {.body-text-s}
-The shape of $\hat{f}$ emerges entirely from the training observations — no functional form was specified.
+::: {.center-text .body-text-s .teal-text}
+The shape of $\hat{f}$ emerges entirely from the training observations, no functional form was specified.
 :::
 
 ---
@@ -675,25 +677,21 @@ The shape of $\hat{f}$ emerges entirely from the training observations — no fu
 Variables can be:
 
 ::: {.body-text-m}
-- **Quantitative** — continuous numerical values
-- **Qualitative / categorical** — values in one of $K$ classes
+- **Quantitative:** continuous numerical values
+- **Qualitative or categorical:** values in one of $K$ classes or categories
 :::
-
-<br>
 
 . . .
 
 ::: {.body-text-m}
-[**Regression problems:**]{.teal-text} quantitative response variable
+[**Regression problems:**]{.teal-text} have a quantitative response variable
 
 > *Predict elephant seal population count*
 
-[**Classification problems:**]{.teal-text} qualitative response variable
+[**Classification problems:**]{.teal-text} have a qualitative response variable
 
 > *Predict seal health status: healthy / malnourished / injured*
 :::
-
-<br>
 
 . . .
 
@@ -756,7 +754,9 @@ plt.close()
 
 Each observation has **predictors paired with a response variable**:
 
-$$\text{training set} = \{(x_1, y_1),\, \ldots,\, (x_n, y_n)\}$$
+$$\text{training set} = \{(x_1, y_1),\, \ldots,\, (x_n, y_n)\},$$
+
+where each $x_i = (x_{i1}, ..., x_{ip})$ is a vector with $p$ predictors and $y_i$ is the response to $x_i$. 
 
 <br>
 
@@ -766,11 +766,8 @@ The algorithm *learns* by adjusting $\hat{f}$ to predict $y$ from $x$ as accurat
 
 <br>
 
-. . .
 
-::: {.center-text .body-text-m .teal-text}
 Both regression and classification are supervised learning problems.
-:::
 
 ---
 
@@ -780,17 +777,19 @@ Both regression and classification are supervised learning problems.
 
 <hr>
 
-Each observation has **features only — no response variable**:
+Each observation has **features only**, there is no response variable:
 
 $$\text{training set} = \{x_1,\, \ldots,\, x_n\}$$
 
-<br>
+where each $x_i = (x_{i1}, ..., x_{ip})$ is a vector with $p$ features.
 
 . . .
 
 ::: {.body-text-m}
-Amanda records dive depth and duration for many seals, with no labels. She asks: *are there distinct foraging strategies among these seals?*
+Example
 :::
+
+Amanda records dive depth and duration for many seals, with no labels. She asks: *are there distinct foraging strategies among these seals?*
 
 ```{python}
 #| echo: false
@@ -844,23 +843,13 @@ plt.close()
 
 - We want to estimate an unknown function $f$ such that $Y = f(X) + \epsilon$
 
-<br>
-
 - We estimate $f$ using a **training set** of observed $(x_i, y_i)$ pairs
-
-<br>
 
 - **Inference** uses $\hat{f}$ to understand relationships; **prediction** uses $\hat{f}$ to forecast new $Y$
 
-<br>
-
-- **Parametric** methods assume a functional form; **non-parametric** methods let the data speak
-
-<br>
+- **Parametric** methods assume a functional form; **non-parametric** methods don't
 
 - **Regression** = quantitative response; **classification** = qualitative response
-
-<br>
 
 - **Supervised** = response variable present; **unsupervised** = no response variable
 
