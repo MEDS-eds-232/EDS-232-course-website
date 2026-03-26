@@ -216,7 +216,8 @@ Below we have simulated train data based on the true underlying function $f$ (bl
 
 ```{python}
 #| echo: false
-plt.figure(figsize=(fig_size_x, fig_size_y))
+#| fig-align: "center"
+plt.figure(figsize=(10, 5))
 plt.plot(x, true_f(x), 'k-', linewidth=2, label='f (true)')
 plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
 plt.xlabel('X')
@@ -246,7 +247,8 @@ Using these we calcualte the train MSE for this $\hat{f}$ to be `{python} round(
 
 ```{python}
 #| echo: false
-plt.figure(figsize=(fig_size_x, fig_size_y))
+#| fig-align: "center"
+plt.figure(figsize=(10, 5))
 plt.plot(x, y_linear, color='orange', linewidth=2, label=r'$\hat{f}$ (linear fit)')
 plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
 for i, (xi, yi, yhi) in enumerate(zip(x_obs, y_obs, y_hat_train_lin)):
@@ -325,7 +327,8 @@ When we have enough data, we divide our observations into two groups:
 
 ```{python}
 #| echo: false
-plt.figure(figsize=(fig_size_x, fig_size_y))
+#| fig-align: "center"
+plt.figure(figsize=(10, 5))
 plt.plot(x, true_f(x), 'k-', linewidth=2, label='f (true)')
 plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
 plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')
@@ -368,7 +371,9 @@ We generally care much more about the test MSE than the training MSE.
 Our linear model $\hat{f}(x)=$ `{python} eq_string` has the following residuals on the test set, with a test MSE of `{python} round(test_mse, 2)`.
 
 ```{python}
-plt.figure(figsize=(fig_size_x, fig_size_y))
+#| echo: false
+#| fig-align: "center"
+plt.figure(figsize=(10, 5))
 plt.plot(x, y_linear, color='orange', linewidth=2, label=r'$\hat{f}$')
 plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')
 
@@ -432,7 +437,8 @@ We say a model is **overfitting** when it has a:
 
 ```{python}
 #| echo: false
-plt.figure(figsize=(fig_size_x, fig_size_y))
+#| fig-align: "center"
+plt.figure(figsize=(10, 5))
 plt.plot(x, true_f(x), 'k-', linewidth=2, label='f (true)')
 plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
 plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')
@@ -456,7 +462,8 @@ plt.close()
 
 ```{python}
 #| echo: false
-plt.figure(figsize=(fig_size_x, fig_size_y))
+#| fig-align: "center"
+plt.figure(figsize=(10, 5))
 plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='"Observed" data')
 plt.plot(x, y_linear,  color='orange',    linewidth=2, label='Linear')
 plt.plot(x, y_poly3,   color='steelblue', linewidth=2, label='Degree 3 polynomial')
@@ -535,7 +542,8 @@ Does a better fit on the training data always indicate good performance on unsee
 
 ```{python}
 #| echo: false
-plt.figure(figsize=(fig_size_x, fig_size_y))
+#| fig-align: "center"
+plt.figure(figsize=(10, 5))
 plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')
 plt.plot(x, y_linear,  color='orange',    linewidth=2, label='Linear')
 plt.plot(x, y_poly3,   color='steelblue', linewidth=2, label='Degree 3 polynomial')
@@ -594,7 +602,8 @@ The degree 15 polynomial has the lowest training MSE but fails to capture the tr
 
 ```{python}
 #| echo: false
-plt.figure(figsize=(fig_size_x, fig_size_y))
+#| fig-align: "center"
+plt.figure(figsize=(10, 5))
 plt.plot(x, true_f(x), 'k-', linewidth=2, label='f (true)')
 plt.scatter(x_obs,   y_obs,   s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data 1')
 plt.scatter(x_obs_2, y_obs_2, s=30, marker='^', facecolors='none', edgecolors='black', zorder=5, label='Train data 2')
