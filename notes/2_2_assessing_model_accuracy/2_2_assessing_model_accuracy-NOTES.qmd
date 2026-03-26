@@ -1,8 +1,5 @@
 ---
 title: Assessing model accuracy
-format:
-  html:
-    code-fold: true
 ---
 
 
@@ -137,6 +134,8 @@ If enough observations are available, we create our training and test datasets b
 ## Check-in
 Generally, what do you expect to be larger, the training MSE or the test MSE?
 :::
+
+<!-- We should include something here about how to split test/train data and what to do with limited data. -->
 
 ## Overfitting 
 
@@ -312,9 +311,106 @@ plt.close()
 It is important to have in mind that **as model flexibility increases, the training MSE will decrease, but the test MSE may not!**
 
 
-<!-- 
-## Bias-Variance trade off
+## The Bias-Variance tradeoff
 
-## Classification setting
- -->
+**Model variance** refers to how much our estimate of $\hat{f}$ would change if we trained it a different set. If we collected a new set of data for training and re-fitted the model, would we get a similar $\hat{f}$ or a very different one? A **high-variance** model is very sensitive to the specific training data used. Any slight change in the training set will produce a very different estimate $\hat{f}$. On the other hand, a **low-variance** model will be relatively stable if the training set changes.
+
+For example, suppose we crate a new training set from the same true function $f$, as show in the graph below. 
+
+```{python}
+np.random.seed(21)
+# Create another train set
+n=30
+x_obs_2 = np.random.uniform(0, 100, n)
+y_obs_2 = true_f(x_obs_2) + np.random.normal(0, 50, n)
+
+# Train and test data plot
+x = np.linspace(0, 100, 200)
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(x, true_f(x),  'k-',          linewidth=2, label='f (true)')
+plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data 1')
+plt.scatter(x_obs_2, y_obs_2, s=30, marker='^', facecolors='none', edgecolors='black', zorder=5, label='Train data 2')
+#plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, 100)
+plt.ylim(-150, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+Then we can fit our models again on each of these training sets and see how much the resulting estimates $\hat{f}$ vary:
+
+```{python}
+
+# Fit linear model on second training set
+lin_model_2 = LinearRegression()
+lin_model_2.fit(x_obs_2.reshape(-1, 1), y_obs_2)
+y_linear_2 = lin_model_2.predict(x.reshape(-1, 1))
+
+# Fit degree 15 on second training set
+x_norm_2 = (x_obs_2 - t_min) / (t_max - t_min)
+coeffs15_2 = np.polyfit(x_norm_2, y_obs_2, 15)
+y_poly15_2 = np.polyval(coeffs15_2, x_line_norm)
+
+# Linear fits
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
+ax.scatter(x_obs,   y_obs,   s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data 1')
+ax.scatter(x_obs_2, y_obs_2, s=30, facecolors='none', edgecolors='black', zorder=5, marker='^', label='Train data 2')
+ax.plot(x, y_linear,   color='orange', linewidth=2, label='Linear fit 1')
+ax.plot(x, y_linear_2, color='maroon', linewidth=2, label='Linear fit 2')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_xlim(0, 100)
+ax.set_ylim(-150, 600)
+ax.set_title('Linear (lower variance)')
+ax.legend(loc='upper left', fontsize=8)
+plt.tight_layout()
+plt.show()
+plt.close()
+
+# Degree 15 fits
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
+ax.scatter(x_obs,   y_obs,   s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data 1')
+ax.scatter(x_obs_2, y_obs_2, s=30, facecolors='none', edgecolors='black', zorder=5, marker='^', label='Train data 2')
+ax.plot(x, y_poly15,   color='forestgreen', linewidth=2, label='Degree 15 fit 1')
+ax.plot(x, y_poly15_2, color='darkviolet',  linewidth=2, label='Degree 15 fit 2')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_xlim(0, 100)
+ax.set_ylim(-150, 600)
+ax.set_title('Degree 15 (higher variance)')
+ax.legend(loc='upper left', fontsize=8)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+**Model bias** refers to the error introduced by the assumptions built into the model, as the assumptions might not reflect the complexity of a real-life problem. A **high-bias** model will be systematically wrong, no matter how much training data we give it. For example, if we fit a linear model to data that is truly cubic, the linear model simply cannot capture the true shape of $f$. A **low-bias** model's assumptions are flexible enough to approximate the true shape of $f$.
+
+
+
+Roughly speaking and from a theoretical perspective, the expected test MSE can be decomposed as
+
+$\text{expected test MSE} = \text{model variance} + \text{model bias} + \text{irreducible error}.$
+
+Though the formal statement and computation of this formula are beyond the scope of the course, intuitively understanding the three components on the right hand side can help us understand important behaviour different models have relative to a variety of training sets.
+
+<!-- In the future, it would be nice to include a box explaining the maths of where this comes from and address formula 2.7. -->
+
+The irreducible error is the variance associated with the error term, $\text{Var}(\epsilon)$. This is a positive value that is independent of the model selection, so the expected test MSE can never be zero: it is bounded below by $\text{Var}(\epsilon)$. 
+
+The model variance and bias are also non-negative, but these depend on the model being selected. So, to minimize the expected test MSE, our goal is to select a model that simultaneously gives *low variance* and *low bias*. 
+
+TO DO:
+
+- decide how to restructure this relative to the example: mention bias in the example as well?
+- add one exercise so students get to the bias-variance tradeoff on their own
+- add notes for the last paragraph in this section
+- read classification setting and make a small personal summary
+
+<!-- ## Classification setting -->
+
 
