@@ -319,7 +319,7 @@ When we have enough data, we divide our observations into two groups:
 
 ## {#train-test-split data-menu-title="Train/test split"}
 
-[Splitting data into train and test sets]{.slide-title}
+[Splitting observations into train and test sets]{.slide-title}
 
 <hr>
 
@@ -403,30 +403,54 @@ plt.close()
 
 <hr>
 
-<br>
+One instance in which it is useful to calcualte both the *train MSE* and the *test MSE* is to understand when a model is overfitting. 
 
 We say a model is **overfitting** when it has a:
 
 ::: {.body-text-m}
 - **small training MSE**, but a
-- **large test MSE**
+- **large test MSE**, and 
+- a simpler model would have achieved a lower test MSE.
 :::
 
-and a simpler model would have achieved a lower test MSE.
 
 <br>
 
 . . .
 
 ::: {.body-text-m .gray-text}
-> "Our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by random chance rather than by true properties of $f$." — *ISLP*
+> "Our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by random chance rather than by true properties of $f$." [@islp_2023]
 :::
+
+---
+
+## {#remember-our-data data-menu-title="Train/test split reprise"}
+
+[Remember our train and test sets]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(x, true_f(x), 'k-', linewidth=2, label='f (true)')
+plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
+plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, 100)
+plt.ylim(-150, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
 ---
 
 ## {#three-models data-menu-title="Three models fitted"}
 
-[Three models, same training data]{.slide-title}
+[Three models for the same training data]{.slide-title}
 
 <hr>
 
@@ -447,9 +471,9 @@ plt.show()
 plt.close()
 ```
 
-::: {.center-text .body-text-s .teal-text}
-Which model do you think will have the lowest training MSE? The lowest test MSE?
-:::
+. . .
+
+Check-in: Which model do you think will have the lowest training MSE? The lowest test MSE?
 
 ---
 
@@ -459,9 +483,12 @@ Which model do you think will have the lowest training MSE? The lowest test MSE?
 
 <hr>
 
+:::: {.columns}
+
+::: {.column width="55%"}
 ```{python}
 #| echo: false
-plt.figure(figsize=(fig_size_x * 0.6, fig_size_y))
+plt.figure(figsize=(fig_size_x * 0.65, fig_size_y))
 plt.plot(flexibility, train_mses, '-', color='gray', linewidth=2, label='Training MSE')
 plt.plot(flexibility, test_mses,  '-', color='red',  linewidth=2, label='Test MSE')
 for i, (f, c) in enumerate(zip(flexibility, colors)):
@@ -469,29 +496,63 @@ for i, (f, c) in enumerate(zip(flexibility, colors)):
     plt.plot(f, test_mses[i],  's', color=c, markersize=8)
 plt.xlabel('Model flexibility (polynomial degree)')
 plt.ylabel('Mean Squared Error')
-plt.xticks(flexibility, ['1 (linear)', '3', '15'])
+plt.xticks(flexibility, ['1', '3', '15'])
 plt.legend(loc='upper center')
 plt.grid(False)
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
-
-. . .
-
-::: {.body-text-m}
-As flexibility increases, training MSE [always]{.teal-text} decreases — but the test MSE may go back up!
 :::
+
+::: {.column width="45%"}
+
+<br>
+
+As flexibility increases, the [training MSE decreases]{.teal-text}...
+
+<br>
+
+...but the [test MSE may go back up!]{.teal-text}
+
+<br>
+
+
+**Check-in:** Which model is overfitting, and why?
+
+Does a better fit on the training data always indicate good performance on unseen data?
+:::
+
+::::
 
 ---
 
-## {#checkin-2 data-menu-title="Check-in 2" background="#053660"}
+## {#models-on-test data-menu-title="Models on test data"}
 
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">Which model is overfitting, and why?</p>
-<p class="custom-subtitle3">Does a better fit on the training data always indicate good performance on unseen data?</p>
-</div>
+[Models predictions on the test set]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')
+plt.plot(x, y_linear,  color='orange',    linewidth=2, label='Linear')
+plt.plot(x, y_poly3,   color='steelblue', linewidth=2, label='Degree 3 polynomial')
+plt.plot(x, y_poly15,  color='green',     linewidth=2, label='Degree 15 polynomial')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, 100)
+plt.ylim(-150, 600)
+plt.legend()
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.center-text .body-text-s .teal-text}
+The degree 15 polynomial has the lowest training MSE but fails to capture the trend in the test data.
+:::
 
 ---
 
