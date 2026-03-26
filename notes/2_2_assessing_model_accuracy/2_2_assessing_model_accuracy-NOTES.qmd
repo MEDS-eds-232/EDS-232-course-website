@@ -2,10 +2,13 @@
 title: Training and test errors, and model flexibility
 ---
 
+[📊 Slides](2_2_assessing_model_accuracy-SLIDES.qmd)
+
 In this lesson we cover:
 
 - What is the training MSE and how to compute it
 - What is the test MSE and why it differs from the training MSE
+- Overfitting: when a model learns *too much* from training data
 - What are model bias and variance
 - The bias-variance decomposition of the expected test MSE
 - The bias-variance tradeoff and its relationship to model flexibility
@@ -51,7 +54,7 @@ Our goal is to obtain a good enough estimate $\hat{f}$ of $f$. We do this by:
 
 ## Selecting a model to use for our data
 
-The question now is: *How do we do step 1: selecting which model to use for our data?*
+The question now is: *How do we select which model to use for our data (step 1)?*
 
 There is no single "best" model to apply across all problems. It's always about evaluating tradeoffs and selecting the best model to work in a given problem for a specific dataset.
 
@@ -59,23 +62,94 @@ To evaluate the performance of a model on a given data set, we need some way to 
 
 Remember we want: $\hat{f}(x_i)$ (the prediction on $x_i$) is close enough to $f(x_i)= y_i$ (the true value).
 
-## Mean Squared Error 
+## Mean Squared Error and training MSE
 
 For regression, the most commonly used way to measure how close $\hat{f}$ is to $f$ is the **mean squared error (MSE)**:
 
 $$ MSE = \frac{1}{n} \sum_{i=1}^n(y_i - \hat{f}(x_i))^2. $$
 
+- Each term $y_i - \hat{f}(x_i)$ is called a **residual**, it is the difference between the true value and the prediction.
+- Squaring makes all differences positive and penalizes large errors more.
+
 When we calculate this MSE using the training data, we obtain the **training MSE**. Many models are fitted by estimating coefficients that minimize the training MSE. 
 
-<!-- GRAPH 1: with the known function, the estimated function, a few observations, and the observation's predicted response and true response. The data point with the biggest difference between y_i and f^\hat(x_i) has the corresponding labels. -->
+Below we have simulated train data based on the function $f$ shown in black in the plot.
 
+```{python}
+np.random.seed(42)
+
+# True function: third degree polynomial
+def true_f(x):
+    return 0.003*x**3 - 0.35*x**2 + 10*x - 20
+
+# Create train set
+n=30
+x_obs = np.random.uniform(0, 100, n)
+y_obs = true_f(x_obs) + np.random.normal(0, 50, n)
+
+x = np.linspace(0, 100, 200)
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(x, true_f(x), 'k-', linewidth=2, label='f (true)')
+plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
+
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, 100)
+plt.ylim(-150, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+```{python}
+# Fit linear model
+lin_model = LinearRegression()
+lin_model.fit(x_obs.reshape(-1, 1), y_obs)
+
+# Coefficients
+beta_0 = lin_model.intercept_
+beta_1 = lin_model.coef_[0]
+eq_string = f"{beta_1:.2f}x + {beta_0:.2f}"
+
+# Estimates
+y_linear = lin_model.predict(x.reshape(-1, 1))
+y_hat_obs = lin_model.predict(x_obs.reshape(-1, 1))
+
+train_mse = np.mean((y_obs - y_hat_obs)**2)
+```
+
+We fit a linear model to obtain the estimate $\hat{f}(x)=$ `{python} eq_string`. With this funciton we obtain the following residuals and a train MSE of `{python} round(train_mse, 2)`.
+
+```{python}
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(x, y_linear, color='orange', linewidth=2, label=r'$\hat{f}$')
+plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
+
+# Residual lines from observations to linear fit
+for i, (xi, yi, yhi) in enumerate(zip(x_obs, y_obs, y_hat_obs)):
+    plt.plot([xi, xi], [yi, yhi], 'r--', linewidth=0.8,
+             label='Residuals' if i == 0 else None)
+
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, 100)
+plt.ylim(-150, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
+<!-- 
 ::: {.callout-tip}
 ## Check-in
 
 The training data are the points $(1,2), (2,5), (3,6), (4,9),$ and $(5,9)$. These are shown in the graph below together with the fitted model $\hat{f}(x)$. Use $\hat{f}(x) = 1.8x + 0.8$ to compute the training MSE. This is mainly to make sure you are sure you understand what the sigma notation means. 
 
-
-```{python}
+```python
 
 # Small dataset - easy numbers for hand calculation
 x_train = np.array([1, 2, 3, 4, 5])
@@ -112,14 +186,14 @@ plt.close()
 ```
 
 :::
+ -->
 
-
-## Test data
+## Test data and test MSE
 
 ::: {.callout-tip}
 ## Check-in
 
-If you were going to take a big final exam in this class, how would you prefer the instructor to come up with exam questions:
+If you were going to take a big final exam in this class, how would you prefer the instructor to come up with exam questions?
 
 1. Take the questions from assignments questions that you completed this quarter.
 2. Come up with new questions to test on the material that we covered this quarter.
@@ -127,18 +201,70 @@ If you were going to take a big final exam in this class, how would you prefer t
 On which questions would you expect to do better?
 :::
 
-Much like this thought exercise, a model will perform better if we evaluate it on the training set, instead of evaluating it on previously unseen data. 
+Much like this thought exercise, a model will generally perform better if we evaluate it on the training set, instead of evaluating it on previously unseen data. 
 
-**Test data** is data that is *not part of the training dataset* and is used for the purpose of evaluating our model's performance. 
+**Test data** is data that **is not part of the training dataset** and is used for the purpose of evaluating our model's performance. 
 
 Generally, we are interested in the accuracy of the predictions that we obtain when we apply our model to the test data. To estimate how well our model will perform, we calculate the MSE (or any other accuracy metric) on the test data to obtain a **test MSE**. 
 
-If enough observations are available, we create our training and test datasets by dividing the observations into the ones that will be usef for training, and the ones that will be used for testing. 
-
 ::: {.callout-tip}
 ## Check-in
-Generally, what do you expect to be larger, the training MSE or the test MSE?
+Intuitively, what do you expect to be larger, the training MSE or the test MSE?
 :::
+
+Let's continue our previous example. We have additional data coming from the same function that is not part of the training  data. We can use this as our test data (red circles) since it was not used to fit the model. 
+
+```{python}
+# Create test set
+n_test = 15
+x_test = np.random.uniform(0, 100, n_test)
+y_test = true_f(x_test) + np.random.normal(0, 50, n_test)
+
+# Train and test data plot
+x = np.linspace(0, 100, 200)
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(x, true_f(x),  'k-',          linewidth=2, label='f (true)')
+plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
+plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, 100)
+plt.ylim(-150, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+```{python}
+y_hat_test = lin_model.predict(x_test.reshape(-1, 1))
+test_mse = np.mean((y_test - y_hat_test)**2)
+```
+
+Now we can use the same linear estimate $\hat{f}(x)=$ `{python} eq_string` to visualize the test residuals and calcualte a test MSE of `{python} round(test_mse, 2)`. 
+
+```{python}
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(x, y_linear, color='orange', linewidth=2, label=r'$\hat{f}$')
+plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')
+
+# Residual lines from test observations to linear fit
+for i, (xi, yi, yhi) in enumerate(zip(x_test, y_test, y_hat_test)):
+    plt.plot([xi, xi], [yi, yhi], 'r--', linewidth=0.8,
+             label='Residuals' if i == 0 else None)
+
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, 100)
+plt.ylim(-150, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+In practice, if enough observations are available, we create our training and test datasets by dividing all available observations into the ones that will be usef for training, and the ones that will be used for testing. 
+
 
 <!-- We should include something here about how to split test/train data and what to do with limited data. -->
 
@@ -150,28 +276,14 @@ We say a model is **overfitting** the data when it has a small training MSE but 
 
 > This happens because our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by random chance rather than by true properties of the unknown function $f$.
 
-
-### Visualizing overfitting
-
-Data was simulated based on the function $f$ shown in black in the plot. The data is spllit into train data (black circles) and test data (red circles). 
+Let's go back to our simulated data that has been split into train data (black circles) and test data (red circles). 
 
 ```{python}
-np.random.seed(42)
-
-# True function: third degree polynomial
-def true_f(x):
-    return 0.003*x**3 - 0.35*x**2 + 10*x - 20
-
-# Create train set
-n=30
-x_obs = np.random.uniform(0, 100, n)
-y_obs = true_f(x_obs) + np.random.normal(0, 50, n)
-
 # Create test set
-# np.random.seed(99)
-n_test = 15
-x_test = np.random.uniform(0, 100, n_test)
-y_test = true_f(x_test) + np.random.normal(0, 50, n_test)
+# # np.random.seed(99)
+# n_test = 15
+# x_test = np.random.uniform(0, 100, n_test)
+# y_test = true_f(x_test) + np.random.normal(0, 50, n_test)
 
 # Train and test data plot
 x = np.linspace(0, 100, 200)
@@ -452,10 +564,10 @@ Looking at the test MSE plot, which model would you select and why? Would you co
 ## Classification setting
 I want students to practice recognizing the concepts of train error, test error, overfitting, bias and variance in the context of the KNN example with different K for number of neighbors used in the computation as the flexibility parameter.  
 
-- Going back to the classification setting: recap of the notation 
+- Going back to the classification setting: recap of the notation (x_i, y_i) but now y_i are qualitative
 - Instead of MSE, the most common way of assessing error is the **error rate**
-- Error rate formula (verbal, simplify)
-- KNN method explanation. Figure 2.14
+    - Error rate formula
+- KNN method explanation: how it works, include a small example students can compute themselves.
 - Discussion as K varies:
     - what controls the model's flexibility in this case? does flexibility increase or decrease as n increases?
     - Show the graphs for variance with two Ks in two different training sets, identify which is high variance. 
