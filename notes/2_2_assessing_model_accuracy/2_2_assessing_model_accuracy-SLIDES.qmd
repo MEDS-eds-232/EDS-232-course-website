@@ -40,6 +40,18 @@ lin_model = LinearRegression()
 lin_model.fit(x_obs.reshape(-1, 1), y_obs)
 y_linear = lin_model.predict(x.reshape(-1, 1))
 
+# Coefficients
+beta_0 = lin_model.intercept_
+beta_1 = lin_model.coef_[0]
+eq_string = f"{beta_1:.2f}x + {beta_0:.2f}"
+
+# Linear train and test MSE
+y_hat_obs = lin_model.predict(x_obs.reshape(-1, 1))
+train_mse = np.mean((y_obs - y_hat_obs)**2)
+
+y_hat_test = lin_model.predict(x_test.reshape(-1, 1))
+test_mse = np.mean((y_test - y_hat_test)**2)
+
 # Degree 3 polynomial
 coeffs3 = np.polyfit(x_obs, y_obs, 3)
 y_poly3 = np.polyval(coeffs3, x)
@@ -126,14 +138,6 @@ y_poly15_2 = np.polyval(coeffs15_2, x_line_norm)
 
 ---
 
-## {#section-mse data-menu-title="# Mean Squared Error #" background="#047C90"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Mean Squared Error</p>
-</div>
-
----
-
 ## {#notation-recap data-menu-title="Notation recap"}
 
 [Notation recap]{.slide-title}
@@ -161,6 +165,14 @@ We **train** a model on these data points to obtain an estimate $\hat{f}$.
 ::: {.center-text .body-text-m .teal-text}
 How do we know if $\hat{f}$ is any good?
 :::
+
+---
+
+## {#section-mse data-menu-title="# Mean Squared Error #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Mean Squared Error</p>
+</div>
 
 ---
 
@@ -194,47 +206,81 @@ When computed on the training set, this is called the **training MSE**.
 
 ---
 
-## {#mse-checkin-graph data-menu-title="MSE check-in graph"}
+## {#train-data-plot data-menu-title="Training data and true f"}
 
-[Visualizing the training MSE]{.slide-title}
+[Training data and true $f$]{.slide-title}
 
 <hr>
 
+Below we have simulated train data based on the true underlying function $f$ (black line).
+
 ```{python}
 #| echo: false
-x_train_ex = np.array([1, 2, 3, 4, 5])
-y_train_ex = np.array([2, 5, 6, 9, 9])
-coeffs_ex = np.polyfit(x_train_ex, y_train_ex, 1)
-x_line_ex = np.linspace(0, 6, 100)
-y_hat_line_ex = np.polyval(coeffs_ex, x_line_ex)
-y_hat_train_ex = np.polyval(coeffs_ex, x_train_ex)
-
-fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
-ax.plot(x_line_ex, y_hat_line_ex, color='orange', linewidth=2, label=r'$\hat{f}$')
-ax.scatter(x_train_ex, y_train_ex, s=60, c='red', zorder=5, label='Training data')
-for xi, yi, yhi in zip(x_train_ex, y_train_ex, y_hat_train_ex):
-    ax.plot([xi, xi], [yi, yhi], 'g--', linewidth=1.5)
-ax.set_xlabel('x')
-ax.set_ylabel('y')
-ax.grid(True, alpha=0.3)
-ax.legend()
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(x, true_f(x), 'k-', linewidth=2, label='f (true)')
+plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, 100)
+plt.ylim(-150, 600)
+plt.legend(loc='upper left')
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
-::: {.center-text .body-text-s .teal-text}
-The green dashed lines are the residuals $(y_i - \hat{f}(x_i))$. We square each, sum them, and divide by $n$.
-:::
+---
+
+## {#train-mse-viz data-menu-title="Visualizing the training MSE"}
+
+[Visualizing the training MSE]{.slide-title}
+
+<hr>
+
+We fit a linear model to the training data and obtain the estimate:
+ $\hat{f}(x)=$ `{python} eq_string`.
+
+The **residuals** (dashed red lines) show the difference between each $y_i$ and $\hat{f}(x_i)$.
+
+Using these we calcualte the train MSE for this $\hat{f}$ to be `{python} round(train_mse, 2)`.
+
+```{python}
+#| echo: false
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(x, y_linear, color='orange', linewidth=2, label=r'$\hat{f}$ (linear fit)')
+plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
+for i, (xi, yi, yhi) in enumerate(zip(x_obs, y_obs, y_hat_train_lin)):
+    plt.plot([xi, xi], [yi, yhi], 'r--', linewidth=0.8,
+             label='Residuals' if i == 0 else None)
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, 100)
+plt.ylim(-150, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
 
 ---
 
-## {#section-test-data data-menu-title="# Test Data #" background="#047C90"}
+## {#section-test-data data-menu-title="Test Data" background="#047C90"}
 
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">Test data and the test MSE</p>
 </div>
 
+<!-- ---
+## {#exam-analogy data-menu-title="Exam analogy" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">If you were going to take a final exam, how would you prefer the instructor to create the questions?</p>
+<p class="custom-subtitle3">1. Take questions from assignments you already completed this quarter.</p>
+<p class="custom-subtitle3">2. Come up with new questions testing the material covered this quarter.</p>
+<p class="custom-subtitle3">On which set of questions would you expect to do better?</p>
+</div> -->
 
 ---
 
@@ -246,26 +292,27 @@ The green dashed lines are the residuals $(y_i - \hat{f}(x_i))$. We square each,
 
 <br>
 
-Just like that exam analogy: a model will *always* perform better when evaluated on the data it was trained on.
+A model will generally perform better when evaluated on the data it was trained on. 
+
+But in most cases, we want to use our model to make predictions on previously unseen data. 
 
 <br>
 
 . . .
 
-**Test data** is data that is *not part of the training dataset*, used to evaluate how well our model generalizes.
+**Test data** is data that is **not part of the training dataset**, used to evaluate how well our model generalizes to previously unseen observations.
 
 <br>
 
 . . .
 
-When we compute the MSE on test data, we get the **test MSE**.
+When we have enough data, we divide our observations into two groups:
 
-<br>
 
-. . .
+::: {.body-text-m}
+- [**Training set:**]{.teal-text} used to fit the model and estimate $\hat{f}$
 
-::: {.center-text .body-text-m .teal-text}
-We generally care much more about the test MSE than the training MSE.
+- [**Test set:**]{.teal-text} held out until after training, used only to evaluate performance
 :::
 
 ---
@@ -276,28 +323,60 @@ We generally care much more about the test MSE than the training MSE.
 
 <hr>
 
-<br>
-
-When we have enough data, we divide our observations into two groups:
-
-<br>
-
-::: {.body-text-m}
-- [**Training set:**]{.teal-text} used to fit the model and estimate $\hat{f}$
-
-- [**Test set:**]{.teal-text} held out until after training, used only to evaluate performance
-:::
-
-<br>
-
-. . .
-
 ```{python}
 #| echo: false
 plt.figure(figsize=(fig_size_x, fig_size_y))
 plt.plot(x, true_f(x), 'k-', linewidth=2, label='f (true)')
 plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
 plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, 100)
+plt.ylim(-150, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#test-mse data-menu-title="Test MSE"}
+
+[Test MSE]{.slide-title}
+
+<hr>
+
+<br>
+
+When we compute the MSE on the test data, we get the **test MSE**.
+
+We generally care much more about the test MSE than the training MSE.
+
+<br>
+
+**Check-in:** Intuitively, what do you expect to be larger: the training MSE or the test MSE?
+
+---
+
+## {#test-mse-viz data-menu-title="Visualizing the test MSE"}
+
+[Visualizing the test MSE]{.slide-title}
+
+<hr>
+
+Our linear model $\hat{f}(x)=$ `{python} eq_string` has the following residuals on the test set, with a test MSE of `{python} round(test_mse, 2)`.
+
+```{python}
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(x, y_linear, color='orange', linewidth=2, label=r'$\hat{f}$')
+plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')
+
+# Residual lines from test observations to linear fit
+for i, (xi, yi, yhi) in enumerate(zip(x_test, y_test, y_hat_test)):
+    plt.plot([xi, xi], [yi, yhi], 'r--', linewidth=0.8,
+             label='Residuals' if i == 0 else None)
+
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.xlim(0, 100)
