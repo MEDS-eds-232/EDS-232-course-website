@@ -122,7 +122,6 @@ train_mse = np.mean((y_obs - y_hat_obs)**2)
 We fit a linear model to obtain the estimate $\hat{f}(x)=$ `{python} eq_string`. With this funciton we obtain the following residuals and a train MSE of `{python} round(train_mse, 2)`.
 
 ```{python}
-
 plt.figure(figsize=(fig_size_x, fig_size_y))
 plt.plot(x, y_linear, color='orange', linewidth=2, label=r'$\hat{f}$')
 plt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')
@@ -383,7 +382,7 @@ for i, (f, c) in enumerate(zip(flexibility, colors)):
     plt.plot(f, train_mses[i], 's', color=c, markersize=5)
     plt.plot(f, test_mses[i],  's', color=c, markersize=5)
 
-plt.xlabel('Flexibility (degree)')
+plt.xlabel('Model flexibility (polynomial degree)')
 plt.ylabel('Mean Squared Error')
 #plt.ylabel('Mean Squared Error (log scale)')
 #plt.yscale('log')
@@ -514,7 +513,7 @@ Which method has higher variance, the linear model or the degree 15 polynomial? 
 
 We are interested in model variance and bias because, roughly speaking and from a theoretical perspective, the expected test MSE can be decomposed as
 
-$$\text{expected test MSE} = \text{model variance} + \text{model bias} + \text{irreducible error}.$$
+$$\text{expected test MSE} = \text{model variance}^2 + \text{model bias} + \text{irreducible error}.$$
 
 The irreducible error is the variance associated with the error term, $\text{Var}(\epsilon)$. 
 

@@ -577,17 +577,39 @@ The degree 15 polynomial has the lowest training MSE but fails to capture the tr
 . . .
 
 ::: {.body-text-m}
-- [**High-variance model:**]{.teal-text} very sensitive to the specific training data — a small change in the data produces a very different $\hat{f}$
+- [**High-variance model:**]{.teal-text} very sensitive to the specific training data: a small change in the data produces a very different $\hat{f}$
 
 - [**Low-variance model:**]{.teal-text} relatively stable across different training sets
 :::
 
 <br>
 
-. . .
+---
 
-::: {.center-text .body-text-m .teal-text}
-Which do you think has higher variance: a linear model or a degree-15 polynomial?
+## {#two-training-sets data-menu-title="Two training sets"}
+
+[Suppose we collect a second training set]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(x, true_f(x), 'k-', linewidth=2, label='f (true)')
+plt.scatter(x_obs,   y_obs,   s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data 1')
+plt.scatter(x_obs_2, y_obs_2, s=30, marker='^', facecolors='none', edgecolors='black', zorder=5, label='Train data 2')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.xlim(0, 100)
+plt.ylim(-150, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.center-text .body-text-s}
+Both datasets come from the same true $f$ but differ due to random noise. 
 :::
 
 ---
@@ -598,14 +620,16 @@ Which do you think has higher variance: a linear model or a degree-15 polynomial
 
 <hr>
 
-Two training sets, same true $f$ — how much do the fitted models change?
+<br>
+
+<br>
 
 :::: {.columns}
 
 ::: {.column width="50%"}
 ```{python}
 #| echo: false
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.6, fig_size_y))
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
 ax.scatter(x_obs,   y_obs,   s=20, facecolors='none', edgecolors='black', zorder=5, label='Train 1')
 ax.scatter(x_obs_2, y_obs_2, s=20, facecolors='none', edgecolors='black', zorder=5, marker='^', label='Train 2')
 ax.plot(x, y_linear,   color='orange', linewidth=2, label='Linear fit 1')
@@ -614,7 +638,7 @@ ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_xlim(0, 100)
 ax.set_ylim(-150, 600)
-ax.set_title('Linear (low variance)')
+ax.set_title('Linear')
 ax.legend(loc='upper left', fontsize=7)
 plt.tight_layout()
 plt.show()
@@ -625,7 +649,7 @@ plt.close()
 ::: {.column width="50%"}
 ```{python}
 #| echo: false
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.6, fig_size_y))
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
 ax.scatter(x_obs,   y_obs,   s=20, facecolors='none', edgecolors='black', zorder=5, label='Train 1')
 ax.scatter(x_obs_2, y_obs_2, s=20, facecolors='none', edgecolors='black', zorder=5, marker='^', label='Train 2')
 ax.plot(x, y_poly15,   color='forestgreen', linewidth=2, label='Degree 15 fit 1')
@@ -634,7 +658,7 @@ ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_xlim(0, 100)
 ax.set_ylim(-150, 600)
-ax.set_title('Degree 15 (high variance)')
+ax.set_title('Degree 15')
 ax.legend(loc='upper left', fontsize=7)
 plt.tight_layout()
 plt.show()
@@ -643,6 +667,15 @@ plt.close()
 :::
 
 ::::
+
+::: {.center-text .teal-text}
+
+<br>
+
+**Check-in:** Which method has higher variance,
+
+ the linear model or the degree 15 polynomial? Why?
+:::
 
 ---
 
@@ -659,9 +692,9 @@ plt.close()
 . . .
 
 ::: {.body-text-m}
-- [**High-bias model:**]{.teal-text} its assumptions are too restrictive to capture the true shape of $f$ — it will be systematically wrong no matter how much data we give it
+- [**High-bias model:**]{.teal-text} its assumptions are too restrictive to capture the true shape of $f$: it will be systematically wrong no matter how much data we give it
 
-- [**Low-bias model:**]{.teal-text} flexible enough to approximate the true $f$
+- [**Low-bias model:**]{.teal-text} flexible enough to approximate the true shape of $f$
 :::
 
 <br>
@@ -669,7 +702,7 @@ plt.close()
 . . .
 
 ::: {.body-text-m .gray-text}
-Example: if the true $f$ is cubic but we fit a linear model, the linear model simply cannot capture the true shape — it will always be biased.
+Example: if the true $f$ is cubic but we fit a linear model, the linear model simply cannot capture the true shape, it will always be biased.
 :::
 
 ---
@@ -682,7 +715,7 @@ Example: if the true $f$ is cubic but we fit a linear model, the linear model si
 
 <br>
 
-From a theoretical perspective, the **expected test MSE** decomposes as:
+Roughly speaking and from a theoretical perspective, the **expected test MSE** decomposes as:
 
 $$\text{Expected test MSE} = \underbrace{\text{Model variance}}_{\text{sensitivity to training data}} + \underbrace{\text{Model bias}^2}_{\text{systematic error}} + \underbrace{\text{Irreducible error}}_{\text{Var}(\epsilon)}$$
 
@@ -690,9 +723,9 @@ $$\text{Expected test MSE} = \underbrace{\text{Model variance}}_{\text{sensitivi
 
 . . .
 
-- The **irreducible error** $\text{Var}(\epsilon)$ is always present — it sets a lower bound on the test MSE
+- The **irreducible error** $\text{Var}(\epsilon)$ is always present and positive, it sets a lower bound on the test MSE
 
-- **Model variance** and **bias** both contribute to error, but depend on the model we choose
+- **Model variance** and **bias** are  non-negative and thus contribute to the MSE, but depend on the model we choose.
 
 . . .
 
@@ -708,11 +741,19 @@ To minimize the expected test MSE, we need *both* low variance and low bias.
 
 <hr>
 
-::: {.body-text-m .gray-text}
-> "As we use more flexible methods, the variance will increase and the bias will decrease. The relative rate of change of these two quantities determines whether the test MSE increases or decreases." — *ISLP*
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.gray-text}
+> "As we use more flexible methods, the variance will increase and the bias will decrease. The relative rate of change of these two quantities determines whether the test MSE increases or decreases." [@islp_2023]
+
+> "The challenge is finding a method for which both the variance and the squared bias are reasonably low." [@islp_2023]
 :::
 
-. . .
+:::
+
+::: {.column width="50%"}
 
 ```{python}
 #| echo: false
@@ -724,7 +765,7 @@ for i, (f, c) in enumerate(zip(flexibility, colors)):
     plt.plot(f, test_mses[i],  's', color=c, markersize=8)
 plt.xlabel('Model flexibility (polynomial degree)')
 plt.ylabel('Mean Squared Error')
-plt.xticks(flexibility, ['1 (linear)', '3', '15'])
+plt.xticks(flexibility, ['1', '3', '15'])
 plt.legend(loc='upper center')
 plt.grid(False)
 plt.tight_layout()
@@ -733,20 +774,14 @@ plt.close()
 ```
 
 ::: {.body-text-s}
-From degree 1 → 3: bias drops faster than variance rises → test MSE falls.
+From degree 1 → 3: bias drops faster than variance rises, so test MSE falls.
 
-From degree 3 → 15: variance rises faster than bias drops → test MSE climbs back up.
+From degree 3 → 15: variance rises faster than bias drops, so test MSE climbs back up.
 :::
 
----
+:::
 
-## {#checkin-3 data-menu-title="Check-in 3" background="#053660"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">Looking at the test MSE plot, which model would you select and why?</p>
-<p class="custom-subtitle3">Would you consider evaluating polynomials with other degrees?</p>
-</div>
+:::
 
 ---
 
@@ -758,7 +793,7 @@ From degree 3 → 15: variance rises faster than bias drops → test MSE climbs 
 
 <br>
 
-- The **training MSE** measures how well $\hat{f}$ fits the training data — but we care more about the **test MSE**
+- The **training MSE** measures how well $\hat{f}$ fits the training data, but we care more about the **test MSE** because we want to know how our model performs on **unseen data**.
 
 - A model that fits training data too closely may **overfit**: low training MSE, high test MSE
 
@@ -766,12 +801,18 @@ From degree 3 → 15: variance rises faster than bias drops → test MSE climbs 
 
 - **Model bias** measures systematic error from restrictive model assumptions
 
-- Expected test MSE = variance + bias² + irreducible error
-
-- The **bias-variance tradeoff**: more flexible models have lower bias but higher variance
+- The **bias-variance tradeoff**: more flexible models generally have lower bias but higher variance
 
 <br>
 
 ::: {.center-text .teal-text}
 The challenge is finding a model where both variance *and* bias are reasonably low.
 :::
+
+---
+
+## {#references data-menu-title="References"}
+
+[References]{.slide-title}
+
+<hr>
