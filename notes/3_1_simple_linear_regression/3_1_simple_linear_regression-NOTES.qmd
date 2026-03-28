@@ -1,0 +1,378 @@
+---
+title: Simple Linear Regression
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+# Elephant seal data from previous lesson
+def logistic_function(x, L, k, x0):
+    return L / (1 + np.exp(-k * (x - x0)))
+
+time = np.linspace(0, 20, 100)
+np.random.seed(42)
+observed_time = np.array([2, 4, 6, 8, 10, 12, 14, 16, 18])
+observed_population = logistic_function(observed_time, L=500, k=0.5, x0=8) + np.random.normal(0, 50, len(observed_time))
+```
+
+In this lesson we introduce:
+
+- The simple linear regression (SLR) model and its assumptions
+- How the model coefficients are estimated (least squares)
+- How to assess the accuracy of the coefficient estimates (standard errors, confidence intervals)
+- How to test whether a relationship between $X$ and $Y$ exists (hypothesis testing, $t$-statistic, $p$-values)
+- How to assess overall model accuracy (RSE and $R^2$)
+
+These notes are based on chapter 3.1 of *An Introduction to Statistical Learning with Applications in Python* (James et al., 2023).
+
+## Motivating questions
+
+Regression is a method for estimating and studying the relationship between one or more predictors and a response variable. Before fitting any model, it is useful to ask:
+
+1. Is there a relationship between the predictor(s) and the response?
+2. How strong is that relationship?
+3. Which predictors are actually associated with the response?
+4. How large is the effect of each predictor on the response?
+5. Is the relationship linear?
+6. How accurately can we predict the response for a given combination of predictor values?
+
+::: {.callout-note}
+We do not need to answer all of these at once. We can select the questions that matter most for our specific goal — and the answers depend on whether we are doing **inference** or **prediction**.
+:::
+
+Linear regression is really useful for addressing all of these questions. Unlike more flexible methods that may prioritize prediction accuracy, linear regression supports direct inference: you can interpret the coefficients, compute confidence intervals, and test hypotheses about the relationship between variables.
+
+## 3.1 Simple linear regression
+
+**Simple linear regression (SLR)** assumes a (roughly) linear relationship between a single predictor $X$ and a response $Y$. The model is
+
+$$Y \approx \beta_0 + \beta_1 X$$
+
+where
+
+- $\beta_0$ is the **intercept** — the expected value of $Y$ when $X = 0$,
+- $\beta_1$ is the **slope** — the average change in $Y$ for a one-unit increase in $X$.
+
+Together, $\beta_0$ and $\beta_1$ are the model **coefficients** (also called **parameters**). They define the true underlying function that maps $X$ to $Y$.
+
+In practice, we do not know the true $\beta_0$ and $\beta_1$, so we **estimate** them from data. Given estimates $\hat{\beta}_0$ and $\hat{\beta}_1$, our prediction for $Y$ at a value $x$ is
+
+$$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x$$
+
+The "hat" notation ($\hat{\cdot}$) throughout this chapter indicates an **estimated** quantity — not the true, unknown population value.
+
+Continuing with Amanda's elephant seal example from the previous lesson: she wants to understand how population changes with time since protection. With a single predictor (time), SLR models this as
+
+$$\text{population} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{time}$$
+
+```{python}
+#| echo: false
+# Fit simple linear regression: population ~ time
+X = observed_time.reshape(-1, 1)
+y = observed_population
+model = LinearRegression()
+model.fit(X, y)
+b0 = model.intercept_
+b1 = model.coef_[0]
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
+plt.plot(time, b0 + b1 * time, 'steelblue', linewidth=2.5, label=f'Fitted line: $\\hat{{y}} = {b0:.1f} + {b1:.1f}x$')
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+## Estimating the coefficients
+
+### Residuals and RSS
+
+Given $n$ training observations $(x_1, y_1), \ldots, (x_n, y_n)$, we want to find $\hat{\beta}_0$ and $\hat{\beta}_1$ such that the line $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x$ is as close as possible to the observed data.
+
+The **residual** for observation $i$ is the difference between the observed response and the predicted response:
+
+$$e_i = y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i$$
+
+The **residual sum of squares (RSS)** totals the squared residuals across all observations:
+
+$$RSS = \sum_{i=1}^{n} e_i^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2$$
+
+The **least squares** approach chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to **minimize** the RSS. The residuals are shown as vertical segments below:
+
+```{python}
+#| echo: false
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data', zorder=3)
+plt.plot(time, b0 + b1 * time, 'steelblue', linewidth=2.5, label='Fitted line', zorder=2)
+
+for i, (xi, yi) in enumerate(zip(observed_time, observed_population)):
+    yi_hat = b0 + b1 * xi
+    lbl = 'Residual $e_i = y_i - \\hat{y}_i$' if i == 0 else None
+    plt.plot([xi, xi], [yi, yi_hat], color='green', linewidth=1.5, linestyle='--', label=lbl, zorder=1)
+
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+### Closed-form estimates
+
+Minimizing the RSS analytically gives the following closed-form expressions:
+
+$$\hat{\beta}_1 = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n}(x_i - \bar{x})^2}$$
+
+$$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
+
+where $\bar{x} = \frac{1}{n}\sum x_i$ and $\bar{y} = \frac{1}{n}\sum y_i$ are the sample means.
+
+::: {.callout-note}
+## Why do these formulas matter?
+
+Two important points:
+
+1. The **optimal** $\hat{\beta}_0$ and $\hat{\beta}_1$ depend entirely on the training data. Feed the same model different data and you get different estimates — this is the source of estimation uncertainty.
+
+2. In practice, **the computer computes these** for you. The key is understanding what the estimates represent, not memorizing the algebra.
+:::
+
+## Accuracy of the coefficient estimates
+
+### Standard errors
+
+Once we have $\hat{\beta}_0$ and $\hat{\beta}_1$, a natural question is: *how close are these estimates to the true $\beta_0$ and $\beta_1$?*
+
+Recall the true data-generating process:
+
+$$Y = f(X) + \epsilon = \beta_0 + \beta_1 X + \epsilon$$
+
+The **standard error** of an estimate quantifies, on average, how far $\hat{\beta}$ is from the true $\beta$. For the slope:
+
+$$SE(\hat{\beta}_1)^2 = \frac{\sigma^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2}$$
+
+where $\sigma^2 = \text{Var}(\epsilon)$ is the variance of the error term. The standard error of the intercept is:
+
+$$SE(\hat{\beta}_0)^2 = \sigma^2 \left[\frac{1}{n} + \frac{\bar{x}^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2}\right]$$
+
+In practice $\sigma^2$ is unknown and must also be estimated from the data (see RSE below).
+
+### Confidence intervals
+
+Standard errors allow us to construct **confidence intervals** for the true coefficients. A **95% confidence interval** is a range of values such that, if we repeated our experiment many times, approximately 95% of the computed intervals would contain the true parameter value.
+
+For simple linear regression, the approximate 95% confidence interval for $\beta_1$ is:
+
+$$\hat{\beta}_1 \pm 2 \cdot SE(\hat{\beta}_1)$$
+
+and similarly for $\beta_0$.
+
+::: {.callout-tip}
+## Check-in
+
+Suppose the 95% confidence interval for $\beta_1$ is $[1.2,\; 3.8]$. What does this tell us about the relationship between time and elephant seal population? What if the interval were $[-0.5,\; 3.8]$?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+
+- An interval of $[1.2, 3.8]$ tells us that, with high confidence, the slope is **positive** — population tends to increase with time since protection. The interval does not include 0, so we have evidence of a real relationship.
+
+- An interval of $[-0.5, 3.8]$ includes 0. We cannot rule out that $\beta_1 = 0$, meaning we cannot confidently conclude there is a relationship. Wider intervals (more uncertainty) generally arise from smaller samples or noisier data.
+:::
+
+A **narrower** confidence interval means our estimate is more precise. This happens when the sample size $n$ is large and when the residual variance $\sigma^2$ is small.
+
+## Hypothesis testing
+
+### The null and alternative hypothesis
+
+The most fundamental question in regression is: **is there actually a relationship between $X$ and $Y$?**
+
+We frame this as a hypothesis test:
+
+- **Null hypothesis** $H_0$: there is no relationship between $X$ and $Y$, i.e., $\beta_1 = 0$
+- **Alternative hypothesis** $H_a$: there is some relationship between $X$ and $Y$, i.e., $\beta_1 \neq 0$
+
+Note what these imply for the model:
+
+- If $\beta_1 = 0$, then $\hat{Y} = \hat{\beta}_0$ — the prediction is just a constant, $X$ carries no information about $Y$.
+- If $\beta_1 \neq 0$, then $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X$ — $Y$ is related to $X$.
+
+### The $t$-statistic
+
+To test $H_0$, we need to determine whether $\hat{\beta}_1$ is **sufficiently far from 0** relative to its uncertainty. We use the **$t$-statistic**:
+
+$$t = \frac{\hat{\beta}_1}{SE(\hat{\beta}_1)}$$
+
+This measures how many standard deviations $\hat{\beta}_1$ is away from 0. If there truly is no relationship ($\beta_1 = 0$), then $t$ follows a $t$-distribution with $n - 2$ degrees of freedom.
+
+### $p$-values
+
+The **$p$-value** is the probability of observing a $t$-statistic at least as extreme as ours, assuming $H_0$ is true.
+
+- A **small $p$-value** means it is very unlikely to have observed a $\hat{\beta}_1$ this far from 0 by chance alone, if $\beta_1$ were truly 0. We **reject** $H_0$ and conclude there is a relationship.
+- A **large $p$-value** means our data are consistent with $H_0$ — we **fail to reject** it.
+
+Conventionally, $p < 0.05$ is used as a threshold for rejecting $H_0$, though the appropriate cutoff depends on context.
+
+::: {.callout-tip}
+## Check-in
+
+Consider a regression output table for a study predicting sales from TV advertising spend:
+
+| | Coefficient | Std. Error | $p$-value |
+|---|---|---|---|
+| Intercept | 7.03 | 0.46 | < 0.0001 |
+| TV spend | 0.05 | 0.003 | < 0.0001 |
+
+1. What does the $p$-value for TV spend tell us?
+2. The $p$-value for the intercept is also very small. Does this mean the intercept is an important predictor of sales?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+
+1. The very small $p$-value for TV spend (< 0.0001) gives strong evidence that $\beta_1 \neq 0$ — there is a statistically significant positive relationship between TV advertising spend and sales.
+
+2. The $p$-value for the intercept tests $H_0: \beta_0 = 0$, i.e., whether the intercept is significantly different from zero. It is not testing whether the intercept is a "predictor." Since TV spend is measured in dollars, an intercept near 7 just means expected sales are about 7 units when TV spend is zero — the small $p$-value simply confirms the intercept is not zero, which is usually not the interesting question.
+:::
+
+## Assessing model accuracy
+
+Beyond asking *whether* a relationship exists, we want to know *how well* the model fits the data. Two key measures are the **Residual Standard Error** and **$R^2$**.
+
+### Residual Standard Error (RSE)
+
+The **RSE** estimates the standard deviation of the error term $\epsilon$ and is defined as:
+
+$$RSE = \sqrt{\frac{1}{n-2} RSS} = \sqrt{\frac{1}{n-2} \sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$$
+
+It represents the **average amount by which the response deviates from the true regression line**. A smaller RSE means the model fits the data more closely.
+
+::: {.callout-note}
+## Interpreting RSE
+
+- RSE is measured in the **same units as $Y$**, which makes it interpretable.
+- "Small" is context-dependent: an RSE of 50 seals might be great for a population of 500, but poor for a population of 60.
+- A small RSE occurs when the residuals $y_i - \hat{y}_i$ are close to 0 — meaning our predictions are near the actual values.
+:::
+
+### $R^2$ statistic
+
+The **$R^2$** statistic measures the **proportion of variance in $Y$ explained by $X$** (by the regression model). It is defined as:
+
+$$R^2 = \frac{TSS - RSS}{TSS} = 1 - \frac{RSS}{TSS}$$
+
+where
+
+- $TSS = \sum_{i=1}^{n}(y_i - \bar{y})^2$ is the **Total Sum of Squares** — total variability in $Y$ before fitting the model,
+- $RSS = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2$ is the **Residual Sum of Squares** — variability left unexplained after fitting.
+
+We can think of it as:
+
+$$\underbrace{TSS}_{\text{total variability in }Y} = \underbrace{(TSS - RSS)}_{\text{explained by regression}} + \underbrace{RSS}_{\text{unexplained}}$$
+
+So $R^2$ is the fraction of variability that the model accounts for:
+
+$$R^2 = \frac{\text{variability explained by regression}}{\text{total variability in }Y}$$
+
+::: {.callout-note}
+## Interpreting $R^2$
+
+- $R^2$ is always between 0 and 1.
+- $R^2$ close to **1**: the model explains most of the variability in $Y$ — a good fit.
+- $R^2$ close to **0**: the model explains little of the variability — $X$ alone is not capturing much of what drives $Y$. This could mean the true relationship is non-linear, the model needs more predictors, or there is a lot of irreducible noise.
+- What counts as a "good" $R^2$ is **context-dependent**. In some fields (physics), $R^2 > 0.99$ is expected. In ecology or social sciences, $R^2 = 0.3$ might be quite meaningful.
+:::
+
+### Relationship between $R^2$ and correlation
+
+In simple linear regression (one predictor), $R^2$ is exactly the square of the **Pearson correlation** between $X$ and $Y$:
+
+$$R^2 = r^2 = \left[\text{Cor}(X, Y)\right]^2$$
+
+where
+
+$$\text{Cor}(X, Y) = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n}(x_i - \bar{x})^2 \cdot \sum_{i=1}^{n}(y_i - \bar{y})^2}}$$
+
+This relationship only holds for SLR — once we move to multiple predictors, $R^2$ and correlation diverge.
+
+::: {.callout-tip}
+## Check-in
+
+For the elephant seal data, the fitted SLR gives $R^2 \approx 0.88$.
+
+1. How would you interpret this value in plain language?
+2. Would you say this is a "good" model? What might limit your confidence?
+:::
+
+```{python}
+#| echo: false
+y_hat = b0 + b1 * observed_time
+y_bar = np.mean(observed_population)
+TSS = np.sum((observed_population - y_bar)**2)
+RSS = np.sum((observed_population - y_hat)**2)
+R2 = 1 - RSS / TSS
+n = len(observed_time)
+RSE = np.sqrt(RSS / (n - 2))
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x, fig_size_y))
+
+# Left: residuals plot
+axes[0].scatter(observed_time, observed_population, s=60, c='red', alpha=0.7)
+axes[0].plot(time, b0 + b1 * time, 'steelblue', linewidth=2)
+for xi, yi in zip(observed_time, observed_population):
+    axes[0].plot([xi, xi], [yi, b0 + b1 * xi], 'g--', linewidth=1)
+axes[0].set_xlabel('Time (years)')
+axes[0].set_ylabel('Population')
+axes[0].set_title(f'Fit   |   RSE = {RSE:.1f}')
+axes[0].grid(True, alpha=0.3)
+axes[0].set_xlim(0, 20)
+axes[0].set_ylim(0, 600)
+
+# Right: residuals vs fitted
+axes[1].scatter(y_hat, observed_population - y_hat, s=60, c='steelblue', alpha=0.7)
+axes[1].axhline(0, color='gray', linewidth=1, linestyle='--')
+axes[1].set_xlabel('Fitted values $\\hat{y}_i$')
+axes[1].set_ylabel('Residuals $y_i - \\hat{y}_i$')
+axes[1].set_title(f'Residuals vs Fitted   |   $R^2$ = {R2:.2f}')
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+## Recap
+
+What we covered in this lesson:
+
+- **SLR model:** $Y \approx \beta_0 + \beta_1 X$, estimated as $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 x$
+- **Least squares:** choose $\hat{\beta}_0, \hat{\beta}_1$ to minimize $RSS = \sum(y_i - \hat{y}_i)^2$
+- **Standard errors** quantify uncertainty in the coefficient estimates
+- **Confidence intervals:** approximately $\hat{\beta}_1 \pm 2 \cdot SE(\hat{\beta}_1)$ for 95% coverage
+- **Hypothesis testing:** $H_0: \beta_1 = 0$ vs $H_a: \beta_1 \neq 0$, tested with the $t$-statistic
+- **$p$-value:** probability of observing results this extreme if $H_0$ were true; small $p$-value → reject $H_0$
+- **RSE:** average deviation of observations from the fitted line, in units of $Y$
+- **$R^2$:** proportion of variance in $Y$ explained by $X$; $R^2 = r^2$ in SLR
+
+Next class: multiple linear regression.
