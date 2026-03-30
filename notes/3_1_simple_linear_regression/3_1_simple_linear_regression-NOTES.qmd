@@ -46,7 +46,7 @@ Regression is a method for estimating and studying the relationship between one 
 
 We do not need to answer all of these at once. We can select the questions that matter most for our specific goal, depending on whether we are doing **inference** or **prediction**.
 
-**Linear regression** is really useful for addressing all of these questions. Unlike more flexible methods that may prioritize prediction accuracy, linear regression supports direct inference: you can interpret the coefficients, compute confidence intervals, and test hypotheses about the relationship between variables.
+**Linear regression** can be really useful for addressing all of these questions. Unlike more flexible methods that may prioritize prediction accuracy, linear regression supports direct inference: you can interpret the coefficients, compute confidence intervals, and test hypotheses about the relationship between variables.
 
 ## Simple linear regression
 
@@ -56,12 +56,12 @@ $$Y \approx \beta_0 + \beta_1 X$$
 
 where
 
-- $\beta_0$ is the **y-intercept**: the expected value of $Y$ when $X = 0$,
+- $\beta_0$ is the **y-intercept**: the value of $Y$ when $X = 0$,
 - $\beta_1$ is the **slope**: the average change in $Y$ for a one-unit increase in $X$.
 
 Together, $\beta_0$ and $\beta_1$ are the model **coefficients** (also called **parameters**). They define the true underlying function $f$ that maps $X$ to $Y$. 
 
-Remember $f$ is the function we are aiming to estimate throughout, so we see it is defined by $\beta_i$. In practice, we do not know the true $\beta_0$ and $\beta_1$, so we **estimate** them from data. Given estimates $\hat{\beta}_0$ and $\hat{\beta}_1$, our prediction for $Y$ at a value $x$ is
+In practice, we do not know the true $\beta_0$ and $\beta_1$, so we **estimate** them from data. Given estimates $\hat{\beta}_0$ and $\hat{\beta}_1$, our prediction for $Y$ at a value $x$ is
 
 $$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x = \hat{f}(x).$$
 
@@ -186,13 +186,13 @@ $$Y = f(X) + \epsilon = \beta_0 + \beta_1 X + \epsilon,$$
 
 where $\epsilon$ is an error term. 
 
-The **standard error** of an estimate quantifies, on average, how far our estimates $\hat{\beta}_i$ are from the true coefficients $\beta_i$. For the slope the standard error is given by
+The **standard error** of an estimate quantifies, on average, how far our estimates $\hat{\beta}_i$ are from the true coefficients $\beta_i$. For the slope $\hat{\beta}_1$ the standard error is given by
 
 $$SE(\hat{\beta}_1)^2 = \frac{\sigma^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2},$$
 
-where $\sigma^2 = \text{Var}(\epsilon)$ is the variance of the error term (assuming that the errrors $\epsilon_i$ for each observation have common variance $\sigma^2$ and are uncorrelated), and $\bar{x} =\frac{1}{n}\sigma_{i=1}^n x_i$ is the average of the $x$ values. 
+where $\sigma^2 = \text{Var}(\epsilon)$ is the variance of the error term (assuming that the errrors $\epsilon_i$ for each observation have common variance $\sigma^2$ and are uncorrelated), and $\bar{x} =\frac{1}{n}\sum x_i$ is the average of the $x$ values. 
 
-The standard error of the $y$-intercept is:
+The standard error of the $y$-intercept $\hat{\beta}_0$ is:
 
 $$SE(\hat{\beta}_0)^2 = \sigma^2 \left[\frac{1}{n} + \frac{\bar{x}^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2}\right].$$
 
@@ -200,7 +200,7 @@ In practice $\sigma^2$ is unknown and must also be estimated from the data using
 
 :::{.callout-tip}
 ## Check-in 
-In the standard error for the slope estimate $\hat{\beta_1}$, how does the standard error change as the $x$ values are more spread out?
+How does the standard error for the slope estimate $\hat{\beta_1}$ change as the $x$ values are more spread out?
 :::
 ::: {.callout-tip collapse="true"}
 ## Discussion
@@ -218,15 +218,15 @@ For simple linear regression, the approximate 95% confidence interval for a coef
 $$[\hat{\beta}_i - 2 \cdot SE(\hat{\beta}_i), \hat{\beta}_i + 2 \cdot SE(\hat{\beta}_i)].$$
 
 
-This means there is approximately a 95% chance that the interval will contain the true vlaue for $\beta_1$. The "approximately" is becasue the factor of 2 will vary slightly with the numnber of observations used to perform the regression. Strictly speaking, this factor will come for the 97.5% quantile of a $t$-distribution with $n-2$ degrees of freedom. In practice, we use implemented methods in our computers to calculate these exactly. 
+This means there is approximately a 95% chance that the interval will contain the true vlaue for $\beta_1$. The "approximately" is becasue the factor of 2 will vary slightly with the numnber of observations used to perform the regression. Strictly speaking, this factor will come for the 97.5% quantile of a $t$-distribution with $n-2$ degrees of freedom. In practice, we use implemented methods in our computers to calculate these confidence intervals exactly. 
 
 In general terms, we interpret the confidence interval for the slope $\hat{\beta}_1$ as follows:
 
-*a 95% confidence inerval for $\beta_1$ is $[a_1, b_1]$ means that there's a 95% chance that for an average increase of one unit of $x$, there will be an average increase in $y$  between $a_1$ and $b_1$ units.*
+> *a 95% confidence inerval for $\beta_1$ is $[a_1, b_1]$ means that there's a 95% chance that for an average increase of one unit of $x$, there will be an average increase in $y$  between $a_1$ and $b_1$ units.*
 
-and the confidence interval for hte intercetp $\hat{\beta}_0$ like
+and we interpret the confidence interval for hte intercetp $\hat{\beta}_0$ like
 
-*a 95% confidence inerval for $\beta_0$ is $[a_0, b_0]$ means that there's a 95% chance that the linear model will intercept the $y$-axis between $a_0$ and $b_0$.*
+> *a 95% confidence inerval for $\beta_0$ is $[a_0, b_0]$ means that there's a 95% chance that the linear model will intercept the $y$-axis between $a_0$ and $b_0$.*
 
 A **narrower** confidence interval means our estimate is more precise. This happens when the sample size $n$ is large and when the residual variance $\sigma^2$ is small.
 
@@ -248,34 +248,42 @@ Suppose the 95% confidence interval for $\beta_1$ is $[1.2,\; 3.8]$. What does t
 
 ### The null and alternative hypothesis
 
-The most fundamental question in regression is: **is there actually a relationship between $X$ and $Y$?**
-
-We frame this as a hypothesis test:
+A fundamental question in regression is: is there actually a relationship between $X$ and $Y$? We frame this as a hypothesis test:
 
 - **Null hypothesis** $H_0$: there is no relationship between $X$ and $Y$, i.e., $\beta_1 = 0$
 - **Alternative hypothesis** $H_a$: there is some relationship between $X$ and $Y$, i.e., $\beta_1 \neq 0$
 
 Note what these imply for the model:
 
-- If $\beta_1 = 0$, then $\hat{Y} = \hat{\beta}_0$ — the prediction is just a constant, $X$ carries no information about $Y$.
+- If $\beta_1 = 0$, then $\hat{Y} = \hat{\beta}_0$, which means the prediction is just a constant, $X$ carries no information about $Y$.
 - If $\beta_1 \neq 0$, then $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X$ — $Y$ is related to $X$.
 
-### The $t$-statistic
+### The $t$-statistic & $p$-values
 
-To test $H_0$, we need to determine whether $\hat{\beta}_1$ is **sufficiently far from 0** relative to its uncertainty. We use the **$t$-statistic**:
+To test $H_0$, we need to determine whether $\hat{\beta}_1$ is sufficiently far from 0 relative to its uncertainty. We use the **$t$-statistic**
 
 $$t = \frac{\hat{\beta}_1}{SE(\hat{\beta}_1)}$$
 
-This measures how many standard deviations $\hat{\beta}_1$ is away from 0. If there truly is no relationship ($\beta_1 = 0$), then $t$ follows a $t$-distribution with $n - 2$ degrees of freedom.
+which measures how many standard deviations $\hat{\beta}_1$ is away from 0. If there truly is no relationship ($\beta_1 = 0$), then $t$ follows a $t$-distribution with $n - 2$ degrees of freedom.
 
-### $p$-values
+The **$p$-value** is the probability of observing any number equal to the $t$-statistic $|t|$ or larger, assuming there is no relationship between the variables (i.e. assuming $H_0$ is true). Conventionally, $p < 0.05$ is used as a threshold for rejecting $H_0$, though the appropriate cutoff depends on context.
 
-The **$p$-value** is the probability of observing a $t$-statistic at least as extreme as ours, assuming $H_0$ is true.
-
-- A **small $p$-value** means it is very unlikely to have observed a $\hat{\beta}_1$ this far from 0 by chance alone, if $\beta_1$ were truly 0. We **reject** $H_0$ and conclude there is a relationship.
+- A **small $p$-value** means it is very unlikely to have observed a $\hat{\beta}_1$ this far from 0 by chance alone, if $\beta_1$ were truly 0. We **reject** $H_0$ and conclude there is a relationship between $X$ and $Y$.
 - A **large $p$-value** means our data are consistent with $H_0$ — we **fail to reject** it.
 
-Conventionally, $p < 0.05$ is used as a threshold for rejecting $H_0$, though the appropriate cutoff depends on context.
+A summary of this story is:
+
+1. We want to know whether $X$ is related to $Y$
+
+2. We compute the $t$-statistic which is the number of standard deviations that $\hat{\beta}_1$ is away fron 0.
+
+<!-- 3. Assuming $\beta_1=0$ (i.e. no relationship between $X$ and $Y$) and $n>30$, then $t$'s distribution is very similar to normal distribution.  -->
+
+4. We ask the question: *what is the probability that $|\hat{\beta}_1|$ is more than $t$ standard deviations away from zero if the true parameter is $\beta_1=0$?* This is the $p$-value
+
+5. There are two options depending on the answer to this question:
+    - Option 1: small probability that $\hat{\beta}_1$ is that far away from 0 if the true parameter $\beta_1=0$: so the most likely scenario is that $\beta_1\neq0$, which means the variables are related
+    - Option 2: high probability that $\hat{\beta}_1$ is that far away from 0 is the true parameter $\beta_1=0$: maybe $\beta_1=0$ is really zero, which means maybe there is no relationship between the variables
 
 ::: {.callout-tip}
 ## Check-in
@@ -307,47 +315,47 @@ Beyond asking *whether* a relationship exists, we want to know *how well* the mo
 
 The **RSE** estimates the standard deviation of the error term $\epsilon$ and is defined as:
 
-$$RSE = \sqrt{\frac{1}{n-2} RSS} = \sqrt{\frac{1}{n-2} \sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$$
+$$RSE = \sqrt{\frac{1}{n-2} RSS} = \sqrt{\frac{1}{n-2} \sum_{i=1}^{n}(y_i - \hat{y}_i)^2}.$$
 
-It represents the **average amount by which the response deviates from the true regression line**. A smaller RSE means the model fits the data more closely.
+It represents the average amount by which the response deviates from the true regression line. A smaller RSE means the model fits the data more closely.
 
 ::: {.callout-note}
 ## Interpreting RSE
 
-- RSE is measured in the **same units as $Y$**, which makes it interpretable.
-- "Small" is context-dependent: an RSE of 50 seals might be great for a population of 500, but poor for a population of 60.
-- A small RSE occurs when the residuals $y_i - \hat{y}_i$ are close to 0 — meaning our predictions are near the actual values.
+- A small RSE occurs when the residuals $y_i - \hat{y}_i$ are close to 0, meaning our predictions are near the actual values.
+- *RSE is measured in the same units as $Y$*, which makes it interpretable but also context dependent. What a small RSE is depends on what we are measuring: an RSE of 50 seals might be great for a population of 500, but poor for a population of 60.
 :::
 
 ### $R^2$ statistic
 
-The **$R^2$** statistic measures the **proportion of variance in $Y$ explained by $X$** (by the regression model). It is defined as:
+An easier to interpret statistic is the **$R^2$**, which  measures the *proportion of variance in $Y$ explained by the regression model*. To compute it we need these ingredients:
 
-$$R^2 = \frac{TSS - RSS}{TSS} = 1 - \frac{RSS}{TSS}$$
+- $TSS = \sum_{i=1}^{n}(y_i - \bar{y})^2$ is the **Total Sum of Squares**. This captures the inherent total variability in $Y$, how much do the observations vary from the mean $\bar{y}$.
 
-where
 
-- $TSS = \sum_{i=1}^{n}(y_i - \bar{y})^2$ is the **Total Sum of Squares** — total variability in $Y$ before fitting the model,
-- $RSS = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2$ is the **Residual Sum of Squares** — variability left unexplained after fitting.
+- $RSS = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2$ is the **Residual Sum of Squares**. This captures the variability in $y$ unexplained by the regression. Think about explained by regression being $y_i = \hat{y}_i$. 
 
-We can think of it as:
+So 
 
-$$\underbrace{TSS}_{\text{total variability in }Y} = \underbrace{(TSS - RSS)}_{\text{explained by regression}} + \underbrace{RSS}_{\text{unexplained}}$$
+$$\underbrace{TSS}_{\text{total variability in }Y} - \underbrace{RSS}_{\text{unexplained by regression}} = \text{variability explained by regression}$$
+
+We use this to define
+$$R^2 = \frac{TSS - RSS}{TSS}.$$
 
 So $R^2$ is the fraction of variability that the model accounts for:
 
-$$R^2 = \frac{\text{variability explained by regression}}{\text{total variability in }Y}$$
+$$R^2 = \frac{\text{variability explained by regression}}{\text{total variability in }Y}/$$
 
 ::: {.callout-note}
 ## Interpreting $R^2$
 
 - $R^2$ is always between 0 and 1.
-- $R^2$ close to **1**: the model explains most of the variability in $Y$ — a good fit.
-- $R^2$ close to **0**: the model explains little of the variability — $X$ alone is not capturing much of what drives $Y$. This could mean the true relationship is non-linear, the model needs more predictors, or there is a lot of irreducible noise.
-- What counts as a "good" $R^2$ is **context-dependent**. In some fields (physics), $R^2 > 0.99$ is expected. In ecology or social sciences, $R^2 = 0.3$ might be quite meaningful.
+- $R^2$ close to **1**: the model explains most of the variability in $Y$: a good fit.
+- $R^2$ close to **0**: the model explains little of the variability: $X$ alone is not capturing much of what drives $Y$. This could mean the true relationship is non-linear, the model needs more predictors, or there is a lot of irreducible noise.
+- What counts as a "good" $R^2$ is context-dependent.
 :::
 
-### Relationship between $R^2$ and correlation
+<!-- ### Relationship between $R^2$ and correlation
 
 In simple linear regression (one predictor), $R^2$ is exactly the square of the **Pearson correlation** between $X$ and $Y$:
 
@@ -357,7 +365,7 @@ where
 
 $$\text{Cor}(X, Y) = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n}(x_i - \bar{x})^2 \cdot \sum_{i=1}^{n}(y_i - \bar{y})^2}}$$
 
-This relationship only holds for SLR — once we move to multiple predictors, $R^2$ and correlation diverge.
+This relationship only holds for SLR — once we move to multiple predictors, $R^2$ and correlation diverge. -->
 
 ::: {.callout-tip}
 ## Check-in
@@ -409,13 +417,12 @@ plt.close()
 
 What we covered in this lesson:
 
-- **SLR model:** $Y \approx \beta_0 + \beta_1 X$, estimated as $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 x$
-- **Least squares:** choose $\hat{\beta}_0, \hat{\beta}_1$ to minimize $RSS = \sum(y_i - \hat{y}_i)^2$
-- **Standard errors** quantify uncertainty in the coefficient estimates
-- **Confidence intervals:** approximately $\hat{\beta}_1 \pm 2 \cdot SE(\hat{\beta}_1)$ for 95% coverage
-- **Hypothesis testing:** $H_0: \beta_1 = 0$ vs $H_a: \beta_1 \neq 0$, tested with the $t$-statistic
-- **$p$-value:** probability of observing results this extreme if $H_0$ were true; small $p$-value → reject $H_0$
-- **RSE:** average deviation of observations from the fitted line, in units of $Y$
-- **$R^2$:** proportion of variance in $Y$ explained by $X$; $R^2 = r^2$ in SLR
+- **Standard linear regression model:** $Y \approx \beta_0 + \beta_1 X$, estimated as $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 x$
+- Minimiinge $RSS = \sum(y_i - \hat{y}_i)^2$ gives us coeffient estimates $$\hat{\beta}_0, \hat{\beta}_1$
+- Standard errors quantify uncertainty in the coefficient estimates
+- Confidence intervals give us a high-probability range in which our true coefficients may be in
+- We can use Hypothesis testing to figure out if there is a relationship between the variables
+- $p$-value: probability of observing results there were no variable relation $(H_0)$; small $p$-value → reject $H_0$
+- $R^2$: proportion of variance in $Y$ explained by $X$
 
 Next class: multiple linear regression.
