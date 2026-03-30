@@ -1,26 +1,56 @@
 ---
 title: Simple linear regression
+jupyter: eds232-env                                                       
 ---
 
 ```{python}
 #| echo: false
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 from sklearn.linear_model import LinearRegression
+import statsmodels.api as sm
 
 plt.style.use('default')
 fig_size_x = 8
 fig_size_y = 4
 plt.rcParams['font.size'] = 10
 
-# Elephant seal data from previous lesson
-def logistic_function(x, L, k, x0):
-    return L / (1 + np.exp(-k * (x - x0)))
+# ── GreenAbate synthetic dataset ───────────────────────────────────────────────────────
+# 200 manufacturing firms tracked on three abatement spending channels and
+# their resulting annual CO₂ emissions reduction.
+#
+# Predictors (annual spending, $K):
+#   process    – investment in cleaner production processes        (≈ TV)
+#   efficiency – energy efficiency upgrades                        (≈ radio)
+#   offsets    – carbon offset purchases                           (≈ newspaper)
+#
+# Response:
+#   co2_reduction – annual CO₂ emissions reduced (thousand metric tons, ktCO₂e)
+#
+# True data-generating model (mirrors ISLP Advertising, Ch. 3):
+#   co2_reduction = 2.939 + 0.046·process + 0.189·efficiency − 0.001·offsets + ε
+#   ε ~ N(0, 1.69²)
+# ─────────────────────────────────────────────────────────────────────────────
+np.random.seed(7)
+n = 200
 
-time = np.linspace(0, 20, 100)
-np.random.seed(42)
-observed_time = np.array([2, 4, 6, 8, 10, 12, 14, 16, 18])
-observed_population = logistic_function(observed_time, L=500, k=0.5, x0=8) + np.random.normal(0, 50, len(observed_time))
+process    = np.random.uniform(0, 300, n)
+efficiency = np.random.uniform(0,  50, n)
+offsets    = np.random.uniform(0, 100, n)
+
+co2_reduction = (2.939
+                 + 0.046  * process
+                 + 0.189  * efficiency
+                 - 0.001  * offsets
+                 + np.random.normal(0, 1.69, n))
+
+df = pd.DataFrame({
+    'process':       process,
+    'efficiency':    efficiency,
+    'offsets':       offsets,
+    'co2_reduction': co2_reduction
+})
 ```
 
 In this lesson we introduce:
@@ -31,7 +61,7 @@ In this lesson we introduce:
 - How to test whether a relationship between $X$ and $Y$ exists (hypothesis testing, $t$-statistic, $p$-values)
 - How to assess overall model accuracy (RSE and $R^2$)
 
-These notes are based on chapter 3.1 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023].
+These notes are based on chapter 3.1 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The **example data is synthetic** and was generated with the aid of Claude Code for the purpose of this lesson based on the data in ISLP used in Figure 2.1.
 
 ## Motivating questions
 
@@ -47,6 +77,46 @@ Regression is a method for estimating and studying the relationship between one 
 We do not need to answer all of these at once. We can select the questions that matter most for our specific goal, depending on whether we are doing **inference** or **prediction**.
 
 **Linear regression** can be really useful for addressing all of these questions. Unlike more flexible methods that may prioritize prediction accuracy, linear regression supports direct inference: you can interpret the coefficients, compute confidence intervals, and test hypotheses about the relationship between variables.
+
+## A guiding example: the GreenAbate dataset
+
+A research consortium tracks **200 manufacturing firms** across different industries and regions. For each firm they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:
+
+- **`process`** — investment in cleaner production processes (\$K/year)
+- **`efficiency`** — energy efficiency upgrades (\$K/year)
+- **`offsets`** — carbon offset purchases (\$K/year)
+- **`co2_reduction`** — annual CO₂ emissions reduced (thousand metric tons, ktCO₂e)
+
+The central question is: *do these abatement investments actually drive emissions reductions, and if so, by how much?*
+
+The figure below shows `co2_reduction` plotted against each predictor separately — analogous to Figure 2.1 in the ISLP book. Each blue line is the simple least-squares fit of `co2_reduction` on that predictor alone.
+
+```{python}
+#| echo: false
+fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.4, fig_size_y))
+
+specs = [
+    ('process',    'steelblue',  'Process upgrades ($K)'),
+    ('efficiency', 'darkorange', 'Efficiency upgrades ($K)'),
+    ('offsets',    'seagreen',   'Carbon offsets ($K)'),
+]
+
+for ax, (col, color, xlabel) in zip(axes, specs):
+    m = LinearRegression().fit(df[[col]], df['co2_reduction'])
+    x_line = np.linspace(df[col].min(), df[col].max(), 200).reshape(-1, 1)
+    ax.scatter(df[col], df['co2_reduction'], s=15, alpha=0.5, color=color)
+    ax.plot(x_line, m.predict(x_line), 'b-', linewidth=2)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel('CO₂ reduction (ktCO₂e)')
+    ax.grid(True, alpha=0.3)
+
+plt.suptitle('GreenAbate dataset – CO₂ reduction vs. each abatement channel', y=1.01)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+`process` spending shows the strongest linear association with CO₂ reductions; `efficiency` spending shows a moderate relationship; `offsets` shows a weak one. In this lesson we focus on **simple linear regression** (one predictor at a time), using `process` as our primary example. We will bring in all three predictors in the next lesson on multiple linear regression.
 
 ## Simple linear regression
 
@@ -69,28 +139,24 @@ Remember the "hat" notation ($\hat{\ }$) throughout these notes indicates an **e
 
 
 
-Continuing with Amanda's elephant seal example from the previous lesson: she wants to understand how population changes with time since protection. With a single predictor (time), SLR models this as
+For the GreenAbate dataset, using `process` as the sole predictor, SLR models CO₂ reductions as
 
-$$\text{population} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \text{time}$$
+$$\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}$$
 
 ```{python}
 #| echo: false
-# Fit simple linear regression: population ~ time
-X = observed_time.reshape(-1, 1)
-y = observed_population
-model = LinearRegression()
-model.fit(X, y)
-b0 = model.intercept_
-b1 = model.coef_[0]
+model_proc = LinearRegression().fit(df[['process']], df['co2_reduction'])
+b0 = model_proc.intercept_
+b1 = model_proc.coef_[0]
+x_line = np.linspace(0, 300, 300)
 
 plt.figure(figsize=(fig_size_x, fig_size_y))
-plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
-plt.plot(time, b0 + b1 * time, 'steelblue', linewidth=2.5, label=f'Fitted line: $\\hat{{y}} = {b0:.1f} + {b1:.1f}x$')
-plt.xlabel('Time since rookery was protected (years)')
-plt.ylabel('Elephant seal population')
+plt.scatter(df['process'], df['co2_reduction'], s=20, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'Fitted line: $\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
 plt.grid(True, alpha=0.3)
-plt.xlim(0, 20)
-plt.ylim(0, 600)
 plt.legend(loc='upper left')
 plt.tight_layout()
 plt.show()
@@ -100,8 +166,8 @@ plt.close()
 :::{.callout-tip}
 ## Check-in
 - In the context of this problem, what does $\hat{\beta}_0$ represent?
-- What about $\hat{\beta}_1$?
-- what is the approxiamte Y at certain X?
+- What does $\hat{\beta}_1$ represent?
+- If a firm spends \$150K on process upgrades, what is the model's predicted CO₂ reduction?
 :::
 
 ## Estimating the coefficients
@@ -123,20 +189,23 @@ The **least squares** approach to fit the regression line chooses $\hat{\beta}_0
 
 ```{python}
 #| echo: false
+rng = np.random.default_rng(0)
+idx = rng.choice(n, 50, replace=False)
+
 plt.figure(figsize=(fig_size_x, fig_size_y))
-plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data', zorder=3)
-plt.plot(time, b0 + b1 * time, 'steelblue', linewidth=2.5, label='Fitted line', zorder=2)
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.4, color='steelblue', zorder=2, label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5, zorder=3, label='Fitted line')
 
-for i, (xi, yi) in enumerate(zip(observed_time, observed_population)):
+for i, ix in enumerate(idx):
+    xi     = df['process'].iloc[ix]
+    yi     = df['co2_reduction'].iloc[ix]
     yi_hat = b0 + b1 * xi
-    lbl = 'Residual $ y_i - \\hat{y}_i$' if i == 0 else None
-    plt.plot([xi, xi], [yi, yi_hat], color='green', linewidth=1.5, linestyle='--', label=lbl, zorder=1)
+    lbl = 'Residual $e_i = y_i - \\hat{y}_i$' if i == 0 else None
+    plt.plot([xi, xi], [yi, yi_hat], color='tomato', linewidth=0.9, label=lbl, zorder=1)
 
-plt.xlabel('Time since rookery was protected (years)')
-plt.ylabel('Elephant seal population')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
 plt.grid(True, alpha=0.3)
-plt.xlim(0, 20)
-plt.ylim(0, 600)
 plt.legend(loc='upper left')
 plt.tight_layout()
 plt.show()
@@ -233,15 +302,18 @@ A **narrower** confidence interval means our estimate is more precise. This happ
 ::: {.callout-tip}
 ## Check-in
 
-Suppose the 95% confidence interval for $\beta_1$ is $[1.2,\; 3.8]$. What does this tell us about the relationship between time and elephant seal population? What if the interval were $[-0.5,\; 3.8]$?
+For the GreenAbate data, the SLR of `co2_reduction` on `process` gives a 95% CI for $\beta_1$ of approximately $[0.039,\; 0.053]$.
+
+1. What does this interval tell us about the relationship between process upgrade spending and CO₂ reductions?
+2. What if the interval had been $[-0.002,\; 0.053]$ instead?
 :::
 
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-- An interval of $[1.2, 3.8]$ tells us that, with high confidence, the slope is **positive** — population tends to increase with time since protection. The interval does not include 0, so we have evidence of a real relationship.
+1. An interval of $[0.039, 0.053]$ tells us that, with high confidence, the slope is **positive**: firms that invest more in cleaner production processes achieve greater CO₂ reductions. Since the entire interval is above 0, we have strong evidence of a real relationship. More precisely, each additional \$1K in process spending is associated with a reduction of between 0.039 and 0.053 ktCO₂e per year on average.
 
-- An interval of $[-0.5, 3.8]$ includes 0. We cannot rule out that $\beta_1 = 0$, meaning we cannot confidently conclude there is a relationship. Wider intervals (more uncertainty) generally arise from smaller samples or noisier data.
+2. An interval of $[-0.002, 0.053]$ includes 0. We cannot rule out that $\beta_1 = 0$, meaning we cannot confidently conclude that process spending drives reductions. Wider intervals generally arise from smaller samples or noisier data.
 :::
 
 ## Hypothesis testing
@@ -285,26 +357,44 @@ A summary of this story is:
     - Option 1: small probability that $\hat{\beta}_1$ is that far away from 0 if the true parameter $\beta_1=0$: so the most likely scenario is that $\beta_1\neq0$, which means the variables are related
     - Option 2: high probability that $\hat{\beta}_1$ is that far away from 0 is the true parameter $\beta_1=0$: maybe $\beta_1=0$ is really zero, which means maybe there is no relationship between the variables
 
+The table below (analogous to Table 3.1 in ISLP) shows the regression output for the SLR of `co2_reduction` on `process`:
+
+```{python}
+#| echo: false
+X_ols = sm.add_constant(df['process'])
+res   = sm.OLS(df['co2_reduction'], X_ols).fit()
+
+def fmt_p(p):
+    return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
+
+coef_df = pd.DataFrame({
+    '':              ['Intercept', 'process'],
+    'Coefficient':   [f"{res.params['const']:.4f}",   f"{res.params['process']:.4f}"],
+    'Std. error':    [f"{res.bse['const']:.4f}",       f"{res.bse['process']:.4f}"],
+    't-statistic':   [f"{res.tvalues['const']:.2f}",   f"{res.tvalues['process']:.2f}"],
+    'p-value':       [fmt_p(res.pvalues['const']),      fmt_p(res.pvalues['process'])],
+})
+print(coef_df.to_string(index=False))
+```
+
 ::: {.callout-tip}
 ## Check-in
 
-Consider a regression output table for a study predicting sales from TV advertising spend:
+Looking at the regression output above:
 
-| | Coefficient | Std. Error | $p$-value |
-|---|---|---|---|
-| Intercept | 7.03 | 0.46 | < 0.0001 |
-| TV spend | 0.05 | 0.003 | < 0.0001 |
-
-1. What does the $p$-value for TV spend tell us?
-2. The $p$-value for the intercept is also very small. Does this mean the intercept is an important predictor of sales?
+1. What does the $p$-value for `process` tell us about the relationship between process upgrade spending and CO₂ reductions?
+2. The intercept also has a very small $p$-value. Does this mean the intercept is an important predictor of CO₂ reductions?
+3. How would you interpret the coefficient for `process` in plain language?
 :::
 
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-1. The very small $p$-value for TV spend (< 0.0001) gives strong evidence that $\beta_1 \neq 0$ — there is a statistically significant positive relationship between TV advertising spend and sales.
+1. The very small $p$-value for `process` gives strong evidence that $\beta_1 \neq 0$ — there is a statistically significant positive relationship between process upgrade investment and CO₂ emissions reductions.
 
-2. The $p$-value for the intercept tests $H_0: \beta_0 = 0$, i.e., whether the intercept is significantly different from zero. It is not testing whether the intercept is a "predictor." Since TV spend is measured in dollars, an intercept near 7 just means expected sales are about 7 units when TV spend is zero — the small $p$-value simply confirms the intercept is not zero, which is usually not the interesting question.
+2. The $p$-value for the intercept tests $H_0: \beta_0 = 0$, not whether the intercept is a useful predictor. A significant intercept simply means the regression line does not pass through the origin — there is some baseline CO₂ reduction even at zero process spending (likely from other firm-level factors not captured in the model). The intercept's $p$-value is rarely the question of interest.
+
+3. A coefficient of roughly 0.046 means that, on average, each additional \$1K invested in cleaner production processes is associated with approximately 0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction per year.
 :::
 
 ## Assessing model accuracy
@@ -323,7 +413,7 @@ It represents the average amount by which the response deviates from the true re
 ## Interpreting RSE
 
 - A small RSE occurs when the residuals $y_i - \hat{y}_i$ are close to 0, meaning our predictions are near the actual values.
-- *RSE is measured in the same units as $Y$*, which makes it interpretable but also context dependent. What a small RSE is depends on what we are measuring: an RSE of 50 seals might be great for a population of 500, but poor for a population of 60.
+- *RSE is measured in the same units as $Y$*, which makes it interpretable but also context-dependent. For the GreenAbate data, if RSE ≈ 3.26 ktCO₂e, that means our predictions are off by about 3,260 metric tons on average — whether that is acceptable depends on the scale of reductions in the dataset and the firm's targets.
 :::
 
 ### $R^2$ statistic
@@ -367,51 +457,75 @@ $$\text{Cor}(X, Y) = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\
 
 This relationship only holds for SLR — once we move to multiple predictors, $R^2$ and correlation diverge. -->
 
-::: {.callout-tip}
-## Check-in
-
-For the elephant seal data, the fitted SLR gives $R^2 \approx 0.88$.
-
-1. How would you interpret this value in plain language?
-2. Would you say this is a "good" model? What might limit your confidence?
-:::
+The table below (analogous to Table 3.2 in ISLP) summarizes the accuracy of the SLR of `co2_reduction` on `process`:
 
 ```{python}
 #| echo: false
-y_hat = b0 + b1 * observed_time
-y_bar = np.mean(observed_population)
-TSS = np.sum((observed_population - y_bar)**2)
-RSS = np.sum((observed_population - y_hat)**2)
-R2 = 1 - RSS / TSS
-n = len(observed_time)
-RSE = np.sqrt(RSS / (n - 2))
+y_hat = model_proc.predict(df[['process']])
+y_bar = df['co2_reduction'].mean()
+TSS   = np.sum((df['co2_reduction'] - y_bar)**2)
+RSS   = np.sum((df['co2_reduction'] - y_hat)**2)
+R2    = 1 - RSS / TSS
+RSE   = np.sqrt(RSS / (n - 2))
+F     = res.fvalue
+
+acc_df = pd.DataFrame({
+    'Quantity': ['Residual standard error', 'R²', 'F-statistic'],
+    'Value':    [f'{RSE:.2f}', f'{R2:.3f}', f'{F:.1f}']
+})
+print(acc_df.to_string(index=False))
+```
+
+```{python}
+#| echo: false
+rng2 = np.random.default_rng(1)
+idx2 = rng2.choice(n, 50, replace=False)
 
 fig, axes = plt.subplots(1, 2, figsize=(fig_size_x, fig_size_y))
 
-# Left: residuals plot
-axes[0].scatter(observed_time, observed_population, s=60, c='red', alpha=0.7)
-axes[0].plot(time, b0 + b1 * time, 'steelblue', linewidth=2)
-for xi, yi in zip(observed_time, observed_population):
-    axes[0].plot([xi, xi], [yi, b0 + b1 * xi], 'g--', linewidth=1)
-axes[0].set_xlabel('Time (years)')
-axes[0].set_ylabel('Population')
-axes[0].set_title(f'Fit   |   RSE = {RSE:.1f}')
+# Left: fit with residuals
+axes[0].scatter(df['process'], df['co2_reduction'], s=15, alpha=0.4, color='steelblue')
+axes[0].plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2)
+for ix in idx2:
+    xi = df['process'].iloc[ix]; yi = df['co2_reduction'].iloc[ix]
+    axes[0].plot([xi, xi], [yi, b0 + b1 * xi], color='tomato', linewidth=0.8)
+axes[0].set_xlabel('Process upgrade spending ($K)')
+axes[0].set_ylabel('CO₂ reduction (ktCO₂e)')
+axes[0].set_title(f'Fit  |  RSE = {RSE:.2f}')
 axes[0].grid(True, alpha=0.3)
-axes[0].set_xlim(0, 20)
-axes[0].set_ylim(0, 600)
 
 # Right: residuals vs fitted
-axes[1].scatter(y_hat, observed_population - y_hat, s=60, c='steelblue', alpha=0.7)
+axes[1].scatter(y_hat, df['co2_reduction'] - y_hat, s=15, alpha=0.5, color='steelblue')
 axes[1].axhline(0, color='gray', linewidth=1, linestyle='--')
 axes[1].set_xlabel('Fitted values $\\hat{y}_i$')
-axes[1].set_ylabel('Residuals $y_i - \\hat{y}_i$')
-axes[1].set_title(f'Residuals vs Fitted   |   $R^2$ = {R2:.2f}')
+axes[1].set_ylabel('Residuals $e_i$')
+axes[1].set_title(f'Residuals vs Fitted  |  $R^2$ = {R2:.3f}')
 axes[1].grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
+
+::: {.callout-tip}
+## Check-in
+
+For the GreenAbate SLR of `co2_reduction` on `process`:
+
+1. The $R^2$ is approximately 0.61. How would you interpret this in plain language?
+2. What does the residuals vs fitted plot suggest about the model fit?
+3. Looking at the three scatter plots from earlier, would you expect the SLR of `co2_reduction` on `efficiency` to have a higher or lower $R^2$ than the one on `process`?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+
+1. An $R^2$ of 0.61 means that approximately 61% of the variability in CO₂ reductions across firms can be explained by variation in process upgrade spending alone.
+
+2. The residuals vs fitted plot shows residuals roughly centered around zero with no strong pattern — a good sign. However, the spread is substantial, indicating that `process` alone does not fully account for CO₂ reductions. Information in `efficiency` and `offsets` is not yet being used.
+
+3. From the scatter plots, `efficiency` spending shows a weaker linear association with CO₂ reductions than `process` does, so we would expect its SLR $R^2$ to be lower than 0.61.
+:::
 
 ## Recap
 
