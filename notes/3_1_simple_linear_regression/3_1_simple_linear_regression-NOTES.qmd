@@ -1,6 +1,7 @@
 ---
 title: Simple linear regression
-jupyter: eds232-env                                                       
+jupyter: eds232-env     
+echo: false
 ---
 
 ```{python}
@@ -52,13 +53,15 @@ df = pd.DataFrame({
 })
 ```
 
+[📊 Slides](3_1_simple_linear_regression-SLIDES.qmd) / [📊 Blank slides]()
+
 In this lesson we introduce:
 
-- The simple linear regression (SLR) model and its assumptions
-- How the model coefficients are estimated (least squares)
-- How to assess the accuracy of the coefficient estimates (standard errors, confidence intervals)
-- How to test whether a relationship between $X$ and $Y$ exists (hypothesis testing, $t$-statistic, $p$-values)
-- How to assess overall model accuracy (RSE and $R^2$)
+- The simple linear regression (SLR) model
+- Estimating coefficients with least squares
+- Standard errors and confidence intervals
+- Hypothesis testing: $t$-statistic and $p$-values
+- Assessing model accuracy: RSE and $R^2$
 
 These notes are based on chapter 3.1 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The **example data is synthetic** and was generated with the aid of Claude Code for the purpose of this lesson based on the data in ISLP used in Figure 2.1.
 
@@ -82,7 +85,7 @@ We do not need to answer all of these at once. We can select the questions that 
 A research consortium tracks **200 manufacturing firms** across different industries and regions. For each firm they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:
 
 - **`process`** — investment in cleaner production processes (\$K/year)
-- **`efficiency`** — energy efficiency upgrades (\$K/year)
+- **`efficiency`** — investment in energy efficiency upgrades (\$K/year)
 - **`offsets`** — carbon offset purchases (\$K/year)
 - **`co2_reduction`** — annual CO₂ emissions reduced (thousand metric tons, ktCO₂e)
 
@@ -139,11 +142,9 @@ $$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x = \hat{f}(x).$$
 
 Remember the "hat" notation ($\hat{\ }$) throughout these notes indicates an **estimated** quantity, not the true, unknown population value.
 
+For the GreenAbate dataset, using `process` as the sole predictor, a linear model will model CO₂ reductions as
 
-
-For the GreenAbate dataset, using `process` as the sole predictor, SLR models CO₂ reductions as
-
-$$\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}$$
+$$\texttt{co2_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}$$
 
 ```{python}
 model_proc = LinearRegression().fit(df[['process']], df['co2_reduction'])
@@ -190,14 +191,14 @@ Given $n$ training observations $(x_1, y_1), \ldots, (x_n, y_n)$, we want to fin
 
 In our previous lesson we had talked about the **residual** for observation $i$ being the difference between the observed response and the predicted response:
 
-$$y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i.$$
+$$e_i y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i.$$
 
 The **residual sum of squares (RSS)** totals the squared residuals across all observations:
 
 $$RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2.$$
 
 
-The **least squares** approach to fit the regression line chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to **minimize** the RSS. The residuals are shown as vertical segments below:
+The **least squares approach** to fit the regression line chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to **minimize** the RSS. The residuals are shown as vertical segments below:
 
 ```{python}
 #| label: residuals

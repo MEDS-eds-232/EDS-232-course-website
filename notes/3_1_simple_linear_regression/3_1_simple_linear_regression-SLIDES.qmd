@@ -104,20 +104,20 @@ RSE   = np.sqrt(RSS / (n - 2))
 
 <hr>
 
-::: {.body-text-m}
 A research consortium tracks **200 manufacturing firms**. For each firm, they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:
-:::
 
 <br>
 
 ::: {.body-text-m}
 - **`process`** — investment in cleaner production processes (\$K/year)
-- **`efficiency`** — energy efficiency upgrades (\$K/year)
+- **`efficiency`** — investment in energy efficiency upgrades (\$K/year)
 - **`offsets`** — carbon offset purchases (\$K/year)
 - **`co2_reduction`** — annual CO₂ emissions reduced (ktCO₂e/year)
 :::
 
 <br>
+
+The researchers want to understand:
 
 ::: {.center-text .body-text-m .teal-text}
 *Do these investments actually drive emissions reductions, and if so, by how much?*
@@ -127,7 +127,7 @@ A research consortium tracks **200 manufacturing firms**. For each firm, they re
 
 ## {#greenabate-plots data-menu-title="GreenAbate: data overview"}
 
-[CO₂ reduction vs. each abatement channel]{.slide-title}
+[CO₂ reduction vs. each predictor]{.slide-title}
 
 <hr>
 
@@ -159,6 +159,12 @@ plt.close()
 *Synthetic data generated for educational purposes only*
 :::
 
+. . .
+
+`process` spending: strongest linear association with CO₂ reductions. We will use this predictor as our variable today and go back to the others in the next lesson.
+
+
+
 ---
 
 ## {#section-slr data-menu-title="# Simple linear regression #" background="#047C90"}
@@ -182,8 +188,8 @@ $$Y \approx \beta_0 + \beta_1 X$$
 . . .
 
 ::: {.body-text-m}
-- $\beta_0$ — **intercept**: expected value of $Y$ when $X = 0$
-- $\beta_1$ — **slope**: average change in $Y$ for a one-unit increase in $X$
+- $\beta_0 =$ **$y$-intercept**: expected value of $Y$ when $X = 0$
+- $\beta_1 =$ **slope**: average change in $Y$ for a one-unit increase in $X$
 :::
 
 . . .
@@ -194,21 +200,17 @@ Since $\beta_0$ and $\beta_1$ are unknown, we **estimate** them from data:
 
 $$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x = \hat{f}(x)$$
 
-::: {.body-text-s .teal-text .center-text}
-The $\hat{\cdot}$ notation always denotes an *estimated* quantity.
-:::
-
 ---
 
 ## {#slr-greenabate data-menu-title="SLR: fitted line"}
 
-[Fitting SLR to the GreenAbate data]{.slide-title}
+[Using a linear model for our data]{.slide-title}
 
 <hr>
 
-Using `process` as the sole predictor:
+Using `process` as the sole predictor, a linear model for our data would assume this functional form:
 
-$$\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}$$
+$$\texttt{co2_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}$$
 
 ```{python}
 #| echo: false
@@ -228,16 +230,12 @@ plt.show()
 plt.close()
 ```
 
----
 
-## {#checkin-slr data-menu-title="Check-in: coefficients" background="#053660"}
+**Check-in:** 
 
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">In the context of the GreenAbate problem:</p>
-<p class="custom-subtitle3">What does $\hat{\beta}_0$ represent? What does $\hat{\beta}_1$ represent?</p>
-<p class="custom-subtitle3">If a firm spends \$150K on process upgrades, what is the predicted CO₂ reduction?</p>
-</div>
+- How would you interpret the value of $\hat{\beta}_0$? 
+- What about what does $\hat{\beta}_1$ represent? 
+- If a firm spends \$150K on process upgrades, how would you calcualte the predicted CO₂ reduction?
 
 ---
 
@@ -255,6 +253,10 @@ plt.close()
 
 <hr>
 
+Given $n$ training observations $(x_1, y_1), \ldots, (x_n, y_n)$, we want to find $\hat{\beta}_0$ and $\hat{\beta}_1$ such that the line $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x$ is as close as possible to the observed data.
+
+. . .
+
 The **residual** for observation $i$ is the difference between observed and predicted:
 
 $$e_i = y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i$$
@@ -263,21 +265,21 @@ $$e_i = y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i$$
 
 The **residual sum of squares (RSS)** totals all squared residuals:
 
-$$RSS = \sum_{i=1}^{n} e_i^2 = \sum_{i=1}^{n}(y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2$$
+$$RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2.$$
 
 . . .
 
 <br>
 
 ::: {.center-text .body-text-m .teal-text}
-The **least squares** approach chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to **minimize** the RSS.
+The **least squares** approach to fit the regression line chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to **minimize** the RSS.
 :::
 
 ---
 
 ## {#residuals-plot data-menu-title="Residuals: visual"}
 
-[Residuals as vertical distances to the fitted line]{.slide-title}
+[Residuals can be visualized as the vertical distance to the fitted line]{.slide-title}
 
 <hr>
 
@@ -292,7 +294,7 @@ plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5, zorder=3, label='Fitted 
 
 for i, (xi, yi) in enumerate(zip(df['process'], df['co2_reduction'])):
     yi_hat = b0 + b1 * xi
-    lbl = 'Residual $e_i$' if i == 0 else None
+    lbl = 'Residual $e_i = y_i - \\hat{y}_i$' if i == 0 else None
     plt.plot([xi, xi], [yi, yi_hat], color='tomato', linewidth=0.6, alpha=0.6, label=lbl, zorder=1)
 
 plt.xlabel('Process upgrade spending ($K)')
@@ -312,9 +314,13 @@ plt.close()
 
 <hr>
 
-Minimizing the RSS gives closed-form expressions for the coefficients:
+Minimizing the RSS using calculus gives the following formulas:
+
+<br>
 
 $$\hat{\beta}_1 = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n}(x_i - \bar{x})^2}$$
+
+<br>
 
 $$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
 
@@ -322,13 +328,9 @@ $$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
 
 <br>
 
-::: {.body-text-m}
-Two important points:
+- The estimates depend entirely on the training data: if you feed the model different data, you will get different estimates. This is the source of estimation uncertainty.
 
-1. The estimates depend entirely on the training data — different data, different estimates. This is the source of estimation uncertainty.
-
-2. In practice, **the computer computes these** for you.
-:::
+- In practice, **the computer computes these** for you.
 
 ---
 
@@ -346,29 +348,28 @@ Two important points:
 
 <hr>
 
-::: {.body-text-m}
-The true data-generating process is $Y = \beta_0 + \beta_1 X + \epsilon$. The **standard error** quantifies how far $\hat{\beta}$ is from the true $\beta$ on average.
-:::
+Our true function describing the relationship between predictor and response is given by $f(X) = \beta_0 + \beta_1 X$. Our observed data is described by:
+
+$$Y = f(X) + \epsilon = \beta_0 + \beta_1 X + \epsilon,$$
+
+The **standard error** quantifies how far $\hat{\beta}_i$ is from the true $\beta_i$ on average.
+
+The standard error for the slope $\hat{\beta}_1$ is:
 
 $$SE(\hat{\beta}_1)^2 = \frac{\sigma^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2}$$
+
+
+The standard error of the $y$-intercept $\hat{\beta}_0$ is:
 
 $$SE(\hat{\beta}_0)^2 = \sigma^2 \left[\frac{1}{n} + \frac{\bar{x}^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2}\right]$$
 
 . . .
 
 ::: {.body-text-s}
-where $\sigma^2 = \text{Var}(\epsilon)$ is the error variance (unknown in practice — estimated from the data).
+$\sigma^2 = \text{Var}(\epsilon)$ is the error variance (unknown in practice — estimated from the data).
 :::
 
----
-
-## {#checkin-se data-menu-title="Check-in: standard errors" background="#053660"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">How does $SE(\hat{\beta}_1)$ change as the $x$ values become more spread out?</p>
-<p class="custom-subtitle3">Does this make intuitive sense?</p>
-</div>
+**Check-in:** In these formulas, what do $n$, $x_i$, $\bar{x}$ represent?
 
 ---
 
