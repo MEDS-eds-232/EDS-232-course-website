@@ -202,202 +202,235 @@
     ]
   },
   {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html",
-    "title": "Learning from data",
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#title-slide",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#title-slide",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "📊 Slides\nIn this lesson we introduce:\nThese notes are based on chapter 2.1 of the book An Introduction to Statistical Learning with Applications in Python (James et al., 2023).",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
+    "text": "EDS 232\n\nLesson 2\nLearning from data"
   },
   {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#investigating-elephant-seal-population",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#investigating-elephant-seal-population",
-    "title": "Learning from data",
-    "section": "Investigating elephant seal population",
-    "text": "Investigating elephant seal population\nAmanda is a marine scientist investigating how protected areas affect the population of elephant seals in California. Specifically, she wants to understand: how does elephant seal population change in a protected rookery that has just been protected?\n\n\n\n(Northern Elephant Seals (M. angustirostris) at sunrise early light at Piedras Blancas, San Simeon, CA 03 Feb 2012. Photo by Mike Baird.\n\n\nShe identifies the predictor variable as time since the rookery was protected and the response variable as elephant seal population (since elephant seal population responds on time).\n\n\n\n\n\n\n\n\n\n\nAn ideal function \\(f\\) exists somewhere, we just can’t access it\nWhat if Amanda was given the true, real relationship between time and population?\nIn mathematical terms, this would mean Amanda would have a function \\(f\\) such that\n\\[f(\\text{time since protection}) = \\text{true population}.\\]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\n\nWhat does \\(f(0)\\) represent? What does \\(f(5)=100\\) mean?\nWhat could Amanda do if she had this function \\(f\\)?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\nShe could understand whether and how population and time are related: is there no relation, does it increase, decrease, varies, etc?\nShe could also understand the mathematical form of this relationship: for example, is it linear? These are examples of using the function \\(f\\) for inference.\nShe could also use the function \\(f\\) to know the elephant seal population in the future, i.e. using the function for prediction. In addtion, she could probably save resources spent in going out into the field for data collection.\n\n\n\n\n\n\nOur next best option is to estimate \\(f\\) using data\nClearly Amanda has no access to this true, ideal function! So her next best option is to try to estimate \\(f\\) using data.\nFortunately, she found some long-term ecological data that measures the elephant seal population since the protection for the rookery was established:\n\n\n\n\n\n\n\n\n\nThese are the observed values for the response variable.\n\n\n\n\n\n\nCheck-in\n\n\n\nAre the observed values the “true values” for the response variable?\n\n\nError can be introduced during measurement. In this case we have\n\\[f(\\text{time}) = \\text{true population} = \\text{observed population} + \\text{error}\\]\n\n\n\n\n\n\n\n\n\nWith these observed population values at a given time, Amanda can try to estimate the real function \\(f\\) with another function \\(\\hat{f}\\). Some estimates of \\(f\\) are shown in the graph below.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat considerations can Amanda take into account when choosing an estimate \\(\\hat{f}\\)?\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\nMany! Preliminary understanding of the data, the application (prediction or inference?), volume of available data, minimizing error, even computing power. Selecting any \\(\\hat{f}\\) comes with tradeoffs!",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#abstract-setup",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#abstract-setup",
-    "title": "Learning from data",
-    "section": "Abstract setup",
-    "text": "Abstract setup\nRoughly, this is the setup in which we will be working in. Let’s see it more abstractly:\nWe have a set of \\(p\\) predictors \\(X_1, ..., X_p\\) and a dependent variable \\(Y\\).\nWe assume there is a relationship between \\(Y\\) and \\(X = (X_1, ..., X_p)\\) that can be written as \\[Y = f(X) + \\epsilon.\\]\nHere \\(f\\) is some fixed but unknown function of the predictors \\(X_1, . . ., X_p\\) and \\(\\epsilon\\) represents an error term (independent of \\(X\\) and with mean zero).\nOur objective is to estimate \\(f(X)\\) well enough with another function \\(\\hat{f}(X)\\).\n\nWhy bother to estimate \\(f\\)?\n\nDo inference: use \\(\\hat{f}\\) to understand which predictors are associated with the response and understand the form of this relationship.\nDo predictions: this means calculating \\(\\hat{f}(X) = \\hat{Y}\\) to predict what the value of \\(Y\\) will be with at a new input \\(X\\).\n\nDepending whether our goal is prediction, inference, or a combination of the two, we may select different methods for estimating \\(f\\).\nGenerally:\n\nmodels for \\(f\\) that are interpretable enough to allow inference may not be have as accurate prediction results as other approaches.\nmodels for \\(f\\) that can give excellent predictions, may not be as interpretable and make inference more challenging.\n\nThere’s a tradeoff.\nGenerally, machine learning may prioritize predictions over interpretability (we want the best prediction, even if we got it out of a black box), while statistical modeling may prioritize interpretability over prediction.\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat are some problems or scenarios where inference may be more important than prediction? What about an problems or scenarios where prediction is the priority?\n\n\n\n\nHow do we estimate \\(f\\)?\nWe start with a set of \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}, \\]\nwhere\n\n\\(x_i\\) = a vector with with the predictor information, and\n\\(y_i\\) = the response variable for the \\(i\\)-th observation.\n\nThese data points are the training set or training data because we will use them to train (or fit) our method and obtain an estimate \\(\\hat{f}\\) of the “true” function \\(f\\).\nOur goal is to apply methods to the training data to estimate the unknown function \\(f\\) that links predictors with the response.\nThe “learning” part in machine learning is precisely the process of adjusting \\(\\hat{f}\\) to minimize error on the training data.\n\n\nNotation\nOur training set has \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}.\\]\nIf we have \\(p\\) predictors, then each \\(x_i\\) is a vector of the form: \\[x_i = (x_{i1}, ..., x_{ip}).\\] The response variable \\(y_i\\) is just a single number or category.\nFor example, for our previous data we would transfor the data table into the corresponding notation as shown below.\n\n\n\n\n\n\nObs.\nTime (Predictor)\nPopulation (Response)\n\n\n\n\n1\n2\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\n\n\n\\((x_1,y_1) = (2,53)\\)\n\\(\\vdots\\)\n\\((x_5,y_5) = (10,353)\\)\n\\(\\vdots\\)\n\\((x_9,y_9) = (18,473)\\)\n\n\nIf we were to add average annual sea surface temperature (SST) as a second predictor variable, then our notation would update accordingly:\n\n\n\n\n\nObs.\nTime (Predictor 1)\nSST (Predictor 2)\nPopulation (Response)\n\n\n\n\n1\n2\n17.05\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n20.86\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n23.27\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (2, 17.05)\\)\n\\(y_1 = 53\\)\n\\(\\vdots\\)\n\\(x_5 = (x_{5,1}, x_{5,2}) = (10, 20.86)\\)\n\\(y_5 = 353\\)\n\\(\\vdots\\)\n\\(x_9 = (x_{9,1}, x_{9,2}) = (18, 23.27)\\)\n\\(y_9 = 473\\)",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#parametric-methods",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#parametric-methods",
-    "title": "Learning from data",
-    "section": "Parametric methods",
-    "text": "Parametric methods\nBroadly, most methods for estimating \\(f\\) can be characterized as parametric or non-parametric.\nParametric methods estimate \\(f\\) in two steps:\n\nMake an assumption about the functional form or shape of \\(f\\).\nUse the training data to train or fit the model and get those parameters that will define the estimate \\(\\hat{f}\\).\n\nConsiderations:\n\nMay be used with small training sets\nMay be computationally easier to estimate a few parameters\nSimpler functional forms for \\(\\hat{f}\\) can make inference easier\nAssumed functional form for \\(\\hat{f}\\) may be far from true \\(f\\), making predictions inaccurate\nPredictions could not be as good\n\n\nExample\n\nAmanda decides to model the population with a linear model on the predictors \\(X_1 =\\) time and \\(X_2=\\) average annual sea surface temperature (SST). This means she assumes the function\n\n\\[f(\\text{time}, \\text{SST}) = \\text{population}\\]\nhas the form\n\\[ f(x_1, x_2) = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2. \\]\n\nShe trains the model to get an estimate for \\(f\\), by finding parameters \\(\\beta_0, \\beta_1\\), and \\(\\beta_2\\) such that\n\n\\[ \\text{observed data} \\approx \\beta_0 + \\beta_1 \\text{time} + \\beta_2 \\text{SST} .\\]\nThis is great! She only needs to find three numbers to get a model for the population.\n\n\nLinear Model: Population = -1112.46 + 10.10*Time + 64.58*SST",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#non-parametric-methods",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#non-parametric-methods",
-    "title": "Learning from data",
-    "section": "Non-parametric methods",
-    "text": "Non-parametric methods\nNon-parametric methods do not make explicit assumptions about the functional form of \\(f\\). Instead, they seek an estimate of \\(f\\) that gets as close to the training set as possible without being “being too rough or wiggly”.\nConsiderations:\n\nMay be better at prediction\nMay need a lot of data to fit the model\nMay follow errors or noise in the data too closely\nMay be less interpretable than more restrictive models\n\n\nExample\nInstead of assuming a linear form, Amanda uses K-nearest neighbors (KNN) to estimate \\(f(\\text{time}, \\text{SST})\\). For any new combination of time and SST, the model predicts population as the average of the \\(K\\) most similar observations in the training set. No assumptions about the shape of \\(f\\) required.\n\n\n\n\n\n\n\n\n\nNotice the fitted surface is no longer a flat plane, but it bends and curves to follow the data. Amanda did not specify any functional form; the shape of \\(\\hat{f}\\) emerges entirely from the training observations.",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#regression-vs.-classification",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#regression-vs.-classification",
-    "title": "Learning from data",
-    "section": "Regression vs. Classification",
-    "text": "Regression vs. Classification\nVariables can be either:\n\nquantitative: continuous numerical values, or\nqualitative or categorical: values in one of \\(K\\) different classes or categories.\n\nProblems having a quantitative response are regression problems.\nProblems having a qualitative response are classification problems.\nWe tend to select machine learning methods based on whether the response is quantitative or qualitative.\nWhat about the predictors being quantitative or categorical? Not as important, often possible to code qualitative predictors before the analysis.\n\nExample\nAmanda wants to predict the health status of individual adult seals. A veterinarian has assessed a sample of seals and labeled each one as healthy, malnourished, or injured. Amanda wants to train a classifier using weight and length as predictors:\n\\[f(\\text{weight, length}) = \\text{health status} \\in \\{\\text{healthy, malnourished, injured}\\}.\\]\nHer labeled training data looks like this:\n\n\n\n\n\n\n\n\n\n\n\nObs.\nLength (Predictor 1)\nWeight (Predictor 2)\nHealth status (Response)\n\n\n\n\n1\n173.58\n200.14\nhealthy\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n44\n157.06\n122.96\nmalnourished\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n90\n163.48\n164.98\ninjured\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (173.58 ,200.14)\\)\n\\(y_1 =\\) healthy\n\\(\\vdots\\)\n\\(x_{44} = (x_{44,1}, x_{44,2}) = (157.06, 122.96)\\)\n\\(y_{44} =\\) malnourished\n\\(\\vdots\\)\n\\(x_{90} = (x_{90,1}, x_{90,2}) = (163.48, 164.98)\\)\n\\(y_{90} =\\) injured\n\n\nShe can use this data to train a classifier, and then use it to predict the health status of new, unlabeled seals given their weight and length.",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#unsupervised-vs.-supervised-learning",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#unsupervised-vs.-supervised-learning",
-    "title": "Learning from data",
-    "section": "Unsupervised vs. Supervised Learning",
-    "text": "Unsupervised vs. Supervised Learning\nSupervised learning: each observation has predictors associated to a response variable: \\[\\text{training set} = \\{(x_1, y_1), ..., (x_n, y_n)\\}\\]\nwhere each \\(x_i = (x_{i1}, ..., x_{ip})\\) is a vector with \\(p\\) predictors and \\(y_i\\) is the response to \\(x_i\\).\nUnsupervised learning: each observation only has features, no response variable.\nOur training set only has observations of \\(p\\) different features: \\[ \\text{training set} = \\{ x_1, ..., x_n\\},\\]\nwhere each \\(x_i = (x_{i1}, ..., x_{ip})\\) is a vector with \\(p\\) features. There’s no reponse variable \\(Y\\).\nIn unsupervised learning problems, we seek to understand the relationships between the variables or between the observations.\n\nExample\nAmanda records dive depth and dive duration for a large number of seals, but has no prior labels or categories in mind. She wants to know: are there distinct foraging strategies among these seals? Her data looks like this:\n\n\n\n\n\nObs.\nDepth (Feature 1)\nDuration (Feature 2)\n\n\n\n\n1\n585.29\n39.39\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n23\n108.23\n9.52\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n41\n324.37\n23.2\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (585.29, 39.39)\\)\n\\(\\vdots\\)\n\\(x_{23} = (x_{23,1}, x_{23,2}) = (108.23, 9.52)\\)\n\\(\\vdots\\)\n\\(x_{41} = (x_{41,1}, x_{41,2}) = (324.37, 23.2)\\)\n\n\nIn this case, there is no response variable \\(y\\), Amanda lets the algorithm find structure in the data on its own.\n\n\n\n\n\n\n\n\n\nThe top plot shows what Amanda starts with: just measurements, no categories. The bottom plot shows the structure the algorithm uncovers, which Amanda interprets as distinct foraging strategies.\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat is the key difference between the classification and clustering examples above?",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#recap",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#recap",
-    "title": "Learning from data",
-    "section": "Recap",
-    "text": "Recap\nWhat we covered today:\n\nThe idea of estimating a function \\(f\\) using observed data\nInference and prediction\nTraining set = observations used to fit/train a model\nPredictors + response variable & their math notation\nParametric vs. non parametric\nRegression vs. classification\nSupervised vs. unsupervised learning\n\nNext class: assessing model accuracy",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html",
-    "title": "What is machine learning?",
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#in-this-lesson",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#in-this-lesson",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "📊 Slides\nIn this lesson we introduce:",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "What is machine learning?"
-    ]
+    "text": "In this lesson\n\n\n\nEstimating a function \\(f\\) from observed data\nInference vs. prediction\nParametric vs. non-parametric methods\nRegression vs. classification\nSupervised vs. unsupervised learning"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#what-is-machine-learning",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#what-is-machine-learning",
-    "title": "What is machine learning?",
-    "section": "What is machine learning?",
-    "text": "What is machine learning?\nYou have probably heard the term machine learning a lot recently. But what does it actually mean?\nMachine learning (ML) is a branch of computer science focused on building systems that can learn from data to make predictions or decisions, without being explicitly programmed with rules.\nThe key idea is: instead of a human writing down rules, an algorithm discovers the rules from examples.\nTo make this concrete, consider two approaches to the same problem: predicting whether a kelp forest has been degraded based on water temperature and sea urchin density.\nTraditional programming approach:\n\nIf temperature is greater than 18°C and urchin density is greater than 50/m², then the kelp forest will be degraded\n\nA human expert would write these rules by hand, based on their knowledge of the system.\nMachine learning approach:\n\nGive the algorithm many examples of (temperature, urchin density) and how whether these kelp forests are degraded or not. Then let the algorithm figure out the rules itself.\n\nThe rules are learned from data, not written by hand.\n\n\n\n\n\n\nCheck-in\n\n\n\nThink of a task in environmental science that would be very hard to solve with hand-written rules, but where you might have a lot of labeled data. What are the inputs and outputs?\n\n\nAt its core, a machine learning algorithm does the following:\n\nTake a set of training examples.\nFind a function \\(\\hat{f}\\) that maps inputs to outputs well on those examples.\nUse \\(\\hat{f}\\) to make predictions on new, unseen data.\n\n“Learning” simply means adjusting \\(\\hat{f}\\) to minimize error on the training data.",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "What is machine learning?"
-    ]
-  },
-  {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#ai-machine-learning-and-deep-learning",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#ai-machine-learning-and-deep-learning",
-    "title": "What is machine learning?",
-    "section": "AI, machine learning, and deep learning",
-    "text": "AI, machine learning, and deep learning\nIn addition to machine learning, you may have also heard about artificial intelligence or deep learning. These are related terms:\nArtificial intelligence (AI) is the broadest term. It refers to any technique that enables machines to mimic human intelligence. This including rule-based systems, search algorithms, and more.\nMachine learning is a subset of AI: systems that learn from data rather than from hand-coded rules.\nDeep learning is a subset of machine learning: methods based on artificial neural networks with many layers. Deep learning is behind many recent breakthroughs, such as image recognition and large language models. It is one family of ML methods.\n\n\n\nHierarcky of Modern Intelligence: AI, Machine Learning, and Deep Learning. Source: PromptEngineering.org\n\n\nFor this course, we will focus on machine learning, primarily the classical methods (regression, support vector machines, decision trees, clustering).",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "What is machine learning?"
-    ]
-  },
-  {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#machine-learning-in-environmental-science",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#machine-learning-in-environmental-science",
-    "title": "What is machine learning?",
-    "section": "Machine learning in environmental science",
-    "text": "Machine learning in environmental science\nML is increasingly used across environmental disciplines. A few high-profile examples:\nSpecies distribution modeling. Algorithms like MaxEnt and random forests use occurrence records and environmental covariates (temperature, precipitation, land cover) to predict where species are likely to be found \n\nBird detection from acoustics.Deep learning models are trained on North American and European bird species calls, enabling large-scale passive acoustic monitoring that would be impossible to do by hand. \nHigh-resolution permafrost mapping. Deep learning methods trained on high-resolution commercial satellite imagery have been used to map and track permafrost covered in the Arctic at sub-meter scale. [C. Witharana et al., 2021]",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "What is machine learning?"
-    ]
-  },
-  {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#limitations-and-considerations",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#limitations-and-considerations",
-    "title": "What is machine learning?",
-    "section": "Limitations and considerations",
-    "text": "Limitations and considerations\nML is a powerful tool, but it comes with important caveats that are especially relevant in environmental science:\n\nData hungry. Many ML methods need large amounts of training data, which can be scarce for rare species or remote locations.\nExtrapolation risk. A model trained on data from one region or time period may perform poorly when applied elsewhere or under novel conditions.\nInterpretability. Flexible models may predict well but be hard to interpret. This is a problem if you need to explain why something is changing, not just that it is.\nBias in training data. If the data used for training is unrepresentative the model will inherit those biases.\n\nThese are not reasons to avoid ML, they are reasons to use it carefully!\n\n\n\n\n\n\nCheck-in\n\n\n\nConstruct a scenario in which developing and using a machine learning model with one or more of these limitations would be particularly consequential.",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "What is machine learning?"
-    ]
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Welcome!",
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#section-learning-from-data",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#section-learning-from-data",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Welcome to the course materials for EDS 232 - Machine Learning for Environmental Science! In this website you will find all the materials for the Spring 2026 term. This course is part of the UCSB Masters in Environmental Data Science.\n\n\nMachine learning can help process big/complex data and extract knowledge. It forms one of the foundations in data science. This course provides a broad introduction to machine learning and statistical pattern recognition. Topics include supervised learning (decision tree, random forest, support vector machines, neural networks) and unsupervised learning (clustering, dimensionality reduction, deep learning). Problems and exercises are framed within environmental science applications. The course will be taught using Python.\n\n\n\n\n\n\nCarmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm - 3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 11 am - 12 pm @ Bren Hall 3418\n\n\n\n\n\n\nClick here to see the syllabus.\n\n\n\nThe following is our tentative calendar. The course content and calendar may be subject to change as the course progresses.\n\n\n\n\n📝 If you have suggestions on how to correct, improve, or expand these course materials, please feel free to email the course instructor at c_galazgarcia@ucsb.edu or file a GitHub issue.\n🌟 If these materials have been useful to you, consider adding a star to the project’s repository!"
+    "text": "A guiding example"
   },
   {
-    "objectID": "index.html#course-description",
-    "href": "index.html#course-description",
-    "title": "Welcome!",
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#researching-elephant-seals",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#researching-elephant-seals",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Machine learning can help process big/complex data and extract knowledge. It forms one of the foundations in data science. This course provides a broad introduction to machine learning and statistical pattern recognition. Topics include supervised learning (decision tree, random forest, support vector machines, neural networks) and unsupervised learning (clustering, dimensionality reduction, deep learning). Problems and exercises are framed within environmental science applications. The course will be taught using Python."
+    "text": "Researching elephant seals\n\n\nAmanda is a marine scientist investigating how protected areas affect elephant seal populations in California. She wants to understand:\n\n\n\nHow does elephant seal population change\nin a rookery that has just been protected?"
   },
   {
-    "objectID": "index.html#teaching-team",
-    "href": "index.html#teaching-team",
-    "title": "Welcome!",
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#predictor-response",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#predictor-response",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Carmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm - 3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 11 am - 12 pm @ Bren Hall 3418"
+    "text": "Amanda identifies the following variables\n\n\n\nPredictor variable: time since the rookery was protected\nResponse variable: elephant seal population"
   },
   {
-    "objectID": "index.html#syllabus",
-    "href": "index.html#syllabus",
-    "title": "Welcome!",
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#true-function",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#true-function",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Click here to see the syllabus."
+    "text": "An ideal function \\(f\\) exists somewhere…\n\n\nWhat if Amanda had the true relationship between time and population?\n\n\nIn mathematical terms this means having a function \\(f\\) such that"
   },
   {
-    "objectID": "index.html#calendar",
-    "href": "index.html#calendar",
-    "title": "Welcome!",
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#checkin-1",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#checkin-1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "The following is our tentative calendar. The course content and calendar may be subject to change as the course progresses."
+    "text": "Check-in\n\n\\[f(\\text{time since protection}) = \\text{true population}\\]\n\nWhat information could Amanda acquire if she had this function \\(f\\)?"
   },
   {
-    "objectID": "index.html#contribute",
-    "href": "index.html#contribute",
-    "title": "Welcome!",
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#observed-data",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#observed-data",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "📝 If you have suggestions on how to correct, improve, or expand these course materials, please feel free to email the course instructor at c_galazgarcia@ucsb.edu or file a GitHub issue.\n🌟 If these materials have been useful to you, consider adding a star to the project’s repository!"
+    "text": "…but we have to estimate \\(f\\) from data\n\n\nAmanda has no access to the true \\(f\\). Her next best option:\n\n\nestimate \\(f\\) using observed data."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#observation-error",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#observation-error",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Observed values \\(\\neq\\) true values\n\n\nError is introduced during measurement:"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#estimates-f",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#estimates-f",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Many possible estimates for \\(f\\)\n\nWith these observed population values at a given time, Amanda can try to\n\nestimate the real function \\(f\\) with another function"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#estimates-f-linear",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#estimates-f-linear",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Many possible estimates for \\(f\\)\n\nWith these observed population values at a given time, Amanda can try to\n\nestimate the real function \\(f\\) with another function \\(\\hat{f}\\)."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#estimates-f-logistic",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#estimates-f-logistic",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Many possible estimates for \\(f\\)\n\nWith these observed population values at a given time, Amanda can try to\n\nestimate the real function \\(f\\) with another function \\(\\hat{f}\\)."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#estimates-f-poly",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#estimates-f-poly",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Many possible estimates for \\(f\\)\n\nWith these observed population values at a given time, Amanda can try to\n\nestimate the real function \\(f\\) with another function \\(\\hat{f}\\)."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#checkin-estimates",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#checkin-estimates",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Check-in\n\n\nWhat considerations can Amanda take into account\n\n\nwhen choosing an estimate \\(\\hat{f}\\)?"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#section-abstract-setup",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#section-abstract-setup",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "The general framework"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#general-framework",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#general-framework",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "The general framework\n\n\nWe have\n\n\n\nWe assume there is a relationship:\n\n\nwhere \\(f\\) is a fixed but unknown function of the predictors \\(X_1, ..., X_p\\) and \\(\\epsilon\\) is an error term (independent of \\(X\\), mean zero).\n\n\n\n\nOur goal:"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#why-estimate-f",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#why-estimate-f",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Why estimate \\(f\\)?\n\n\n\n1. Inference\n\nUse \\(\\hat{f}\\) to understand which predictors are associated with the response and understand the form of this relationship.\n\n\n\n2. Prediction\n\nCalculate \\(\\hat{Y} = \\hat{f}(X)\\) to predict the value of \\(Y\\) for new inputs \\(X\\).\n\n\n\n\nThe method we choose often depends on whether our goal is inference, prediction, or both.\nInterpretable models may not predict as well, and vice versa."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#checkin-2",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#checkin-2",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Check-in\n\n\nWhat are some problems or scenarios where inference may be more important than prediction?\n\n\nWhat about problems or scenarios where prediction is the priority?"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#training-data",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#training-data",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "The ML approach\n\nWe start with a\n\n\n\n\n\n\n\n\n\n\n“Training” means using these data points to find an estimate \\(\\hat{f}\\).\nThe “learning” in machine learning is precisely adjusting \\(\\hat{f}\\) to minimize error on this data."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#notation-example-1",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#notation-example-1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Example: One variable notation\n\n\nWith one predictor variable (time), Amanda’s data maps to the following vectors:\n\n\n\n\n\n\nObs.\nTime (Predictor)\nPopulation (Response)\n\n\n\n\n1\n2\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#notation-example-2",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#notation-example-2",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Example: Multi-variable notation\n\n\nIf we add average annual sea surface temperature (SST) as a second predictor variable, then each \\(x_i\\) becomes a vector:\n\n\n\n\n\n\nObs.\nTime (Predictor 1)\nSST (Predictor 2)\nPopulation (Response)\n\n\n\n\n1\n2\n17.05\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n20.86\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n23.27\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#section-parametric",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#section-parametric",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Parametric vs. non-parametric methods"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#parametric",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#parametric",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Parametric methods\n\nParametric methods estimate \\(f\\) in two steps:\n\n\nStep 1: Assume a functional form for \\(f\\)\n\ne.g., linear: \\(f(X) = \\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p\\)\n\n\n\nStep 2: Use the training data to fit the model and estimate the parameters\n\ne.g., find \\(\\beta_0, \\beta_1, \\ldots, \\beta_p\\) that best match the observations\n\n\n\n\n\nPros: Works with small datasets · computationally efficient · easier inference\nCons: Assumed form may be far from true \\(f\\) · predictions may suffer"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#parametric-example",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#parametric-example",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Parametric example: linear model\n\n\n\nAmanda decides to model elephant seal population as linear in time and SST:\n\\[f(x_1, x_2) = \\beta_0 + \\beta_1\\, \\text{time} + \\beta_2\\, \\text{SST}\\]\nTraining the model finds \\(\\beta_0, \\beta_1, \\beta_2\\) that best fit the observed data. The graph of the fitted \\(\\hat{f}\\) is a plane.\n\nThe shape of \\(\\hat{f}\\) was decided before seeing the data."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#nonparametric",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#nonparametric",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Non-parametric methods\n\nNon-parametric methods make no assumptions about the functional form of \\(f\\). They seek an estimate that fits the training data without being “too rough or wiggly”.\n\n\n\nPros: More flexible · can capture complex relationships · potentially better predictions\nCons: Needs more data · can follow noise too closely · may be less interpretable"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#nonparametric-example",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#nonparametric-example",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Non-parametric example: K-nearest neighbors\n\n\n\nInstead of assuming a linear form, Amanda uses K-nearest neighbors (KNN).\nFor any new (time, SST) pair, the model predicts population as the average of the \\(K\\) closest training observations.\n\nThe shape of \\(\\hat{f}\\) emerges entirely from the training observations, no functional form was specified."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#section-reg-class",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#section-reg-class",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Regression vs. classification"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#reg-vs-class",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#reg-vs-class",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Regression vs. classification\n\n\nVariables can be:\n\n\nQuantitative: continuous numerical values\nQualitative or categorical: values in one of \\(K\\) classes or categories\n\n\n\n\nRegression problems: have a quantitative response variable\n\nPredict elephant seal population count\n\nClassification problems: have a qualitative response variable\n\nPredict seal health status: healthy / malnourished / injured\n\n\n\n\n\nWe select methods based primarily on the type of the response variable. Predictors can often be coded regardless of type."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#classification-example",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#classification-example",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Classification example\n\nAmanda trains a classifier to predict seal health status from weight and length:\n\\[f(\\text{weight, length}) = \\text{health status} \\in \\{\\text{healthy, malnourished, injured}\\}\\]"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#section-sup-unsup",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#section-sup-unsup",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Supervised vs. unsupervised learning"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#supervised",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#supervised",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Supervised learning\n\n\nEach observation has\n\n\n\n\n\nThe algorithm learns by adjusting \\(\\hat{f}\\) to predict \\(y\\) from \\(x\\) as accurately as possible.\n\nBoth regression and classification are supervised learning problems."
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#unsupervised",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#unsupervised",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Unsupervised learning\n\nEach observation has\n\n\n\n\n\nExample\n\nAmanda records dive depth and duration for many seals, with no labels. She asks: are there distinct foraging strategies among these seals?"
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#recap",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html#recap",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Recap\n\n\n\nWe want to estimate an unknown function \\(f\\) such that \\(Y = f(X) + \\epsilon\\)\nWe estimate \\(f\\) using a training set of observed \\((x_i, y_i)\\) pairs\nInference uses \\(\\hat{f}\\) to understand relationships; prediction uses \\(\\hat{f}\\) to forecast new \\(Y\\)\nParametric methods assume a functional form; non-parametric methods don’t\nRegression = quantitative response; classification = qualitative response\nSupervised = response variable present; unsupervised = no response variable\n\n\n\nNext class: assessing model accuracy"
   },
   {
     "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#title-slide",
@@ -503,6 +536,204 @@
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
     "text": "Check-in\n\n\nConstruct a scenario in which developing and using a machine learning model with one or more of these limitations would be particularly consequential."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome!",
+    "section": "",
+    "text": "Welcome to the course materials for EDS 232 - Machine Learning for Environmental Science! In this website you will find all the materials for the Spring 2026 term. This course is part of the UCSB Masters in Environmental Data Science.\n\n\nMachine learning can help process big/complex data and extract knowledge. It forms one of the foundations in data science. This course provides a broad introduction to machine learning and statistical pattern recognition. Topics include supervised learning (decision tree, random forest, support vector machines, neural networks) and unsupervised learning (clustering, dimensionality reduction, deep learning). Problems and exercises are framed within environmental science applications. The course will be taught using Python.\n\n\n\n\n\n\nCarmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm - 3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 11 am - 12 pm @ Bren Hall 3418\n\n\n\n\n\n\nClick here to see the syllabus.\n\n\n\nThe following is our tentative calendar. The course content and calendar may be subject to change as the course progresses.\n\n\n\n\n📝 If you have suggestions on how to correct, improve, or expand these course materials, please feel free to email the course instructor at c_galazgarcia@ucsb.edu or file a GitHub issue.\n🌟 If these materials have been useful to you, consider adding a star to the project’s repository!"
+  },
+  {
+    "objectID": "index.html#course-description",
+    "href": "index.html#course-description",
+    "title": "Welcome!",
+    "section": "",
+    "text": "Machine learning can help process big/complex data and extract knowledge. It forms one of the foundations in data science. This course provides a broad introduction to machine learning and statistical pattern recognition. Topics include supervised learning (decision tree, random forest, support vector machines, neural networks) and unsupervised learning (clustering, dimensionality reduction, deep learning). Problems and exercises are framed within environmental science applications. The course will be taught using Python."
+  },
+  {
+    "objectID": "index.html#teaching-team",
+    "href": "index.html#teaching-team",
+    "title": "Welcome!",
+    "section": "",
+    "text": "Carmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm - 3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 11 am - 12 pm @ Bren Hall 3418"
+  },
+  {
+    "objectID": "index.html#syllabus",
+    "href": "index.html#syllabus",
+    "title": "Welcome!",
+    "section": "",
+    "text": "Click here to see the syllabus."
+  },
+  {
+    "objectID": "index.html#calendar",
+    "href": "index.html#calendar",
+    "title": "Welcome!",
+    "section": "",
+    "text": "The following is our tentative calendar. The course content and calendar may be subject to change as the course progresses."
+  },
+  {
+    "objectID": "index.html#contribute",
+    "href": "index.html#contribute",
+    "title": "Welcome!",
+    "section": "",
+    "text": "📝 If you have suggestions on how to correct, improve, or expand these course materials, please feel free to email the course instructor at c_galazgarcia@ucsb.edu or file a GitHub issue.\n🌟 If these materials have been useful to you, consider adding a star to the project’s repository!"
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html",
+    "title": "What is machine learning?",
+    "section": "",
+    "text": "📊 Slides\nIn this lesson we introduce:",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "What is machine learning?"
+    ]
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#what-is-machine-learning",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#what-is-machine-learning",
+    "title": "What is machine learning?",
+    "section": "What is machine learning?",
+    "text": "What is machine learning?\nYou have probably heard the term machine learning a lot recently. But what does it actually mean?\nMachine learning (ML) is a branch of computer science focused on building systems that can learn from data to make predictions or decisions, without being explicitly programmed with rules.\nThe key idea is: instead of a human writing down rules, an algorithm discovers the rules from examples.\nTo make this concrete, consider two approaches to the same problem: predicting whether a kelp forest has been degraded based on water temperature and sea urchin density.\nTraditional programming approach:\n\nIf temperature is greater than 18°C and urchin density is greater than 50/m², then the kelp forest will be degraded\n\nA human expert would write these rules by hand, based on their knowledge of the system.\nMachine learning approach:\n\nGive the algorithm many examples of (temperature, urchin density) and how whether these kelp forests are degraded or not. Then let the algorithm figure out the rules itself.\n\nThe rules are learned from data, not written by hand.\n\n\n\n\n\n\nCheck-in\n\n\n\nThink of a task in environmental science that would be very hard to solve with hand-written rules, but where you might have a lot of labeled data. What are the inputs and outputs?\n\n\nAt its core, a machine learning algorithm does the following:\n\nTake a set of training examples.\nFind a function \\(\\hat{f}\\) that maps inputs to outputs well on those examples.\nUse \\(\\hat{f}\\) to make predictions on new, unseen data.\n\n“Learning” simply means adjusting \\(\\hat{f}\\) to minimize error on the training data.",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "What is machine learning?"
+    ]
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#ai-machine-learning-and-deep-learning",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#ai-machine-learning-and-deep-learning",
+    "title": "What is machine learning?",
+    "section": "AI, machine learning, and deep learning",
+    "text": "AI, machine learning, and deep learning\nIn addition to machine learning, you may have also heard about artificial intelligence or deep learning. These are related terms:\nArtificial intelligence (AI) is the broadest term. It refers to any technique that enables machines to mimic human intelligence. This including rule-based systems, search algorithms, and more.\nMachine learning is a subset of AI: systems that learn from data rather than from hand-coded rules.\nDeep learning is a subset of machine learning: methods based on artificial neural networks with many layers. Deep learning is behind many recent breakthroughs, such as image recognition and large language models. It is one family of ML methods.\n\n\n\nHierarcky of Modern Intelligence: AI, Machine Learning, and Deep Learning. Source: PromptEngineering.org\n\n\nFor this course, we will focus on machine learning, primarily the classical methods (regression, support vector machines, decision trees, clustering).",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "What is machine learning?"
+    ]
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#machine-learning-in-environmental-science",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#machine-learning-in-environmental-science",
+    "title": "What is machine learning?",
+    "section": "Machine learning in environmental science",
+    "text": "Machine learning in environmental science\nML is increasingly used across environmental disciplines. A few high-profile examples:\nSpecies distribution modeling. Algorithms like MaxEnt and random forests use occurrence records and environmental covariates (temperature, precipitation, land cover) to predict where species are likely to be found \n\nBird detection from acoustics.Deep learning models are trained on North American and European bird species calls, enabling large-scale passive acoustic monitoring that would be impossible to do by hand. \nHigh-resolution permafrost mapping. Deep learning methods trained on high-resolution commercial satellite imagery have been used to map and track permafrost covered in the Arctic at sub-meter scale. [C. Witharana et al., 2021]",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "What is machine learning?"
+    ]
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#limitations-and-considerations",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#limitations-and-considerations",
+    "title": "What is machine learning?",
+    "section": "Limitations and considerations",
+    "text": "Limitations and considerations\nML is a powerful tool, but it comes with important caveats that are especially relevant in environmental science:\n\nData hungry. Many ML methods need large amounts of training data, which can be scarce for rare species or remote locations.\nExtrapolation risk. A model trained on data from one region or time period may perform poorly when applied elsewhere or under novel conditions.\nInterpretability. Flexible models may predict well but be hard to interpret. This is a problem if you need to explain why something is changing, not just that it is.\nBias in training data. If the data used for training is unrepresentative the model will inherit those biases.\n\nThese are not reasons to avoid ML, they are reasons to use it carefully!\n\n\n\n\n\n\nCheck-in\n\n\n\nConstruct a scenario in which developing and using a machine learning model with one or more of these limitations would be particularly consequential.",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "What is machine learning?"
+    ]
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html",
+    "title": "Learning from data",
+    "section": "",
+    "text": "📊 Slides / 📊 Blank slides\nIn this lesson we introduce:\nThese notes are based on chapter 2.1 of the book An Introduction to Statistical Learning with Applications in Python (James et al., 2023).",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#investigating-elephant-seal-population",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#investigating-elephant-seal-population",
+    "title": "Learning from data",
+    "section": "Investigating elephant seal population",
+    "text": "Investigating elephant seal population\nAmanda is a marine scientist investigating how protected areas affect the population of elephant seals in California. Specifically, she wants to understand: how does elephant seal population change in a protected rookery that has just been protected?\n\n\n\n(Northern Elephant Seals (M. angustirostris) at sunrise early light at Piedras Blancas, San Simeon, CA 03 Feb 2012. Photo by Mike Baird.\n\n\nShe identifies the predictor variable as time since the rookery was protected and the response variable as elephant seal population (since elephant seal population responds on time).\n\n\n\n\n\n\n\n\n\n\nAn ideal function \\(f\\) exists somewhere, we just can’t access it\nWhat if Amanda was given the true, real relationship between time and population?\nIn mathematical terms, this would mean Amanda would have a function \\(f\\) such that\n\\[f(\\text{time since protection}) = \\text{true population}.\\]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\n\nWhat does \\(f(0)\\) represent? What does \\(f(5)=100\\) mean?\nWhat could Amanda do if she had this function \\(f\\)?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\nShe could understand whether and how population and time are related: is there no relation, does it increase, decrease, varies, etc?\nShe could also understand the mathematical form of this relationship: for example, is it linear? These are examples of using the function \\(f\\) for inference.\nShe could also use the function \\(f\\) to know the elephant seal population in the future, i.e. using the function for prediction. In addtion, she could probably save resources spent in going out into the field for data collection.\n\n\n\n\n\n\nOur next best option is to estimate \\(f\\) using data\nClearly Amanda has no access to this true, ideal function! So her next best option is to try to estimate \\(f\\) using data.\nFortunately, she found some long-term ecological data that measures the elephant seal population since the protection for the rookery was established:\n\n\n\n\n\n\n\n\n\nThese are the observed values for the response variable.\n\n\n\n\n\n\nCheck-in\n\n\n\nAre the observed values the “true values” for the response variable?\n\n\nError can be introduced during measurement. In this case we have\n\\[f(\\text{time}) = \\text{true population} = \\text{observed population} + \\text{error}\\]\n\n\n\n\n\n\n\n\n\nWith these observed population values at a given time, Amanda can try to estimate the real function \\(f\\) with another function \\(\\hat{f}\\). Some estimates of \\(f\\) are shown in the graph below.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat considerations can Amanda take into account when choosing an estimate \\(\\hat{f}\\)?\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\nMany! Preliminary understanding of the data, the application (prediction or inference?), volume of available data, minimizing error, even computing power. Selecting any \\(\\hat{f}\\) comes with tradeoffs!",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#abstract-setup",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#abstract-setup",
+    "title": "Learning from data",
+    "section": "Abstract setup",
+    "text": "Abstract setup\nRoughly, this is the setup in which we will be working in. Let’s see it more abstractly:\nWe have a set of \\(p\\) predictors \\(X_1, ..., X_p\\) and a dependent variable \\(Y\\).\nWe assume there is a relationship between \\(Y\\) and \\(X = (X_1, ..., X_p)\\) that can be written as \\[Y = f(X) + \\epsilon.\\]\nHere \\(f\\) is some fixed but unknown function of the predictors \\(X_1, . . ., X_p\\) and \\(\\epsilon\\) represents an error term (independent of \\(X\\) and with mean zero).\nOur objective is to estimate \\(f(X)\\) well enough with another function \\(\\hat{f}(X)\\).\n\nWhy bother to estimate \\(f\\)?\n\nDo inference: use \\(\\hat{f}\\) to understand which predictors are associated with the response and understand the form of this relationship.\nDo predictions: this means calculating \\(\\hat{f}(X) = \\hat{Y}\\) to predict what the value of \\(Y\\) will be with at a new input \\(X\\).\n\nDepending whether our goal is prediction, inference, or a combination of the two, we may select different methods for estimating \\(f\\).\nGenerally:\n\nmodels for \\(f\\) that are interpretable enough to allow inference may not be have as accurate prediction results as other approaches.\nmodels for \\(f\\) that can give excellent predictions, may not be as interpretable and make inference more challenging.\n\nThere’s a tradeoff.\nGenerally, machine learning may prioritize predictions over interpretability (we want the best prediction, even if we got it out of a black box), while statistical modeling may prioritize interpretability over prediction.\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat are some problems or scenarios where inference may be more important than prediction? What about an problems or scenarios where prediction is the priority?\n\n\n\n\nHow do we estimate \\(f\\)?\nWe start with a set of \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}, \\]\nwhere\n\n\\(x_i\\) = a vector with with the predictor information, and\n\\(y_i\\) = the response variable for the \\(i\\)-th observation.\n\nThese data points are the training set or training data because we will use them to train (or fit) our method and obtain an estimate \\(\\hat{f}\\) of the “true” function \\(f\\).\nOur goal is to apply methods to the training data to estimate the unknown function \\(f\\) that links predictors with the response.\nThe “learning” part in machine learning is precisely the process of adjusting \\(\\hat{f}\\) to minimize error on the training data.\n\n\nNotation\nOur training set has \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}.\\]\nIf we have \\(p\\) predictors, then each \\(x_i\\) is a vector of the form: \\[x_i = (x_{i1}, ..., x_{ip}).\\] The response variable \\(y_i\\) is just a single number or category.\nFor example, for our previous data we would transfor the data table into the corresponding notation as shown below.\n\n\n\n\n\n\nObs.\nTime (Predictor)\nPopulation (Response)\n\n\n\n\n1\n2\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\n\n\n\\((x_1,y_1) = (2,53)\\)\n\\(\\vdots\\)\n\\((x_5,y_5) = (10,353)\\)\n\\(\\vdots\\)\n\\((x_9,y_9) = (18,473)\\)\n\n\nIf we were to add average annual sea surface temperature (SST) as a second predictor variable, then our notation would update accordingly:\n\n\n\n\n\nObs.\nTime (Predictor 1)\nSST (Predictor 2)\nPopulation (Response)\n\n\n\n\n1\n2\n17.05\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n20.86\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n23.27\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (2, 17.05)\\)\n\\(y_1 = 53\\)\n\\(\\vdots\\)\n\\(x_5 = (x_{5,1}, x_{5,2}) = (10, 20.86)\\)\n\\(y_5 = 353\\)\n\\(\\vdots\\)\n\\(x_9 = (x_{9,1}, x_{9,2}) = (18, 23.27)\\)\n\\(y_9 = 473\\)",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#parametric-methods",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#parametric-methods",
+    "title": "Learning from data",
+    "section": "Parametric methods",
+    "text": "Parametric methods\nBroadly, most methods for estimating \\(f\\) can be characterized as parametric or non-parametric.\nParametric methods estimate \\(f\\) in two steps:\n\nMake an assumption about the functional form or shape of \\(f\\).\nUse the training data to train or fit the model and get those parameters that will define the estimate \\(\\hat{f}\\).\n\nConsiderations:\n\nMay be used with small training sets\nMay be computationally easier to estimate a few parameters\nSimpler functional forms for \\(\\hat{f}\\) can make inference easier\nAssumed functional form for \\(\\hat{f}\\) may be far from true \\(f\\), making predictions inaccurate\nPredictions could not be as good\n\n\nExample\n\nAmanda decides to model the population with a linear model on the predictors \\(X_1 =\\) time and \\(X_2=\\) average annual sea surface temperature (SST). This means she assumes the function\n\n\\[f(\\text{time}, \\text{SST}) = \\text{population}\\]\nhas the form\n\\[ f(x_1, x_2) = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2. \\]\n\nShe trains the model to get an estimate for \\(f\\), by finding parameters \\(\\beta_0, \\beta_1\\), and \\(\\beta_2\\) such that\n\n\\[ \\text{observed data} \\approx \\beta_0 + \\beta_1 \\text{time} + \\beta_2 \\text{SST} .\\]\nThis is great! She only needs to find three numbers to get a model for the population.\n\n\nLinear Model: Population = -1112.46 + 10.10*Time + 64.58*SST",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#non-parametric-methods",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#non-parametric-methods",
+    "title": "Learning from data",
+    "section": "Non-parametric methods",
+    "text": "Non-parametric methods\nNon-parametric methods do not make explicit assumptions about the functional form of \\(f\\). Instead, they seek an estimate of \\(f\\) that gets as close to the training set as possible without being “being too rough or wiggly”.\nConsiderations:\n\nMay be better at prediction\nMay need a lot of data to fit the model\nMay follow errors or noise in the data too closely\nMay be less interpretable than more restrictive models\n\n\nExample\nInstead of assuming a linear form, Amanda uses K-nearest neighbors (KNN) to estimate \\(f(\\text{time}, \\text{SST})\\). For any new combination of time and SST, the model predicts population as the average of the \\(K\\) most similar observations in the training set. No assumptions about the shape of \\(f\\) required.\n\n\n\n\n\n\n\n\n\nNotice the fitted surface is no longer a flat plane, but it bends and curves to follow the data. Amanda did not specify any functional form; the shape of \\(\\hat{f}\\) emerges entirely from the training observations.",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#regression-vs.-classification",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#regression-vs.-classification",
+    "title": "Learning from data",
+    "section": "Regression vs. Classification",
+    "text": "Regression vs. Classification\nVariables can be either:\n\nquantitative: continuous numerical values, or\nqualitative or categorical: values in one of \\(K\\) different classes or categories.\n\nProblems having a quantitative response are regression problems.\nProblems having a qualitative response are classification problems.\nWe tend to select machine learning methods based on whether the response is quantitative or qualitative.\nWhat about the predictors being quantitative or categorical? Not as important, often possible to code qualitative predictors before the analysis.\n\nExample\nAmanda wants to predict the health status of individual adult seals. A veterinarian has assessed a sample of seals and labeled each one as healthy, malnourished, or injured. Amanda wants to train a classifier using weight and length as predictors:\n\\[f(\\text{weight, length}) = \\text{health status} \\in \\{\\text{healthy, malnourished, injured}\\}.\\]\nHer labeled training data looks like this:\n\n\n\n\n\n\n\n\n\n\n\nObs.\nLength (Predictor 1)\nWeight (Predictor 2)\nHealth status (Response)\n\n\n\n\n1\n173.58\n200.14\nhealthy\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n44\n157.06\n122.96\nmalnourished\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n90\n163.48\n164.98\ninjured\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (173.58 ,200.14)\\)\n\\(y_1 =\\) healthy\n\\(\\vdots\\)\n\\(x_{44} = (x_{44,1}, x_{44,2}) = (157.06, 122.96)\\)\n\\(y_{44} =\\) malnourished\n\\(\\vdots\\)\n\\(x_{90} = (x_{90,1}, x_{90,2}) = (163.48, 164.98)\\)\n\\(y_{90} =\\) injured\n\n\nShe can use this data to train a classifier, and then use it to predict the health status of new, unlabeled seals given their weight and length.",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#unsupervised-vs.-supervised-learning",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#unsupervised-vs.-supervised-learning",
+    "title": "Learning from data",
+    "section": "Unsupervised vs. Supervised Learning",
+    "text": "Unsupervised vs. Supervised Learning\nSupervised learning: each observation has predictors associated to a response variable: \\[\\text{training set} = \\{(x_1, y_1), ..., (x_n, y_n)\\}\\]\nwhere each \\(x_i = (x_{i1}, ..., x_{ip})\\) is a vector with \\(p\\) predictors and \\(y_i\\) is the response to \\(x_i\\).\nUnsupervised learning: each observation only has features, no response variable.\nOur training set only has observations of \\(p\\) different features: \\[ \\text{training set} = \\{ x_1, ..., x_n\\},\\]\nwhere each \\(x_i = (x_{i1}, ..., x_{ip})\\) is a vector with \\(p\\) features. There’s no reponse variable \\(Y\\).\nIn unsupervised learning problems, we seek to understand the relationships between the variables or between the observations.\n\nExample\nAmanda records dive depth and dive duration for a large number of seals, but has no prior labels or categories in mind. She wants to know: are there distinct foraging strategies among these seals? Her data looks like this:\n\n\n\n\n\nObs.\nDepth (Feature 1)\nDuration (Feature 2)\n\n\n\n\n1\n585.29\n39.39\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n23\n108.23\n9.52\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n41\n324.37\n23.2\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (585.29, 39.39)\\)\n\\(\\vdots\\)\n\\(x_{23} = (x_{23,1}, x_{23,2}) = (108.23, 9.52)\\)\n\\(\\vdots\\)\n\\(x_{41} = (x_{41,1}, x_{41,2}) = (324.37, 23.2)\\)\n\n\nIn this case, there is no response variable \\(y\\), Amanda lets the algorithm find structure in the data on its own.\n\n\n\n\n\n\n\n\n\nThe top plot shows what Amanda starts with: just measurements, no categories. The bottom plot shows the structure the algorithm uncovers, which Amanda interprets as distinct foraging strategies.\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat is the key difference between the classification and clustering examples above?",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
+  },
+  {
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#recap",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#recap",
+    "title": "Learning from data",
+    "section": "Recap",
+    "text": "Recap\nWhat we covered today:\n\nThe idea of estimating a function \\(f\\) using observed data\nInference and prediction\nTraining set = observations used to fit/train a model\nPredictors + response variable & their math notation\nParametric vs. non parametric\nRegression vs. classification\nSupervised vs. unsupervised learning\n\nNext class: assessing model accuracy",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
   },
   {
     "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#title-slide",

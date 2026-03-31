@@ -1,0 +1,992 @@
+---
+format:
+    revealjs:
+        theme: ../../styles/meds-slides-styles.scss
+        slide-number: true
+        chalkboard: true
+        title-slide: false
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+def logistic_function(x, L, k, x0):
+    return L / (1 + np.exp(-k * (x - x0)))
+
+time = np.linspace(0, 20, 100)
+true_population = logistic_function(time, L=500, k=0.5, x0=8)
+
+np.random.seed(42)
+observed_time = np.array([2, 4, 6, 8, 10, 12, 14, 16, 18])
+observed_population = logistic_function(observed_time, L=500, k=0.5, x0=8) + np.random.normal(0, 50, len(observed_time))
+observed_sst = 15 + 2 * np.sin(observed_time / 5) + 0.5 * observed_time + np.random.normal(0, 0.5, len(observed_time))
+```
+
+## {#title-slide data-menu-title="Title Slide" background="#053660"}
+
+[EDS 232]{.custom-title}
+
+<hr class="hr-teal">
+
+[Lesson 2]{.custom-subtitle}
+
+[*Learning from data*]{.custom-subtitle}
+
+---
+
+## {#in-this-lesson data-menu-title="In this lesson"}
+
+[In this lesson]{.slide-title}
+
+<hr>
+
+
+<br>
+
+- Estimating a function $f$ from observed data
+- Inference vs. prediction
+- Parametric vs. non-parametric methods
+- Regression vs. classification
+- Supervised vs. unsupervised learning
+
+---
+
+## {#section-learning-from-data data-menu-title="# Learning from data #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">A guiding example</p>
+</div>
+
+---
+
+## {#researching-elephant-seals data-menu-title="Researching elephant seals"}
+
+[Researching elephant seals]{.slide-title}
+
+<hr>
+
+
+::: {.body-text-m}
+Amanda is a marine scientist investigating how protected areas affect elephant seal populations in California. She wants to understand:
+:::
+
+<br>
+
+::: {.center-text .body-text-m .teal-text}
+*How does elephant seal population change*
+
+*in a rookery that has just been protected?*
+:::
+
+
+![](images/elephant_seals.jpg){fig-align="center" width="100%"}
+
+---
+
+## {#predictor-response data-menu-title="Predictor and response variables"}
+
+[Amanda identifies the following variables]{.slide-title}
+
+<hr>
+
+::: {.body-text-m}
+- **Predictor variable:** time since the rookery was protected
+- **Response variable:** elephant seal population
+:::
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+# GRAPH 1: A simple graph that only has the axes labelled. The x axis is time and the y axis is elephant seal population.
+
+plt.figure(figsize=( fig_size_x,  fig_size_y))
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.show()
+plt.close()
+```
+
+---
+
+## {#true-function data-menu-title="The true function f"}
+
+[An ideal function $f$ exists somewhere...]{.slide-title}
+
+<hr>
+
+::: {.center-text .body-text-m .teal-text}
+What if Amanda had the *true* relationship between time and population?
+:::
+
+::: {.body-text-m}
+In mathematical terms this means having a function $f$ such that
+:::
+
+<br>
+
+```{python}
+#| echo: false
+#| fig-height: 3.5
+#| fig-align: center
+#| out-width: "100%"
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.plot(time, true_population, 'b-', linewidth=3, label='f (true relationship)')
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#checkin-1 data-menu-title="Check-in 1" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+
+
+$$f(\text{time since protection}) = \text{true population}$$
+
+<p class="custom-subtitle3">What information could Amanda acquire if she had this function $f$?</p>
+</div>
+
+---
+
+## {#observed-data data-menu-title="Estimating f from data"}
+
+[...but we have to estimate $f$ from data]{.slide-title}
+
+<hr>
+
+::: {.body-text-m}
+Amanda has no access to the true $f$. Her next best option:
+:::
+
+::: {.center-text .body-text-m .teal-text}
+ **estimate $f$ using observed data**.
+:::
+
+```{python}
+#| echo: false
+#| fig-height: 3.5
+#| fig-align: center
+#| out-width: "100%"
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#observation-error data-menu-title="Observation error"}
+
+[Observed values $\neq$ true values]{.slide-title}
+
+<hr>
+
+::: {.body-text-m}
+Error is introduced during measurement:
+:::
+
+<br>
+
+<br>
+
+```{python}
+#| echo: false
+#| fig-height: 3.2
+#| fig-align: center
+#| out-width: "100%"
+plt.figure(figsize=(fig_size_x, fig_size_y - 0.5))
+plt.plot(time, true_population, 'b-', linewidth=3, label='f (true relationship)')
+plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
+i = 0
+for t, obs_pop in zip(observed_time, observed_population):
+    true_pop = logistic_function(t, L=500, k=0.5, x0=8)
+    if i == 0:
+        plt.plot([t, t], [obs_pop, true_pop], 'g--', linewidth=1, label='Observation error')
+        i += 1
+    else:
+        plt.plot([t, t], [obs_pop, true_pop], 'g--', linewidth=1)
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#estimates-f data-menu-title="Choosing an estimate"}
+
+[Many possible estimates for $f$]{.slide-title}
+
+<hr>
+
+With these observed population values at a given time, Amanda can try to
+
+::: {.center-text .body-text-m .teal-text}
+estimate the real function $f$ with another **function**
+:::
+
+```{python}
+#| echo: false
+#| fig-height: 4
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#estimates-f-linear data-menu-title="Choosing an estimate: linear"}
+
+[Many possible estimates for $f$]{.slide-title}
+
+<hr>
+
+With these observed population values at a given time, Amanda can try to
+
+::: {.center-text .body-text-m .teal-text}
+estimate the real function $f$ with another **function $\hat{f}$**.
+:::
+
+```{python}
+#| echo: false
+#| fig-height: 4
+#| fig-align: center
+#| out-width: "100%"
+
+linear_coeffs = np.polyfit(observed_time, observed_population, 1)
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
+plt.plot(time, np.polyval(linear_coeffs, time), 'orange', linewidth=2, label='Linear fit')
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend()
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#estimates-f-logistic data-menu-title="Choosing an estimate: logistic"}
+
+[Many possible estimates for $f$]{.slide-title}
+
+<hr>
+
+With these observed population values at a given time, Amanda can try to
+
+::: {.center-text .body-text-m .teal-text}
+estimate the real function $f$ with another **function $\hat{f}$**.
+:::
+
+```{python}
+#| echo: false
+#| fig-height: 4
+#| fig-align: center
+#| out-width: "100%"
+
+linear_coeffs = np.polyfit(observed_time, observed_population, 1)
+
+def logistic_simple(x, L, k, x0):
+    return L / (1 + np.exp(-k * (x - x0)))
+
+popt, _ = curve_fit(logistic_simple, observed_time, observed_population, p0=[500, 0.5, 8])
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
+plt.plot(time, np.polyval(linear_coeffs, time), 'orange', linewidth=2, label='Linear fit')
+plt.plot(time, logistic_simple(time, *popt), 'green', linewidth=2, label='Logistic fit')
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend()
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#estimates-f-poly data-menu-title="Choosing an estimate: polynomial"}
+
+[Many possible estimates for $f$]{.slide-title}
+
+<hr>
+
+With these observed population values at a given time, Amanda can try to
+
+::: {.center-text .body-text-m .teal-text}
+estimate the real function $f$ with another **function $\hat{f}$**.
+:::
+
+```{python}
+#| echo: false
+#| fig-height: 4
+#| fig-align: center
+#| out-width: "100%"
+
+linear_coeffs = np.polyfit(observed_time, observed_population, 1)
+
+def logistic_simple(x, L, k, x0):
+    return L / (1 + np.exp(-k * (x - x0)))
+
+popt, _ = curve_fit(logistic_simple, observed_time, observed_population, p0=[500, 0.5, 8])
+poly_coeffs = np.polyfit(observed_time, observed_population, 8)
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(observed_time, observed_population, s=60, c='red', alpha=0.7, label='Observed data')
+plt.plot(time, np.polyval(linear_coeffs, time), 'orange', linewidth=2, label='Linear fit')
+plt.plot(time, logistic_simple(time, *popt), 'green', linewidth=2, label='Logistic fit')
+plt.plot(time, np.polyval(poly_coeffs, time), 'purple', linewidth=2, label='Degree 8 polynomial')
+plt.xlabel('Time since rookery was protected (years)')
+plt.ylabel('Elephant seal population')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 20)
+plt.ylim(0, 600)
+plt.legend()
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#checkin-estimates data-menu-title="Check-in: Choosing f̂" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">What considerations can Amanda take into account </p>
+<p class="custom-subtitle3">when choosing an estimate $\hat{f}$?</p>
+</div>
+
+---
+
+## {#section-abstract-setup data-menu-title="# Abstract setup #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">The general framework</p>
+</div>
+
+---
+
+## {#general-framework data-menu-title="Abstract setup"}
+
+[The general framework]{.slide-title}
+
+<hr>
+
+<br>
+
+We have
+
+<br>
+
+<br>
+
+. . .
+
+We assume there is a relationship:
+
+<br>
+
+<br>
+
+where $f$ is a fixed but *unknown* function of the predictors $X_1, ..., X_p$ and $\epsilon$ is an error term (independent of $X$, mean zero).
+
+<br>
+
+. . .
+
+::: {.center-text .body-text-m .teal-text}
+Our goal: 
+:::
+
+
+
+---
+
+## {#why-estimate-f data-menu-title="Why estimate f?"}
+
+[Why estimate $f$?]{.slide-title}
+
+<hr>
+
+<br>
+
+::: {.teal-text .body-text-m}
+**1. Inference**
+:::
+Use $\hat{f}$ to understand *which* predictors are associated with the response and understand the form of this relationship.
+
+<br>
+
+. . .
+
+::: {.teal-text .body-text-m}
+**2. Prediction**
+:::
+Calculate $\hat{Y} = \hat{f}(X)$ to predict the value of $Y$ for new inputs $X$.
+
+<br>
+
+. . .
+
+::: {.body-text-m}
+The method we choose often depends on whether our goal is inference, prediction, or both. 
+
+Interpretable models may not predict as well, and vice versa.
+:::
+
+---
+
+## {#checkin-2 data-menu-title="Check-in 2" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">What are some problems or scenarios where **inference** may be more important than prediction?</p>
+<p class="custom-subtitle3">What about problems or scenarios where **prediction** is the priority?</p>
+</div>
+
+---
+
+## {#training-data data-menu-title="Training data and notation"}
+
+[The ML approach]{.slide-title}
+
+<hr>
+
+We start with a 
+
+<br>
+
+<br>
+
+<br>
+
+- 
+- 
+
+<br>
+
+. . .
+
+::: {.center-text .body-text-m .teal-text}
+"Training" means using these data points to find an estimate $\hat{f}$.
+
+The "learning" in *machine learning* is precisely adjusting $\hat{f}$ to minimize error on this data.
+:::
+
+---
+
+## {#notation-example-1 data-menu-title="One variable notation example"}
+
+[Example: One variable notation]{.slide-title}
+
+<hr>
+
+::: {.body-text-m}
+With **one predictor variable** (time), Amanda's data maps to the following vectors:
+:::
+
+:::: {.columns}
+
+::: {.column width="55%"}
+| Obs. | Time (Predictor) |  Population (Response)|
+|-------------|------|------------|
+| 1 | 2 | 53 |
+| $\vdots$ | $\vdots$ | $\vdots$ |
+| 5 | 10 | 353 |
+| $\vdots$ | $\vdots$ | $\vdots$ |
+| 9  | 18 | 473 |
+:::
+
+::: {.column width="10%"}
+\
+
+\
+
+\
+
+\
+
+\ \ \ \ \ \ \ \ \ **→**
+:::
+
+::: {.column width="35%"}
+
+:::
+
+::::
+
+## {#notation-example-2 data-menu-title="Multiple variables notation example"}
+
+[Example: Multi-variable notation]{.slide-title}
+
+<hr>
+
+::: {.body-text-m}
+If we add average annual sea surface temperature (SST) as a second predictor variable, then each $x_i$ becomes a vector:
+:::
+
+:::: {.columns}
+
+::: {.column width="55%"}
+| Obs. | Time (Predictor 1) | SST (Predictor 2) | Population (Response)|
+|-------------|------|------|------------|
+| 1 | 2 | 17.05| 53 |
+| $\vdots$ | $\vdots$ |  $\vdots$ | $\vdots$ |
+| 5 | 10 | 20.86 | 353 |
+| $\vdots$ | $\vdots$ | $\vdots$ |  $\vdots$ |
+| 9  | 18 | 23.27| 473 |
+:::
+
+::: {.column width="10%"}
+\
+
+\
+
+\
+
+\
+
+\ \ \ \ \ \ \ \ \ **→**
+:::
+
+::: {.column width="35%"}
+
+
+:::
+
+::::
+
+---
+
+## {#section-parametric data-menu-title="# Parametric vs. non-parametric #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Parametric vs. non-parametric methods</p>
+</div>
+
+---
+
+## {#parametric data-menu-title="Parametric methods"}
+
+[Parametric methods]{.slide-title}
+
+<hr>
+
+Parametric methods estimate $f$ in two steps:
+
+<br>
+
+. . .
+
+**Step 1:** Assume a *functional form* for $f$
+
+> e.g., linear: $f(X) = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p$
+
+. . .
+
+**Step 2:** Use the training data to **fit** the model and estimate the parameters
+
+> e.g., find $\beta_0, \beta_1, \ldots, \beta_p$ that best match the observations
+
+<br>
+
+. . .
+
+::: {.body-text-m}
+[**Pros:**]{.teal-text} Works with small datasets · computationally efficient · easier inference
+
+[**Cons:**]{.teal-text} Assumed form may be far from true $f$ · predictions may suffer
+:::
+
+---
+
+## {#parametric-example data-menu-title="Parametric example"}
+
+[Parametric example: linear model]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="42%"}
+
+Amanda decides to model elephant seal population as **linear in time and SST**:
+
+$$f(x_1, x_2) = \beta_0 + \beta_1\, \text{time} + \beta_2\, \text{SST}$$
+
+Training the model finds $\beta_0, \beta_1, \beta_2$ that best fit the observed data. The graph of the fitted $\hat{f}$ is a plane.
+
+::: {.center-text .body-text-s .teal-text}
+The shape of $\hat{f}$ was decided *before* seeing the data.
+:::
+
+:::
+
+::: {.column width="58%"}
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+X = np.column_stack([observed_time, observed_sst])
+y = observed_population
+model = LinearRegression()
+model.fit(X, y)
+beta_0 = model.intercept_
+beta_1, beta_2 = model.coef_
+
+time_range = np.linspace(observed_time.min(), observed_time.max(), 20)
+sst_range = np.linspace(observed_sst.min(), observed_sst.max(), 20)
+time_mesh, sst_mesh = np.meshgrid(time_range, sst_range)
+population_mesh = beta_0 + beta_1 * time_mesh + beta_2 * sst_mesh
+
+fig = plt.figure(figsize=(fig_size_x, fig_size_y))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(time_mesh, sst_mesh, population_mesh, alpha=0.5, color='orange')
+ax.scatter(observed_time, observed_sst, observed_population, color='red', s=80, label='Observed data')
+ax.set_xlabel('Time (years)')
+ax.set_ylabel('SST (°C)')
+ax.set_zlabel('Population')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::::
+
+---
+
+## {#nonparametric data-menu-title="Non-parametric methods"}
+
+[Non-parametric methods]{.slide-title}
+
+<hr>
+
+Non-parametric methods make **no assumptions** about the functional form of $f$. They seek an estimate that fits the training data without being "too rough or wiggly".
+
+<br>
+
+. . .
+
+::: {.body-text-m}
+[**Pros:**]{.teal-text} More flexible · can capture complex relationships · potentially better predictions
+
+[**Cons:**]{.teal-text} Needs more data · can follow noise too closely · may be less interpretable
+:::
+
+---
+
+## {#nonparametric-example data-menu-title="Non-parametric example"}
+
+[Non-parametric example: K-nearest neighbors]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="42%"}
+
+Instead of assuming a linear form, Amanda uses **K-nearest neighbors (KNN)**.
+
+For any new (time, SST) pair, the model predicts population as the average of the $K$ closest training observations.
+
+::: {.center-text .body-text-s .teal-text}
+The shape of $\hat{f}$ emerges entirely from the training observations, no functional form was specified.
+:::
+
+:::
+
+::: {.column width="58%"}
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+X = np.column_stack([observed_time, observed_sst])
+y = observed_population
+
+time_range = np.linspace(observed_time.min(), observed_time.max(), 20)
+sst_range = np.linspace(observed_sst.min(), observed_sst.max(), 20)
+time_mesh, sst_mesh = np.meshgrid(time_range, sst_range)
+
+knn = KNeighborsRegressor(n_neighbors=3)
+knn.fit(X, y)
+population_mesh_knn = knn.predict(
+    np.column_stack([time_mesh.ravel(), sst_mesh.ravel()])
+).reshape(time_mesh.shape)
+
+fig = plt.figure(figsize=(fig_size_x, fig_size_y))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(time_mesh, sst_mesh, population_mesh_knn, alpha=0.4, color='green')
+ax.scatter(observed_time, observed_sst, observed_population, color='red', s=80, label='Observed data')
+ax.set_xlabel('Time (years)')
+ax.set_ylabel('SST (°C)')
+ax.set_zlabel('Population')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::::
+
+---
+
+## {#section-reg-class data-menu-title="# Regression vs. classification #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Regression vs. classification</p>
+</div>
+
+---
+
+## {#reg-vs-class data-menu-title="Regression vs. classification"}
+
+[Regression vs. classification]{.slide-title}
+
+<hr>
+
+<br>
+
+Variables can be:
+
+::: {.body-text-m}
+- **Quantitative:** continuous numerical values
+- **Qualitative or categorical:** values in one of $K$ classes or categories
+:::
+
+. . .
+
+::: {.body-text-m}
+[**Regression problems:**]{.teal-text} have a quantitative response variable
+
+> *Predict elephant seal population count*
+
+[**Classification problems:**]{.teal-text} have a qualitative response variable
+
+> *Predict seal health status: healthy / malnourished / injured*
+:::
+
+. . .
+
+::: {.body-text-s}
+We select methods based primarily on the **type of the response variable**. Predictors can often be coded regardless of type.
+:::
+
+---
+
+## {#classification-example data-menu-title="Classification example"}
+
+[Classification example]{.slide-title}
+
+<hr>
+
+Amanda trains a classifier to predict **seal health status** from weight and length:
+
+$$f(\text{weight, length}) = \text{health status} \in \{\text{healthy, malnourished, injured}\}$$
+
+```{python}
+#| echo: false
+#| fig-height: 3.5
+#| fig-align: center
+#| out-width: "100%"
+np.random.seed(7)
+healthy    = np.random.multivariate_normal([200, 180], [[300, 50], [50, 40]], 30)
+malnourish = np.random.multivariate_normal([130, 155], [[200, 40], [40, 30]], 30)
+injured    = np.random.multivariate_normal([170, 165], [[250, 40], [40, 30]], 30)
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
+for color, label, subset in zip(['green', 'orange', 'red'],
+                                  ['Healthy', 'Malnourished', 'Injured'],
+                                  [healthy, malnourish, injured]):
+    ax.scatter(subset[:, 0], subset[:, 1], c=color, alpha=0.6, s=40, label=label)
+ax.set_xlabel('Weight (kg)')
+ax.set_ylabel('Length (cm)')
+ax.set_title('Training data (labeled by veterinarian)')
+ax.grid(True, alpha=0.3)
+ax.legend()
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#section-sup-unsup data-menu-title="# Supervised vs. unsupervised #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Supervised vs. unsupervised learning</p>
+</div>
+
+---
+
+## {#supervised data-menu-title="Supervised learning"}
+
+[Supervised learning]{.slide-title}
+
+<hr>
+
+<br>
+
+Each observation has
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+. . .
+
+The algorithm *learns* by adjusting $\hat{f}$ to predict $y$ from $x$ as accurately as possible.
+
+<br>
+
+
+Both regression and classification are supervised learning problems.
+
+---
+
+## {#unsupervised data-menu-title="Unsupervised learning"}
+
+[Unsupervised learning]{.slide-title}
+
+<hr>
+
+Each observation has
+
+<br>
+
+<br>
+
+<br>
+
+. . .
+
+::: {.body-text-m}
+Example
+:::
+
+Amanda records dive depth and duration for many seals, with no labels. She asks: *are there distinct foraging strategies among these seals?*
+
+```{python}
+#| echo: false
+#| fig-height: 3.2
+#| fig-align: center
+#| out-width: "100%"
+np.random.seed(9)
+deep_long    = np.random.multivariate_normal([550, 45], [[1500, 30], [30, 20]], 30)
+shallow_freq = np.random.multivariate_normal([150, 12], [[800,  20], [20,  8]], 30)
+medium       = np.random.multivariate_normal([350, 28], [[1000, 25], [25, 12]], 30)
+data_dive    = np.vstack([deep_long, shallow_freq, medium])
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x, fig_size_y - 0.5))
+
+axes[0].scatter(data_dive[:, 0], data_dive[:, 1], c='steelblue', alpha=0.6, s=30)
+axes[0].set_xlabel('Dive depth (m)')
+axes[0].set_ylabel('Dive duration (min)')
+axes[0].set_title('Observed data (no labels)')
+axes[0].grid(True, alpha=0.3)
+
+for color, label, subset in zip(['royalblue', 'coral', 'mediumpurple'],
+                                  ['Deep & long', 'Shallow & frequent', 'Medium'],
+                                  [deep_long, shallow_freq, medium]):
+    axes[1].scatter(subset[:, 0], subset[:, 1], c=color, alpha=0.6, s=30, label=label)
+axes[1].set_xlabel('Dive depth (m)')
+axes[1].set_title('Clusters discovered')
+axes[1].grid(True, alpha=0.3)
+axes[1].legend(fontsize=8)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#recap data-menu-title="Recap"}
+
+[Recap]{.slide-title}
+
+<hr>
+
+<br>
+
+- We want to estimate an unknown function $f$ such that $Y = f(X) + \epsilon$
+
+- We estimate $f$ using a **training set** of observed $(x_i, y_i)$ pairs
+
+- **Inference** uses $\hat{f}$ to understand relationships; **prediction** uses $\hat{f}$ to forecast new $Y$
+
+- **Parametric** methods assume a functional form; **non-parametric** methods don't
+
+- **Regression** = quantitative response; **classification** = qualitative response
+
+- **Supervised** = response variable present; **unsupervised** = no response variable
+
+<br>
+
+::: {.center-text .teal-text}
+Next class: assessing model accuracy
+:::
