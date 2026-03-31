@@ -20,6 +20,7 @@ plt.style.use('default')
 fig_size_x = 8
 fig_size_y = 4
 plt.rcParams['font.size'] = 10
+plt.rcParams['legend.fontsize'] = 'x-large'
 
 np.random.seed(7)
 n = 200
@@ -87,6 +88,34 @@ RSE   = np.sqrt(RSS / (n - 2))
 - Standard errors and confidence intervals
 - Hypothesis testing: $t$-statistic and $p$-values
 - Assessing model accuracy: RSE and $R^2$
+
+---
+
+## {#why-linear-regression data-menu-title="Why study linear regression?"}
+
+[Why study linear regression?]{.slide-title}
+
+<hr>
+
+Regression estimates relationships between predictors and a response. It can help answer questions such as:
+
+<br>
+
+1. Is there a relationship between the predictor(s) and the response?
+2. How strong is that relationship?
+3. Which predictors are actually associated with the response?
+4. How large is the effect of each predictor on the response?
+5. Is the relationship linear?
+6. How accurately can we predict the response for a given combination of predictor values?
+
+<br>
+
+. . .
+
+
+::: {.center-text .body-text-m .teal-text}
+Linear regression supports both **inference** and **prediction**.
+:::
 
 ---
 
@@ -231,11 +260,90 @@ plt.close()
 ```
 
 
-**Check-in:** 
+---
 
-- How would you interpret the value of $\hat{\beta}_0$? 
-- What about what does $\hat{\beta}_1$ represent? 
-- If a firm spends \$150K on process upgrades, how would you calcualte the predicted CO₂ reduction?
+## {#linear-model-checkin data-menu-title="Check-in"}
+
+[Check in ]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+- How would you interpret the value of $\hat{\beta}_0$?
+- How would you interpret the value of $\hat{\beta}_1$?
+- If a firm spends \$150K on process upgrades, how would you calculate the predicted CO₂ reduction?
+:::
+
+::: {.column width="50%"}
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x * 0.9, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+:::
+
+::::
+
+---
+
+## {#linear-model-checkin-answers data-menu-title="Check-in Answers"}
+
+[Check in ]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+- How would you interpret the value of $\hat{\beta}_0$?
+- How would you interpret the value of $\hat{\beta}_1$?
+- If a firm spends \$150K on process upgrades, how would you calculate the predicted CO₂ reduction?
+
+<br> 
+
+- $\hat{\beta}_0 \approx$ `{python} f"{b0:.2f}"` ktCO₂e: predicted CO₂ reduction when a firm spends \$0 on process upgrades (baseline).
+
+- $\hat{\beta}_1 \approx$ `{python} f"{b1:.4f}"` ktCO₂e per \$K: each additional \$1K in process spending is associated with `{python} f"{b1:.4f}"` ktCO₂e of additional reduction.
+
+- Just plug in 150 into the line equation!
+
+:::
+
+::: {.column width="50%"}
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x * 0.9, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+:::
+
+::::
 
 ---
 
