@@ -137,6 +137,10 @@ What if Amanda had the *true* relationship between time and population?
 In mathematical terms this means having a function $f$ such that
 :::
 
+<div style="position: absolute; bottom: 400px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                                                                                                                                                          
+</div> 
+
 <br>
 
 ```{python}
@@ -156,6 +160,7 @@ plt.tight_layout()
 plt.show()
 plt.close()
 ```
+ 
 
 ---
 
@@ -216,6 +221,10 @@ plt.close()
 Error is introduced during measurement:
 :::
 
+<div style="position: absolute; bottom: 450px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                                                                                                                                                          
+</div> 
+
 <br>
 
 <br>
@@ -256,6 +265,11 @@ plt.close()
 <hr>
 
 With these observed population values at a given time, Amanda can try to
+
+<div style="position: absolute; bottom: 475px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                                                                                                                                                          
+</div> 
+
 
 ::: {.center-text .body-text-m .teal-text}
 estimate the real function $f$ with another **function**
@@ -422,6 +436,18 @@ plt.close()
 
 ---
 
+## {#general-framework-blank data-menu-title="Abstract setup"}
+
+[The general framework]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 500px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                                                                                                                                                          
+</div> 
+
+---
+
 ## {#general-framework data-menu-title="Abstract setup"}
 
 [The general framework]{.slide-title}
@@ -430,30 +456,23 @@ plt.close()
 
 <br>
 
-We have
+We have $p$ **predictors** $X_1, \ldots, X_p$ and a **response variable** $Y$.
 
 <br>
 
-<br>
-
-. . .
 
 We assume there is a relationship:
 
-<br>
-
-<br>
+$$Y = f(X) + \epsilon$$
 
 where $f$ is a fixed but *unknown* function of the predictors $X_1, ..., X_p$ and $\epsilon$ is an error term (independent of $X$, mean zero).
 
 <br>
 
-. . .
 
 ::: {.center-text .body-text-m .teal-text}
-Our goal: 
+Our goal: find an estimate $\hat{f}(X)$ that approximates $f(X)$ well.
 :::
-
 
 
 ---
@@ -473,7 +492,6 @@ Use $\hat{f}$ to understand *which* predictors are associated with the response 
 
 <br>
 
-. . .
 
 ::: {.teal-text .body-text-m}
 **2. Prediction**
@@ -502,32 +520,42 @@ Interpretable models may not predict as well, and vice versa.
 
 ---
 
+## {#training-data-blank data-menu-title="Training data and notation"}
+
+[The ML approach]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 475px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                                                                                                                                                          
+</div> 
+
+---
+
 ## {#training-data data-menu-title="Training data and notation"}
 
 [The ML approach]{.slide-title}
 
 <hr>
 
-We start with a 
+We start with a set of $n$ **observed data points**. These are called the **training set**:
+
+$$\{(x_1, y_1),\, \ldots,\, (x_n, y_n)\}$$
 
 <br>
 
-<br>
+- $x_i$ = a **vector** of predictor values for observation $i$: $\;\; x_i = (x_{i1}, \ldots, x_{ip})$
+- $y_i$ = the **response value** for observation $i$
 
 <br>
 
-- 
-- 
-
-<br>
-
-. . .
 
 ::: {.center-text .body-text-m .teal-text}
 "Training" means using these data points to find an estimate $\hat{f}$.
 
 The "learning" in *machine learning* is precisely adjusting $\hat{f}$ to minimize error on this data.
 :::
+
 
 ---
 
@@ -805,14 +833,11 @@ plt.close()
 
 <hr>
 
-<br>
 
 Variables can be:
 
-::: {.body-text-m}
 - **Quantitative:** continuous numerical values
 - **Qualitative or categorical:** values in one of $K$ classes or categories
-:::
 
 . . .
 
@@ -879,13 +904,15 @@ plt.close()
 
 ---
 
-## {#supervised data-menu-title="Supervised learning"}
+## {#supervised-blank data-menu-title="Supervised learning"}
 
 [Supervised learning]{.slide-title}
 
 <hr>
 
-<br>
+<div style="position: absolute; bottom: 475px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                                                                                                                                                          
+</div> 
 
 Each observation has
 
@@ -897,7 +924,24 @@ Each observation has
 
 <br>
 
-. . .
+
+
+---
+
+## {#supervised data-menu-title="Supervised learning"}
+
+[Supervised learning]{.slide-title}
+
+<hr>
+
+Each observation has **predictors paired with a response variable**:
+
+$$\text{training set} = \{(x_1, y_1),\, \ldots,\, (x_n, y_n)\},$$
+
+where each $x_i = (x_{i1}, ..., x_{ip})$ is a vector with $p$ predictors and $y_i$ is the response to $x_i$. 
+
+<br>
+
 
 The algorithm *learns* by adjusting $\hat{f}$ to predict $y$ from $x$ as accurately as possible.
 
@@ -908,25 +952,34 @@ Both regression and classification are supervised learning problems.
 
 ---
 
+## {#unsupervised-blank data-menu-title="Unsupervised learning"}
+
+[Unsupervised learning]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 475px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                                                                                                                                                          
+</div> 
+
+
+Each observation has
+
+---
+
 ## {#unsupervised data-menu-title="Unsupervised learning"}
 
 [Unsupervised learning]{.slide-title}
 
 <hr>
 
-Each observation has
+Each observation has **features only**, there is no response variable:
 
-<br>
+$$\text{training set} = \{x_1,\, \ldots,\, x_n\}$$
 
-<br>
+where each $x_i = (x_{i1}, ..., x_{ip})$ is a vector with $p$ features.
 
-<br>
-
-. . .
-
-::: {.body-text-m}
 Example
-:::
 
 Amanda records dive depth and duration for many seals, with no labels. She asks: *are there distinct foraging strategies among these seals?*
 
@@ -963,6 +1016,7 @@ plt.show()
 plt.close()
 ```
 
+
 ---
 
 ## {#recap data-menu-title="Recap"}
@@ -984,9 +1038,3 @@ plt.close()
 - **Regression** = quantitative response; **classification** = qualitative response
 
 - **Supervised** = response variable present; **unsupervised** = no response variable
-
-<br>
-
-::: {.center-text .teal-text}
-Next class: assessing model accuracy
-:::
