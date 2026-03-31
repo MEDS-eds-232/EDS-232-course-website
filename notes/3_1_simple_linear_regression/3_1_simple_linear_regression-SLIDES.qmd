@@ -1,0 +1,685 @@
+---
+format:
+    revealjs:
+        theme: ../../styles/meds-slides-styles.scss
+        slide-number: true
+        chalkboard: true
+        title-slide: false
+jupyter: eds232-env
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+import statsmodels.api as sm
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+np.random.seed(7)
+n = 200
+
+process    = np.random.uniform(0, 300, n)
+efficiency = np.random.uniform(0,  50, n)
+offsets    = np.random.uniform(0, 100, n)
+
+co2_reduction = (2.939
+                 + 0.046  * process
+                 + 0.189  * efficiency
+                 - 0.001  * offsets
+                 + np.random.normal(0, 1.69, n))
+
+df = pd.DataFrame({
+    'process':       process,
+    'efficiency':    efficiency,
+    'offsets':       offsets,
+    'co2_reduction': co2_reduction
+})
+
+# Fit models
+model_proc = LinearRegression().fit(df[['process']], df['co2_reduction'])
+b0 = model_proc.intercept_
+b1 = model_proc.coef_[0]
+x_line = np.linspace(0, 300, 300)
+
+X_ols = sm.add_constant(df['process'])
+res   = sm.OLS(df['co2_reduction'], X_ols).fit()
+
+ci = res.conf_int(alpha=0.05)
+ci_b1_low  = ci.loc['process', 0]
+ci_b1_high = ci.loc['process', 1]
+
+y_hat = model_proc.predict(df[['process']])
+y_bar = df['co2_reduction'].mean()
+TSS   = np.sum((df['co2_reduction'] - y_bar)**2)
+RSS   = np.sum((df['co2_reduction'] - y_hat)**2)
+R2    = 1 - RSS / TSS
+RSE   = np.sqrt(RSS / (n - 2))
+```
+
+## {#title-slide data-menu-title="Title Slide" background="#053660"}
+
+[EDS 232]{.custom-title}
+
+<hr class="hr-teal">
+
+[Lesson 3]{.custom-subtitle}
+
+[*Simple linear regression*]{.custom-subtitle}
+
+---
+
+## {#in-this-lesson data-menu-title="In this lesson"}
+
+[In this lesson]{.slide-title}
+
+<hr>
+
+<br>
+
+- The simple linear regression (SLR) model
+- Estimating coefficients with least squares
+- Standard errors and confidence intervals
+- Hypothesis testing: $t$-statistic and $p$-values
+- Assessing model accuracy: RSE and $R^2$
+
+---
+
+## {#section-example data-menu-title="# A guiding example #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">A guiding example</p>
+</div>
+
+---
+
+## {#greenabate data-menu-title="The GreenAbate dataset"}
+
+[The GreenAbate dataset]{.slide-title}
+
+<hr>
+
+::: {.body-text-m}
+A research consortium tracks **200 manufacturing firms**. For each firm, they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:
+:::
+
+<br>
+
+::: {.body-text-m}
+- **`process`** — investment in cleaner production processes (\$K/year)
+- **`efficiency`** — energy efficiency upgrades (\$K/year)
+- **`offsets`** — carbon offset purchases (\$K/year)
+- **`co2_reduction`** — annual CO₂ emissions reduced (ktCO₂e/year)
+:::
+
+<br>
+
+::: {.center-text .body-text-m .teal-text}
+*Do these investments actually drive emissions reductions, and if so, by how much?*
+:::
+
+---
+
+## {#greenabate-plots data-menu-title="GreenAbate: data overview"}
+
+[CO₂ reduction vs. each abatement channel]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.5, fig_size_y))
+
+specs = [
+    ('process',    'steelblue',  'Process upgrades ($K)'),
+    ('efficiency', 'darkorange', 'Efficiency upgrades ($K)'),
+    ('offsets',    'seagreen',   'Carbon offsets ($K)'),
+]
+
+for ax, (col, color, xlabel) in zip(axes, specs):
+    ax.scatter(df[col], df['co2_reduction'], s=12, alpha=0.5, color=color)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel('CO₂ reduction (ktCO₂e)')
+    ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.center-text .body-text-s}
+*Synthetic data generated for educational purposes only*
+:::
+
+---
+
+## {#section-slr data-menu-title="# Simple linear regression #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Simple linear regression</p>
+</div>
+
+---
+
+## {#slr-model data-menu-title="The SLR model"}
+
+[The simple linear regression model]{.slide-title}
+
+<hr>
+
+**Simple linear regression (SLR)** assumes a linear relationship between a single predictor $X$ and a response $Y$:
+
+$$Y \approx \beta_0 + \beta_1 X$$
+
+. . .
+
+::: {.body-text-m}
+- $\beta_0$ — **intercept**: expected value of $Y$ when $X = 0$
+- $\beta_1$ — **slope**: average change in $Y$ for a one-unit increase in $X$
+:::
+
+. . .
+
+<br>
+
+Since $\beta_0$ and $\beta_1$ are unknown, we **estimate** them from data:
+
+$$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x = \hat{f}(x)$$
+
+::: {.body-text-s .teal-text .center-text}
+The $\hat{\cdot}$ notation always denotes an *estimated* quantity.
+:::
+
+---
+
+## {#slr-greenabate data-menu-title="SLR: fitted line"}
+
+[Fitting SLR to the GreenAbate data]{.slide-title}
+
+<hr>
+
+Using `process` as the sole predictor:
+
+$$\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}$$
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x, fig_size_y - 0.5))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#checkin-slr data-menu-title="Check-in: coefficients" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">In the context of the GreenAbate problem:</p>
+<p class="custom-subtitle3">What does $\hat{\beta}_0$ represent? What does $\hat{\beta}_1$ represent?</p>
+<p class="custom-subtitle3">If a firm spends \$150K on process upgrades, what is the predicted CO₂ reduction?</p>
+</div>
+
+---
+
+## {#section-estimation data-menu-title="# Estimating the coefficients #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Estimating the coefficients</p>
+</div>
+
+---
+
+## {#residuals-def data-menu-title="Residuals and RSS"}
+
+[Residuals and the RSS]{.slide-title}
+
+<hr>
+
+The **residual** for observation $i$ is the difference between observed and predicted:
+
+$$e_i = y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i$$
+
+. . .
+
+The **residual sum of squares (RSS)** totals all squared residuals:
+
+$$RSS = \sum_{i=1}^{n} e_i^2 = \sum_{i=1}^{n}(y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2$$
+
+. . .
+
+<br>
+
+::: {.center-text .body-text-m .teal-text}
+The **least squares** approach chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to **minimize** the RSS.
+:::
+
+---
+
+## {#residuals-plot data-menu-title="Residuals: visual"}
+
+[Residuals as vertical distances to the fitted line]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=12, alpha=0.4, color='steelblue', zorder=2, label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5, zorder=3, label='Fitted line')
+
+for i, (xi, yi) in enumerate(zip(df['process'], df['co2_reduction'])):
+    yi_hat = b0 + b1 * xi
+    lbl = 'Residual $e_i$' if i == 0 else None
+    plt.plot([xi, xi], [yi, yi_hat], color='tomato', linewidth=0.6, alpha=0.6, label=lbl, zorder=1)
+
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#ls-formulas data-menu-title="Least squares formulas"}
+
+[Least squares solution]{.slide-title}
+
+<hr>
+
+Minimizing the RSS gives closed-form expressions for the coefficients:
+
+$$\hat{\beta}_1 = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n}(x_i - \bar{x})^2}$$
+
+$$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+Two important points:
+
+1. The estimates depend entirely on the training data — different data, different estimates. This is the source of estimation uncertainty.
+
+2. In practice, **the computer computes these** for you.
+:::
+
+---
+
+## {#section-accuracy data-menu-title="# Coefficient accuracy #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Accuracy of the coefficient estimates</p>
+</div>
+
+---
+
+## {#standard-errors data-menu-title="Standard errors"}
+
+[Standard errors]{.slide-title}
+
+<hr>
+
+::: {.body-text-m}
+The true data-generating process is $Y = \beta_0 + \beta_1 X + \epsilon$. The **standard error** quantifies how far $\hat{\beta}$ is from the true $\beta$ on average.
+:::
+
+$$SE(\hat{\beta}_1)^2 = \frac{\sigma^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2}$$
+
+$$SE(\hat{\beta}_0)^2 = \sigma^2 \left[\frac{1}{n} + \frac{\bar{x}^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2}\right]$$
+
+. . .
+
+::: {.body-text-s}
+where $\sigma^2 = \text{Var}(\epsilon)$ is the error variance (unknown in practice — estimated from the data).
+:::
+
+---
+
+## {#checkin-se data-menu-title="Check-in: standard errors" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">How does $SE(\hat{\beta}_1)$ change as the $x$ values become more spread out?</p>
+<p class="custom-subtitle3">Does this make intuitive sense?</p>
+</div>
+
+---
+
+## {#confidence-intervals data-menu-title="Confidence intervals"}
+
+[Confidence intervals]{.slide-title}
+
+<hr>
+
+A **95% confidence interval** for a coefficient $\beta_i$ is:
+
+$$[\hat{\beta}_i - 2 \cdot SE(\hat{\beta}_i),\;\; \hat{\beta}_i + 2 \cdot SE(\hat{\beta}_i)]$$
+
+::: {.body-text-s}
+*(the factor 2 is approximate; the exact value comes from the $t$-distribution with $n-2$ d.f.)*
+:::
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+**Interpretation:**
+
+> A 95% CI for $\beta_1$ of $[a_1, b_1]$ means there is a 95% chance that a one-unit increase in $x$ is associated with an average increase in $y$ between $a_1$ and $b_1$ units.
+
+> A 95% CI for $\beta_0$ of $[a_0, b_0]$ means there is a 95% chance that the regression line crosses the $y$-axis between $a_0$ and $b_0$.
+:::
+
+---
+
+## {#ci-greenabate data-menu-title="CIs: GreenAbate"}
+
+[95% confidence intervals for the GreenAbate SLR]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+ci_df = pd.DataFrame({
+    '':       ['Intercept', 'process'],
+    '2.5%':   [f"{ci.loc['const', 0]:.4f}",   f"{ci.loc['process', 0]:.4f}"],
+    '97.5%':  [f"{ci.loc['const', 1]:.4f}",   f"{ci.loc['process', 1]:.4f}"],
+})
+print(ci_df.to_string(index=False))
+```
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+- The 95% CI for $\beta_1$ (process) is $[`{python} f"{ci_b1_low:.3f}"`,\; `{python} f"{ci_b1_high:.3f}"`]$ — entirely above 0.
+- Strong evidence that higher process spending is associated with greater CO₂ reductions.
+:::
+
+---
+
+## {#checkin-ci data-menu-title="Check-in: confidence intervals" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">The 95% CI for $\beta_1$ is $[`{python} f"{ci_b1_low:.3f}"`,\; `{python} f"{ci_b1_high:.3f}"`]$.</p>
+<p class="custom-subtitle3">What if the interval had been $[-0.002,\; `{python} f"{ci_b1_high:.3f}"`]$ instead?</p>
+<p class="custom-subtitle3">What would that tell us about the relationship?</p>
+</div>
+
+---
+
+## {#section-hypothesis data-menu-title="# Hypothesis testing #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Hypothesis testing</p>
+</div>
+
+---
+
+## {#hypotheses data-menu-title="Null and alternative hypotheses"}
+
+[Is there a relationship between $X$ and $Y$?]{.slide-title}
+
+<hr>
+
+<br>
+
+::: {.body-text-m}
+- **Null hypothesis** $H_0$: $\beta_1 = 0$ — no relationship between $X$ and $Y$
+
+  → $\hat{Y} = \hat{\beta}_0$ (a constant; $X$ carries no information)
+
+- **Alternative hypothesis** $H_a$: $\beta_1 \neq 0$ — there is a relationship
+
+  → $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X$
+:::
+
+. . .
+
+<br>
+
+::: {.center-text .body-text-m .teal-text}
+To test $H_0$, we need to determine whether $\hat{\beta}_1$ is sufficiently far from 0 relative to its uncertainty.
+:::
+
+---
+
+## {#t-stat data-menu-title="t-statistic and p-value"}
+
+[The $t$-statistic and $p$-value]{.slide-title}
+
+<hr>
+
+The **$t$-statistic** measures how many standard deviations $\hat{\beta}_1$ is from 0:
+
+$$t = \frac{\hat{\beta}_1}{SE(\hat{\beta}_1)}$$
+
+. . .
+
+The **$p$-value** is the probability of observing $|t|$ this large, *assuming $H_0$ is true*.
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+- **Small $p$-value** ($p < 0.05$): unlikely to see $\hat{\beta}_1$ this far from 0 by chance → **reject $H_0$** → evidence of a relationship
+- **Large $p$-value**: data are consistent with $\beta_1 = 0$ → **fail to reject $H_0$**
+:::
+
+---
+
+## {#regression-table data-menu-title="Regression table"}
+
+[SLR output: `co2_reduction` ~ `process`]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+def fmt_p(p):
+    return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
+
+coef_df = pd.DataFrame({
+    '':              ['Intercept', 'process'],
+    'Coefficient':   [f"{res.params['const']:.4f}",   f"{res.params['process']:.4f}"],
+    'Std. error':    [f"{res.bse['const']:.4f}",       f"{res.bse['process']:.4f}"],
+    't-statistic':   [f"{res.tvalues['const']:.2f}",   f"{res.tvalues['process']:.2f}"],
+    'p-value':       [fmt_p(res.pvalues['const']),      fmt_p(res.pvalues['process'])],
+})
+print(coef_df.to_string(index=False))
+```
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+Each additional \$1K in process upgrade spending is associated with **`{python} f"{b1:.4f}"` ktCO₂e** (~`{python} f"{b1*1000:.0f}"` metric tons) of additional annual CO₂ reduction.
+:::
+
+---
+
+## {#checkin-pvalue data-menu-title="Check-in: p-values" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">The $p$-value for `process` is < 0.0001. What does this tell us?</p>
+<p class="custom-subtitle3">The intercept also has a very small $p$-value. Does this mean the intercept is an important predictor of CO₂ reductions?</p>
+</div>
+
+---
+
+## {#section-model-accuracy data-menu-title="# Model accuracy #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Assessing model accuracy</p>
+</div>
+
+---
+
+## {#rse data-menu-title="Residual Standard Error"}
+
+[Residual Standard Error (RSE)]{.slide-title}
+
+<hr>
+
+The **RSE** estimates the standard deviation of $\epsilon$ — the average amount the response deviates from the true regression line:
+
+$$RSE = \sqrt{\frac{1}{n-2} RSS} = \sqrt{\frac{1}{n-2} \sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$$
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+- A smaller RSE means predictions are closer to observed values
+- RSE is in the **same units as $Y$** → directly interpretable
+- "Small" is context-dependent: compare relative to the range or mean of $Y$
+:::
+
+---
+
+## {#checkin-rse data-menu-title="Check-in: RSE" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">For the GreenAbate SLR, RSE ≈ `{python} f"{RSE:.2f}"` ktCO₂e (≈ `{python} f"{RSE*1000:.0f}"` metric tons).</p>
+<p class="custom-subtitle3">Is this a good or bad fit? What additional information would you need to judge this?</p>
+</div>
+
+---
+
+## {#r2-def data-menu-title="R² statistic"}
+
+[$R^2$ statistic]{.slide-title}
+
+<hr>
+
+$R^2$ measures the **proportion of variance in $Y$ explained by the model**:
+
+$$R^2 = \frac{TSS - RSS}{TSS} = 1 - \frac{RSS}{TSS}$$
+
+where:
+
+- $TSS = \sum(y_i - \bar{y})^2$ — **total** variability in $Y$
+- $RSS = \sum(y_i - \hat{y}_i)^2$ — variability **unexplained** by the regression
+
+. . .
+
+$$\underbrace{TSS}_{\text{total variability}} - \underbrace{RSS}_{\text{unexplained}} = \underbrace{TSS - RSS}_{\text{explained by regression}}$$
+
+---
+
+## {#r2-interpret data-menu-title="Interpreting R²"}
+
+[Interpreting $R^2$]{.slide-title}
+
+<hr>
+
+<br>
+
+::: {.body-text-m}
+- $R^2 \in [0, 1]$ always
+
+- $R^2$ close to **1** → model explains most of the variability → good fit
+
+- $R^2$ close to **0** → $X$ alone is not capturing what drives $Y$
+  - Could mean: non-linear relationship, more predictors needed, high irreducible noise
+
+- What counts as "good" is **context-dependent**
+:::
+
+. . .
+
+<br>
+
+::: {.center-text .body-text-m .teal-text}
+Always look at your data — a high $R^2$ does not guarantee a good model!
+:::
+
+---
+
+## {#accuracy-table data-menu-title="Model accuracy: GreenAbate"}
+
+[Model accuracy: `co2_reduction` ~ `process`]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+acc_df = pd.DataFrame({
+    'Quantity': ['Residual standard error', 'R²'],
+    'Value':    [f'{RSE:.2f} ktCO₂e', f'{R2:.3f}']
+})
+print(acc_df.to_string(index=False))
+```
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x, fig_size_y - 0.5))
+
+axes[0].scatter(df['process'], df['co2_reduction'], s=12, alpha=0.4, color='steelblue')
+axes[0].plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2)
+for xi, yi in zip(df['process'], df['co2_reduction']):
+    axes[0].plot([xi, xi], [yi, b0 + b1 * xi], color='tomato', linewidth=0.5, alpha=0.5)
+axes[0].set_xlabel('Process upgrade spending ($K)')
+axes[0].set_ylabel('CO₂ reduction (ktCO₂e)')
+axes[0].set_title(f'Fit  |  RSE = {RSE:.2f}')
+axes[0].grid(True, alpha=0.3)
+
+axes[1].scatter(y_hat, df['co2_reduction'] - y_hat, s=12, alpha=0.5, color='steelblue')
+axes[1].axhline(0, color='gray', linewidth=1, linestyle='--')
+axes[1].set_xlabel('Fitted values $\\hat{y}_i$')
+axes[1].set_ylabel('Residuals $e_i$')
+axes[1].set_title(f'Residuals vs Fitted  |  $R^2$ = {R2:.3f}')
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#checkin-r2 data-menu-title="Check-in: R²" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">$R^2$ = `{python} f"{R2:.3f}"` and RSE = `{python} f"{RSE:.2f}"` ktCO₂e for the SLR on `process`.</p>
+<p class="custom-subtitle3">How would you interpret $R^2$ in plain language?</p>
+<p class="custom-subtitle3">Is RSE = `{python} f"{RSE:.2f}"` a good fit for a firm targeting 5 ktCO₂e/year? What about 25 ktCO₂e/year?</p>
+</div>
