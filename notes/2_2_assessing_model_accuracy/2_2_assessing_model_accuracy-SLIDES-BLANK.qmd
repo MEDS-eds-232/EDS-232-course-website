@@ -174,7 +174,24 @@ How do we know if $\hat{f}$ is any good?
 <p class="custom-subtitle bottombr">Mean Squared Error</p>
 </div>
 
+--
 
+## {#mse-definition-blank data-menu-title="Mean Squared Error"}
+
+[Mean Squared Error (MSE)]{.slide-title}
+
+<hr>
+
+::: {.center-text .body-text-m .teal-text}
+To evaluate the performance of a model on a given data set, we need some way to measure how well its predictions match the observed data. 
+:::
+
+
+For regression, the most common way to measure how close $\hat{f}$ is to the truth is the
+
+ <div style="position: absolute; bottom: 375px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+  </div>  
 
 ---
 
@@ -191,16 +208,15 @@ To evaluate the performance of a model on a given data set, we need some way to 
 
 For regression, the most common way to measure how close $\hat{f}$ is to the truth is the **mean squared error (MSE)**:
 
+
 $$\text{MSE} = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{f}(x_i))^2$$
 
 <br>
 
-. . .
 
 - Each term $y_i - \hat{f}(x_i)$ is called a **residual** , it is the difference between the true value and the prediction
 - Squaring makes all differences positive and penalizes large errors more
 
-. . .
 
 ::: {.center-text .body-text-m .teal-text}
 When computed on the training set, this is called the **training MSE**.
@@ -226,7 +242,7 @@ plt.xlabel('X')
 plt.ylabel('Y')
 plt.xlim(0, 100)
 plt.ylim(-150, 600)
-plt.legend(loc='upper left')
+plt.legend(loc='upper left', fontsize='x-large')
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -260,7 +276,7 @@ plt.xlabel('X')
 plt.ylabel('Y')
 plt.xlim(0, 100)
 plt.ylim(-150, 600)
-plt.legend(loc='upper left')
+plt.legend(loc='upper left', fontsize='x-large')
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -275,16 +291,19 @@ plt.close()
 <p class="custom-subtitle bottombr">Test data and the test MSE</p>
 </div>
 
-<!-- ---
-## {#exam-analogy data-menu-title="Exam analogy" background="#053660"}
 
-<div class="page-center vertical-center">
+## {#checkin-1 data-menu-title="Check-in" background="#053660"}
+
+<div class="vertical-center">
+
 <p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">If you were going to take a final exam, how would you prefer the instructor to create the questions?</p>
-<p class="custom-subtitle3">1. Take questions from assignments you already completed this quarter.</p>
-<p class="custom-subtitle3">2. Come up with new questions testing the material covered this quarter.</p>
-<p class="custom-subtitle3">On which set of questions would you expect to do better?</p>
-</div> -->
+
+If you were going to take a final exam, how would you prefer the instructor to create the questions?
+
+1. Have the exam questions be a subset of the homework questions you already completed this quarter.
+2. Come up with new questions you have not seen before. 
+</div>
+
 
 ---
 
@@ -294,7 +313,6 @@ plt.close()
 
 <hr>
 
-<br>
 
 A model will generally perform better when evaluated on the data it was trained on. 
 
@@ -338,7 +356,7 @@ plt.xlabel('X')
 plt.ylabel('Y')
 plt.xlim(0, 100)
 plt.ylim(-150, 600)
-plt.legend(loc='upper left')
+plt.legend(loc='upper left', fontsize='x-large')
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -388,7 +406,7 @@ plt.xlabel('X')
 plt.ylabel('Y')
 plt.xlim(0, 100)
 plt.ylim(-150, 600)
-plt.legend(loc='upper left')
+plt.legend(loc='upper left', fontsize='x-large')
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -401,6 +419,21 @@ plt.close()
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">Overfitting</p>
 </div>
+---
+
+## {#overfitting-def-blank data-menu-title="What is overfitting?"}
+
+[Overfitting]{.slide-title}
+
+<hr>
+
+One instance in which it is useful to calcualte both the *train MSE* and the *test MSE* is to understand when a model is overfitting. 
+
+ <div style="position: absolute; bottom: 470px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+  </div>  
+
+
 
 ---
 
@@ -423,7 +456,6 @@ We say a model is **overfitting** when it has a:
 
 <br>
 
-. . .
 
 ::: {.body-text-m .gray-text}
 > "Our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by random chance rather than by true properties of $f$." [@islp_2023]
@@ -448,7 +480,7 @@ plt.xlabel('X')
 plt.ylabel('Y')
 plt.xlim(0, 100)
 plt.ylim(-150, 600)
-plt.legend(loc='upper left')
+plt.legend(loc='upper left', fontsize='x-large')
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -474,7 +506,7 @@ plt.xlabel('X')
 plt.ylabel('Y')
 plt.xlim(0, 100)
 plt.ylim(-150, 600)
-plt.legend(fontsize=8)
+plt.legend(loc='upper left', fontsize='x-large')
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -482,7 +514,7 @@ plt.close()
 
 . . .
 
-Check-in: Which model do you think will have the lowest training MSE? The lowest test MSE?
+**Check-in:**  Which model do you think will have the lowest training MSE? The lowest test MSE?
 
 ---
 
@@ -506,7 +538,7 @@ for i, (f, c) in enumerate(zip(flexibility, colors)):
 plt.xlabel('Model flexibility (polynomial degree)')
 plt.ylabel('Mean Squared Error')
 plt.xticks(flexibility, ['1', '3', '15'])
-plt.legend(loc='upper center')
+plt.legend(loc='upper center', fontsize='large')
 plt.grid(False)
 plt.tight_layout()
 plt.show()
@@ -554,7 +586,7 @@ plt.xlabel('X')
 plt.ylabel('Y')
 plt.xlim(0, 100)
 plt.ylim(-150, 600)
-plt.legend()
+plt.legend(loc='upper left', fontsize='x-large')
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -613,7 +645,7 @@ plt.xlabel('X')
 plt.ylabel('Y')
 plt.xlim(0, 100)
 plt.ylim(-150, 600)
-plt.legend(loc='upper left')
+plt.legend(loc='upper left', fontsize='x-large')
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -650,7 +682,7 @@ ax.set_ylabel('Y')
 ax.set_xlim(0, 100)
 ax.set_ylim(-150, 600)
 ax.set_title('Linear')
-ax.legend(loc='upper left', fontsize=7)
+ax.legend(loc='upper left', fontsize='x-large')
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -670,7 +702,7 @@ ax.set_ylabel('Y')
 ax.set_xlim(0, 100)
 ax.set_ylim(-150, 600)
 ax.set_title('Degree 15')
-ax.legend(loc='upper left', fontsize=7)
+ax.legend(loc='upper left', fontsize='x-large')
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -777,7 +809,7 @@ for i, (f, c) in enumerate(zip(flexibility, colors)):
 plt.xlabel('Model flexibility (polynomial degree)')
 plt.ylabel('Mean Squared Error')
 plt.xticks(flexibility, ['1', '3', '15'])
-plt.legend(loc='upper center')
+plt.legend(loc='upper center', fontsize='large')
 plt.grid(False)
 plt.tight_layout()
 plt.show()
