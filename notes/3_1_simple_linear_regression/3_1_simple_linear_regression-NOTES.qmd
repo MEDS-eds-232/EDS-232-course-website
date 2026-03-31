@@ -4,7 +4,6 @@ jupyter: eds232-env
 ---
 
 ```{python}
-#| echo: false
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -87,12 +86,14 @@ A research consortium tracks **200 manufacturing firms** across different indust
 - **`offsets`** — carbon offset purchases (\$K/year)
 - **`co2_reduction`** — annual CO₂ emissions reduced (thousand metric tons, ktCO₂e)
 
-The central question is: *do these abatement investments actually drive emissions reductions, and if so, by how much?*
+The central question is: *do these investments actually drive emissions reductions, and if so, by how much?*
 
-The figure below shows `co2_reduction` plotted against each predictor separately — analogous to Figure 2.1 in the ISLP book. Each blue line is the simple least-squares fit of `co2_reduction` on that predictor alone.
+The figure below shows `co2_reduction` plotted against each predictor separately.
 
 ```{python}
-#| echo: false
+#| label: initial-data-plotting
+#| warning: false
+
 fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.4, fig_size_y))
 
 specs = [
@@ -110,13 +111,13 @@ for ax, (col, color, xlabel) in zip(axes, specs):
     ax.set_ylabel('CO₂ reduction (ktCO₂e)')
     ax.grid(True, alpha=0.3)
 
-plt.suptitle('GreenAbate dataset – CO₂ reduction vs. each abatement channel', y=1.01)
+plt.suptitle('GreenAbate dataset – CO₂ reduction vs. each reduction spending', y=1.01)
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
-`process` spending shows the strongest linear association with CO₂ reductions; `efficiency` spending shows a moderate relationship; `offsets` shows a weak one. In this lesson we focus on **simple linear regression** (one predictor at a time), using `process` as our primary example. We will bring in all three predictors in the next lesson on multiple linear regression.
+We can see the `process` spending shows the strongest linear association with CO₂ reductions; `efficiency` spending shows a moderate relationship; `offsets` shows a weak one. In this lesson we focus on **simple linear regression** (one predictor at a time), using `process` as our primary example. We will bring in all three predictors in the next lesson on multiple linear regression.
 
 ## Simple linear regression
 
@@ -144,7 +145,6 @@ For the GreenAbate dataset, using `process` as the sole predictor, SLR models CO
 $$\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}$$
 
 ```{python}
-#| echo: false
 model_proc = LinearRegression().fit(df[['process']], df['co2_reduction'])
 b0 = model_proc.intercept_
 b1 = model_proc.coef_[0]
@@ -172,7 +172,7 @@ plt.close()
 
 ## Estimating the coefficients
 
-### Residuals and RSS
+### Residuals and Residual sum of squares (RSS)
 
 Given $n$ training observations $(x_1, y_1), \ldots, (x_n, y_n)$, we want to find $\hat{\beta}_0$ and $\hat{\beta}_1$ such that the line $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x$ is as close as possible to the observed data. For this, we need to define what does "as close as possible" mean mathematically. 
 
@@ -188,7 +188,8 @@ $$RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0
 The **least squares** approach to fit the regression line chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to **minimize** the RSS. The residuals are shown as vertical segments below:
 
 ```{python}
-#| echo: false
+#| label: residuals
+
 rng = np.random.default_rng(0)
 idx = rng.choice(n, 50, replace=False)
 
@@ -289,6 +290,8 @@ $$[\hat{\beta}_i - 2 \cdot SE(\hat{\beta}_i), \hat{\beta}_i + 2 \cdot SE(\hat{\b
 
 This means there is approximately a 95% chance that the interval will contain the true vlaue for $\beta_1$. The "approximately" is becasue the factor of 2 will vary slightly with the numnber of observations used to perform the regression. Strictly speaking, this factor will come for the 97.5% quantile of a $t$-distribution with $n-2$ degrees of freedom. In practice, we use implemented methods in our computers to calculate these confidence intervals exactly. 
 
+::: {.callout-note}
+## Interpreting the confidence interval
 In general terms, we interpret the confidence interval for the slope $\hat{\beta}_1$ as follows:
 
 > *a 95% confidence inerval for $\beta_1$ is $[a_1, b_1]$ means that there's a 95% chance that for an average increase of one unit of $x$, there will be an average increase in $y$  between $a_1$ and $b_1$ units.*
@@ -297,7 +300,8 @@ and we interpret the confidence interval for hte intercetp $\hat{\beta}_0$ like
 
 > *a 95% confidence inerval for $\beta_0$ is $[a_0, b_0]$ means that there's a 95% chance that the linear model will intercept the $y$-axis between $a_0$ and $b_0$.*
 
-A **narrower** confidence interval means our estimate is more precise. This happens when the sample size $n$ is large and when the residual variance $\sigma^2$ is small.
+A narrower confidence interval means our estimate is more precise. This happens when the sample size $n$ is large and when the residual variance $\sigma^2$ is small.
+:::
 
 ::: {.callout-tip}
 ## Check-in
@@ -322,12 +326,12 @@ For the GreenAbate data, the SLR of `co2_reduction` on `process` gives a 95% CI 
 
 A fundamental question in regression is: is there actually a relationship between $X$ and $Y$? We frame this as a hypothesis test:
 
-- **Null hypothesis** $H_0$: there is no relationship between $X$ and $Y$, i.e., $\beta_1 = 0$
-- **Alternative hypothesis** $H_a$: there is some relationship between $X$ and $Y$, i.e., $\beta_1 \neq 0$
+- **Null hypothesis** $H_0$: there is no relationship between $X$ and $Y$, i.e., $\beta_1 = 0$.
+- **Alternative hypothesis** $H_a$: there is some relationship between $X$ and $Y$, i.e., $\beta_1 \neq 0$.
 
 Note what these imply for the model:
 
-- If $\beta_1 = 0$, then $\hat{Y} = \hat{\beta}_0$, which means the prediction is just a constant, $X$ carries no information about $Y$.
+- If $\beta_1 = 0$, then $\hat{Y} = \hat{\beta}_0$, which means the prediction is just a constant, so $X$ carries no information about $Y$.
 - If $\beta_1 \neq 0$, then $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X$ — $Y$ is related to $X$.
 
 ### The $t$-statistic & $p$-values
@@ -336,31 +340,36 @@ To test $H_0$, we need to determine whether $\hat{\beta}_1$ is sufficiently far 
 
 $$t = \frac{\hat{\beta}_1}{SE(\hat{\beta}_1)}$$
 
-which measures how many standard deviations $\hat{\beta}_1$ is away from 0. If there truly is no relationship ($\beta_1 = 0$), then $t$ follows a $t$-distribution with $n - 2$ degrees of freedom.
+which measures how many standard deviations $\hat{\beta}_1$ is away from 0. If there truly is no relationship between the variables ($\beta_1 = 0$), then $t$ follows a $t$-distribution with $n - 2$ degrees of freedom.
 
 The **$p$-value** is the probability of observing any number equal to the $t$-statistic $|t|$ or larger, assuming there is no relationship between the variables (i.e. assuming $H_0$ is true). Conventionally, $p < 0.05$ is used as a threshold for rejecting $H_0$, though the appropriate cutoff depends on context.
 
+::: {.callout-note}
+## Interpreting the $p$-value
 - A **small $p$-value** means it is very unlikely to have observed a $\hat{\beta}_1$ this far from 0 by chance alone, if $\beta_1$ were truly 0. We **reject** $H_0$ and conclude there is a relationship between $X$ and $Y$.
-- A **large $p$-value** means our data are consistent with $H_0$ — we **fail to reject** it.
+- A **large $p$-value** means our data are consistent with $H_0$,  so we do not reject $H_0$: it could be that there's no relationship between $X$ and $Y$!
+:::
 
 A summary of this story is:
 
-1. We want to know whether $X$ is related to $Y$
+1. We want to know whether $X$ is related to $Y$.
 
-2. We compute the $t$-statistic which is the number of standard deviations that $\hat{\beta}_1$ is away fron 0.
+2. We compute the $t$-statistic which is the number of standard deviations that $\hat{\beta}_1$ is away from 0.
 
 <!-- 3. Assuming $\beta_1=0$ (i.e. no relationship between $X$ and $Y$) and $n>30$, then $t$'s distribution is very similar to normal distribution.  -->
 
-4. We ask the question: *what is the probability that $|\hat{\beta}_1|$ is more than $t$ standard deviations away from zero if the true parameter is $\beta_1=0$?* This is the $p$-value
+4. We ask the question: *what is the probability that $|\hat{\beta}_1|$ is more than $t$ standard deviations away from zero if the true parameter is $\beta_1=0$?* This probability is the $p$-value.
 
 5. There are two options depending on the answer to this question:
-    - Option 1: small probability that $\hat{\beta}_1$ is that far away from 0 if the true parameter $\beta_1=0$: so the most likely scenario is that $\beta_1\neq0$, which means the variables are related
-    - Option 2: high probability that $\hat{\beta}_1$ is that far away from 0 is the true parameter $\beta_1=0$: maybe $\beta_1=0$ is really zero, which means maybe there is no relationship between the variables
+    - Option 1: small probability that $\hat{\beta}_1$ is that far away from 0 if the true parameter $\beta_1=0$: so the most likely scenario is that $\beta_1\neq0$, which means the variables are related.
+    - Option 2: high probability that $\hat{\beta}_1$ is that far away from 0 is the true parameter $\beta_1=0$: maybe $\beta_1=0$ is really zero, which means maybe there is no relationship between the variables.
 
-The table below (analogous to Table 3.1 in ISLP) shows the regression output for the SLR of `co2_reduction` on `process`:
+::: {.callout-tip}
+## Check-in
+
+The table below shows the regression output for the SLR of `co2_reduction` on `process`:
 
 ```{python}
-#| echo: false
 X_ols = sm.add_constant(df['process'])
 res   = sm.OLS(df['co2_reduction'], X_ols).fit()
 
@@ -377,13 +386,10 @@ coef_df = pd.DataFrame({
 print(coef_df.to_string(index=False))
 ```
 
-::: {.callout-tip}
-## Check-in
-
 Looking at the regression output above:
 
 1. What does the $p$-value for `process` tell us about the relationship between process upgrade spending and CO₂ reductions?
-2. The intercept also has a very small $p$-value. Does this mean the intercept is an important predictor of CO₂ reductions?
+2. The intercept also has a very small $p$-value. What does this mean about the intercept estimate?
 3. How would you interpret the coefficient for `process` in plain language?
 :::
 
@@ -392,7 +398,7 @@ Looking at the regression output above:
 
 1. The very small $p$-value for `process` gives strong evidence that $\beta_1 \neq 0$ — there is a statistically significant positive relationship between process upgrade investment and CO₂ emissions reductions.
 
-2. The $p$-value for the intercept tests $H_0: \beta_0 = 0$, not whether the intercept is a useful predictor. A significant intercept simply means the regression line does not pass through the origin — there is some baseline CO₂ reduction even at zero process spending (likely from other firm-level factors not captured in the model). The intercept's $p$-value is rarely the question of interest.
+2. The $p$-value for the intercept tests $H_0: \beta_0 = 0$, not whether the intercept is a useful predictor. A significant intercept simply means the regression line does not pass through the origin. There is likely some baseline CO₂ reduction even at zero process spending (likely from other firm-level factors not captured in the model). The intercept's $p$-value is rarely the question of interest.
 
 3. A coefficient of roughly 0.046 means that, on average, each additional \$1K invested in cleaner production processes is associated with approximately 0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction per year.
 :::
@@ -413,8 +419,10 @@ It represents the average amount by which the response deviates from the true re
 ## Interpreting RSE
 
 - A small RSE occurs when the residuals $y_i - \hat{y}_i$ are close to 0, meaning our predictions are near the actual values.
-- *RSE is measured in the same units as $Y$*, which makes it interpretable but also context-dependent. For the GreenAbate data, if RSE ≈ 3.26 ktCO₂e, that means our predictions are off by about 3,260 metric tons on average — whether that is acceptable depends on the scale of reductions in the dataset and the firm's targets.
+- *RSE is measured in the same units as $Y$*, which makes it interpretable but also context-dependent. 
 :::
+
+For the GreenAbate data, if RSE ≈ 3.26 ktCO₂e, that means our predictions are off by about 3,260 metric tons on average — whether that is acceptable depends on the scale of reductions in the dataset and the firm's targets.
 
 ### $R^2$ statistic
 
@@ -434,7 +442,7 @@ $$R^2 = \frac{TSS - RSS}{TSS}.$$
 
 So $R^2$ is the fraction of variability that the model accounts for:
 
-$$R^2 = \frac{\text{variability explained by regression}}{\text{total variability in }Y}/$$
+$$R^2 = \frac{\text{variability explained by regression}}{\text{total variability in }Y}.$$
 
 ::: {.callout-note}
 ## Interpreting $R^2$
@@ -443,6 +451,7 @@ $$R^2 = \frac{\text{variability explained by regression}}{\text{total variabilit
 - $R^2$ close to **1**: the model explains most of the variability in $Y$: a good fit.
 - $R^2$ close to **0**: the model explains little of the variability: $X$ alone is not capturing much of what drives $Y$. This could mean the true relationship is non-linear, the model needs more predictors, or there is a lot of irreducible noise.
 - What counts as a "good" $R^2$ is context-dependent.
+- **You should always look at your data to assess linearity and an existing relationship!**
 :::
 
 <!-- ### Relationship between $R^2$ and correlation
@@ -457,10 +466,14 @@ $$\text{Cor}(X, Y) = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\
 
 This relationship only holds for SLR — once we move to multiple predictors, $R^2$ and correlation diverge. -->
 
-The table below (analogous to Table 3.2 in ISLP) summarizes the accuracy of the SLR of `co2_reduction` on `process`:
+::: {.callout-tip}
+## Check-in
+
+The table below summarizes the accuracy of the SLR of `co2_reduction` on `process`:
 
 ```{python}
-#| echo: false
+#| label: R2-calculation
+
 y_hat = model_proc.predict(df[['process']])
 y_bar = df['co2_reduction'].mean()
 TSS   = np.sum((df['co2_reduction'] - y_bar)**2)
@@ -476,58 +489,18 @@ acc_df = pd.DataFrame({
 print(acc_df.to_string(index=False))
 ```
 
-```{python}
-#| echo: false
-rng2 = np.random.default_rng(1)
-idx2 = rng2.choice(n, 50, replace=False)
-
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x, fig_size_y))
-
-# Left: fit with residuals
-axes[0].scatter(df['process'], df['co2_reduction'], s=15, alpha=0.4, color='steelblue')
-axes[0].plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2)
-for ix in idx2:
-    xi = df['process'].iloc[ix]; yi = df['co2_reduction'].iloc[ix]
-    axes[0].plot([xi, xi], [yi, b0 + b1 * xi], color='tomato', linewidth=0.8)
-axes[0].set_xlabel('Process upgrade spending ($K)')
-axes[0].set_ylabel('CO₂ reduction (ktCO₂e)')
-axes[0].set_title(f'Fit  |  RSE = {RSE:.2f}')
-axes[0].grid(True, alpha=0.3)
-
-# Right: residuals vs fitted
-axes[1].scatter(y_hat, df['co2_reduction'] - y_hat, s=15, alpha=0.5, color='steelblue')
-axes[1].axhline(0, color='gray', linewidth=1, linestyle='--')
-axes[1].set_xlabel('Fitted values $\\hat{y}_i$')
-axes[1].set_ylabel('Residuals $e_i$')
-axes[1].set_title(f'Residuals vs Fitted  |  $R^2$ = {R2:.3f}')
-axes[1].grid(True, alpha=0.3)
-
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-::: {.callout-tip}
-## Check-in
-
 For the GreenAbate SLR of `co2_reduction` on `process`:
 
-1. The $R^2$ is approximately 0.61. How would you interpret this in plain language?
-2. What does the residuals vs fitted plot suggest about the model fit?
-3. Looking at the three scatter plots from earlier, would you expect the SLR of `co2_reduction` on `efficiency` to have a higher or lower $R^2$ than the one on `process`?
+The $R^2$ is approximately 0.61. How would you interpret this in plain language?
 :::
 
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-1. An $R^2$ of 0.61 means that approximately 61% of the variability in CO₂ reductions across firms can be explained by variation in process upgrade spending alone.
-
-2. The residuals vs fitted plot shows residuals roughly centered around zero with no strong pattern — a good sign. However, the spread is substantial, indicating that `process` alone does not fully account for CO₂ reductions. Information in `efficiency` and `offsets` is not yet being used.
-
-3. From the scatter plots, `efficiency` spending shows a weaker linear association with CO₂ reductions than `process` does, so we would expect its SLR $R^2$ to be lower than 0.61.
+An $R^2$ of 0.61 means that approximately 61% of the variability in CO₂ reductions across firms can be explained by variation in process upgrade spending alone.
 :::
 
-## Recap
+<!-- ## Recap
 
 What we covered in this lesson:
 
@@ -539,4 +512,4 @@ What we covered in this lesson:
 - $p$-value: probability of observing results there were no variable relation $(H_0)$; small $p$-value → reject $H_0$
 - $R^2$: proportion of variance in $Y$ explained by $X$
 
-Next class: multiple linear regression.
+Next class: multiple linear regression. -->
