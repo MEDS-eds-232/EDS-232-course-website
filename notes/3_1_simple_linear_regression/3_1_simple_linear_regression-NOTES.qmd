@@ -94,7 +94,7 @@ The figure below shows `co2_reduction` plotted against each predictor separately
 #| label: initial-data-plotting
 #| warning: false
 
-fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.4, fig_size_y))
+fig, axes = plt.subplots(3, 1, figsize=(fig_size_x, fig_size_y * 3))
 
 specs = [
     ('process',    'steelblue',  'Process upgrades ($K)'),
@@ -103,15 +103,16 @@ specs = [
 ]
 
 for ax, (col, color, xlabel) in zip(axes, specs):
-    m = LinearRegression().fit(df[[col]], df['co2_reduction'])
-    x_line = np.linspace(df[col].min(), df[col].max(), 200).reshape(-1, 1)
     ax.scatter(df[col], df['co2_reduction'], s=15, alpha=0.5, color=color)
-    ax.plot(x_line, m.predict(x_line), 'b-', linewidth=2)
     ax.set_xlabel(xlabel)
     ax.set_ylabel('CO₂ reduction (ktCO₂e)')
     ax.grid(True, alpha=0.3)
 
-plt.suptitle('GreenAbate dataset – CO₂ reduction vs. each reduction spending', y=1.01)
+fig.suptitle(
+    'GreenAbate dataset – CO₂ reduction vs. each abatement channel\n'
+    '*Synthetic data generated for educational purposes only*',
+    y=1.01
+)
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -150,6 +151,10 @@ b0 = model_proc.intercept_
 b1 = model_proc.coef_[0]
 x_line = np.linspace(0, 300, 300)
 
+# statsmodels fit (needed for SEs, CIs, p-values throughout)
+X_ols = sm.add_constant(df['process'])
+res   = sm.OLS(df['co2_reduction'], X_ols).fit()
+
 plt.figure(figsize=(fig_size_x, fig_size_y))
 plt.scatter(df['process'], df['co2_reduction'], s=20, alpha=0.5, color='steelblue', label='Observed data')
 plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
@@ -168,6 +173,13 @@ plt.close()
 - In the context of this problem, what does $\hat{\beta}_0$ represent?
 - What does $\hat{\beta}_1$ represent?
 - If a firm spends \$150K on process upgrades, what is the model's predicted CO₂ reduction?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+- $\hat{\beta}_0$ is the **intercept**: the model's predicted CO₂ reduction for a firm that spends \$0 on process upgrades. In practice this baseline reflects reductions driven by factors other than process spending that are not captured in the model.
+- $\hat{\beta}_1$ is the **slope**: the average increase in CO₂ reduction (in ktCO₂e) associated with each additional \$1K spent on process upgrades. A positive $\hat{\beta}_1$ means that higher process investment is associated with greater reductions.
+- At $x = 150$ we have that $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 \cdot 150$. With the fitted values from the model this gives approximately `{python} f"{b0 + b1 * 150:.2f}"` ktCO₂e.
 :::
 
 ## Estimating the coefficients
@@ -190,19 +202,14 @@ The **least squares** approach to fit the regression line chooses $\hat{\beta}_0
 ```{python}
 #| label: residuals
 
-rng = np.random.default_rng(0)
-idx = rng.choice(n, 50, replace=False)
-
 plt.figure(figsize=(fig_size_x, fig_size_y))
 plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.4, color='steelblue', zorder=2, label='Observed data')
 plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5, zorder=3, label='Fitted line')
 
-for i, ix in enumerate(idx):
-    xi     = df['process'].iloc[ix]
-    yi     = df['co2_reduction'].iloc[ix]
+for i, (xi, yi) in enumerate(zip(df['process'], df['co2_reduction'])):
     yi_hat = b0 + b1 * xi
     lbl = 'Residual $e_i = y_i - \\hat{y}_i$' if i == 0 else None
-    plt.plot([xi, xi], [yi, yi_hat], color='tomato', linewidth=0.9, label=lbl, zorder=1)
+    plt.plot([xi, xi], [yi, yi_hat], color='tomato', linewidth=0.6, alpha=0.6, label=lbl, zorder=1)
 
 plt.xlabel('Process upgrade spending ($K)')
 plt.ylabel('CO₂ reduction (ktCO₂e)')
@@ -303,21 +310,32 @@ and we interpret the confidence interval for hte intercetp $\hat{\beta}_0$ like
 A narrower confidence interval means our estimate is more precise. This happens when the sample size $n$ is large and when the residual variance $\sigma^2$ is small.
 :::
 
+
 ::: {.callout-tip}
 ## Check-in
 
-For the GreenAbate data, the SLR of `co2_reduction` on `process` gives a 95% CI for $\beta_1$ of approximately $[0.039,\; 0.053]$.
+The exact 95% confidence intervals for each coefficient is:
+```{python}
+ci = res.conf_int(alpha=0.05)
+ci_b1_low  = ci.loc['process', 0]
+ci_b1_high = ci.loc['process', 1]
+ci_b0_low  = ci.loc['const', 0]
+ci_b0_high = ci.loc['const', 1]
 
-1. What does this interval tell us about the relationship between process upgrade spending and CO₂ reductions?
-2. What if the interval had been $[-0.002,\; 0.053]$ instead?
+print(f"95% CI for β₀ (intercept): [{ci_b0_low:.3f}, {ci_b0_high:.3f}]")
+print(f"95% CI for β₁ (process):   [{ci_b1_low:.3f}, {ci_b1_high:.3f}]")
+```
+
+1. What does the CI [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] tell us about the relationship between process upgrade spending and CO₂ reductions?
+2. What if the interval had been [-0.002,  `{python} f"{ci_b1_high:.3f}"`] instead?
 :::
 
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-1. An interval of $[0.039, 0.053]$ tells us that, with high confidence, the slope is **positive**: firms that invest more in cleaner production processes achieve greater CO₂ reductions. Since the entire interval is above 0, we have strong evidence of a real relationship. More precisely, each additional \$1K in process spending is associated with a reduction of between 0.039 and 0.053 ktCO₂e per year on average.
+1. The entire interval [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] is above 0, so with 95% confidence the slope is positive: firms that invest more in cleaner production processes achieve greater CO₂ reductions. Each additional \$1K in process spending is associated with a reduction of between `{python} f"{ci_b1_low:.3f}"` and `{python} f"{ci_b1_high:.3f}"` ktCO₂e per year on average.
 
-2. An interval of $[-0.002, 0.053]$ includes 0. We cannot rule out that $\beta_1 = 0$, meaning we cannot confidently conclude that process spending drives reductions. Wider intervals generally arise from smaller samples or noisier data.
+2. An interval of [-0.002,  `{python} f"{ci_b1_high:.3f}"`] includes 0. We cannot rule out that $\beta_1 = 0$, meaning we cannot confidently conclude that process spending drives reductions. Wider intervals generally arise from smaller samples or noisier data.
 :::
 
 ## Hypothesis testing
@@ -370,9 +388,6 @@ A summary of this story is:
 The table below shows the regression output for the SLR of `co2_reduction` on `process`:
 
 ```{python}
-X_ols = sm.add_constant(df['process'])
-res   = sm.OLS(df['co2_reduction'], X_ols).fit()
-
 def fmt_p(p):
     return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
 
@@ -419,10 +434,23 @@ It represents the average amount by which the response deviates from the true re
 ## Interpreting RSE
 
 - A small RSE occurs when the residuals $y_i - \hat{y}_i$ are close to 0, meaning our predictions are near the actual values.
-- *RSE is measured in the same units as $Y$*, which makes it interpretable but also context-dependent. 
+- *RSE is measured in the same units as $Y$*, which makes it interpretable but also context-dependent.
 :::
 
-For the GreenAbate data, if RSE ≈ 3.26 ktCO₂e, that means our predictions are off by about 3,260 metric tons on average — whether that is acceptable depends on the scale of reductions in the dataset and the firm's targets.
+::: {.callout-tip}
+## Check-in
+For the GreenAbate data, the RSE of the SLR on `process` is approximately 3.26 ktCO₂e. This means predictions are off by about 3,260 metric tons on average. Is this a good or bad fit? What additional information would you need to judge this?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+Whether an RSE of 3.26 ktCO₂e is acceptable depends on context. A few ways to judge it:
+
+- **Relative to the response range**: CO₂ reductions in the dataset range roughly from 3 to 27 ktCO₂e, so an average error of 3.26 represents about 12–15% of the response range. That is a moderate error — not great, but not terrible.
+- **Relative to the mean response**: the mean reduction is around 14 ktCO₂e, so the RSE is about 23% of the mean. This suggests the model has meaningful predictive error.
+- **Relative to the firm's target**: if a firm has committed to reducing 5 ktCO₂e per year, an average prediction error of 3.26 is large relative to their target. For a firm targeting 25 ktCO₂e, it may be acceptable.
+- **By adding more predictors**: we are only using `process` here. Including `efficiency` and `offsets` in a multiple regression model should reduce the RSE substantially.
+:::
 
 ### $R^2$ statistic
 
@@ -480,24 +508,26 @@ TSS   = np.sum((df['co2_reduction'] - y_bar)**2)
 RSS   = np.sum((df['co2_reduction'] - y_hat)**2)
 R2    = 1 - RSS / TSS
 RSE   = np.sqrt(RSS / (n - 2))
-F     = res.fvalue
 
 acc_df = pd.DataFrame({
-    'Quantity': ['Residual standard error', 'R²', 'F-statistic'],
-    'Value':    [f'{RSE:.2f}', f'{R2:.3f}', f'{F:.1f}']
+    'Quantity': ['Residual standard error', 'R²'],
+    'Value':    [f'{RSE:.2f}', f'{R2:.3f}']
 })
 print(acc_df.to_string(index=False))
 ```
 
-For the GreenAbate SLR of `co2_reduction` on `process`:
+For the GreenAbate SLR of `co2_reduction` on `process`, RSE = `{python} f"{RSE:.2f}"` ktCO₂e and $R^2$ = `{python} f"{R2:.3f}"`.
 
-The $R^2$ is approximately 0.61. How would you interpret this in plain language?
+1. How would you interpret the $R^2$ value in plain language?
+2. The RSE is `{python} f"{RSE:.2f}"` ktCO₂e. Thinking back to the RSE check-in, is this model a good fit for a firm with an annual CO₂ reduction target of 5 ktCO₂e? What about a firm targeting 25 ktCO₂e?
 :::
 
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-An $R^2$ of 0.61 means that approximately 61% of the variability in CO₂ reductions across firms can be explained by variation in process upgrade spending alone.
+1. An $R^2$ of `{python} f"{R2:.3f}"` means that approximately `{python} f"{R2*100:.1f}"`% of the variability in CO₂ reductions across firms is explained by variation in process upgrade spending alone. The remaining ~`{python} f"{(1-R2)*100:.1f}"`% of variability is driven by other factors not included in this model — such as efficiency upgrades, offsets, firm size, or industry type.
+
+2. An RSE of `{python} f"{RSE:.2f}"` ktCO₂e (≈ `{python} f"{RSE*1000:.0f}"` metric tons) is large relative to, for example, a 5 ktCO₂e reduction target. A prediction error of that magnitude could meaningfully mislead decisions for a small-target firm. For a firm targeting 25 ktCO₂e, the same RSE represents roughly `{python} f"{RSE/25*100:.0f}"`% of the target, which may or may not be acceptable depending on how precise their planning needs to be.
 :::
 
 <!-- ## Recap
