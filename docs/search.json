@@ -15,200 +15,494 @@
     "href": "notes/week-by-week/week-by-week.html#week-1",
     "title": "Week by week",
     "section": "Week 1",
-    "text": "Week 1\n\n\n\n\n\n\nNoteWhat happened\n\n\n\n\n\n\nClass 1 (Tuesday)\n\n\n\n\n\n\nWarningPreparation for lab\n\n\n\nSetup\n\n\n\n\nClass 2 (Thursday)",
+    "text": "Week 1\n\n\n\n\n\n\nWhat happened\n\n\n\n\n\n\nClass 1 (Tuesday)\n\n\n\n\n\n\nPreparation for lab\n\n\n\nSetup\n\n\n\n\nClass 2 (Thursday)",
     "crumbs": [
       "notes",
       "Week by week"
     ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#title-slide",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#title-slide",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html",
+    "title": "Simple linear regression",
     "section": "",
-    "text": "EDS 232\n\nLesson 3\nTraining and test errors, and model flexibility"
+    "text": "Code\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport pandas as pd\nfrom sklearn.linear_model import LinearRegression\nimport statsmodels.api as sm\n\nplt.style.use('default')\nfig_size_x = 8\nfig_size_y = 4\nplt.rcParams['font.size'] = 10\n\n# ── GreenAbate synthetic dataset ───────────────────────────────────────────────────────\n# 200 manufacturing firms tracked on three abatement spending channels and\n# their resulting annual CO₂ emissions reduction.\n#\n# Predictors (annual spending, $K):\n#   process    – investment in cleaner production processes        (≈ TV)\n#   efficiency – energy efficiency upgrades                        (≈ radio)\n#   offsets    – carbon offset purchases                           (≈ newspaper)\n#\n# Response:\n#   co2_reduction – annual CO₂ emissions reduced (thousand metric tons, ktCO₂e)\n#\n# True data-generating model (mirrors ISLP Advertising, Ch. 3):\n#   co2_reduction = 2.939 + 0.046·process + 0.189·efficiency − 0.001·offsets + ε\n#   ε ~ N(0, 1.69²)\n# ─────────────────────────────────────────────────────────────────────────────\nnp.random.seed(7)\nn = 200\n\nprocess    = np.random.uniform(0, 300, n)\nefficiency = np.random.uniform(0,  50, n)\noffsets    = np.random.uniform(0, 100, n)\n\nco2_reduction = (2.939\n                 + 0.046  * process\n                 + 0.189  * efficiency\n                 - 0.001  * offsets\n                 + np.random.normal(0, 1.69, n))\n\ndf = pd.DataFrame({\n    'process':       process,\n    'efficiency':    efficiency,\n    'offsets':       offsets,\n    'co2_reduction': co2_reduction\n})\nIn this lesson we introduce:\nThese notes are based on chapter 3.1 of An Introduction to Statistical Learning with Applications in Python (James et al. 2023). The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson based on the data in ISLP used in Figure 2.1.",
+    "crumbs": [
+      "notes",
+      "Linear regression",
+      "Simple linear regression"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#in-this-lesson",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#in-this-lesson",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "In this lesson\n\n\nTraining and test MSE\n\n\n\nOverfitting\n\n\n\nModel bias and variance\n\n\n\nThe bias-variance tradeoff"
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#motivating-questions",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#motivating-questions",
+    "title": "Simple linear regression",
+    "section": "Motivating questions",
+    "text": "Motivating questions\nRegression is a method for estimating and studying the relationship between one or more predictors and a response variable. It allows us to investigate answers to questions such as:\n\nIs there a relationship between the predictor(s) and the response?\nHow strong is that relationship?\nWhich predictors are actually associated with the response?\nHow large is the effect of each predictor on the response?\nIs the relationship linear?\nHow accurately can we predict the response for a given combination of predictor values?\n\nWe do not need to answer all of these at once. We can select the questions that matter most for our specific goal, depending on whether we are doing inference or prediction.\nLinear regression can be really useful for addressing all of these questions. Unlike more flexible methods that may prioritize prediction accuracy, linear regression supports direct inference: you can interpret the coefficients, compute confidence intervals, and test hypotheses about the relationship between variables.",
+    "crumbs": [
+      "notes",
+      "Linear regression",
+      "Simple linear regression"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#notation-recap",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#notation-recap",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Notation recap\n\nWe have a training set of \\(n\\) observed data points:\n\\[\\{(x_1, y_1),\\, \\ldots,\\, (x_n, y_n)\\}\\]\n\n\\(x_i\\) = predictor information for observation \\(i\\)\n\\(y_i\\) = response variable for observation \\(i\\)\n\n\n\nWe assume \\(f\\) is the unknown true function, so \\(f(x_i) = y_i\\).\nWe train a model on these data points to obtain an estimate \\(\\hat{f}\\).\n\n\nHow do we know if \\(\\hat{f}\\) is any good?"
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#a-guiding-example-the-greenabate-dataset",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#a-guiding-example-the-greenabate-dataset",
+    "title": "Simple linear regression",
+    "section": "A guiding example: the GreenAbate dataset",
+    "text": "A guiding example: the GreenAbate dataset\nA research consortium tracks 200 manufacturing firms across different industries and regions. For each firm they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:\n\nprocess — investment in cleaner production processes ($K/year)\nefficiency — energy efficiency upgrades ($K/year)\noffsets — carbon offset purchases ($K/year)\nco2_reduction — annual CO₂ emissions reduced (thousand metric tons, ktCO₂e)\n\nThe central question is: do these investments actually drive emissions reductions, and if so, by how much?\nThe figure below shows co2_reduction plotted against each predictor separately.\n\n\nCode\nfig, axes = plt.subplots(3, 1, figsize=(fig_size_x, fig_size_y * 3))\n\nspecs = [\n    ('process',    'steelblue',  'Process upgrades ($K)'),\n    ('efficiency', 'darkorange', 'Efficiency upgrades ($K)'),\n    ('offsets',    'seagreen',   'Carbon offsets ($K)'),\n]\n\nfor ax, (col, color, xlabel) in zip(axes, specs):\n    ax.scatter(df[col], df['co2_reduction'], s=15, alpha=0.5, color=color)\n    ax.set_xlabel(xlabel)\n    ax.set_ylabel('CO₂ reduction (ktCO₂e)')\n    ax.grid(True, alpha=0.3)\n\nfig.suptitle(\n    'GreenAbate dataset – CO₂ reduction vs. each abatement channel\\n'\n    '*Synthetic data generated for educational purposes only*',\n    y=1.01\n)\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\nWe can see the process spending shows the strongest linear association with CO₂ reductions; efficiency spending shows a moderate relationship; offsets shows a weak one. In this lesson we focus on simple linear regression (one predictor at a time), using process as our primary example. We will bring in all three predictors in the next lesson on multiple linear regression.",
+    "crumbs": [
+      "notes",
+      "Linear regression",
+      "Simple linear regression"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-mse",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-mse",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Mean Squared Error"
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#simple-linear-regression",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#simple-linear-regression",
+    "title": "Simple linear regression",
+    "section": "Simple linear regression",
+    "text": "Simple linear regression\nSimple linear regression (SLR) assumes a (roughly) linear relationship between a single predictor \\(X\\) and a response \\(Y\\). The model is given by\n\\[Y \\approx \\beta_0 + \\beta_1 X\\]\nwhere\n\n\\(\\beta_0\\) is the y-intercept: the value of \\(Y\\) when \\(X = 0\\),\n\\(\\beta_1\\) is the slope: the average change in \\(Y\\) for a one-unit increase in \\(X\\).\n\nTogether, \\(\\beta_0\\) and \\(\\beta_1\\) are the model coefficients (also called parameters). They define the true underlying function \\(f\\) that maps \\(X\\) to \\(Y\\).\nIn practice, we do not know the true \\(\\beta_0\\) and \\(\\beta_1\\), so we estimate them from data. Given estimates \\(\\hat{\\beta}_0\\) and \\(\\hat{\\beta}_1\\), our prediction for \\(Y\\) at a value \\(x\\) is\n\\[\\hat{y} = \\hat{\\beta}_0 + \\hat{\\beta}_1 x = \\hat{f}(x).\\]\nRemember the “hat” notation (\\(\\hat{\\ }\\)) throughout these notes indicates an estimated quantity, not the true, unknown population value.\nFor the GreenAbate dataset, using process as the sole predictor, SLR models CO₂ reductions as\n\\[\\texttt{co2\\_reduction} \\approx \\hat{\\beta}_0 + \\hat{\\beta}_1 \\cdot \\texttt{process}\\]\n\n\nCode\nmodel_proc = LinearRegression().fit(df[['process']], df['co2_reduction'])\nb0 = model_proc.intercept_\nb1 = model_proc.coef_[0]\nx_line = np.linspace(0, 300, 300)\n\n# statsmodels fit (needed for SEs, CIs, p-values throughout)\nX_ols = sm.add_constant(df['process'])\nres   = sm.OLS(df['co2_reduction'], X_ols).fit()\n\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.scatter(df['process'], df['co2_reduction'], s=20, alpha=0.5, color='steelblue', label='Observed data')\nplt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,\n         label=f'Fitted line: $\\\\hat{{y}} = {b0:.2f} + {b1:.4f}\\\\,x$')\nplt.xlabel('Process upgrade spending ($K)')\nplt.ylabel('CO₂ reduction (ktCO₂e)')\nplt.grid(True, alpha=0.3)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\n\nIn the context of this problem, what does \\(\\hat{\\beta}_0\\) represent?\nWhat does \\(\\hat{\\beta}_1\\) represent?\nIf a firm spends $150K on process upgrades, what is the model’s predicted CO₂ reduction?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\n\\(\\hat{\\beta}_0\\) is the intercept: the model’s predicted CO₂ reduction for a firm that spends $0 on process upgrades. In practice this baseline reflects reductions driven by factors other than process spending that are not captured in the model.\n\\(\\hat{\\beta}_1\\) is the slope: the average increase in CO₂ reduction (in ktCO₂e) associated with each additional $1K spent on process upgrades. A positive \\(\\hat{\\beta}_1\\) means that higher process investment is associated with greater reductions.\nAt \\(x = 150\\) we have that \\(\\hat{y} = \\hat{\\beta}_0 + \\hat{\\beta}_1 \\cdot 150\\). With the fitted values from the model this gives approximately 14.59 ktCO₂e.",
+    "crumbs": [
+      "notes",
+      "Linear regression",
+      "Simple linear regression"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#mse-definition",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#mse-definition",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Mean Squared Error (MSE)\n\n\nTo evaluate the performance of a model on a given data set, we need some way to measure how well its predictions match the observed data.\n\nFor regression, the most common way to measure how close \\(\\hat{f}\\) is to the truth is the mean squared error (MSE):\n\\[\\text{MSE} = \\frac{1}{n} \\sum_{i=1}^n (y_i - \\hat{f}(x_i))^2\\]\n\n\n\nEach term \\(y_i - \\hat{f}(x_i)\\) is called a residual , it is the difference between the true value and the prediction\nSquaring makes all differences positive and penalizes large errors more\n\n\n\n\nWhen computed on the training set, this is called the training MSE."
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#estimating-the-coefficients",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#estimating-the-coefficients",
+    "title": "Simple linear regression",
+    "section": "Estimating the coefficients",
+    "text": "Estimating the coefficients\n\nResiduals and Residual sum of squares (RSS)\nGiven \\(n\\) training observations \\((x_1, y_1), \\ldots, (x_n, y_n)\\), we want to find \\(\\hat{\\beta}_0\\) and \\(\\hat{\\beta}_1\\) such that the line \\(\\hat{y} = \\hat{\\beta}_0 + \\hat{\\beta}_1 x\\) is as close as possible to the observed data. For this, we need to define what does “as close as possible” mean mathematically.\nIn our previous lesson we had talked about the residual for observation \\(i\\) being the difference between the observed response and the predicted response:\n\\[y_i - \\hat{y}_i = y_i - \\hat{\\beta}_0 - \\hat{\\beta}_1 x_i.\\]\nThe residual sum of squares (RSS) totals the squared residuals across all observations:\n\\[RSS = \\sum_{i=1}^{n} (y_i - \\hat{y}_i)^2 = \\sum_{i=1}^{n} (y_i - \\hat{\\beta}_0 - \\hat{\\beta}_1 x_i)^2.\\]\nThe least squares approach to fit the regression line chooses \\(\\hat{\\beta}_0\\) and \\(\\hat{\\beta}_1\\) to minimize the RSS. The residuals are shown as vertical segments below:\n\n\nCode\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.4, color='steelblue', zorder=2, label='Observed data')\nplt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5, zorder=3, label='Fitted line')\n\nfor i, (xi, yi) in enumerate(zip(df['process'], df['co2_reduction'])):\n    yi_hat = b0 + b1 * xi\n    lbl = 'Residual $e_i = y_i - \\\\hat{y}_i$' if i == 0 else None\n    plt.plot([xi, xi], [yi, yi_hat], color='tomato', linewidth=0.6, alpha=0.6, label=lbl, zorder=1)\n\nplt.xlabel('Process upgrade spending ($K)')\nplt.ylabel('CO₂ reduction (ktCO₂e)')\nplt.grid(True, alpha=0.3)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\nMinimizing the RSS using calculus gives the following formulas:\n\\[\\hat{\\beta}_1 = \\frac{\\sum_{i=1}^{n}(x_i - \\bar{x})(y_i - \\bar{y})}{\\sum_{i=1}^{n}(x_i - \\bar{x})^2}, \\text{and}\\]\n\\[\\hat{\\beta}_0 = \\bar{y} - \\hat{\\beta}_1 \\bar{x},\\]\nwhere \\(\\bar{x} = \\frac{1}{n}\\sum x_i\\) and \\(\\bar{y} = \\frac{1}{n}\\sum y_i\\) are the sample means.\nTwo important points:\n\nThe optimal \\(\\hat{\\beta}_0\\) and \\(\\hat{\\beta}_1\\) depend entirely on the training data. Feed the same model different data and you get different estimates. This is the source of estimation uncertainty.\nIn practice, the computer computes these for you. The key is understanding what the estimates represent, not memorizing the algebra.\n\n\n\n\n\n\n\nWhat is the relation between the RSS and the MSE?\n\n\n\nIn the last lession we talked about the mean squared error (MSE) as a way to measure how close any estimate \\(\\hat{f}\\) is to the observed data:\n\\[ MSE = \\frac{1}{n} \\sum_{i=1}^n(y_i - \\hat{f}(x_i))^2. \\]\nNotice that the MSE is the average of the RSS:\n\\[RSS = \\sum_{i=1}^{n} (y_i - \\hat{f}(x_i))^2.\\]\nSince \\(n\\) is a positive constant, minimizing the MSE and minimizing the RSS would give the same estimates for the coefficients \\(\\hat{\\beta}_i\\).\nHowever, the averaging by the dataset’s size in the MSE allows the MSE to be more meaningful as an error metric that is comparable across datasets. The RSS will always grow with as the number of observations increases.",
+    "crumbs": [
+      "notes",
+      "Linear regression",
+      "Simple linear regression"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-data-plot",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-data-plot",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Training data and true \\(f\\)\n\nBelow we have simulated train data based on the true underlying function \\(f\\) (black line)."
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#accuracy-of-the-coefficient-estimates",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#accuracy-of-the-coefficient-estimates",
+    "title": "Simple linear regression",
+    "section": "Accuracy of the coefficient estimates",
+    "text": "Accuracy of the coefficient estimates\n\nStandard errors\nOnce we have \\(\\hat{\\beta}_0\\) and \\(\\hat{\\beta}_1\\), a natural question is: how close are these estimates to the true \\(\\beta_0\\) and \\(\\beta_1\\)?\nRecall that if our true function describing the relationship between predictor and response is given by \\(f(X) = \\beta_0 + \\beta_1 X\\), then our observed data is described by:\n\\[Y = f(X) + \\epsilon = \\beta_0 + \\beta_1 X + \\epsilon,\\]\nwhere \\(\\epsilon\\) is an error term.\nThe standard error of an estimate quantifies, on average, how far our estimates \\(\\hat{\\beta}_i\\) are from the true coefficients \\(\\beta_i\\). For the slope \\(\\hat{\\beta}_1\\) the standard error is given by\n\\[SE(\\hat{\\beta}_1)^2 = \\frac{\\sigma^2}{\\sum_{i=1}^{n}(x_i - \\bar{x})^2},\\]\nwhere \\(\\sigma^2 = \\text{Var}(\\epsilon)\\) is the variance of the error term (assuming that the errrors \\(\\epsilon_i\\) for each observation have common variance \\(\\sigma^2\\) and are uncorrelated), and \\(\\bar{x} =\\frac{1}{n}\\sum x_i\\) is the average of the \\(x\\) values.\nThe standard error of the \\(y\\)-intercept \\(\\hat{\\beta}_0\\) is:\n\\[SE(\\hat{\\beta}_0)^2 = \\sigma^2 \\left[\\frac{1}{n} + \\frac{\\bar{x}^2}{\\sum_{i=1}^{n}(x_i - \\bar{x})^2}\\right].\\]\nIn practice \\(\\sigma^2\\) is unknown and must also be estimated from the data using the residual standard error, which we will talk about in a moment.\n\n\n\n\n\n\nCheck-in\n\n\n\nHow does the standard error for the slope estimate \\(\\hat{\\beta_1}\\) change as the \\(x\\) values are more spread out?\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\nAs the \\(x\\) values spread, they are further away from their mean \\(\\bar{x}\\), this causes the sum in the denominator to increase, thus reducing the standard error \\(SE(\\hat{\\beta}_1)^2\\). This makes sense intuitively as more spread out values for \\(x\\) should give us a better estimate for the slope of the function.\n\n\n\n\n\nConfidence intervals\n\nStandard errors allow us to construct confidence intervals for the true coefficients. A 95% confidence interval is a range of values such that, with 95% probability, the range will contain the true unknown value of the parameter.\nFor simple linear regression, the approximate 95% confidence interval for a coefficient \\(\\beta_i\\) is:\n\\[[\\hat{\\beta}_i - 2 \\cdot SE(\\hat{\\beta}_i), \\hat{\\beta}_i + 2 \\cdot SE(\\hat{\\beta}_i)].\\]\nThis means there is approximately a 95% chance that the interval will contain the true vlaue for \\(\\beta_1\\). The “approximately” is becasue the factor of 2 will vary slightly with the numnber of observations used to perform the regression. Strictly speaking, this factor will come for the 97.5% quantile of a \\(t\\)-distribution with \\(n-2\\) degrees of freedom. In practice, we use implemented methods in our computers to calculate these confidence intervals exactly.\n\n\n\n\n\n\nInterpreting the confidence interval\n\n\n\nIn general terms, we interpret the confidence interval for the slope \\(\\hat{\\beta}_1\\) as follows:\n\na 95% confidence inerval for \\(\\beta_1\\) is \\([a_1, b_1]\\) means that there’s a 95% chance that for an average increase of one unit of \\(x\\), there will be an average increase in \\(y\\) between \\(a_1\\) and \\(b_1\\) units.\n\nand we interpret the confidence interval for hte intercetp \\(\\hat{\\beta}_0\\) like\n\na 95% confidence inerval for \\(\\beta_0\\) is \\([a_0, b_0]\\) means that there’s a 95% chance that the linear model will intercept the \\(y\\)-axis between \\(a_0\\) and \\(b_0\\).\n\nA narrower confidence interval means our estimate is more precise. This happens when the sample size \\(n\\) is large and when the residual variance \\(\\sigma^2\\) is small.\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nThe exact 95% confidence intervals for each coefficient is:\n\n\nCode\nci = res.conf_int(alpha=0.05)\nci_b1_low  = ci.loc['process', 0]\nci_b1_high = ci.loc['process', 1]\nci_b0_low  = ci.loc['const', 0]\nci_b0_high = ci.loc['const', 1]\n\nprint(f\"95% CI for β₀ (intercept): [{ci_b0_low:.3f}, {ci_b0_high:.3f}]\")\nprint(f\"95% CI for β₁ (process):   [{ci_b1_low:.3f}, {ci_b1_high:.3f}]\")\n\n\n95% CI for β₀ (intercept): [6.823, 8.567]\n95% CI for β₁ (process):   [0.041, 0.051]\n\n\n\nWhat does the CI [0.041, 0.051] tell us about the relationship between process upgrade spending and CO₂ reductions?\nWhat if the interval had been [-0.002, 0.051] instead?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\nThe entire interval [0.041, 0.051] is above 0, so with 95% confidence the slope is positive: firms that invest more in cleaner production processes achieve greater CO₂ reductions. Each additional $1K in process spending is associated with a reduction of between 0.041 and 0.051 ktCO₂e per year on average.\nAn interval of [-0.002, 0.051] includes 0. We cannot rule out that \\(\\beta_1 = 0\\), meaning we cannot confidently conclude that process spending drives reductions. Wider intervals generally arise from smaller samples or noisier data.",
+    "crumbs": [
+      "notes",
+      "Linear regression",
+      "Simple linear regression"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-mse-viz",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-mse-viz",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Visualizing the training MSE\n\nWe fit a linear model to the training data and obtain the estimate: \\(\\hat{f}(x)=\\) 0.81x + 8.25.\nThe residuals (dashed red lines) show the difference between each \\(y_i\\) and \\(\\hat{f}(x_i)\\).\nUsing these we calcualte the train MSE for this \\(\\hat{f}\\) to be 8614.9."
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#hypothesis-testing",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#hypothesis-testing",
+    "title": "Simple linear regression",
+    "section": "Hypothesis testing",
+    "text": "Hypothesis testing\n\nThe null and alternative hypothesis\nA fundamental question in regression is: is there actually a relationship between \\(X\\) and \\(Y\\)? We frame this as a hypothesis test:\n\nNull hypothesis \\(H_0\\): there is no relationship between \\(X\\) and \\(Y\\), i.e., \\(\\beta_1 = 0\\).\nAlternative hypothesis \\(H_a\\): there is some relationship between \\(X\\) and \\(Y\\), i.e., \\(\\beta_1 \\neq 0\\).\n\nNote what these imply for the model:\n\nIf \\(\\beta_1 = 0\\), then \\(\\hat{Y} = \\hat{\\beta}_0\\), which means the prediction is just a constant, so \\(X\\) carries no information about \\(Y\\).\nIf \\(\\beta_1 \\neq 0\\), then \\(\\hat{Y} = \\hat{\\beta}_0 + \\hat{\\beta}_1 X\\) — \\(Y\\) is related to \\(X\\).\n\n\n\nThe \\(t\\)-statistic & \\(p\\)-values\nTo test \\(H_0\\), we need to determine whether \\(\\hat{\\beta}_1\\) is sufficiently far from 0 relative to its uncertainty. We use the \\(t\\)-statistic\n\\[t = \\frac{\\hat{\\beta}_1}{SE(\\hat{\\beta}_1)}\\]\nwhich measures how many standard deviations \\(\\hat{\\beta}_1\\) is away from 0. If there truly is no relationship between the variables (\\(\\beta_1 = 0\\)), then \\(t\\) follows a \\(t\\)-distribution with \\(n - 2\\) degrees of freedom.\nThe \\(p\\)-value is the probability of observing any number equal to the \\(t\\)-statistic \\(|t|\\) or larger, assuming there is no relationship between the variables (i.e. assuming \\(H_0\\) is true). Conventionally, \\(p &lt; 0.05\\) is used as a threshold for rejecting \\(H_0\\), though the appropriate cutoff depends on context.\n\n\n\n\n\n\nInterpreting the \\(p\\)-value\n\n\n\n\nA small \\(p\\)-value means it is very unlikely to have observed a \\(\\hat{\\beta}_1\\) this far from 0 by chance alone, if \\(\\beta_1\\) were truly 0. We reject \\(H_0\\) and conclude there is a relationship between \\(X\\) and \\(Y\\).\nA large \\(p\\)-value means our data are consistent with \\(H_0\\), so we do not reject \\(H_0\\): it could be that there’s no relationship between \\(X\\) and \\(Y\\)!\n\n\n\nA summary of this story is:\n\nWe want to know whether \\(X\\) is related to \\(Y\\).\nWe compute the \\(t\\)-statistic which is the number of standard deviations that \\(\\hat{\\beta}_1\\) is away from 0.\n\n\n\nWe ask the question: what is the probability that \\(|\\hat{\\beta}_1|\\) is more than \\(t\\) standard deviations away from zero if the true parameter is \\(\\beta_1=0\\)? This probability is the \\(p\\)-value.\nThere are two options depending on the answer to this question:\n\nOption 1: small probability that \\(\\hat{\\beta}_1\\) is that far away from 0 if the true parameter \\(\\beta_1=0\\): so the most likely scenario is that \\(\\beta_1\\neq0\\), which means the variables are related.\nOption 2: high probability that \\(\\hat{\\beta}_1\\) is that far away from 0 is the true parameter \\(\\beta_1=0\\): maybe \\(\\beta_1=0\\) is really zero, which means maybe there is no relationship between the variables.\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nThe table below shows the regression output for the SLR of co2_reduction on process:\n\n\nCode\ndef fmt_p(p):\n    return '&lt; 0.0001' if p &lt; 0.0001 else f'{p:.4f}'\n\ncoef_df = pd.DataFrame({\n    '':              ['Intercept', 'process'],\n    'Coefficient':   [f\"{res.params['const']:.4f}\",   f\"{res.params['process']:.4f}\"],\n    'Std. error':    [f\"{res.bse['const']:.4f}\",       f\"{res.bse['process']:.4f}\"],\n    't-statistic':   [f\"{res.tvalues['const']:.2f}\",   f\"{res.tvalues['process']:.2f}\"],\n    'p-value':       [fmt_p(res.pvalues['const']),      fmt_p(res.pvalues['process'])],\n})\nprint(coef_df.to_string(index=False))\n\n\n          Coefficient Std. error t-statistic  p-value\nIntercept      7.6953     0.4421       17.41 &lt; 0.0001\n  process      0.0460     0.0026       17.64 &lt; 0.0001\n\n\nLooking at the regression output above:\n\nWhat does the \\(p\\)-value for process tell us about the relationship between process upgrade spending and CO₂ reductions?\nThe intercept also has a very small \\(p\\)-value. What does this mean about the intercept estimate?\nHow would you interpret the coefficient for process in plain language?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\nThe very small \\(p\\)-value for process gives strong evidence that \\(\\beta_1 \\neq 0\\) — there is a statistically significant positive relationship between process upgrade investment and CO₂ emissions reductions.\nThe \\(p\\)-value for the intercept tests \\(H_0: \\beta_0 = 0\\), not whether the intercept is a useful predictor. A significant intercept simply means the regression line does not pass through the origin. There is likely some baseline CO₂ reduction even at zero process spending (likely from other firm-level factors not captured in the model). The intercept’s \\(p\\)-value is rarely the question of interest.\nA coefficient of roughly 0.046 means that, on average, each additional $1K invested in cleaner production processes is associated with approximately 0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction per year.",
+    "crumbs": [
+      "notes",
+      "Linear regression",
+      "Simple linear regression"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-test-data",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-test-data",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Test data and the test MSE"
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#assessing-model-accuracy",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html#assessing-model-accuracy",
+    "title": "Simple linear regression",
+    "section": "Assessing model accuracy",
+    "text": "Assessing model accuracy\nBeyond asking whether a relationship exists, we want to know how well the model fits the data. Two key measures are the Residual Standard Error and \\(R^2\\).\n\nResidual Standard Error (RSE)\nThe RSE estimates the standard deviation of the error term \\(\\epsilon\\) and is defined as:\n\\[RSE = \\sqrt{\\frac{1}{n-2} RSS} = \\sqrt{\\frac{1}{n-2} \\sum_{i=1}^{n}(y_i - \\hat{y}_i)^2}.\\]\nIt represents the average amount by which the response deviates from the true regression line. A smaller RSE means the model fits the data more closely.\n\n\n\n\n\n\nInterpreting RSE\n\n\n\n\nA small RSE occurs when the residuals \\(y_i - \\hat{y}_i\\) are close to 0, meaning our predictions are near the actual values.\nRSE is measured in the same units as \\(Y\\), which makes it interpretable but also context-dependent.\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nFor the GreenAbate data, the RSE of the SLR on process is approximately 3.26 ktCO₂e. This means predictions are off by about 3,260 metric tons on average. Is this a good or bad fit? What additional information would you need to judge this?\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\nWhether an RSE of 3.26 ktCO₂e is acceptable depends on context. A few ways to judge it:\n\nRelative to the response range: CO₂ reductions in the dataset range roughly from 3 to 27 ktCO₂e, so an average error of 3.26 represents about 12–15% of the response range. That is a moderate error — not great, but not terrible.\nRelative to the mean response: the mean reduction is around 14 ktCO₂e, so the RSE is about 23% of the mean. This suggests the model has meaningful predictive error.\nRelative to the firm’s target: if a firm has committed to reducing 5 ktCO₂e per year, an average prediction error of 3.26 is large relative to their target. For a firm targeting 25 ktCO₂e, it may be acceptable.\nBy adding more predictors: we are only using process here. Including efficiency and offsets in a multiple regression model should reduce the RSE substantially.\n\n\n\n\n\n\n\\(R^2\\) statistic\nAn easier to interpret statistic is the \\(R^2\\), which measures the proportion of variance in \\(Y\\) explained by the regression model. To compute it we need these ingredients:\n\n\\(TSS = \\sum_{i=1}^{n}(y_i - \\bar{y})^2\\) is the Total Sum of Squares. This captures the inherent total variability in \\(Y\\), how much do the observations vary from the mean \\(\\bar{y}\\).\n\\(RSS = \\sum_{i=1}^{n}(y_i - \\hat{y}_i)^2\\) is the Residual Sum of Squares. This captures the variability in \\(y\\) unexplained by the regression. Think about explained by regression being \\(y_i = \\hat{y}_i\\).\n\nSo\n\\[\\underbrace{TSS}_{\\text{total variability in }Y} - \\underbrace{RSS}_{\\text{unexplained by regression}} = \\text{variability explained by regression}\\]\nWe use this to define \\[R^2 = \\frac{TSS - RSS}{TSS}.\\]\nSo \\(R^2\\) is the fraction of variability that the model accounts for:\n\\[R^2 = \\frac{\\text{variability explained by regression}}{\\text{total variability in }Y}.\\]\n\n\n\n\n\n\nInterpreting \\(R^2\\)\n\n\n\n\n\\(R^2\\) is always between 0 and 1.\n\\(R^2\\) close to 1: the model explains most of the variability in \\(Y\\): a good fit.\n\\(R^2\\) close to 0: the model explains little of the variability: \\(X\\) alone is not capturing much of what drives \\(Y\\). This could mean the true relationship is non-linear, the model needs more predictors, or there is a lot of irreducible noise.\nWhat counts as a “good” \\(R^2\\) is context-dependent.\nYou should always look at your data to assess linearity and an existing relationship!\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nThe table below summarizes the accuracy of the SLR of co2_reduction on process:\n\n\nCode\ny_hat = model_proc.predict(df[['process']])\ny_bar = df['co2_reduction'].mean()\nTSS   = np.sum((df['co2_reduction'] - y_bar)**2)\nRSS   = np.sum((df['co2_reduction'] - y_hat)**2)\nR2    = 1 - RSS / TSS\nRSE   = np.sqrt(RSS / (n - 2))\n\nacc_df = pd.DataFrame({\n    'Quantity': ['Residual standard error', 'R²'],\n    'Value':    [f'{RSE:.2f}', f'{R2:.3f}']\n})\nprint(acc_df.to_string(index=False))\n\n\n               Quantity Value\nResidual standard error  3.14\n                     R² 0.611\n\n\nFor the GreenAbate SLR of co2_reduction on process, RSE = 3.14 ktCO₂e and \\(R^2\\) = 0.611.\n\nHow would you interpret the \\(R^2\\) value in plain language?\nThe RSE is 3.14 ktCO₂e. Thinking back to the RSE check-in, is this model a good fit for a firm with an annual CO₂ reduction target of 5 ktCO₂e? What about a firm targeting 25 ktCO₂e?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\nAn \\(R^2\\) of 0.611 means that approximately 61.1% of the variability in CO₂ reductions across firms is explained by variation in process upgrade spending alone. The remaining ~38.9% of variability is driven by other factors not included in this model — such as efficiency upgrades, offsets, firm size, or industry type.\nAn RSE of 3.14 ktCO₂e (≈ 3138 metric tons) is large relative to, for example, a 5 ktCO₂e reduction target. A prediction error of that magnitude could meaningfully mislead decisions for a small-target firm. For a firm targeting 25 ktCO₂e, the same RSE represents roughly 13% of the target, which may or may not be acceptable depending on how precise their planning needs to be.",
+    "crumbs": [
+      "notes",
+      "Linear regression",
+      "Simple linear regression"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-data",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-data",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html",
+    "title": "Training and test errors, and model flexibility",
     "section": "",
-    "text": "Test data\n\n\nA model will generally perform better when evaluated on the data it was trained on.\nBut in most cases, we want to use our model to make predictions on previously unseen data.\n\n\nTest data is data that is not part of the training dataset, used to evaluate how well our model generalizes to previously unseen observations.\n\n\n\nWhen we have enough data, we divide our observations into two groups:\n\n\nTraining set: used to fit the model and estimate \\(\\hat{f}\\)\nTest set: held out until after training, used only to evaluate performance"
+    "text": "📊 Slides\nIn this lesson we cover:\nThese notes are based on chapter 2.2 of the book An Introduction to Statistical Learning with Applications in Python (James et al. 2023).\nCode\nimport os\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nfrom sklearn.linear_model import LinearRegression\n\n# Set consistent style\nplt.style.use('default')\nfig_size_x = 7\nfig_size_y = 4\nplt.rcParams['font.size'] = 10",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Training and test errors, and model flexibility"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-test-split",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-test-split",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Splitting observations into train and test sets"
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#notation-recap",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#notation-recap",
+    "title": "Training and test errors, and model flexibility",
+    "section": "Notation recap",
+    "text": "Notation recap\nWe start with a set of \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}, \\]\nwhere\n\n\\(x_i\\) = predictor information, and\n\\(y_i\\) = the response variable for the \\(i\\)-th observation.\n\nThese data points are the training set.\nWe assume the relationship between \\(x_i\\) and \\(y_i\\) is perfectly captured by an unknown function \\(f\\), this means \\(f(x_i)= y_i\\).\nOur goal is to obtain a good enough estimate \\(\\hat{f}\\) of \\(f\\). We do this by:\n\nselecting a general model for \\(f\\) (linear regression, KNN, …)\nusing the training set to train the model and obtain the estimate \\(\\hat{f}\\).",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Training and test errors, and model flexibility"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-mse",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-mse",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Test MSE\n\n\nWhen we compute the MSE on the test data, we get the test MSE.\nWe generally care much more about the test MSE than the training MSE.\n\nCheck-in: Intuitively, what do you expect to be larger: the training MSE or the test MSE?"
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#selecting-a-model-to-use-for-our-data",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#selecting-a-model-to-use-for-our-data",
+    "title": "Training and test errors, and model flexibility",
+    "section": "Selecting a model to use for our data",
+    "text": "Selecting a model to use for our data\nThe question now is: How do we select which model to use for our data (step 1)?\nThere is no single “best” model to apply across all problems. It’s always about evaluating tradeoffs and selecting the best model to work in a given problem for a specific dataset.\nTo evaluate the performance of a model on a given data set, we need some way to measure how well its predictions match the observed data.\nRemember we want: \\(\\hat{f}(x_i)\\) (the prediction on \\(x_i\\)) is close enough to \\(f(x_i)= y_i\\) (the true value).",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Training and test errors, and model flexibility"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-mse-viz",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-mse-viz",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Visualizing the test MSE\n\nOur linear model \\(\\hat{f}(x)=\\) 0.81x + 8.25 has the following residuals on the test set, with a test MSE of 9169.18."
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#mean-squared-error-and-training-mse",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#mean-squared-error-and-training-mse",
+    "title": "Training and test errors, and model flexibility",
+    "section": "Mean Squared Error and training MSE",
+    "text": "Mean Squared Error and training MSE\nFor regression, the most commonly used way to measure how close \\(\\hat{f}\\) is to \\(f\\) is the mean squared error (MSE):\n\\[ MSE = \\frac{1}{n} \\sum_{i=1}^n(y_i - \\hat{f}(x_i))^2. \\]\n\nEach term \\(y_i - \\hat{f}(x_i)\\) is called a residual, it is the difference between the true value and the prediction.\nSquaring makes all differences positive and penalizes large errors more.\n\nWhen we calculate this MSE using the training data, we obtain the training MSE. Many models are fitted by estimating coefficients that minimize the training MSE.\nBelow we have simulated train data based on the function \\(f\\) shown in black in the plot.\n\n\nCode\nnp.random.seed(42)\n\n# True function: third degree polynomial\ndef true_f(x):\n    return 0.003*x**3 - 0.35*x**2 + 10*x - 20\n\n# Create train set\nn=30\nx_obs = np.random.uniform(0, 100, n)\ny_obs = true_f(x_obs) + np.random.normal(0, 50, n)\n\nx = np.linspace(0, 100, 200)\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, true_f(x), 'k-', linewidth=2, label='f (true)')\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')\n\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\nCode\n# Fit linear model\nlin_model = LinearRegression()\nlin_model.fit(x_obs.reshape(-1, 1), y_obs)\n\n# Coefficients\nbeta_0 = lin_model.intercept_\nbeta_1 = lin_model.coef_[0]\neq_string = f\"{beta_1:.2f}x + {beta_0:.2f}\"\n\n# Estimates\ny_linear = lin_model.predict(x.reshape(-1, 1))\ny_hat_obs = lin_model.predict(x_obs.reshape(-1, 1))\n\ntrain_mse = np.mean((y_obs - y_hat_obs)**2)\n\n\nWe fit a linear model to obtain the estimate \\(\\hat{f}(x)=\\) 0.81x + 8.25. With this funciton we obtain the following residuals and a train MSE of 8614.9.\n\n\nCode\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, y_linear, color='orange', linewidth=2, label=r'$\\hat{f}$')\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')\n\n# Residual lines from observations to linear fit\nfor i, (xi, yi, yhi) in enumerate(zip(x_obs, y_obs, y_hat_obs)):\n    plt.plot([xi, xi], [yi, yhi], 'r--', linewidth=0.8,\n             label='Residuals' if i == 0 else None)\n\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Training and test errors, and model flexibility"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-overfitting",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-overfitting",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Overfitting"
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#test-data-and-test-mse",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#test-data-and-test-mse",
+    "title": "Training and test errors, and model flexibility",
+    "section": "Test data and test MSE",
+    "text": "Test data and test MSE\n\n\n\n\n\n\nCheck-in\n\n\n\nIf you were going to take a big final exam in this class, how would you prefer the instructor to come up with exam questions?\n\nTake the questions from assignments questions that you completed this quarter.\nCome up with new questions to test on the material that we covered this quarter.\n\nOn which questions would you expect to do better?\n\n\nMuch like this thought exercise, a model will generally perform better if we evaluate it on the training set, instead of evaluating it on previously unseen data.\nTest data is data that is not part of the training dataset and is used for the purpose of evaluating our model’s performance.\nGenerally, we are interested in the accuracy of the predictions that we obtain when we apply our model to the test data. To estimate how well our model will perform, we calculate the MSE (or any other accuracy metric) on the test data to obtain a test MSE.\n\n\n\n\n\n\nCheck-in\n\n\n\nIntuitively, what do you expect to be larger, the training MSE or the test MSE?\n\n\nLet’s continue our previous example. We have additional data coming from the same function that is not part of the training data. We can use this as our test data (red circles) since it was not used to fit the model.\n\n\nCode\n# Create test set\nn_test = 15\nx_test = np.random.uniform(0, 100, n_test)\ny_test = true_f(x_test) + np.random.normal(0, 50, n_test)\n\n# Train and test data plot\nx = np.linspace(0, 100, 200)\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, true_f(x),  'k-',          linewidth=2, label='f (true)')\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')\nplt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\nCode\ny_hat_test = lin_model.predict(x_test.reshape(-1, 1))\ntest_mse = np.mean((y_test - y_hat_test)**2)\n\n\nNow we can use the same linear estimate \\(\\hat{f}(x)=\\) 0.81x + 8.25 to visualize the test residuals and calcualte a test MSE of 9169.18.\n\n\nCode\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, y_linear, color='orange', linewidth=2, label=r'$\\hat{f}$')\nplt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')\n\n# Residual lines from test observations to linear fit\nfor i, (xi, yi, yhi) in enumerate(zip(x_test, y_test, y_hat_test)):\n    plt.plot([xi, xi], [yi, yhi], 'r--', linewidth=0.8,\n             label='Residuals' if i == 0 else None)\n\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\nIn practice, if enough observations are available, we create our training and test datasets by dividing all available observations into the ones that will be usef for training, and the ones that will be used for testing.",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Training and test errors, and model flexibility"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#overfitting-def",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#overfitting-def",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Overfitting\n\nOne instance in which it is useful to calcualte both the train MSE and the test MSE is to understand when a model is overfitting.\nWe say a model is overfitting when it has a:\n\n\nsmall training MSE, but a\nlarge test MSE, and\na simpler model would have achieved a lower test MSE.\n\n\n\n\n\n\n“Our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by random chance rather than by true properties of \\(f\\).” (James et al. 2023)"
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#overfitting",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#overfitting",
+    "title": "Training and test errors, and model flexibility",
+    "section": "Overfitting",
+    "text": "Overfitting\nOne instance in which it is useful to calcualte both the train MSE and the test MSE is to understand when a model is overfitting.\nWe say a model is overfitting the data when it has a small training MSE but a large test MSE and a lower test MSE would have been achieved by a simpler model. From the (James et al. 2023):\n\nThis happens because our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by random chance rather than by true properties of the unknown function \\(f\\).\n\nLet’s go back to our simulated data that has been split into train data (black circles) and test data (red circles).\n\n\nCode\n# Create test set\n# # np.random.seed(99)\n# n_test = 15\n# x_test = np.random.uniform(0, 100, n_test)\n# y_test = true_f(x_test) + np.random.normal(0, 50, n_test)\n\n# Train and test data plot\nx = np.linspace(0, 100, 200)\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, true_f(x),  'k-',          linewidth=2, label='f (true)')\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')\nplt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\nThree models were fit using the train data: a linear model (orange line), a degree 3 polyonimal (blue line), and a degree 15 polynomial (green line) as seen in the graph below.\n\n\nCode\n# # Three fits\n# Linear fit\nlin_model = LinearRegression()\nlin_model.fit(x_obs.reshape(-1, 1), y_obs)\ny_linear = lin_model.predict(x.reshape(-1, 1))\n\n# Degree 3 polynomial (matches true f)\ncoeffs3 = np.polyfit(x_obs, y_obs, 3)\ny_poly3 = np.polyval(coeffs3, x)\n\n# Degree 15 polynomial (overfitting)\nt_min, t_max = x_obs.min(), x_obs.max()\nx_norm = (x_obs - t_min) / (t_max - t_min)\nx_line_norm = (x - t_min) / (t_max - t_min)\ncoeffs15 = np.polyfit(x_norm, y_obs, 15)\ny_poly15 = np.polyval(coeffs15, x_line_norm)\n\n# Models with train data\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='\"Observed\" data')\nplt.plot(x, y_linear,   color='orange',    linewidth=2, label='Linear')\nplt.plot(x, y_poly3,    color='steelblue', linewidth=2, label='Degree 3 polynomial')\nplt.plot(x, y_poly15,   color='green',     linewidth=2, label='Degree 15 polynomial')\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(fontsize=8)\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\nNext, the train and test MSE was calculated for each of the models. These can be seen in the graph below\n\n\nCode\n# Predictions on training and test sets\n# Linear\ny_hat_train_lin = lin_model.predict(x_obs.reshape(-1, 1))\ny_hat_test_lin  = lin_model.predict(x_test.reshape(-1, 1))\n\n# Degree 3\ny_hat_train_3 = np.polyval(coeffs3, x_obs)\ny_hat_test_3  = np.polyval(coeffs3, x_test)\n\n# Degree 15 (using normalization)\nx_test_norm = (x_test - t_min) / (t_max - t_min)\nx_obs_norm  = (x_obs  - t_min) / (t_max - t_min)\ny_hat_train_15 = np.polyval(coeffs15, x_obs_norm)\ny_hat_test_15  = np.polyval(coeffs15, x_test_norm)\n\n# MSEs\ndef mse(y_true, y_pred):\n    return np.mean((y_true - y_pred)**2)\n\ntrain_mses = [mse(y_obs, y_hat_train_lin),\n              mse(y_obs, y_hat_train_3),\n              mse(y_obs, y_hat_train_15)]\n\ntest_mses  = [mse(y_test, y_hat_test_lin),\n              mse(y_test, y_hat_test_3),\n              mse(y_test, y_hat_test_15)]\n\nflexibility = [1, 3, 15]\n\ncolors = ['orange', 'steelblue', 'green']\n\nplt.figure(figsize=(fig_size_x * 0.6, fig_size_y))\nplt.plot(flexibility, train_mses, '-', color='gray', linewidth=2, label='Training MSE')\nplt.plot(flexibility, test_mses,  '-', color='red',  linewidth=2, label='Test MSE')\n\nfor i, (f, c) in enumerate(zip(flexibility, colors)):\n    plt.plot(f, train_mses[i], 's', color=c, markersize=5)\n    plt.plot(f, test_mses[i],  's', color=c, markersize=5)\n\nplt.xlabel('Model flexibility (polynomial degree)')\nplt.ylabel('Mean Squared Error')\n#plt.ylabel('Mean Squared Error (log scale)')\n#plt.yscale('log')\nplt.xticks(flexibility, ['1', '3', '15'])\nplt.legend(loc='upper center')\nplt.grid(False)\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nWhich one of these models would you say is overfitting and why?\nDoes a better fit on the training data always indicate a good performance on unseen data?\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\nWe can see on the first graph that the degree 15 polynomial follows the pattern of the training data the closest. This is corresponds to this polynomial having the lowest train MSE as seen on the second graph. However, we can consider this model to be overfitting since the test MSE is (1) much higher than the train MSE and (2) higher than the test MSE of the simpler third degree polynomial. On the graph below we can see how the degree 15 polynomial fails to capture the trend in the test data.\n\n\nCode\n# Models with test data\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')\nplt.plot(x, y_linear,   color='orange',    linewidth=2, label='Linear')\nplt.plot(x, y_poly3,    color='steelblue', linewidth=2, label='Degree 3 polynomial')\nplt.plot(x, y_poly15,   color='green',     linewidth=2, label='Degree 15 polynomial')\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend()\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\n\nIt is important to have in mind that as model flexibility increases, the training MSE will decrease, but the test MSE may not!",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Training and test errors, and model flexibility"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#remember-our-data",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#remember-our-data",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Remember our train and test sets"
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#the-bias-variance-tradeoff",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#the-bias-variance-tradeoff",
+    "title": "Training and test errors, and model flexibility",
+    "section": "The Bias-Variance tradeoff",
+    "text": "The Bias-Variance tradeoff\nModel variance refers to how much our estimate of \\(\\hat{f}\\) would change if we trained it on a different data set. If we collected a new set of data for training and re-fitted the model, would we get a similar \\(\\hat{f}\\) or a very different one? A high-variance model is very sensitive to the specific training data used. Any slight change in the training set will produce a very different estimate \\(\\hat{f}\\). On the other hand, a low-variance model will be relatively stable if the training set changes.\nFor example, suppose we crate a new training set from the same true function \\(f\\), as show in the graph below.\n\n\nCode\nnp.random.seed(21)\n# Create another train set\nn=30\nx_obs_2 = np.random.uniform(0, 100, n)\ny_obs_2 = true_f(x_obs_2) + np.random.normal(0, 50, n)\n\n# Train and test data plot\nx = np.linspace(0, 100, 200)\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, true_f(x),  'k-',          linewidth=2, label='f (true)')\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data 1')\nplt.scatter(x_obs_2, y_obs_2, s=30, marker='^', facecolors='none', edgecolors='black', zorder=5, label='Train data 2')\n#plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\nThen we can fit our models again on each of these training sets and see how much the resulting estimates \\(\\hat{f}\\) vary:\n\n\nCode\n# Fit linear model on second training set\nlin_model_2 = LinearRegression()\nlin_model_2.fit(x_obs_2.reshape(-1, 1), y_obs_2)\ny_linear_2 = lin_model_2.predict(x.reshape(-1, 1))\n\n# Fit degree 15 on second training set\nx_norm_2 = (x_obs_2 - t_min) / (t_max - t_min)\ncoeffs15_2 = np.polyfit(x_norm_2, y_obs_2, 15)\ny_poly15_2 = np.polyval(coeffs15_2, x_line_norm)\n\n# Linear fits\nfig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))\nax.scatter(x_obs,   y_obs,   s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data 1')\nax.scatter(x_obs_2, y_obs_2, s=30, facecolors='none', edgecolors='black', zorder=5, marker='^', label='Train data 2')\nax.plot(x, y_linear,   color='orange', linewidth=2, label='Linear fit 1')\nax.plot(x, y_linear_2, color='maroon', linewidth=2, label='Linear fit 2')\nax.set_xlabel('X')\nax.set_ylabel('Y')\nax.set_xlim(0, 100)\nax.set_ylim(-150, 600)\nax.set_title('Linear')\nax.legend(loc='upper left', fontsize=8)\nplt.tight_layout()\nplt.show()\nplt.close()\n\n# Degree 15 fits\nfig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))\nax.scatter(x_obs,   y_obs,   s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data 1')\nax.scatter(x_obs_2, y_obs_2, s=30, facecolors='none', edgecolors='black', zorder=5, marker='^', label='Train data 2')\nax.plot(x, y_poly15,   color='forestgreen', linewidth=2, label='Degree 15 fit 1')\nax.plot(x, y_poly15_2, color='darkviolet',  linewidth=2, label='Degree 15 fit 2')\nax.set_xlabel('X')\nax.set_ylabel('Y')\nax.set_xlim(0, 100)\nax.set_ylim(-150, 600)\nax.set_title('Degree 15')\nax.legend(loc='upper left', fontsize=8)\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nWhich method has higher variance, the linear model or the degree 15 polynomial? Why?\n\n\nModel bias refers to the error introduced by the assumptions built into the model, as the assumptions might not reflect the complexity of a real-life problem. A high-bias model will be systematically wrong, no matter how much training data we give it. For example, if we fit a linear model to data that is truly cubic, the linear model simply cannot capture the true shape of \\(f\\). A low-bias model’s assumptions are flexible enough to approximate the true shape of \\(f\\).\nWe are interested in model variance and bias because, roughly speaking and from a theoretical perspective, the expected test MSE can be decomposed as\n\\[\\text{expected test MSE} = \\text{model variance}^2 + \\text{model bias} + \\text{irreducible error}.\\]\nThe irreducible error is the variance associated with the error term, \\(\\text{Var}(\\epsilon)\\).\nThough the formal statement and computation of this formula are beyond the scope of the course, intuitively understanding the three components on the right hand side can help us understand important behaviour different models have relative to a variety of training sets. So let’s look at it more closely:\n\n\nthe expected test MSE is (intuitively) a sum of three terms: model variance, model bias, and the irreducible error. Our theoretical goal is minimize the expected test MSE.\nThe irreducible error is a positive value that is independent of the model selection, so the expected test MSE can never be zero: it is bounded below by \\(\\text{Var}(\\epsilon)\\).\nThe model variance and bias are non-negative, but these depend on the model being selected. So, to minimize the expected test MSE, our goal is to select a model that simultaneously gives low variance and low bias.\n\nThis is where the bias-variance tradeoff comes in (James et al. 2023):\n\nas a general rule, as we use more flexible methods, the variance will increase and the bias will decrease. The relative rate of change of these two quantities determines whether the test MSE increases or decreases. […] The challenge is finding a method for which both the variance and the squared bias are reasonably low.\n\nWe can intuitively see the relative rate of change between variance and bias in our previous test MSE graph:\n\n\nCode\nplt.figure(figsize=(fig_size_x * 0.6, fig_size_y))\nplt.plot(flexibility, train_mses, '-', color='gray', linewidth=2, label='Training MSE')\nplt.plot(flexibility, test_mses,  '-', color='red',  linewidth=2, label='Test MSE')\n\nfor i, (f, c) in enumerate(zip(flexibility, colors)):\n    plt.plot(f, train_mses[i], 's', color=c, markersize=5)\n    plt.plot(f, test_mses[i],  's', color=c, markersize=5)\n\nplt.xlabel('Flexibility (degree)')\nplt.ylabel('Mean Squared Error')\n#plt.ylabel('Mean Squared Error (log scale)')\n#plt.yscale('log')\nplt.xticks(flexibility, ['1', '3', '15'])\nplt.legend(loc='upper center')\nplt.grid(False)\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\nAs we increase the model flexibility (in this example controlled by the degree of the polynomial used to compute \\(\\hat{f}\\)), the bias decreases faster than the variance increases and the test MSE drops. Eventually, increasing the flexibility does little to keep reducing the bias, but starts to significantly increase the variance, resulting in the test MSE to go back up again.\n\n\n\n\n\n\nCheck-in\n\n\n\nLooking at the test MSE plot, which model would you select and why? Would you consider evaluating polynomilas with other degrees?",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Training and test errors, and model flexibility"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#three-models",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#three-models",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html",
+    "title": "Learning from data",
     "section": "",
-    "text": "Three models for the same training data\n\n\n\nCheck-in: Which model do you think will have the lowest training MSE? The lowest test MSE?"
+    "text": "📊 Slides\nIn this lesson we introduce:\nThese notes are based on chapter 2.1 of the book An Introduction to Statistical Learning with Applications in Python (James et al., 2023).",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-test-mse",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-test-mse",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Training MSE vs. test MSE\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAs flexibility increases, the training MSE decreases…\n\n…but the test MSE may go back up!\n\nCheck-in: Which model is overfitting, and why?\nDoes a better fit on the training data always indicate good performance on unseen data?"
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#investigating-elephant-seal-population",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#investigating-elephant-seal-population",
+    "title": "Learning from data",
+    "section": "Investigating elephant seal population",
+    "text": "Investigating elephant seal population\nAmanda is a marine scientist investigating how protected areas affect the population of elephant seals in California. Specifically, she wants to understand: how does elephant seal population change in a protected rookery that has just been protected?\n\n\n\n(Northern Elephant Seals (M. angustirostris) at sunrise early light at Piedras Blancas, San Simeon, CA 03 Feb 2012. Photo by Mike Baird.\n\n\nShe identifies the predictor variable as time since the rookery was protected and the response variable as elephant seal population (since elephant seal population responds on time).\n\n\n\n\n\n\n\n\n\n\nAn ideal function \\(f\\) exists somewhere, we just can’t access it\nWhat if Amanda was given the true, real relationship between time and population?\nIn mathematical terms, this would mean Amanda would have a function \\(f\\) such that\n\\[f(\\text{time since protection}) = \\text{true population}.\\]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\n\nWhat does \\(f(0)\\) represent? What does \\(f(5)=100\\) mean?\nWhat could Amanda do if she had this function \\(f\\)?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\nShe could understand whether and how population and time are related: is there no relation, does it increase, decrease, varies, etc?\nShe could also understand the mathematical form of this relationship: for example, is it linear? These are examples of using the function \\(f\\) for inference.\nShe could also use the function \\(f\\) to know the elephant seal population in the future, i.e. using the function for prediction. In addtion, she could probably save resources spent in going out into the field for data collection.\n\n\n\n\n\n\nOur next best option is to estimate \\(f\\) using data\nClearly Amanda has no access to this true, ideal function! So her next best option is to try to estimate \\(f\\) using data.\nFortunately, she found some long-term ecological data that measures the elephant seal population since the protection for the rookery was established:\n\n\n\n\n\n\n\n\n\nThese are the observed values for the response variable.\n\n\n\n\n\n\nCheck-in\n\n\n\nAre the observed values the “true values” for the response variable?\n\n\nError can be introduced during measurement. In this case we have\n\\[f(\\text{time}) = \\text{true population} = \\text{observed population} + \\text{error}\\]\n\n\n\n\n\n\n\n\n\nWith these observed population values at a given time, Amanda can try to estimate the real function \\(f\\) with another function \\(\\hat{f}\\). Some estimates of \\(f\\) are shown in the graph below.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat considerations can Amanda take into account when choosing an estimate \\(\\hat{f}\\)?\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\nMany! Preliminary understanding of the data, the application (prediction or inference?), volume of available data, minimizing error, even computing power. Selecting any \\(\\hat{f}\\) comes with tradeoffs!",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#models-on-test",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#models-on-test",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Models predictions on the test set\n\n\n\nThe degree 15 polynomial has the lowest training MSE but fails to capture the trend in the test data."
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#abstract-setup",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#abstract-setup",
+    "title": "Learning from data",
+    "section": "Abstract setup",
+    "text": "Abstract setup\nRoughly, this is the setup in which we will be working in. Let’s see it more abstractly:\nWe have a set of \\(p\\) predictors \\(X_1, ..., X_p\\) and a dependent variable \\(Y\\).\nWe assume there is a relationship between \\(Y\\) and \\(X = (X_1, ..., X_p)\\) that can be written as \\[Y = f(X) + \\epsilon.\\]\nHere \\(f\\) is some fixed but unknown function of the predictors \\(X_1, . . ., X_p\\) and \\(\\epsilon\\) represents an error term (independent of \\(X\\) and with mean zero).\nOur objective is to estimate \\(f(X)\\) well enough with another function \\(\\hat{f}(X)\\).\n\nWhy bother to estimate \\(f\\)?\n\nDo inference: use \\(\\hat{f}\\) to understand which predictors are associated with the response and understand the form of this relationship.\nDo predictions: this means calculating \\(\\hat{f}(X) = \\hat{Y}\\) to predict what the value of \\(Y\\) will be with at a new input \\(X\\).\n\nDepending whether our goal is prediction, inference, or a combination of the two, we may select different methods for estimating \\(f\\).\nGenerally:\n\nmodels for \\(f\\) that are interpretable enough to allow inference may not be have as accurate prediction results as other approaches.\nmodels for \\(f\\) that can give excellent predictions, may not be as interpretable and make inference more challenging.\n\nThere’s a tradeoff.\nGenerally, machine learning may prioritize predictions over interpretability (we want the best prediction, even if we got it out of a black box), while statistical modeling may prioritize interpretability over prediction.\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat are some problems or scenarios where inference may be more important than prediction? What about an problems or scenarios where prediction is the priority?\n\n\n\n\nHow do we estimate \\(f\\)?\nWe start with a set of \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}, \\]\nwhere\n\n\\(x_i\\) = a vector with with the predictor information, and\n\\(y_i\\) = the response variable for the \\(i\\)-th observation.\n\nThese data points are the training set or training data because we will use them to train (or fit) our method and obtain an estimate \\(\\hat{f}\\) of the “true” function \\(f\\).\nOur goal is to apply methods to the training data to estimate the unknown function \\(f\\) that links predictors with the response.\nThe “learning” part in machine learning is precisely the process of adjusting \\(\\hat{f}\\) to minimize error on the training data.\n\n\nNotation\nOur training set has \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}.\\]\nIf we have \\(p\\) predictors, then each \\(x_i\\) is a vector of the form: \\[x_i = (x_{i1}, ..., x_{ip}).\\] The response variable \\(y_i\\) is just a single number or category.\nFor example, for our previous data we would transfor the data table into the corresponding notation as shown below.\n\n\n\n\n\n\nObs.\nTime (Predictor)\nPopulation (Response)\n\n\n\n\n1\n2\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\n\n\n\\((x_1,y_1) = (2,53)\\)\n\\(\\vdots\\)\n\\((x_5,y_5) = (10,353)\\)\n\\(\\vdots\\)\n\\((x_9,y_9) = (18,473)\\)\n\n\nIf we were to add average annual sea surface temperature (SST) as a second predictor variable, then our notation would update accordingly:\n\n\n\n\n\nObs.\nTime (Predictor 1)\nSST (Predictor 2)\nPopulation (Response)\n\n\n\n\n1\n2\n17.05\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n20.86\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n23.27\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (2, 17.05)\\)\n\\(y_1 = 53\\)\n\\(\\vdots\\)\n\\(x_5 = (x_{5,1}, x_{5,2}) = (10, 20.86)\\)\n\\(y_5 = 353\\)\n\\(\\vdots\\)\n\\(x_9 = (x_{9,1}, x_{9,2}) = (18, 23.27)\\)\n\\(y_9 = 473\\)",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-bias-variance",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-bias-variance",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "The bias-variance tradeoff"
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#parametric-methods",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#parametric-methods",
+    "title": "Learning from data",
+    "section": "Parametric methods",
+    "text": "Parametric methods\nBroadly, most methods for estimating \\(f\\) can be characterized as parametric or non-parametric.\nParametric methods estimate \\(f\\) in two steps:\n\nMake an assumption about the functional form or shape of \\(f\\).\nUse the training data to train or fit the model and get those parameters that will define the estimate \\(\\hat{f}\\).\n\nConsiderations:\n\nMay be used with small training sets\nMay be computationally easier to estimate a few parameters\nSimpler functional forms for \\(\\hat{f}\\) can make inference easier\nAssumed functional form for \\(\\hat{f}\\) may be far from true \\(f\\), making predictions inaccurate\nPredictions could not be as good\n\n\nExample\n\nAmanda decides to model the population with a linear model on the predictors \\(X_1 =\\) time and \\(X_2=\\) average annual sea surface temperature (SST). This means she assumes the function\n\n\\[f(\\text{time}, \\text{SST}) = \\text{population}\\]\nhas the form\n\\[ f(x_1, x_2) = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2. \\]\n\nShe trains the model to get an estimate for \\(f\\), by finding parameters \\(\\beta_0, \\beta_1\\), and \\(\\beta_2\\) such that\n\n\\[ \\text{observed data} \\approx \\beta_0 + \\beta_1 \\text{time} + \\beta_2 \\text{SST} .\\]\nThis is great! She only needs to find three numbers to get a model for the population.\n\n\nLinear Model: Population = -1112.46 + 10.10*Time + 64.58*SST",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#model-variance",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#model-variance",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Model variance\n\nModel variance is how much \\(\\hat{f}\\) would change if we trained it on a different dataset drawn from the same population.\n\n\n\n\nHigh-variance model: very sensitive to the specific training data: a small change in the data produces a very different \\(\\hat{f}\\)\nLow-variance model: relatively stable across different training sets"
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#non-parametric-methods",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#non-parametric-methods",
+    "title": "Learning from data",
+    "section": "Non-parametric methods",
+    "text": "Non-parametric methods\nNon-parametric methods do not make explicit assumptions about the functional form of \\(f\\). Instead, they seek an estimate of \\(f\\) that gets as close to the training set as possible without being “being too rough or wiggly”.\nConsiderations:\n\nMay be better at prediction\nMay need a lot of data to fit the model\nMay follow errors or noise in the data too closely\nMay be less interpretable than more restrictive models\n\n\nExample\nInstead of assuming a linear form, Amanda uses K-nearest neighbors (KNN) to estimate \\(f(\\text{time}, \\text{SST})\\). For any new combination of time and SST, the model predicts population as the average of the \\(K\\) most similar observations in the training set. No assumptions about the shape of \\(f\\) required.\n\n\n\n\n\n\n\n\n\nNotice the fitted surface is no longer a flat plane, but it bends and curves to follow the data. Amanda did not specify any functional form; the shape of \\(\\hat{f}\\) emerges entirely from the training observations.",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#two-training-sets",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#two-training-sets",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Suppose we collect a second training set\n\n\n\nBoth datasets come from the same true \\(f\\) but differ due to random noise."
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#regression-vs.-classification",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#regression-vs.-classification",
+    "title": "Learning from data",
+    "section": "Regression vs. Classification",
+    "text": "Regression vs. Classification\nVariables can be either:\n\nquantitative: continuous numerical values, or\nqualitative or categorical: values in one of \\(K\\) different classes or categories.\n\nProblems having a quantitative response are regression problems.\nProblems having a qualitative response are classification problems.\nWe tend to select machine learning methods based on whether the response is quantitative or qualitative.\nWhat about the predictors being quantitative or categorical? Not as important, often possible to code qualitative predictors before the analysis.\n\nExample\nAmanda wants to predict the health status of individual adult seals. A veterinarian has assessed a sample of seals and labeled each one as healthy, malnourished, or injured. Amanda wants to train a classifier using weight and length as predictors:\n\\[f(\\text{weight, length}) = \\text{health status} \\in \\{\\text{healthy, malnourished, injured}\\}.\\]\nHer labeled training data looks like this:\n\n\n\n\n\n\n\n\n\n\n\nObs.\nLength (Predictor 1)\nWeight (Predictor 2)\nHealth status (Response)\n\n\n\n\n1\n173.58\n200.14\nhealthy\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n44\n157.06\n122.96\nmalnourished\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n90\n163.48\n164.98\ninjured\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (173.58 ,200.14)\\)\n\\(y_1 =\\) healthy\n\\(\\vdots\\)\n\\(x_{44} = (x_{44,1}, x_{44,2}) = (157.06, 122.96)\\)\n\\(y_{44} =\\) malnourished\n\\(\\vdots\\)\n\\(x_{90} = (x_{90,1}, x_{90,2}) = (163.48, 164.98)\\)\n\\(y_{90} =\\) injured\n\n\nShe can use this data to train a classifier, and then use it to predict the health status of new, unlabeled seals given their weight and length.",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#variance-demo",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#variance-demo",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "High vs. low variance\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in: Which method has higher variance,\nthe linear model or the degree 15 polynomial? Why?"
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#unsupervised-vs.-supervised-learning",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#unsupervised-vs.-supervised-learning",
+    "title": "Learning from data",
+    "section": "Unsupervised vs. Supervised Learning",
+    "text": "Unsupervised vs. Supervised Learning\nSupervised learning: each observation has predictors associated to a response variable: \\[\\text{training set} = \\{(x_1, y_1), ..., (x_n, y_n)\\}\\]\nwhere each \\(x_i = (x_{i1}, ..., x_{ip})\\) is a vector with \\(p\\) predictors and \\(y_i\\) is the response to \\(x_i\\).\nUnsupervised learning: each observation only has features, no response variable.\nOur training set only has observations of \\(p\\) different features: \\[ \\text{training set} = \\{ x_1, ..., x_n\\},\\]\nwhere each \\(x_i = (x_{i1}, ..., x_{ip})\\) is a vector with \\(p\\) features. There’s no reponse variable \\(Y\\).\nIn unsupervised learning problems, we seek to understand the relationships between the variables or between the observations.\n\nExample\nAmanda records dive depth and dive duration for a large number of seals, but has no prior labels or categories in mind. She wants to know: are there distinct foraging strategies among these seals? Her data looks like this:\n\n\n\n\n\nObs.\nDepth (Feature 1)\nDuration (Feature 2)\n\n\n\n\n1\n585.29\n39.39\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n23\n108.23\n9.52\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n41\n324.37\n23.2\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (585.29, 39.39)\\)\n\\(\\vdots\\)\n\\(x_{23} = (x_{23,1}, x_{23,2}) = (108.23, 9.52)\\)\n\\(\\vdots\\)\n\\(x_{41} = (x_{41,1}, x_{41,2}) = (324.37, 23.2)\\)\n\n\nIn this case, there is no response variable \\(y\\), Amanda lets the algorithm find structure in the data on its own.\n\n\n\n\n\n\n\n\n\nThe top plot shows what Amanda starts with: just measurements, no categories. The bottom plot shows the structure the algorithm uncovers, which Amanda interprets as distinct foraging strategies.\n\n\n\n\n\n\nCheck-in\n\n\n\nWhat is the key difference between the classification and clustering examples above?",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#model-bias",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#model-bias",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Model bias\n\nModel bias is the error introduced by the assumptions built into the model.\n\n\n\n\nHigh-bias model: its assumptions are too restrictive to capture the true shape of \\(f\\): it will be systematically wrong no matter how much data we give it\nLow-bias model: flexible enough to approximate the true shape of \\(f\\)\n\n\n\n\n\n\nExample: if the true \\(f\\) is cubic but we fit a linear model, the linear model simply cannot capture the true shape, it will always be biased."
+    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#recap",
+    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#recap",
+    "title": "Learning from data",
+    "section": "Recap",
+    "text": "Recap\nWhat we covered today:\n\nThe idea of estimating a function \\(f\\) using observed data\nInference and prediction\nTraining set = observations used to fit/train a model\nPredictors + response variable & their math notation\nParametric vs. non parametric\nRegression vs. classification\nSupervised vs. unsupervised learning\n\nNext class: assessing model accuracy",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "Learning from data"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#bv-decomposition",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#bv-decomposition",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html",
+    "title": "What is machine learning?",
     "section": "",
-    "text": "The bias-variance decomposition\n\n\nRoughly speaking and from a theoretical perspective, the expected test MSE decomposes as:\n\\[\\text{Expected test MSE} = \\underbrace{\\text{Model variance}}_{\\text{sensitivity to training data}} + \\underbrace{\\text{Model bias}^2}_{\\text{systematic error}} + \\underbrace{\\text{Irreducible error}}_{\\text{Var}(\\epsilon)}\\]\n\n\n\nThe irreducible error \\(\\text{Var}(\\epsilon)\\) is always present and positive, it sets a lower bound on the test MSE\nModel variance and bias are non-negative and thus contribute to the MSE, but depend on the model we choose.\n\n\n\n\nTo minimize the expected test MSE, we need both low variance and low bias."
+    "text": "📊 Slides\nIn this lesson we introduce:",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "What is machine learning?"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#the-tradeoff",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#the-tradeoff",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "The bias-variance tradeoff\n\n\n\n\n\n“As we use more flexible methods, the variance will increase and the bias will decrease. The relative rate of change of these two quantities determines whether the test MSE increases or decreases.” (James et al. 2023)\n\n\n“The challenge is finding a method for which both the variance and the squared bias are reasonably low.” (James et al. 2023)\n\n\n\n\n\n\n\n\n\n\n\n\n\nFrom degree 1 → 3: bias drops faster than variance rises, so test MSE falls.\nFrom degree 3 → 15: variance rises faster than bias drops, so test MSE climbs back up."
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#what-is-machine-learning",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#what-is-machine-learning",
+    "title": "What is machine learning?",
+    "section": "What is machine learning?",
+    "text": "What is machine learning?\nYou have probably heard the term machine learning a lot recently. But what does it actually mean?\nMachine learning (ML) is a branch of computer science focused on building systems that can learn from data to make predictions or decisions, without being explicitly programmed with rules.\nThe key idea is: instead of a human writing down rules, an algorithm discovers the rules from examples.\nTo make this concrete, consider two approaches to the same problem: predicting whether a kelp forest has been degraded based on water temperature and sea urchin density.\nTraditional programming approach:\n\nIf temperature is greater than 18°C and urchin density is greater than 50/m², then the kelp forest will be degraded\n\nA human expert would write these rules by hand, based on their knowledge of the system.\nMachine learning approach:\n\nGive the algorithm many examples of (temperature, urchin density) and how whether these kelp forests are degraded or not. Then let the algorithm figure out the rules itself.\n\nThe rules are learned from data, not written by hand.\n\n\n\n\n\n\nCheck-in\n\n\n\nThink of a task in environmental science that would be very hard to solve with hand-written rules, but where you might have a lot of labeled data. What are the inputs and outputs?\n\n\nAt its core, a machine learning algorithm does the following:\n\nTake a set of training examples.\nFind a function \\(\\hat{f}\\) that maps inputs to outputs well on those examples.\nUse \\(\\hat{f}\\) to make predictions on new, unseen data.\n\n“Learning” simply means adjusting \\(\\hat{f}\\) to minimize error on the training data.",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "What is machine learning?"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#recap",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#recap",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Recap\n\n\n\nThe training MSE measures how well \\(\\hat{f}\\) fits the training data, but we care more about the test MSE because we want to know how our model performs on unseen data.\nA model that fits training data too closely may overfit: low training MSE, high test MSE\nModel variance measures how sensitive \\(\\hat{f}\\) is to the specific training set used\nModel bias measures systematic error from restrictive model assumptions\nThe bias-variance tradeoff: more flexible models generally have lower bias but higher variance\n\n\n\nThe challenge is finding a model where both variance and bias are reasonably low."
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#ai-machine-learning-and-deep-learning",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#ai-machine-learning-and-deep-learning",
+    "title": "What is machine learning?",
+    "section": "AI, machine learning, and deep learning",
+    "text": "AI, machine learning, and deep learning\nIn addition to machine learning, you may have also heard about artificial intelligence or deep learning. These are related terms:\nArtificial intelligence (AI) is the broadest term. It refers to any technique that enables machines to mimic human intelligence. This including rule-based systems, search algorithms, and more.\nMachine learning is a subset of AI: systems that learn from data rather than from hand-coded rules.\nDeep learning is a subset of machine learning: methods based on artificial neural networks with many layers. Deep learning is behind many recent breakthroughs, such as image recognition and large language models. It is one family of ML methods.\n\n\n\nHierarcky of Modern Intelligence: AI, Machine Learning, and Deep Learning. Source: PromptEngineering.org\n\n\nFor this course, we will focus on machine learning, primarily the classical methods (regression, support vector machines, decision trees, clustering).",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "What is machine learning?"
+    ]
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#references",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#references",
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#machine-learning-in-environmental-science",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#machine-learning-in-environmental-science",
+    "title": "What is machine learning?",
+    "section": "Machine learning in environmental science",
+    "text": "Machine learning in environmental science\nML is increasingly used across environmental disciplines. A few high-profile examples:\nSpecies distribution modeling. Algorithms like MaxEnt and random forests use occurrence records and environmental covariates (temperature, precipitation, land cover) to predict where species are likely to be found (Elith et al. 2011; Phillips et al. 2017).\nRemote sensing and land cover classification. Satellite imagery is classified into land cover types (forest, wetland, urban, etc.) using supervised classifiers. This is used to track deforestation, monitor wetland loss, and assess wildfire burn severity at continental scales (Kattenborn et al. 2021).\nClimate downscaling. Global climate models operate at coarse spatial resolution. ML methods are used to “downscale” these outputs to finer scales relevant for local impact assessment. For example, predicting local precipitation from large-scale atmospheric patterns (Baño-Medina, Manzanas, and Gutiérrez 2020).\nWhale detection from acoustics. Deep learning models are trained on underwater recordings to detect and classify marine mammal calls, enabling large-scale passive acoustic monitoring that would be impossible to do by hand (Shiu et al. 2020).\nHarmful algal bloom prediction. ML models trained on water quality sensors, satellite data, and weather forecasts are used to predict the timing and location of algal blooms in lakes and coastal waters (Rousso et al. 2020).",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "What is machine learning?"
+    ]
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#limitations-and-considerations",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#limitations-and-considerations",
+    "title": "What is machine learning?",
+    "section": "Limitations and considerations",
+    "text": "Limitations and considerations\nML is a powerful tool, but it comes with important caveats that are especially relevant in environmental science:\n\nData hungry. Many ML methods need large amounts of training data, which can be scarce for rare species or remote locations.\nExtrapolation risk. A model trained on data from one region or time period may perform poorly when applied elsewhere or under novel conditions.\nInterpretability. Flexible models may predict well but be hard to interpret. This is a problem if you need to explain why something is changing, not just that it is.\nBias in training data. If the data used for training is unrepresentative the model will inherit those biases.\n\nThese are not reasons to avoid ML, they are reasons to use it carefully!\n\n\n\n\n\n\nCheck-in\n\n\n\nConstruct a scenario in which developing and using a machine learning model with one or more of these limitations would be particularly consequential.",
+    "crumbs": [
+      "notes",
+      "Introduction",
+      "What is machine learning?"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome!",
+    "section": "",
+    "text": "Welcome to the course materials for EDS 232 - Machine Learning for Environmental Science! In this website you will find all the materials for the Spring 2026 term. This course is part of the UCSB Masters in Environmental Data Science.\n\n\nMachine learning can help process big/complex data and extract knowledge. It forms one of the foundations in data science. This course provides a broad introduction to machine learning and statistical pattern recognition. Topics include supervised learning (decision tree, random forest, support vector machines, neural networks) and unsupervised learning (clustering, dimensionality reduction, deep learning). Problems and exercises are framed within environmental science applications. The course will be taught using Python.\n\n\n\n\n\n\nCarmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm - 3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 11 am - 12 pm @ Bren Hall 3418\n\n\n\n\n\n\nClick here to see the syllabus.\n\n\n\nThe following is our tentative calendar. The course content and calendar may be subject to change as the course progresses.\n\n\n\n\n📝 If you have suggestions on how to correct, improve, or expand these course materials, please feel free to email the course instructor at c_galazgarcia@ucsb.edu or file a GitHub issue.\n🌟 If these materials have been useful to you, consider adding a star to the project’s repository!"
+  },
+  {
+    "objectID": "index.html#course-description",
+    "href": "index.html#course-description",
+    "title": "Welcome!",
+    "section": "",
+    "text": "Machine learning can help process big/complex data and extract knowledge. It forms one of the foundations in data science. This course provides a broad introduction to machine learning and statistical pattern recognition. Topics include supervised learning (decision tree, random forest, support vector machines, neural networks) and unsupervised learning (clustering, dimensionality reduction, deep learning). Problems and exercises are framed within environmental science applications. The course will be taught using Python."
+  },
+  {
+    "objectID": "index.html#teaching-team",
+    "href": "index.html#teaching-team",
+    "title": "Welcome!",
+    "section": "",
+    "text": "Carmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm - 3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 11 am - 12 pm @ Bren Hall 3418"
+  },
+  {
+    "objectID": "index.html#syllabus",
+    "href": "index.html#syllabus",
+    "title": "Welcome!",
+    "section": "",
+    "text": "Click here to see the syllabus."
+  },
+  {
+    "objectID": "index.html#calendar",
+    "href": "index.html#calendar",
+    "title": "Welcome!",
+    "section": "",
+    "text": "The following is our tentative calendar. The course content and calendar may be subject to change as the course progresses."
+  },
+  {
+    "objectID": "index.html#contribute",
+    "href": "index.html#contribute",
+    "title": "Welcome!",
+    "section": "",
+    "text": "📝 If you have suggestions on how to correct, improve, or expand these course materials, please feel free to email the course instructor at c_galazgarcia@ucsb.edu or file a GitHub issue.\n🌟 If these materials have been useful to you, consider adding a star to the project’s repository!"
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#title-slide",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#title-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "References\n\n\n\n\n\nJames, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E. Taylor. 2023. An Introduction to Statistical Learning: With Applications in Python. Springer Texts in Statistics. Cham: Springer."
+    "text": "EDS 232\n\nLesson 1\nWhat is Machine Learning?"
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#in-this-lesson",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#in-this-lesson",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "In this lesson\n\n\nWhat machine learning is and how it differs from traditional programming\n\n\n\nThe relationship between AI, machine learning, and deep learning\n\n\n\nExamples and limitations of machine learning applied to environmental problems"
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-what-is-ml",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-what-is-ml",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "What is machine learning?"
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#what-is-ml",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#what-is-ml",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "What is machine learning?\n\n\n\nMachine learning (ML) is a branch of computer science focused on building systems that can learn from data to make predictions or decisions, without being explicitly programmed with rules.\n\n\n\nInstead of a human writing down rules,\nan algorithm discovers the rules from examples."
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#two-approaches",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#two-approaches",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Two approaches to the same problem\n\n\nPredicting whether a kelp forest has been degraded based on water temperature and sea urchin density.\n\n\n\nTraditional programming\n\nIf temperature &gt; 18°C and urchin density &gt; 50/m², then: degraded\n\n\n\n\nMachine learning\n\nGive the algorithm many examples and let it figure out the rules itself."
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#how-machines-learn",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#how-machines-learn",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "How does a machine learn?\n\n\nAt its core, a machine learning algorithm does the following:\n\n\nTake a set of data examples that is used to train the model\nFind a function \\(\\hat{f}\\) that maps inputs to outputs well on those examples\nUse \\(\\hat{f}\\) to make predictions on new, unseen data\n\n\n\n“Learning” means adjusting \\(\\hat{f}\\) to minimize error on the training data."
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#checkin-1",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#checkin-1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Check-in\n\n\nThink of a task in environmental science that would be very hard to solve with hand-written rules, but where you might have a lot of labeled data.\n\n\nWhat are the inputs and outputs?"
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-ai-ml-dl",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-ai-ml-dl",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "AI, Machine Learning, and Deep Learning"
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#three-terms",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#three-terms",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Three related terms\n\n\n\nArtificial intelligence (AI)\n\nThe broadest term — any technique enabling machines to mimic human intelligence, including rule-based systems and search algorithms.\n\n\n\nMachine learning\n\nA subset of AI — systems that learn from data rather than hand-coded rules.\n\n\n\n\nDeep learning\n\nA subset of ML — methods based on neural networks with many layers, behind breakthroughs like image recognition and large language models."
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#this-course",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#this-course",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "This course\n\n\n\nWe will focus on machine learning, primarily the classical methods:\n\n\n\nRegression · Support vector machines · Decision trees · Clustering · Dimension reduction\n\n\nProbably some deep learning in the last two weeks."
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#env-apps-1",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#env-apps-1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "ML in environmental science\n\n\n\n\nSpecies distribution modeling\n\nAlgorithms like MaxEnt and random forests predict where species are likely to be found using occurrence records and environmental covariates.\n\n\n\nAdapted from Helgen et al., 2013 for illustration purposes.\n\n\n\n\nRemote sensing & land cover\n\nSatellite imagery is classified into land cover types (forest, wetland, urban) to track deforestation, wetland loss, and wildfire burn severity at continental scales."
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#env-apps-2",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#env-apps-2",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "ML in environmental science\n\n\n\n\nClimate downscaling\n\nDeep learning methods trained on high-resolution commercial satellite imagery have been used to map and track permafrost covered in the Arctic at sub-meter scale.\n\n\n\nC. Witharana et al., 2021\n\n\n\n\nWhale detection from acoustics\n\nDeep learning models trained on underwater recordings detect and classify marine mammal calls, enabling passive acoustic monitoring at scale."
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-limitations",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-limitations",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "We need to be aware of ML limitations"
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#limitations",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#limitations",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Limitations\n\n\nData hungry — many methods need large amounts of data to “learn”\n\n\n\nExtrapolation risk — a model trained in one region or time period may fail under novel conditions\n\n\n\nInterpretability — flexible models may predict well but be hard to interpret\n\n\n\nBias in training data — unrepresentative data produces biased models\n\n\n\n\nThese are not reasons to avoid ML — they are reasons to use it carefully!"
+  },
+  {
+    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#checkin-2",
+    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#checkin-2",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Check-in\n\n\nConstruct a scenario in which developing and using a machine learning model with one or more of these limitations would be particularly consequential."
   },
   {
     "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html#title-slide",
@@ -449,391 +743,193 @@
     "text": "Recap\n\n\n\nWe want to estimate an unknown function \\(f\\) such that \\(Y = f(X) + \\epsilon\\)\nWe estimate \\(f\\) using a training set of observed \\((x_i, y_i)\\) pairs\nInference uses \\(\\hat{f}\\) to understand relationships; prediction uses \\(\\hat{f}\\) to forecast new \\(Y\\)\nParametric methods assume a functional form; non-parametric methods don’t\nRegression = quantitative response; classification = qualitative response\nSupervised = response variable present; unsupervised = no response variable\n\n\n\nNext class: assessing model accuracy"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#title-slide",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#title-slide",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#title-slide",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#title-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "EDS 232\n\nLesson 1\nWhat is Machine Learning?"
+    "text": "EDS 232\n\nLesson 3\nTraining and test errors, and model flexibility"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#in-this-lesson",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#in-this-lesson",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#in-this-lesson",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#in-this-lesson",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "In this lesson\n\n\nWhat machine learning is and how it differs from traditional programming\n\n\n\nThe relationship between AI, machine learning, and deep learning\n\n\n\nExamples and limitations of machine learning applied to environmental problems"
+    "text": "In this lesson\n\n\nTraining and test MSE\n\n\n\nOverfitting\n\n\n\nModel bias and variance\n\n\n\nThe bias-variance tradeoff"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-what-is-ml",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-what-is-ml",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#notation-recap",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#notation-recap",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "What is machine learning?"
+    "text": "Notation recap\n\nWe have a training set of \\(n\\) observed data points:\n\\[\\{(x_1, y_1),\\, \\ldots,\\, (x_n, y_n)\\}\\]\n\n\\(x_i\\) = predictor information for observation \\(i\\)\n\\(y_i\\) = response variable for observation \\(i\\)\n\n\n\nWe assume \\(f\\) is the unknown true function, so \\(f(x_i) = y_i\\).\nWe train a model on these data points to obtain an estimate \\(\\hat{f}\\).\n\n\nHow do we know if \\(\\hat{f}\\) is any good?"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#what-is-ml",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#what-is-ml",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-mse",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-mse",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "What is machine learning?\n\n\n\nMachine learning (ML) is a branch of computer science focused on building systems that can learn from data to make predictions or decisions, without being explicitly programmed with rules.\n\n\n\nInstead of a human writing down rules,\nan algorithm discovers the rules from examples."
+    "text": "Mean Squared Error"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#two-approaches",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#two-approaches",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#mse-definition",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#mse-definition",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Two approaches to the same problem\n\n\nPredicting whether a kelp forest has been degraded based on water temperature and sea urchin density.\n\n\n\nTraditional programming\n\nIf temperature &gt; 18°C and urchin density &gt; 50/m², then: degraded\n\n\n\n\nMachine learning\n\nGive the algorithm many examples and let it figure out the rules itself."
+    "text": "Mean Squared Error (MSE)\n\n\nTo evaluate the performance of a model on a given data set, we need some way to measure how well its predictions match the observed data.\n\nFor regression, the most common way to measure how close \\(\\hat{f}\\) is to the truth is the mean squared error (MSE):\n\\[\\text{MSE} = \\frac{1}{n} \\sum_{i=1}^n (y_i - \\hat{f}(x_i))^2\\]\n\n\n\nEach term \\(y_i - \\hat{f}(x_i)\\) is called a residual , it is the difference between the true value and the prediction\nSquaring makes all differences positive and penalizes large errors more\n\n\n\n\nWhen computed on the training set, this is called the training MSE."
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#how-machines-learn",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#how-machines-learn",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-data-plot",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-data-plot",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "How does a machine learn?\n\n\nAt its core, a machine learning algorithm does the following:\n\n\nTake a set of data examples that is used to train the model\nFind a function \\(\\hat{f}\\) that maps inputs to outputs well on those examples\nUse \\(\\hat{f}\\) to make predictions on new, unseen data\n\n\n\n“Learning” means adjusting \\(\\hat{f}\\) to minimize error on the training data."
+    "text": "Training data and true \\(f\\)\n\nBelow we have simulated train data based on the true underlying function \\(f\\) (black line)."
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#checkin-1",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#checkin-1",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-mse-viz",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-mse-viz",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\nThink of a task in environmental science that would be very hard to solve with hand-written rules, but where you might have a lot of labeled data.\n\n\nWhat are the inputs and outputs?"
+    "text": "Visualizing the training MSE\n\nWe fit a linear model to the training data and obtain the estimate: \\(\\hat{f}(x)=\\) 0.81x + 8.25.\nThe residuals (dashed red lines) show the difference between each \\(y_i\\) and \\(\\hat{f}(x_i)\\).\nUsing these we calcualte the train MSE for this \\(\\hat{f}\\) to be 8614.9."
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-ai-ml-dl",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-ai-ml-dl",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-test-data",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-test-data",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "AI, Machine Learning, and Deep Learning"
+    "text": "Test data and the test MSE"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#three-terms",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#three-terms",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-data",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-data",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Three related terms\n\n\n\nArtificial intelligence (AI)\n\nThe broadest term — any technique enabling machines to mimic human intelligence, including rule-based systems and search algorithms.\n\n\n\nMachine learning\n\nA subset of AI — systems that learn from data rather than hand-coded rules.\n\n\n\n\nDeep learning\n\nA subset of ML — methods based on neural networks with many layers, behind breakthroughs like image recognition and large language models."
+    "text": "Test data\n\n\nA model will generally perform better when evaluated on the data it was trained on.\nBut in most cases, we want to use our model to make predictions on previously unseen data.\n\n\nTest data is data that is not part of the training dataset, used to evaluate how well our model generalizes to previously unseen observations.\n\n\n\nWhen we have enough data, we divide our observations into two groups:\n\n\nTraining set: used to fit the model and estimate \\(\\hat{f}\\)\nTest set: held out until after training, used only to evaluate performance"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#this-course",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#this-course",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-test-split",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-test-split",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "This course\n\n\n\nWe will focus on machine learning, primarily the classical methods:\n\n\n\nRegression · Support vector machines · Decision trees · Clustering · Dimension reduction\n\n\nProbably some deep learning in the last two weeks."
+    "text": "Splitting observations into train and test sets"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#env-apps-1",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#env-apps-1",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-mse",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-mse",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "ML in environmental science\n\n\n\n\nSpecies distribution modeling\n\nAlgorithms like MaxEnt and random forests predict where species are likely to be found using occurrence records and environmental covariates.\n\n\n\nAdapted from Helgen et al., 2013 for illustration purposes.\n\n\n\n\nRemote sensing & land cover\n\nSatellite imagery is classified into land cover types (forest, wetland, urban) to track deforestation, wetland loss, and wildfire burn severity at continental scales."
+    "text": "Test MSE\n\n\nWhen we compute the MSE on the test data, we get the test MSE.\nWe generally care much more about the test MSE than the training MSE.\n\nCheck-in: Intuitively, what do you expect to be larger: the training MSE or the test MSE?"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#env-apps-2",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#env-apps-2",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-mse-viz",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#test-mse-viz",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "ML in environmental science\n\n\n\n\nClimate downscaling\n\nDeep learning methods trained on high-resolution commercial satellite imagery have been used to map and track permafrost covered in the Arctic at sub-meter scale.\n\n\n\nC. Witharana et al., 2021\n\n\n\n\nWhale detection from acoustics\n\nDeep learning models trained on underwater recordings detect and classify marine mammal calls, enabling passive acoustic monitoring at scale."
+    "text": "Visualizing the test MSE\n\nOur linear model \\(\\hat{f}(x)=\\) 0.81x + 8.25 has the following residuals on the test set, with a test MSE of 9169.18."
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-limitations",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#section-limitations",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-overfitting",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-overfitting",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "We need to be aware of ML limitations"
+    "text": "Overfitting"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#limitations",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#limitations",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#overfitting-def",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#overfitting-def",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Limitations\n\n\nData hungry — many methods need large amounts of data to “learn”\n\n\n\nExtrapolation risk — a model trained in one region or time period may fail under novel conditions\n\n\n\nInterpretability — flexible models may predict well but be hard to interpret\n\n\n\nBias in training data — unrepresentative data produces biased models\n\n\n\n\nThese are not reasons to avoid ML — they are reasons to use it carefully!"
+    "text": "Overfitting\n\nOne instance in which it is useful to calcualte both the train MSE and the test MSE is to understand when a model is overfitting.\nWe say a model is overfitting when it has a:\n\n\nsmall training MSE, but a\nlarge test MSE, and\na simpler model would have achieved a lower test MSE.\n\n\n\n\n\n\n“Our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by random chance rather than by true properties of \\(f\\).” (James et al. 2023)"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#checkin-2",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#checkin-2",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#remember-our-data",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#remember-our-data",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\nConstruct a scenario in which developing and using a machine learning model with one or more of these limitations would be particularly consequential."
+    "text": "Remember our train and test sets"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Welcome!",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#three-models",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#three-models",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Welcome to the course materials for EDS 232 - Machine Learning for Environmental Science! In this website you will find all the materials for the Spring 2026 term. This course is part of the UCSB Masters in Environmental Data Science.\n\n\nMachine learning can help process big/complex data and extract knowledge. It forms one of the foundations in data science. This course provides a broad introduction to machine learning and statistical pattern recognition. Topics include supervised learning (decision tree, random forest, support vector machines, neural networks) and unsupervised learning (clustering, dimensionality reduction, deep learning). Problems and exercises are framed within environmental science applications. The course will be taught using Python.\n\n\n\n\n\n\nCarmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm - 3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 11 am - 12 pm @ Bren Hall 3418\n\n\n\n\n\n\nClick here to see the syllabus.\n\n\n\nThe following is our tentative calendar. The course content and calendar may be subject to change as the course progresses.\n\n\n\n\n📝 If you have suggestions on how to correct, improve, or expand these course materials, please feel free to email the course instructor at c_galazgarcia@ucsb.edu or file a GitHub issue.\n🌟 If these materials have been useful to you, consider adding a star to the project’s repository!"
+    "text": "Three models for the same training data\n\n\n\nCheck-in: Which model do you think will have the lowest training MSE? The lowest test MSE?"
   },
   {
-    "objectID": "index.html#course-description",
-    "href": "index.html#course-description",
-    "title": "Welcome!",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-test-mse",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#train-test-mse",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Machine learning can help process big/complex data and extract knowledge. It forms one of the foundations in data science. This course provides a broad introduction to machine learning and statistical pattern recognition. Topics include supervised learning (decision tree, random forest, support vector machines, neural networks) and unsupervised learning (clustering, dimensionality reduction, deep learning). Problems and exercises are framed within environmental science applications. The course will be taught using Python."
+    "text": "Training MSE vs. test MSE\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAs flexibility increases, the training MSE decreases…\n\n…but the test MSE may go back up!\n\nCheck-in: Which model is overfitting, and why?\nDoes a better fit on the training data always indicate good performance on unseen data?"
   },
   {
-    "objectID": "index.html#teaching-team",
-    "href": "index.html#teaching-team",
-    "title": "Welcome!",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#models-on-test",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#models-on-test",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Carmen Galaz García (she/her/hers)\n\nE-mail: c_galazgarcia@ucsb.edu\nStudent hours: Thursday 2 pm - 3 pm @ Bren Hall 4424\n\n\n\n\nAnnie Adams (she/her/hers)\n\nE-mail: aradams@ucsb.edu\nStudent hours: Tuesday 11 am - 12 pm @ Bren Hall 3418"
+    "text": "Models predictions on the test set\n\n\n\nThe degree 15 polynomial has the lowest training MSE but fails to capture the trend in the test data."
   },
   {
-    "objectID": "index.html#syllabus",
-    "href": "index.html#syllabus",
-    "title": "Welcome!",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-bias-variance",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#section-bias-variance",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Click here to see the syllabus."
+    "text": "The bias-variance tradeoff"
   },
   {
-    "objectID": "index.html#calendar",
-    "href": "index.html#calendar",
-    "title": "Welcome!",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#model-variance",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#model-variance",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "The following is our tentative calendar. The course content and calendar may be subject to change as the course progresses."
+    "text": "Model variance\n\nModel variance is how much \\(\\hat{f}\\) would change if we trained it on a different dataset drawn from the same population.\n\n\n\n\nHigh-variance model: very sensitive to the specific training data: a small change in the data produces a very different \\(\\hat{f}\\)\nLow-variance model: relatively stable across different training sets"
   },
   {
-    "objectID": "index.html#contribute",
-    "href": "index.html#contribute",
-    "title": "Welcome!",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#two-training-sets",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#two-training-sets",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "📝 If you have suggestions on how to correct, improve, or expand these course materials, please feel free to email the course instructor at c_galazgarcia@ucsb.edu or file a GitHub issue.\n🌟 If these materials have been useful to you, consider adding a star to the project’s repository!"
+    "text": "Suppose we collect a second training set\n\n\n\nBoth datasets come from the same true \\(f\\) but differ due to random noise."
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html",
-    "title": "What is machine learning?",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#variance-demo",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#variance-demo",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "📊 Slides\nIn this lesson we introduce:",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "What is machine learning?"
-    ]
+    "text": "High vs. low variance\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in: Which method has higher variance,\nthe linear model or the degree 15 polynomial? Why?"
   },
   {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#what-is-machine-learning",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#what-is-machine-learning",
-    "title": "What is machine learning?",
-    "section": "What is machine learning?",
-    "text": "What is machine learning?\nYou have probably heard the term machine learning a lot recently. But what does it actually mean?\nMachine learning (ML) is a branch of computer science focused on building systems that can learn from data to make predictions or decisions, without being explicitly programmed with rules.\nThe key idea is: instead of a human writing down rules, an algorithm discovers the rules from examples.\nTo make this concrete, consider two approaches to the same problem: predicting whether a kelp forest has been degraded based on water temperature and sea urchin density.\nTraditional programming approach:\n\nIf temperature is greater than 18°C and urchin density is greater than 50/m², then the kelp forest will be degraded\n\nA human expert would write these rules by hand, based on their knowledge of the system.\nMachine learning approach:\n\nGive the algorithm many examples of (temperature, urchin density) and how whether these kelp forests are degraded or not. Then let the algorithm figure out the rules itself.\n\nThe rules are learned from data, not written by hand.\n\n\n\n\n\n\nTipCheck-in\n\n\n\nThink of a task in environmental science that would be very hard to solve with hand-written rules, but where you might have a lot of labeled data. What are the inputs and outputs?\n\n\nAt its core, a machine learning algorithm does the following:\n\nTake a set of training examples.\nFind a function \\(\\hat{f}\\) that maps inputs to outputs well on those examples.\nUse \\(\\hat{f}\\) to make predictions on new, unseen data.\n\n“Learning” simply means adjusting \\(\\hat{f}\\) to minimize error on the training data.",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "What is machine learning?"
-    ]
-  },
-  {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#ai-machine-learning-and-deep-learning",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#ai-machine-learning-and-deep-learning",
-    "title": "What is machine learning?",
-    "section": "AI, machine learning, and deep learning",
-    "text": "AI, machine learning, and deep learning\nIn addition to machine learning, you may have also heard about artificial intelligence or deep learning. These are related terms:\nArtificial intelligence (AI) is the broadest term. It refers to any technique that enables machines to mimic human intelligence. This including rule-based systems, search algorithms, and more.\nMachine learning is a subset of AI: systems that learn from data rather than from hand-coded rules.\nDeep learning is a subset of machine learning: methods based on artificial neural networks with many layers. Deep learning is behind many recent breakthroughs, such as image recognition and large language models. It is one family of ML methods.\n\n\n\nHierarcky of Modern Intelligence: AI, Machine Learning, and Deep Learning. Source: PromptEngineering.org\n\n\nFor this course, we will focus on machine learning, primarily the classical methods (regression, support vector machines, decision trees, clustering).",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "What is machine learning?"
-    ]
-  },
-  {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#machine-learning-in-environmental-science",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#machine-learning-in-environmental-science",
-    "title": "What is machine learning?",
-    "section": "Machine learning in environmental science",
-    "text": "Machine learning in environmental science\nML is increasingly used across environmental disciplines. A few high-profile examples:\nSpecies distribution modeling. Algorithms like MaxEnt and random forests use occurrence records and environmental covariates (temperature, precipitation, land cover) to predict where species are likely to be found (Elith et al. 2011; Phillips et al. 2017).\nRemote sensing and land cover classification. Satellite imagery is classified into land cover types (forest, wetland, urban, etc.) using supervised classifiers. This is used to track deforestation, monitor wetland loss, and assess wildfire burn severity at continental scales (Kattenborn et al. 2021).\nClimate downscaling. Global climate models operate at coarse spatial resolution. ML methods are used to “downscale” these outputs to finer scales relevant for local impact assessment. For example, predicting local precipitation from large-scale atmospheric patterns (Baño-Medina, Manzanas, and Gutiérrez 2020).\nWhale detection from acoustics. Deep learning models are trained on underwater recordings to detect and classify marine mammal calls, enabling large-scale passive acoustic monitoring that would be impossible to do by hand (Shiu et al. 2020).\nHarmful algal bloom prediction. ML models trained on water quality sensors, satellite data, and weather forecasts are used to predict the timing and location of algal blooms in lakes and coastal waters (Rousso et al. 2020).",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "What is machine learning?"
-    ]
-  },
-  {
-    "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#limitations-and-considerations",
-    "href": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html#limitations-and-considerations",
-    "title": "What is machine learning?",
-    "section": "Limitations and considerations",
-    "text": "Limitations and considerations\nML is a powerful tool, but it comes with important caveats that are especially relevant in environmental science:\n\nData hungry. Many ML methods need large amounts of training data, which can be scarce for rare species or remote locations.\nExtrapolation risk. A model trained on data from one region or time period may perform poorly when applied elsewhere or under novel conditions.\nInterpretability. Flexible models may predict well but be hard to interpret. This is a problem if you need to explain why something is changing, not just that it is.\nBias in training data. If the data used for training is unrepresentative the model will inherit those biases.\n\nThese are not reasons to avoid ML, they are reasons to use it carefully!\n\n\n\n\n\n\nTipCheck-in\n\n\n\nConstruct a scenario in which developing and using a machine learning model with one or more of these limitations would be particularly consequential.",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "What is machine learning?"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html",
-    "title": "Learning from data",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#model-bias",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#model-bias",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "📊 Slides\nIn this lesson we introduce:\nThese notes are based on chapter 2.1 of the book An Introduction to Statistical Learning with Applications in Python (James et al., 2023).",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
+    "text": "Model bias\n\nModel bias is the error introduced by the assumptions built into the model.\n\n\n\n\nHigh-bias model: its assumptions are too restrictive to capture the true shape of \\(f\\): it will be systematically wrong no matter how much data we give it\nLow-bias model: flexible enough to approximate the true shape of \\(f\\)\n\n\n\n\n\n\nExample: if the true \\(f\\) is cubic but we fit a linear model, the linear model simply cannot capture the true shape, it will always be biased."
   },
   {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#investigating-elephant-seal-population",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#investigating-elephant-seal-population",
-    "title": "Learning from data",
-    "section": "Investigating elephant seal population",
-    "text": "Investigating elephant seal population\nAmanda is a marine scientist investigating how protected areas affect the population of elephant seals in California. Specifically, she wants to understand: how does elephant seal population change in a protected rookery that has just been protected?\n\n\n\n(Northern Elephant Seals (M. angustirostris) at sunrise early light at Piedras Blancas, San Simeon, CA 03 Feb 2012. Photo by Mike Baird.\n\n\nShe identifies the predictor variable as time since the rookery was protected and the response variable as elephant seal population (since elephant seal population responds on time).\n\n\n\n\n\n\n\n\n\n\nAn ideal function \\(f\\) exists somewhere, we just can’t access it\nWhat if Amanda was given the true, real relationship between time and population?\nIn mathematical terms, this would mean Amanda would have a function \\(f\\) such that\n\\[f(\\text{time since protection}) = \\text{true population}.\\]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipCheck-in\n\n\n\n\nWhat does \\(f(0)\\) represent? What does \\(f(5)=100\\) mean?\nWhat could Amanda do if she had this function \\(f\\)?\n\n\n\n\n\n\n\n\n\nTipDiscussion\n\n\n\n\n\n\nShe could understand whether and how population and time are related: is there no relation, does it increase, decrease, varies, etc?\nShe could also understand the mathematical form of this relationship: for example, is it linear? These are examples of using the function \\(f\\) for inference.\nShe could also use the function \\(f\\) to know the elephant seal population in the future, i.e. using the function for prediction. In addtion, she could probably save resources spent in going out into the field for data collection.\n\n\n\n\n\n\nOur next best option is to estimate \\(f\\) using data\nClearly Amanda has no access to this true, ideal function! So her next best option is to try to estimate \\(f\\) using data.\nFortunately, she found some long-term ecological data that measures the elephant seal population since the protection for the rookery was established:\n\n\n\n\n\n\n\n\n\nThese are the observed values for the response variable.\n\n\n\n\n\n\nTipCheck-in\n\n\n\nAre the observed values the “true values” for the response variable?\n\n\nError can be introduced during measurement. In this case we have\n\\[f(\\text{time}) = \\text{true population} = \\text{observed population} + \\text{error}\\]\n\n\n\n\n\n\n\n\n\nWith these observed population values at a given time, Amanda can try to estimate the real function \\(f\\) with another function \\(\\hat{f}\\). Some estimates of \\(f\\) are shown in the graph below.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipCheck-in\n\n\n\nWhat considerations can Amanda take into account when choosing an estimate \\(\\hat{f}\\)?\n\n\n\n\n\n\n\n\nTipDiscussion\n\n\n\n\n\nMany! Preliminary understanding of the data, the application (prediction or inference?), volume of available data, minimizing error, even computing power. Selecting any \\(\\hat{f}\\) comes with tradeoffs!",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#abstract-setup",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#abstract-setup",
-    "title": "Learning from data",
-    "section": "Abstract setup",
-    "text": "Abstract setup\nRoughly, this is the setup in which we will be working in. Let’s see it more abstractly:\nWe have a set of \\(p\\) predictors \\(X_1, ..., X_p\\) and a dependent variable \\(Y\\).\nWe assume there is a relationship between \\(Y\\) and \\(X = (X_1, ..., X_p)\\) that can be written as \\[Y = f(X) + \\epsilon.\\]\nHere \\(f\\) is some fixed but unknown function of the predictors \\(X_1, . . ., X_p\\) and \\(\\epsilon\\) represents an error term (independent of \\(X\\) and with mean zero).\nOur objective is to estimate \\(f(X)\\) well enough with another function \\(\\hat{f}(X)\\).\n\nWhy bother to estimate \\(f\\)?\n\nDo inference: use \\(\\hat{f}\\) to understand which predictors are associated with the response and understand the form of this relationship.\nDo predictions: this means calculating \\(\\hat{f}(X) = \\hat{Y}\\) to predict what the value of \\(Y\\) will be with at a new input \\(X\\).\n\nDepending whether our goal is prediction, inference, or a combination of the two, we may select different methods for estimating \\(f\\).\nGenerally:\n\nmodels for \\(f\\) that are interpretable enough to allow inference may not be have as accurate prediction results as other approaches.\nmodels for \\(f\\) that can give excellent predictions, may not be as interpretable and make inference more challenging.\n\nThere’s a tradeoff.\nGenerally, machine learning may prioritize predictions over interpretability (we want the best prediction, even if we got it out of a black box), while statistical modeling may prioritize interpretability over prediction.\n\n\n\n\n\n\nTipCheck-in\n\n\n\nWhat are some problems or scenarios where inference may be more important than prediction? What about an problems or scenarios where prediction is the priority?\n\n\n\n\nHow do we estimate \\(f\\)?\nWe start with a set of \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}, \\]\nwhere\n\n\\(x_i\\) = a vector with with the predictor information, and\n\\(y_i\\) = the response variable for the \\(i\\)-th observation.\n\nThese data points are the training set or training data because we will use them to train (or fit) our method and obtain an estimate \\(\\hat{f}\\) of the “true” function \\(f\\).\nOur goal is to apply methods to the training data to estimate the unknown function \\(f\\) that links predictors with the response.\nThe “learning” part in machine learning is precisely the process of adjusting \\(\\hat{f}\\) to minimize error on the training data.\n\n\nNotation\nOur training set has \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}.\\]\nIf we have \\(p\\) predictors, then each \\(x_i\\) is a vector of the form: \\[x_i = (x_{i1}, ..., x_{ip}).\\] The response variable \\(y_i\\) is just a single number or category.\nFor example, for our previous data we would transfor the data table into the corresponding notation as shown below.\n\n\n\n\n\n\nObs.\nTime (Predictor)\nPopulation (Response)\n\n\n\n\n1\n2\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\n\n\n\\((x_1,y_1) = (2,53)\\)\n\\(\\vdots\\)\n\\((x_5,y_5) = (10,353)\\)\n\\(\\vdots\\)\n\\((x_9,y_9) = (18,473)\\)\n\n\nIf we were to add average annual sea surface temperature (SST) as a second predictor variable, then our notation would update accordingly:\n\n\n\n\n\nObs.\nTime (Predictor 1)\nSST (Predictor 2)\nPopulation (Response)\n\n\n\n\n1\n2\n17.05\n53\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n5\n10\n20.86\n353\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n9\n18\n23.27\n473\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (2, 17.05)\\)\n\\(y_1 = 53\\)\n\\(\\vdots\\)\n\\(x_5 = (x_{5,1}, x_{5,2}) = (10, 20.86)\\)\n\\(y_5 = 353\\)\n\\(\\vdots\\)\n\\(x_9 = (x_{9,1}, x_{9,2}) = (18, 23.27)\\)\n\\(y_9 = 473\\)",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#parametric-methods",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#parametric-methods",
-    "title": "Learning from data",
-    "section": "Parametric methods",
-    "text": "Parametric methods\nBroadly, most methods for estimating \\(f\\) can be characterized as parametric or non-parametric.\nParametric methods estimate \\(f\\) in two steps:\n\nMake an assumption about the functional form or shape of \\(f\\).\nUse the training data to train or fit the model and get those parameters that will define the estimate \\(\\hat{f}\\).\n\nConsiderations:\n\nMay be used with small training sets\nMay be computationally easier to estimate a few parameters\nSimpler functional forms for \\(\\hat{f}\\) can make inference easier\nAssumed functional form for \\(\\hat{f}\\) may be far from true \\(f\\), making predictions inaccurate\nPredictions could not be as good\n\n\nExample\n\nAmanda decides to model the population with a linear model on the predictors \\(X_1 =\\) time and \\(X_2=\\) average annual sea surface temperature (SST). This means she assumes the function\n\n\\[f(\\text{time}, \\text{SST}) = \\text{population}\\]\nhas the form\n\\[ f(x_1, x_2) = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2. \\]\n\nShe trains the model to get an estimate for \\(f\\), by finding parameters \\(\\beta_0, \\beta_1\\), and \\(\\beta_2\\) such that\n\n\\[ \\text{observed data} \\approx \\beta_0 + \\beta_1 \\text{time} + \\beta_2 \\text{SST} .\\]\nThis is great! She only needs to find three numbers to get a model for the population.\n\n\nLinear Model: Population = -1112.46 + 10.10*Time + 64.58*SST",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#non-parametric-methods",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#non-parametric-methods",
-    "title": "Learning from data",
-    "section": "Non-parametric methods",
-    "text": "Non-parametric methods\nNon-parametric methods do not make explicit assumptions about the functional form of \\(f\\). Instead, they seek an estimate of \\(f\\) that gets as close to the training set as possible without being “being too rough or wiggly”.\nConsiderations:\n\nMay be better at prediction\nMay need a lot of data to fit the model\nMay follow errors or noise in the data too closely\nMay be less interpretable than more restrictive models\n\n\nExample\nInstead of assuming a linear form, Amanda uses K-nearest neighbors (KNN) to estimate \\(f(\\text{time}, \\text{SST})\\). For any new combination of time and SST, the model predicts population as the average of the \\(K\\) most similar observations in the training set. No assumptions about the shape of \\(f\\) required.\n\n\n\n\n\n\n\n\n\nNotice the fitted surface is no longer a flat plane, but it bends and curves to follow the data. Amanda did not specify any functional form; the shape of \\(\\hat{f}\\) emerges entirely from the training observations.",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#regression-vs.-classification",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#regression-vs.-classification",
-    "title": "Learning from data",
-    "section": "Regression vs. Classification",
-    "text": "Regression vs. Classification\nVariables can be either:\n\nquantitative: continuous numerical values, or\nqualitative or categorical: values in one of \\(K\\) different classes or categories.\n\nProblems having a quantitative response are regression problems.\nProblems having a qualitative response are classification problems.\nWe tend to select machine learning methods based on whether the response is quantitative or qualitative.\nWhat about the predictors being quantitative or categorical? Not as important, often possible to code qualitative predictors before the analysis.\n\nExample\nAmanda wants to predict the health status of individual adult seals. A veterinarian has assessed a sample of seals and labeled each one as healthy, malnourished, or injured. Amanda wants to train a classifier using weight and length as predictors:\n\\[f(\\text{weight, length}) = \\text{health status} \\in \\{\\text{healthy, malnourished, injured}\\}.\\]\nHer labeled training data looks like this:\n\n\n\n\n\n\n\n\n\n\n\nObs.\nLength (Predictor 1)\nWeight (Predictor 2)\nHealth status (Response)\n\n\n\n\n1\n173.58\n200.14\nhealthy\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n44\n157.06\n122.96\nmalnourished\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n90\n163.48\n164.98\ninjured\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (173.58 ,200.14)\\)\n\\(y_1 =\\) healthy\n\\(\\vdots\\)\n\\(x_{44} = (x_{44,1}, x_{44,2}) = (157.06, 122.96)\\)\n\\(y_{44} =\\) malnourished\n\\(\\vdots\\)\n\\(x_{90} = (x_{90,1}, x_{90,2}) = (163.48, 164.98)\\)\n\\(y_{90} =\\) injured\n\n\nShe can use this data to train a classifier, and then use it to predict the health status of new, unlabeled seals given their weight and length.",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#unsupervised-vs.-supervised-learning",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#unsupervised-vs.-supervised-learning",
-    "title": "Learning from data",
-    "section": "Unsupervised vs. Supervised Learning",
-    "text": "Unsupervised vs. Supervised Learning\nSupervised learning: each observation has predictors associated to a response variable: \\[\\text{training set} = \\{(x_1, y_1), ..., (x_n, y_n)\\}\\]\nwhere each \\(x_i = (x_{i1}, ..., x_{ip})\\) is a vector with \\(p\\) predictors and \\(y_i\\) is the response to \\(x_i\\).\nUnsupervised learning: each observation only has features, no response variable.\nOur training set only has observations of \\(p\\) different features: \\[ \\text{training set} = \\{ x_1, ..., x_n\\},\\]\nwhere each \\(x_i = (x_{i1}, ..., x_{ip})\\) is a vector with \\(p\\) features. There’s no reponse variable \\(Y\\).\nIn unsupervised learning problems, we seek to understand the relationships between the variables or between the observations.\n\nExample\nAmanda records dive depth and dive duration for a large number of seals, but has no prior labels or categories in mind. She wants to know: are there distinct foraging strategies among these seals? Her data looks like this:\n\n\n\n\n\nObs.\nDepth (Feature 1)\nDuration (Feature 2)\n\n\n\n\n1\n585.29\n39.39\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n23\n108.23\n9.52\n\n\n\\(\\vdots\\)\n\\(\\vdots\\)\n\\(\\vdots\\)\n\n\n41\n324.37\n23.2\n\n\n\n\n\n\n\n\n\n\n\n\n         →\n\n\n\n\\(x_1 = (x_{1,1}, x_{1,2}) = (585.29, 39.39)\\)\n\\(\\vdots\\)\n\\(x_{23} = (x_{23,1}, x_{23,2}) = (108.23, 9.52)\\)\n\\(\\vdots\\)\n\\(x_{41} = (x_{41,1}, x_{41,2}) = (324.37, 23.2)\\)\n\n\nIn this case, there is no response variable \\(y\\), Amanda lets the algorithm find structure in the data on its own.\n\n\n\n\n\n\n\n\n\nThe top plot shows what Amanda starts with: just measurements, no categories. The bottom plot shows the structure the algorithm uncovers, which Amanda interprets as distinct foraging strategies.\n\n\n\n\n\n\nTipCheck-in\n\n\n\nWhat is the key difference between the classification and clustering examples above?",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#recap",
-    "href": "notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html#recap",
-    "title": "Learning from data",
-    "section": "Recap",
-    "text": "Recap\nWhat we covered today:\n\nThe idea of estimating a function \\(f\\) using observed data\nInference and prediction\nTraining set = observations used to fit/train a model\nPredictors + response variable & their math notation\nParametric vs. non parametric\nRegression vs. classification\nSupervised vs. unsupervised learning\n\nNext class: assessing model accuracy",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Learning from data"
-    ]
-  },
-  {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html",
-    "title": "Training and test errors, and model flexibility",
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#bv-decomposition",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#bv-decomposition",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "📊 Slides\nIn this lesson we cover:\nThese notes are based on chapter 2.2 of the book An Introduction to Statistical Learning with Applications in Python (James et al. 2023).\nCode\nimport os\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nfrom sklearn.linear_model import LinearRegression\n\n# Set consistent style\nplt.style.use('default')\nfig_size_x = 7\nfig_size_y = 4\nplt.rcParams['font.size'] = 10",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Training and test errors, and model flexibility"
-    ]
+    "text": "The bias-variance decomposition\n\n\nRoughly speaking and from a theoretical perspective, the expected test MSE decomposes as:\n\\[\\text{Expected test MSE} = \\underbrace{\\text{Model variance}}_{\\text{sensitivity to training data}} + \\underbrace{\\text{Model bias}^2}_{\\text{systematic error}} + \\underbrace{\\text{Irreducible error}}_{\\text{Var}(\\epsilon)}\\]\n\n\n\nThe irreducible error \\(\\text{Var}(\\epsilon)\\) is always present and positive, it sets a lower bound on the test MSE\nModel variance and bias are non-negative and thus contribute to the MSE, but depend on the model we choose.\n\n\n\n\nTo minimize the expected test MSE, we need both low variance and low bias."
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#notation-recap",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#notation-recap",
-    "title": "Training and test errors, and model flexibility",
-    "section": "Notation recap",
-    "text": "Notation recap\nWe start with a set of \\(n\\) observed data points:\n\\[ \\{ (x_1, y_1) , ..., (x_n, y_n)\\}, \\]\nwhere\n\n\\(x_i\\) = predictor information, and\n\\(y_i\\) = the response variable for the \\(i\\)-th observation.\n\nThese data points are the training set.\nWe assume the relationship between \\(x_i\\) and \\(y_i\\) is perfectly captured by an unknown function \\(f\\), this means \\(f(x_i)= y_i\\).\nOur goal is to obtain a good enough estimate \\(\\hat{f}\\) of \\(f\\). We do this by:\n\nselecting a general model for \\(f\\) (linear regression, KNN, …)\nusing the training set to train the model and obtain the estimate \\(\\hat{f}\\).",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Training and test errors, and model flexibility"
-    ]
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#the-tradeoff",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#the-tradeoff",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "The bias-variance tradeoff\n\n\n\n\n\n“As we use more flexible methods, the variance will increase and the bias will decrease. The relative rate of change of these two quantities determines whether the test MSE increases or decreases.” (James et al. 2023)\n\n\n“The challenge is finding a method for which both the variance and the squared bias are reasonably low.” (James et al. 2023)\n\n\n\n\n\n\n\n\n\n\n\n\n\nFrom degree 1 → 3: bias drops faster than variance rises, so test MSE falls.\nFrom degree 3 → 15: variance rises faster than bias drops, so test MSE climbs back up."
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#selecting-a-model-to-use-for-our-data",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#selecting-a-model-to-use-for-our-data",
-    "title": "Training and test errors, and model flexibility",
-    "section": "Selecting a model to use for our data",
-    "text": "Selecting a model to use for our data\nThe question now is: How do we select which model to use for our data (step 1)?\nThere is no single “best” model to apply across all problems. It’s always about evaluating tradeoffs and selecting the best model to work in a given problem for a specific dataset.\nTo evaluate the performance of a model on a given data set, we need some way to measure how well its predictions match the observed data.\nRemember we want: \\(\\hat{f}(x_i)\\) (the prediction on \\(x_i\\)) is close enough to \\(f(x_i)= y_i\\) (the true value).",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Training and test errors, and model flexibility"
-    ]
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#recap",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#recap",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Recap\n\n\n\nThe training MSE measures how well \\(\\hat{f}\\) fits the training data, but we care more about the test MSE because we want to know how our model performs on unseen data.\nA model that fits training data too closely may overfit: low training MSE, high test MSE\nModel variance measures how sensitive \\(\\hat{f}\\) is to the specific training set used\nModel bias measures systematic error from restrictive model assumptions\nThe bias-variance tradeoff: more flexible models generally have lower bias but higher variance\n\n\n\nThe challenge is finding a model where both variance and bias are reasonably low."
   },
   {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#mean-squared-error-and-training-mse",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#mean-squared-error-and-training-mse",
-    "title": "Training and test errors, and model flexibility",
-    "section": "Mean Squared Error and training MSE",
-    "text": "Mean Squared Error and training MSE\nFor regression, the most commonly used way to measure how close \\(\\hat{f}\\) is to \\(f\\) is the mean squared error (MSE):\n\\[ MSE = \\frac{1}{n} \\sum_{i=1}^n(y_i - \\hat{f}(x_i))^2. \\]\n\nEach term \\(y_i - \\hat{f}(x_i)\\) is called a residual, it is the difference between the true value and the prediction.\nSquaring makes all differences positive and penalizes large errors more.\n\nWhen we calculate this MSE using the training data, we obtain the training MSE. Many models are fitted by estimating coefficients that minimize the training MSE.\nBelow we have simulated train data based on the function \\(f\\) shown in black in the plot.\n\n\nCode\nnp.random.seed(42)\n\n# True function: third degree polynomial\ndef true_f(x):\n    return 0.003*x**3 - 0.35*x**2 + 10*x - 20\n\n# Create train set\nn=30\nx_obs = np.random.uniform(0, 100, n)\ny_obs = true_f(x_obs) + np.random.normal(0, 50, n)\n\nx = np.linspace(0, 100, 200)\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, true_f(x), 'k-', linewidth=2, label='f (true)')\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')\n\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\nCode\n# Fit linear model\nlin_model = LinearRegression()\nlin_model.fit(x_obs.reshape(-1, 1), y_obs)\n\n# Coefficients\nbeta_0 = lin_model.intercept_\nbeta_1 = lin_model.coef_[0]\neq_string = f\"{beta_1:.2f}x + {beta_0:.2f}\"\n\n# Estimates\ny_linear = lin_model.predict(x.reshape(-1, 1))\ny_hat_obs = lin_model.predict(x_obs.reshape(-1, 1))\n\ntrain_mse = np.mean((y_obs - y_hat_obs)**2)\n\n\nWe fit a linear model to obtain the estimate \\(\\hat{f}(x)=\\) 0.81x + 8.25. With this funciton we obtain the following residuals and a train MSE of 8614.9.\n\n\nCode\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, y_linear, color='orange', linewidth=2, label=r'$\\hat{f}$')\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')\n\n# Residual lines from observations to linear fit\nfor i, (xi, yi, yhi) in enumerate(zip(x_obs, y_obs, y_hat_obs)):\n    plt.plot([xi, xi], [yi, yhi], 'r--', linewidth=0.8,\n             label='Residuals' if i == 0 else None)\n\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Training and test errors, and model flexibility"
-    ]
-  },
-  {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#test-data-and-test-mse",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#test-data-and-test-mse",
-    "title": "Training and test errors, and model flexibility",
-    "section": "Test data and test MSE",
-    "text": "Test data and test MSE\n\n\n\n\n\n\nTipCheck-in\n\n\n\nIf you were going to take a big final exam in this class, how would you prefer the instructor to come up with exam questions?\n\nTake the questions from assignments questions that you completed this quarter.\nCome up with new questions to test on the material that we covered this quarter.\n\nOn which questions would you expect to do better?\n\n\nMuch like this thought exercise, a model will generally perform better if we evaluate it on the training set, instead of evaluating it on previously unseen data.\nTest data is data that is not part of the training dataset and is used for the purpose of evaluating our model’s performance.\nGenerally, we are interested in the accuracy of the predictions that we obtain when we apply our model to the test data. To estimate how well our model will perform, we calculate the MSE (or any other accuracy metric) on the test data to obtain a test MSE.\n\n\n\n\n\n\nTipCheck-in\n\n\n\nIntuitively, what do you expect to be larger, the training MSE or the test MSE?\n\n\nLet’s continue our previous example. We have additional data coming from the same function that is not part of the training data. We can use this as our test data (red circles) since it was not used to fit the model.\n\n\nCode\n# Create test set\nn_test = 15\nx_test = np.random.uniform(0, 100, n_test)\ny_test = true_f(x_test) + np.random.normal(0, 50, n_test)\n\n# Train and test data plot\nx = np.linspace(0, 100, 200)\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, true_f(x),  'k-',          linewidth=2, label='f (true)')\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')\nplt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\nCode\ny_hat_test = lin_model.predict(x_test.reshape(-1, 1))\ntest_mse = np.mean((y_test - y_hat_test)**2)\n\n\nNow we can use the same linear estimate \\(\\hat{f}(x)=\\) 0.81x + 8.25 to visualize the test residuals and calcualte a test MSE of 9169.18.\n\n\nCode\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, y_linear, color='orange', linewidth=2, label=r'$\\hat{f}$')\nplt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')\n\n# Residual lines from test observations to linear fit\nfor i, (xi, yi, yhi) in enumerate(zip(x_test, y_test, y_hat_test)):\n    plt.plot([xi, xi], [yi, yhi], 'r--', linewidth=0.8,\n             label='Residuals' if i == 0 else None)\n\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\nIn practice, if enough observations are available, we create our training and test datasets by dividing all available observations into the ones that will be usef for training, and the ones that will be used for testing.",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Training and test errors, and model flexibility"
-    ]
-  },
-  {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#overfitting",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#overfitting",
-    "title": "Training and test errors, and model flexibility",
-    "section": "Overfitting",
-    "text": "Overfitting\nOne instance in which it is useful to calcualte both the train MSE and the test MSE is to understand when a model is overfitting.\nWe say a model is overfitting the data when it has a small training MSE but a large test MSE and a lower test MSE would have been achieved by a simpler model. From the (James et al. 2023):\n\nThis happens because our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by random chance rather than by true properties of the unknown function \\(f\\).\n\nLet’s go back to our simulated data that has been split into train data (black circles) and test data (red circles).\n\n\nCode\n# Create test set\n# # np.random.seed(99)\n# n_test = 15\n# x_test = np.random.uniform(0, 100, n_test)\n# y_test = true_f(x_test) + np.random.normal(0, 50, n_test)\n\n# Train and test data plot\nx = np.linspace(0, 100, 200)\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, true_f(x),  'k-',          linewidth=2, label='f (true)')\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data')\nplt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\nThree models were fit using the train data: a linear model (orange line), a degree 3 polyonimal (blue line), and a degree 15 polynomial (green line) as seen in the graph below.\n\n\nCode\n# # Three fits\n# Linear fit\nlin_model = LinearRegression()\nlin_model.fit(x_obs.reshape(-1, 1), y_obs)\ny_linear = lin_model.predict(x.reshape(-1, 1))\n\n# Degree 3 polynomial (matches true f)\ncoeffs3 = np.polyfit(x_obs, y_obs, 3)\ny_poly3 = np.polyval(coeffs3, x)\n\n# Degree 15 polynomial (overfitting)\nt_min, t_max = x_obs.min(), x_obs.max()\nx_norm = (x_obs - t_min) / (t_max - t_min)\nx_line_norm = (x - t_min) / (t_max - t_min)\ncoeffs15 = np.polyfit(x_norm, y_obs, 15)\ny_poly15 = np.polyval(coeffs15, x_line_norm)\n\n# Models with train data\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='\"Observed\" data')\nplt.plot(x, y_linear,   color='orange',    linewidth=2, label='Linear')\nplt.plot(x, y_poly3,    color='steelblue', linewidth=2, label='Degree 3 polynomial')\nplt.plot(x, y_poly15,   color='green',     linewidth=2, label='Degree 15 polynomial')\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(fontsize=8)\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\nNext, the train and test MSE was calculated for each of the models. These can be seen in the graph below\n\n\nCode\n# Predictions on training and test sets\n# Linear\ny_hat_train_lin = lin_model.predict(x_obs.reshape(-1, 1))\ny_hat_test_lin  = lin_model.predict(x_test.reshape(-1, 1))\n\n# Degree 3\ny_hat_train_3 = np.polyval(coeffs3, x_obs)\ny_hat_test_3  = np.polyval(coeffs3, x_test)\n\n# Degree 15 (using normalization)\nx_test_norm = (x_test - t_min) / (t_max - t_min)\nx_obs_norm  = (x_obs  - t_min) / (t_max - t_min)\ny_hat_train_15 = np.polyval(coeffs15, x_obs_norm)\ny_hat_test_15  = np.polyval(coeffs15, x_test_norm)\n\n# MSEs\ndef mse(y_true, y_pred):\n    return np.mean((y_true - y_pred)**2)\n\ntrain_mses = [mse(y_obs, y_hat_train_lin),\n              mse(y_obs, y_hat_train_3),\n              mse(y_obs, y_hat_train_15)]\n\ntest_mses  = [mse(y_test, y_hat_test_lin),\n              mse(y_test, y_hat_test_3),\n              mse(y_test, y_hat_test_15)]\n\nflexibility = [1, 3, 15]\n\ncolors = ['orange', 'steelblue', 'green']\n\nplt.figure(figsize=(fig_size_x * 0.6, fig_size_y))\nplt.plot(flexibility, train_mses, '-', color='gray', linewidth=2, label='Training MSE')\nplt.plot(flexibility, test_mses,  '-', color='red',  linewidth=2, label='Test MSE')\n\nfor i, (f, c) in enumerate(zip(flexibility, colors)):\n    plt.plot(f, train_mses[i], 's', color=c, markersize=5)\n    plt.plot(f, test_mses[i],  's', color=c, markersize=5)\n\nplt.xlabel('Model flexibility (polynomial degree)')\nplt.ylabel('Mean Squared Error')\n#plt.ylabel('Mean Squared Error (log scale)')\n#plt.yscale('log')\nplt.xticks(flexibility, ['1', '3', '15'])\nplt.legend(loc='upper center')\nplt.grid(False)\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipCheck-in\n\n\n\nWhich one of these models would you say is overfitting and why?\nDoes a better fit on the training data always indicate a good performance on unseen data?\n\n\n\n\n\n\n\n\nTipDiscussion\n\n\n\n\n\nWe can see on the first graph that the degree 15 polynomial follows the pattern of the training data the closest. This is corresponds to this polynomial having the lowest train MSE as seen on the second graph. However, we can consider this model to be overfitting since the test MSE is (1) much higher than the train MSE and (2) higher than the test MSE of the simpler third degree polynomial. On the graph below we can see how the degree 15 polynomial fails to capture the trend in the test data.\n\n\nCode\n# Models with test data\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')\nplt.plot(x, y_linear,   color='orange',    linewidth=2, label='Linear')\nplt.plot(x, y_poly3,    color='steelblue', linewidth=2, label='Degree 3 polynomial')\nplt.plot(x, y_poly15,   color='green',     linewidth=2, label='Degree 15 polynomial')\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend()\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\n\nIt is important to have in mind that as model flexibility increases, the training MSE will decrease, but the test MSE may not!",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Training and test errors, and model flexibility"
-    ]
-  },
-  {
-    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#the-bias-variance-tradeoff",
-    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html#the-bias-variance-tradeoff",
-    "title": "Training and test errors, and model flexibility",
-    "section": "The Bias-Variance tradeoff",
-    "text": "The Bias-Variance tradeoff\nModel variance refers to how much our estimate of \\(\\hat{f}\\) would change if we trained it on a different data set. If we collected a new set of data for training and re-fitted the model, would we get a similar \\(\\hat{f}\\) or a very different one? A high-variance model is very sensitive to the specific training data used. Any slight change in the training set will produce a very different estimate \\(\\hat{f}\\). On the other hand, a low-variance model will be relatively stable if the training set changes.\nFor example, suppose we crate a new training set from the same true function \\(f\\), as show in the graph below.\n\n\nCode\nnp.random.seed(21)\n# Create another train set\nn=30\nx_obs_2 = np.random.uniform(0, 100, n)\ny_obs_2 = true_f(x_obs_2) + np.random.normal(0, 50, n)\n\n# Train and test data plot\nx = np.linspace(0, 100, 200)\nplt.figure(figsize=(fig_size_x, fig_size_y))\nplt.plot(x, true_f(x),  'k-',          linewidth=2, label='f (true)')\nplt.scatter(x_obs, y_obs, s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data 1')\nplt.scatter(x_obs_2, y_obs_2, s=30, marker='^', facecolors='none', edgecolors='black', zorder=5, label='Train data 2')\n#plt.scatter(x_test, y_test, s=30, facecolors='none', edgecolors='red', zorder=5, label='Test data')\nplt.xlabel('X')\nplt.ylabel('Y')\nplt.xlim(0, 100)\nplt.ylim(-150, 600)\nplt.legend(loc='upper left')\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\nThen we can fit our models again on each of these training sets and see how much the resulting estimates \\(\\hat{f}\\) vary:\n\n\nCode\n# Fit linear model on second training set\nlin_model_2 = LinearRegression()\nlin_model_2.fit(x_obs_2.reshape(-1, 1), y_obs_2)\ny_linear_2 = lin_model_2.predict(x.reshape(-1, 1))\n\n# Fit degree 15 on second training set\nx_norm_2 = (x_obs_2 - t_min) / (t_max - t_min)\ncoeffs15_2 = np.polyfit(x_norm_2, y_obs_2, 15)\ny_poly15_2 = np.polyval(coeffs15_2, x_line_norm)\n\n# Linear fits\nfig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))\nax.scatter(x_obs,   y_obs,   s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data 1')\nax.scatter(x_obs_2, y_obs_2, s=30, facecolors='none', edgecolors='black', zorder=5, marker='^', label='Train data 2')\nax.plot(x, y_linear,   color='orange', linewidth=2, label='Linear fit 1')\nax.plot(x, y_linear_2, color='maroon', linewidth=2, label='Linear fit 2')\nax.set_xlabel('X')\nax.set_ylabel('Y')\nax.set_xlim(0, 100)\nax.set_ylim(-150, 600)\nax.set_title('Linear')\nax.legend(loc='upper left', fontsize=8)\nplt.tight_layout()\nplt.show()\nplt.close()\n\n# Degree 15 fits\nfig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))\nax.scatter(x_obs,   y_obs,   s=30, facecolors='none', edgecolors='black', zorder=5, label='Train data 1')\nax.scatter(x_obs_2, y_obs_2, s=30, facecolors='none', edgecolors='black', zorder=5, marker='^', label='Train data 2')\nax.plot(x, y_poly15,   color='forestgreen', linewidth=2, label='Degree 15 fit 1')\nax.plot(x, y_poly15_2, color='darkviolet',  linewidth=2, label='Degree 15 fit 2')\nax.set_xlabel('X')\nax.set_ylabel('Y')\nax.set_xlim(0, 100)\nax.set_ylim(-150, 600)\nax.set_title('Degree 15')\nax.legend(loc='upper left', fontsize=8)\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipCheck-in\n\n\n\nWhich method has higher variance, the linear model or the degree 15 polynomial? Why?\n\n\nModel bias refers to the error introduced by the assumptions built into the model, as the assumptions might not reflect the complexity of a real-life problem. A high-bias model will be systematically wrong, no matter how much training data we give it. For example, if we fit a linear model to data that is truly cubic, the linear model simply cannot capture the true shape of \\(f\\). A low-bias model’s assumptions are flexible enough to approximate the true shape of \\(f\\).\nWe are interested in model variance and bias because, roughly speaking and from a theoretical perspective, the expected test MSE can be decomposed as\n\\[\\text{expected test MSE} = \\text{model variance}^2 + \\text{model bias} + \\text{irreducible error}.\\]\nThe irreducible error is the variance associated with the error term, \\(\\text{Var}(\\epsilon)\\).\nThough the formal statement and computation of this formula are beyond the scope of the course, intuitively understanding the three components on the right hand side can help us understand important behaviour different models have relative to a variety of training sets. So let’s look at it more closely:\n\n\nthe expected test MSE is (intuitively) a sum of three terms: model variance, model bias, and the irreducible error. Our theoretical goal is minimize the expected test MSE.\nThe irreducible error is a positive value that is independent of the model selection, so the expected test MSE can never be zero: it is bounded below by \\(\\text{Var}(\\epsilon)\\).\nThe model variance and bias are non-negative, but these depend on the model being selected. So, to minimize the expected test MSE, our goal is to select a model that simultaneously gives low variance and low bias.\n\nThis is where the bias-variance tradeoff comes in (James et al. 2023):\n\nas a general rule, as we use more flexible methods, the variance will increase and the bias will decrease. The relative rate of change of these two quantities determines whether the test MSE increases or decreases. […] The challenge is finding a method for which both the variance and the squared bias are reasonably low.\n\nWe can intuitively see the relative rate of change between variance and bias in our previous test MSE graph:\n\n\nCode\nplt.figure(figsize=(fig_size_x * 0.6, fig_size_y))\nplt.plot(flexibility, train_mses, '-', color='gray', linewidth=2, label='Training MSE')\nplt.plot(flexibility, test_mses,  '-', color='red',  linewidth=2, label='Test MSE')\n\nfor i, (f, c) in enumerate(zip(flexibility, colors)):\n    plt.plot(f, train_mses[i], 's', color=c, markersize=5)\n    plt.plot(f, test_mses[i],  's', color=c, markersize=5)\n\nplt.xlabel('Flexibility (degree)')\nplt.ylabel('Mean Squared Error')\n#plt.ylabel('Mean Squared Error (log scale)')\n#plt.yscale('log')\nplt.xticks(flexibility, ['1', '3', '15'])\nplt.legend(loc='upper center')\nplt.grid(False)\nplt.tight_layout()\nplt.show()\nplt.close()\n\n\n\n\n\n\n\n\n\nAs we increase the model flexibility (in this example controlled by the degree of the polynomial used to compute \\(\\hat{f}\\)), the bias decreases faster than the variance increases and the test MSE drops. Eventually, increasing the flexibility does little to keep reducing the bias, but starts to significantly increase the variance, resulting in the test MSE to go back up again.\n\n\n\n\n\n\nTipCheck-in\n\n\n\nLooking at the test MSE plot, which model would you select and why? Would you consider evaluating polynomilas with other degrees?",
-    "crumbs": [
-      "notes",
-      "Introduction",
-      "Training and test errors, and model flexibility"
-    ]
+    "objectID": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#references",
+    "href": "notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-SLIDES.html#references",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "References\n\n\n\n\n\nJames, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E. Taylor. 2023. An Introduction to Statistical Learning: With Applications in Python. Springer Texts in Statistics. Cham: Springer."
   },
   {
     "objectID": "notes/setup/setup.html",
