@@ -164,33 +164,7 @@ print(model.summary())                 # 3. Get the full stats breakdown
 
 ---
 
-### TensorFlow — Deep Learning at Scale
 
-**TensorFlow** (Google) is a framework for building **neural networks and deep learning models**. It is more powerful but more complex than scikit-learn.
-
-| Use scikit-learn when... | Use TensorFlow when... |
-|--------------------------|------------------------|
-| Dataset is small/medium | You have millions of rows |
-| Classical algorithm is sufficient | You need deep neural networks |
-| Fast iteration and interpretability | Working with images, audio, or text |
-
-**Keras** is TensorFlow's high-level API, built in as `tf.keras` in TF 2.x. Here is a preview:
-
-```python
-import tensorflow as tf
-
-model = tf.keras.Sequential([
-    tf.keras.layers.Dense(64, activation='relu', input_shape=(10,)),
-    tf.keras.layers.Dropout(0.3),
-    tf.keras.layers.Dense(32, activation='relu'),
-    tf.keras.layers.Dense(1, activation='sigmoid')  # binary output
-])
-
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-model.fit(X_train, y_train, epochs=10, batch_size=32, validation_split=0.2)
-```
-
-> **Note:** We won't run TensorFlow in this lab to keep setup simple, but the sklearn patterns you learn — split, scale, train, evaluate — apply in spirit to TF/Keras too.
 
 ### Ecosystem Summary
 
@@ -200,7 +174,6 @@ SciPy          ->  Scientific algorithms: stats, distances, optimization
 Pandas         ->  Data manipulation and exploration
 scikit-learn   ->  Classical ML models, preprocessing, evaluation
 statsmodels    ->  Statistical Analysis and inference
-TensorFlow     ->  Deep learning / neural networks (production scale)
 ```
 
 ---
