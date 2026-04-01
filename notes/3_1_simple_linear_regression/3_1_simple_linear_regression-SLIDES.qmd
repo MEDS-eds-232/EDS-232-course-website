@@ -496,7 +496,7 @@ A 95% confidence interval for a coefficient $\beta_i$ is:
 $$[\hat{\beta}_i - 2 \cdot SE(\hat{\beta}_i),\;\; \hat{\beta}_i + 2 \cdot SE(\hat{\beta}_i)]$$
 
 ::: {.body-text-s}
-*(the factor 2 is approximate; the exact value comes from the $t$-distribution with $n-2$ degrees of freedom)*
+*(the factor 2 is approximate, the exact value comes from the $t$-distribution with $n-2$ degrees of freedom)*
 :::
 
 . . .
@@ -578,7 +578,7 @@ plt.close()
 
 ---
 
-## {#ci-greenabate-checkin data-menu-title="CIs: GreenAbate"}
+## {#ci-greenabate-checkin-solution data-menu-title="CIs: GreenAbate"}
 
 [Check-in]{.slide-title}
 
@@ -786,7 +786,7 @@ print(coef_df.to_string(index=False))
 
 ---
 
-## {#p-values-checkin data-menu-title="p-values: GreenAbate"}
+## {#p-values-checkin-solution data-menu-title="p-values: GreenAbate"}
 
 [Check-in]{.slide-title}
 
@@ -847,56 +847,37 @@ print(coef_df.to_string(index=False))
 
 ---
 
-## {#rse data-menu-title="Residual Standard Error"}
-
-[Residual Standard Error (RSE)]{.slide-title}
-
-<hr>
-
-The **RSE** estimates the standard deviation of $\epsilon$ — the average amount the response deviates from the true regression line:
-
-$$RSE = \sqrt{\frac{1}{n-2} RSS} = \sqrt{\frac{1}{n-2} \sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$$
-
-. . .
-
-<br>
-
-::: {.body-text-m}
-- A smaller RSE means predictions are closer to observed values
-- RSE is in the **same units as $Y$** → directly interpretable
-- "Small" is context-dependent: compare relative to the range or mean of $Y$
-:::
-
----
-
-## {#checkin-rse data-menu-title="Check-in: RSE" background="#053660"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">For the GreenAbate SLR, RSE ≈ `{python} f"{RSE:.2f}"` ktCO₂e (≈ `{python} f"{RSE*1000:.0f}"` metric tons).</p>
-<p class="custom-subtitle3">Is this a good or bad fit? What additional information would you need to judge this?</p>
-</div>
-
----
-
 ## {#r2-def data-menu-title="R² statistic"}
 
 [$R^2$ statistic]{.slide-title}
 
 <hr>
 
-$R^2$ measures the **proportion of variance in $Y$ explained by the model**:
-
-$$R^2 = \frac{TSS - RSS}{TSS} = 1 - \frac{RSS}{TSS}$$
-
-where:
-
-- $TSS = \sum(y_i - \bar{y})^2$ — **total** variability in $Y$
-- $RSS = \sum(y_i - \hat{y}_i)^2$ — variability **unexplained** by the regression
+$R^2$ measures the **proportion of variance in $Y$ explained by the model.**
 
 . . .
 
-$$\underbrace{TSS}_{\text{total variability}} - \underbrace{RSS}_{\text{unexplained}} = \underbrace{TSS - RSS}_{\text{explained by regression}}$$
+To compute it we need these ingredients:
+
+- $TSS = \sum_{i=1}^{n}(y_i - \bar{y})^2 =$  **Total Sum of Squares**: *how much do the observations vary from the mean $\bar{y}$: a way of measuring total variability in $Y$*
+
+. . .
+
+- Intuitively: $y_i = \hat{y}_i$ means a $y$-value is explained by the regression
+
+. . .
+
+- $RSS = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 =$ **Residual Sum of Squares**: *variability in $y$ unexplained by the regression*. 
+
+So 
+
+$$\underbrace{TSS}_{\text{total variability in }Y} - \underbrace{RSS}_{\text{unexplained by regression}} = \text{variability explained by regression}$$
+
+. . .
+
+We use this to define
+$$R^2 = \frac{TSS - RSS}{TSS}.$$
+
 
 ---
 
@@ -911,12 +892,10 @@ $$\underbrace{TSS}_{\text{total variability}} - \underbrace{RSS}_{\text{unexplai
 ::: {.body-text-m}
 - $R^2 \in [0, 1]$ always
 
-- $R^2$ close to **1** → model explains most of the variability → good fit
+- $R^2$ close to 1 → model explains most of the variability → good fit
 
-- $R^2$ close to **0** → $X$ alone is not capturing what drives $Y$
+- $R^2$ close to 0 → $X$ alone is not capturing what drives $Y$
   - Could mean: non-linear relationship, more predictors needed, high irreducible noise
-
-- What counts as "good" is **context-dependent**
 :::
 
 . . .
@@ -924,61 +903,71 @@ $$\underbrace{TSS}_{\text{total variability}} - \underbrace{RSS}_{\text{unexplai
 <br>
 
 ::: {.center-text .body-text-m .teal-text}
-Always look at your data — a high $R^2$ does not guarantee a good model!
+Always look at your data: a high $R^2$ does not guarantee a good model and a low $R^2$ does not mean no relationship!
 :::
 
 ---
 
-## {#accuracy-table data-menu-title="Model accuracy: GreenAbate"}
+## {#accuracy-table-checkin data-menu-title="Model accuracy: GreenAbate"}
 
-[Model accuracy: `co2_reduction` ~ `process`]{.slide-title}
+[Check-in]{.slide-title}
 
 <hr>
 
 ```{python}
-#| echo: false
-acc_df = pd.DataFrame({
-    'Quantity': ['Residual standard error', 'R²'],
-    'Value':    [f'{RSE:.2f} ktCO₂e', f'{R2:.3f}']
-})
-print(acc_df.to_string(index=False))
+#| label: R2-calculation
+
+y_hat = model_proc.predict(df[['process']])
+y_bar = df['co2_reduction'].mean()
+TSS   = np.sum((df['co2_reduction'] - y_bar)**2)
+RSS   = np.sum((df['co2_reduction'] - y_hat)**2)
+R2    = 1 - RSS / TSS
 ```
+
+::: {.teal-text}
+For our SLR model of `co2_reduction` on `process`, we have that $R^2$ = `{python} f"{R2:.3f}"`.
+
+How would you interpret the $R^2$ value in plain language?
+
 
 ```{python}
 #| echo: false
 #| fig-align: center
 #| out-width: "100%"
 
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x, fig_size_y - 0.5))
-
-axes[0].scatter(df['process'], df['co2_reduction'], s=12, alpha=0.4, color='steelblue')
-axes[0].plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2)
-for xi, yi in zip(df['process'], df['co2_reduction']):
-    axes[0].plot([xi, xi], [yi, b0 + b1 * xi], color='tomato', linewidth=0.5, alpha=0.5)
-axes[0].set_xlabel('Process upgrade spending ($K)')
-axes[0].set_ylabel('CO₂ reduction (ktCO₂e)')
-axes[0].set_title(f'Fit  |  RSE = {RSE:.2f}')
-axes[0].grid(True, alpha=0.3)
-
-axes[1].scatter(y_hat, df['co2_reduction'] - y_hat, s=12, alpha=0.5, color='steelblue')
-axes[1].axhline(0, color='gray', linewidth=1, linestyle='--')
-axes[1].set_xlabel('Fitted values $\\hat{y}_i$')
-axes[1].set_ylabel('Residuals $e_i$')
-axes[1].set_title(f'Residuals vs Fitted  |  $R^2$ = {R2:.3f}')
-axes[1].grid(True, alpha=0.3)
-
+plt.figure(figsize=(fig_size_x * 0.9, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
+
+:::
+
+. . . 
+
+An $R^2$ of `{python} f"{R2:.3f}"` means that approximately `{python} f"{R2*100:.1f}"`% of the variability in CO₂ reductions across firms is explained by a linear variation in process upgrade spending alone. The remaining ~`{python} f"{(1-R2)*100:.1f}"`% of variability is driven by other factors not included in this model.
+
 ---
 
-## {#checkin-r2 data-menu-title="Check-in: R²" background="#053660"}
+## {#recap data-menu-title="Recap"}
 
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">$R^2$ = `{python} f"{R2:.3f}"` and RSE = `{python} f"{RSE:.2f}"` ktCO₂e for the SLR on `process`.</p>
-<p class="custom-subtitle3">How would you interpret $R^2$ in plain language?</p>
-<p class="custom-subtitle3">Is RSE = `{python} f"{RSE:.2f}"` a good fit for a firm targeting 5 ktCO₂e/year? What about 25 ktCO₂e/year?</p>
-</div>
+[In this lesson we covered]{.slide-title}
+
+<hr>
+
+- **Standard linear regression model:** $Y \approx \beta_0 + \beta_1 X$, estimated as $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 x$
+- Minimizing $RSS = \sum(y_i - \hat{y}_i)^2$ gives us coeffient estimates $\hat{\beta}_0, \hat{\beta}_1$
+- Standard errors quantify uncertainty in the coefficient estimates
+- Confidence intervals give us a high-confidence method to estimate the coefficients
+- We can use Hypothesis testing to figure out if there is a relationship between the variables
+- $p$-value: probability of observing results if there was no variable relation $(H_0)$
+- small $p$-value → reject $H_0$  → evidence of relation
+- $R^2$: proportion of variance in $Y$ explained by the model

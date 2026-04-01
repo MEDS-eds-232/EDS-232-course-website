@@ -445,10 +445,9 @@ For the GreenAbate data, the RSE of the SLR on `process` is approximately 3.26 k
 ## Discussion
 Whether an RSE of 3.26 ktCO₂e is acceptable depends on context. A few ways to judge it:
 
-- **Relative to the response range**: CO₂ reductions in the dataset range roughly from 3 to 27 ktCO₂e, so an average error of 3.26 represents about 12–15% of the response range. That is a moderate error — not great, but not terrible.
+- **Relative to the response range**: CO₂ reductions in the dataset range roughly from 3 to 27 ktCO₂e, so an average error of 3.26 represents about 12–15% of the response range. That is a moderate error, not great, but not terrible.
 - **Relative to the mean response**: the mean reduction is around 14 ktCO₂e, so the RSE is about 23% of the mean. This suggests the model has meaningful predictive error.
 - **Relative to the firm's target**: if a firm has committed to reducing 5 ktCO₂e per year, an average prediction error of 3.26 is large relative to their target. For a firm targeting 25 ktCO₂e, it may be acceptable.
-- **By adding more predictors**: we are only using `process` here. Including `efficiency` and `offsets` in a multiple regression model should reduce the RSE substantially.
 :::
 
 ### $R^2$ statistic
@@ -524,7 +523,7 @@ For the GreenAbate SLR of `co2_reduction` on `process`, RSE = `{python} f"{RSE:.
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-1. An $R^2$ of `{python} f"{R2:.3f}"` means that approximately `{python} f"{R2*100:.1f}"`% of the variability in CO₂ reductions across firms is explained by variation in process upgrade spending alone. The remaining ~`{python} f"{(1-R2)*100:.1f}"`% of variability is driven by other factors not included in this model — such as efficiency upgrades, offsets, firm size, or industry type.
+1. An $R^2$ of `{python} f"{R2:.3f}"` means that approximately `{python} f"{R2*100:.1f}"`% of the variability in CO₂ reductions across firms is explained by a linear variation in process upgrade spending alone. The remaining ~`{python} f"{(1-R2)*100:.1f}"`% of variability is driven by other factors not included in this model.
 
 2. An RSE of `{python} f"{RSE:.2f}"` ktCO₂e (≈ `{python} f"{RSE*1000:.0f}"` metric tons) is large relative to, for example, a 5 ktCO₂e reduction target. A prediction error of that magnitude could meaningfully mislead decisions for a small-target firm. For a firm targeting 25 ktCO₂e, the same RSE represents roughly `{python} f"{RSE/25*100:.0f}"`% of the target, which may or may not be acceptable depending on how precise their planning needs to be.
 :::
@@ -534,11 +533,12 @@ For the GreenAbate SLR of `co2_reduction` on `process`, RSE = `{python} f"{RSE:.
 What we covered in this lesson:
 
 - **Standard linear regression model:** $Y \approx \beta_0 + \beta_1 X$, estimated as $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 x$
-- Minimiinge $RSS = \sum(y_i - \hat{y}_i)^2$ gives us coeffient estimates $$\hat{\beta}_0, \hat{\beta}_1$
+- Minimizing $RSS = \sum(y_i - \hat{y}_i)^2$ gives us coeffient estimates $\hat{\beta}_0, \hat{\beta}_1$
 - Standard errors quantify uncertainty in the coefficient estimates
-- Confidence intervals give us a high-probability range in which our true coefficients may be in
+- Confidence intervals give us a high-confidence method to estimate the coefficients
 - We can use Hypothesis testing to figure out if there is a relationship between the variables
-- $p$-value: probability of observing results there were no variable relation $(H_0)$; small $p$-value → reject $H_0$
-- $R^2$: proportion of variance in $Y$ explained by $X$
+- $p$-value: probability of observing results if there was no variable relation $(H_0)$
+- small $p$-value → reject $H_0$  → evidence of relation
+- $R^2$: proportion of variance in $Y$ explained by the model
 
 Next class: multiple linear regression. -->
