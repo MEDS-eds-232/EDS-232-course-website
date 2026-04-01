@@ -661,21 +661,23 @@ plt.close()
 
 <br>
 
-::: {.body-text-m}
-- **Null hypothesis** $H_0$: $\beta_1 = 0$ — no relationship between $X$ and $Y$
+- **Null hypothesis** $H_0$: no relationship between $X$ and $Y$. 
 
-  → $\hat{Y} = \hat{\beta}_0$ (a constant; $X$ carries no information)
+In mathematical terms this means $\beta_1 = 0$:
 
-- **Alternative hypothesis** $H_a$: $\beta_1 \neq 0$ — there is a relationship
+  $$\hat{Y} = \hat{\beta}_0.$$
 
-  → $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X$
-:::
+- **Alternative hypothesis** $H_a$: there is some relationship between $X$ and $Y$. 
+
+In mathematical terms this means $\beta_1 \neq 0$:
+
+  $$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X.$$
 
 . . .
 
 <br>
 
-::: {.center-text .body-text-m .teal-text}
+::: {.center-text .teal-text}
 To test $H_0$, we need to determine whether $\hat{\beta}_1$ is sufficiently far from 0 relative to its uncertainty.
 :::
 
@@ -689,31 +691,64 @@ To test $H_0$, we need to determine whether $\hat{\beta}_1$ is sufficiently far 
 
 The **$t$-statistic** measures how many standard deviations $\hat{\beta}_1$ is from 0:
 
-$$t = \frac{\hat{\beta}_1}{SE(\hat{\beta}_1)}$$
+$$t = \frac{\hat{\beta}_1}{SE(\hat{\beta}_1)}.$$
 
-. . .
-
-The **$p$-value** is the probability of observing $|t|$ this large, *assuming $H_0$ is true*.
-
-. . .
+::: {.body-text-s}
+If there truly is no relationship between the variables ($\beta_1 = 0$), then $t$ follows a $t$-distribution with $n - 2$ degrees of freedom.
+:::
 
 <br>
 
-::: {.body-text-m}
-- **Small $p$-value** ($p < 0.05$): unlikely to see $\hat{\beta}_1$ this far from 0 by chance → **reject $H_0$** → evidence of a relationship
-- **Large $p$-value**: data are consistent with $\beta_1 = 0$ → **fail to reject $H_0$**
+. . .
+
+The **$p$-value** is the probability of obtaining a $t$-statistic at least as large as the observed $|t|$ in absolute value, *assuming $H_0$ is true.* 
+
+. . .
+
+::: {.teal-text}
+
+:::: {.columns}
+::: {.column width="50%"}
+$$
+\begin{aligned}
+&\text{Small } p\text{-value } (p < 0.05) \\
+&\Rightarrow \text{unlikely to observe } |\hat{\beta}_1| \\
+&\quad\text{this far from 0 by chance if } H_0 \text{ were true} \\
+&\Rightarrow \textbf{reject } H_0 \\
+&\Rightarrow \text{most likely } \beta_1 \neq 0 \\
+&\Rightarrow \text{evidence of a relationship}\\
+&\quad\text{between } X \text{ and } Y
+\end{aligned}
+$$
+:::
+::: {.column width="50%"}
+$$
+\begin{aligned}
+&\text{Large } p\text{-value} \\
+&\Rightarrow \text{plausible to observe } |\hat{\beta}_1| \\
+&\quad\text{this far from 0 by chance if } H_0 \text{ were true} \\
+&\Rightarrow \textbf{fail to reject } H_0 \\
+&\Rightarrow \beta_1 = 0 \text{ is consistent with the data} \\
+&\Rightarrow \text{no evidence of a relationship}\\
+&\quad\text{between } X \text{ and } Y
+\end{aligned}
+$$
+:::
+::::
+
 :::
 
 ---
 
-## {#regression-table data-menu-title="Regression table"}
+## {#p-values-checkin data-menu-title="p-values: GreenAbate"}
 
-[SLR output: `co2_reduction` ~ `process`]{.slide-title}
+[Check-in]{.slide-title}
 
 <hr>
 
+The table below shows the regression output for the SLR of `co2_reduction` on `process`:
+
 ```{python}
-#| echo: false
 def fmt_p(p):
     return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
 
@@ -727,23 +762,80 @@ coef_df = pd.DataFrame({
 print(coef_df.to_string(index=False))
 ```
 
-. . .
-
 <br>
 
-::: {.body-text-m}
-Each additional \$1K in process upgrade spending is associated with **`{python} f"{b1:.4f}"` ktCO₂e** (~`{python} f"{b1*1000:.0f}"` metric tons) of additional annual CO₂ reduction.
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text}
+1. What does the $p$-value for `process` tell us about the relationship between process upgrade spending and CO₂ reductions?
+2. The intercept also has a very small $p$-value. What does this mean about the intercept estimate? What would be an equivalent $H_0$ for $\beta_0$?
+3. How would you interpret the coefficient for `process` in plain language?
+
+:::
+
+:::
+
+
+::: {.column width="50%"}
+
+:::
+
 :::
 
 ---
 
-## {#checkin-pvalue data-menu-title="Check-in: p-values" background="#053660"}
+## {#p-values-checkin data-menu-title="p-values: GreenAbate"}
 
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">The $p$-value for `process` is < 0.0001. What does this tell us?</p>
-<p class="custom-subtitle3">The intercept also has a very small $p$-value. Does this mean the intercept is an important predictor of CO₂ reductions?</p>
-</div>
+[Check-in]{.slide-title}
+
+<hr>
+
+The table below shows the regression output for the SLR of `co2_reduction` on `process`:
+
+```{python}
+def fmt_p(p):
+    return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
+
+coef_df = pd.DataFrame({
+    '':              ['Intercept', 'process'],
+    'Coefficient':   [f"{res.params['const']:.4f}",   f"{res.params['process']:.4f}"],
+    'Std. error':    [f"{res.bse['const']:.4f}",       f"{res.bse['process']:.4f}"],
+    't-statistic':   [f"{res.tvalues['const']:.2f}",   f"{res.tvalues['process']:.2f}"],
+    'p-value':       [fmt_p(res.pvalues['const']),      fmt_p(res.pvalues['process'])],
+})
+print(coef_df.to_string(index=False))
+```
+
+<br>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text}
+1. What does the $p$-value for `process` tell us about the relationship between process upgrade spending and CO₂ reductions?
+2. The intercept also has a very small $p$-value. What does this mean about the intercept estimate? What would be an equivalent $H_0$ for $\beta_0$?
+3. How would you interpret the coefficient for `process` in plain language?
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+::: {.body-text-s}
+1. small $p$-value $\Rightarrow$ strong evidence that $\beta_1 \neq 0$: there is evidence of a positive relationship between process upgrade investment and CO₂ emissions reductions.
+
+2. The $p$-value for the intercept tests $H_0: \beta_0 = 0$. A small $p$-value means the regression line does not pass through the origin. There is likely some baseline CO₂ reduction even at zero process spending.
+
+3. On average, each additional \$1K invested in production processes is associated with ~0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction.
+:::
+
+:::
+
+:::
 
 ---
 

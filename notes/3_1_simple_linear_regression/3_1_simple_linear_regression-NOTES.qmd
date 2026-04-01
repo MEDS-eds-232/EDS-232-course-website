@@ -332,7 +332,7 @@ print(f"95% CI for β₁ (process):   [{ci_b1_low:.3f}, {ci_b1_high:.3f}]")
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-1. The entire interval [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] is above 0, so with 95% confidence the slope is positive: firms that invest more in cleaner production processes achieve greater CO₂ reductions. Each additional \$1K in process spending is associated with a reduction of between `{python} f"{ci_b1_low:.3f}"` and `{python} f"{ci_b1_high:.3f}"` ktCO₂e per year on average.
+1. The entire interval [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] is above 0 so our procedure points to a positive slope: firms that invest more in cleaner production processes achieve greater CO₂ reductions. Each additional \$1K in process spending is associated with a reduction of between `{python} f"{ci_b1_low:.3f}"` and `{python} f"{ci_b1_high:.3f}"` ktCO₂e per year on average.
 
 2. An interval of [-0.002,  `{python} f"{ci_b1_high:.3f}"`] includes 0. We cannot rule out that $\beta_1 = 0$, meaning we cannot confidently conclude that process spending drives reductions. Wider intervals generally arise from smaller samples or noisier data.
 :::
@@ -351,7 +351,7 @@ Note what these imply for the model:
 - If $\beta_1 = 0$, then $\hat{Y} = \hat{\beta}_0$, which means the prediction is just a constant, so $X$ carries no information about $Y$.
 - If $\beta_1 \neq 0$, then $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X$ — $Y$ is related to $X$.
 
-### The $t$-statistic & $p$-values
+### The $t$-statistic & $p$-value
 
 To test $H_0$, we need to determine whether $\hat{\beta}_1$ is sufficiently far from 0 relative to its uncertainty. We use the **$t$-statistic**
 
@@ -410,11 +410,11 @@ Looking at the regression output above:
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-1. The very small $p$-value for `process` gives strong evidence that $\beta_1 \neq 0$ — there is a statistically significant positive relationship between process upgrade investment and CO₂ emissions reductions.
+1. The very small $p$-value for `process` gives strong evidence that $\beta_1 \neq 0$: there is a evidence of a positive relationship between process upgrade investment and CO₂ emissions reductions.
 
 2. The $p$-value for the intercept tests $H_0: \beta_0 = 0$, not whether the intercept is a useful predictor. A significant intercept simply means the regression line does not pass through the origin. There is likely some baseline CO₂ reduction even at zero process spending (likely from other firm-level factors not captured in the model). The intercept's $p$-value is rarely the question of interest.
 
-3. A coefficient of roughly 0.046 means that, on average, each additional \$1K invested in cleaner production processes is associated with approximately 0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction per year.
+3. A coefficient of roughly 0.046 means that, on average, each additional \$1K invested in cleaner production processes is associated with approximately 0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction.
 :::
 
 ## Assessing model accuracy
