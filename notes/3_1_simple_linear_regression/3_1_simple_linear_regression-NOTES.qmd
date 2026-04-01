@@ -136,11 +136,11 @@ where
 
 Together, $\beta_0$ and $\beta_1$ are the model **coefficients** (also called **parameters**). They define the true underlying function $f$ that maps $X$ to $Y$. 
 
-In practice, we do not know the true $\beta_0$ and $\beta_1$, so we **estimate** them from data. Given estimates $\hat{\beta}_0$ and $\hat{\beta}_1$, our prediction for $Y$ at a value $x$ is
+In practice, we do not know the true $\beta_0$ and $\beta_1$, so we estimate them from data. Given estimates $\hat{\beta}_0$ and $\hat{\beta}_1$, our prediction for $Y$ at a value $x$ is
 
 $$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x = \hat{f}(x).$$
 
-Remember the "hat" notation ($\hat{\ }$) throughout these notes indicates an **estimated** quantity, not the true, unknown population value.
+Remember the "hat" notation ($\hat{\ }$) throughout these notes indicates an estimated quantity, not the true, unknown population value.
 
 For the GreenAbate dataset, using `process` as the sole predictor, a linear model will model CO₂ reductions as
 
@@ -198,7 +198,7 @@ The **residual sum of squares (RSS)** totals the squared residuals across all ob
 $$RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2.$$
 
 
-The **least squares approach** to fit the regression line chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to **minimize** the RSS. The residuals are shown as vertical segments below:
+The **least squares approach** to fit the regression line chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to minimize the RSS. The residuals are shown as vertical segments below:
 
 ```{python}
 #| label: residuals
@@ -231,9 +231,9 @@ where $\bar{x} = \frac{1}{n}\sum x_i$ and $\bar{y} = \frac{1}{n}\sum y_i$ are th
 
 Two important points:
 
-1. The **optimal** $\hat{\beta}_0$ and $\hat{\beta}_1$ depend entirely on the training data. Feed the same model different data and you get different estimates. This is the source of estimation uncertainty.
+1. The optimal $\hat{\beta}_0$ and $\hat{\beta}_1$ depend entirely on the training data. Feed the same model different data and you get different estimates. This is the source of estimation uncertainty.
 
-2. In practice, **the computer computes these** for you. The key is understanding what the estimates represent, not memorizing the algebra.
+2. In practice, the computer computes these for you. The key is understanding what the estimates represent, not memorizing the algebra.
 
 
 ::: {.callout-note}
@@ -363,8 +363,8 @@ The **$p$-value** is the probability of obtaining a $t$-statistic at least as la
 
 ::: {.callout-note}
 ## Interpreting the $p$-value
-- A **small $p$-value** means it is very unlikely to have observed a $\hat{\beta}_1$ this far from 0 by chance alone, if $\beta_1$ were truly 0. We **reject** $H_0$ and conclude there is a relationship between $X$ and $Y$.
-- A **large $p$-value** means our data are consistent with $H_0$,  so we do not reject $H_0$: it could be that there's no relationship between $X$ and $Y$!
+- A small $p$-value means it is very unlikely to have observed a $\hat{\beta}_1$ this far from 0 by chance alone, if $\beta_1$ were truly 0. We **reject $H_0$** and conclude there is a relationship between $X$ and $Y$.
+- A large $p$-value means our data are consistent with $H_0$,  so we do not reject $H_0$: it could be that there's no relationship between $X$ and $Y$!
 :::
 
 A summary of this story is:

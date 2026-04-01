@@ -302,7 +302,7 @@ plt.close()
 
 ## {#linear-model-checkin-answers data-menu-title="Check-in Answers"}
 
-[Check in ]{.slide-title}
+[Check-in ]{.slide-title}
 
 <hr>
 
@@ -487,63 +487,161 @@ $\sigma^2 = \text{Var}(\epsilon)$ is the error variance (unknown in practice —
 
 <hr>
 
-A **95% confidence interval** for a coefficient $\beta_i$ is:
+Standard errors allow us to construct confidence intervals for the true coefficients.
+
+A **95% confidence interval** is a range of values such that, *if we repeated our experiment many times*, approximately 95% of the computed intervals would contain the true parameter value.
+
+A 95% confidence interval for a coefficient $\beta_i$ is:
 
 $$[\hat{\beta}_i - 2 \cdot SE(\hat{\beta}_i),\;\; \hat{\beta}_i + 2 \cdot SE(\hat{\beta}_i)]$$
 
 ::: {.body-text-s}
-*(the factor 2 is approximate; the exact value comes from the $t$-distribution with $n-2$ d.f.)*
+*(the factor 2 is approximate; the exact value comes from the $t$-distribution with $n-2$ degrees of freedom)*
 :::
 
 . . .
 
 <br>
 
-::: {.body-text-m}
+::: {.body-text-s}
 **Interpretation:**
 
-> A 95% CI for $\beta_1$ of $[a_1, b_1]$ means there is a 95% chance that a one-unit increase in $x$ is associated with an average increase in $y$ between $a_1$ and $b_1$ units.
+> a 95% CI for $\beta_1$ of $[a_1, b_1]$ means that, using a procedure that captures the true slope 95% of the time, we estimate that a one-unit increase of $x$ is associated with an average increase in $y$ between $a_1$ and $b_1$ units.
 
-> A 95% CI for $\beta_0$ of $[a_0, b_0]$ means there is a 95% chance that the regression line crosses the $y$-axis between $a_0$ and $b_0$.
+> a 95% confidence inerval for $\beta_0$ is $[a_0, b_0]$ means that, using a procedure that captures the true intercept 95% of the time, we estimate the model's $y$-intercept is between $a_0$ and $b_0$.
 :::
 
 ---
 
-## {#ci-greenabate data-menu-title="CIs: GreenAbate"}
+## {#ci-greenabate-checkin data-menu-title="CIs: GreenAbate"}
 
-[95% confidence intervals for the GreenAbate SLR]{.slide-title}
+[Check-in]{.slide-title}
 
 <hr>
 
-```{python}
-#| echo: false
-ci_df = pd.DataFrame({
-    '':       ['Intercept', 'process'],
-    '2.5%':   [f"{ci.loc['const', 0]:.4f}",   f"{ci.loc['process', 0]:.4f}"],
-    '97.5%':  [f"{ci.loc['const', 1]:.4f}",   f"{ci.loc['process', 1]:.4f}"],
-})
-print(ci_df.to_string(index=False))
-```
+:::: {.columns}
 
-. . .
+::: {.column width="50%"}
+The exact 95% confidence intervals for each coefficient is:
+```{python}
+ci = res.conf_int(alpha=0.05)
+ci_b1_low  = ci.loc['process', 0]
+ci_b1_high = ci.loc['process', 1]
+ci_b0_low  = ci.loc['const', 0]
+ci_b0_high = ci.loc['const', 1]
+
+print(f"95% CI for β₀ (intercept): [{ci_b0_low:.3f}, {ci_b0_high:.3f}]")
+print(f"95% CI for β₁ (process):   [{ci_b1_low:.3f}, {ci_b1_high:.3f}]")
+```
 
 <br>
 
-::: {.body-text-m}
-- The 95% CI for $\beta_1$ (process) is $[`{python} f"{ci_b1_low:.3f}"`,\; `{python} f"{ci_b1_high:.3f}"`]$ — entirely above 0.
-- Strong evidence that higher process spending is associated with greater CO₂ reductions.
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x * 0.9, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="50%"}
+
+:::{.teal-text}
+1. What does the CI [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] tell us about the relationship between process upgrade spending and CO₂ reductions?
+2. What if the interval had been [-0.002,  `{python} f"{ci_b1_high:.3f}"`] instead?
+:::
+
+
+::: {.body-text-s}
+**Interpretation:**
+
+> a 95% CI for $\beta_1$ of $[a_1, b_1]$ means that, using a procedure that captures the true slope 95% of the time, we estimate that a one-unit increase of $x$ is associated with an average increase in $y$ between $a_1$ and $b_1$ units.
+
+> a 95% confidence inerval for $\beta_0$ is $[a_0, b_0]$ means that, using a procedure that captures the true intercept 95% of the time, we estimate the model's $y$-intercept is between $a_0$ and $b_0$.
+:::
+
+:::
+
 :::
 
 ---
 
-## {#checkin-ci data-menu-title="Check-in: confidence intervals" background="#053660"}
+## {#ci-greenabate-checkin data-menu-title="CIs: GreenAbate"}
 
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">The 95% CI for $\beta_1$ is $[`{python} f"{ci_b1_low:.3f}"`,\; `{python} f"{ci_b1_high:.3f}"`]$.</p>
-<p class="custom-subtitle3">What if the interval had been $[-0.002,\; `{python} f"{ci_b1_high:.3f}"`]$ instead?</p>
-<p class="custom-subtitle3">What would that tell us about the relationship?</p>
-</div>
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+The exact 95% confidence intervals for each coefficient is:
+```{python}
+ci = res.conf_int(alpha=0.05)
+ci_b1_low  = ci.loc['process', 0]
+ci_b1_high = ci.loc['process', 1]
+ci_b0_low  = ci.loc['const', 0]
+ci_b0_high = ci.loc['const', 1]
+
+print(f"95% CI for β₀ (intercept): [{ci_b0_low:.3f}, {ci_b0_high:.3f}]")
+print(f"95% CI for β₁ (process):   [{ci_b1_low:.3f}, {ci_b1_high:.3f}]")
+```
+
+<br>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x * 0.9, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="50%"}
+
+:::{.teal-text}
+1. What does the CI [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] tell us about the relationship between process upgrade spending and CO₂ reductions?
+2. What if the interval had been [-0.002,  `{python} f"{ci_b1_high:.3f}"`] instead?
+:::
+
+
+::: {.body-text-s}
+**Interpretation:**
+
+- Each additional \$1K in process spending is associated with a reduction of between `{python} f"{ci_b1_low:.3f}"` and `{python} f"{ci_b1_high:.3f}"` ktCO₂e per year on average. 
+
+- Also, the entire interval [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] is above 0 so our procedure points to a positive slope: firms that invest more in cleaner production processes achieve greater CO₂ reductions. 
+
+- An interval of [-0.002,  `{python} f"{ci_b1_high:.3f}"`] includes 0. We cannot rule out that $\beta_1 = 0$, meaning we cannot confidently conclude that process spending drives reductions. Wider intervals generally arise from smaller samples or noisier data.
+:::
+
+:::
+
+:::
 
 ---
 
