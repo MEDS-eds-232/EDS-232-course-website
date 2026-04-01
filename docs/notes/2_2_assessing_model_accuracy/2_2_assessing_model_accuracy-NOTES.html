@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.7.33">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -87,15 +87,14 @@ div.csl-indent {
 <meta name="quarto:offset" content="../../">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -138,7 +137,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+      if (mathElements[i].tagName == "SPAN") {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -163,8 +162,6 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
     </a>
@@ -176,21 +173,32 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../notes/week-by-week/week-by-week.html"> 
+    <a class="nav-link active" href="../../notes/week-by-week/week-by-week.html" aria-current="page"> 
 <span class="menu-text">notes</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../../#"> 
 <span class="menu-text">assignments</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../#"> 
-<span class="menu-text">weekly labs</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">weekly labs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
+        <li>
+    <a class="dropdown-item" href="../../lab/lab1.html">
+ <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab2.html">
+ <span class="dropdown-text">Lab 2: No lab this week!</span></a>
+  </li>  
+    </ul>
+  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
       <i class="bi bi-github" role="img">
@@ -232,10 +240,6 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header">
-      <a href="../../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -348,10 +352,10 @@ window.Quarto = {
 <li>The bias-variance tradeoff and its relationship to model flexibility</li>
 </ul>
 <p>These notes are based on chapter 2.2 of the book <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>.</p>
-<div id="3cf8ed78" class="cell" data-execution_count="1">
+<div id="38709977" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -361,7 +365,7 @@ window.Quarto = {
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'default'</span>)</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>fig_size_x <span class="op">=</span> <span class="dv">7</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>fig_size_y <span class="op">=</span> <span class="dv">4</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'font.size'</span>] <span class="op">=</span> <span class="dv">10</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'font.size'</span>] <span class="op">=</span> <span class="dv">10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="notation-recap" class="level2">
@@ -398,10 +402,10 @@ window.Quarto = {
 </ul>
 <p>When we calculate this MSE using the training data, we obtain the <strong>training MSE</strong>. Many models are fitted by estimating coefficients that minimize the training MSE.</p>
 <p>Below we have simulated train data based on the function <span class="math inline">\(f\)</span> shown in black in the plot.</p>
-<div id="fa006679" class="cell" data-execution_count="2">
+<div id="8f620a44" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># True function: third degree polynomial</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> true_f(x):</span>
@@ -424,7 +428,7 @@ window.Quarto = {
 <span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'upper left'</span>)</span>
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -434,10 +438,10 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<div id="180547af" class="cell" data-execution_count="3">
+<div id="19208a53" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit linear model</span></span>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit linear model</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>lin_model <span class="op">=</span> LinearRegression()</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>lin_model.fit(x_obs.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>), y_obs)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -450,14 +454,14 @@ window.Quarto = {
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>y_linear <span class="op">=</span> lin_model.predict(x.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>y_hat_obs <span class="op">=</span> lin_model.predict(x_obs.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>train_mse <span class="op">=</span> np.mean((y_obs <span class="op">-</span> y_hat_obs)<span class="op">**</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>train_mse <span class="op">=</span> np.mean((y_obs <span class="op">-</span> y_hat_obs)<span class="op">**</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>We fit a linear model to obtain the estimate <span class="math inline">\(\hat{f}(x)=\)</span> 0.81x + 8.25. With this funciton we obtain the following residuals and a train MSE of 8614.9.</p>
-<div id="955e175e" class="cell" data-execution_count="4">
+<div id="a3c74cf7" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(fig_size_x, fig_size_y))</span>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(fig_size_x, fig_size_y))</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>plt.plot(x, y_linear, color<span class="op">=</span><span class="st">'orange'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="vs">r'</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{f}</span><span class="dv">$</span><span class="vs">'</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>plt.scatter(x_obs, y_obs, s<span class="op">=</span><span class="dv">30</span>, facecolors<span class="op">=</span><span class="st">'none'</span>, edgecolors<span class="op">=</span><span class="st">'black'</span>, zorder<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">'Train data'</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -473,7 +477,7 @@ window.Quarto = {
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'upper left'</span>)</span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -536,7 +540,7 @@ plt.close()
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -557,7 +561,7 @@ plt.close()
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -565,10 +569,10 @@ plt.close()
 </div>
 </div>
 <p>Let’s continue our previous example. We have additional data coming from the same function that is not part of the training data. We can use this as our test data (red circles) since it was not used to fit the model.</p>
-<div id="6877be6d" class="cell" data-execution_count="5">
+<div id="c7476089" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create test set</span></span>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create test set</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>n_test <span class="op">=</span> <span class="dv">15</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>x_test <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">100</span>, n_test)</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> true_f(x_test) <span class="op">+</span> np.random.normal(<span class="dv">0</span>, <span class="dv">50</span>, n_test)</span>
@@ -586,7 +590,7 @@ plt.close()
 <span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'upper left'</span>)</span>
 <span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -596,18 +600,18 @@ plt.close()
 </div>
 </div>
 </div>
-<div id="4fed0260" class="cell" data-execution_count="6">
+<div id="af537c8c" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>y_hat_test <span class="op">=</span> lin_model.predict(x_test.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>test_mse <span class="op">=</span> np.mean((y_test <span class="op">-</span> y_hat_test)<span class="op">**</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>y_hat_test <span class="op">=</span> lin_model.predict(x_test.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>test_mse <span class="op">=</span> np.mean((y_test <span class="op">-</span> y_hat_test)<span class="op">**</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now we can use the same linear estimate <span class="math inline">\(\hat{f}(x)=\)</span> 0.81x + 8.25 to visualize the test residuals and calcualte a test MSE of 9169.18.</p>
-<div id="3f7c6db3" class="cell" data-execution_count="7">
+<div id="925b6531" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(fig_size_x, fig_size_y))</span>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(fig_size_x, fig_size_y))</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>plt.plot(x, y_linear, color<span class="op">=</span><span class="st">'orange'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="vs">r'</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat{f}</span><span class="dv">$</span><span class="vs">'</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>plt.scatter(x_test, y_test, s<span class="op">=</span><span class="dv">30</span>, facecolors<span class="op">=</span><span class="st">'none'</span>, edgecolors<span class="op">=</span><span class="st">'red'</span>, zorder<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">'Test data'</span>)</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -623,7 +627,7 @@ plt.close()
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'upper left'</span>)</span>
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -644,10 +648,10 @@ plt.close()
 <p>This happens because our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by random chance rather than by true properties of the unknown function <span class="math inline">\(f\)</span>.</p>
 </blockquote>
 <p>Let’s go back to our simulated data that has been split into train data (black circles) and test data (red circles).</p>
-<div id="f15a3ffd" class="cell" data-execution_count="8">
+<div id="23b87bb2" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create test set</span></span>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create test set</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># # np.random.seed(99)</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># n_test = 15</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># x_test = np.random.uniform(0, 100, n_test)</span></span>
@@ -666,7 +670,7 @@ plt.close()
 <span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'upper left'</span>)</span>
 <span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -678,10 +682,10 @@ plt.close()
 </div>
 <p><br></p>
 <p>Three models were fit using the train data: a linear model (orange line), a degree 3 polyonimal (blue line), and a degree 15 polynomial (green line) as seen in the graph below.</p>
-<div id="8683480a" class="cell" data-execution_count="9">
+<div id="2272029a" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # Three fits</span></span>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # Three fits</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Linear fit</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>lin_model <span class="op">=</span> LinearRegression()</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>lin_model.fit(x_obs.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>), y_obs)</span>
@@ -711,7 +715,7 @@ plt.close()
 <span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>plt.legend(fontsize<span class="op">=</span><span class="dv">8</span>)</span>
 <span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -723,10 +727,10 @@ plt.close()
 </div>
 <p><br></p>
 <p>Next, the train and test MSE was calculated for each of the models. These can be seen in the graph below</p>
-<div id="adb339de" class="cell" data-execution_count="10">
+<div id="aa2eea14" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predictions on training and test sets</span></span>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predictions on training and test sets</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Linear</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>y_hat_train_lin <span class="op">=</span> lin_model.predict(x_obs.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>y_hat_test_lin  <span class="op">=</span> lin_model.predict(x_test.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
@@ -774,7 +778,7 @@ plt.close()
 <span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">False</span>)</span>
 <span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -790,7 +794,7 @@ plt.close()
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -799,22 +803,22 @@ plt.close()
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>We can see on the first graph that the degree 15 polynomial follows the pattern of the training data the closest. This is corresponds to this polynomial having the lowest train MSE as seen on the second graph. However, we can consider this model to be overfitting since the test MSE is (1) much higher than the train MSE and (2) higher than the test MSE of the simpler third degree polynomial. On the graph below we can see how the degree 15 polynomial fails to capture the trend in the test data.</p>
-<div id="5252084d" class="cell" data-execution_count="11">
+<div id="74dee125" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Models with test data</span></span>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Models with test data</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(fig_size_x, fig_size_y))</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>plt.scatter(x_test, y_test, s<span class="op">=</span><span class="dv">30</span>, facecolors<span class="op">=</span><span class="st">'none'</span>, edgecolors<span class="op">=</span><span class="st">'red'</span>, zorder<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">'Test data'</span>)</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>plt.plot(x, y_linear,   color<span class="op">=</span><span class="st">'orange'</span>,    linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">'Linear'</span>)</span>
@@ -827,7 +831,7 @@ plt.close()
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -846,10 +850,10 @@ plt.close()
 <h2 class="anchored" data-anchor-id="the-bias-variance-tradeoff">The Bias-Variance tradeoff</h2>
 <p><strong>Model variance</strong> refers to how much our estimate of <span class="math inline">\(\hat{f}\)</span> would change if we trained it on a different data set. If we collected a new set of data for training and re-fitted the model, would we get a similar <span class="math inline">\(\hat{f}\)</span> or a very different one? A <strong>high-variance</strong> model is very sensitive to the specific training data used. Any slight change in the training set will produce a very different estimate <span class="math inline">\(\hat{f}\)</span>. On the other hand, a <strong>low-variance</strong> model will be relatively stable if the training set changes.</p>
 <p>For example, suppose we crate a new training set from the same true function <span class="math inline">\(f\)</span>, as show in the graph below.</p>
-<div id="649baf7a" class="cell" data-execution_count="12">
+<div id="b8ca6283" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">21</span>)</span>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">21</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Create another train set</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>n<span class="op">=</span><span class="dv">30</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>x_obs_2 <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">100</span>, n)</span>
@@ -869,7 +873,7 @@ plt.close()
 <span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'upper left'</span>)</span>
 <span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -880,10 +884,10 @@ plt.close()
 </div>
 </div>
 <p>Then we can fit our models again on each of these training sets and see how much the resulting estimates <span class="math inline">\(\hat{f}\)</span> vary:</p>
-<div id="3054050d" class="cell" data-execution_count="13">
+<div id="2eb39d1f" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit linear model on second training set</span></span>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit linear model on second training set</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>lin_model_2 <span class="op">=</span> LinearRegression()</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>lin_model_2.fit(x_obs_2.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>), y_obs_2)</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>y_linear_2 <span class="op">=</span> lin_model_2.predict(x.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
@@ -923,7 +927,7 @@ plt.close()
 <span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">'upper left'</span>, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
 <span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -946,7 +950,7 @@ plt.close()
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -969,10 +973,10 @@ plt.close()
 <p>as a general rule, as we use more flexible methods, the variance will increase and the bias will decrease. The relative rate of change of these two quantities determines whether the test MSE increases or decreases. […] The challenge is finding a method for which both the variance and the squared bias are reasonably low.</p>
 </blockquote>
 <p>We can intuitively see the relative rate of change between variance and bias in our previous test MSE graph:</p>
-<div id="fbf22778" class="cell" data-execution_count="14">
+<div id="02b46a4c" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(fig_size_x <span class="op">*</span> <span class="fl">0.6</span>, fig_size_y))</span>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(fig_size_x <span class="op">*</span> <span class="fl">0.6</span>, fig_size_y))</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plt.plot(flexibility, train_mses, <span class="st">'-'</span>, color<span class="op">=</span><span class="st">'gray'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">'Training MSE'</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>plt.plot(flexibility, test_mses,  <span class="st">'-'</span>, color<span class="op">=</span><span class="st">'red'</span>,  linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">'Test MSE'</span>)</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -989,7 +993,7 @@ plt.close()
 <span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">False</span>)</span>
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -1006,7 +1010,7 @@ plt.close()
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -1087,14 +1091,13 @@ James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
         }
-      }
-      return codeEl.innerText;
+        return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.7.33">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -19,41 +19,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 /* CSS for citations */
 div.csl-bib-body { }
@@ -87,15 +52,14 @@ div.csl-indent {
 <meta name="quarto:offset" content="../../">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -138,7 +102,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+      if (mathElements[i].tagName == "SPAN") {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -163,8 +127,6 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
     </a>
@@ -176,21 +138,32 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../notes/week-by-week/week-by-week.html"> 
+    <a class="nav-link active" href="../../notes/week-by-week/week-by-week.html" aria-current="page"> 
 <span class="menu-text">notes</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../../#"> 
 <span class="menu-text">assignments</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../#"> 
-<span class="menu-text">weekly labs</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">weekly labs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
+        <li>
+    <a class="dropdown-item" href="../../lab/lab1.html">
+ <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab2.html">
+ <span class="dropdown-text">Lab 2: No lab this week!</span></a>
+  </li>  
+    </ul>
+  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
       <i class="bi bi-github" role="img">
@@ -232,10 +205,6 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header">
-      <a href="../../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -321,7 +290,7 @@ window.Quarto = {
   <li><a href="#hypothesis-testing" id="toc-hypothesis-testing" class="nav-link" data-scroll-target="#hypothesis-testing">Hypothesis testing</a>
   <ul class="collapse">
   <li><a href="#the-null-and-alternative-hypothesis" id="toc-the-null-and-alternative-hypothesis" class="nav-link" data-scroll-target="#the-null-and-alternative-hypothesis">The null and alternative hypothesis</a></li>
-  <li><a href="#the-t-statistic-p-values" id="toc-the-t-statistic-p-values" class="nav-link" data-scroll-target="#the-t-statistic-p-values">The <span class="math inline">\(t\)</span>-statistic &amp; <span class="math inline">\(p\)</span>-values</a></li>
+  <li><a href="#the-t-statistic-p-value" id="toc-the-t-statistic-p-value" class="nav-link" data-scroll-target="#the-t-statistic-p-value">The <span class="math inline">\(t\)</span>-statistic &amp; <span class="math inline">\(p\)</span>-value</a></li>
   </ul></li>
   <li><a href="#assessing-model-accuracy" id="toc-assessing-model-accuracy" class="nav-link" data-scroll-target="#assessing-model-accuracy">Assessing model accuracy</a>
   <ul class="collapse">
@@ -353,64 +322,14 @@ window.Quarto = {
 </header>
 
 
-<div id="b841fc9e" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'default'</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>fig_size_x <span class="op">=</span> <span class="dv">8</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>fig_size_y <span class="op">=</span> <span class="dv">4</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'font.size'</span>] <span class="op">=</span> <span class="dv">10</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># ── GreenAbate synthetic dataset ───────────────────────────────────────────────────────</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 200 manufacturing firms tracked on three abatement spending channels and</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># their resulting annual CO₂ emissions reduction.</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Predictors (annual spending, $K):</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#   process    – investment in cleaner production processes        (≈ TV)</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   efficiency – energy efficiency upgrades                        (≈ radio)</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#   offsets    – carbon offset purchases                           (≈ newspaper)</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Response:</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#   co2_reduction – annual CO₂ emissions reduced (thousand metric tons, ktCO₂e)</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># True data-generating model (mirrors ISLP Advertising, Ch. 3):</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">#   co2_reduction = 2.939 + 0.046·process + 0.189·efficiency − 0.001·offsets + ε</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">#   ε ~ N(0, 1.69²)</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co"># ─────────────────────────────────────────────────────────────────────────────</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">7</span>)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">200</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>process    <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">300</span>, n)</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>efficiency <span class="op">=</span> np.random.uniform(<span class="dv">0</span>,  <span class="dv">50</span>, n)</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>offsets    <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">100</span>, n)</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>co2_reduction <span class="op">=</span> (<span class="fl">2.939</span></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>                 <span class="op">+</span> <span class="fl">0.046</span>  <span class="op">*</span> process</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>                 <span class="op">+</span> <span class="fl">0.189</span>  <span class="op">*</span> efficiency</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>                 <span class="op">-</span> <span class="fl">0.001</span>  <span class="op">*</span> offsets</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>                 <span class="op">+</span> np.random.normal(<span class="dv">0</span>, <span class="fl">1.69</span>, n))</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="st">'process'</span>:       process,</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    <span class="st">'efficiency'</span>:    efficiency,</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    <span class="st">'offsets'</span>:       offsets,</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="st">'co2_reduction'</span>: co2_reduction</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
+<p><a href="../../notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html">📊 Slides</a> / <a href="">📊 Blank slides</a></p>
 <p>In this lesson we introduce:</p>
 <ul>
-<li>The simple linear regression (SLR) model and its assumptions</li>
-<li>How the model coefficients are estimated (least squares)</li>
-<li>How to assess the accuracy of the coefficient estimates (standard errors, confidence intervals)</li>
-<li>How to test whether a relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> exists (hypothesis testing, <span class="math inline">\(t\)</span>-statistic, <span class="math inline">\(p\)</span>-values)</li>
-<li>How to assess overall model accuracy (RSE and <span class="math inline">\(R^2\)</span>)</li>
+<li>The simple linear regression (SLR) model</li>
+<li>Estimating coefficients with least squares</li>
+<li>Standard errors and confidence intervals</li>
+<li>Hypothesis testing: <span class="math inline">\(t\)</span>-statistic and <span class="math inline">\(p\)</span>-values</li>
+<li>Assessing model accuracy: RSE and <span class="math inline">\(R^2\)</span></li>
 </ul>
 <p>These notes are based on chapter 3.1 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. The <strong>example data is synthetic</strong> and was generated with the aid of Claude Code for the purpose of this lesson based on the data in ISLP used in Figure 2.1.</p>
 <section id="motivating-questions" class="level2">
@@ -432,38 +351,13 @@ window.Quarto = {
 <p>A research consortium tracks <strong>200 manufacturing firms</strong> across different industries and regions. For each firm they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:</p>
 <ul>
 <li><strong><code>process</code></strong> — investment in cleaner production processes ($K/year)</li>
-<li><strong><code>efficiency</code></strong> — energy efficiency upgrades ($K/year)</li>
+<li><strong><code>efficiency</code></strong> — investment in energy efficiency upgrades ($K/year)</li>
 <li><strong><code>offsets</code></strong> — carbon offset purchases ($K/year)</li>
 <li><strong><code>co2_reduction</code></strong> — annual CO₂ emissions reduced (thousand metric tons, ktCO₂e)</li>
 </ul>
 <p>The central question is: <em>do these investments actually drive emissions reductions, and if so, by how much?</em></p>
 <p>The figure below shows <code>co2_reduction</code> plotted against each predictor separately.</p>
 <div id="cell-initial-data-plotting" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(fig_size_x, fig_size_y <span class="op">*</span> <span class="dv">3</span>))</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>specs <span class="op">=</span> [</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'process'</span>,    <span class="st">'steelblue'</span>,  <span class="st">'Process upgrades ($K)'</span>),</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'efficiency'</span>, <span class="st">'darkorange'</span>, <span class="st">'Efficiency upgrades ($K)'</span>),</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'offsets'</span>,    <span class="st">'seagreen'</span>,   <span class="st">'Carbon offsets ($K)'</span>),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (col, color, xlabel) <span class="kw">in</span> <span class="bu">zip</span>(axes, specs):</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    ax.scatter(df[col], df[<span class="st">'co2_reduction'</span>], s<span class="op">=</span><span class="dv">15</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span>color)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(xlabel)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="st">'CO₂ reduction (ktCO₂e)'</span>)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>fig.suptitle(</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'GreenAbate dataset – CO₂ reduction vs. each abatement channel</span><span class="ch">\n</span><span class="st">'</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">'*Synthetic data generated for educational purposes only*'</span>,</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="fl">1.01</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -484,35 +378,12 @@ window.Quarto = {
 <li><span class="math inline">\(\beta_1\)</span> is the <strong>slope</strong>: the average change in <span class="math inline">\(Y\)</span> for a one-unit increase in <span class="math inline">\(X\)</span>.</li>
 </ul>
 <p>Together, <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> are the model <strong>coefficients</strong> (also called <strong>parameters</strong>). They define the true underlying function <span class="math inline">\(f\)</span> that maps <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span>.</p>
-<p>In practice, we do not know the true <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>, so we <strong>estimate</strong> them from data. Given estimates <span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span>, our prediction for <span class="math inline">\(Y\)</span> at a value <span class="math inline">\(x\)</span> is</p>
+<p>In practice, we do not know the true <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>, so we estimate them from data. Given estimates <span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span>, our prediction for <span class="math inline">\(Y\)</span> at a value <span class="math inline">\(x\)</span> is</p>
 <p><span class="math display">\[\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x = \hat{f}(x).\]</span></p>
-<p>Remember the “hat” notation (<span class="math inline">\(\hat{\ }\)</span>) throughout these notes indicates an <strong>estimated</strong> quantity, not the true, unknown population value.</p>
-<p>For the GreenAbate dataset, using <code>process</code> as the sole predictor, SLR models CO₂ reductions as</p>
+<p>Remember the “hat” notation (<span class="math inline">\(\hat{\ }\)</span>) throughout these notes indicates an estimated quantity, not the true, unknown population value.</p>
+<p>For the GreenAbate dataset, using <code>process</code> as the sole predictor, a linear model will model CO₂ reductions as</p>
 <p><span class="math display">\[\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}\]</span></p>
-<div id="36d27431" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>model_proc <span class="op">=</span> LinearRegression().fit(df[[<span class="st">'process'</span>]], df[<span class="st">'co2_reduction'</span>])</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>b0 <span class="op">=</span> model_proc.intercept_</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>b1 <span class="op">=</span> model_proc.coef_[<span class="dv">0</span>]</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>x_line <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">300</span>, <span class="dv">300</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># statsmodels fit (needed for SEs, CIs, p-values throughout)</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>X_ols <span class="op">=</span> sm.add_constant(df[<span class="st">'process'</span>])</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>res   <span class="op">=</span> sm.OLS(df[<span class="st">'co2_reduction'</span>], X_ols).fit()</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(fig_size_x, fig_size_y))</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>plt.scatter(df[<span class="st">'process'</span>], df[<span class="st">'co2_reduction'</span>], s<span class="op">=</span><span class="dv">20</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">'steelblue'</span>, label<span class="op">=</span><span class="st">'Observed data'</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>plt.plot(x_line, b0 <span class="op">+</span> b1 <span class="op">*</span> x_line, <span class="st">'b-'</span>, linewidth<span class="op">=</span><span class="fl">2.5</span>,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>         label<span class="op">=</span><span class="ss">f'Fitted line: $</span><span class="ch">\\</span><span class="ss">hat</span><span class="ch">{{</span><span class="ss">y</span><span class="ch">}}</span><span class="ss"> = </span><span class="sc">{</span>b0<span class="sc">:.2f}</span><span class="ss"> + </span><span class="sc">{</span>b1<span class="sc">:.4f}</span><span class="ch">\\</span><span class="ss">,x$'</span>)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Process upgrade spending ($K)'</span>)</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'CO₂ reduction (ktCO₂e)'</span>)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'upper left'</span>)</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
+<div id="e2876fdc" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -527,7 +398,7 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -539,12 +410,12 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -565,30 +436,11 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="residuals-and-residual-sum-of-squares-rss">Residuals and Residual sum of squares (RSS)</h3>
 <p>Given <span class="math inline">\(n\)</span> training observations <span class="math inline">\((x_1, y_1), \ldots, (x_n, y_n)\)</span>, we want to find <span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span> such that the line <span class="math inline">\(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x\)</span> is as close as possible to the observed data. For this, we need to define what does “as close as possible” mean mathematically.</p>
 <p>In our previous lesson we had talked about the <strong>residual</strong> for observation <span class="math inline">\(i\)</span> being the difference between the observed response and the predicted response:</p>
-<p><span class="math display">\[y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i.\]</span></p>
+<p><span class="math display">\[e_i = y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i.\]</span></p>
 <p>The <strong>residual sum of squares (RSS)</strong> totals the squared residuals across all observations:</p>
 <p><span class="math display">\[RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2.\]</span></p>
-<p>The <strong>least squares</strong> approach to fit the regression line chooses <span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span> to <strong>minimize</strong> the RSS. The residuals are shown as vertical segments below:</p>
+<p>The <strong>least squares approach</strong> to fit the regression line chooses <span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span> to minimize the RSS. The residuals are shown as vertical segments below:</p>
 <div id="cell-residuals" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(fig_size_x, fig_size_y))</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(df[<span class="st">'process'</span>], df[<span class="st">'co2_reduction'</span>], s<span class="op">=</span><span class="dv">15</span>, alpha<span class="op">=</span><span class="fl">0.4</span>, color<span class="op">=</span><span class="st">'steelblue'</span>, zorder<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">'Observed data'</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>plt.plot(x_line, b0 <span class="op">+</span> b1 <span class="op">*</span> x_line, <span class="st">'b-'</span>, linewidth<span class="op">=</span><span class="fl">2.5</span>, zorder<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">'Fitted line'</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, (xi, yi) <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">zip</span>(df[<span class="st">'process'</span>], df[<span class="st">'co2_reduction'</span>])):</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    yi_hat <span class="op">=</span> b0 <span class="op">+</span> b1 <span class="op">*</span> xi</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    lbl <span class="op">=</span> <span class="st">'Residual $e_i = y_i - </span><span class="ch">\\</span><span class="st">hat</span><span class="sc">{y}</span><span class="st">_i$'</span> <span class="cf">if</span> i <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="va">None</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    plt.plot([xi, xi], [yi, yi_hat], color<span class="op">=</span><span class="st">'tomato'</span>, linewidth<span class="op">=</span><span class="fl">0.6</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span>lbl, zorder<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Process upgrade spending ($K)'</span>)</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'CO₂ reduction (ktCO₂e)'</span>)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'upper left'</span>)</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -603,8 +455,8 @@ window.Quarto = {
 <p>where <span class="math inline">\(\bar{x} = \frac{1}{n}\sum x_i\)</span> and <span class="math inline">\(\bar{y} = \frac{1}{n}\sum y_i\)</span> are the sample means.</p>
 <p>Two important points:</p>
 <ol type="1">
-<li><p>The <strong>optimal</strong> <span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span> depend entirely on the training data. Feed the same model different data and you get different estimates. This is the source of estimation uncertainty.</p></li>
-<li><p>In practice, <strong>the computer computes these</strong> for you. The key is understanding what the estimates represent, not memorizing the algebra.</p></li>
+<li><p>The optimal <span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span> depend entirely on the training data. Feed the same model different data and you get different estimates. This is the source of estimation uncertainty.</p></li>
+<li><p>In practice, the computer computes these for you. The key is understanding what the estimates represent, not memorizing the algebra.</p></li>
 </ol>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -612,7 +464,7 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>What is the relation between the RSS and the MSE?
+What is the relation between the RSS and the MSE?
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -646,7 +498,7 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -654,12 +506,12 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -672,28 +524,27 @@ window.Quarto = {
 </section>
 <section id="confidence-intervals" class="level3">
 <h3 class="anchored" data-anchor-id="confidence-intervals">Confidence intervals</h3>
-<!-- Standard errors allow us to construct **confidence intervals** for the true coefficients. A **95% confidence interval** is a range of values such that, if we repeated our experiment many times, approximately 95% of the computed intervals would contain the true parameter value. -->
-<p>Standard errors allow us to construct <strong>confidence intervals</strong> for the true coefficients. A <strong>95% confidence interval</strong> is a range of values such that, with 95% probability, the range will contain the true unknown value of the parameter.</p>
+<p>Standard errors allow us to construct <strong>confidence intervals</strong> for the true coefficients. A <strong>95% confidence interval</strong> is a range of values such that, if we repeated our experiment many times, approximately 95% of the computed intervals would contain the true parameter value.</p>
 <p>For simple linear regression, the approximate 95% confidence interval for a coefficient <span class="math inline">\(\beta_i\)</span> is:</p>
 <p><span class="math display">\[[\hat{\beta}_i - 2 \cdot SE(\hat{\beta}_i), \hat{\beta}_i + 2 \cdot SE(\hat{\beta}_i)].\]</span></p>
-<p>This means there is approximately a 95% chance that the interval will contain the true vlaue for <span class="math inline">\(\beta_1\)</span>. The “approximately” is becasue the factor of 2 will vary slightly with the numnber of observations used to perform the regression. Strictly speaking, this factor will come for the 97.5% quantile of a <span class="math inline">\(t\)</span>-distribution with <span class="math inline">\(n-2\)</span> degrees of freedom. In practice, we use implemented methods in our computers to calculate these confidence intervals exactly.</p>
+<p>The “approximately” is becasue the factor of 2 will vary slightly with the numnber of observations used to perform the regression. Strictly speaking, this factor will come for the 97.5% quantile of a <span class="math inline">\(t\)</span>-distribution with <span class="math inline">\(n-2\)</span> degrees of freedom. In practice, we use implemented methods in our computers to calculate these confidence intervals exactly.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Interpreting the confidence interval
+Interpreting the confidence interval
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <p>In general terms, we interpret the confidence interval for the slope <span class="math inline">\(\hat{\beta}_1\)</span> as follows:</p>
 <blockquote class="blockquote">
-<p><em>a 95% confidence inerval for <span class="math inline">\(\beta_1\)</span> is <span class="math inline">\([a_1, b_1]\)</span> means that there’s a 95% chance that for an average increase of one unit of <span class="math inline">\(x\)</span>, there will be an average increase in <span class="math inline">\(y\)</span> between <span class="math inline">\(a_1\)</span> and <span class="math inline">\(b_1\)</span> units.</em></p>
+<p><em>a 95% confidence inerval for <span class="math inline">\(\beta_1\)</span> of <span class="math inline">\([a_1, b_1]\)</span> means that, using a procedure that captures the true slope 95% of the time, we estimate that a one-unit increase of <span class="math inline">\(x\)</span> is associated with an average increase in <span class="math inline">\(y\)</span> between <span class="math inline">\(a_1\)</span> and <span class="math inline">\(b_1\)</span> units.</em></p>
 </blockquote>
 <p>and we interpret the confidence interval for hte intercetp <span class="math inline">\(\hat{\beta}_0\)</span> like</p>
 <blockquote class="blockquote">
-<p><em>a 95% confidence inerval for <span class="math inline">\(\beta_0\)</span> is <span class="math inline">\([a_0, b_0]\)</span> means that there’s a 95% chance that the linear model will intercept the <span class="math inline">\(y\)</span>-axis between <span class="math inline">\(a_0\)</span> and <span class="math inline">\(b_0\)</span>.</em></p>
+<p><em>a 95% confidence inerval for <span class="math inline">\(\beta_0\)</span> is <span class="math inline">\([a_0, b_0]\)</span> means that, using a procedure that captures the true intercept 95% of the time, we estimate the model’s <span class="math inline">\(y\)</span>-intercept is between <span class="math inline">\(a_0\)</span> and <span class="math inline">\(b_0\)</span>.</em></p>
 </blockquote>
 <p>A narrower confidence interval means our estimate is more precise. This happens when the sample size <span class="math inline">\(n\)</span> is large and when the residual variance <span class="math inline">\(\sigma^2\)</span> is small.</p>
 </div>
@@ -704,23 +555,12 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <p>The exact 95% confidence intervals for each coefficient is:</p>
-<div id="b8e819df" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ci <span class="op">=</span> res.conf_int(alpha<span class="op">=</span><span class="fl">0.05</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ci_b1_low  <span class="op">=</span> ci.loc[<span class="st">'process'</span>, <span class="dv">0</span>]</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>ci_b1_high <span class="op">=</span> ci.loc[<span class="st">'process'</span>, <span class="dv">1</span>]</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ci_b0_low  <span class="op">=</span> ci.loc[<span class="st">'const'</span>, <span class="dv">0</span>]</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>ci_b0_high <span class="op">=</span> ci.loc[<span class="st">'const'</span>, <span class="dv">1</span>]</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"95% CI for β₀ (intercept): [</span><span class="sc">{</span>ci_b0_low<span class="sc">:.3f}</span><span class="ss">, </span><span class="sc">{</span>ci_b0_high<span class="sc">:.3f}</span><span class="ss">]"</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"95% CI for β₁ (process):   [</span><span class="sc">{</span>ci_b1_low<span class="sc">:.3f}</span><span class="ss">, </span><span class="sc">{</span>ci_b1_high<span class="sc">:.3f}</span><span class="ss">]"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
+<div id="664b45f1" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-stdout">
 <pre><code>95% CI for β₀ (intercept): [6.823, 8.567]
 95% CI for β₁ (process):   [0.041, 0.051]</code></pre>
@@ -733,19 +573,19 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p>The entire interval [0.041, 0.051] is above 0, so with 95% confidence the slope is positive: firms that invest more in cleaner production processes achieve greater CO₂ reductions. Each additional $1K in process spending is associated with a reduction of between 0.041 and 0.051 ktCO₂e per year on average.</p></li>
+<li><p>The entire interval [0.041, 0.051] is above 0 so our procedure points to a positive slope: firms that invest more in cleaner production processes achieve greater CO₂ reductions. Each additional $1K in process spending is associated with a reduction of between 0.041 and 0.051 ktCO₂e per year on average.</p></li>
 <li><p>An interval of [-0.002, 0.051] includes 0. We cannot rule out that <span class="math inline">\(\beta_1 = 0\)</span>, meaning we cannot confidently conclude that process spending drives reductions. Wider intervals generally arise from smaller samples or noisier data.</p></li>
 </ol>
 </div>
@@ -768,25 +608,25 @@ window.Quarto = {
 <li>If <span class="math inline">\(\beta_1 \neq 0\)</span>, then <span class="math inline">\(\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X\)</span> — <span class="math inline">\(Y\)</span> is related to <span class="math inline">\(X\)</span>.</li>
 </ul>
 </section>
-<section id="the-t-statistic-p-values" class="level3">
-<h3 class="anchored" data-anchor-id="the-t-statistic-p-values">The <span class="math inline">\(t\)</span>-statistic &amp; <span class="math inline">\(p\)</span>-values</h3>
+<section id="the-t-statistic-p-value" class="level3">
+<h3 class="anchored" data-anchor-id="the-t-statistic-p-value">The <span class="math inline">\(t\)</span>-statistic &amp; <span class="math inline">\(p\)</span>-value</h3>
 <p>To test <span class="math inline">\(H_0\)</span>, we need to determine whether <span class="math inline">\(\hat{\beta}_1\)</span> is sufficiently far from 0 relative to its uncertainty. We use the <strong><span class="math inline">\(t\)</span>-statistic</strong></p>
 <p><span class="math display">\[t = \frac{\hat{\beta}_1}{SE(\hat{\beta}_1)}\]</span></p>
 <p>which measures how many standard deviations <span class="math inline">\(\hat{\beta}_1\)</span> is away from 0. If there truly is no relationship between the variables (<span class="math inline">\(\beta_1 = 0\)</span>), then <span class="math inline">\(t\)</span> follows a <span class="math inline">\(t\)</span>-distribution with <span class="math inline">\(n - 2\)</span> degrees of freedom.</p>
-<p>The <strong><span class="math inline">\(p\)</span>-value</strong> is the probability of observing any number equal to the <span class="math inline">\(t\)</span>-statistic <span class="math inline">\(|t|\)</span> or larger, assuming there is no relationship between the variables (i.e.&nbsp;assuming <span class="math inline">\(H_0\)</span> is true). Conventionally, <span class="math inline">\(p &lt; 0.05\)</span> is used as a threshold for rejecting <span class="math inline">\(H_0\)</span>, though the appropriate cutoff depends on context.</p>
+<p>The <strong><span class="math inline">\(p\)</span>-value</strong> is the probability of obtaining a <span class="math inline">\(t\)</span>-statistic at least as large as the observed <span class="math inline">\(|t|\)</span> in absolute value, assuming there is no relationship between the variables (i.e.&nbsp;assuming <span class="math inline">\(H_0\)</span> is true). Conventionally, <span class="math inline">\(p &lt; 0.05\)</span> is used as a threshold for rejecting <span class="math inline">\(H_0\)</span>, though the appropriate cutoff depends on context.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Interpreting the <span class="math inline">\(p\)</span>-value
+Interpreting the <span class="math inline">\(p\)</span>-value
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>A <strong>small <span class="math inline">\(p\)</span>-value</strong> means it is very unlikely to have observed a <span class="math inline">\(\hat{\beta}_1\)</span> this far from 0 by chance alone, if <span class="math inline">\(\beta_1\)</span> were truly 0. We <strong>reject</strong> <span class="math inline">\(H_0\)</span> and conclude there is a relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</li>
-<li>A <strong>large <span class="math inline">\(p\)</span>-value</strong> means our data are consistent with <span class="math inline">\(H_0\)</span>, so we do not reject <span class="math inline">\(H_0\)</span>: it could be that there’s no relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>!</li>
+<li>A small <span class="math inline">\(p\)</span>-value means it is very unlikely to have observed a <span class="math inline">\(\hat{\beta}_1\)</span> this far from 0 by chance alone, if <span class="math inline">\(\beta_1\)</span> were truly 0. We <strong>reject <span class="math inline">\(H_0\)</span></strong> and conclude there is a relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</li>
+<li>A large <span class="math inline">\(p\)</span>-value means our data are consistent with <span class="math inline">\(H_0\)</span>, so we do not reject <span class="math inline">\(H_0\)</span>: it could be that there’s no relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>!</li>
 </ul>
 </div>
 </div>
@@ -796,8 +636,8 @@ window.Quarto = {
 <li><p>We compute the <span class="math inline">\(t\)</span>-statistic which is the number of standard deviations that <span class="math inline">\(\hat{\beta}_1\)</span> is away from 0.</p></li>
 </ol>
 <!-- 3. Assuming $\beta_1=0$ (i.e. no relationship between $X$ and $Y$) and $n>30$, then $t$'s distribution is very similar to normal distribution.  -->
-<ol start="4" type="1">
-<li><p>We ask the question: <em>what is the probability that <span class="math inline">\(|\hat{\beta}_1|\)</span> is more than <span class="math inline">\(t\)</span> standard deviations away from zero if the true parameter is <span class="math inline">\(\beta_1=0\)</span>?</em> This probability is the <span class="math inline">\(p\)</span>-value.</p></li>
+<ol start="3" type="1">
+<li><p>We ask the question: <em>what is the probability that <span class="math inline">\(|\hat{\beta}_1|\)</span> is more than <span class="math inline">\(|t|\)</span> standard deviations away from zero if the true parameter is <span class="math inline">\(\beta_1=0\)</span>?</em> This probability is the <span class="math inline">\(p\)</span>-value.</p></li>
 <li><p>There are two options depending on the answer to this question:</p>
 <ul>
 <li>Option 1: small probability that <span class="math inline">\(\hat{\beta}_1\)</span> is that far away from 0 if the true parameter <span class="math inline">\(\beta_1=0\)</span>: so the most likely scenario is that <span class="math inline">\(\beta_1\neq0\)</span>, which means the variables are related.</li>
@@ -810,26 +650,12 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <p>The table below shows the regression output for the SLR of <code>co2_reduction</code> on <code>process</code>:</p>
-<div id="410b061e" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fmt_p(p):</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">'&lt; 0.0001'</span> <span class="cf">if</span> p <span class="op">&lt;</span> <span class="fl">0.0001</span> <span class="cf">else</span> <span class="ss">f'</span><span class="sc">{</span>p<span class="sc">:.4f}</span><span class="ss">'</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>coef_df <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">''</span>:              [<span class="st">'Intercept'</span>, <span class="st">'process'</span>],</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Coefficient'</span>:   [<span class="ss">f"</span><span class="sc">{</span>res<span class="sc">.</span>params[<span class="st">'const'</span>]<span class="sc">:.4f}</span><span class="ss">"</span>,   <span class="ss">f"</span><span class="sc">{</span>res<span class="sc">.</span>params[<span class="st">'process'</span>]<span class="sc">:.4f}</span><span class="ss">"</span>],</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Std. error'</span>:    [<span class="ss">f"</span><span class="sc">{</span>res<span class="sc">.</span>bse[<span class="st">'const'</span>]<span class="sc">:.4f}</span><span class="ss">"</span>,       <span class="ss">f"</span><span class="sc">{</span>res<span class="sc">.</span>bse[<span class="st">'process'</span>]<span class="sc">:.4f}</span><span class="ss">"</span>],</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'t-statistic'</span>:   [<span class="ss">f"</span><span class="sc">{</span>res<span class="sc">.</span>tvalues[<span class="st">'const'</span>]<span class="sc">:.2f}</span><span class="ss">"</span>,   <span class="ss">f"</span><span class="sc">{</span>res<span class="sc">.</span>tvalues[<span class="st">'process'</span>]<span class="sc">:.2f}</span><span class="ss">"</span>],</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'p-value'</span>:       [fmt_p(res.pvalues[<span class="st">'const'</span>]),      fmt_p(res.pvalues[<span class="st">'process'</span>])],</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(coef_df.to_string(index<span class="op">=</span><span class="va">False</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
+<div id="266c8dbe" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-stdout">
 <pre><code>          Coefficient Std. error t-statistic  p-value
 Intercept      7.6953     0.4421       17.41 &lt; 0.0001
@@ -845,21 +671,21 @@ Intercept      7.6953     0.4421       17.41 &lt; 0.0001
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p>The very small <span class="math inline">\(p\)</span>-value for <code>process</code> gives strong evidence that <span class="math inline">\(\beta_1 \neq 0\)</span> — there is a statistically significant positive relationship between process upgrade investment and CO₂ emissions reductions.</p></li>
+<li><p>The very small <span class="math inline">\(p\)</span>-value for <code>process</code> gives strong evidence that <span class="math inline">\(\beta_1 \neq 0\)</span>: there is a evidence of a positive relationship between process upgrade investment and CO₂ emissions reductions.</p></li>
 <li><p>The <span class="math inline">\(p\)</span>-value for the intercept tests <span class="math inline">\(H_0: \beta_0 = 0\)</span>, not whether the intercept is a useful predictor. A significant intercept simply means the regression line does not pass through the origin. There is likely some baseline CO₂ reduction even at zero process spending (likely from other firm-level factors not captured in the model). The intercept’s <span class="math inline">\(p\)</span>-value is rarely the question of interest.</p></li>
-<li><p>A coefficient of roughly 0.046 means that, on average, each additional $1K invested in cleaner production processes is associated with approximately 0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction per year.</p></li>
+<li><p>A coefficient of roughly 0.046 means that, on average, each additional $1K invested in cleaner production processes is associated with approximately 0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction.</p></li>
 </ol>
 </div>
 </div>
@@ -880,7 +706,7 @@ Intercept      7.6953     0.4421       17.41 &lt; 0.0001
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Interpreting RSE
+Interpreting RSE
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -896,7 +722,7 @@ Intercept      7.6953     0.4421       17.41 &lt; 0.0001
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -904,12 +730,12 @@ Intercept      7.6953     0.4421       17.41 &lt; 0.0001
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -917,10 +743,9 @@ Intercept      7.6953     0.4421       17.41 &lt; 0.0001
 <div class="callout-body-container callout-body">
 <p>Whether an RSE of 3.26 ktCO₂e is acceptable depends on context. A few ways to judge it:</p>
 <ul>
-<li><strong>Relative to the response range</strong>: CO₂ reductions in the dataset range roughly from 3 to 27 ktCO₂e, so an average error of 3.26 represents about 12–15% of the response range. That is a moderate error — not great, but not terrible.</li>
+<li><strong>Relative to the response range</strong>: CO₂ reductions in the dataset range roughly from 3 to 27 ktCO₂e, so an average error of 3.26 represents about 12–15% of the response range. That is a moderate error, not great, but not terrible.</li>
 <li><strong>Relative to the mean response</strong>: the mean reduction is around 14 ktCO₂e, so the RSE is about 23% of the mean. This suggests the model has meaningful predictive error.</li>
 <li><strong>Relative to the firm’s target</strong>: if a firm has committed to reducing 5 ktCO₂e per year, an average prediction error of 3.26 is large relative to their target. For a firm targeting 25 ktCO₂e, it may be acceptable.</li>
-<li><strong>By adding more predictors</strong>: we are only using <code>process</code> here. Including <code>efficiency</code> and <code>offsets</code> in a multiple regression model should reduce the RSE substantially.</li>
 </ul>
 </div>
 </div>
@@ -944,14 +769,14 @@ Intercept      7.6953     0.4421       17.41 &lt; 0.0001
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Interpreting <span class="math inline">\(R^2\)</span>
+Interpreting <span class="math inline">\(R^2\)</span>
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <ul>
 <li><span class="math inline">\(R^2\)</span> is always between 0 and 1.</li>
-<li><span class="math inline">\(R^2\)</span> close to <strong>1</strong>: the model explains most of the variability in <span class="math inline">\(Y\)</span>: a good fit.</li>
-<li><span class="math inline">\(R^2\)</span> close to <strong>0</strong>: the model explains little of the variability: <span class="math inline">\(X\)</span> alone is not capturing much of what drives <span class="math inline">\(Y\)</span>. This could mean the true relationship is non-linear, the model needs more predictors, or there is a lot of irreducible noise.</li>
+<li><span class="math inline">\(R^2\)</span> close to 1: the model explains most of the variability in <span class="math inline">\(Y\)</span>: a good fit.</li>
+<li><span class="math inline">\(R^2\)</span> close to 0: the model explains little of the variability: <span class="math inline">\(X\)</span> alone is not capturing much of what drives <span class="math inline">\(Y\)</span>. This could mean the true relationship is non-linear, the model needs more predictors, or there is a lot of irreducible noise.</li>
 <li>What counts as a “good” <span class="math inline">\(R^2\)</span> is context-dependent.</li>
 <li><strong>You should always look at your data to assess linearity and an existing relationship!</strong></li>
 </ul>
@@ -974,27 +799,12 @@ This relationship only holds for SLR — once we move to multiple predictors, $R
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <p>The table below summarizes the accuracy of the SLR of <code>co2_reduction</code> on <code>process</code>:</p>
 <div id="r2-calculation" class="cell" data-execution_count="7">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> model_proc.predict(df[[<span class="st">'process'</span>]])</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>y_bar <span class="op">=</span> df[<span class="st">'co2_reduction'</span>].mean()</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>TSS   <span class="op">=</span> np.<span class="bu">sum</span>((df[<span class="st">'co2_reduction'</span>] <span class="op">-</span> y_bar)<span class="op">**</span><span class="dv">2</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>RSS   <span class="op">=</span> np.<span class="bu">sum</span>((df[<span class="st">'co2_reduction'</span>] <span class="op">-</span> y_hat)<span class="op">**</span><span class="dv">2</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>R2    <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> RSS <span class="op">/</span> TSS</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>RSE   <span class="op">=</span> np.sqrt(RSS <span class="op">/</span> (n <span class="op">-</span> <span class="dv">2</span>))</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>acc_df <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Quantity'</span>: [<span class="st">'Residual standard error'</span>, <span class="st">'R²'</span>],</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Value'</span>:    [<span class="ss">f'</span><span class="sc">{</span>RSE<span class="sc">:.2f}</span><span class="ss">'</span>, <span class="ss">f'</span><span class="sc">{</span>R2<span class="sc">:.3f}</span><span class="ss">'</span>]</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(acc_df.to_string(index<span class="op">=</span><span class="va">False</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>               Quantity Value
 Residual standard error  3.14
@@ -1009,19 +819,19 @@ Residual standard error  3.14
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-17" class="callout-17-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p>An <span class="math inline">\(R^2\)</span> of 0.611 means that approximately 61.1% of the variability in CO₂ reductions across firms is explained by variation in process upgrade spending alone. The remaining ~38.9% of variability is driven by other factors not included in this model — such as efficiency upgrades, offsets, firm size, or industry type.</p></li>
+<li><p>An <span class="math inline">\(R^2\)</span> of 0.611 means that approximately 61.1% of the variability in CO₂ reductions across firms is explained by a linear variation in process upgrade spending alone. The remaining ~38.9% of variability is driven by other factors not included in this model.</p></li>
 <li><p>An RSE of 3.14 ktCO₂e (≈ 3138 metric tons) is large relative to, for example, a 5 ktCO₂e reduction target. A prediction error of that magnitude could meaningfully mislead decisions for a small-target firm. For a firm targeting 25 ktCO₂e, the same RSE represents roughly 13% of the target, which may or may not be acceptable depending on how precise their planning needs to be.</p></li>
 </ol>
 </div>
@@ -1032,12 +842,13 @@ Residual standard error  3.14
 What we covered in this lesson:
 
 - **Standard linear regression model:** $Y \approx \beta_0 + \beta_1 X$, estimated as $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 x$
-- Minimiinge $RSS = \sum(y_i - \hat{y}_i)^2$ gives us coeffient estimates $$\hat{\beta}_0, \hat{\beta}_1$
+- Minimizing $RSS = \sum(y_i - \hat{y}_i)^2$ gives us coeffient estimates $\hat{\beta}_0, \hat{\beta}_1$
 - Standard errors quantify uncertainty in the coefficient estimates
-- Confidence intervals give us a high-probability range in which our true coefficients may be in
+- Confidence intervals give us a high-confidence method to estimate the coefficients
 - We can use Hypothesis testing to figure out if there is a relationship between the variables
-- $p$-value: probability of observing results there were no variable relation $(H_0)$; small $p$-value → reject $H_0$
-- $R^2$: proportion of variance in $Y$ explained by $X$
+- $p$-value: probability of observing results if there was no variable relation $(H_0)$
+- small $p$-value → reject $H_0$  → evidence of relation
+- $R^2$: proportion of variance in $Y$ explained by the model
 
 Next class: multiple linear regression. -->
 
@@ -1102,14 +913,13 @@ James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
         }
-      }
-      return codeEl.innerText;
+        return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

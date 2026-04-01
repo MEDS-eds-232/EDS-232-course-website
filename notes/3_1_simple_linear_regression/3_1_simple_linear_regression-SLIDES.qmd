@@ -1,0 +1,973 @@
+---
+format:
+    revealjs:
+        theme: ../../styles/meds-slides-styles.scss
+        slide-number: true
+        chalkboard: true
+        title-slide: false
+jupyter: eds232-env
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+import statsmodels.api as sm
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+plt.rcParams['legend.fontsize'] = 'x-large'
+
+np.random.seed(7)
+n = 200
+
+process    = np.random.uniform(0, 300, n)
+efficiency = np.random.uniform(0,  50, n)
+offsets    = np.random.uniform(0, 100, n)
+
+co2_reduction = (2.939
+                 + 0.046  * process
+                 + 0.189  * efficiency
+                 - 0.001  * offsets
+                 + np.random.normal(0, 1.69, n))
+
+df = pd.DataFrame({
+    'process':       process,
+    'efficiency':    efficiency,
+    'offsets':       offsets,
+    'co2_reduction': co2_reduction
+})
+
+# Fit models
+model_proc = LinearRegression().fit(df[['process']], df['co2_reduction'])
+b0 = model_proc.intercept_
+b1 = model_proc.coef_[0]
+x_line = np.linspace(0, 300, 300)
+
+X_ols = sm.add_constant(df['process'])
+res   = sm.OLS(df['co2_reduction'], X_ols).fit()
+
+ci = res.conf_int(alpha=0.05)
+ci_b1_low  = ci.loc['process', 0]
+ci_b1_high = ci.loc['process', 1]
+
+y_hat = model_proc.predict(df[['process']])
+y_bar = df['co2_reduction'].mean()
+TSS   = np.sum((df['co2_reduction'] - y_bar)**2)
+RSS   = np.sum((df['co2_reduction'] - y_hat)**2)
+R2    = 1 - RSS / TSS
+RSE   = np.sqrt(RSS / (n - 2))
+```
+
+## {#title-slide data-menu-title="Title Slide" background="#053660"}
+
+[EDS 232]{.custom-title}
+
+<hr class="hr-teal">
+
+[Lesson 3]{.custom-subtitle}
+
+[*Simple linear regression*]{.custom-subtitle}
+
+---
+
+## {#in-this-lesson data-menu-title="In this lesson"}
+
+[In this lesson]{.slide-title}
+
+<hr>
+
+<br>
+
+- The simple linear regression (SLR) model
+- Estimating coefficients with least squares
+- Standard errors and confidence intervals
+- Hypothesis testing: $t$-statistic and $p$-values
+- Assessing model accuracy: RSE and $R^2$
+
+---
+
+## {#why-linear-regression data-menu-title="Why study linear regression?"}
+
+[Why study linear regression?]{.slide-title}
+
+<hr>
+
+Regression estimates relationships between predictors and a response. It can help answer questions such as:
+
+<br>
+
+1. Is there a relationship between the predictor(s) and the response?
+2. How strong is that relationship?
+3. Which predictors are actually associated with the response?
+4. How large is the effect of each predictor on the response?
+5. Is the relationship linear?
+6. How accurately can we predict the response for a given combination of predictor values?
+
+<br>
+
+. . .
+
+
+::: {.center-text .body-text-m .teal-text}
+Linear regression supports both **inference** and **prediction**.
+:::
+
+---
+
+## {#section-example data-menu-title="# A guiding example #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">A guiding example</p>
+</div>
+
+---
+
+## {#greenabate data-menu-title="The GreenAbate dataset"}
+
+[The GreenAbate dataset]{.slide-title}
+
+<hr>
+
+A research consortium tracks **200 manufacturing firms**. For each firm, they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:
+
+<br>
+
+::: {.body-text-m}
+- **`process`** — investment in cleaner production processes (\$K/year)
+- **`efficiency`** — investment in energy efficiency upgrades (\$K/year)
+- **`offsets`** — carbon offset purchases (\$K/year)
+- **`co2_reduction`** — annual CO₂ emissions reduced (ktCO₂e/year)
+:::
+
+<br>
+
+The researchers want to understand:
+
+::: {.center-text .body-text-m .teal-text}
+*Do these investments actually drive emissions reductions, and if so, by how much?*
+:::
+
+---
+
+## {#greenabate-plots data-menu-title="GreenAbate: data overview"}
+
+[CO₂ reduction vs. each predictor]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.5, fig_size_y))
+
+specs = [
+    ('process',    'steelblue',  'Process upgrades ($K)'),
+    ('efficiency', 'darkorange', 'Efficiency upgrades ($K)'),
+    ('offsets',    'seagreen',   'Carbon offsets ($K)'),
+]
+
+for ax, (col, color, xlabel) in zip(axes, specs):
+    ax.scatter(df[col], df['co2_reduction'], s=12, alpha=0.5, color=color)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel('CO₂ reduction (ktCO₂e)')
+    ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.center-text .body-text-s}
+*Synthetic data generated for educational purposes only*
+:::
+
+. . .
+
+`process` spending: strongest linear association with CO₂ reductions. We will use this predictor as our variable today and go back to the others in the next lesson.
+
+
+
+---
+
+## {#section-slr data-menu-title="# Simple linear regression #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Simple linear regression</p>
+</div>
+
+---
+
+## {#slr-model data-menu-title="The SLR model"}
+
+[The simple linear regression model]{.slide-title}
+
+<hr>
+
+**Simple linear regression (SLR)** assumes a linear relationship between a single predictor $X$ and a response $Y$:
+
+$$Y \approx \beta_0 + \beta_1 X$$
+
+. . .
+
+::: {.body-text-m}
+- $\beta_0 =$ **$y$-intercept**: expected value of $Y$ when $X = 0$
+- $\beta_1 =$ **slope**: average change in $Y$ for a one-unit increase in $X$
+:::
+
+. . .
+
+<br>
+
+Since $\beta_0$ and $\beta_1$ are unknown, we **estimate** them from data:
+
+$$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x = \hat{f}(x)$$
+
+---
+
+## {#slr-greenabate data-menu-title="SLR: fitted line"}
+
+[Using a linear model for our data]{.slide-title}
+
+<hr>
+
+Using `process` as the sole predictor, a linear model for our data would assume this functional form:
+
+$$\texttt{co2_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}$$
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x, fig_size_y - 0.5))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
+---
+
+## {#linear-model-checkin data-menu-title="Check-in"}
+
+[Check in ]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+- How would you interpret the value of $\hat{\beta}_0$?
+- How would you interpret the value of $\hat{\beta}_1$?
+- If a firm spends \$150K on process upgrades, how would you calculate the predicted CO₂ reduction?
+:::
+
+::: {.column width="50%"}
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x * 0.9, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+:::
+
+::::
+
+---
+
+## {#linear-model-checkin-answers data-menu-title="Check-in Answers"}
+
+[Check-in ]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+- How would you interpret the value of $\hat{\beta}_0$?
+- How would you interpret the value of $\hat{\beta}_1$?
+- If a firm spends \$150K on process upgrades, how would you calculate the predicted CO₂ reduction?
+
+<br> 
+
+- $\hat{\beta}_0 \approx$ `{python} f"{b0:.2f}"` ktCO₂e: predicted CO₂ reduction when a firm spends \$0 on process upgrades (baseline).
+
+- $\hat{\beta}_1 \approx$ `{python} f"{b1:.4f}"` ktCO₂e per \$K: each additional \$1K in process spending is associated with `{python} f"{b1:.4f}"` ktCO₂e of additional reduction.
+
+- Just plug in 150 into the line equation!
+
+:::
+
+::: {.column width="50%"}
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x * 0.9, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+:::
+
+::::
+
+---
+
+## {#section-estimation data-menu-title="# Estimating the coefficients #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Estimating the coefficients</p>
+</div>
+
+---
+
+## {#residuals-def data-menu-title="Residuals and RSS"}
+
+[Residuals and the RSS]{.slide-title}
+
+<hr>
+
+Given $n$ training observations $(x_1, y_1), \ldots, (x_n, y_n)$, we want to find $\hat{\beta}_0$ and $\hat{\beta}_1$ such that the line $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x$ is as close as possible to the observed data.
+
+. . .
+
+The **residual** for observation $i$ is the difference between observed and predicted:
+
+$$e_i = y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i$$
+
+. . .
+
+The **residual sum of squares (RSS)** totals all squared residuals:
+
+$$RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2.$$
+
+. . .
+
+<br>
+
+::: {.center-text .body-text-m .teal-text}
+The **least squares** approach to fit the regression line chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to **minimize** the RSS.
+:::
+
+---
+
+## {#residuals-plot data-menu-title="Residuals: visual"}
+
+[Residuals can be visualized as the vertical distance to the fitted line]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=12, alpha=0.4, color='steelblue', zorder=2, label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5, zorder=3, label='Fitted line')
+
+for i, (xi, yi) in enumerate(zip(df['process'], df['co2_reduction'])):
+    yi_hat = b0 + b1 * xi
+    lbl = 'Residual $e_i = y_i - \\hat{y}_i$' if i == 0 else None
+    plt.plot([xi, xi], [yi, yi_hat], color='tomato', linewidth=0.6, alpha=0.6, label=lbl, zorder=1)
+
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#ls-formulas data-menu-title="Least squares formulas"}
+
+[Least squares solution]{.slide-title}
+
+<hr>
+
+Minimizing the RSS using calculus gives the following formulas:
+
+<br>
+
+$$\hat{\beta}_1 = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n}(x_i - \bar{x})^2}$$
+
+<br>
+
+$$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
+
+. . .
+
+<br>
+
+- The estimates depend entirely on the training data: if you feed the model different data, you will get different estimates. This is the source of estimation uncertainty.
+
+- In practice, **the computer computes these** for you.
+
+---
+
+## {#section-accuracy data-menu-title="# Coefficient accuracy #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Accuracy of the coefficient estimates</p>
+</div>
+
+---
+
+## {#standard-errors data-menu-title="Standard errors"}
+
+[Standard errors]{.slide-title}
+
+<hr>
+
+Our true function describing the relationship between predictor and response is given by $f(X) = \beta_0 + \beta_1 X$. Our observed data is described by:
+
+$$Y = f(X) + \epsilon = \beta_0 + \beta_1 X + \epsilon,$$
+
+The **standard error** quantifies how far $\hat{\beta}_i$ is from the true $\beta_i$ on average.
+
+The standard error for the slope $\hat{\beta}_1$ is:
+
+$$SE(\hat{\beta}_1)^2 = \frac{\sigma^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2}$$
+
+
+The standard error of the $y$-intercept $\hat{\beta}_0$ is:
+
+$$SE(\hat{\beta}_0)^2 = \sigma^2 \left[\frac{1}{n} + \frac{\bar{x}^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2}\right]$$
+
+. . .
+
+::: {.body-text-s}
+$\sigma^2 = \text{Var}(\epsilon)$ is the error variance (unknown in practice — estimated from the data).
+:::
+
+**Check-in:** In these formulas, what do $n$, $x_i$, $\bar{x}$ represent?
+
+---
+
+## {#confidence-intervals data-menu-title="Confidence intervals"}
+
+[Confidence intervals]{.slide-title}
+
+<hr>
+
+Standard errors allow us to construct confidence intervals for the true coefficients.
+
+A **95% confidence interval** is a range of values such that, *if we repeated our experiment many times*, approximately 95% of the computed intervals would contain the true parameter value.
+
+A 95% confidence interval for a coefficient $\beta_i$ is:
+
+$$[\hat{\beta}_i - 2 \cdot SE(\hat{\beta}_i),\;\; \hat{\beta}_i + 2 \cdot SE(\hat{\beta}_i)]$$
+
+::: {.body-text-s}
+*(the factor 2 is approximate, the exact value comes from the $t$-distribution with $n-2$ degrees of freedom)*
+:::
+
+. . .
+
+<br>
+
+::: {.body-text-s}
+**Interpretation:**
+
+> a 95% CI for $\beta_1$ of $[a_1, b_1]$ means that, using a procedure that captures the true slope 95% of the time, we estimate that a one-unit increase of $x$ is associated with an average increase in $y$ between $a_1$ and $b_1$ units.
+
+> a 95% confidence inerval for $\beta_0$ is $[a_0, b_0]$ means that, using a procedure that captures the true intercept 95% of the time, we estimate the model's $y$-intercept is between $a_0$ and $b_0$.
+:::
+
+---
+
+## {#ci-greenabate-checkin data-menu-title="CIs: GreenAbate"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+The exact 95% confidence intervals for each coefficient is:
+```{python}
+ci = res.conf_int(alpha=0.05)
+ci_b1_low  = ci.loc['process', 0]
+ci_b1_high = ci.loc['process', 1]
+ci_b0_low  = ci.loc['const', 0]
+ci_b0_high = ci.loc['const', 1]
+
+print(f"95% CI for β₀ (intercept): [{ci_b0_low:.3f}, {ci_b0_high:.3f}]")
+print(f"95% CI for β₁ (process):   [{ci_b1_low:.3f}, {ci_b1_high:.3f}]")
+```
+
+<br>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x * 0.9, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="50%"}
+
+:::{.teal-text}
+1. What does the CI [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] tell us about the relationship between process upgrade spending and CO₂ reductions?
+2. What if the interval had been [-0.002,  `{python} f"{ci_b1_high:.3f}"`] instead?
+:::
+
+
+::: {.body-text-s}
+**Interpretation:**
+
+> a 95% CI for $\beta_1$ of $[a_1, b_1]$ means that, using a procedure that captures the true slope 95% of the time, we estimate that a one-unit increase of $x$ is associated with an average increase in $y$ between $a_1$ and $b_1$ units.
+
+> a 95% confidence inerval for $\beta_0$ is $[a_0, b_0]$ means that, using a procedure that captures the true intercept 95% of the time, we estimate the model's $y$-intercept is between $a_0$ and $b_0$.
+:::
+
+:::
+
+:::
+
+---
+
+## {#ci-greenabate-checkin-solution data-menu-title="CIs: GreenAbate"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+The exact 95% confidence intervals for each coefficient is:
+```{python}
+ci = res.conf_int(alpha=0.05)
+ci_b1_low  = ci.loc['process', 0]
+ci_b1_high = ci.loc['process', 1]
+ci_b0_low  = ci.loc['const', 0]
+ci_b0_high = ci.loc['const', 1]
+
+print(f"95% CI for β₀ (intercept): [{ci_b0_low:.3f}, {ci_b0_high:.3f}]")
+print(f"95% CI for β₁ (process):   [{ci_b1_low:.3f}, {ci_b1_high:.3f}]")
+```
+
+<br>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x * 0.9, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="50%"}
+
+:::{.teal-text}
+1. What does the CI [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] tell us about the relationship between process upgrade spending and CO₂ reductions?
+2. What if the interval had been [-0.002,  `{python} f"{ci_b1_high:.3f}"`] instead?
+:::
+
+
+::: {.body-text-s}
+**Interpretation:**
+
+- Each additional \$1K in process spending is associated with a reduction of between `{python} f"{ci_b1_low:.3f}"` and `{python} f"{ci_b1_high:.3f}"` ktCO₂e per year on average. 
+
+- Also, the entire interval [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] is above 0 so our procedure points to a positive slope: firms that invest more in cleaner production processes achieve greater CO₂ reductions. 
+
+- An interval of [-0.002,  `{python} f"{ci_b1_high:.3f}"`] includes 0. We cannot rule out that $\beta_1 = 0$, meaning we cannot confidently conclude that process spending drives reductions. Wider intervals generally arise from smaller samples or noisier data.
+:::
+
+:::
+
+:::
+
+---
+
+## {#section-hypothesis data-menu-title="# Hypothesis testing #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Hypothesis testing</p>
+</div>
+
+---
+
+## {#hypotheses data-menu-title="Null and alternative hypotheses"}
+
+[Is there a relationship between $X$ and $Y$?]{.slide-title}
+
+<hr>
+
+<br>
+
+- **Null hypothesis** $H_0$: no relationship between $X$ and $Y$. 
+
+In mathematical terms this means $\beta_1 = 0$:
+
+  $$\hat{Y} = \hat{\beta}_0.$$
+
+- **Alternative hypothesis** $H_a$: there is some relationship between $X$ and $Y$. 
+
+In mathematical terms this means $\beta_1 \neq 0$:
+
+  $$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X.$$
+
+. . .
+
+<br>
+
+::: {.center-text .teal-text}
+To test $H_0$, we need to determine whether $\hat{\beta}_1$ is sufficiently far from 0 relative to its uncertainty.
+:::
+
+---
+
+## {#t-stat data-menu-title="t-statistic and p-value"}
+
+[The $t$-statistic and $p$-value]{.slide-title}
+
+<hr>
+
+The **$t$-statistic** measures how many standard deviations $\hat{\beta}_1$ is from 0:
+
+$$t = \frac{\hat{\beta}_1}{SE(\hat{\beta}_1)}.$$
+
+::: {.body-text-s}
+If there truly is no relationship between the variables ($\beta_1 = 0$), then $t$ follows a $t$-distribution with $n - 2$ degrees of freedom.
+:::
+
+<br>
+
+. . .
+
+The **$p$-value** is the probability of obtaining a $t$-statistic at least as large as the observed $|t|$ in absolute value, *assuming $H_0$ is true.* 
+
+. . .
+
+::: {.teal-text}
+
+:::: {.columns}
+::: {.column width="50%"}
+$$
+\begin{aligned}
+&\text{Small } p\text{-value } (p < 0.05) \\
+&\Rightarrow \text{unlikely to observe } |\hat{\beta}_1| \\
+&\quad\text{this far from 0 by chance if } H_0 \text{ were true} \\
+&\Rightarrow \textbf{reject } H_0 \\
+&\Rightarrow \text{most likely } \beta_1 \neq 0 \\
+&\Rightarrow \text{evidence of a relationship}\\
+&\quad\text{between } X \text{ and } Y
+\end{aligned}
+$$
+:::
+::: {.column width="50%"}
+$$
+\begin{aligned}
+&\text{Large } p\text{-value} \\
+&\Rightarrow \text{plausible to observe } |\hat{\beta}_1| \\
+&\quad\text{this far from 0 by chance if } H_0 \text{ were true} \\
+&\Rightarrow \textbf{fail to reject } H_0 \\
+&\Rightarrow \beta_1 = 0 \text{ is consistent with the data} \\
+&\Rightarrow \text{no evidence of a relationship}\\
+&\quad\text{between } X \text{ and } Y
+\end{aligned}
+$$
+:::
+::::
+
+:::
+
+---
+
+## {#p-values-checkin data-menu-title="p-values: GreenAbate"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+The table below shows the regression output for the SLR of `co2_reduction` on `process`:
+
+```{python}
+def fmt_p(p):
+    return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
+
+coef_df = pd.DataFrame({
+    '':              ['Intercept', 'process'],
+    'Coefficient':   [f"{res.params['const']:.4f}",   f"{res.params['process']:.4f}"],
+    'Std. error':    [f"{res.bse['const']:.4f}",       f"{res.bse['process']:.4f}"],
+    't-statistic':   [f"{res.tvalues['const']:.2f}",   f"{res.tvalues['process']:.2f}"],
+    'p-value':       [fmt_p(res.pvalues['const']),      fmt_p(res.pvalues['process'])],
+})
+print(coef_df.to_string(index=False))
+```
+
+<br>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text}
+1. What does the $p$-value for `process` tell us about the relationship between process upgrade spending and CO₂ reductions?
+2. The intercept also has a very small $p$-value. What does this mean about the intercept estimate? What would be an equivalent $H_0$ for $\beta_0$?
+3. How would you interpret the coefficient for `process` in plain language?
+
+:::
+
+:::
+
+
+::: {.column width="50%"}
+
+:::
+
+:::
+
+---
+
+## {#p-values-checkin-solution data-menu-title="p-values: GreenAbate"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+The table below shows the regression output for the SLR of `co2_reduction` on `process`:
+
+```{python}
+def fmt_p(p):
+    return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
+
+coef_df = pd.DataFrame({
+    '':              ['Intercept', 'process'],
+    'Coefficient':   [f"{res.params['const']:.4f}",   f"{res.params['process']:.4f}"],
+    'Std. error':    [f"{res.bse['const']:.4f}",       f"{res.bse['process']:.4f}"],
+    't-statistic':   [f"{res.tvalues['const']:.2f}",   f"{res.tvalues['process']:.2f}"],
+    'p-value':       [fmt_p(res.pvalues['const']),      fmt_p(res.pvalues['process'])],
+})
+print(coef_df.to_string(index=False))
+```
+
+<br>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text}
+1. What does the $p$-value for `process` tell us about the relationship between process upgrade spending and CO₂ reductions?
+2. The intercept also has a very small $p$-value. What does this mean about the intercept estimate? What would be an equivalent $H_0$ for $\beta_0$?
+3. How would you interpret the coefficient for `process` in plain language?
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+::: {.body-text-s}
+1. small $p$-value $\Rightarrow$ strong evidence that $\beta_1 \neq 0$: there is evidence of a positive relationship between process upgrade investment and CO₂ emissions reductions.
+
+2. The $p$-value for the intercept tests $H_0: \beta_0 = 0$. A small $p$-value means the regression line does not pass through the origin. There is likely some baseline CO₂ reduction even at zero process spending.
+
+3. On average, each additional \$1K invested in production processes is associated with ~0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction.
+:::
+
+:::
+
+:::
+
+---
+
+## {#section-model-accuracy data-menu-title="# Model accuracy #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Assessing model accuracy</p>
+</div>
+
+---
+
+## {#r2-def data-menu-title="R² statistic"}
+
+[$R^2$ statistic]{.slide-title}
+
+<hr>
+
+$R^2$ measures the **proportion of variance in $Y$ explained by the model.**
+
+. . .
+
+To compute it we need these ingredients:
+
+- $TSS = \sum_{i=1}^{n}(y_i - \bar{y})^2 =$  **Total Sum of Squares**: *how much do the observations vary from the mean $\bar{y}$: a way of measuring total variability in $Y$*
+
+. . .
+
+- Intuitively: $y_i = \hat{y}_i$ means a $y$-value is explained by the regression
+
+. . .
+
+- $RSS = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 =$ **Residual Sum of Squares**: *variability in $y$ unexplained by the regression*. 
+
+So 
+
+$$\underbrace{TSS}_{\text{total variability in }Y} - \underbrace{RSS}_{\text{unexplained by regression}} = \text{variability explained by regression}$$
+
+. . .
+
+We use this to define
+$$R^2 = \frac{TSS - RSS}{TSS}.$$
+
+
+---
+
+## {#r2-interpret data-menu-title="Interpreting R²"}
+
+[Interpreting $R^2$]{.slide-title}
+
+<hr>
+
+<br>
+
+::: {.body-text-m}
+- $R^2 \in [0, 1]$ always
+
+- $R^2$ close to 1 → model explains most of the variability → good fit
+
+- $R^2$ close to 0 → $X$ alone is not capturing what drives $Y$
+  - Could mean: non-linear relationship, more predictors needed, high irreducible noise
+:::
+
+. . .
+
+<br>
+
+::: {.center-text .body-text-m .teal-text}
+Always look at your data: a high $R^2$ does not guarantee a good model and a low $R^2$ does not mean no relationship!
+:::
+
+---
+
+## {#accuracy-table-checkin data-menu-title="Model accuracy: GreenAbate"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: R2-calculation
+
+y_hat = model_proc.predict(df[['process']])
+y_bar = df['co2_reduction'].mean()
+TSS   = np.sum((df['co2_reduction'] - y_bar)**2)
+RSS   = np.sum((df['co2_reduction'] - y_hat)**2)
+R2    = 1 - RSS / TSS
+```
+
+::: {.teal-text}
+For our SLR model of `co2_reduction` on `process`, we have that $R^2$ = `{python} f"{R2:.3f}"`.
+
+How would you interpret the $R^2$ value in plain language?
+
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x * 0.9, fig_size_y))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
+:::
+
+. . . 
+
+An $R^2$ of `{python} f"{R2:.3f}"` means that approximately `{python} f"{R2*100:.1f}"`% of the variability in CO₂ reductions across firms is explained by a linear variation in process upgrade spending alone. The remaining ~`{python} f"{(1-R2)*100:.1f}"`% of variability is driven by other factors not included in this model.
+
+---
+
+## {#recap data-menu-title="Recap"}
+
+[In this lesson we covered]{.slide-title}
+
+<hr>
+
+- **Standard linear regression model:** $Y \approx \beta_0 + \beta_1 X$, estimated as $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 x$
+- Minimizing $RSS = \sum(y_i - \hat{y}_i)^2$ gives us coeffient estimates $\hat{\beta}_0, \hat{\beta}_1$
+- Standard errors quantify uncertainty in the coefficient estimates
+- Confidence intervals give us a high-confidence method to estimate the coefficients
+- We can use Hypothesis testing to figure out if there is a relationship between the variables
+- $p$-value: probability of observing results if there was no variable relation $(H_0)$
+- small $p$-value → reject $H_0$  → evidence of relation
+- $R^2$: proportion of variance in $Y$ explained by the model

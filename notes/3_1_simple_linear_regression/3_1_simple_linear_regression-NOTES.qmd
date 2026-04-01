@@ -1,6 +1,7 @@
 ---
 title: Simple linear regression
-jupyter: eds232-env                                                       
+jupyter: eds232-env     
+echo: false
 ---
 
 ```{python}
@@ -52,13 +53,15 @@ df = pd.DataFrame({
 })
 ```
 
+[📊 Slides](3_1_simple_linear_regression-SLIDES.qmd) / [📊 Blank slides]()
+
 In this lesson we introduce:
 
-- The simple linear regression (SLR) model and its assumptions
-- How the model coefficients are estimated (least squares)
-- How to assess the accuracy of the coefficient estimates (standard errors, confidence intervals)
-- How to test whether a relationship between $X$ and $Y$ exists (hypothesis testing, $t$-statistic, $p$-values)
-- How to assess overall model accuracy (RSE and $R^2$)
+- The simple linear regression (SLR) model
+- Estimating coefficients with least squares
+- Standard errors and confidence intervals
+- Hypothesis testing: $t$-statistic and $p$-values
+- Assessing model accuracy: RSE and $R^2$
 
 These notes are based on chapter 3.1 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The **example data is synthetic** and was generated with the aid of Claude Code for the purpose of this lesson based on the data in ISLP used in Figure 2.1.
 
@@ -82,7 +85,7 @@ We do not need to answer all of these at once. We can select the questions that 
 A research consortium tracks **200 manufacturing firms** across different industries and regions. For each firm they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:
 
 - **`process`** — investment in cleaner production processes (\$K/year)
-- **`efficiency`** — energy efficiency upgrades (\$K/year)
+- **`efficiency`** — investment in energy efficiency upgrades (\$K/year)
 - **`offsets`** — carbon offset purchases (\$K/year)
 - **`co2_reduction`** — annual CO₂ emissions reduced (thousand metric tons, ktCO₂e)
 
@@ -133,15 +136,13 @@ where
 
 Together, $\beta_0$ and $\beta_1$ are the model **coefficients** (also called **parameters**). They define the true underlying function $f$ that maps $X$ to $Y$. 
 
-In practice, we do not know the true $\beta_0$ and $\beta_1$, so we **estimate** them from data. Given estimates $\hat{\beta}_0$ and $\hat{\beta}_1$, our prediction for $Y$ at a value $x$ is
+In practice, we do not know the true $\beta_0$ and $\beta_1$, so we estimate them from data. Given estimates $\hat{\beta}_0$ and $\hat{\beta}_1$, our prediction for $Y$ at a value $x$ is
 
 $$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x = \hat{f}(x).$$
 
-Remember the "hat" notation ($\hat{\ }$) throughout these notes indicates an **estimated** quantity, not the true, unknown population value.
+Remember the "hat" notation ($\hat{\ }$) throughout these notes indicates an estimated quantity, not the true, unknown population value.
 
-
-
-For the GreenAbate dataset, using `process` as the sole predictor, SLR models CO₂ reductions as
+For the GreenAbate dataset, using `process` as the sole predictor, a linear model will model CO₂ reductions as
 
 $$\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}$$
 
@@ -190,14 +191,14 @@ Given $n$ training observations $(x_1, y_1), \ldots, (x_n, y_n)$, we want to fin
 
 In our previous lesson we had talked about the **residual** for observation $i$ being the difference between the observed response and the predicted response:
 
-$$y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i.$$
+$$e_i = y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i.$$
 
 The **residual sum of squares (RSS)** totals the squared residuals across all observations:
 
 $$RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2.$$
 
 
-The **least squares** approach to fit the regression line chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to **minimize** the RSS. The residuals are shown as vertical segments below:
+The **least squares approach** to fit the regression line chooses $\hat{\beta}_0$ and $\hat{\beta}_1$ to minimize the RSS. The residuals are shown as vertical segments below:
 
 ```{python}
 #| label: residuals
@@ -230,9 +231,9 @@ where $\bar{x} = \frac{1}{n}\sum x_i$ and $\bar{y} = \frac{1}{n}\sum y_i$ are th
 
 Two important points:
 
-1. The **optimal** $\hat{\beta}_0$ and $\hat{\beta}_1$ depend entirely on the training data. Feed the same model different data and you get different estimates. This is the source of estimation uncertainty.
+1. The optimal $\hat{\beta}_0$ and $\hat{\beta}_1$ depend entirely on the training data. Feed the same model different data and you get different estimates. This is the source of estimation uncertainty.
 
-2. In practice, **the computer computes these** for you. The key is understanding what the estimates represent, not memorizing the algebra.
+2. In practice, the computer computes these for you. The key is understanding what the estimates represent, not memorizing the algebra.
 
 
 ::: {.callout-note}
@@ -286,26 +287,24 @@ As the $x$ values spread, they are further away from their mean $\bar{x}$, this 
 
 ### Confidence intervals
 
-<!-- Standard errors allow us to construct **confidence intervals** for the true coefficients. A **95% confidence interval** is a range of values such that, if we repeated our experiment many times, approximately 95% of the computed intervals would contain the true parameter value. -->
-
-Standard errors allow us to construct **confidence intervals** for the true coefficients. A **95% confidence interval** is a range of values such that, with 95% probability, the range will contain the true unknown value of the parameter. 
+Standard errors allow us to construct **confidence intervals** for the true coefficients. A **95% confidence interval** is a range of values such that, if we repeated our experiment many times, approximately 95% of the computed intervals would contain the true parameter value.
 
 For simple linear regression, the approximate 95% confidence interval for a coefficient $\beta_i$ is:
 
 $$[\hat{\beta}_i - 2 \cdot SE(\hat{\beta}_i), \hat{\beta}_i + 2 \cdot SE(\hat{\beta}_i)].$$
 
 
-This means there is approximately a 95% chance that the interval will contain the true vlaue for $\beta_1$. The "approximately" is becasue the factor of 2 will vary slightly with the numnber of observations used to perform the regression. Strictly speaking, this factor will come for the 97.5% quantile of a $t$-distribution with $n-2$ degrees of freedom. In practice, we use implemented methods in our computers to calculate these confidence intervals exactly. 
+The "approximately" is becasue the factor of 2 will vary slightly with the numnber of observations used to perform the regression. Strictly speaking, this factor will come for the 97.5% quantile of a $t$-distribution with $n-2$ degrees of freedom. In practice, we use implemented methods in our computers to calculate these confidence intervals exactly. 
 
 ::: {.callout-note}
 ## Interpreting the confidence interval
 In general terms, we interpret the confidence interval for the slope $\hat{\beta}_1$ as follows:
 
-> *a 95% confidence inerval for $\beta_1$ is $[a_1, b_1]$ means that there's a 95% chance that for an average increase of one unit of $x$, there will be an average increase in $y$  between $a_1$ and $b_1$ units.*
+> *a 95% confidence inerval for $\beta_1$ of $[a_1, b_1]$ means that, using a procedure that captures the true slope 95% of the time, we estimate that a one-unit increase of $x$ is associated with an average increase in $y$ between $a_1$ and $b_1$ units.*
 
 and we interpret the confidence interval for hte intercetp $\hat{\beta}_0$ like
 
-> *a 95% confidence inerval for $\beta_0$ is $[a_0, b_0]$ means that there's a 95% chance that the linear model will intercept the $y$-axis between $a_0$ and $b_0$.*
+> *a 95% confidence inerval for $\beta_0$ is $[a_0, b_0]$ means that, using a procedure that captures the true intercept 95% of the time, we estimate the model's $y$-intercept is between $a_0$ and $b_0$.*
 
 A narrower confidence interval means our estimate is more precise. This happens when the sample size $n$ is large and when the residual variance $\sigma^2$ is small.
 :::
@@ -333,7 +332,7 @@ print(f"95% CI for β₁ (process):   [{ci_b1_low:.3f}, {ci_b1_high:.3f}]")
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-1. The entire interval [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] is above 0, so with 95% confidence the slope is positive: firms that invest more in cleaner production processes achieve greater CO₂ reductions. Each additional \$1K in process spending is associated with a reduction of between `{python} f"{ci_b1_low:.3f}"` and `{python} f"{ci_b1_high:.3f}"` ktCO₂e per year on average.
+1. The entire interval [`{python} f"{ci_b1_low:.3f}"`, `{python} f"{ci_b1_high:.3f}"`] is above 0 so our procedure points to a positive slope: firms that invest more in cleaner production processes achieve greater CO₂ reductions. Each additional \$1K in process spending is associated with a reduction of between `{python} f"{ci_b1_low:.3f}"` and `{python} f"{ci_b1_high:.3f}"` ktCO₂e per year on average.
 
 2. An interval of [-0.002,  `{python} f"{ci_b1_high:.3f}"`] includes 0. We cannot rule out that $\beta_1 = 0$, meaning we cannot confidently conclude that process spending drives reductions. Wider intervals generally arise from smaller samples or noisier data.
 :::
@@ -352,7 +351,7 @@ Note what these imply for the model:
 - If $\beta_1 = 0$, then $\hat{Y} = \hat{\beta}_0$, which means the prediction is just a constant, so $X$ carries no information about $Y$.
 - If $\beta_1 \neq 0$, then $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X$ — $Y$ is related to $X$.
 
-### The $t$-statistic & $p$-values
+### The $t$-statistic & $p$-value
 
 To test $H_0$, we need to determine whether $\hat{\beta}_1$ is sufficiently far from 0 relative to its uncertainty. We use the **$t$-statistic**
 
@@ -360,12 +359,12 @@ $$t = \frac{\hat{\beta}_1}{SE(\hat{\beta}_1)}$$
 
 which measures how many standard deviations $\hat{\beta}_1$ is away from 0. If there truly is no relationship between the variables ($\beta_1 = 0$), then $t$ follows a $t$-distribution with $n - 2$ degrees of freedom.
 
-The **$p$-value** is the probability of observing any number equal to the $t$-statistic $|t|$ or larger, assuming there is no relationship between the variables (i.e. assuming $H_0$ is true). Conventionally, $p < 0.05$ is used as a threshold for rejecting $H_0$, though the appropriate cutoff depends on context.
+The **$p$-value** is the probability of obtaining a $t$-statistic at least as large as the observed $|t|$ in absolute value, assuming there is no relationship between the variables (i.e. assuming $H_0$ is true). Conventionally, $p < 0.05$ is used as a threshold for rejecting $H_0$, though the appropriate cutoff depends on context.
 
 ::: {.callout-note}
 ## Interpreting the $p$-value
-- A **small $p$-value** means it is very unlikely to have observed a $\hat{\beta}_1$ this far from 0 by chance alone, if $\beta_1$ were truly 0. We **reject** $H_0$ and conclude there is a relationship between $X$ and $Y$.
-- A **large $p$-value** means our data are consistent with $H_0$,  so we do not reject $H_0$: it could be that there's no relationship between $X$ and $Y$!
+- A small $p$-value means it is very unlikely to have observed a $\hat{\beta}_1$ this far from 0 by chance alone, if $\beta_1$ were truly 0. We **reject $H_0$** and conclude there is a relationship between $X$ and $Y$.
+- A large $p$-value means our data are consistent with $H_0$,  so we do not reject $H_0$: it could be that there's no relationship between $X$ and $Y$!
 :::
 
 A summary of this story is:
@@ -376,9 +375,9 @@ A summary of this story is:
 
 <!-- 3. Assuming $\beta_1=0$ (i.e. no relationship between $X$ and $Y$) and $n>30$, then $t$'s distribution is very similar to normal distribution.  -->
 
-4. We ask the question: *what is the probability that $|\hat{\beta}_1|$ is more than $t$ standard deviations away from zero if the true parameter is $\beta_1=0$?* This probability is the $p$-value.
+3. We ask the question: *what is the probability that $|\hat{\beta}_1|$ is more than $|t|$ standard deviations away from zero if the true parameter is $\beta_1=0$?* This probability is the $p$-value.
 
-5. There are two options depending on the answer to this question:
+4. There are two options depending on the answer to this question:
     - Option 1: small probability that $\hat{\beta}_1$ is that far away from 0 if the true parameter $\beta_1=0$: so the most likely scenario is that $\beta_1\neq0$, which means the variables are related.
     - Option 2: high probability that $\hat{\beta}_1$ is that far away from 0 is the true parameter $\beta_1=0$: maybe $\beta_1=0$ is really zero, which means maybe there is no relationship between the variables.
 
@@ -411,11 +410,11 @@ Looking at the regression output above:
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-1. The very small $p$-value for `process` gives strong evidence that $\beta_1 \neq 0$ — there is a statistically significant positive relationship between process upgrade investment and CO₂ emissions reductions.
+1. The very small $p$-value for `process` gives strong evidence that $\beta_1 \neq 0$: there is a evidence of a positive relationship between process upgrade investment and CO₂ emissions reductions.
 
 2. The $p$-value for the intercept tests $H_0: \beta_0 = 0$, not whether the intercept is a useful predictor. A significant intercept simply means the regression line does not pass through the origin. There is likely some baseline CO₂ reduction even at zero process spending (likely from other firm-level factors not captured in the model). The intercept's $p$-value is rarely the question of interest.
 
-3. A coefficient of roughly 0.046 means that, on average, each additional \$1K invested in cleaner production processes is associated with approximately 0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction per year.
+3. A coefficient of roughly 0.046 means that, on average, each additional \$1K invested in cleaner production processes is associated with approximately 0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction.
 :::
 
 ## Assessing model accuracy
@@ -446,10 +445,9 @@ For the GreenAbate data, the RSE of the SLR on `process` is approximately 3.26 k
 ## Discussion
 Whether an RSE of 3.26 ktCO₂e is acceptable depends on context. A few ways to judge it:
 
-- **Relative to the response range**: CO₂ reductions in the dataset range roughly from 3 to 27 ktCO₂e, so an average error of 3.26 represents about 12–15% of the response range. That is a moderate error — not great, but not terrible.
+- **Relative to the response range**: CO₂ reductions in the dataset range roughly from 3 to 27 ktCO₂e, so an average error of 3.26 represents about 12–15% of the response range. That is a moderate error, not great, but not terrible.
 - **Relative to the mean response**: the mean reduction is around 14 ktCO₂e, so the RSE is about 23% of the mean. This suggests the model has meaningful predictive error.
 - **Relative to the firm's target**: if a firm has committed to reducing 5 ktCO₂e per year, an average prediction error of 3.26 is large relative to their target. For a firm targeting 25 ktCO₂e, it may be acceptable.
-- **By adding more predictors**: we are only using `process` here. Including `efficiency` and `offsets` in a multiple regression model should reduce the RSE substantially.
 :::
 
 ### $R^2$ statistic
@@ -476,8 +474,8 @@ $$R^2 = \frac{\text{variability explained by regression}}{\text{total variabilit
 ## Interpreting $R^2$
 
 - $R^2$ is always between 0 and 1.
-- $R^2$ close to **1**: the model explains most of the variability in $Y$: a good fit.
-- $R^2$ close to **0**: the model explains little of the variability: $X$ alone is not capturing much of what drives $Y$. This could mean the true relationship is non-linear, the model needs more predictors, or there is a lot of irreducible noise.
+- $R^2$ close to 1: the model explains most of the variability in $Y$: a good fit.
+- $R^2$ close to 0: the model explains little of the variability: $X$ alone is not capturing much of what drives $Y$. This could mean the true relationship is non-linear, the model needs more predictors, or there is a lot of irreducible noise.
 - What counts as a "good" $R^2$ is context-dependent.
 - **You should always look at your data to assess linearity and an existing relationship!**
 :::
@@ -525,7 +523,7 @@ For the GreenAbate SLR of `co2_reduction` on `process`, RSE = `{python} f"{RSE:.
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-1. An $R^2$ of `{python} f"{R2:.3f}"` means that approximately `{python} f"{R2*100:.1f}"`% of the variability in CO₂ reductions across firms is explained by variation in process upgrade spending alone. The remaining ~`{python} f"{(1-R2)*100:.1f}"`% of variability is driven by other factors not included in this model — such as efficiency upgrades, offsets, firm size, or industry type.
+1. An $R^2$ of `{python} f"{R2:.3f}"` means that approximately `{python} f"{R2*100:.1f}"`% of the variability in CO₂ reductions across firms is explained by a linear variation in process upgrade spending alone. The remaining ~`{python} f"{(1-R2)*100:.1f}"`% of variability is driven by other factors not included in this model.
 
 2. An RSE of `{python} f"{RSE:.2f}"` ktCO₂e (≈ `{python} f"{RSE*1000:.0f}"` metric tons) is large relative to, for example, a 5 ktCO₂e reduction target. A prediction error of that magnitude could meaningfully mislead decisions for a small-target firm. For a firm targeting 25 ktCO₂e, the same RSE represents roughly `{python} f"{RSE/25*100:.0f}"`% of the target, which may or may not be acceptable depending on how precise their planning needs to be.
 :::
@@ -535,11 +533,12 @@ For the GreenAbate SLR of `co2_reduction` on `process`, RSE = `{python} f"{RSE:.
 What we covered in this lesson:
 
 - **Standard linear regression model:** $Y \approx \beta_0 + \beta_1 X$, estimated as $\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 x$
-- Minimiinge $RSS = \sum(y_i - \hat{y}_i)^2$ gives us coeffient estimates $$\hat{\beta}_0, \hat{\beta}_1$
+- Minimizing $RSS = \sum(y_i - \hat{y}_i)^2$ gives us coeffient estimates $\hat{\beta}_0, \hat{\beta}_1$
 - Standard errors quantify uncertainty in the coefficient estimates
-- Confidence intervals give us a high-probability range in which our true coefficients may be in
+- Confidence intervals give us a high-confidence method to estimate the coefficients
 - We can use Hypothesis testing to figure out if there is a relationship between the variables
-- $p$-value: probability of observing results there were no variable relation $(H_0)$; small $p$-value → reject $H_0$
-- $R^2$: proportion of variance in $Y$ explained by $X$
+- $p$-value: probability of observing results if there was no variable relation $(H_0)$
+- small $p$-value → reject $H_0$  → evidence of relation
+- $R^2$: proportion of variance in $Y$ explained by the model
 
 Next class: multiple linear regression. -->
