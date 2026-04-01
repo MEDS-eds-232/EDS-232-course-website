@@ -1423,33 +1423,44 @@
     ]
   },
   {
-    "objectID": "notes/setup/setup.html#step-2-vscode-set-up",
-    "href": "notes/setup/setup.html#step-2-vscode-set-up",
+    "objectID": "notes/setup/setup.html#step-2-conda-setup",
+    "href": "notes/setup/setup.html#step-2-conda-setup",
     "title": "Setup",
-    "section": "Step 2: VSCode set-up",
-    "text": "Step 2: VSCode set-up\nMake sure you have created and cloned the course repositories before doing the VSCode set-up.\n\nOpen Visual Studio Code (VSCode). If you don’t have this IDE in your computer, now is the moment to install it: https://code.visualstudio.com/download.\nOpen a new bash terminal in VSCode.\nConfirm your conda installation by running conda info in the terminal. If conda is active you will get something similar to\n\nactive environment : base\nactive env location : /Users/galaz-garcia/opt/anaconda3\nshell level : 1\n\n[...]\n\nUID:GID : 502:20\nnetrc file : None\noffline mode : False\n\nIf conda needs to be added to the shell profile, follow the troubleshooting steps in the MEDS installation guide within a bash terminal (not Powershell if you are on Windows).\nInstall the Python extension to VSCode:",
+    "section": "Step 2: Conda setup",
+    "text": "Step 2: Conda setup\n\nOpen Visual Studio Code (VSCode). If you don’t have this IDE in your computer, now is the moment to install it: https://code.visualstudio.com/download.\nOpen a new bash terminal in VSCode.\nConfirm your conda installation by running conda --version in the terminal. If conda is active you will get something similar to\n\nconda 25.5.1\n\nIf you do not have conda or if conda needs to be added to the shell profile, follow the installation and troubleshooting steps in the MEDS installation guide within a bash terminal (not Powershell if you are on Windows).\nIf your conda version is lower than 25.5.1, update it to the latest by running this command in the terminal:\n\nconda update --name base conda\n\nRestart your terminal and run conda --version again to verify it has been updated.\n\nIf updating conda through the terminal does not work, just reinstall it from the link in the MEDS installation guide. An old conda version can keep your environment solving forever when you try to create it.",
     "crumbs": [
       "notes",
       "Setup"
     ]
   },
   {
-    "objectID": "notes/setup/setup.html#step-3-build-conda-environment-for-the-course",
-    "href": "notes/setup/setup.html#step-3-build-conda-environment-for-the-course",
+    "objectID": "notes/setup/setup.html#step-3-vscode-setup",
+    "href": "notes/setup/setup.html#step-3-vscode-setup",
     "title": "Setup",
-    "section": "Step 3: Build conda environment for the course",
-    "text": "Step 3: Build conda environment for the course\nMake sure you have completed the VSCode set-up before creating the environment.\n\nOpen VSCode on your computer.\nDownload the following YAML file and move it into your eds232-in-class directory: https://github.com/MEDS-eds-232/EDS-232-course-website/blob/main/eds232-env.yml\nOpen a bash terminal inside VSCode and in it:\n\n\nVerify you are in the eds232-in-class directory.\nVerify that the eds232-env.yml file is in the directory.\nRun the following conda command to build the environment we will use for the course:\n\nconda env create --name eds232-env --file eds232-env.yml\nIt may take a moment to build the environment. Once conda has finished, verify that the environment was created by running conda env list.\n\n\n\n\n\n\nTip\n\n\n\nIf you need a refresher on basic conda commands, check out the table on the EDS 220 website.",
+    "section": "Step 3: VSCode setup",
+    "text": "Step 3: VSCode setup\n\nOpen Visual Studio Code (VSCode). If you don’t have this IDE in your computer, now is the moment to install it: https://code.visualstudio.com/download.\nInstall the VSCode Python extension:\n\n\n\n\n\nSearch for and install the Jupyter and JupyterHub VSCode extensions too. Their logos look like this:\n\n\n\nRestart VSCode.",
     "crumbs": [
       "notes",
       "Setup"
     ]
   },
   {
-    "objectID": "notes/setup/setup.html#step-4-add-jupyter-kernel-for-the-course-environment",
-    "href": "notes/setup/setup.html#step-4-add-jupyter-kernel-for-the-course-environment",
+    "objectID": "notes/setup/setup.html#step-4-build-conda-environment-for-the-course",
+    "href": "notes/setup/setup.html#step-4-build-conda-environment-for-the-course",
     "title": "Setup",
-    "section": "Step 4: Add Jupyter kernel for the course environment",
-    "text": "Step 4: Add Jupyter kernel for the course environment\nMake sure you have built the eds232-env before creating the kernel.\n\nOpen VSCode on your computer.\nAdd a new bash terminal in it.\nVerify you have the eds232-env conda environment available by running\n\nconda env list\n\nActivate the eds232-env by running\n\nconda activate eds232-env\n\nVerify the environment has been activated.\nRun\n\npython -m ipykernel install --user --name eds232-env --display-name \"eds232-env\"\n\nVerify that the kernel has been created by running\n\njupyter kernelspec list\nThe output should look similar to this:\nAvailable kernels:\n  eds232-env        /Users/galaz-garcia/Library/Jupyter/kernels/eds220-env\n  python3           /Users/galaz-garcia/opt/anaconda3/share/jupyter/kernels/python3\n\nClose and reopen VSCode.\nTo use the new kernel, open a Jupyter notebook on VSCode and…",
+    "section": "Step 4: Build conda environment for the course",
+    "text": "Step 4: Build conda environment for the course\nMake sure you have completed the conda setup before creating the environment.\n\nOpen VSCode on your computer.\nDownload the following YAML file and move it into your eds232-in-class directory: https://github.com/MEDS-eds-232/EDS-232-course-website/blob/main/eds232-env.yml\nOpen a bash terminal inside VSCode and in it:\n\n\nVerify you are in the eds232-in-class directory.\nVerify that the eds232-env.yml file is in the directory.\nRun the following conda command to build the environment we will use for the course:\n\nconda env create --name eds232-env --file eds232-env.yml\nIt may take a moment to build the environment. Once conda has finished, verify that the environment was created by running conda env list.\n\n\n\n\n\n\nTip\n\n\n\nIf you need a refresher on basic conda commands, check out the table on the EDS 220 website.\n\n\n\n\n\n\n\n\nDo not skip the next step!\n\n\n\nYou will need to install manually a jupyter kernel associated to your environment so you can use the environment on VSCode!",
+    "crumbs": [
+      "notes",
+      "Setup"
+    ]
+  },
+  {
+    "objectID": "notes/setup/setup.html#step-5-add-jupyter-kernel-for-the-course-environment",
+    "href": "notes/setup/setup.html#step-5-add-jupyter-kernel-for-the-course-environment",
+    "title": "Setup",
+    "section": "Step 5: Add Jupyter kernel for the course environment",
+    "text": "Step 5: Add Jupyter kernel for the course environment\nMake sure you have built the eds232-env and completed the VSCode setup before creating the kernel.\n\nOpen VSCode on your computer.\nAdd a new bash terminal in it.\nVerify you have the eds232-env conda environment available by running\n\nconda env list\n\nActivate the eds232-env by running\n\nconda activate eds232-env\n\nVerify the environment has been activated.\nRun\n\npython -m ipykernel install --user --name eds232-env --display-name \"eds232-env\"\n\nVerify that the kernel has been created by running\n\njupyter kernelspec list\nThe output should look similar to this:\nAvailable kernels:\n  eds232-env        /Users/galaz-garcia/Library/Jupyter/kernels/eds220-env\n  python3           /Users/galaz-garcia/opt/anaconda3/share/jupyter/kernels/python3\n\nClose and reopen VSCode.\nTo use the new kernel, open a Jupyter notebook on VSCode and…\n\n\n\n\nThat’s the end of the setup!",
     "crumbs": [
       "notes",
       "Setup"

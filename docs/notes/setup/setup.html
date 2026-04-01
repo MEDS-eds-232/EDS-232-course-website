@@ -251,9 +251,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#step-1-create-and-clone-course-repositories" id="toc-step-1-create-and-clone-course-repositories" class="nav-link active" data-scroll-target="#step-1-create-and-clone-course-repositories">Step 1: Create and clone course repositories</a></li>
-  <li><a href="#step-2-vscode-set-up" id="toc-step-2-vscode-set-up" class="nav-link" data-scroll-target="#step-2-vscode-set-up">Step 2: VSCode set-up</a></li>
-  <li><a href="#step-3-build-conda-environment-for-the-course" id="toc-step-3-build-conda-environment-for-the-course" class="nav-link" data-scroll-target="#step-3-build-conda-environment-for-the-course">Step 3: Build conda environment for the course</a></li>
-  <li><a href="#step-4-add-jupyter-kernel-for-the-course-environment" id="toc-step-4-add-jupyter-kernel-for-the-course-environment" class="nav-link" data-scroll-target="#step-4-add-jupyter-kernel-for-the-course-environment">Step 4: Add Jupyter kernel for the course environment</a></li>
+  <li><a href="#step-2-conda-setup" id="toc-step-2-conda-setup" class="nav-link" data-scroll-target="#step-2-conda-setup">Step 2: Conda setup</a></li>
+  <li><a href="#step-3-vscode-setup" id="toc-step-3-vscode-setup" class="nav-link" data-scroll-target="#step-3-vscode-setup">Step 3: VSCode setup</a></li>
+  <li><a href="#step-4-build-conda-environment-for-the-course" id="toc-step-4-build-conda-environment-for-the-course" class="nav-link" data-scroll-target="#step-4-build-conda-environment-for-the-course">Step 4: Build conda environment for the course</a></li>
+  <li><a href="#step-5-add-jupyter-kernel-for-the-course-environment" id="toc-step-5-add-jupyter-kernel-for-the-course-environment" class="nav-link" data-scroll-target="#step-5-add-jupyter-kernel-for-the-course-environment">Step 5: Add Jupyter kernel for the course environment</a></li>
   </ul>
 </nav>
     </div>
@@ -293,34 +294,44 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>Clone your <code>eds232-in-class</code> and <code>eds232-labs</code> repositories inside the <code>MEDS/EDS-232</code> directory. Make sure you don’t end up cloning one inside the other!</p></li>
 </ol>
 </section>
-<section id="step-2-vscode-set-up" class="level2">
-<h2 class="anchored" data-anchor-id="step-2-vscode-set-up">Step 2: VSCode set-up</h2>
-<p><em>Make sure you have created and cloned the course repositories before doing the VSCode set-up.</em></p>
+<section id="step-2-conda-setup" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-conda-setup">Step 2: Conda setup</h2>
 <ol type="1">
 <li><p>Open Visual Studio Code (VSCode). If you don’t have this IDE in your computer, now is the moment to install it: <a href="https://code.visualstudio.com/download">https://code.visualstudio.com/download</a>.</p></li>
 <li><p>Open a new <strong>bash terminal</strong> in VSCode.</p></li>
-<li><p>Confirm your conda installation by running <code>conda info</code> in the terminal. If conda is active you will get something similar to</p></li>
+<li><p>Confirm your conda installation by running <code>conda --version</code> in the terminal. If conda is active you will get something similar to</p></li>
 </ol>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">active</span> environment : base</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">active</span> env location : /Users/galaz-garcia/opt/anaconda3</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">shell</span> level : 1</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">[...]</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ex">UID:GID</span> : 502:20</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">netrc</span> file : None</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="ex">offline</span> mode : False</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> 25.5.1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ol start="4" type="1">
-<li><p><em>If conda needs to be added to the shell profile, follow the <a href="https://ucsb-meds.github.io/MEDS-installation-guide/#install-Anaconda">troubleshooting steps</a> in the MEDS installation guide within a <strong>bash terminal</strong> (not Powershell if you are on Windows).</em></p></li>
-<li><p>Install the Python extension to VSCode:</p></li>
+<li><p><em>If you do not have conda or if conda needs to be added to the shell profile, follow the <a href="https://ucsb-meds.github.io/MEDS-installation-guide/#install-Anaconda">installation and troubleshooting steps</a> in the MEDS installation guide within a <strong>bash terminal</strong> (not Powershell if you are on Windows).</em></p></li>
+<li><p>If your conda version is lower than 25.5.1, update it to the latest by running this command in the terminal:</p></li>
+</ol>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> update <span class="at">--name</span> base conda</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ol start="6" type="1">
+<li>Restart your terminal and run <code>conda --version</code> again to verify it has been updated.</li>
+</ol>
+<p>If updating conda through the terminal does not work, just reinstall it from the link in the MEDS installation guide. An old conda version can keep your environment solving forever when you try to create it.</p>
+</section>
+<section id="step-3-vscode-setup" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-vscode-setup">Step 3: VSCode setup</h2>
+<ol type="1">
+<li><p>Open Visual Studio Code (VSCode). If you don’t have this IDE in your computer, now is the moment to install it: <a href="https://code.visualstudio.com/download">https://code.visualstudio.com/download</a>.</p></li>
+<li><p>Install the VSCode Python extension:</p></li>
 </ol>
 <p><img src="images/extensions-1.png" class="img-fluid" style="width:80.0%"></p>
 <p><img src="images/extensions-2.png" class="img-fluid" style="width:80.0%"></p>
 <p><img src="images/extensions-3.png" class="img-fluid" style="width:80.0%"></p>
+<ol start="3" type="1">
+<li>Search for and install the Jupyter and JupyterHub VSCode extensions too. Their logos look like this:</li>
+</ol>
+<p><img src="images/jupyter-extensions.png" class="img-fluid"></p>
+<ol start="4" type="1">
+<li>Restart VSCode.</li>
+</ol>
 </section>
-<section id="step-3-build-conda-environment-for-the-course" class="level2">
-<h2 class="anchored" data-anchor-id="step-3-build-conda-environment-for-the-course">Step 3: Build conda environment for the course</h2>
-<p><em>Make sure you have completed the VSCode set-up before creating the environment.</em></p>
+<section id="step-4-build-conda-environment-for-the-course" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-build-conda-environment-for-the-course">Step 4: Build conda environment for the course</h2>
+<p><em>Make sure you have completed the conda setup before creating the environment.</em></p>
 <ol type="1">
 <li><p>Open VSCode on your computer.</p></li>
 <li><p>Download the following YAML file and move it into your <code>eds232-in-class</code> directory: <a href="https://github.com/MEDS-eds-232/EDS-232-course-website/blob/main/eds232-env.yml">https://github.com/MEDS-eds-232/EDS-232-course-website/blob/main/eds232-env.yml</a></p></li>
@@ -331,7 +342,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Verify that the <code>eds232-env.yml</code> file is in the directory.</li>
 <li>Run the following conda command to build the environment we will use for the course:</li>
 </ol>
-<div class="sourceCode" id="cb3"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>conda env create --name eds232-env --file eds232-env.yml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>conda env create --name eds232-env --file eds232-env.yml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>It may take a moment to build the environment. Once conda has finished, verify that the environment was created by running <code>conda env list</code>.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -346,33 +357,46 @@ Tip
 <p>If you need a refresher on basic conda commands, check out the <a href="https://meds-eds-220.github.io/MEDS-eds-220-course/book/appendices/A-python-environments.html#conda-commands">table on the EDS 220 website</a>.</p>
 </div>
 </div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Do not skip the next step!
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You will need to install manually a jupyter kernel associated to your environment so you can use the environment on VSCode!</p>
+</div>
+</div>
 </section>
-<section id="step-4-add-jupyter-kernel-for-the-course-environment" class="level2">
-<h2 class="anchored" data-anchor-id="step-4-add-jupyter-kernel-for-the-course-environment">Step 4: Add Jupyter kernel for the course environment</h2>
-<p><em>Make sure you have built the eds232-env before creating the kernel.</em></p>
+<section id="step-5-add-jupyter-kernel-for-the-course-environment" class="level2">
+<h2 class="anchored" data-anchor-id="step-5-add-jupyter-kernel-for-the-course-environment">Step 5: Add Jupyter kernel for the course environment</h2>
+<p><em>Make sure you have built the eds232-env and completed the VSCode setup before creating the kernel.</em></p>
 <ol type="1">
 <li><p>Open VSCode on your computer.</p></li>
 <li><p>Add a new bash terminal in it.</p></li>
 <li><p>Verify you have the <code>eds232-env</code> conda environment available by running</p></li>
 </ol>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ol start="4" type="1">
 <li>Activate the <code>eds232-env</code> by running</li>
 </ol>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate eds232-env</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate eds232-env</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ol start="5" type="1">
 <li><p>Verify the environment has been activated.</p></li>
 <li><p>Run</p></li>
 </ol>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> ipykernel install <span class="at">--user</span> <span class="at">--name</span> eds232-env <span class="at">--display-name</span> <span class="st">"eds232-env"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> ipykernel install <span class="at">--user</span> <span class="at">--name</span> eds232-env <span class="at">--display-name</span> <span class="st">"eds232-env"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ol start="7" type="1">
 <li>Verify that the kernel has been created by running</li>
 </ol>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> kernelspec list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> kernelspec list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The output should look similar to this:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Available</span> kernels:</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="ex">eds232-env</span>        /Users/galaz-garcia/Library/Jupyter/kernels/eds220-env</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">python3</span>           /Users/galaz-garcia/opt/anaconda3/share/jupyter/kernels/python3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Available</span> kernels:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="ex">eds232-env</span>        /Users/galaz-garcia/Library/Jupyter/kernels/eds220-env</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">python3</span>           /Users/galaz-garcia/opt/anaconda3/share/jupyter/kernels/python3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ol start="8" type="1">
 <li><p>Close and reopen VSCode.</p></li>
 <li><p>To use the new kernel, open a Jupyter notebook on VSCode and…</p></li>
@@ -380,6 +404,7 @@ Tip
 <p><img src="images/kernel-1.png" class="img-fluid" style="width:90.0%"></p>
 <p><img src="images/kernel-2.png" class="img-fluid" style="width:90.0%"></p>
 <p><img src="images/kernel-4.png" class="img-fluid" style="width:90.0%"></p>
+<p>That’s the end of the setup!</p>
 
 
 </section>
