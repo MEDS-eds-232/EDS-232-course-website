@@ -191,7 +191,7 @@ Given $n$ training observations $(x_1, y_1), \ldots, (x_n, y_n)$, we want to fin
 
 In our previous lesson we had talked about the **residual** for observation $i$ being the difference between the observed response and the predicted response:
 
-$$e_i y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i.$$
+$$e_i = y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i.$$
 
 The **residual sum of squares (RSS)** totals the squared residuals across all observations:
 
@@ -287,26 +287,24 @@ As the $x$ values spread, they are further away from their mean $\bar{x}$, this 
 
 ### Confidence intervals
 
-<!-- Standard errors allow us to construct **confidence intervals** for the true coefficients. A **95% confidence interval** is a range of values such that, if we repeated our experiment many times, approximately 95% of the computed intervals would contain the true parameter value. -->
-
-Standard errors allow us to construct **confidence intervals** for the true coefficients. A **95% confidence interval** is a range of values such that, with 95% probability, the range will contain the true unknown value of the parameter. 
+Standard errors allow us to construct **confidence intervals** for the true coefficients. A **95% confidence interval** is a range of values such that, if we repeated our experiment many times, approximately 95% of the computed intervals would contain the true parameter value.
 
 For simple linear regression, the approximate 95% confidence interval for a coefficient $\beta_i$ is:
 
 $$[\hat{\beta}_i - 2 \cdot SE(\hat{\beta}_i), \hat{\beta}_i + 2 \cdot SE(\hat{\beta}_i)].$$
 
 
-This means there is approximately a 95% chance that the interval will contain the true vlaue for $\beta_1$. The "approximately" is becasue the factor of 2 will vary slightly with the numnber of observations used to perform the regression. Strictly speaking, this factor will come for the 97.5% quantile of a $t$-distribution with $n-2$ degrees of freedom. In practice, we use implemented methods in our computers to calculate these confidence intervals exactly. 
+The "approximately" is becasue the factor of 2 will vary slightly with the numnber of observations used to perform the regression. Strictly speaking, this factor will come for the 97.5% quantile of a $t$-distribution with $n-2$ degrees of freedom. In practice, we use implemented methods in our computers to calculate these confidence intervals exactly. 
 
 ::: {.callout-note}
 ## Interpreting the confidence interval
 In general terms, we interpret the confidence interval for the slope $\hat{\beta}_1$ as follows:
 
-> *a 95% confidence inerval for $\beta_1$ is $[a_1, b_1]$ means that there's a 95% chance that for an average increase of one unit of $x$, there will be an average increase in $y$  between $a_1$ and $b_1$ units.*
+> *a 95% confidence inerval for $\beta_1$ of $[a_1, b_1]$ means that, using a procedure that captures the true slope 95% of the time, we estimate that a one-unit increase of $x$ is associated with an average increase in $y$ between $a_1$ and $b_1$ units.*
 
 and we interpret the confidence interval for hte intercetp $\hat{\beta}_0$ like
 
-> *a 95% confidence inerval for $\beta_0$ is $[a_0, b_0]$ means that there's a 95% chance that the linear model will intercept the $y$-axis between $a_0$ and $b_0$.*
+> *a 95% confidence inerval for $\beta_0$ is $[a_0, b_0]$ means that, using a procedure that captures the true intercept 95% of the time, we estimate the model's $y$-intercept is between $a_0$ and $b_0$.*
 
 A narrower confidence interval means our estimate is more precise. This happens when the sample size $n$ is large and when the residual variance $\sigma^2$ is small.
 :::
@@ -361,7 +359,7 @@ $$t = \frac{\hat{\beta}_1}{SE(\hat{\beta}_1)}$$
 
 which measures how many standard deviations $\hat{\beta}_1$ is away from 0. If there truly is no relationship between the variables ($\beta_1 = 0$), then $t$ follows a $t$-distribution with $n - 2$ degrees of freedom.
 
-The **$p$-value** is the probability of observing any number equal to the $t$-statistic $|t|$ or larger, assuming there is no relationship between the variables (i.e. assuming $H_0$ is true). Conventionally, $p < 0.05$ is used as a threshold for rejecting $H_0$, though the appropriate cutoff depends on context.
+The **$p$-value** is the probability of obtaining a $t$-statistic at least as large as the observed $|t|$ in absolute value, assuming there is no relationship between the variables (i.e. assuming $H_0$ is true). Conventionally, $p < 0.05$ is used as a threshold for rejecting $H_0$, though the appropriate cutoff depends on context.
 
 ::: {.callout-note}
 ## Interpreting the $p$-value
@@ -377,9 +375,9 @@ A summary of this story is:
 
 <!-- 3. Assuming $\beta_1=0$ (i.e. no relationship between $X$ and $Y$) and $n>30$, then $t$'s distribution is very similar to normal distribution.  -->
 
-4. We ask the question: *what is the probability that $|\hat{\beta}_1|$ is more than $t$ standard deviations away from zero if the true parameter is $\beta_1=0$?* This probability is the $p$-value.
+3. We ask the question: *what is the probability that $|\hat{\beta}_1|$ is more than $|t|$ standard deviations away from zero if the true parameter is $\beta_1=0$?* This probability is the $p$-value.
 
-5. There are two options depending on the answer to this question:
+4. There are two options depending on the answer to this question:
     - Option 1: small probability that $\hat{\beta}_1$ is that far away from 0 if the true parameter $\beta_1=0$: so the most likely scenario is that $\beta_1\neq0$, which means the variables are related.
     - Option 2: high probability that $\hat{\beta}_1$ is that far away from 0 is the true parameter $\beta_1=0$: maybe $\beta_1=0$ is really zero, which means maybe there is no relationship between the variables.
 
@@ -477,8 +475,8 @@ $$R^2 = \frac{\text{variability explained by regression}}{\text{total variabilit
 ## Interpreting $R^2$
 
 - $R^2$ is always between 0 and 1.
-- $R^2$ close to **1**: the model explains most of the variability in $Y$: a good fit.
-- $R^2$ close to **0**: the model explains little of the variability: $X$ alone is not capturing much of what drives $Y$. This could mean the true relationship is non-linear, the model needs more predictors, or there is a lot of irreducible noise.
+- $R^2$ close to 1: the model explains most of the variability in $Y$: a good fit.
+- $R^2$ close to 0: the model explains little of the variability: $X$ alone is not capturing much of what drives $Y$. This could mean the true relationship is non-linear, the model needs more predictors, or there is a lot of irreducible noise.
 - What counts as a "good" $R^2$ is context-dependent.
 - **You should always look at your data to assess linearity and an existing relationship!**
 :::
