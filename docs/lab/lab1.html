@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Lab 01: Introduction to Machine Learning in Python – EDS 232 - Machine Learning for Environmental Science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes/week-by-week/week-by-week.html"> 
+<span class="menu-text">notes</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../#"> 
+<span class="menu-text">assignments</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">weekly labs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
+        <li>
+    <a class="dropdown-item" href="../lab/lab1.html">
+ <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lab/lab2.html">
+ <span class="dropdown-text">Lab 2: No lab this week!</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website">
+ <span class="dropdown-text">Source code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website/issues">
+ <span class="dropdown-text">Report a bug</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p>This wesbite is under construction.</p>
+</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-python-ml-ecosystem" id="toc-the-python-ml-ecosystem" class="nav-link active" data-scroll-target="#the-python-ml-ecosystem">The Python ML Ecosystem</a>
+  <ul class="collapse">
+  <li><a href="#numpy-the-foundation" id="toc-numpy-the-foundation" class="nav-link" data-scroll-target="#numpy-the-foundation">NumPy — The Foundation</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  <li><a href="#scipy-scientific-computing" id="toc-scipy-scientific-computing" class="nav-link" data-scroll-target="#scipy-scientific-computing">SciPy — Scientific Computing</a></li>
+  <li><a href="#scikit-learn-sklearn-machine-learning-library" id="toc-scikit-learn-sklearn-machine-learning-library" class="nav-link" data-scroll-target="#scikit-learn-sklearn-machine-learning-library">scikit-learn (sklearn) — Machine Learning Library</a></li>
+  <li><a href="#statsmodels-statistical-inference-library" id="toc-statsmodels-statistical-inference-library" class="nav-link" data-scroll-target="#statsmodels-statistical-inference-library">statsmodels — Statistical Inference Library</a></li>
+  <li><a href="#tensorflow-deep-learning-at-scale" id="toc-tensorflow-deep-learning-at-scale" class="nav-link" data-scroll-target="#tensorflow-deep-learning-at-scale">TensorFlow — Deep Learning at Scale</a></li>
+  <li><a href="#ecosystem-summary" id="toc-ecosystem-summary" class="nav-link" data-scroll-target="#ecosystem-summary">Ecosystem Summary</a></li>
+  </ul></li>
+  <li><a href="#the-statistical-learning-framework" id="toc-the-statistical-learning-framework" class="nav-link" data-scroll-target="#the-statistical-learning-framework">The Statistical Learning Framework</a>
+  <ul class="collapse">
+  <li><a href="#the-fundamental-equation" id="toc-the-fundamental-equation" class="nav-link" data-scroll-target="#the-fundamental-equation">The Fundamental Equation</a></li>
+  <li><a href="#two-goals-inference-vs.-prediction" id="toc-two-goals-inference-vs.-prediction" class="nav-link" data-scroll-target="#two-goals-inference-vs.-prediction">Two Goals: Inference vs.&nbsp;Prediction</a></li>
+  </ul></li>
+  <li><a href="#the-algerian-forest-fires-dataset" id="toc-the-algerian-forest-fires-dataset" class="nav-link" data-scroll-target="#the-algerian-forest-fires-dataset">The Algerian Forest Fires Dataset</a>
+  <ul class="collapse">
+  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background">Background</a></li>
+  <li><a href="#predictor-and-target" id="toc-predictor-and-target" class="nav-link" data-scroll-target="#predictor-and-target">Predictor and Target</a></li>
+  </ul></li>
+  <li><a href="#data-cleaning" id="toc-data-cleaning" class="nav-link" data-scroll-target="#data-cleaning">Data Cleaning</a>
+  <ul class="collapse">
+  <li><a href="#step-1-strip-whitespace-from-column-names" id="toc-step-1-strip-whitespace-from-column-names" class="nav-link" data-scroll-target="#step-1-strip-whitespace-from-column-names">Step 1: Strip whitespace from column names</a></li>
+  <li><a href="#step-2-convert-columns-to-numeric-dtypes" id="toc-step-2-convert-columns-to-numeric-dtypes" class="nav-link" data-scroll-target="#step-2-convert-columns-to-numeric-dtypes">Step 2: Convert columns to numeric dtypes</a></li>
+  <li><a href="#step-3-drop-rows-with-missing-values" id="toc-step-3-drop-rows-with-missing-values" class="nav-link" data-scroll-target="#step-3-drop-rows-with-missing-values">Step 3: Drop rows with missing values</a></li>
+  </ul></li>
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory Data Analysis</a></li>
+  <li><a href="#preparing-x-and-y" id="toc-preparing-x-and-y" class="nav-link" data-scroll-target="#preparing-x-and-y">Preparing X and y</a></li>
+  <li><a href="#training-vs.-testing-the-core-concept" id="toc-training-vs.-testing-the-core-concept" class="nav-link" data-scroll-target="#training-vs.-testing-the-core-concept">Training vs.&nbsp;Testing: The Core Concept</a></li>
+  <li><a href="#train_test_split-in-depth" id="toc-train_test_split-in-depth" class="nav-link" data-scroll-target="#train_test_split-in-depth"><code>train_test_split</code> in Depth</a>
+  <ul class="collapse">
+  <li><a href="#random_state" id="toc-random_state" class="nav-link" data-scroll-target="#random_state"><code>random_state</code></a></li>
+  <li><a href="#stratify" id="toc-stratify" class="nav-link" data-scroll-target="#stratify"><code>stratify</code></a></li>
+  <li><a href="#test_size" id="toc-test_size" class="nav-link" data-scroll-target="#test_size"><code>test_size</code></a></li>
+  <li><a href="#how-test-size-affects-model-performance" id="toc-how-test-size-affects-model-performance" class="nav-link" data-scroll-target="#how-test-size-affects-model-performance">How Test Size Affects Model Performance</a></li>
+  <li><a href="#an-example" id="toc-an-example" class="nav-link" data-scroll-target="#an-example">An Example</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Lab 01: Introduction to Machine Learning in Python</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<hr>
+<section id="the-python-ml-ecosystem" class="level2">
+<h2 class="anchored" data-anchor-id="the-python-ml-ecosystem">The Python ML Ecosystem</h2>
+<p>Let’s meet the main ML python library players.</p>
+<hr>
+<section id="numpy-the-foundation" class="level3">
+<h3 class="anchored" data-anchor-id="numpy-the-foundation">NumPy — The Foundation</h3>
+<p>Before the ML-specific packages, <strong>NumPy</strong> is the backbone everything else is built on. It provides fast, efficient <strong>multi-dimensional arrays</strong> (<code>ndarray</code>) and element-wise math operations.</p>
+<p>Almost every ML library stores data as NumPy arrays under the hood.</p>
+</section>
+<section id="example" class="level3">
+<h3 class="anchored" data-anchor-id="example">Example</h3>
+<div id="eab29842" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulated daily weather readings from a forest monitoring station</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>temperatures <span class="op">=</span> np.array([<span class="fl">28.0</span>, <span class="fl">32.5</span>, <span class="fl">36.1</span>, <span class="fl">29.8</span>, <span class="fl">41.0</span>, <span class="fl">38.3</span>, <span class="fl">22.5</span>, <span class="fl">35.7</span>])</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>humidity     <span class="op">=</span> np.array([<span class="fl">57.0</span>, <span class="fl">42.0</span>, <span class="fl">33.0</span>, <span class="fl">65.0</span>, <span class="fl">18.0</span>, <span class="fl">25.0</span>, <span class="fl">78.0</span>, <span class="fl">38.0</span>])</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Temperatures (C):"</span>, temperatures)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Mean temperature :"</span>, np.mean(temperatures).<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Max temperature  :"</span>, np.<span class="bu">max</span>(temperatures))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Std deviation    :"</span>, np.std(temperatures).<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Operations apply element-wise — no loops needed!</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Rough heat-dryness index: higher = greater fire concern</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>heat_dryness <span class="op">=</span> temperatures <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> humidity <span class="op">/</span> <span class="dv">100</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Heat-dryness index:"</span>, np.<span class="bu">round</span>(heat_dryness, <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Temperatures (C): [28.  32.5 36.1 29.8 41.  38.3 22.5 35.7]
+Mean temperature : 32.99
+Max temperature  : 41.0
+Std deviation    : 5.64
+
+Heat-dryness index: [12.04 18.85 24.19 10.43 33.62 28.72  4.95 22.13]</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="scipy-scientific-computing" class="level3">
+<h3 class="anchored" data-anchor-id="scipy-scientific-computing">SciPy — Scientific Computing</h3>
+<p><strong>SciPy</strong> builds on NumPy and provides algorithms for:</p>
+<ul>
+<li>Statistics (<code>scipy.stats</code>)</li>
+<li>Linear algebra (<code>scipy.linalg</code>)</li>
+<li>Optimization (<code>scipy.optimize</code>) — the math behind model training</li>
+<li>Spatial data and distances (<code>scipy.spatial</code>)</li>
+</ul>
+<p>In ML, SciPy is used for <strong>statistical tests</strong>, <strong>distance calculations</strong>, and <strong>preprocessing math</strong>. Many scikit-learn functions use SciPy internally.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 36%">
+<col style="width: 63%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>scipy.stats</code></td>
+<td>Distributions, hypothesis tests, normality checks</td>
+</tr>
+<tr class="even">
+<td><code>scipy.spatial</code></td>
+<td>Distance metrics (Euclidean, cosine, etc.)</td>
+</tr>
+<tr class="odd">
+<td><code>scipy.sparse</code></td>
+<td>Sparse matrices — efficient storage for high-dimensional data</td>
+</tr>
+<tr class="even">
+<td><code>scipy.optimize</code></td>
+<td>Minimization functions that power gradient descent</td>
+</tr>
+</tbody>
+</table>
+<div id="9879f6c7" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats <span class="im">as</span> stats</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.spatial.distance <span class="im">import</span> euclidean</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># --- scipy.stats: Are fire-day temperatures statistically different? ---</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>fire_temps    <span class="op">=</span> np.array([<span class="fl">38.5</span>, <span class="fl">41.2</span>, <span class="fl">36.8</span>, <span class="fl">40.1</span>, <span class="fl">39.5</span>, <span class="fl">37.9</span>, <span class="fl">42.0</span>, <span class="fl">38.8</span>])</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>no_fire_temps <span class="op">=</span> np.array([<span class="fl">22.1</span>, <span class="fl">28.4</span>, <span class="fl">25.6</span>, <span class="fl">30.2</span>, <span class="fl">19.8</span>, <span class="fl">26.5</span>, <span class="fl">23.0</span>, <span class="fl">27.1</span>])</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>t_stat, p_value <span class="op">=</span> stats.ttest_ind(fire_temps, no_fire_temps)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== t-test: fire-day vs no-fire-day temperatures ==="</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Fire mean   : </span><span class="sc">{</span>fire_temps<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss"> C"</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"No-fire mean: </span><span class="sc">{</span>no_fire_temps<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss"> C"</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"t-statistic : </span><span class="sc">{</span>t_stat<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"p-value     : </span><span class="sc">{</span>p_value<span class="sc">:.6f}</span><span class="ss">"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Significant : </span><span class="sc">{</span><span class="st">'Yes - temperature is a strong predictor!'</span> <span class="cf">if</span> p_value <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="cf">else</span> <span class="st">'No'</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># --- scipy.spatial: distance between two weather observations ---</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Each observation: [Temperature, Humidity, Wind, Rain]</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>day_A <span class="op">=</span> [<span class="fl">35.0</span>, <span class="fl">28.0</span>, <span class="fl">15.0</span>, <span class="fl">0.0</span>]   <span class="co"># hot, dry, windy — fire likely</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>day_B <span class="op">=</span> [<span class="fl">22.0</span>, <span class="fl">75.0</span>,  <span class="fl">5.0</span>, <span class="fl">2.5</span>]   <span class="co"># cool, humid, calm, rainy — fire unlikely</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Euclidean distance between day A and day B: </span><span class="sc">{</span>euclidean(day_A, day_B)<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"(Large distance = very different weather conditions)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>=== t-test: fire-day vs no-fire-day temperatures ===
+Fire mean   : 39.35 C
+No-fire mean: 25.34 C
+t-statistic : 10.242
+p-value     : 0.000000
+Significant : Yes - temperature is a strong predictor!
+
+Euclidean distance between day A and day B: 49.84
+(Large distance = very different weather conditions)</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="scikit-learn-sklearn-machine-learning-library" class="level3">
+<h3 class="anchored" data-anchor-id="scikit-learn-sklearn-machine-learning-library">scikit-learn (sklearn) — Machine Learning Library</h3>
+<p><strong>scikit-learn</strong> is the go-to library for classical machine learning in Python. It provides:</p>
+<ul>
+<li><strong>Dozens of ready-to-use algorithms</strong> (regression, decision trees, SVMs, k-means, etc.)</li>
+<li><strong>Consistent API</strong> — every model has the same <code>.fit()</code>, <code>.predict()</code>, <code>.score()</code> methods</li>
+<li><strong>Preprocessing tools</strong> — scaling, encoding, imputing missing values</li>
+<li><strong>Model evaluation</strong> — cross-validation, metrics, confusion matrices</li>
+<li><strong>Pipelines</strong> — chain preprocessing + modeling steps together cleanly</li>
+</ul>
+<section id="the-sklearn-api-pattern-learn-it-once-use-it-everywhere" class="level4">
+<h4 class="anchored" data-anchor-id="the-sklearn-api-pattern-learn-it-once-use-it-everywhere">The sklearn API pattern — learn it once, use it everywhere:</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.some_module <span class="im">import</span> SomeModel</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SomeModel()                    <span class="co"># 1. Create the model</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train)            <span class="co"># 2. Train it on data</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> model.predict(X_test)    <span class="co"># 3. Make predictions</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> model.score(X_test, y_test)    <span class="co"># 4. Evaluate it</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This same 4-step pattern works for <strong>every</strong> sklearn algorithm.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>What it provides</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>sklearn.linear_model</code></td>
+<td>Linear &amp; Logistic Regression</td>
+</tr>
+<tr class="even">
+<td><code>sklearn.tree</code></td>
+<td>Decision Trees</td>
+</tr>
+<tr class="odd">
+<td><code>sklearn.ensemble</code></td>
+<td>Random Forests, Gradient Boosting</td>
+</tr>
+<tr class="even">
+<td><code>sklearn.svm</code></td>
+<td>Support Vector Machines</td>
+</tr>
+<tr class="odd">
+<td><code>sklearn.neighbors</code></td>
+<td>K-Nearest Neighbors</td>
+</tr>
+<tr class="even">
+<td><code>sklearn.cluster</code></td>
+<td>K-Means, DBSCAN (unsupervised)</td>
+</tr>
+<tr class="odd">
+<td><code>sklearn.preprocessing</code></td>
+<td>Scaling, Encoding, Normalization</td>
+</tr>
+<tr class="even">
+<td><code>sklearn.model_selection</code></td>
+<td>train_test_split, cross_val_score</td>
+</tr>
+<tr class="odd">
+<td><code>sklearn.metrics</code></td>
+<td>Accuracy, F1, RMSE, Confusion Matrix</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="statsmodels-statistical-inference-library" class="level3">
+<h3 class="anchored" data-anchor-id="statsmodels-statistical-inference-library">statsmodels — Statistical Inference Library</h3>
+<p><strong>statsmodels</strong> is the go-to library for statistical analysis and inference in Python. While sklearn focuses on <em>prediction</em>, statsmodels focuses on <em>understanding your data</em> — giving you the full picture of model diagnostics. It provides:</p>
+<ul>
+<li><strong>Detailed model summaries</strong> — coefficients, p-values, t-statistics, confidence intervals</li>
+<li><strong>Hypothesis testing</strong> — test whether a coefficient is statistically significant</li>
+<li><strong>Inference-first design</strong> — built for answering “does X actually affect Y?” not just “what does Y predict?”</li>
+<li><strong>Wide range of models</strong> — OLS, GLM, time series (ARIMA), logistic regression, and more</li>
+<li><strong>Residual diagnostics</strong> — check assumptions like normality and homoscedasticity</li>
+</ul>
+<section id="the-statsmodels-pattern" class="level4">
+<h4 class="anchored" data-anchor-id="the-statsmodels-pattern">The statsmodels pattern:</h4>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>X_with_const <span class="op">=</span> sm.add_constant(X)      <span class="co"># 1. Add intercept manually</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> sm.OLS(y, X_with_const).fit()  <span class="co"># 2. Fit the model</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model.summary())                 <span class="co"># 3. Get the full stats breakdown</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="key-attributes-after-fitting" class="level4">
+<h4 class="anchored" data-anchor-id="key-attributes-after-fitting">Key attributes after fitting:</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Attribute</th>
+<th>What it gives you</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>model.params</code></td>
+<td>Coefficients (like <code>coef_</code> in sklearn)</td>
+</tr>
+<tr class="even">
+<td><code>model.pvalues</code></td>
+<td>P-values for each coefficient</td>
+</tr>
+<tr class="odd">
+<td><code>model.tvalues</code></td>
+<td>T-statistics</td>
+</tr>
+<tr class="even">
+<td><code>model.bse</code></td>
+<td>Standard errors</td>
+</tr>
+<tr class="odd">
+<td><code>model.conf_int()</code></td>
+<td>95% confidence intervals</td>
+</tr>
+<tr class="even">
+<td><code>model.rsquared</code></td>
+<td>R² score</td>
+</tr>
+<tr class="odd">
+<td><code>model.summary()</code></td>
+<td>Full table with all of the above</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="sklearn-vs-statsmodels-when-to-use-which" class="level4">
+<h4 class="anchored" data-anchor-id="sklearn-vs-statsmodels-when-to-use-which">sklearn vs statsmodels — when to use which:</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>sklearn</th>
+<th>statsmodels</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Goal</td>
+<td>Predict on new data</td>
+<td>Understand relationships in data</td>
+</tr>
+<tr class="even">
+<td>Output</td>
+<td>Predictions, scores</td>
+<td>Coefficients, p-values, diagnostics</td>
+</tr>
+<tr class="odd">
+<td>Use when</td>
+<td>Building an ML pipeline</td>
+<td>Running a regression analysis</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="tensorflow-deep-learning-at-scale" class="level3">
+<h3 class="anchored" data-anchor-id="tensorflow-deep-learning-at-scale">TensorFlow — Deep Learning at Scale</h3>
+<p><strong>TensorFlow</strong> (Google) is a framework for building <strong>neural networks and deep learning models</strong>. It is more powerful but more complex than scikit-learn.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 52%">
+<col style="width: 48%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Use scikit-learn when…</th>
+<th>Use TensorFlow when…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Dataset is small/medium</td>
+<td>You have millions of rows</td>
+</tr>
+<tr class="even">
+<td>Classical algorithm is sufficient</td>
+<td>You need deep neural networks</td>
+</tr>
+<tr class="odd">
+<td>Fast iteration and interpretability</td>
+<td>Working with images, audio, or text</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Keras</strong> is TensorFlow’s high-level API, built in as <code>tf.keras</code> in TF 2.x. Here is a preview:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> tf.keras.Sequential([</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Dense(<span class="dv">64</span>, activation<span class="op">=</span><span class="st">'relu'</span>, input_shape<span class="op">=</span>(<span class="dv">10</span>,)),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Dropout(<span class="fl">0.3</span>),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Dense(<span class="dv">32</span>, activation<span class="op">=</span><span class="st">'relu'</span>),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    tf.keras.layers.Dense(<span class="dv">1</span>, activation<span class="op">=</span><span class="st">'sigmoid'</span>)  <span class="co"># binary output</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">compile</span>(optimizer<span class="op">=</span><span class="st">'adam'</span>, loss<span class="op">=</span><span class="st">'binary_crossentropy'</span>, metrics<span class="op">=</span>[<span class="st">'accuracy'</span>])</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train, epochs<span class="op">=</span><span class="dv">10</span>, batch_size<span class="op">=</span><span class="dv">32</span>, validation_split<span class="op">=</span><span class="fl">0.2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p><strong>Note:</strong> We won’t run TensorFlow in this lab to keep setup simple, but the sklearn patterns you learn — split, scale, train, evaluate — apply in spirit to TF/Keras too.</p>
+</blockquote>
+</section>
+<section id="ecosystem-summary" class="level3">
+<h3 class="anchored" data-anchor-id="ecosystem-summary">Ecosystem Summary</h3>
+<pre><code>NumPy          -&gt;  Arrays and math (the foundation of everything)
+SciPy          -&gt;  Scientific algorithms: stats, distances, optimization
+Pandas         -&gt;  Data manipulation and exploration
+scikit-learn   -&gt;  Classical ML models, preprocessing, evaluation
+statsmodels    -&gt;  Statistical Analysis and inference
+TensorFlow     -&gt;  Deep learning / neural networks (production scale)</code></pre>
+<hr>
+</section>
+</section>
+<section id="the-statistical-learning-framework" class="level2">
+<h2 class="anchored" data-anchor-id="the-statistical-learning-framework">The Statistical Learning Framework</h2>
+<p>Before diving into data, let’s ground ourselves in the theoretical framework from lecture.</p>
+<hr>
+<section id="the-fundamental-equation" class="level3">
+<h3 class="anchored" data-anchor-id="the-fundamental-equation">The Fundamental Equation</h3>
+<p>Every statistical learning problem can be written as:</p>
+<p><span class="math display">\[Y = f(X) + \varepsilon\]</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Y</strong></td>
+<td>Response variable — what we want to predict</td>
+</tr>
+<tr class="even">
+<td><strong>X</strong></td>
+<td>Predictors / features — our inputs</td>
+</tr>
+<tr class="odd">
+<td><strong>f</strong></td>
+<td>The true, unknown relationship between X and Y</td>
+</tr>
+<tr class="even">
+<td><strong>ε</strong></td>
+<td>Irreducible error — random noise that no model can eliminate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Our job:</strong> estimate f as accurately as possible using data.</p>
+<hr>
+</section>
+<section id="two-goals-inference-vs.-prediction" class="level3">
+<h3 class="anchored" data-anchor-id="two-goals-inference-vs.-prediction">Two Goals: Inference vs.&nbsp;Prediction</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Goal</th>
+<th>Core Question</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Prediction</strong></td>
+<td>What will Y be for new inputs?</td>
+</tr>
+<tr class="even">
+<td><strong>Inference</strong></td>
+<td>Which predictors matter? How?</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Forest fire example:</strong></p>
+<ul>
+<li><em>Prediction</em>: Will tomorrow be a fire day? → Use the most accurate classifier.</li>
+<li><em>Inference</em>: Does temperature or humidity drive fire risk more? → Use an interpretable model where coefficients have clear meaning.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="the-algerian-forest-fires-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="the-algerian-forest-fires-dataset">The Algerian Forest Fires Dataset</h2>
+<p>We will use the <strong>Algerian Forest Fires</strong> dataset from the UCI Machine Learning Repository, fetched directly using the <code>ucimlrepo</code> package.</p>
+<section id="background" class="level3">
+<h3 class="anchored" data-anchor-id="background">Background</h3>
+<p>This dataset was collected across two regions of Algeria — <strong>Bejaia</strong> (northeast) and <strong>Sidi Bel-Abbes</strong> (northwest) — during the summer of 2012 (June to September). Researchers recorded daily weather conditions alongside fire danger indices.</p>
+</section>
+<section id="predictor-and-target" class="level3">
+<h3 class="anchored" data-anchor-id="predictor-and-target">Predictor and Target</h3>
+<p>For this lab we’ll fit a <strong>simple linear regression</strong> with one predictor:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 20%">
+<col style="width: 44%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Role</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ISI</code></td>
+<td>Predictor (X)</td>
+<td>Initial Spread Index — measures how fast a fire would spread based on wind and fuel moisture</td>
+</tr>
+<tr class="even">
+<td><code>FWI</code></td>
+<td>Target (y)</td>
+<td>Fire Weather Index — overall measure of fire danger</td>
+</tr>
+</tbody>
+</table>
+<p>These two are directly related in the Canadian Forest Fire Weather Index system: ISI feeds into the FWI calculation, so we expect a strong linear relationship.</p>
+<p>This is a <strong>supervised regression</strong> problem: given X, learn <span class="math inline">\(\hat{f}(X) = \beta_0 + \beta_1 X\)</span> that predicts FWI.</p>
+<div id="c87db554" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ucimlrepo <span class="im">import</span> fetch_ucirepo</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>forest_fires <span class="op">=</span> fetch_ucirepo(<span class="bu">id</span><span class="op">=</span><span class="dv">547</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> forest_fires.data.features.reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">region</th>
+<th data-quarto-table-cell-role="th">day</th>
+<th data-quarto-table-cell-role="th">month</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">Temperature</th>
+<th data-quarto-table-cell-role="th">RH</th>
+<th data-quarto-table-cell-role="th">Ws</th>
+<th data-quarto-table-cell-role="th">Rain</th>
+<th data-quarto-table-cell-role="th">FFMC</th>
+<th data-quarto-table-cell-role="th">DMC</th>
+<th data-quarto-table-cell-role="th">DC</th>
+<th data-quarto-table-cell-role="th">ISI</th>
+<th data-quarto-table-cell-role="th">BUI</th>
+<th data-quarto-table-cell-role="th">FWI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>Bejaia</td>
+<td>1</td>
+<td>6</td>
+<td>2012</td>
+<td>29</td>
+<td>57</td>
+<td>18</td>
+<td>0.0</td>
+<td>65.7</td>
+<td>3.4</td>
+<td>7.6</td>
+<td>1.3</td>
+<td>3.4</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>Bejaia</td>
+<td>2</td>
+<td>6</td>
+<td>2012</td>
+<td>29</td>
+<td>61</td>
+<td>13</td>
+<td>1.3</td>
+<td>64.4</td>
+<td>4.1</td>
+<td>7.6</td>
+<td>1.0</td>
+<td>3.9</td>
+<td>0.4</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>Bejaia</td>
+<td>3</td>
+<td>6</td>
+<td>2012</td>
+<td>26</td>
+<td>82</td>
+<td>22</td>
+<td>13.1</td>
+<td>47.1</td>
+<td>2.5</td>
+<td>7.1</td>
+<td>0.3</td>
+<td>2.7</td>
+<td>0.1</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>Bejaia</td>
+<td>4</td>
+<td>6</td>
+<td>2012</td>
+<td>25</td>
+<td>89</td>
+<td>13</td>
+<td>2.5</td>
+<td>28.6</td>
+<td>1.3</td>
+<td>6.9</td>
+<td>0.0</td>
+<td>1.7</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>Bejaia</td>
+<td>5</td>
+<td>6</td>
+<td>2012</td>
+<td>27</td>
+<td>77</td>
+<td>16</td>
+<td>0.0</td>
+<td>64.8</td>
+<td>3.0</td>
+<td>14.2</td>
+<td>1.2</td>
+<td>3.9</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">...</th>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">239</th>
+<td>Sidi-Bel Abbes</td>
+<td>26</td>
+<td>9</td>
+<td>2012</td>
+<td>30</td>
+<td>65</td>
+<td>14</td>
+<td>0.0</td>
+<td>85.4</td>
+<td>16.0</td>
+<td>44.5</td>
+<td>4.5</td>
+<td>16.9</td>
+<td>6.5</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">240</th>
+<td>Sidi-Bel Abbes</td>
+<td>27</td>
+<td>9</td>
+<td>2012</td>
+<td>28</td>
+<td>87</td>
+<td>15</td>
+<td>4.4</td>
+<td>41.1</td>
+<td>6.5</td>
+<td>8</td>
+<td>0.1</td>
+<td>6.2</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">241</th>
+<td>Sidi-Bel Abbes</td>
+<td>28</td>
+<td>9</td>
+<td>2012</td>
+<td>27</td>
+<td>87</td>
+<td>29</td>
+<td>0.5</td>
+<td>45.9</td>
+<td>3.5</td>
+<td>7.9</td>
+<td>0.4</td>
+<td>3.4</td>
+<td>0.2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">242</th>
+<td>Sidi-Bel Abbes</td>
+<td>29</td>
+<td>9</td>
+<td>2012</td>
+<td>24</td>
+<td>54</td>
+<td>18</td>
+<td>0.1</td>
+<td>79.7</td>
+<td>4.3</td>
+<td>15.2</td>
+<td>1.7</td>
+<td>5.1</td>
+<td>0.7</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">243</th>
+<td>Sidi-Bel Abbes</td>
+<td>30</td>
+<td>9</td>
+<td>2012</td>
+<td>24</td>
+<td>64</td>
+<td>15</td>
+<td>0.2</td>
+<td>67.3</td>
+<td>3.8</td>
+<td>16.5</td>
+<td>1.2</td>
+<td>4.8</td>
+<td>0.5</td>
+</tr>
+</tbody>
+</table>
+
+<p>244 rows × 14 columns</p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="data-cleaning" class="level2">
+<h2 class="anchored" data-anchor-id="data-cleaning">Data Cleaning</h2>
+<p>This dataset has two main messy features we need to update before we can build our model/visualizations.</p>
+<ol type="1">
+<li><strong>Whitespace in column names</strong> — some column names have trailing spaces that will cause silent lookup errors</li>
+<li><strong>One corrupted row</strong> — a data entry error packed two values into one cell, which will surface as <code>NaN</code> after we convert columns to numeric</li>
+</ol>
+<section id="step-1-strip-whitespace-from-column-names" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-strip-whitespace-from-column-names">Step 1: Strip whitespace from column names</h3>
+<div id="59ac0331" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Column names before cleaning:"</span>, df.columns.tolist())</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>df.columns <span class="op">=</span> df.columns.<span class="bu">str</span>.strip()</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Column names after cleaning:"</span>, df.columns.tolist())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Column names before cleaning: ['region', 'day', 'month', 'year', 'Temperature', ' RH', ' Ws', 'Rain ', 'FFMC', 'DMC', 'DC', 'ISI', 'BUI', 'FWI']
+Column names after cleaning: ['region', 'day', 'month', 'year', 'Temperature', 'RH', 'Ws', 'Rain', 'FFMC', 'DMC', 'DC', 'ISI', 'BUI', 'FWI']</code></pre>
+</div>
+</div>
+</section>
+<section id="step-2-convert-columns-to-numeric-dtypes" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-convert-columns-to-numeric-dtypes">Step 2: Convert columns to numeric dtypes</h3>
+<p>Row 165 has a data entry error where two values were merged into one cell (e.g., <code>DC = "14.6 9"</code>). Pandas read the affected columns (<code>DC</code>, <code>FWI</code>) as strings instead of numbers. Converting to numeric with <code>errors='coerce'</code> turns that bad value into <code>NaN</code>, making the corrupted row easy to identify and remove.</p>
+<div id="0444577f" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"DC and FWI column types before conversion:"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[[<span class="st">'DC'</span>, <span class="st">'FWI'</span>]].dtypes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>DC and FWI column types before conversion:
+DC     object
+FWI    object
+dtype: object</code></pre>
+</div>
+</div>
+<div id="b3ca86e0" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>numeric_cols <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> df.columns <span class="cf">if</span> c <span class="op">!=</span> <span class="st">'region'</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>df[numeric_cols] <span class="op">=</span> df[numeric_cols].<span class="bu">apply</span>(pd.to_numeric, errors<span class="op">=</span><span class="st">'coerce'</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"DC and FWI column types after conversion:"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[[<span class="st">'DC'</span>, <span class="st">'FWI'</span>]].dtypes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>DC and FWI column types after conversion:
+DC     float64
+FWI    float64
+dtype: object</code></pre>
+</div>
+</div>
+</section>
+<section id="step-3-drop-rows-with-missing-values" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-drop-rows-with-missing-values">Step 3: Drop rows with missing values</h3>
+<p>Any row with a <code>NaN</code> is unusable for modeling. Dropping them removes the one corrupted row identified above.</p>
+<div id="88cb9449" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.dropna().reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.dtypes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>region          object
+day              int64
+month            int64
+year             int64
+Temperature      int64
+RH               int64
+Ws               int64
+Rain           float64
+FFMC           float64
+DMC            float64
+DC             float64
+ISI            float64
+BUI            float64
+FWI            float64
+dtype: object</code></pre>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="exploratory-data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory Data Analysis</h2>
+<p>Before modeling, let’s look at the distribution of our target variable and the relationship between our predictor and target.</p>
+<p>Two plots below:</p>
+<ol type="1">
+<li><strong>FWI distribution</strong> — what does the range of fire danger look like?</li>
+<li><strong>ISI vs.&nbsp;FWI</strong> — does a higher initial spread index correspond to higher overall fire danger?</li>
+</ol>
+<div id="28c2c077" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Plot 1: FWI distribution ---</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].hist(df[<span class="st">'FWI'</span>], bins<span class="op">=</span><span class="dv">20</span>, color<span class="op">=</span><span class="st">'#d62728'</span>, edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Fire Weather Index (FWI)'</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Number of days'</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'Distribution of FWI'</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Plot 2: ISI vs FWI ---</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].scatter(df[<span class="st">'ISI'</span>], df[<span class="st">'FWI'</span>], alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">'#d62728'</span>, edgecolor<span class="op">=</span><span class="st">'white'</span>, linewidths<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'Initial Spread Index (ISI)'</span>)</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'Fire Weather Index (FWI)'</span>)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'ISI vs. FWI'</span>)</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>plt.suptitle(<span class="st">'Algerian Forest Fires — Exploratory Data Analysis'</span>, fontsize<span class="op">=</span><span class="dv">13</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab1_files/figure-html/cell-9-output-1.png" width="949" height="379" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="preparing-x-and-y" class="level2">
+<h2 class="anchored" data-anchor-id="preparing-x-and-y">Preparing X and y</h2>
+<p>Extract the single predictor (<code>ISI</code>) and the target (<code>FWI</code>) from <code>df</code>. sklearn expects X to be <strong>2D</strong> — even for a single feature — so we use double brackets <code>df[['ISI']]</code> to get a one-column DataFrame rather than a flat array.</p>
+<div id="099ed0a8" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[[<span class="st">'ISI'</span>]].values   <span class="co"># shape (n, 1) — 2D required by sklearn</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">'FWI'</span>].values     <span class="co"># shape (n,)</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"X shape: </span><span class="sc">{</span>X<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"y shape: </span><span class="sc">{</span>y<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>X shape: (243, 1)
+y shape: (243,)</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="training-vs.-testing-the-core-concept" class="level2">
+<h2 class="anchored" data-anchor-id="training-vs.-testing-the-core-concept">Training vs.&nbsp;Testing: The Core Concept</h2>
+<p>Before fitting a model, we split our data into two non-overlapping sets:</p>
+<pre><code>All Data (243 days)
+|
+|-- Training Set (80% = ~194 days)   &lt;-- model learns from this
+|
+|-- Test Set     (20% = ~49 days)    &lt;-- model is evaluated on this</code></pre>
+<p><strong>Why?</strong> We want to know how the model performs on data it has never seen — that’s what matters in practice. Evaluating on the same data used for training gives an overly optimistic picture.</p>
+<p>After fitting on the training set, we’ll compare R² on both sets. For a well-behaved model like linear regression, the two should be close — confirming that the model generalizes rather than just fitting noise.</p>
+<hr>
+</section>
+<section id="train_test_split-in-depth" class="level2">
+<h2 class="anchored" data-anchor-id="train_test_split-in-depth"><code>train_test_split</code> in Depth</h2>
+<p>scikit-learn provides <code>train_test_split</code> to split data automatically and safely.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    X,            <span class="co"># feature matrix</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    y,            <span class="co"># target vector</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    test_size,    <span class="co"># fraction or count to put in the test set</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    random_state  <span class="co"># integer seed for reproducibility</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Let’s dig into each parameter.</p>
+<section id="random_state" class="level3">
+<h3 class="anchored" data-anchor-id="random_state"><code>random_state</code></h3>
+<p><code>train_test_split</code> randomly shuffles the data before splitting. That is good — you don’t want all fire days landing in the training set.</p>
+<p>But random shuffling means a <strong>different split every run</strong>, making results impossible to reproduce or compare. <code>random_state</code> sets a fixed random seed so the split is identical every time.</p>
+<ul>
+<li><code>random_state=42</code> — any integer; 42 is common convention</li>
+<li><code>random_state=None</code> — truly random every run (not reproducible)</li>
+</ul>
+</section>
+<section id="stratify" class="level3">
+<h3 class="anchored" data-anchor-id="stratify"><code>stratify</code></h3>
+<p>For <strong>classification</strong> problems, <code>train_test_split</code> accepts a <code>stratify=y</code> argument that preserves class proportions in both splits. For <strong>regression</strong>, there are no discrete classes, so <code>stratify</code> is not applicable — the split is always random.</p>
+</section>
+<section id="test_size" class="level3">
+<h3 class="anchored" data-anchor-id="test_size"><code>test_size</code></h3>
+<p><code>test_size</code> accepts:</p>
+<ul>
+<li>A <strong>float</strong> between 0 and 1 — proportion of data (e.g.&nbsp;<code>0.2</code> = 20%)</li>
+<li>An <strong>integer</strong> — exact number of samples (e.g.&nbsp;<code>50</code> = 50 days)</li>
+</ul>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Split</th>
+<th>Train %</th>
+<th>Test %</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>80/20</td>
+<td>80</td>
+<td>20</td>
+<td>Default; works well for most datasets</td>
+</tr>
+<tr class="even">
+<td>70/30</td>
+<td>70</td>
+<td>30</td>
+<td>Smaller datasets needing more test coverage</td>
+</tr>
+<tr class="odd">
+<td>90/10</td>
+<td>90</td>
+<td>10</td>
+<td>Large datasets where training data is precious</td>
+</tr>
+</tbody>
+</table>
+<p>Rule of thumb: more training data means a better model, but you need at least 30–50 test samples for a reliable evaluation.</p>
+</section>
+<section id="how-test-size-affects-model-performance" class="level3">
+<h3 class="anchored" data-anchor-id="how-test-size-affects-model-performance">How Test Size Affects Model Performance</h3>
+<p>Choosing <code>test_size</code> involves a tradeoff:</p>
+<ul>
+<li><strong>Smaller test set</strong> → more data for training → higher train accuracy, but the test estimate is based on fewer samples and is less reliable (higher variance across different random splits)</li>
+<li><strong>Larger test set</strong> → more reliable performance estimate, but the model trains on less data</li>
+</ul>
+</section>
+<section id="an-example" class="level3">
+<h3 class="anchored" data-anchor-id="an-example">An Example</h3>
+<div id="d1b9bd0f" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Standard 80/20 split</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    X, y,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    test_size<span class="op">=</span><span class="fl">0.2</span>,    <span class="co"># 20% goes to test set</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span>   <span class="co"># fix the random seed</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Original dataset : </span><span class="sc">{</span>X<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> observations"</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Training set:"</span>)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  X_train: </span><span class="sc">{</span>X_train<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">  -&gt; </span><span class="sc">{</span><span class="bu">len</span>(X_train)<span class="sc">}</span><span class="ss"> days"</span>)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  y_train: </span><span class="sc">{</span>y_train<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Test set:"</span>)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  X_test : </span><span class="sc">{</span>X_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">   -&gt; </span><span class="sc">{</span><span class="bu">len</span>(X_test)<span class="sc">}</span><span class="ss"> days"</span>)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  y_test : </span><span class="sc">{</span>y_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Original dataset : 243 observations
+
+Training set:
+  X_train: (194, 1)  -&gt; 194 days
+  y_train: (194,)
+
+Test set:
+  X_test : (49, 1)   -&gt; 49 days
+  y_test : (49,)</code></pre>
+</div>
+</div>
+<div id="09aa6db8" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> r2_score</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression()</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> model.predict(X_test)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test R²: </span><span class="sc">{</span>r2_score(y_test, y_pred)<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Test R²: 0.897</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>This work is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License</a></p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This website is built with <a href="https://quarto.org/">Quarto</a> and <a href="https://github.com/MEDS-eds-220/MEDS-eds-220-course">GitHub pages</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
