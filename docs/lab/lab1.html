@@ -302,7 +302,7 @@ window.Quarto = {
 </section>
 <section id="example" class="level3">
 <h3 class="anchored" data-anchor-id="example">Example</h3>
-<div id="e74a4134" class="cell" data-execution_count="1">
+<div id="867e1ac7" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -372,7 +372,7 @@ Heat-dryness index: [12.04 18.85 24.19 10.43 33.62 28.72  4.95 22.13]</code></pr
 </tr>
 </tbody>
 </table>
-<div id="336136e3" class="cell" data-execution_count="2">
+<div id="7c08507c" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats <span class="im">as</span> stats</span>
@@ -590,7 +590,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 </table>
 <p>These two are directly related in the Canadian Forest Fire Weather Index system: ISI feeds into the FWI calculation, so we expect a strong linear relationship.</p>
 <p>This is a <strong>supervised regression</strong> problem: given X, learn <span class="math inline">\(\hat{f}(X) = \beta_0 + \beta_1 X\)</span> that predicts FWI.</p>
-<div id="ad879fda" class="cell" data-execution_count="3">
+<div id="f1b27076" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -833,7 +833,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 </ol>
 <section id="step-1-strip-whitespace-from-column-names" class="level3">
 <h3 class="anchored" data-anchor-id="step-1-strip-whitespace-from-column-names">Step 1: Strip whitespace from column names</h3>
-<div id="ca346026" class="cell" data-execution_count="4">
+<div id="71759d69" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Column names before cleaning:"</span>, df.columns.tolist())</span>
@@ -851,7 +851,7 @@ Column names after cleaning: ['region', 'day', 'month', 'year', 'Temperature', '
 <section id="step-2-convert-columns-to-numeric-dtypes" class="level3">
 <h3 class="anchored" data-anchor-id="step-2-convert-columns-to-numeric-dtypes">Step 2: Convert columns to numeric dtypes</h3>
 <p>Row 165 has a data entry error where two values were merged into one cell (e.g., <code>DC = "14.6 9"</code>). Pandas read the affected columns (<code>DC</code>, <code>FWI</code>) as strings instead of numbers. Converting to numeric with <code>errors='coerce'</code> turns that bad value into <code>NaN</code>, making the corrupted row easy to identify and remove.</p>
-<div id="7ad511e1" class="cell" data-execution_count="5">
+<div id="e2e4c505" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"DC and FWI column types before conversion:"</span>)</span>
@@ -864,7 +864,7 @@ FWI    object
 dtype: object</code></pre>
 </div>
 </div>
-<div id="b77abce2" class="cell" data-execution_count="6">
+<div id="c0bacee8" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>numeric_cols <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> df.columns <span class="cf">if</span> c <span class="op">!=</span> <span class="st">'region'</span>]</span>
@@ -884,7 +884,7 @@ dtype: object</code></pre>
 <section id="step-3-drop-rows-with-missing-values" class="level3">
 <h3 class="anchored" data-anchor-id="step-3-drop-rows-with-missing-values">Step 3: Drop rows with missing values</h3>
 <p>Any row with a <code>NaN</code> is unusable for modeling. Dropping them removes the one corrupted row identified above.</p>
-<div id="a4539eb8" class="cell" data-execution_count="7">
+<div id="e500427b" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.dropna().reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
@@ -920,7 +920,7 @@ dtype: object</code></pre>
 <li><strong>FWI distribution</strong> — what does the range of fire danger look like?</li>
 <li><strong>ISI vs.&nbsp;FWI</strong> — does a higher initial spread index correspond to higher overall fire danger?</li>
 </ol>
-<div id="0ac6a32e" class="cell" data-execution_count="8">
+<div id="35608824" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -956,7 +956,7 @@ dtype: object</code></pre>
 <section id="preparing-x-and-y" class="level2">
 <h2 class="anchored" data-anchor-id="preparing-x-and-y">Preparing X and y</h2>
 <p>Extract the single predictor (<code>ISI</code>) and the target (<code>FWI</code>) from <code>df</code>. sklearn expects X to be <strong>2D</strong> — even for a single feature — so we use double brackets <code>df[['ISI']]</code> to get a one-column DataFrame rather than a flat array.</p>
-<div id="c3588947" class="cell" data-execution_count="9">
+<div id="e3f6b745" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[[<span class="st">'ISI'</span>]].values   <span class="co"># shape (n, 1) — 2D required by sklearn</span></span>
@@ -1058,7 +1058,7 @@ y shape: (243,)</code></pre>
 </section>
 <section id="an-example" class="level3">
 <h3 class="anchored" data-anchor-id="an-example">An Example</h3>
-<div id="8fc532ad" class="cell" data-execution_count="10">
+<div id="c2713f3c" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
@@ -1092,21 +1092,23 @@ Test set:
   y_test : (49,)</code></pre>
 </div>
 </div>
-<div id="07697f22" class="cell" data-execution_count="11">
+<div id="52749c44" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> r2_score</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression()</span>
 <span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train)</span>
 <span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> model.predict(X_test)</span>
 <span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test R²: </span><span class="sc">{</span>r2_score(y_test, y_pred)<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>mse <span class="op">=</span> mean_squared_error(y_test, y_pred)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test MSE: </span><span class="sc">{</span>mse<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Test R²: 0.897</code></pre>
+<pre><code>Test MSE: 3.111</code></pre>
 </div>
 </div>
 
