@@ -43,17 +43,11 @@ df = pd.DataFrame({
 
 In this lesson we introduce:
 
-- Why "linear" in linear regression — and why it is not what it sounds like
-- The multiple linear regression (MLR) model
-- Estimating coefficients with least squares
-- Interpreting MLR coefficients and comparing to individual SLRs
-- Hypothesis testing: the $F$-statistic
-- Deciding on important variables: variable selection
-- Assessing model accuracy: $R^2$ in MLR
+TO BE FILLED OUT AT THE END
 
 These notes are based on chapter 3.2 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The **example data is synthetic** and was generated with the aid of Claude Code for the purpose of this lesson based on the data in ISLP used in Figure 2.1.
 
-## What does "linear" mean in linear regression?
+<!-- ## What does "linear" mean in linear regression?
 
 A natural question when first encountering multiple linear regression is: what does "linear" actually refer to?
 
@@ -72,90 +66,119 @@ A model is a **linear regression model** if it can be written as:
 $$Y = \beta_0 + \beta_1 f_1(x_1, \ldots, x_p) + \beta_2 f_2(x_1, \ldots, x_p) + \cdots + \beta_p f_p(x_1, \ldots, x_p) + \epsilon$$
 
 where $f_1, \ldots, f_p$ can be any functions of the predictors. The $f_j$ might be raw predictors $x_j$, polynomial terms $x_j^2$, log transforms $\log(x_j)$, interactions $x_j \cdot x_k$, and so on. The key is that the $\beta_j$ are not transformed — they multiply $f_j$ directly.
-:::
+::: -->
+
+## A guiding example: emissions-reduction strategies scenario
+
+In this lesson we use the same example dataset as in our simple linear regression lesson. In this scenario, a research consortium tracks 200 manufacturing firms across different industries and regions. For each firm they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:
+
+- **`process`** — investment in cleaner production processes (\$K/year)
+- **`efficiency`** — investment in energy efficiency upgrades (\$K/year)
+- **`offsets`** — carbon offset purchases (\$K/year)
+- **`co2_reduction`** — annual CO₂ emissions reduced (thousand metric tons, ktCO₂e)
+
+The central question is: *do these investments actually drive emissions reductions, and if so, by how much?*
+
+The figure below shows `co2_reduction` plotted against each predictor separately.
+
+```{python}
+#| label: initial-data-plotting
+#| warning: false
+
+fig, axes = plt.subplots(3, 1, figsize=(fig_size_x, fig_size_y * 3))
+
+specs = [
+    ('process',    'steelblue',  'Process upgrades ($K)'),
+    ('efficiency', 'darkorange', 'Efficiency upgrades ($K)'),
+    ('offsets',    'seagreen',   'Carbon offsets ($K)'),
+]
+
+for ax, (col, color, xlabel) in zip(axes, specs):
+    ax.scatter(df[col], df['co2_reduction'], s=15, alpha=0.5, color=color)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel('CO₂ reduction (ktCO₂e)')
+    ax.grid(True, alpha=0.3)
+
+fig.suptitle(
+    'CO₂ reduction vs. each abatement strategy\n'
+    '*Synthetic data generated for educational purposes only*',
+    y=1.01
+)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
 
 ## The multiple linear regression model
 
-### Setup
+Suppose we have  a response variable $Y$ associated with $p$ predictors $X_1, \ldots, X_p$. The **multiple linear regression (MLR) model** assumes the predictors are related with the response by the formula:
 
-Suppose we have $n$ training observations $\{(x_1, y_1), \ldots, (x_n, y_n)\}$, where each $x_i = (x_{i1}, x_{i2}, \ldots, x_{ip})$ is a vector of $p$ predictor values and $y_i$ is the response. The notation we will use:
+$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon,$$
 
-- $y$: response / output / dependent variable
-- $x_1, x_2, \ldots, x_p$: predictors / features / independent variables
-- $n$: number of observations
-- $\beta_0, \beta_1, \ldots, \beta_p$: unknown parameters to be estimated ($p + 1$ parameters in total)
-  - $\beta_0$: intercept
-  - $\beta_1, \ldots, \beta_p$: slopes
-- $\epsilon$: error term
+where each $\beta_j$ is a number called a **coefficient** and $\epsilon$ is an error term. 
 
-The **multiple linear regression (MLR) model** is:
+### Example 
+In our example dataset:
 
-$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon$$
+- $Y =$ `co2_reduction` as the response variable
+- $p = 3$ is the number of predictors (`process`, `efficiency`, `offsets`). 
+- $X_1 =$ `process` predictor 
+- $X_2 =$ `efficiency` predictor
+- $X_3 =$ `offset` predictor 
 
-where $X_j$ is the $j$-th predictor and $\beta_j$ is its coefficient.
+So the MLR model takes the form:
 
-Given estimates $\hat{\beta}_0, \hat{\beta}_1, \ldots, \hat{\beta}_p$, our prediction for $Y$ at a new observation $(x_1, \ldots, x_p)$ is:
+$$\texttt{co2\_reduction} = \\beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \cdot \texttt{efficiency} + \beta_3 \cdot \texttt{offsets} + \epsilon$$
 
-$$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2 + \cdots + \hat{\beta}_p x_p$$
 
-Geometrically, this is a **hyperplane** in a $(p+1)$-dimensional space — a generalization of the regression line from SLR.
+### Estimating the coefficients
 
-### For the GreenAbate dataset
+As usual, our goal is to estimate the unknown coefficients $\beta_i$ using available data to find an estimate
 
-The GreenAbate dataset has $p = 3$ predictors (`process`, `efficiency`, `offsets`). The MLR model takes the form:
+$$\hat{f}(X_1, \ldots, X_p) = \hat{\beta_0} + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.$$
 
-$$\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process} + \hat{\beta}_2 \cdot \texttt{efficiency} + \hat{\beta}_3 \cdot \texttt{offsets}$$
+We are given a training set $\{(x_1, y_1), \ldots, (x_n, y_n)\}$ with $n$ observations to do so. For each of the observations
 
-### Interpreting the coefficients
+- $x_i = (x_{i1}, x_{i2}, \ldots, x_{ip})$ is a vector of $p$ predictor values, and 
+- $y_i$ is the response associated to $x_i$.
 
-In MLR, the interpretation of each coefficient includes the crucial phrase: **holding all other predictors constant** (also called *ceteris paribus* or *all else equal*). Specifically:
+Just as in a simple linear regression, we find $\hat{\beta}_0, \ldots, \hat{\beta}_p$ by minimizing the residual sum of squares (RSS):
 
-> *$\hat{\beta}_j$ is the average change in $Y$ associated with a one-unit increase in $X_j$, holding all other predictors fixed.*
+$$
+\begin{align}
+RSS &=& \sum_{i=1}^{n} (y_i - \hat{f}(x_i))^2 \\
+    &=& \sum_{i=1}^{n} (y_i - (\hat{\beta_0} + \hat{\beta}_1x_1 + \ldots + \hat{\beta}_px_p))^2 \\
+    &=& \sum_{i=1}^{n} (y_i - \hat{\beta_0} - \hat{\beta}_1x_1 - \ldots - \hat{\beta}_px_p)^2.
+\end{align}
+$$
 
-For the GreenAbate example:
+Notice that the RSS is a function of the coefficients $\hat{\beta}_i$, the values $x_i$ are fixed numbers that come from our training data. In practice, the computer finds the coefficients $\hat{\beta}_i$ that minimize the RSS for us.
 
-> *$\hat{\beta}_1$ is the average change in CO₂ reduction associated with a \$1K increase in process upgrade spending, assuming efficiency spending and offset purchases remain unchanged.*
 
-This "holding constant" property is what distinguishes an MLR coefficient from the analogous SLR coefficient, and it is why we often prefer MLR over running separate SLRs — we discuss this further in @sec-comparison.
+<!-- TO DO: would be really nice to have a small example of an RSS on two variables and graph.  -->
 
-## Estimating the coefficients
 
-### Least squares for MLR
+### Interpreting the coefficients and prediction
 
-Just as in SLR, we find $\hat{\beta}_0, \ldots, \hat{\beta}_p$ by **minimizing the RSS**. For observation $i$, the residual is:
+Once we have found coefficients that minimize the $RSS$ we obtain our model 
 
-$$e_i = y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_{i1} - \cdots - \hat{\beta}_p x_{ip}$$
+$$\hat{f}(X_1, \ldots, X_p) = \hat{\beta_0} + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.$$
 
-The RSS sums the squared residuals across all $n$ observations:
+We can obtain new insights about our data through $\hat{f}$. To begin with, given a new observation $(x_1, \ldots, x_p)$, we can predict what the value of $f$ will be by simply plugging in each $x_i$ in the corresponding variable:
 
-$$RSS = \sum_{i=1}^{n} e_i^2 = \sum_{i=1}^{n} \left(y_i - \hat{\beta}_0 - \hat{\beta}_1 x_{i1} - \hat{\beta}_2 x_{i2} - \cdots - \hat{\beta}_p x_{ip}\right)^2$$
+$$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2 + \cdots + \hat{\beta}_p x_p.$$
 
-### The matrix form
+We can also interpret the coefficients to gain insight about how each predictor $X_i$ is associated with the response variable $Y$: 
 
-The MLR model can be written compactly using matrix notation. Define:
+> *the coefficient $\hat{\beta}_j$ represents the average change in $Y$ associated with a one-unit increase in $X_j$, holding all other predictors fixed.*
 
-- $\mathbf{y} = (y_1, \ldots, y_n)^\top$ — the $n \times 1$ response vector,
-- $\mathbf{X}$ — the $n \times (p+1)$ **design matrix**, where the first column is all ones (for the intercept) and the remaining columns are the predictor values,
-- $\boldsymbol{\beta} = (\beta_0, \beta_1, \ldots, \beta_p)^\top$ — the $(p+1) \times 1$ coefficient vector,
-- $\boldsymbol{\epsilon} = (\epsilon_1, \ldots, \epsilon_n)^\top$ — the $n \times 1$ error vector.
+Notice that the interpretation of each coefficient includes the crucial phrase: *holding all other predictors constant*, which is a key difference between MLR and SLR. 
 
-Then the model is:
 
-$$\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon}$$
+### Example 
 
-and the RSS is:
-
-$$RSS(\boldsymbol{\beta}) = (\mathbf{y} - \mathbf{X}\boldsymbol{\beta})^\top(\mathbf{y} - \mathbf{X}\boldsymbol{\beta})$$
-
-Taking the derivative with respect to $\boldsymbol{\beta}$ and setting it to zero gives the **normal equations**:
-
-$$\mathbf{X}^\top \mathbf{X} \hat{\boldsymbol{\beta}} = \mathbf{X}^\top \mathbf{y}$$
-
-Solving for $\hat{\boldsymbol{\beta}}$ (assuming $\mathbf{X}^\top \mathbf{X}$ is invertible):
-
-$$\hat{\boldsymbol{\beta}} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}$$
-
-In practice, the computer computes this for you. We do not need to work through the matrix algebra by hand; the key is understanding that the least squares criterion and the minimization principle are exactly the same as in SLR.
 
 ```{python}
 #| label: mlr-fit
@@ -179,13 +202,25 @@ coef_df = pd.DataFrame({
     't-statistic':  [f"{res_mlr.tvalues[v]:.2f}" for v in ['const', 'process', 'efficiency', 'offsets']],
     'p-value':      [fmt_p(res_mlr.pvalues[v])   for v in ['const', 'process', 'efficiency', 'offsets']],
 })
-print(coef_df.to_string(index=False))
+#print(coef_df.to_string(index=False))
 ```
+
+For our example data, the estimated coefficients are:
+
+- $\hat{\beta}_0=$ `{python} f"{b0_mlr:.3f}"` : `intercept`
+- $\hat{\beta}_1=$ `{python} f"{b1_mlr:.3f}"` : `process`
+- $\hat{\beta}_2=$ `{python} f"{b2_mlr:.3f}"` : `efficiency`
+- $\hat{\beta}_3=$ `{python} f"{b3_mlr:.3f}"` : `offsets`
+
+We can interpret the coefficient associated with the process variable as
+
+> *$\hat{\beta}_1$ is the average change in CO₂ reduction associated with a \$1K increase in process upgrade spending, assuming efficiency spending and offset purchases remain unchanged.*
+
 
 :::{.callout-tip}
 ## Check-in
 
-Looking at the MLR output above:
+Looking at the MLR coefficients above:
 
 1. What is the interpretation of the `efficiency` coefficient of `{python} f"{b2_mlr:.3f}"`?
 2. What is the predicted CO₂ reduction for a firm that spends \$100K on process upgrades, \$20K on efficiency, and \$50K on offsets?
@@ -195,16 +230,16 @@ Looking at the MLR output above:
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. Each additional \$1K in energy efficiency upgrades is associated with `{python} f"{b2_mlr:.3f}"` ktCO₂e of additional CO₂ reduction, **holding process and offset spending constant**.
+1. Each additional \$1K in energy efficiency upgrades is associated with `{python} f"{b2_mlr:.3f}"` ktCO₂e of additional CO₂ reduction, *holding process and offset spending constant*.
 
-2. $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 \cdot 100 + \hat{\beta}_2 \cdot 20 + \hat{\beta}_3 \cdot 50$:
+2. Usin gour model, the estimate is given by $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 \cdot 100 + \hat{\beta}_2 \cdot 20 + \hat{\beta}_3 \cdot 50.$ Computing this we obtain:
 
 ```{python}
 pred = b0_mlr + b1_mlr*100 + b2_mlr*20 + b3_mlr*50
 print(f"Predicted CO₂ reduction: {pred:.2f} ktCO₂e")
 ```
 
-3. After accounting for process and efficiency spending, higher offset purchases are associated with a *slightly lower* CO₂ reduction. In this synthetic dataset the true coefficient on `offsets` in the data-generating model is $-0.001$, which is nearly zero — so the model is recovering something close to the truth. In real data a negative coefficient like this might also reflect that firms who buy offsets have already reduced operational emissions as much as they can and are using offsets to compensate for the rest.
+3. It means if we hold process and efficiency spending constant, higher offset purchases are associated with a *slightly lower* CO₂ reduction. Remember this data is synthetically generated, the true coefficient on `offsets` in the data-generating model is $-0.001$, which is nearly zero, so the model is recovering something close to the truth. In real data a negative coefficient like this might also reflect that firms who buy offsets have already reduced operational emissions as much as they can.
 :::
 
 ## Comparing MLR to individual SLRs {#sec-comparison}
