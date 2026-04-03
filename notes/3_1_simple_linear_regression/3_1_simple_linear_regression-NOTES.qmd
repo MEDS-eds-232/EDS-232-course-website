@@ -268,7 +268,7 @@ The **standard error** of an estimate quantifies, on average, how far our estima
 
 $$SE(\hat{\beta}_1)^2 = \frac{\sigma^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2},$$
 
-where $\sigma^2 = \text{Var}(\epsilon)$ is the variance of the error term (assuming that the errrors $\epsilon_i$ for each observation have common variance $\sigma^2$ and are uncorrelated), and $\bar{x} =\frac{1}{n}\sum x_i$ is the average of the $x$ values. 
+where $\sigma^2 = \text{Var}(\epsilon)$ is the variance of the error term (assuming that the errrors $\epsilon_i$ for each observation have common variance $\sigma^2$ and are uncorrelated), and $\bar{x} =\frac{1}{n}\sum_{i=1}^n x_i$ is the average of the $x$ values. 
 
 The standard error of the $y$-intercept $\hat{\beta}_0$ is:
 
@@ -425,7 +425,7 @@ Beyond asking *whether* a relationship exists, we want to know *how well* the mo
 
 The **RSE** estimates the standard deviation of the error term $\epsilon$ and is defined as:
 
-$$RSE = \sqrt{\frac{1}{n-2} RSS} = \sqrt{\frac{1}{n-2} \sum_{i=1}^{n}(y_i - \hat{y}_i)^2}.$$
+$$RSE = \sqrt{\frac{RSS}{n-2} } = \sqrt{\frac{1}{n-2} \sum_{i=1}^{n}(y_i - \hat{y}_i)^2}.$$
 
 It represents the average amount by which the response deviates from the true regression line. A smaller RSE means the model fits the data more closely.
 
@@ -464,7 +464,7 @@ So
 $$\underbrace{TSS}_{\text{total variability in }Y} - \underbrace{RSS}_{\text{unexplained by regression}} = \text{variability explained by regression}$$
 
 We use this to define
-$$R^2 = \frac{TSS - RSS}{TSS}.$$
+$$R^2 = \frac{TSS - RSS}{TSS} = 1 - \frac{TSS}{RSS}.$$
 
 So $R^2$ is the fraction of variability that the model accounts for:
 
