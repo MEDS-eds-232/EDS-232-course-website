@@ -1,0 +1,491 @@
+---
+title: Multiple linear regression
+jupyter: eds232-env
+echo: false
+---
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+import statsmodels.api as sm
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+# ── GreenAbate synthetic dataset ──────────────────────────────────────
+# (same as lesson 3_1)
+np.random.seed(7)
+n = 200
+
+process    = np.random.uniform(0, 300, n)
+efficiency = np.random.uniform(0,  50, n)
+offsets    = np.random.uniform(0, 100, n)
+
+co2_reduction = (2.939
+                 + 0.046  * process
+                 + 0.189  * efficiency
+                 - 0.001  * offsets
+                 + np.random.normal(0, 1.69, n))
+
+df = pd.DataFrame({
+    'process':       process,
+    'efficiency':    efficiency,
+    'offsets':       offsets,
+    'co2_reduction': co2_reduction
+})
+```
+
+[📊 Slides]() / [📊 Blank slides]()
+
+In this lesson we introduce:
+
+- Why "linear" in linear regression — and why it is not what it sounds like
+- The multiple linear regression (MLR) model
+- Estimating coefficients with least squares
+- Interpreting MLR coefficients and comparing to individual SLRs
+- Hypothesis testing: the $F$-statistic
+- Deciding on important variables: variable selection
+- Assessing model accuracy: $R^2$ in MLR
+
+These notes are based on chapter 3.2 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The **example data is synthetic** and was generated with the aid of Claude Code for the purpose of this lesson based on the data in ISLP used in Figure 2.1.
+
+## What does "linear" mean in linear regression?
+
+A natural question when first encountering multiple linear regression is: what does "linear" actually refer to?
+
+The short answer: **linear in the parameters**, not necessarily linear in the predictors. Consider the following model:
+
+$$Y = \beta_0 + \beta_1 x + \beta_2 x^2 + \epsilon$$
+
+Here the predictor $x^2$ is clearly not a linear function of $x$, but the model is still called a linear regression model because the response $Y$ depends **linearly on the coefficients** $\beta_0$, $\beta_1$, $\beta_2$. The $\beta$'s enter the model in a simple, additive way — none of them are squared, multiplied by each other, or transformed.
+
+This means that polynomial regression, log-transformed predictors, and many other-looking models are all "linear regression" in the technical sense, as long as the coefficients appear linearly.
+
+::: {.callout-note}
+## Linear in the parameters
+A model is a **linear regression model** if it can be written as:
+
+$$Y = \beta_0 + \beta_1 f_1(x_1, \ldots, x_p) + \beta_2 f_2(x_1, \ldots, x_p) + \cdots + \beta_p f_p(x_1, \ldots, x_p) + \epsilon$$
+
+where $f_1, \ldots, f_p$ can be any functions of the predictors. The $f_j$ might be raw predictors $x_j$, polynomial terms $x_j^2$, log transforms $\log(x_j)$, interactions $x_j \cdot x_k$, and so on. The key is that the $\beta_j$ are not transformed — they multiply $f_j$ directly.
+:::
+
+## The multiple linear regression model
+
+### Setup
+
+Suppose we have $n$ training observations $\{(x_1, y_1), \ldots, (x_n, y_n)\}$, where each $x_i = (x_{i1}, x_{i2}, \ldots, x_{ip})$ is a vector of $p$ predictor values and $y_i$ is the response. The notation we will use:
+
+- $y$: response / output / dependent variable
+- $x_1, x_2, \ldots, x_p$: predictors / features / independent variables
+- $n$: number of observations
+- $\beta_0, \beta_1, \ldots, \beta_p$: unknown parameters to be estimated ($p + 1$ parameters in total)
+  - $\beta_0$: intercept
+  - $\beta_1, \ldots, \beta_p$: slopes
+- $\epsilon$: error term
+
+The **multiple linear regression (MLR) model** is:
+
+$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon$$
+
+where $X_j$ is the $j$-th predictor and $\beta_j$ is its coefficient.
+
+Given estimates $\hat{\beta}_0, \hat{\beta}_1, \ldots, \hat{\beta}_p$, our prediction for $Y$ at a new observation $(x_1, \ldots, x_p)$ is:
+
+$$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2 + \cdots + \hat{\beta}_p x_p$$
+
+Geometrically, this is a **hyperplane** in a $(p+1)$-dimensional space — a generalization of the regression line from SLR.
+
+### For the GreenAbate dataset
+
+The GreenAbate dataset has $p = 3$ predictors (`process`, `efficiency`, `offsets`). The MLR model takes the form:
+
+$$\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process} + \hat{\beta}_2 \cdot \texttt{efficiency} + \hat{\beta}_3 \cdot \texttt{offsets}$$
+
+### Interpreting the coefficients
+
+In MLR, the interpretation of each coefficient includes the crucial phrase: **holding all other predictors constant** (also called *ceteris paribus* or *all else equal*). Specifically:
+
+> *$\hat{\beta}_j$ is the average change in $Y$ associated with a one-unit increase in $X_j$, holding all other predictors fixed.*
+
+For the GreenAbate example:
+
+> *$\hat{\beta}_1$ is the average change in CO₂ reduction associated with a \$1K increase in process upgrade spending, assuming efficiency spending and offset purchases remain unchanged.*
+
+This "holding constant" property is what distinguishes an MLR coefficient from the analogous SLR coefficient, and it is why we often prefer MLR over running separate SLRs — we discuss this further in @sec-comparison.
+
+## Estimating the coefficients
+
+### Least squares for MLR
+
+Just as in SLR, we find $\hat{\beta}_0, \ldots, \hat{\beta}_p$ by **minimizing the RSS**. For observation $i$, the residual is:
+
+$$e_i = y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_{i1} - \cdots - \hat{\beta}_p x_{ip}$$
+
+The RSS sums the squared residuals across all $n$ observations:
+
+$$RSS = \sum_{i=1}^{n} e_i^2 = \sum_{i=1}^{n} \left(y_i - \hat{\beta}_0 - \hat{\beta}_1 x_{i1} - \hat{\beta}_2 x_{i2} - \cdots - \hat{\beta}_p x_{ip}\right)^2$$
+
+### The matrix form
+
+The MLR model can be written compactly using matrix notation. Define:
+
+- $\mathbf{y} = (y_1, \ldots, y_n)^\top$ — the $n \times 1$ response vector,
+- $\mathbf{X}$ — the $n \times (p+1)$ **design matrix**, where the first column is all ones (for the intercept) and the remaining columns are the predictor values,
+- $\boldsymbol{\beta} = (\beta_0, \beta_1, \ldots, \beta_p)^\top$ — the $(p+1) \times 1$ coefficient vector,
+- $\boldsymbol{\epsilon} = (\epsilon_1, \ldots, \epsilon_n)^\top$ — the $n \times 1$ error vector.
+
+Then the model is:
+
+$$\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon}$$
+
+and the RSS is:
+
+$$RSS(\boldsymbol{\beta}) = (\mathbf{y} - \mathbf{X}\boldsymbol{\beta})^\top(\mathbf{y} - \mathbf{X}\boldsymbol{\beta})$$
+
+Taking the derivative with respect to $\boldsymbol{\beta}$ and setting it to zero gives the **normal equations**:
+
+$$\mathbf{X}^\top \mathbf{X} \hat{\boldsymbol{\beta}} = \mathbf{X}^\top \mathbf{y}$$
+
+Solving for $\hat{\boldsymbol{\beta}}$ (assuming $\mathbf{X}^\top \mathbf{X}$ is invertible):
+
+$$\hat{\boldsymbol{\beta}} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}$$
+
+In practice, the computer computes this for you. We do not need to work through the matrix algebra by hand; the key is understanding that the least squares criterion and the minimization principle are exactly the same as in SLR.
+
+```{python}
+#| label: mlr-fit
+
+# Fit the MLR model using statsmodels
+X_mlr  = sm.add_constant(df[['process', 'efficiency', 'offsets']])
+res_mlr = sm.OLS(df['co2_reduction'], X_mlr).fit()
+
+b0_mlr = res_mlr.params['const']
+b1_mlr = res_mlr.params['process']
+b2_mlr = res_mlr.params['efficiency']
+b3_mlr = res_mlr.params['offsets']
+
+def fmt_p(p):
+    return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
+
+coef_df = pd.DataFrame({
+    '':             ['Intercept', 'process', 'efficiency', 'offsets'],
+    'Coefficient':  [f"{res_mlr.params[v]:.4f}" for v in ['const', 'process', 'efficiency', 'offsets']],
+    'Std. error':   [f"{res_mlr.bse[v]:.4f}"    for v in ['const', 'process', 'efficiency', 'offsets']],
+    't-statistic':  [f"{res_mlr.tvalues[v]:.2f}" for v in ['const', 'process', 'efficiency', 'offsets']],
+    'p-value':      [fmt_p(res_mlr.pvalues[v])   for v in ['const', 'process', 'efficiency', 'offsets']],
+})
+print(coef_df.to_string(index=False))
+```
+
+:::{.callout-tip}
+## Check-in
+
+Looking at the MLR output above:
+
+1. What is the interpretation of the `efficiency` coefficient of `{python} f"{b2_mlr:.3f}"`?
+2. What is the predicted CO₂ reduction for a firm that spends \$100K on process upgrades, \$20K on efficiency, and \$50K on offsets?
+3. The `offsets` coefficient is very small and negative. What does that mean?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. Each additional \$1K in energy efficiency upgrades is associated with `{python} f"{b2_mlr:.3f}"` ktCO₂e of additional CO₂ reduction, **holding process and offset spending constant**.
+
+2. $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 \cdot 100 + \hat{\beta}_2 \cdot 20 + \hat{\beta}_3 \cdot 50$:
+
+```{python}
+pred = b0_mlr + b1_mlr*100 + b2_mlr*20 + b3_mlr*50
+print(f"Predicted CO₂ reduction: {pred:.2f} ktCO₂e")
+```
+
+3. After accounting for process and efficiency spending, higher offset purchases are associated with a *slightly lower* CO₂ reduction. In this synthetic dataset the true coefficient on `offsets` in the data-generating model is $-0.001$, which is nearly zero — so the model is recovering something close to the truth. In real data a negative coefficient like this might also reflect that firms who buy offsets have already reduced operational emissions as much as they can and are using offsets to compensate for the rest.
+:::
+
+## Comparing MLR to individual SLRs {#sec-comparison}
+
+### Why not just run separate SLRs?
+
+A natural question is: why bother with MLR? Why not fit one SLR for each predictor and look at the results separately?
+
+The problem is that **individual SLR coefficients can be misleading when predictors are correlated**. An SLR of CO₂ reduction on `efficiency` alone produces a coefficient that reflects not only the direct effect of efficiency spending, but also any indirect association between `efficiency` and the other predictors. The MLR coefficient for `efficiency` isolates its direct effect, holding the others constant.
+
+Below we compare the SLR and MLR coefficients side by side:
+
+```{python}
+#| label: slr-mlr-comparison
+
+X_proc = sm.add_constant(df['process'])
+res_proc = sm.OLS(df['co2_reduction'], X_proc).fit()
+
+X_eff = sm.add_constant(df['efficiency'])
+res_eff = sm.OLS(df['co2_reduction'], X_eff).fit()
+
+X_off = sm.add_constant(df['offsets'])
+res_off = sm.OLS(df['co2_reduction'], X_off).fit()
+
+comp_df = pd.DataFrame({
+    'Predictor':   ['process', 'efficiency', 'offsets'],
+    'SLR coeff':   [f"{res_proc.params['process']:.4f}",
+                    f"{res_eff.params['efficiency']:.4f}",
+                    f"{res_off.params['offsets']:.4f}"],
+    'SLR p-value': [fmt_p(res_proc.pvalues['process']),
+                    fmt_p(res_eff.pvalues['efficiency']),
+                    fmt_p(res_off.pvalues['offsets'])],
+    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+                    f"{res_mlr.params['efficiency']:.4f}",
+                    f"{res_mlr.params['offsets']:.4f}"],
+    'MLR p-value': [fmt_p(res_mlr.pvalues['process']),
+                    fmt_p(res_mlr.pvalues['efficiency']),
+                    fmt_p(res_mlr.pvalues['offsets'])],
+})
+print(comp_df.to_string(index=False))
+```
+
+In this dataset, the SLR and MLR coefficients are similar because the three predictors were drawn independently (approximately uncorrelated by construction). In real datasets, predictors are typically correlated and the divergence between SLR and MLR coefficients can be much larger — sometimes even reversing the sign of a coefficient.
+
+::: {.callout-note}
+## Multicollinearity
+
+**Multicollinearity** refers to the situation where two or more predictors are highly correlated with each other. It causes several problems:
+
+- The individual coefficient estimates become unstable: small changes in the data can produce large changes in the estimates.
+- Standard errors increase, making it harder to detect relationships.
+- Coefficients become difficult to interpret because it is hard to isolate the effect of one predictor while holding others constant.
+
+Multicollinearity does **not** affect the model's predictions — only the interpretability and stability of individual coefficients.
+:::
+
+:::{.callout-tip}
+## Check-in
+Why can the coefficient for a predictor change — or even reverse sign — when moving from SLR to MLR? In what kind of dataset would you expect the biggest difference?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+When two predictors are correlated, each one's SLR coefficient absorbs part of the other's effect. For example, if firms that invest heavily in process upgrades tend to also invest heavily in efficiency, an SLR of CO₂ reduction on `process` alone will give a coefficient that also reflects some of the efficiency effect. The MLR coefficient for `process` strips out the efficiency effect and reflects only the direct relationship.
+
+The biggest difference occurs when predictors are strongly correlated — i.e., when multicollinearity is severe. In those cases, the SLR coefficients can be substantially biased relative to the "true" marginal effects captured by the MLR coefficients.
+:::
+
+## Hypothesis testing
+
+### Is there a relationship between the predictors and the response?
+
+In SLR, we used the $t$-statistic to test $H_0: \beta_1 = 0$ for a single predictor. In MLR, we can still do this for each individual coefficient, but we also want to ask a broader question:
+
+> *Is **any** predictor related to the response?*
+
+The null and alternative hypotheses for this overall test are:
+
+$$H_0: \beta_1 = \beta_2 = \cdots = \beta_p = 0$$
+$$H_a: \text{at least one } \beta_j \neq 0$$
+
+### The F-statistic
+
+To test these hypotheses we use the **$F$-statistic**:
+
+$$F = \frac{(TSS - RSS)/p}{RSS/(n - p - 1)}$$
+
+where:
+
+- $TSS = \sum(y_i - \bar{y})^2$ is the total variability in $Y$,
+- $RSS = \sum(y_i - \hat{y}_i)^2$ is the variability unexplained by the model,
+- $p$ is the number of predictors,
+- $n - p - 1$ are the residual degrees of freedom.
+
+The numerator measures how much variance the predictors collectively explain; the denominator measures how much variance remains unexplained per degree of freedom.
+
+**Interpreting the $F$-statistic:**
+
+- If $H_0$ is true (no predictor is related to $Y$), we expect $F \approx 1$ — the explained variance is about the same as the unexplained variance per degree of freedom.
+- If $H_a$ is true (at least one predictor is related), the numerator will be larger than the denominator, giving $F > 1$. The larger the $F$, the stronger the evidence against $H_0$.
+
+We compute a **$p$-value** for the $F$-statistic: the probability of observing an $F$ this large (or larger) under $H_0$. A small $p$-value → reject $H_0$ → at least one predictor is associated with the response.
+
+```{python}
+#| label: f-statistic
+
+print(f"F-statistic: {res_mlr.fvalue:.2f}")
+print(f"p-value:     {res_mlr.f_pvalue:.2e}")
+```
+
+### Why not just use individual p-values?
+
+You might wonder: if we already have a $p$-value for each coefficient, why do we need the $F$-test?
+
+The answer comes from the problem of **multiple testing**. When $p$ is large, some individual $p$-values will be small *just by chance*, even when none of the predictors are truly related to $Y$. For example, if $p = 100$ and all null hypotheses $H_0: \beta_j = 0$ are true, we would still expect about 5 of the 100 $p$-values to fall below 0.05 by random chance alone.
+
+The $F$-statistic jointly tests all coefficients at once and naturally accounts for the number of predictors, making it the correct first tool for asking "is **any** predictor related to $Y$?"
+
+::: {.callout-note}
+## When is the F-test most important?
+
+When $p$ is small relative to $n$, the $F$-test and the individual $t$-tests tend to agree. The $F$-test becomes especially important when $p$ is large — relying on individual $p$-values alone in that setting can lead to spurious conclusions.
+:::
+
+:::{.callout-tip}
+## Check-in
+
+For the GreenAbate MLR, the $F$-statistic is `{python} f"{res_mlr.fvalue:.1f}"` with a $p$-value of `{python} fmt_p(res_mlr.f_pvalue)`.
+
+1. What does this $F$-statistic tell us?
+2. Looking at the individual $p$-values in the coefficient table, which predictor(s) appear significantly related to CO₂ reductions?
+3. The `offsets` $p$-value is large. Does this mean offset purchases have no effect on CO₂ reductions in reality?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. An $F$-statistic of `{python} f"{res_mlr.fvalue:.1f}"` (with $p \ll 0.05$) gives very strong evidence that at least one of the three predictors is associated with CO₂ reductions. We reject $H_0$.
+
+2. Both `process` and `efficiency` have very small $p$-values ($p < 0.0001$), providing strong individual evidence of an association after accounting for the other predictors. `offsets` has a large $p$-value, suggesting it adds little beyond what `process` and `efficiency` already explain.
+
+3. Not necessarily. The `offsets` $p$-value says that, *in the context of a model that already includes `process` and `efficiency`*, additional offset spending is not significantly associated with CO₂ reductions. The true coefficient in our data-generating model is $-0.001$, which is effectively zero — so the data is correctly telling us that `offsets` contributes almost nothing. In general, a large $p$-value for one predictor in an MLR does not mean the variable has no effect overall; it means it adds little **beyond what the other predictors already capture**.
+:::
+
+## Deciding on important variables
+
+### Variable selection
+
+Once we decide to use MLR, an important question is: **which predictors should we include?** This is called **variable selection** (or model selection). Including unnecessary predictors does not help predictions and increases variance; leaving out important ones biases our estimates.
+
+With $p$ predictors there are $2^p$ possible subsets of variables to consider — for even moderate $p$ (say, 30 or 40) this is completely infeasible to try exhaustively. Three common automated approaches are:
+
+### Forward selection
+
+Start with the simplest model and build up:
+
+1. Start with the **null model** — only an intercept, no predictors.
+2. Fit $p$ simple regressions (one per predictor) and add the predictor that results in the **lowest RSS**.
+3. Fit all two-variable models that include the predictor chosen in step 2, and add the next predictor that gives the lowest RSS.
+4. Continue adding predictors until a **stopping criterion** is met (e.g., no remaining predictor produces a statistically significant improvement, or an information criterion such as AIC or BIC stops decreasing).
+
+### Backward selection
+
+Start with the most complex model and simplify:
+
+1. Start with the **full model** — all $p$ predictors included.
+2. Remove the predictor with the **largest $p$-value** (least statistically significant).
+3. Refit the model and repeat.
+4. Stop when all remaining predictors are significant at the chosen threshold.
+
+::: {.callout-note}
+## Which approach to use?
+
+Backward selection cannot be used when $p > n$ (more predictors than observations), because the full model cannot be fit. Forward selection is always applicable. There is also **mixed selection**, which alternates adding and removing variables.
+
+In practice, **cross-validation** (which we study in a later lesson) is a more principled approach to variable selection because it directly estimates how well each candidate model generalizes to new data.
+:::
+
+Below we implement forward selection on the GreenAbate dataset:
+
+```{python}
+#| label: forward-selection
+
+remaining = ['process', 'efficiency', 'offsets']
+selected  = []
+
+print("Forward selection steps:")
+print("-" * 55)
+for step in range(1, len(remaining) + 1):
+    best_rss = np.inf
+    best_var = None
+    for var in remaining:
+        X_tmp = sm.add_constant(df[selected + [var]])
+        res_tmp = sm.OLS(df['co2_reduction'], X_tmp).fit()
+        rss_tmp = np.sum(res_tmp.resid**2)
+        if rss_tmp < best_rss:
+            best_rss = rss_tmp
+            best_var = var
+    selected.append(best_var)
+    remaining.remove(best_var)
+    print(f"Step {step}: Add '{best_var}'  →  RSS = {best_rss:.2f}")
+```
+
+:::{.callout-tip}
+## Check-in
+
+Looking at the forward selection output above:
+
+1. Which predictor was selected first? Does this match what you would expect from the scatter plots in lesson 3.1?
+2. How much does adding the second predictor reduce the RSS compared to adding the third?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. `process` was selected first because it has the strongest individual linear association with CO₂ reductions — consistent with the scatter plots in lesson 3.1 where `process` showed the clearest positive trend.
+
+2. The RSS decreases substantially after adding `efficiency` in step 2 (reflecting a genuine association in the data-generating model), but only slightly when `offsets` is added in step 3. This is consistent with the near-zero true coefficient for `offsets` and its large $p$-value in the MLR output.
+:::
+
+## Model fit
+
+### $R^2$ in multiple regression
+
+The $R^2$ statistic is defined the same way as in SLR:
+
+$$R^2 = 1 - \frac{RSS}{TSS}$$
+
+It still measures the proportion of variance in $Y$ explained by the model. However, in MLR there is an important caveat: **adding a predictor to the model will always increase $R^2$ (or leave it unchanged), even if that predictor has no real relationship with $Y$**. This happens because any additional variable can absorb a small amount of random noise in the training data, reducing the RSS slightly.
+
+```{python}
+#| label: r2-comparison
+
+model_slr    = LinearRegression().fit(df[['process']], df['co2_reduction'])
+model_mlr_sk = LinearRegression().fit(df[['process', 'efficiency', 'offsets']], df['co2_reduction'])
+
+r2_slr  = model_slr.score(df[['process']], df['co2_reduction'])
+r2_mlr  = model_mlr_sk.score(df[['process', 'efficiency', 'offsets']], df['co2_reduction'])
+
+y_hat_slr = model_slr.predict(df[['process']])
+y_hat_mlr = model_mlr_sk.predict(df[['process', 'efficiency', 'offsets']])
+
+rse_slr = np.sqrt(np.sum((df['co2_reduction'] - y_hat_slr)**2) / (n - 2))
+rse_mlr = np.sqrt(np.sum((df['co2_reduction'] - y_hat_mlr)**2) / (n - 4))
+
+acc_df = pd.DataFrame({
+    'Model':  ['SLR (process only)', 'MLR (all three predictors)'],
+    'R²':     [f'{r2_slr:.3f}', f'{r2_mlr:.3f}'],
+    'RSE (ktCO₂e)': [f'{rse_slr:.3f}', f'{rse_mlr:.3f}'],
+})
+print(acc_df.to_string(index=False))
+```
+
+Because $R^2$ never decreases when predictors are added, using it alone to compare models with different numbers of predictors can be misleading. The **adjusted $R^2$** corrects for this by penalizing the model for each additional predictor:
+
+$$\bar{R}^2 = 1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}$$
+
+Unlike $R^2$, the adjusted $R^2$ can decrease when adding a predictor that does not improve the fit enough to justify the added complexity. It is therefore a better criterion for comparing models of different sizes.
+
+:::{.callout-tip}
+## Check-in
+
+1. How does the MLR $R^2$ of `{python} f"{r2_mlr:.3f}"` compare to the SLR $R^2$ of `{python} f"{r2_slr:.3f}"`? Is this expected?
+2. The RSE decreased from `{python} f"{rse_slr:.3f}"` (SLR) to `{python} f"{rse_mlr:.3f}"` (MLR). What does this tell us?
+3. If you kept adding random noise predictors (variables with no true relationship to CO₂ reductions) to the model, what would happen to $R^2$? What about adjusted $R^2$?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. The MLR $R^2$ is higher, meaning the three-predictor model explains more variance in CO₂ reductions than `process` alone. This is expected because `efficiency` is genuinely associated with the response in the data-generating model.
+
+2. The lower RSE in the MLR means predictions are on average closer to the observed values. Adding `efficiency` as a predictor improves accuracy because it captures variation in CO₂ reductions that `process` alone could not explain.
+
+3. $R^2$ would keep increasing (or stay the same) every time a new predictor is added, regardless of whether it is truly relevant. Adjusted $R^2$ would decrease if a predictor's contribution to reducing RSS is not large enough to offset the penalty for the extra parameter. This is why adjusted $R^2$ is the better criterion when comparing models of different sizes.
+:::
+
+## Additional topics (preview)
+
+Chapter 3 of ISLP discusses several extensions to the basic MLR model that we will return to in future lessons:
+
+- **Qualitative (categorical) predictors** — how to include non-numeric variables (e.g., industry sector, region) using dummy/indicator variables.
+- **Interaction terms** — when the effect of one predictor on $Y$ depends on the value of another. For example, the benefit of process upgrades might depend on the firm's current efficiency level.
+- **Non-linear relationships** — polynomial regression and other transformations that allow the linear regression framework to fit curved relationships, while remaining "linear" in the parameters.
