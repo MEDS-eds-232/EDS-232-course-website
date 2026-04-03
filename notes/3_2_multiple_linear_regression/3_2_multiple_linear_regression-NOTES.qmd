@@ -159,9 +159,6 @@ Notice that the RSS is a function of the coefficients $\hat{\beta}_i$, the value
 
 <!-- TO DO: would be really nice to have a small example of an RSS on two variables and graph.  -->
 
-
-### Interpreting the coefficients and prediction
-
 Once we have found coefficients that minimize the $RSS$ we obtain our model 
 
 $$\hat{f}(X_1, \ldots, X_p) = \hat{\beta_0} + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.$$
@@ -170,15 +167,17 @@ We can obtain new insights about our data through $\hat{f}$. To begin with, give
 
 $$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2 + \cdots + \hat{\beta}_p x_p.$$
 
+::: {.callout-note}
+## Interpreting the MLR coefficients
+
 We can also interpret the coefficients to gain insight about how each predictor $X_i$ is associated with the response variable $Y$: 
 
 > *the coefficient $\hat{\beta}_j$ represents the average change in $Y$ associated with a one-unit increase in $X_j$, holding all other predictors fixed.*
 
 Notice that the interpretation of each coefficient includes the crucial phrase: *holding all other predictors constant*, which is a key difference between MLR and SLR. 
-
+:::
 
 ### Example 
-
 
 ```{python}
 #| label: mlr-fit
@@ -310,20 +309,30 @@ The biggest difference occurs when predictors are strongly correlated — i.e., 
 
 ## Hypothesis testing
 
-### Is there a relationship between the predictors and the response?
+Through hypothsis testing, we look to investigate whether there are relations between the predictors and the responses. 
 
-In SLR, we used the $t$-statistic to test $H_0: \beta_1 = 0$ for a single predictor. In MLR, we can still do this for each individual coefficient, but we also want to ask a broader question:
+Remember that in SLR, 
+$$SLR: Y \approx \beta_0 + \beta_1 X,$$
 
-> *Is **any** predictor related to the response?*
+ so no relationship between $Y$ and the predictor $X$ occurs when $beta_1=0$. Our hypothesis then were
 
-The null and alternative hypotheses for this overall test are:
+- $H_0$: $\beta_1=0 \Rightarrow$ no relationship between response and predictor, and
+- $H_a$: $\beta_1\neq0 \Rightarrow$ some relationship between response and predictor. 
 
-$$H_0: \beta_1 = \beta_2 = \cdots = \beta_p = 0$$
-$$H_a: \text{at least one } \beta_j \neq 0$$
+To investigate whether $H_0$ is true, we test how far $\hat{\beta}_1$ is from 0 relative to its uncertainty: this is what the $t$-statistic measurs. We then ask what is the probability to observe at $t$ value as extreme as this if $\beta_1=0$: this probability is the $p$-value. If the $p$-value is small, then there is evidence of a relationship. 
 
-### The F-statistic
+For multiple regression we have that
 
-To test these hypotheses we use the **$F$-statistic**:
+$$MLR: Y \approx \beta_0 + \beta_1X_1 + \ldots + \beta_p X_p,$$
+
+so no relationship between $Y$ and the predictors $X_1, \ldots, X_p$ happens when $\beta_1 = \ldots = \beta_p = 0$ (all coefficients are 0). So our hypotheses this time are:
+
+- $H_0$: $\beta_1=0 \Rightarrow$ no relationship between $X$ and $Y$, and
+- $H_a$: at least one $\beta_j \neq 0 \Rightarrow$ some relationship between response and some predictor. 
+
+Effectively, we are investigating the question *Is any predictor related to the response?*
+
+Instead of the $t$-statistic, to test these hypotheses we use the **$F$-statistic**:
 
 $$F = \frac{(TSS - RSS)/p}{RSS/(n - p - 1)}$$
 
@@ -332,23 +341,34 @@ where:
 - $TSS = \sum(y_i - \bar{y})^2$ is the total variability in $Y$,
 - $RSS = \sum(y_i - \hat{y}_i)^2$ is the variability unexplained by the model,
 - $p$ is the number of predictors,
+- $n$ is the number of observations in our training data.
 - $n - p - 1$ are the residual degrees of freedom.
 
 The numerator measures how much variance the predictors collectively explain; the denominator measures how much variance remains unexplained per degree of freedom.
 
-**Interpreting the $F$-statistic:**
-
-- If $H_0$ is true (no predictor is related to $Y$), we expect $F \approx 1$ — the explained variance is about the same as the unexplained variance per degree of freedom.
+::: {.callout-note}
+## Interpreting the $F$-statistic
+- If $H_0$ is true (no predictor is related to $Y$), we expect $F \approx 1$. This means the explained variance is about the same as the unexplained variance per degree of freedom.
 - If $H_a$ is true (at least one predictor is related), the numerator will be larger than the denominator, giving $F > 1$. The larger the $F$, the stronger the evidence against $H_0$.
+::: 
 
-We compute a **$p$-value** for the $F$-statistic: the probability of observing an $F$ this large (or larger) under $H_0$. A small $p$-value → reject $H_0$ → at least one predictor is associated with the response.
+Finally, after we have the $F$-statistic, we ask: what is the probability of observing an $F$ this large (or larger) assuming $H_0$ is true? This probability is the **$p$-value** for the $F$-statistic. As before, a small $p$-value implies we can reject $H_0$ and at least one predictor is associated with the response.
 
+:::{.callout-tip}
+## Check-in
 ```{python}
 #| label: f-statistic
 
 print(f"F-statistic: {res_mlr.fvalue:.2f}")
 print(f"p-value:     {res_mlr.f_pvalue:.2e}")
 ```
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+Discussion
+
+:::
+
 
 ### Why not just use individual p-values?
 
