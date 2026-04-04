@@ -122,29 +122,29 @@ where each $\beta_j$ is a number called a **coefficient** and $\epsilon$ is an e
 ### Example 
 In our example dataset:
 
-- $Y =$ `co2_reduction` as the response variable
-- $p = 3$ is the number of predictors (`process`, `efficiency`, `offsets`). 
-- $X_1 =$ `process` predictor 
-- $X_2 =$ `efficiency` predictor
-- $X_3 =$ `offset` predictor 
+- $Y =$ `co2_reduction` is the response variable
+- $p = 3$ is the number of predictors
+- $X_1 =$ `process` is predictor 1
+- $X_2 =$ `efficiency` is predictor 2
+- $X_3 =$ `offset` is predictor 3
 
 So the MLR model takes the form:
 
-$$\texttt{co2\_reduction} = \\beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \cdot \texttt{efficiency} + \beta_3 \cdot \texttt{offsets} + \epsilon$$
+$$\texttt{co2\_reduction} = \beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \cdot \texttt{efficiency} + \beta_3 \cdot \texttt{offsets} + \epsilon.$$
 
 
 ### Estimating the coefficients
 
-As usual, our goal is to estimate the unknown coefficients $\beta_i$ using available data to find an estimate
+As usual, our goal is to estimate the unknown coefficients $\beta_i$ using available data. This will give us a a function $\hat{f}$ we can use as a model for this scenario:
 
 $$\hat{f}(X_1, \ldots, X_p) = \hat{\beta_0} + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.$$
 
-We are given a training set $\{(x_1, y_1), \ldots, (x_n, y_n)\}$ with $n$ observations to do so. For each of the observations
+In this case, we have a training set $\{(x_1, y_1), \ldots, (x_n, y_n)\}$ with $n$ observations to fit the model. For each of the observations $(x_i, y_i)$ we have that:
 
 - $x_i = (x_{i1}, x_{i2}, \ldots, x_{ip})$ is a vector of $p$ predictor values, and 
 - $y_i$ is the response associated to $x_i$.
 
-Just as in a simple linear regression, we find $\hat{\beta}_0, \ldots, \hat{\beta}_p$ by minimizing the residual sum of squares (RSS):
+Just as in a simple linear regression, we find $\hat{\beta}_0, \hat{\beta}_1, \ldots, \hat{\beta}_p$ by minimizing the residual sum of squares (RSS):
 
 $$
 \begin{align}
@@ -154,7 +154,7 @@ RSS &=& \sum_{i=1}^{n} (y_i - \hat{f}(x_i))^2 \\
 \end{align}
 $$
 
-Notice that the RSS is a function of the coefficients $\hat{\beta}_i$, the values $x_i$ are fixed numbers that come from our training data. In practice, the computer finds the coefficients $\hat{\beta}_i$ that minimize the RSS for us.
+Notice that the RSS is a function of the coefficients $\hat{\beta}_i$. The values $x_i$ are fixed numbers that come from our training data. In practice, the computer finds the coefficients $\hat{\beta}_i$ that minimize the RSS for us.
 
 
 <!-- TO DO: would be really nice to have a small example of an RSS on two variables and graph.  -->
@@ -163,21 +163,19 @@ Once we have found coefficients that minimize the $RSS$ we obtain our model
 
 $$\hat{f}(X_1, \ldots, X_p) = \hat{\beta_0} + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.$$
 
-We can obtain new insights about our data through $\hat{f}$. To begin with, given a new observation $(x_1, \ldots, x_p)$, we can predict what the value of $f$ will be by simply plugging in each $x_i$ in the corresponding variable:
+We can use $\hat{f}$ to predict what will be the value of $Y$ at a new observation $(x_1, \ldots, x_p)$ by simply plugging in each $x_i$ in the corresponding variable:
 
 $$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2 + \cdots + \hat{\beta}_p x_p.$$
 
 ::: {.callout-note}
 ## Interpreting the MLR coefficients
 
-We can also interpret the coefficients to gain insight about how each predictor $X_i$ is associated with the response variable $Y$: 
+We can interpret the coefficients to gain insight about how each predictor $X_i$ is associated with the response variable $Y$: 
 
 > *the coefficient $\hat{\beta}_j$ represents the average change in $Y$ associated with a one-unit increase in $X_j$, holding all other predictors fixed.*
 
 Notice that the interpretation of each coefficient includes the crucial phrase: *holding all other predictors constant*, which is a key difference between MLR and SLR. 
 :::
-
-### Example 
 
 ```{python}
 #| label: mlr-fit
@@ -197,12 +195,17 @@ b3_mlr = res_mlr.params['offsets']
 
 For our example data, the estimated coefficients are:
 
-- $\hat{\beta}_0=$ `{python} f"{b0_mlr:.3f}"` : `intercept`
-- $\hat{\beta}_1=$ `{python} f"{b1_mlr:.3f}"` : `process`
-- $\hat{\beta}_2=$ `{python} f"{b2_mlr:.3f}"` : `efficiency`
-- $\hat{\beta}_3=$ `{python} f"{b3_mlr:.3f}"` : `offsets`
+```{python}
+comp_df = pd.DataFrame({
+    'Predictor':   ['process', 'efficiency', 'offsets'],
+    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+                    f"{res_mlr.params['efficiency']:.4f}",
+                    f"{res_mlr.params['offsets']:.4f}"]
+})
+print(comp_df.to_string(index=False))
+```
 
-We can interpret the coefficient associated with the process variable as
+We can interpret the coefficient associated with the `process` variable as
 
 > *$\hat{\beta}_1$ is the average change in CO₂ reduction associated with a \$1K increase in process upgrade spending, assuming efficiency spending and offset purchases remain unchanged.*
 
@@ -212,7 +215,7 @@ We can interpret the coefficient associated with the process variable as
 
 Looking at the MLR coefficients above:
 
-1. What is the interpretation of the `efficiency` coefficient of `{python} f"{b2_mlr:.3f}"`?
+1. What is the interpretation of the `efficiency` coefficient of `{python} f"{b2_mlr:.4f}"`?
 2. What is the predicted CO₂ reduction for a firm that spends \$100K on process upgrades, \$20K on efficiency, and \$50K on offsets?
 3. The `offsets` coefficient is very small and negative. What does that mean?
 :::
@@ -220,7 +223,7 @@ Looking at the MLR coefficients above:
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. Each additional \$1K in energy efficiency upgrades is associated with `{python} f"{b2_mlr:.3f}"` ktCO₂e of additional CO₂ reduction, *holding process and offset spending constant*.
+1. Each additional \$1K in energy efficiency upgrades is associated with `{python} f"{b2_mlr:.4f}"` ktCO₂e of additional CO₂ reduction, *holding process and offset spending constant*.
 
 2. Usin gour model, the estimate is given by $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 \cdot 100 + \hat{\beta}_2 \cdot 20 + \hat{\beta}_3 \cdot 50.$ Computing this we obtain:
 
@@ -232,15 +235,59 @@ print(f"Predicted CO₂ reduction: {pred:.2f} ktCO₂e")
 3. It means if we hold process and efficiency spending constant, higher offset purchases are associated with a *slightly lower* CO₂ reduction. Remember this data is synthetically generated, the true coefficient on `offsets` in the data-generating model is $-0.001$, which is nearly zero, so the model is recovering something close to the truth. In real data a negative coefficient like this might also reflect that firms who buy offsets have already reduced operational emissions as much as they can.
 :::
 
-## Comparing MLR to individual SLRs {#sec-comparison}
+### $p$-values for the coefficents
 
-### Why not just run separate SLRs?
+In standard linear regression (SLR) we have one variable and one response being modelled by $Y \approx \beta_0 + \beta_1X$. After we have found estimates for $\hat{\beta}_0$ and $\hat{\beta}_1$, we can examine whether there is a relationship between $X$ and $Y$ by computing the $p$-value associated to $\hat{\beta}_1$. If the $p$-value is small enough, we conclude the coefficient $\hat{\beta}_1$ is sgnificantly different from 0 and there is evidence of a relationship between $X$ and $Y$.
+
+When we fit a MLR model, which has more than one variable, we can obtain the $p$-value for each parameter $\hat{\beta}_j$. In this case, we use the $p$-value associated to the coefficient $\beta_j$ to understand the *partial effect* of adding the variable $X_j$ into the model, when all other variables are held fixed. 
+
+For our example data we have that:
+
+```{python}
+comp_df = pd.DataFrame({
+    'Predictor':   ['process', 'efficiency', 'offsets'],
+    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+                    f"{res_mlr.params['efficiency']:.4f}",
+                    f"{res_mlr.params['offsets']:.4f}"],
+    'MLR p-value': [fmt_p(res_mlr.pvalues['process']),
+                    fmt_p(res_mlr.pvalues['efficiency']),
+                    fmt_p(res_mlr.pvalues['offsets'])],
+})
+print(comp_df.to_string(index=False))
+```
+
+We can interpret the $p$-value associated with the `process` variable as
+
+> there is a relationshio between the `process` predictor and the response variable `co2_reduction`, when the `efficiency` and `offset` remain fixed. 
+
+:::{.callout-tip}
+## Check-in
+
+Exercise
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+Discussion
+
+:::
+
+## Comparing MLR to individual SLRs {#sec-comparison}
 
 A natural question is: why bother with MLR? Why not fit one SLR for each predictor and look at the results separately?
 
-The problem is that **individual SLR coefficients can be misleading when predictors are correlated**. An SLR of CO₂ reduction on `efficiency` alone produces a coefficient that reflects not only the direct effect of efficiency spending, but also any indirect association between `efficiency` and the other predictors. The MLR coefficient for `efficiency` isolates its direct effect, holding the others constant.
+The problem is that **individual SLR coefficients can be misleading when predictors are correlated**. 
+When two predictors are correlated, each one's SLR coefficient absorbs part of the other's effect. 
+In cases where the predictors are strongly correlated, the SLR coefficients can be substantially biased relative to the "true" marginal effects captured by the MLR coefficients.
 
-Below we compare the SLR and MLR coefficients side by side:
+
+For example, if firms that invest heavily in `process` upgrades tend to also invest heavily in `efficiency`, an SLR of `co2_reduction` on `process` alone will give a coefficient that also reflects some of the `efficiency` effect.
+The MLR coefficient for `process` strips out the `efficiency` effect and reflects only the direct relationship of `process`.
+
+
+As seen below, in our example dataset the SLR and MLR coefficients are similar because the three predictors were drawn independently (approximately uncorrelated by construction). 
+In real datasets, predictors are typically correlated and the divergence between SLR and MLR coefficients can be much larger, sometimes even reversing the sign of a coefficient.
 
 ```{python}
 #| label: slr-mlr-comparison
@@ -272,9 +319,8 @@ comp_df = pd.DataFrame({
 print(comp_df.to_string(index=False))
 ```
 
-In this dataset, the SLR and MLR coefficients are similar because the three predictors were drawn independently (approximately uncorrelated by construction). In real datasets, predictors are typically correlated and the divergence between SLR and MLR coefficients can be much larger — sometimes even reversing the sign of a coefficient.
 
-::: {.callout-note}
+<!-- ::: {.callout-note}
 ## Multicollinearity
 
 **Multicollinearity** refers to the situation where two or more predictors are highly correlated with each other. It causes several problems:
@@ -284,19 +330,8 @@ In this dataset, the SLR and MLR coefficients are similar because the three pred
 - Coefficients become difficult to interpret because it is hard to isolate the effect of one predictor while holding others constant.
 
 Multicollinearity does **not** affect the model's predictions — only the interpretability and stability of individual coefficients.
-:::
+::: -->
 
-:::{.callout-tip}
-## Check-in
-Why can the coefficient for a predictor change — or even reverse sign — when moving from SLR to MLR? In what kind of dataset would you expect the biggest difference?
-:::
-
-:::{.callout-tip collapse="true"}
-## Discussion
-When two predictors are correlated, each one's SLR coefficient absorbs part of the other's effect. For example, if firms that invest heavily in process upgrades tend to also invest heavily in efficiency, an SLR of CO₂ reduction on `process` alone will give a coefficient that also reflects some of the efficiency effect. The MLR coefficient for `process` strips out the efficiency effect and reflects only the direct relationship.
-
-The biggest difference occurs when predictors are strongly correlated — i.e., when multicollinearity is severe. In those cases, the SLR coefficients can be substantially biased relative to the "true" marginal effects captured by the MLR coefficients.
-:::
 
 ## Hypothesis testing
 
@@ -351,7 +386,7 @@ Finally, after we have the $F$-statistic, we ask: what is the probability of obs
 ## Check-in
 
 For our example MLR, the $F$-statistic is `{python} f"{res_mlr.fvalue:.1f}"` with an associated $p$-value of `{python} fmt_p(res_mlr.f_pvalue)`. 
-Given these statistics, what can we say about the relation of `co2_reduction` with the predictors?
+What can we say about the relation of `co2_reduction` with the predictors?
 :::
 
 :::{.callout-tip collapse="true"}
@@ -479,9 +514,7 @@ Looking at the forward selection output above:
 2. The RSS decreases substantially after adding `efficiency` in step 2 (reflecting a genuine association in the data-generating model), but only slightly when `offsets` is added in step 3. This is consistent with the near-zero true coefficient for `offsets` and its large $p$-value in the MLR output.
 :::
 
-## Model fit
-
-### $R^2$ in multiple regression
+## Model fit: $R^2$ in multiple regression
 
 The $R^2$ statistic is defined the same way as in SLR:
 
@@ -489,6 +522,7 @@ $$R^2 = 1 - \frac{RSS}{TSS}$$
 
 It still measures the proportion of variance in $Y$ explained by the model. However, in MLR there is an important caveat: **adding a predictor to the model will always increase $R^2$ (or leave it unchanged), even if that predictor has no real relationship with $Y$**. This happens because any additional variable can absorb a small amount of random noise in the training data, reducing the RSS slightly.
 
+<!-- 
 ```{python}
 #| label: r2-comparison
 
@@ -507,11 +541,12 @@ rse_mlr = np.sqrt(np.sum((df['co2_reduction'] - y_hat_mlr)**2) / (n - 4))
 
 acc_df = pd.DataFrame({
     'Model':  ['SLR (process only)', 'MLR (all three predictors)'],
-    'R²':     [f'{r2_slr:.3f}', f'{r2_mlr:.3f}'],
-    'RSE (ktCO₂e)': [f'{rse_slr:.3f}', f'{rse_mlr:.3f}'],
+    'R²':     [f'{r2_slr:.4f}', f'{r2_mlr:.4f}'],
+    'RSE (ktCO₂e)': [f'{rse_slr:.4f}', f'{rse_mlr:.4f}'],
 })
 print(acc_df.to_string(index=False))
 ```
+
 
 Because $R^2$ never decreases when predictors are added, using it alone to compare models with different numbers of predictors can be misleading. The **adjusted $R^2$** corrects for this by penalizing the model for each additional predictor:
 
@@ -522,8 +557,8 @@ Unlike $R^2$, the adjusted $R^2$ can decrease when adding a predictor that does 
 :::{.callout-tip}
 ## Check-in
 
-1. How does the MLR $R^2$ of `{python} f"{r2_mlr:.3f}"` compare to the SLR $R^2$ of `{python} f"{r2_slr:.3f}"`? Is this expected?
-2. The RSE decreased from `{python} f"{rse_slr:.3f}"` (SLR) to `{python} f"{rse_mlr:.3f}"` (MLR). What does this tell us?
+1. How does the MLR $R^2$ of `{python} f"{r2_mlr:.4f}"` compare to the SLR $R^2$ of `{python} f"{r2_slr:.4f}"`? Is this expected?
+2. The RSE decreased from `{python} f"{rse_slr:.4f}"` (SLR) to `{python} f"{rse_mlr:.4f}"` (MLR). What does this tell us?
 3. If you kept adding random noise predictors (variables with no true relationship to CO₂ reductions) to the model, what would happen to $R^2$? What about adjusted $R^2$?
 :::
 
@@ -534,7 +569,7 @@ Unlike $R^2$, the adjusted $R^2$ can decrease when adding a predictor that does 
 
 2. The lower RSE in the MLR means predictions are on average closer to the observed values. Adding `efficiency` as a predictor improves accuracy because it captures variation in CO₂ reductions that `process` alone could not explain.
 
-3. $R^2$ would keep increasing (or stay the same) every time a new predictor is added, regardless of whether it is truly relevant. Adjusted $R^2$ would decrease if a predictor's contribution to reducing RSS is not large enough to offset the penalty for the extra parameter. This is why adjusted $R^2$ is the better criterion when comparing models of different sizes.
-:::
+3. $R^2$ would keep increasing (or stay the same) every time a new predictor is added, regardless of whether it is truly relevant. Adjusted $R^2$ would decrease if a predictor's contribution to reducing RSS is not large enough to offset the penalty for the extra parameter. This is why adjusted $R^2$ is the better criterion when comparing models of different sizes. 
+:::-->
 
 <!-- TODO: there's more topics 3.3+ that I would like to cover in the future -->
