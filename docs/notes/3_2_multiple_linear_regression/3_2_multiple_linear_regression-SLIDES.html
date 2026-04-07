@@ -9,7 +9,7 @@
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.7.33">
 
-  <title>EDS 232 - Machine Learning for Environmental Science – assessing_model_accuracy-slides-blank</title>
+  <title>EDS 232 - Machine Learning for Environmental Science – multiple_linear_regression-slides</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -27,27 +27,7 @@
       margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
-    /* CSS for citations */
-    div.csl-bib-body { }
-    div.csl-entry {
-      clear: both;
-      margin-bottom: 0em;
-    }
-    .hanging-indent div.csl-entry {
-      margin-left:2em;
-      text-indent:-2em;
-    }
-    div.csl-left-margin {
-      min-width:2em;
-      float:left;
-    }
-    div.csl-right-inline {
-      margin-left:2em;
-      padding-left:1em;
-    }
-    div.csl-indent {
-      margin-left: 2em;
-    }  </style>
+  </style>
   <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-aa079427e74470e351a8ef456b814408.css">
   <link href="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
@@ -152,511 +132,499 @@
 <h2></h2>
 <p><span class="custom-title">EDS 232</span></p>
 <hr class="hr-teal">
-<p><span class="custom-subtitle">Lesson 3</span></p>
-<p><span class="custom-subtitle"><em>Training and test errors, and model flexibility</em></span></p>
+<p><span class="custom-subtitle">Lesson 4</span></p>
+<p><span class="custom-subtitle"><em>Multiple linear regression</em></span></p>
 </section>
 <section id="in-this-lesson" class="slide level2" data-menu-title="In this lesson">
 <h2></h2>
 <p><span class="slide-title">In this lesson</span></p>
 <hr>
-<ul>
-<li>Training and test MSE</li>
-</ul>
 <p><br></p>
 <ul>
-<li>Overfitting</li>
-</ul>
-<p><br></p>
-<ul>
-<li>Model bias and variance</li>
-</ul>
-<p><br></p>
-<ul>
-<li>The bias-variance tradeoff</li>
+<li>The multiple linear regression (MLR) model</li>
+<li>Estimating coefficients with least squares</li>
+<li>Individual <span class="math inline">\(p\)</span>-values: partial effects</li>
+<li>Comparing MLR to individual SLRs</li>
+<li>Hypothesis testing: the <span class="math inline">\(F\)</span>-statistic</li>
+<li>Model fit: <span class="math inline">\(R^2\)</span> in MLR and adjusted <span class="math inline">\(R^2\)</span></li>
+<li>Variable selection: forward, backward, and mixed</li>
 </ul>
 </section>
-<section id="notation-recap" class="slide level2" data-menu-title="Notation recap">
+<section id="section-mlr" class="slide level2" data-menu-title="# The MLR model #" data-background="#047C90">
 <h2></h2>
-<p><span class="slide-title">Notation recap</span></p>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+The multiple linear regression model
+</p>
+</div>
+</section>
+<section id="mlr-motivation" class="slide level2" data-menu-title="From SLR to MLR">
+<h2></h2>
+<p><span class="slide-title">From SLR to MLR</span></p>
 <hr>
-<p>We have a <strong>training set</strong> of <span class="math inline">\(n\)</span> observed data points:</p>
-<p><span class="math display">\[\{(x_1, y_1),\, \ldots,\, (x_n, y_n)\}\]</span></p>
-<ul>
-<li><span class="math inline">\(x_i\)</span> = predictor information for observation <span class="math inline">\(i\)</span></li>
-<li><span class="math inline">\(y_i\)</span> = response variable for observation <span class="math inline">\(i\)</span></li>
-</ul>
-<p><br></p>
+<p>In SLR we modelled the relationship between <strong>one</strong> predictor and a response:</p>
+<p><span class="math display">\[\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}\]</span></p>
 <div class="fragment">
-<p>We assume <span class="math inline">\(f\)</span> is the unknown true function, so <span class="math inline">\(f(x_i) = y_i\)</span>.</p>
-<p>We <strong>train</strong> a model on these data points to obtain an estimate <span class="math inline">\(\hat{f}\)</span>.</p>
 <p><br></p>
-<div class="center-text body-text-m teal-text">
-<p>How do we know if <span class="math inline">\(\hat{f}\)</span> is any good?</p>
-</div>
-</div>
-</section>
-<section id="section-mse" class="slide level2" data-menu-title="# Mean Squared Error #" data-background="#047C90">
-<h2></h2>
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">
-Mean Squared Error
-</p>
-</div>
-<p>–</p>
-</section>
-<section id="mse-definition-blank" class="slide level2" data-menu-title="Mean Squared Error">
-<h2></h2>
-<p><span class="slide-title">Mean Squared Error (MSE)</span></p>
-<hr>
-<div class="center-text body-text-m teal-text">
-<p>To evaluate the performance of a model on a given data set, we need some way to measure how well its predictions match the observed data.</p>
-</div>
-<p>For regression, the most common way to measure how close <span class="math inline">\(\hat{f}\)</span> is to the truth is the</p>
-<div style="position: absolute; bottom: 375px; right: 1000px; font-size: 1em;">
-✏️<br>
-
-</div>
-</section>
-<section id="mse-definition" class="slide level2" data-menu-title="Mean Squared Error">
-<h2></h2>
-<p><span class="slide-title">Mean Squared Error (MSE)</span></p>
-<hr>
-<div class="center-text body-text-m teal-text">
-<p>To evaluate the performance of a model on a given data set, we need some way to measure how well its predictions match the observed data.</p>
-</div>
-<p>For regression, the most common way to measure how close <span class="math inline">\(\hat{f}\)</span> is to the truth is the <strong>mean squared error (MSE)</strong>:</p>
-<p><span class="math display">\[\text{MSE} = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{f}(x_i))^2\]</span></p>
-<p><br></p>
+<p>But the GreenAbate dataset has <strong>three</strong> potential predictors. Running separate SLRs has two problems:</p>
+<div class="body-text-m">
 <ul>
-<li>Each term <span class="math inline">\(y_i - \hat{f}(x_i)\)</span> is called a <strong>residual</strong> , it is the difference between the true value and the prediction</li>
-<li>Squaring makes all differences positive and penalizes large errors more</li>
+<li>No single prediction combining all three predictors</li>
+<li>Each SLR ignores the other predictors — coefficients can be misleading when predictors are correlated</li>
 </ul>
-<div class="center-text body-text-m teal-text">
-<p>When computed on the training set, this is called the <strong>training MSE</strong>.</p>
+</div>
+</div>
+<div class="fragment">
+<p><br></p>
+<div class="center-text teal-text body-text-m">
+<p><strong>Multiple linear regression</strong> handles all predictors simultaneously.</p>
+</div>
 </div>
 </section>
-<section id="train-data-plot" class="slide level2" data-menu-title="Training data and true f">
+<section id="mlr-model" class="slide level2" data-menu-title="The MLR model">
 <h2></h2>
-<p><span class="slide-title">Training data and true <span class="math inline">\(f\)</span></span></p>
+<p><span class="slide-title">The MLR model</span></p>
 <hr>
-<p>Below we have simulated train data based on the true underlying function <span class="math inline">\(f\)</span> (black line).</p>
-<div id="55da4b25" class="cell" data-execution_count="2">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-3-output-1.png" class="quarto-figure quarto-figure-center" width="989" height="490"></p>
-</figure>
+<p>With <span class="math inline">\(p\)</span> predictors <span class="math inline">\(X_1, \ldots, X_p\)</span> and response <span class="math inline">\(Y\)</span>:</p>
+<p><span class="math display">\[Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon\]</span></p>
+<div class="fragment">
+<p><br></p>
+<div class="body-text-m">
+<p>The key phrase in interpreting each coefficient:</p>
+<blockquote>
+<p><em><span class="math inline">\(\hat{\beta}_j\)</span> is the average change in <span class="math inline">\(Y\)</span> associated with a one-unit increase in <span class="math inline">\(X_j\)</span>, <strong>holding all other predictors constant</strong>.</em></p>
+</blockquote>
 </div>
 </div>
+<div class="fragment">
+<p><br></p>
+<p>For GreenAbate (<span class="math inline">\(p = 3\)</span>):</p>
+<p><span class="math display">\[\texttt{co2\_reduction} = \beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \cdot \texttt{efficiency} + \beta_3 \cdot \texttt{offsets} + \epsilon\]</span></p>
 </div>
 </section>
-<section id="train-mse-viz" class="slide level2" data-menu-title="Visualizing the training MSE">
+<section id="mlr-fit" class="slide level2" data-menu-title="MLR fitted coefficients">
 <h2></h2>
-<p><span class="slide-title">Visualizing the training MSE</span></p>
+<p><span class="slide-title">Fitted MLR coefficients for GreenAbate</span></p>
 <hr>
-<p>We fit a linear model to the training data and obtain the estimate: <span class="math inline">\(\hat{f}(x)=\)</span> 0.81x + 8.25.</p>
-<p>The <strong>residuals</strong> (dashed red lines) show the difference between each <span class="math inline">\(y_i\)</span> and <span class="math inline">\(\hat{f}(x_i)\)</span>.</p>
-<p>Using these we calcualte the train MSE for this <span class="math inline">\(\hat{f}\)</span> to be 8614.9.</p>
-<div id="227654d6" class="cell" data-execution_count="3">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-4-output-1.png" class="quarto-figure quarto-figure-center" width="789" height="390"></p>
-</figure>
+<div id="d26a3d57" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-stdout">
+<pre><code>           Coefficient Std. error t-statistic  p-value
+ Intercept      3.4543     0.3416       10.11 &lt; 0.0001
+   process      0.0461     0.0013       35.37 &lt; 0.0001
+efficiency      0.1831     0.0075       24.37 &lt; 0.0001
+   offsets     -0.0088     0.0037       -2.36   0.0193</code></pre>
 </div>
+</div>
+<div class="fragment">
+<p><br></p>
+<div class="body-text-m">
+<p>The fitted model is:</p>
+<p><span class="math display">\[\widehat{\texttt{co2}} = 3\.454 + 0\.0461 \cdot \texttt{process} + 0\.1831 \cdot \texttt{efficiency} \-0\.0088 \cdot \texttt{offsets}\]</span></p>
 </div>
 </div>
 </section>
-<section id="section-test-data" class="slide level2" data-menu-title="Test Data" data-background="#047C90">
+<section id="checkin-mlr-interp" class="slide level2" data-menu-title="Check-in: MLR coefficients" data-background="#053660">
 <h2></h2>
 <div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">
-Test data and the test MSE
-</p>
-</div>
-</section>
-<section id="checkin-1" class="slide level2" data-menu-title="Check-in" data-background="#053660">
-<h2></h2>
-<div class="vertical-center">
 <p class="custom-subtitle bottombr">
 Check-in
 </p>
-<p>If you were going to take a final exam, how would you prefer the instructor to create the questions?</p>
+<p class="custom-subtitle3">
+What is the interpretation of the <code>efficiency</code> coefficient of 0.1831?
+</p>
+<p class="custom-subtitle3">
+A firm spends $100K on process, $20K on efficiency, $50K on offsets. What is the predicted CO₂ reduction?
+</p>
+</div>
+</section>
+<section id="checkin-mlr-answers" class="slide level2" data-menu-title="Check-in: MLR answers" data-background="#053660">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Check-in — answers
+</p>
+<p class="custom-subtitle3">
+Each additional $1K in efficiency upgrades is associated with 0.1831 ktCO₂e of additional CO₂ reduction, <em>holding process and offset spending constant</em>.
+</p>
+<p class="custom-subtitle3">
+<span class="math inline">\(\hat{y} = 3\.454 + 0\.0461 \times 100 + 0\.1831 \times 20 \-0\.0088 \times 50 \approx 11\.29\)</span> ktCO₂e
+</p>
+</div>
+</section>
+<section id="section-pvalues" class="slide level2" data-menu-title="# p-values for coefficients #" data-background="#047C90">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+p-values for the coefficients
+</p>
+</div>
+</section>
+<section id="pvalues-mlr" class="slide level2" data-menu-title="Individual p-values in MLR">
+<h2></h2>
+<p><span class="slide-title">Individual <span class="math inline">\(p\)</span>-values: partial effects</span></p>
+<hr>
+<p>In SLR, the <span class="math inline">\(p\)</span>-value for <span class="math inline">\(\hat{\beta}_1\)</span> tests <span class="math inline">\(H_0: \beta_1 = 0\)</span> — is <span class="math inline">\(X\)</span> related to <span class="math inline">\(Y\)</span>?</p>
+<div class="fragment">
+<p><br></p>
+<p>In MLR, the <span class="math inline">\(p\)</span>-value for each <span class="math inline">\(\hat{\beta}_j\)</span> tests the <strong>partial effect</strong> of <span class="math inline">\(X_j\)</span>:</p>
+<div class="center-text body-text-m teal-text">
+<p><em>Does <span class="math inline">\(X_j\)</span> add information beyond what the other predictors already explain?</em></p>
+</div>
+</div>
+<div class="fragment">
+<p><br></p>
+<div class="body-text-m">
+<ul>
+<li>Small <span class="math inline">\(p\)</span>-value for <span class="math inline">\(\hat{\beta}_j\)</span> → <span class="math inline">\(X_j\)</span> is informative <strong>given the other predictors are in the model</strong></li>
+<li>Large <span class="math inline">\(p\)</span>-value for <span class="math inline">\(\hat{\beta}_j\)</span> → <span class="math inline">\(X_j\)</span> adds little beyond what the others already capture</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="checkin-offsets-pvalue" class="slide level2" data-menu-title="Check-in: offsets p-value" data-background="#053660">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Check-in
+</p>
+<p class="custom-subtitle3">
+The <code>offsets</code> variable has a p-value of 0.0193 in the MLR.
+</p>
+<p class="custom-subtitle3">
+Does this mean carbon offset purchases have no relationship with CO₂ reductions?
+</p>
+<p class="custom-subtitle3">
+What exactly does this p-value tell us?
+</p>
+</div>
+</section>
+<section id="checkin-offsets-answers" class="slide level2" data-menu-title="Check-in: offsets answers" data-background="#053660">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Check-in — answers
+</p>
+<p class="custom-subtitle3">
+Not necessarily. A large p-value means <code>offsets</code> adds little <em>beyond what <code>process</code> and <code>efficiency</code> already explain</em>.
+</p>
+<p class="custom-subtitle3">
+In a separate SLR of <code>co2_reduction</code> on <code>offsets</code> alone, the result could differ.
+</p>
+<p class="custom-subtitle3">
+Here, the true coefficient for <code>offsets</code> is <span class="math inline">\(-0.001\)</span> (near zero), so the model is correctly detecting it contributes almost nothing.
+</p>
+</div>
+</section>
+<section id="section-comparison" class="slide level2" data-menu-title="# MLR vs. individual SLRs #" data-background="#047C90">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Comparing MLR to individual SLRs
+</p>
+</div>
+</section>
+<section id="slr-vs-mlr" class="slide level2" data-menu-title="SLR vs. MLR coefficients">
+<h2></h2>
+<p><span class="slide-title">SLR vs.&nbsp;MLR: why not run separate regressions?</span></p>
+<hr>
+<div id="5630eef9" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-stdout">
+<pre><code> Predictor SLR coeff SLR p-value MLR coeff MLR p-value
+   process    0.0460    &lt; 0.0001    0.0461    &lt; 0.0001
+efficiency    0.1793    &lt; 0.0001    0.1831    &lt; 0.0001
+   offsets   -0.0060      0.6153   -0.0088      0.0193</code></pre>
+</div>
+</div>
+<div class="fragment">
+<p><br></p>
+<div class="body-text-m">
+<ul>
+<li>In this dataset, SLR ≈ MLR coefficients — because the predictors were drawn independently (uncorrelated by construction).</li>
+<li>In real data, predictors are typically correlated. The divergence can be large, sometimes <strong>reversing the sign</strong> of a coefficient.</li>
+<li>The MLR coefficient reflects the <em>direct</em> effect of each predictor, holding the others constant.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="section-fstat" class="slide level2" data-menu-title="# Hypothesis testing #" data-background="#047C90">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Hypothesis testing: the F-statistic
+</p>
+</div>
+</section>
+<section id="hypotheses-mlr" class="slide level2" data-menu-title="Overall test in MLR">
+<h2></h2>
+<p><span class="slide-title">Is any predictor related to the response?</span></p>
+<hr>
+<p>In SLR we tested <span class="math inline">\(H_0: \beta_1 = 0\)</span>. In MLR, the overall question is:</p>
+<p><span class="math display">\[H_0: \beta_1 = \beta_2 = \cdots = \beta_p = 0\]</span> <span class="math display">\[H_a: \text{at least one } \beta_j \neq 0\]</span></p>
+<div class="fragment">
+<p><br></p>
+<p>We test this with the <strong><span class="math inline">\(F\)</span>-statistic</strong>:</p>
+<p><span class="math display">\[F = \frac{(TSS - RSS)/p}{RSS/(n - p - 1)}\]</span></p>
+</div>
+<div class="fragment">
+<div class="body-text-m">
+<ul>
+<li><span class="math inline">\(F \approx 1\)</span>: no predictor is related to <span class="math inline">\(Y\)</span> (consistent with <span class="math inline">\(H_0\)</span>)</li>
+<li><span class="math inline">\(F \gg 1\)</span>: at least one predictor explains variance beyond noise → evidence against <span class="math inline">\(H_0\)</span></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="fstat-greenabate" class="slide level2" data-menu-title="F-statistic: GreenAbate">
+<h2></h2>
+<p><span class="slide-title">F-statistic for the GreenAbate MLR</span></p>
+<hr>
+<div id="5d41c2ba" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-stdout">
+<pre><code>   Quantity    Value
+F-statistic   612.13
+    p-value &lt; 0.0001</code></pre>
+</div>
+</div>
+<div class="fragment">
+<p><br></p>
+<div class="body-text-m">
+<p>An <span class="math inline">\(F\)</span>-statistic of 612.1 with <span class="math inline">\(p \ll 0.05\)</span> gives very strong evidence that at least one predictor is associated with CO₂ reductions.</p>
+</div>
+</div>
+<div class="fragment">
+<p><br></p>
+<p><strong>Why not just use the individual p-values?</strong></p>
+<p>When <span class="math inline">\(p\)</span> is large, some individual p-values will be small <em>by chance</em> even when no predictor is truly related to <span class="math inline">\(Y\)</span>. With <span class="math inline">\(p = 100\)</span> truly null predictors, we expect ~5 to have <span class="math inline">\(p &lt; 0.05\)</span> by random chance alone. The <span class="math inline">\(F\)</span>-statistic tests all coefficients jointly and accounts for this.</p>
+</div>
+</section>
+<section id="section-modelfit" class="slide level2" data-menu-title="# Model fit #" data-background="#047C90">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Model fit: R² in MLR
+</p>
+</div>
+</section>
+<section id="r2-mlr" class="slide level2" data-menu-title="R² in MLR">
+<h2></h2>
+<p><span class="slide-title"><span class="math inline">\(R^2\)</span> in multiple regression</span></p>
+<hr>
+<p>The <span class="math inline">\(R^2\)</span> formula is the same as in SLR:</p>
+<p><span class="math display">\[R^2 = 1 - \frac{RSS}{TSS}\]</span></p>
+<div class="fragment">
+<p><br></p>
+<div class="body-text-m teal-text">
+<p><strong>Important caveat:</strong> adding a predictor to an MLR model will <strong>always</strong> increase <span class="math inline">\(R^2\)</span> (or leave it unchanged), even if that predictor has no real relationship with <span class="math inline">\(Y\)</span>.</p>
+</div>
+</div>
+<div class="fragment">
+<p><br></p>
+<p>The <strong>adjusted <span class="math inline">\(R^2\)</span></strong> penalizes for the number of predictors:</p>
+<p><span class="math display">\[\bar{R}^2 = 1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}\]</span></p>
+<p>Adjusted <span class="math inline">\(R^2\)</span> can <strong>decrease</strong> when an irrelevant predictor is added — making it better for comparing models of different sizes.</p>
+</div>
+</section>
+<section id="r2-comparison" class="slide level2" data-menu-title="R² comparison: SLR vs MLR">
+<h2></h2>
+<p><span class="slide-title">Comparing SLR and MLR model fit</span></p>
+<hr>
+<div id="0020a585" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-stdout">
+<pre><code>                     Model    R² RSE (ktCO₂e)
+        SLR (process only) 0.611        3.138
+MLR (all three predictors) 0.904        1.571</code></pre>
+</div>
+</div>
+<div class="fragment">
+<p><br></p>
+<div class="body-text-m">
+<ul>
+<li><span class="math inline">\(R^2\)</span> increased from 0.611 to 0.904 — <code>efficiency</code> is genuinely predictive.</li>
+<li>RSE decreased from 3.138 to 1.571 ktCO₂e — predictions are more accurate with all three predictors.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="section-varsel" class="slide level2" data-menu-title="# Variable selection #" data-background="#047C90">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Variable selection
+</p>
+</div>
+</section>
+<section id="varsel-problem" class="slide level2" data-menu-title="The variable selection problem">
+<h2></h2>
+<p><span class="slide-title">Which predictors should we include?</span></p>
+<hr>
+<p>With <span class="math inline">\(p\)</span> predictors there are <span class="math inline">\(2^p\)</span> possible subsets:</p>
+<div class="body-text-m">
+<ul>
+<li><span class="math inline">\(p = 3\)</span>: <strong>8 models</strong> — feasible to compare exhaustively</li>
+<li><span class="math inline">\(p = 10\)</span>: 1,024 models</li>
+<li><span class="math inline">\(p = 30\)</span>: over 1 billion models — completely infeasible</li>
+</ul>
+</div>
+<div class="fragment">
+<p><br></p>
+<p>Three common automated approaches for large <span class="math inline">\(p\)</span>:</p>
+<div class="body-text-m">
+<ul>
+<li><span class="teal-text"><strong>Forward selection</strong></span>: start with nothing, add one predictor at a time</li>
+<li><span class="teal-text"><strong>Backward selection</strong></span>: start with everything, remove one at a time</li>
+<li><span class="teal-text"><strong>Mixed selection</strong></span>: combine forward and backward steps</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="all-8-models" class="slide level2" data-menu-title="All 8 GreenAbate models">
+<h2></h2>
+<p><span class="slide-title">RSS for all 8 possible GreenAbate models</span></p>
+<hr>
+<div id="85ce90d5" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-stdout">
+<pre><code>                    Predictors    RSS
+              (intercept only) 5016.8
+                       process 1950.3
+                    efficiency 3601.4
+                       offsets 5010.4
+          process + efficiency  497.5
+             process + offsets 1949.8
+          efficiency + offsets 3571.4
+process + efficiency + offsets  483.8</code></pre>
+</div>
+</div>
+<div class="fragment">
+<p><br></p>
+<div class="teal-text body-text-m">
+<p><strong>Check-in:</strong> Trace through forward selection using this table.</p>
+<p>Which predictor would be added first? Second? Does adding <code>offsets</code> meaningfully reduce RSS?</p>
+</div>
+</div>
+</section>
+<section id="checkin-forward-sel" class="slide level2" data-menu-title="Check-in: forward selection" data-background="#053660">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Check-in — forward selection answers
+</p>
+<p class="custom-subtitle3">
+Step 1: <code>process</code> has the lowest single-predictor RSS → added first.
+</p>
+<p class="custom-subtitle3">
+Step 2: <code>process + efficiency</code> has lower RSS than <code>process + offsets</code> → <code>efficiency</code> added second.
+</p>
+<p class="custom-subtitle3">
+Step 3: adding <code>offsets</code> gives only a tiny further reduction — whether it is included depends on the stopping criterion.
+</p>
+</div>
+</section>
+<section id="forward-backward" class="slide level2" data-menu-title="Forward and backward selection">
+<h2></h2>
+<p><span class="slide-title">Forward and backward selection</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><strong>Forward selection</strong></p>
 <ol type="1">
-<li>Have the exam questions be a subset of the homework questions you already completed this quarter.</li>
-<li>Come up with new questions you have not seen before.</li>
+<li>Start: null model (intercept only)</li>
+<li>Add the predictor with the largest RSS reduction</li>
+<li>Repeat until stopping criterion is met</li>
+</ol>
+<p>✓ Always applicable (works when <span class="math inline">\(p &gt; n\)</span>)</p>
+<p>✗ A variable added early may become redundant later</p>
+</div><div class="column" style="width:50%;">
+<p><strong>Backward selection</strong></p>
+<ol type="1">
+<li>Start: full model (all <span class="math inline">\(p\)</span> predictors)</li>
+<li>Remove the predictor with the largest <span class="math inline">\(p\)</span>-value</li>
+<li>Repeat until all remaining predictors are significant</li>
+</ol>
+<p>✓ Considers all predictors from the start</p>
+<p>✗ Cannot be used when <span class="math inline">\(p &gt; n\)</span></p>
+</div></div>
+</section>
+<section id="mixed-selection" class="slide level2" data-menu-title="Mixed selection">
+<h2></h2>
+<p><span class="slide-title">Mixed selection</span></p>
+<hr>
+<p><strong>Mixed selection</strong> (stepwise) combines forward and backward steps:</p>
+<p><br></p>
+<div class="body-text-m">
+<ol type="1">
+<li>Start with the null model</li>
+<li><strong>Forward step</strong>: add the variable with the largest RSS reduction</li>
+<li><strong>Backward step</strong>: check if any included variable now has a large <span class="math inline">\(p\)</span>-value — if so, remove it</li>
+<li>Continue until no variables are added or removed</li>
 </ol>
 </div>
-</section>
-<section id="test-data" class="slide level2" data-menu-title="Test data">
-<h2></h2>
-<p><span class="slide-title">Test data</span></p>
-<hr>
-<p>A model will generally perform better when evaluated on the data it was trained on.</p>
-<p>But in most cases, we want to use our model to make predictions on previously unseen data.</p>
-<p><br></p>
 <div class="fragment">
-<p><strong>Test data</strong> is data that is <strong>not part of the training dataset</strong>, used to evaluate how well our model generalizes to previously unseen observations.</p>
 <p><br></p>
+<div class="body-text-m teal-text">
+<p>This fixes the main weakness of forward selection: a variable added early can be <em>removed</em> once other, better variables are in the model.</p>
 </div>
-<div class="fragment">
-<p>When we have enough data, we divide our observations into two groups:</p>
+</div>
+</section>
+<section id="other-metrics" class="slide level2" data-menu-title="Other selection criteria">
+<h2></h2>
+<p><span class="slide-title">Other criteria for variable selection</span></p>
+<hr>
+<p>RSS alone always favors larger models — use criteria that <strong>penalize complexity</strong>:</p>
+<p><br></p>
 <div class="body-text-m">
-<ul>
-<li><p><span class="teal-text"><strong>Training set:</strong></span> used to fit the model and estimate <span class="math inline">\(\hat{f}\)</span></p></li>
-<li><p><span class="teal-text"><strong>Test set:</strong></span> held out until after training, used only to evaluate performance</p></li>
-</ul>
-</div>
-</div>
-</section>
-<section id="train-test-split" class="slide level2" data-menu-title="Train/test split">
-<h2></h2>
-<p><span class="slide-title">Splitting observations into train and test sets</span></p>
-<hr>
-<div id="9179ecc4" class="cell" data-execution_count="4">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-5-output-1.png" class="quarto-figure quarto-figure-center" width="989" height="490"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="test-mse" class="slide level2" data-menu-title="Test MSE">
-<h2></h2>
-<p><span class="slide-title">Test MSE</span></p>
-<hr>
-<p><br></p>
-<p>When we compute the MSE on the test data, we get the <strong>test MSE</strong>.</p>
-<p>We generally care much more about the test MSE than the training MSE.</p>
-<p><br></p>
-<p><strong>Check-in:</strong> Intuitively, what do you expect to be larger: the training MSE or the test MSE?</p>
-</section>
-<section id="test-mse-viz" class="slide level2" data-menu-title="Visualizing the test MSE">
-<h2></h2>
-<p><span class="slide-title">Visualizing the test MSE</span></p>
-<hr>
-<p>Our linear model <span class="math inline">\(\hat{f}(x)=\)</span> 0.81x + 8.25 has the following residuals on the test set, with a test MSE of 9169.18.</p>
-<div id="4c14cd62" class="cell" data-execution_count="5">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-6-output-1.png" class="quarto-figure quarto-figure-center" width="989" height="490"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="section-overfitting" class="slide level2" data-menu-title="# Overfitting #" data-background="#047C90">
-<h2></h2>
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">
-Overfitting
-</p>
-</div>
-</section>
-<section id="overfitting-def-blank" class="slide level2" data-menu-title="What is overfitting?">
-<h2></h2>
-<p><span class="slide-title">Overfitting</span></p>
-<hr>
-<p>One instance in which it is useful to calcualte both the <em>train MSE</em> and the <em>test MSE</em> is to understand when a model is overfitting.</p>
-<div style="position: absolute; bottom: 470px; right: 1000px; font-size: 1em;">
-✏️<br>
-
-</div>
-</section>
-<section id="overfitting-def" class="slide level2" data-menu-title="What is overfitting?">
-<h2></h2>
-<p><span class="slide-title">Overfitting</span></p>
-<hr>
-<p>One instance in which it is useful to calcualte both the <em>train MSE</em> and the <em>test MSE</em> is to understand when a model is overfitting.</p>
-<p>We say a model is <strong>overfitting</strong> when it has a:</p>
-<div class="body-text-m">
-<ul>
-<li><strong>small training MSE</strong>, but a</li>
-<li><strong>large test MSE</strong>, and</li>
-<li>a simpler model would have achieved a lower test MSE.</li>
-</ul>
-</div>
-<div class="body-text-m gray-text">
-<blockquote>
-<p>“Our learning procedure is working too hard to find patterns in the training data, and may be picking up some patterns that are just caused by random chance rather than by true properties of <span class="math inline">\(f\)</span>.” <span class="citation" data-cites="islp_2023">(<a href="#/references" role="doc-biblioref" onclick="">James et al. 2023</a>)</span></p>
-</blockquote>
-</div>
-</section>
-<section id="remember-our-data" class="slide level2" data-menu-title="Train/test split reprise">
-<h2></h2>
-<p><span class="slide-title">Remember our train and test sets</span></p>
-<hr>
-<div id="3c00fcf3" class="cell" data-execution_count="6">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-7-output-1.png" class="quarto-figure quarto-figure-center" width="989" height="490"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="three-models" class="slide level2" data-menu-title="Three models fitted">
-<h2></h2>
-<p><span class="slide-title">Three models for the same training data</span></p>
-<hr>
-<div id="4b137580" class="cell" data-execution_count="7">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-8-output-1.png" class="quarto-figure quarto-figure-center" width="789" height="390"></p>
-</figure>
-</div>
-</div>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Criterion</th>
+<th>Formula</th>
+<th>Goal</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Adjusted <span class="math inline">\(R^2\)</span></td>
+<td><span class="math inline">\(1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}\)</span></td>
+<td>Maximize</td>
+</tr>
+<tr class="even">
+<td>AIC</td>
+<td><span class="math inline">\(n\log(RSS/n) + 2p\)</span></td>
+<td>Minimize</td>
+</tr>
+<tr class="odd">
+<td>BIC</td>
+<td><span class="math inline">\(n\log(RSS/n) + p\log(n)\)</span></td>
+<td>Minimize</td>
+</tr>
+<tr class="even">
+<td>Test MSE (CV)</td>
+<td>held-out set error</td>
+<td>Minimize</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="fragment">
-<div class="teal-text">
-<p><strong>Check-in:</strong> Which model do you think will have the lowest training MSE? The lowest test MSE?</p>
-</div>
-</div>
-</section>
-<section id="train-test-mse" class="slide level2" data-menu-title="Train vs. test MSE">
-<h2></h2>
-<p><span class="slide-title">Training MSE vs.&nbsp;test MSE</span></p>
-<hr>
-<div class="columns">
-<div class="column" style="width:55%;">
-<div id="c751fe2b" class="cell" data-execution_count="8">
-<div class="cell-output cell-output-display">
-<div>
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-9-output-1.png" width="444" height="390"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
 <p><br></p>
-<p>As flexibility increases, the <span class="teal-text">training MSE decreases</span>…</p>
-<p><br></p>
-<p>…but the <span class="teal-text">test MSE may go back up!</span></p>
-</div></div>
-</section>
-<section id="train-test-mse-checkin" class="slide level2" data-menu-title="Train vs. test MSE">
-<h2></h2>
-<p><span class="slide-title">Training MSE vs.&nbsp;test MSE</span></p>
-<hr>
-<div class="columns">
-<div class="column" style="width:55%;">
-<div id="be8be28a" class="cell" data-execution_count="9">
-<div class="cell-output cell-output-display">
-<div>
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-10-output-1.png" width="444" height="390"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
-<p><br></p>
-<p>As flexibility increases, the <span class="teal-text">training MSE decreases</span>…</p>
-<p><br></p>
-<p>…but the <span class="teal-text">test MSE may go back up!</span></p>
-<p><br></p>
-<div class="teal-text">
-<p><strong>Check-in:</strong> Which model is overfitting, and why?</p>
-<p>Does a better fit on the training data always indicate good performance on unseen data?</p>
-</div>
-</div></div>
-</section>
-<section id="models-on-test" class="slide level2" data-menu-title="Models on test data">
-<h2></h2>
-<p><span class="slide-title">Models predictions on the test set</span></p>
-<hr>
-<div id="233ab58b" class="cell" data-execution_count="10">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-11-output-1.png" class="quarto-figure quarto-figure-center" width="989" height="490"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="center-text body-text-s teal-text">
-<p>The degree 15 polynomial has the lowest training MSE but fails to capture the trend in the test data.</p>
-</div>
-</section>
-<section id="section-bias-variance" class="slide level2" data-menu-title="# Bias-Variance Tradeoff #" data-background="#047C90">
-<h2></h2>
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">
-The bias-variance tradeoff
-</p>
-</div>
-</section>
-<section id="model-variance" class="slide level2" data-menu-title="Model variance">
-<h2></h2>
-<p><span class="slide-title">Model variance</span></p>
-<hr>
-<p><strong>Model variance</strong> is how much <span class="math inline">\(\hat{f}\)</span> would change if we trained it on a different dataset drawn from the same population.</p>
-<p><br></p>
-<div class="fragment">
-<div class="body-text-m">
-<ul>
-<li><p><span class="teal-text"><strong>High-variance model:</strong></span> very sensitive to the specific training data: a small change in the data produces a very different <span class="math inline">\(\hat{f}\)</span></p></li>
-<li><p><span class="teal-text"><strong>Low-variance model:</strong></span> relatively stable across different training sets</p></li>
-</ul>
-</div>
-<p><br></p>
-</div>
-</section>
-<section id="two-training-sets" class="slide level2" data-menu-title="Two training sets">
-<h2></h2>
-<p><span class="slide-title">Suppose we collect a second training set</span></p>
-<hr>
-<div id="90d0efc1" class="cell" data-execution_count="11">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-12-output-1.png" class="quarto-figure quarto-figure-center" width="989" height="490"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="center-text body-text-s">
-<p>Both datasets come from the same true <span class="math inline">\(f\)</span> but differ due to random noise.</p>
-</div>
-</section>
-<section id="variance-demo" class="slide level2" data-menu-title="Variance visualization">
-<h2></h2>
-<p><span class="slide-title">High vs.&nbsp;low variance</span></p>
-<hr>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div id="4bae700e" class="cell" data-execution_count="12">
-<div class="cell-output cell-output-display">
-<div>
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-13-output-1.png" width="689" height="390"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:50%;">
-<div id="60ea07b8" class="cell" data-execution_count="13">
-<div class="cell-output cell-output-display">
-<div>
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-14-output-1.png" width="689" height="390"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-<div class="center-text teal-text">
-<div class="teal-text">
-<p><strong>Check-in:</strong> Which method has higher variance,</p>
-<p>the linear model or the degree 15 polynomial? Why?</p>
-</div>
-</div>
-</section>
-<section id="model-bias" class="slide level2" data-menu-title="Model bias">
-<h2></h2>
-<p><span class="slide-title">Model bias</span></p>
-<hr>
-<p><strong>Model bias</strong> is the error introduced by the assumptions built into the model.</p>
-<p><br></p>
-<div class="fragment">
-<div class="body-text-m">
-<ul>
-<li><p><span class="teal-text"><strong>High-bias model:</strong></span> its assumptions are too restrictive to capture the true shape of <span class="math inline">\(f\)</span>: it will be systematically wrong no matter how much data we give it</p></li>
-<li><p><span class="teal-text"><strong>Low-bias model:</strong></span> flexible enough to approximate the true shape of <span class="math inline">\(f\)</span></p></li>
-</ul>
-</div>
-<p><br></p>
-</div>
-<div class="fragment">
-<div class="body-text-m gray-text">
-<p>Example: if the true <span class="math inline">\(f\)</span> is cubic but we fit a linear model, the linear model simply cannot capture the true shape, it will always be biased.</p>
-</div>
-</div>
-</section>
-<section id="bv-decomposition" class="slide level2" data-menu-title="Bias-variance decomposition">
-<h2></h2>
-<p><span class="slide-title">The bias-variance decomposition</span></p>
-<hr>
-<p><br></p>
-<p>Roughly speaking and from a theoretical perspective, the <strong>expected test MSE</strong> decomposes as:</p>
-<p><span class="math display">\[\text{Expected test MSE} = \underbrace{\text{Model variance}}_{\text{sensitivity to training data}} + \underbrace{\text{Model bias}^2}_{\text{systematic error}} + \underbrace{\text{Irreducible error}}_{\text{Var}(\epsilon)}\]</span></p>
-<p><br></p>
-<div class="fragment">
-<ul>
-<li><p>The <strong>irreducible error</strong> <span class="math inline">\(\text{Var}(\epsilon)\)</span> is always present and positive, it sets a lower bound on the test MSE</p></li>
-<li><p><strong>Model variance</strong> and <strong>bias</strong> are non-negative and thus contribute to the MSE, but depend on the model we choose.</p></li>
-</ul>
-</div>
-<div class="fragment">
-<div class="center-text body-text-m teal-text">
-<p>To minimize the expected test MSE, we need <em>both</em> low variance and low bias.</p>
-</div>
-</div>
-</section>
-<section id="the-tradeoff" class="slide level2" data-menu-title="The tradeoff">
-<h2></h2>
-<p><span class="slide-title">The bias-variance tradeoff</span></p>
-<hr>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="gray-text">
-<blockquote>
-<p>“As we use more flexible methods, the variance will increase and the bias will decrease. The relative rate of change of these two quantities determines whether the test MSE increases or decreases.” <span class="citation" data-cites="islp_2023">(<a href="#/references" role="doc-biblioref" onclick="">James et al. 2023</a>)</span></p>
-</blockquote>
-<blockquote>
-<p>“The challenge is finding a method for which both the variance and the squared bias are reasonably low.” <span class="citation" data-cites="islp_2023">(<a href="#/references" role="doc-biblioref" onclick="">James et al. 2023</a>)</span></p>
-</blockquote>
-</div>
-</div><div class="column" style="width:50%;">
-<div id="ea45c8b8" class="cell" data-execution_count="14">
-<div class="cell-output cell-output-display">
-<div>
-<figure>
-<p><img data-src="2_2_assessing_model_accuracy-SLIDES-BLANK_files/figure-revealjs/cell-15-output-1.png" width="444" height="390"></p>
-</figure>
-</div>
-</div>
-</div>
 <div class="body-text-s">
-<p>From degree 1 → 3: bias drops faster than variance rises, so test MSE falls.</p>
-<p>From degree 3 → 15: variance rises faster than bias drops, so test MSE climbs back up.</p>
+<p>BIC penalizes extra predictors more heavily than AIC (for <span class="math inline">\(n &gt; 7\)</span>), tending to select sparser models. Cross-validation is the most direct approach when the goal is prediction accuracy.</p>
 </div>
-</div></div>
+</div>
 </section>
 <section id="recap" class="slide level2" data-menu-title="Recap">
 <h2></h2>
-<p><span class="slide-title">Recap</span></p>
+<p><span class="slide-title">In this lesson we covered</span></p>
 <hr>
-<p><br></p>
 <ul>
-<li><p>The <strong>training MSE</strong> measures how well <span class="math inline">\(\hat{f}\)</span> fits the training data, but we care more about the <strong>test MSE</strong> because we want to know how our model performs on <strong>unseen data</strong>.</p></li>
-<li><p>A model that fits training data too closely may <strong>overfit</strong>: low training MSE, high test MSE</p></li>
-<li><p><strong>Model variance</strong> measures how sensitive <span class="math inline">\(\hat{f}\)</span> is to the specific training set used</p></li>
-<li><p><strong>Model bias</strong> measures systematic error from restrictive model assumptions</p></li>
-<li><p>The <strong>bias-variance tradeoff</strong>: more flexible models generally have lower bias but higher variance</p></li>
+<li><strong>MLR model</strong>: <span class="math inline">\(Y = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p + \epsilon\)</span> — coefficients interpreted <em>holding all else constant</em></li>
+<li>Least squares minimizes RSS; computer solves it</li>
+<li><strong>Individual p-values</strong>: test partial effects (does <span class="math inline">\(X_j\)</span> add beyond the others?)</li>
+<li><strong>F-statistic</strong>: tests <span class="math inline">\(H_0: \beta_1 = \cdots = \beta_p = 0\)</span> — use before relying on individual p-values</li>
+<li><strong><span class="math inline">\(R^2\)</span></strong> always increases with predictors; use <strong>adjusted <span class="math inline">\(R^2\)</span></strong> to compare models of different sizes</li>
+<li><strong>Variable selection</strong>: forward, backward, mixed — use AIC, BIC, adjusted <span class="math inline">\(R^2\)</span>, or CV as criteria</li>
 </ul>
-<p><br></p>
-<div class="center-text teal-text">
-<p>The challenge is finding a model where both variance <em>and</em> bias are reasonably low.</p>
-</div>
-</section>
-<section id="references" class="slide level2 smaller scrollable" data-menu-title="References">
-<h2></h2>
-<p><span class="slide-title">References</span></p>
-<hr>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-islp_2023" class="csl-entry" role="listitem">
-James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E. Taylor. 2023. <em>An Introduction to Statistical Learning: With Applications in <span>Python</span></em>. Springer Texts in Statistics. Cham: Springer.
-</div>
-</div>
 </section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
