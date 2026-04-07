@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="dcterms.date" content="2026-04-06">
 
-<title>Setup – EDS 232 - Machine Learning for Environmental Science</title>
+<title>Assignment 1 – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -58,23 +59,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../../">
-<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/popper.min.js"></script>
-<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -103,17 +104,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
-<body class="nav-sidebar floating nav-fixed quarto-light">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../../index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
     </a>
   </div>
@@ -124,11 +154,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../index.html"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../../notes/week-by-week/week-by-week.html" aria-current="page"> 
+    <a class="nav-link" href="../notes/week-by-week/week-by-week.html"> 
 <span class="menu-text">notes</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -137,7 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
         <li>
-    <a class="dropdown-item" href="../../assignments/assignment-1.html">
+    <a class="dropdown-item" href="../assignments/assignment-1.html">
  <span class="dropdown-text">Assignment 1</span></a>
   </li>  
     </ul>
@@ -148,11 +178,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
         <li>
-    <a class="dropdown-item" href="../../lab/lab1.html">
+    <a class="dropdown-item" href="../lab/lab1.html">
  <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../lab/lab2.html">
+    <a class="dropdown-item" href="../lab/lab2.html">
  <span class="dropdown-text">Lab 2: No lab this week!</span></a>
   </li>  
     </ul>
@@ -180,16 +210,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/setup/setup.html">Setup</a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-        </a>
-    </div>
-  </nav>
   <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
 <p>This wesbite is under construction.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
@@ -197,82 +217,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../notes/week-by-week/week-by-week.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Week by week</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../notes/setup/setup.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Setup</span></a>
-  </div>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Introduction</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">What is machine learning?</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Learning from data</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Training and test errors, and model flexibility</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Linear regression</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Simple linear regression</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#step-1-create-and-clone-course-repositories" id="toc-step-1-create-and-clone-course-repositories" class="nav-link active" data-scroll-target="#step-1-create-and-clone-course-repositories">Step 1: Create and clone course repositories</a></li>
-  <li><a href="#step-2-conda-setup" id="toc-step-2-conda-setup" class="nav-link" data-scroll-target="#step-2-conda-setup">Step 2: Conda setup</a></li>
-  <li><a href="#step-3-vscode-setup" id="toc-step-3-vscode-setup" class="nav-link" data-scroll-target="#step-3-vscode-setup">Step 3: VSCode setup</a></li>
-  <li><a href="#step-4-build-conda-environment-for-the-course" id="toc-step-4-build-conda-environment-for-the-course" class="nav-link" data-scroll-target="#step-4-build-conda-environment-for-the-course">Step 4: Build conda environment for the course</a></li>
-  <li><a href="#step-5-add-jupyter-kernel-for-the-course-environment" id="toc-step-5-add-jupyter-kernel-for-the-course-environment" class="nav-link" data-scroll-target="#step-5-add-jupyter-kernel-for-the-course-environment">Step 5: Add Jupyter kernel for the course environment</a></li>
+  <li><a href="#submission-instructions" id="toc-submission-instructions" class="nav-link active" data-scroll-target="#submission-instructions">Submission Instructions</a></li>
+  <li><a href="#how-to-submit-via-github-to-gradescope" id="toc-how-to-submit-via-github-to-gradescope" class="nav-link" data-scroll-target="#how-to-submit-via-github-to-gradescope">How to Submit via GitHub to Gradescope</a></li>
+  <li><a href="#how-the-otter-grader-works" id="toc-how-the-otter-grader-works" class="nav-link" data-scroll-target="#how-the-otter-grader-works">How the Otter Grader Works</a></li>
+  <li><a href="#ai-policy" id="toc-ai-policy" class="nav-link" data-scroll-target="#ai-policy">AI Policy</a></li>
+  <li><a href="#task-1-edna-vs.-conventional-fish-survey-data-wrangling-40" id="toc-task-1-edna-vs.-conventional-fish-survey-data-wrangling-40" class="nav-link" data-scroll-target="#task-1-edna-vs.-conventional-fish-survey-data-wrangling-40">Task 1: eDNA vs.&nbsp;Conventional Fish Survey — Data Wrangling (40%)</a></li>
+  <li><a href="#task-2-simple-linear-regression-do-edna-and-traditional-surveys-agree-40" id="toc-task-2-simple-linear-regression-do-edna-and-traditional-surveys-agree-40" class="nav-link" data-scroll-target="#task-2-simple-linear-regression-do-edna-and-traditional-surveys-agree-40">Task 2: Simple Linear Regression — Do eDNA and Traditional Surveys Agree? (40%)</a></li>
+  <li><a href="#task-3-statistical-learning-concepts-20" id="toc-task-3-statistical-learning-concepts-20" class="nav-link" data-scroll-target="#task-3-statistical-learning-concepts-20">Task 3: Statistical Learning Concepts (20%)</a></li>
   </ul>
 </nav>
     </div>
@@ -281,7 +238,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Setup</h1>
+<h1 class="title">Assignment 1</h1>
+<p class="subtitle lead">Simple Linear Regression &amp; Statistical Learning Concepts</p>
 </div>
 
 
@@ -289,6 +247,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="quarto-title-meta">
 
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 6, 2026</p>
+    </div>
+  </div>
   
     
   </div>
@@ -298,131 +262,185 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="step-1-create-and-clone-course-repositories" class="level2">
-<h2 class="anchored" data-anchor-id="step-1-create-and-clone-course-repositories">Step 1: Create and clone course repositories</h2>
-<ol type="1">
-<li><p>Create a <code>MEDS/EDS-232</code> directory in your personal computer.</p></li>
-<li><p>Create two GitHub repositores named <code>eds232-in-class</code> and <code>eds232-labs</code>.</p></li>
-<li><p>Open a terminal in your personal computer.</p></li>
-<li><p>Confirm git is installed by running <code>git version</code> in the terminal. If git is installed you will get something similar to</p></li>
-</ol>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> version 2.33.1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ol start="5" type="1">
-<li><p><em>If you don’t get a similar output, install git by following the <a href="https://ucsb-meds.github.io/MEDS-installation-guide/#check-git">MEDS installation guide</a>.</em></p></li>
-<li><p>Clone your <code>eds232-in-class</code> and <code>eds232-labs</code> repositories inside the <code>MEDS/EDS-232</code> directory. Make sure you don’t end up cloning one inside the other!</p></li>
-</ol>
-</section>
-<section id="step-2-conda-setup" class="level2">
-<h2 class="anchored" data-anchor-id="step-2-conda-setup">Step 2: Conda setup</h2>
-<ol type="1">
-<li><p>Open Visual Studio Code (VSCode). If you don’t have this IDE in your computer, now is the moment to install it: <a href="https://code.visualstudio.com/download">https://code.visualstudio.com/download</a>.</p></li>
-<li><p>Open a new <strong>bash terminal</strong> in VSCode.</p></li>
-<li><p>Confirm your conda installation by running <code>conda --version</code> in the terminal. If conda is active you will get something similar to</p></li>
-</ol>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> 25.5.1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ol start="4" type="1">
-<li><p><em>If you do not have conda or if conda needs to be added to the shell profile, follow the <a href="https://ucsb-meds.github.io/MEDS-installation-guide/#install-Anaconda">installation and troubleshooting steps</a> in the MEDS installation guide within a <strong>bash terminal</strong> (not Powershell if you are on Windows).</em></p></li>
-<li><p>If your conda version is lower than 25.5.1, update it to the latest by running this command in the terminal:</p></li>
-</ol>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> update <span class="at">--name</span> base conda</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ol start="6" type="1">
-<li>Restart your terminal and run <code>conda --version</code> again to verify it has been updated.</li>
-</ol>
-<p>If updating conda through the terminal does not work, just reinstall it from the link in the MEDS installation guide. An old conda version can keep your environment solving forever when you try to create it.</p>
-</section>
-<section id="step-3-vscode-setup" class="level2">
-<h2 class="anchored" data-anchor-id="step-3-vscode-setup">Step 3: VSCode setup</h2>
-<ol type="1">
-<li><p>Open Visual Studio Code (VSCode). If you don’t have this IDE in your computer, now is the moment to install it: <a href="https://code.visualstudio.com/download">https://code.visualstudio.com/download</a>.</p></li>
-<li><p>Install the VSCode Python extension:</p></li>
-</ol>
-<p><img src="images/extensions-1.png" class="img-fluid" style="width:80.0%"></p>
-<p><img src="images/extensions-2.png" class="img-fluid" style="width:80.0%"></p>
-<p><img src="images/extensions-3.png" class="img-fluid" style="width:80.0%"></p>
-<ol start="3" type="1">
-<li>Search for and install the Jupyter and JupyterHub VSCode extensions too. Their logos look like this:</li>
-</ol>
-<p><img src="images/jupyter-extensions.png" class="img-fluid"></p>
-<ol start="4" type="1">
-<li>Restart VSCode.</li>
-</ol>
-</section>
-<section id="step-4-build-conda-environment-for-the-course" class="level2">
-<h2 class="anchored" data-anchor-id="step-4-build-conda-environment-for-the-course">Step 4: Build conda environment for the course</h2>
-<p><em>Make sure you have completed the conda setup before creating the environment.</em></p>
-<ol type="1">
-<li><p>Open VSCode on your computer.</p></li>
-<li><p>Download the following YAML file and move it into your <code>eds232-in-class</code> directory: <a href="https://github.com/MEDS-eds-232/EDS-232-course-website/blob/main/eds232-env.yml">https://github.com/MEDS-eds-232/EDS-232-course-website/blob/main/eds232-env.yml</a></p></li>
-<li><p>Open a bash terminal inside VSCode and in it:</p></li>
-</ol>
-<ol type="a">
-<li>Verify you are in the <code>eds232-in-class</code> directory.</li>
-<li>Verify that the <code>eds232-env.yml</code> file is in the directory.</li>
-<li>Run the following conda command to build the environment we will use for the course:</li>
-</ol>
-<div class="sourceCode" id="cb4"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>conda env create --name eds232-env --file eds232-env.yml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>It may take a moment to build the environment. Once conda has finished, verify that the environment was created by running <code>conda env list</code>.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
+<p>This assignment covers topics from the course on Python data wrangling, simple linear regression, and foundational statistical learning concepts. Task 1 will contribute 40% to the total grade, Task 2 will contribute 40%, and Task 3 will contribute 20%. Review the rubric for this assignment <a href="https://docs.google.com/document/d/1a5_Eu_RZ24BMorTcvYepYpxLLjZdb79rRsCvU7LMaFQ/edit?tab=t.0#heading=h.kx0dpavp3fk4">here</a>.</p>
+<hr>
+<section id="submission-instructions" class="level2">
+<h2 class="anchored" data-anchor-id="submission-instructions">Submission Instructions</h2>
+<div class="callout callout-style-simple callout-warning no-icon">
+<div class="callout-body d-flex">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>This assignment is submitted as a <strong>GitHub repository</strong> to Gradescope. Before submitting, make sure you satisfy every item in this checklist:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Your repository is properly forked and all work is committed and pushed to <strong>your own GitHub repository</strong>.</label></li>
+<li><label><input type="checkbox">Your notebooks must include your code <strong>and</strong> all required rendered outputs (printed results, plots, tables). <strong>Run all cells before committing</strong> and verify all outputs are visible.</label></li>
+<li><label><input type="checkbox">Each notebook must include the output from the final <code>grader.check_all()</code> cell.</label></li>
+<li><label><input type="checkbox">The notebooks you submit must contain <strong>your solutions</strong>: do not submit the blank template notebooks.</label></li>
+<li><label><input type="checkbox">Double-check that each file is in the correct folder in your repository and that all code and outputs are visible.</label></li>
+</ul>
+<p><strong>Resubmissions after the due date that fail to satisfy one of the checks above will be strictly held to the course’s 50%-regrade resubmission policy (see syllabus).</strong></p>
+<p>If you have any questions about assignment logistics, please reach out to the instructional team.</p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="how-to-submit-via-github-to-gradescope" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-submit-via-github-to-gradescope">How to Submit via GitHub to Gradescope</h2>
+<div class="callout callout-style-simple callout-tip no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<ol type="1">
+<li><strong>Fork</strong> <a href="https://github.com/MEDS-eds-232/assignment-1">this repository</a> from the course GitHub organization.</li>
+<li><strong>Clone</strong> your forked repository to your local machine or the workbench server.</li>
+<li>Complete the tasks inside your cloned repository. Do not move files out of the repo.</li>
+<li>As you work, <strong>commit and push</strong> your changes regularly.</li>
+<li>When you are finished, <strong>make a final push</strong> to ensure your most recent work is on GitHub.</li>
+<li>On Gradescope, select “GitHub” as your submission method and choose your forked repository and the correct branch (usually <code>main</code>).</li>
+</ol>
+<p><strong>Your Gradescope submission will pull directly from whatever is in your GitHub repo at the time of submission, so be sure to submit only once you are completely finished.</strong></p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="how-the-otter-grader-works" class="level2">
+<h2 class="anchored" data-anchor-id="how-the-otter-grader-works">How the Otter Grader Works</h2>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Expand to learn how to use the autograder
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>If you need a refresher on basic conda commands, check out the <a href="https://meds-eds-220.github.io/MEDS-eds-220-course/book/appendices/A-python-environments.html#conda-commands">table on the EDS 220 website</a>.</p>
-</div>
-</div>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
+<p>These notebooks use the <code>otter-grader</code> library to provide instant feedback on your answers as you work. Here is how it works:</p>
+<section id="step-1-initialize-otter" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-initialize-otter">Step 1 — Initialize Otter</h3>
+<p>The very first cell of each notebook initializes the grader. <strong>Always run this cell first before anything else</strong>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize Otter</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> otter</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>grader <span class="op">=</span> otter.Notebook(<span class="st">"hw1-task1.ipynb"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="step-2-complete-the-exercises" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-complete-the-exercises">Step 2 — Complete the exercises</h3>
+<p>Fill in code in the cells marked with <code>...</code> or <code># Your answer here</code>. Read each question carefully and make sure your variable names match exactly what is asked since the autograder checks specific variable names.</p>
+</section>
+<section id="step-3-run-individual-checks" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-run-individual-checks">Step 3 — Run individual checks</h3>
+<p>After completing an exercise, run the <code>grader.check("qN")</code> cell immediately following it. This will tell you right away whether your answer is correct:</p>
+<ul>
+<li>✅ <strong>Passed:</strong> You’ll see something like <code>q3 passed!</code>. If so, you’re good to move on.</li>
+<li>❌ <strong>Failed:</strong> You’ll see a description of what went wrong. Re-read the question, inspect your output, and try again.</li>
+</ul>
+<div class="callout callout-style-simple callout-tip no-icon">
+<div class="callout-body d-flex">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
 </div>
-<div class="callout-title-container flex-fill">
-Do not skip the next step!
+<div class="callout-body-container">
+<p><strong>Stuck?</strong> Check that your variable names, data types, and shapes all match what the question asks for. Most failures come from a small mismatch. For example, returning a list instead of a DataFrame.</p>
 </div>
-</div>
-<div class="callout-body-container callout-body">
-<p>You will need to install manually a jupyter kernel associated to your environment so you can use the environment on VSCode!</p>
 </div>
 </div>
 </section>
-<section id="step-5-add-jupyter-kernel-for-the-course-environment" class="level2">
-<h2 class="anchored" data-anchor-id="step-5-add-jupyter-kernel-for-the-course-environment">Step 5: Add Jupyter kernel for the course environment</h2>
-<p><em>Make sure you have built the eds232-env and completed the VSCode setup before creating the kernel.</em></p>
-<ol type="1">
-<li><p>Open VSCode on your computer.</p></li>
-<li><p>Add a new bash terminal in it.</p></li>
-<li><p>Verify you have the <code>eds232-env</code> conda environment available by running</p></li>
-</ol>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ol start="4" type="1">
-<li>Activate the <code>eds232-env</code> by running</li>
-</ol>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate eds232-env</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ol start="5" type="1">
-<li><p>Verify the environment has been activated.</p></li>
-<li><p>Run</p></li>
-</ol>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> ipykernel install <span class="at">--user</span> <span class="at">--name</span> eds232-env <span class="at">--display-name</span> <span class="st">"eds232-env"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ol start="7" type="1">
-<li>Verify that the kernel has been created by running</li>
-</ol>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> kernelspec list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The output should look similar to this:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Available</span> kernels:</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="ex">eds232-env</span>        /Users/galaz-garcia/Library/Jupyter/kernels/eds220-env</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">python3</span>           /Users/galaz-garcia/opt/anaconda3/share/jupyter/kernels/python3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ol start="8" type="1">
-<li><p>Close and reopen VSCode.</p></li>
-<li><p>To use the new kernel, open a Jupyter notebook on VSCode and…</p></li>
-</ol>
-<p><img src="images/kernel-1.png" class="img-fluid" style="width:90.0%"></p>
-<p><img src="images/kernel-2.png" class="img-fluid" style="width:90.0%"></p>
-<p><img src="images/kernel-4.png" class="img-fluid" style="width:90.0%"></p>
-<p>That’s the end of the setup!</p>
+<section id="step-4-run-grader.check_all-before-submitting" class="level3">
+<h3 class="anchored" data-anchor-id="step-4-run-grader.check_all-before-submitting">Step 4 — Run <code>grader.check_all()</code> before submitting</h3>
+<p>The <strong>very last cell</strong> of each notebook runs all checks at once and gives you a summary:</p>
+<pre><code>q3  ✅ passed
+q5  ✅ passed
+q6  ❌ failed
+...</code></pre>
+<p><strong>You must run this cell and leave its output visible before committing and pushing your notebook.</strong> This summary will be used to grade your autograded answers. You will not receive credit for questions that failed in this section. If this cell has not been run, or its output is missing, you may lose points.</p>
+<div class="callout callout-style-simple callout-warning no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<ul>
+<li><strong>Do not modify or delete</strong> any <code>grader.check()</code> or <code>grader.check_all()</code> cells.</li>
+<li>Passing all autograder checks does <strong>not</strong> guarantee full credit on the assignemnt. Some questions are graded manually as well.</li>
+<li>Always re-run all cells from top to bottom before your final commit to make sure everything still passes in sequence.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="ai-policy" class="level2">
+<h2 class="anchored" data-anchor-id="ai-policy">AI Policy</h2>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Expand to read the course AI policy
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>If you use generative AI on this assignment, you are expected to adhere to the following course policies:</p>
+<ul>
+<li>✅ <strong>Cultivate understanding:</strong> You should be able to fully understand, justify, and explain all the work you submit.</li>
+<li>🤔 <strong>Question AI outputs:</strong> Assume AI-generated answers may be incorrect and verify all information independently.</li>
+<li>🚫 <strong>Academic integrity:</strong> Submitting work you don’t understand or cannot explain will be considered plagiarism, regardless of whether AI use was disclosed.</li>
+</ul>
+<p>If there are concerns about AI use in your work, your instructor will ask you to meet and discuss it. If understanding is clearly lacking and this is the first occurrence, you will have the chance to revise and resubmit for 50% of the original maximum grade within two days.</p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="task-1-edna-vs.-conventional-fish-survey-data-wrangling-40" class="level2">
+<h2 class="anchored" data-anchor-id="task-1-edna-vs.-conventional-fish-survey-data-wrangling-40">Task 1: eDNA vs.&nbsp;Conventional Fish Survey — Data Wrangling (40%)</h2>
+<p>In this task you will wrangle and explore a dataset comparing <strong>environmental DNA (eDNA) metabarcoding</strong> and <strong>traditional survey methods</strong> for detecting fish species richness across 68 global freshwater lakes.</p>
+<p><strong>Based on:</strong> McElroy et al.&nbsp;(2020). <em>Calibrating environmental DNA metabarcoding to conventional surveys for measuring fish species richness.</em> Frontiers in Ecology and Evolution.</p>
+<p><strong>Follow the instructions in <code>hw1-task1.ipynb</code> to complete this task.</strong> You will practice:</p>
+<ul>
+<li>Loading and inspecting a dataset with <code>pandas</code></li>
+<li>Computing summary statistics (mean, median, min, max, std)</li>
+<li>Filtering rows, sorting, and creating new derived columns</li>
+<li>Grouping data and building pivot tables</li>
+<li>Interpreting results in a conservation biology context</li>
+</ul>
+<p>The notebook walks through 10 exercises that progressively build your understanding of the dataset. Autograder checks (<code>grader.check()</code>) are provided after each coding exercise. Make sure to run <code>grader.check_all()</code> in the final cell before submitting.</p>
+<hr>
+</section>
+<section id="task-2-simple-linear-regression-do-edna-and-traditional-surveys-agree-40" class="level2">
+<h2 class="anchored" data-anchor-id="task-2-simple-linear-regression-do-edna-and-traditional-surveys-agree-40">Task 2: Simple Linear Regression — Do eDNA and Traditional Surveys Agree? (40%)</h2>
+<p>Using the same freshwater lakes dataset from Task 1, you will investigate whether <strong>eDNA-based species richness</strong> (<code>dna_richness</code>) can predict <strong>traditional species richness</strong> (<code>trad_richness</code>). If the two methods broadly agree, eDNA could replace costly conventional field surveys in conservation monitoring.</p>
+<p><strong>Follow the instructions in <code>hw1-task2.ipynb</code> to complete this task.</strong> You will practice:</p>
+<ul>
+<li>Visualising a bivariate relationship with a scatter plot</li>
+<li>Manually computing OLS regression coefficients (<span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span>) from scratch using <code>NumPy</code></li>
+<li>Computing residual standard error (RSE), standard errors, and 95% confidence intervals</li>
+<li>Calculating <span class="math inline">\(R^2\)</span> manually</li>
+<li>Verifying your manual results against <code>sklearn</code>’s <code>LinearRegression</code></li>
+<li>Verifying again with <code>statsmodels</code> and interpreting the full regression table, including p-values</li>
+</ul>
+<p>Each step builds directly on the previous one — complete them in order. Autograder checks are provided for all numerical outputs. Written interpretation questions are graded manually. Answer them in the provided Markdown cells.</p>
+<hr>
+</section>
+<section id="task-3-statistical-learning-concepts-20" class="level2">
+<h2 class="anchored" data-anchor-id="task-3-statistical-learning-concepts-20">Task 3: Statistical Learning Concepts (20%)</h2>
+<p>This task tests your conceptual understanding of foundational ideas from <em>An Introduction to Statistical Learning with Applications in Python</em>, Chapter 2.</p>
+<p><strong>Complete your answers directly in <code>hw1-task3.md</code>.</strong></p>
 
 
 </section>

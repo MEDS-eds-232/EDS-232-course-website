@@ -125,10 +125,17 @@ window.Quarto = {
     <a class="nav-link active" href="../../notes/week-by-week/week-by-week.html" aria-current="page"> 
 <span class="menu-text">notes</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../#"> 
-<span class="menu-text">assignments</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">assignments</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-1.html">
+ <span class="dropdown-text">Assignment 1</span></a>
   </li>  
+    </ul>
+  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">weekly labs</span>
@@ -330,7 +337,7 @@ window.Quarto = {
 </figure>
 </div>
 <p>She identifies the <strong>predictor variable</strong> as time since the rookery was protected and the <strong>response variable</strong> as elephant seal population (since elephant seal population <em>responds</em> on time).</p>
-<div id="1d3ac332" class="cell" data-execution_count="2">
+<div id="9ce16f66" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -344,7 +351,7 @@ window.Quarto = {
 <p>What if Amanda was given the true, real relationship between time and population?</p>
 <p>In mathematical terms, this would mean Amanda would have a <strong>function <span class="math inline">\(f\)</span></strong> such that</p>
 <p><span class="math display">\[f(\text{time since protection}) = \text{true population}.\]</span></p>
-<div id="77865849" class="cell" data-execution_count="3">
+<div id="f0001783" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -394,7 +401,7 @@ Discussion
 <h3 class="anchored" data-anchor-id="our-next-best-option-is-to-estimate-f-using-data">Our next best option is to estimate <span class="math inline">\(f\)</span> using data</h3>
 <p>Clearly Amanda has no access to this true, ideal function! So her next best option is to try to <strong>estimate <span class="math inline">\(f\)</span></strong> using data.</p>
 <p>Fortunately, she found some long-term ecological data that measures the elephant seal population since the protection for the rookery was established:</p>
-<div id="e30d1f5f" class="cell" data-execution_count="4">
+<div id="43cfa165" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -419,7 +426,7 @@ Check-in
 </div>
 <p>Error can be introduced during measurement. In this case we have</p>
 <p><span class="math display">\[f(\text{time}) = \text{true population} = \text{observed population} + \text{error}\]</span></p>
-<div id="e0755627" class="cell" data-execution_count="5">
+<div id="39bd6e57" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -429,7 +436,7 @@ Check-in
 </div>
 </div>
 <p>With these observed population values at a given time, Amanda can try to estimate the real function <span class="math inline">\(f\)</span> with another <strong>function <span class="math inline">\(\hat{f}\)</span></strong>. Some estimates of <span class="math inline">\(f\)</span> are shown in the graph below.</p>
-<div id="de2950a4" class="cell" data-execution_count="6">
+<div id="52fc4647" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -680,7 +687,7 @@ Check-in
 </ol>
 <p><span class="math display">\[ \text{observed data} \approx \beta_0 + \beta_1 \text{time} + \beta_2 \text{SST} .\]</span></p>
 <p>This is great! She only needs to find three numbers to get a model for the population.</p>
-<div id="c9d49598" class="cell" data-execution_count="7">
+<div id="376b5cab" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear Model: Population = -1112.46 + 10.10*Time + 64.58*SST</code></pre>
 </div>
@@ -707,7 +714,7 @@ Check-in
 <section id="example-1" class="level3">
 <h3 class="anchored" data-anchor-id="example-1">Example</h3>
 <p>Instead of assuming a linear form, Amanda uses <strong>K-nearest neighbors (KNN)</strong> to estimate <span class="math inline">\(f(\text{time}, \text{SST})\)</span>. For any new combination of time and SST, the model predicts population as the average of the <span class="math inline">\(K\)</span> most similar observations in the training set. No assumptions about the shape of <span class="math inline">\(f\)</span> required.</p>
-<div id="5a6804d7" class="cell" data-execution_count="8">
+<div id="994f478f" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -807,7 +814,7 @@ Check-in
 </div>
 </div>
 <p>She can use this data to train a classifier, and then use it to predict the health status of new, unlabeled seals given their weight and length.</p>
-<div id="64cbbf1d" class="cell" data-execution_count="9">
+<div id="5161b7ce" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -888,7 +895,7 @@ Check-in
 </div>
 </div>
 <p>In this case, there is no response variable <span class="math inline">\(y\)</span>, Amanda lets the algorithm find structure in the data on its own.</p>
-<div id="3634948b" class="cell" data-execution_count="10">
+<div id="7a05a930" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">

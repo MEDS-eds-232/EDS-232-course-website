@@ -1,0 +1,160 @@
+---
+title: Assignment 1
+subtitle: Simple Linear Regression & Statistical Learning Concepts
+date: today
+format:
+  html:
+    toc: true
+---
+
+This assignment covers topics from the course on Python data wrangling, simple linear regression, and foundational statistical learning concepts. Task 1 will contribute 40% to the total grade, Task 2 will contribute 40%, and Task 3 will contribute 20%. Review the rubric for this assignment [here](https://docs.google.com/document/d/1a5_Eu_RZ24BMorTcvYepYpxLLjZdb79rRsCvU7LMaFQ/edit?tab=t.0#heading=h.kx0dpavp3fk4). 
+
+---
+
+## Submission Instructions
+
+::: {.callout-warning appearance="minimal"}
+This assignment is submitted as a **GitHub repository** to Gradescope. Before submitting, make sure you satisfy every item in this checklist:
+
+- [ ] Your repository is properly forked and all work is committed and pushed to **your own GitHub repository**.
+- [ ] Your notebooks must include your code **and** all required rendered outputs (printed results, plots, tables). **Run all cells before committing** and verify all outputs are visible.
+- [ ] Each notebook must include the output from the final `grader.check_all()` cell.
+- [ ] The notebooks you submit must contain **your solutions**: do not submit the blank template notebooks.
+- [ ] Double-check that each file is in the correct folder in your repository and that all code and outputs are visible.
+
+**Resubmissions after the due date that fail to satisfy one of the checks above will be strictly held to the course's 50%-regrade resubmission policy (see syllabus).**
+
+If you have any questions about assignment logistics, please reach out to the instructional team.
+:::
+
+---
+
+## How to Submit via GitHub to Gradescope
+
+::: {.callout-tip appearance="minimal"}
+1. **Fork** [this repository](https://github.com/MEDS-eds-232/assignment-1) from the course GitHub organization.
+2. **Clone** your forked repository to your local machine or the workbench server.
+3. Complete the tasks inside your cloned repository. Do not move files out of the repo.
+4. As you work, **commit and push** your changes regularly.
+5. When you are finished, **make a final push** to ensure your most recent work is on GitHub.
+6. On Gradescope, select "GitHub" as your submission method and choose your forked repository and the correct branch (usually `main`).
+
+**Your Gradescope submission will pull directly from whatever is in your GitHub repo at the time of submission, so be sure to submit only once you are completely finished.**
+:::
+
+---
+
+## How the Otter Grader Works
+
+::: {.callout-note appearance="minimal" collapse="true"}
+## Expand to learn how to use the autograder
+
+These notebooks use the `otter-grader` library to provide instant feedback on your answers as you work. Here is how it works:
+
+### Step 1 — Initialize Otter
+
+The very first cell of each notebook initializes the grader. **Always run this cell first before anything else**:
+
+```python
+# Initialize Otter
+import otter
+grader = otter.Notebook("hw1-task1.ipynb")
+```
+
+### Step 2 — Complete the exercises
+
+Fill in code in the cells marked with `...` or `# Your answer here`. Read each question carefully and make sure your variable names match exactly what is asked since the autograder checks specific variable names.
+
+### Step 3 — Run individual checks
+
+After completing an exercise, run the `grader.check("qN")` cell immediately following it. This will tell you right away whether your answer is correct:
+
+- ✅ **Passed:** You'll see something like `q3 passed!`. If so, you're good to move on.
+- ❌ **Failed:** You'll see a description of what went wrong. Re-read the question, inspect your output, and try again.
+
+::: {.callout-tip appearance="minimal"}
+**Stuck?** Check that your variable names, data types, and shapes all match what the question asks for. Most failures come from a small mismatch. For example, returning a list instead of a DataFrame.
+:::
+
+### Step 4 — Run `grader.check_all()` before submitting
+
+The **very last cell** of each notebook runs all checks at once and gives you a summary:
+
+```
+q3  ✅ passed
+q5  ✅ passed
+q6  ❌ failed
+...
+```
+
+**You must run this cell and leave its output visible before committing and pushing your notebook.** This summary will be used to grade your autograded answers. You will not receive credit for questions that failed in this section. If this cell has not been run, or its output is missing, you may lose points.
+
+::: {.callout-warning appearance="minimal"}
+- **Do not modify or delete** any `grader.check()` or `grader.check_all()` cells.
+- Passing all autograder checks does **not** guarantee full credit on the assignemnt. Some questions are graded manually as well.
+- Always re-run all cells from top to bottom before your final commit to make sure everything still passes in sequence.
+:::
+:::
+
+---
+
+## AI Policy
+
+::: {.callout-note appearance="minimal" collapse="true"}
+## Expand to read the course AI policy
+
+If you use generative AI on this assignment, you are expected to adhere to the following course policies:
+
+- ✅ **Cultivate understanding:** You should be able to fully understand, justify, and explain all the work you submit.
+- 🤔 **Question AI outputs:** Assume AI-generated answers may be incorrect and verify all information independently.
+- 🚫 **Academic integrity:** Submitting work you don't understand or cannot explain will be considered plagiarism, regardless of whether AI use was disclosed.
+
+
+If there are concerns about AI use in your work, your instructor will ask you to meet and discuss it. If understanding is clearly lacking and this is the first occurrence, you will have the chance to revise and resubmit for 50% of the original maximum grade within two days.
+:::
+
+---
+
+
+## Task 1: eDNA vs. Conventional Fish Survey — Data Wrangling (40%)
+
+In this task you will wrangle and explore a dataset comparing **environmental DNA (eDNA) metabarcoding** and **traditional survey methods** for detecting fish species richness across 68 global freshwater lakes.
+
+**Based on:** McElroy et al. (2020). *Calibrating environmental DNA metabarcoding to conventional surveys for measuring fish species richness.* Frontiers in Ecology and Evolution.
+
+**Follow the instructions in `hw1-task1.ipynb` to complete this task.** You will practice:
+
+- Loading and inspecting a dataset with `pandas`
+- Computing summary statistics (mean, median, min, max, std)
+- Filtering rows, sorting, and creating new derived columns
+- Grouping data and building pivot tables
+- Interpreting results in a conservation biology context
+
+The notebook walks through 10 exercises that progressively build your understanding of the dataset. Autograder checks (`grader.check()`) are provided after each coding exercise. Make sure to run `grader.check_all()` in the final cell before submitting.
+
+
+---
+
+## Task 2: Simple Linear Regression — Do eDNA and Traditional Surveys Agree? (40%)
+
+Using the same freshwater lakes dataset from Task 1, you will investigate whether **eDNA-based species richness** (`dna_richness`) can predict **traditional species richness** (`trad_richness`). If the two methods broadly agree, eDNA could replace costly conventional field surveys in conservation monitoring.
+
+**Follow the instructions in `hw1-task2.ipynb` to complete this task.** You will practice:
+
+- Visualising a bivariate relationship with a scatter plot
+- Manually computing OLS regression coefficients ($\hat{\beta}_0$ and $\hat{\beta}_1$) from scratch using `NumPy`
+- Computing residual standard error (RSE), standard errors, and 95% confidence intervals
+- Calculating $R^2$ manually
+- Verifying your manual results against `sklearn`'s `LinearRegression`
+- Verifying again with `statsmodels` and interpreting the full regression table, including p-values
+
+Each step builds directly on the previous one — complete them in order. Autograder checks are provided for all numerical outputs. Written interpretation questions are graded manually. Answer them in the provided Markdown cells.
+
+
+---
+
+## Task 3: Statistical Learning Concepts (20%)
+
+This task tests your conceptual understanding of foundational ideas from *An Introduction to Statistical Learning with Applications in Python*, Chapter 2.
+
+**Complete your answers directly in `hw1-task3.md`.** 
