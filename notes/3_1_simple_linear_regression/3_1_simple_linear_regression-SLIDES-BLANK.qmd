@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
 import statsmodels.api as sm
 
 plt.style.use('default')
@@ -1120,6 +1121,131 @@ plt.close()
 . . . 
 
 An $R^2$ of `{python} f"{R2:.3f}"` means that approximately `{python} f"{R2*100:.1f}"`% of the variability in CO₂ reductions across firms is explained by a linear variation in process upgrade spending alone. The remaining ~`{python} f"{(1-R2)*100:.1f}"`% of variability is driven by other factors not included in this model.
+
+
+---
+
+## {#training-metrics data-menu-title="RSE and R² are training metrics"}
+
+[RSE and $R^2$ are in-sample metrics]{.slide-title}
+
+<hr>
+
+Both RSE and $R^2$ are computed on the **same data used to fit the model**.
+
+They are in-sample measures, analogous to the **training MSE** from the previous lesson.
+
+. . .
+
+::: {.body-text-m}
+- They can give an overly optimistic picture of how the model generalizes to new data.
+- **For prediction goals**: hold out a test set, fit on training data only, evaluate test MSE on the held-out set.
+:::
+
+---
+
+## {#train-test-slr data-menu-title="Train/test MSE for SLR"}
+
+[Train/test MSE for our SLR]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+X_tt = df[['process']]
+y_tt = df['co2_reduction']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_tt, y_tt, test_size=0.2, random_state=42
+)
+
+model_tt  = LinearRegression().fit(X_train, y_train)
+train_mse = np.mean((y_train - model_tt.predict(X_train))**2)
+test_mse  = np.mean((y_test  - model_tt.predict(X_test))**2)
+
+b0_tt = model_tt.intercept_
+b1_tt = model_tt.coef_[0]
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.3, fig_size_y))
+
+axes[0].scatter(X_train, y_train, s=15, alpha=0.5, color='steelblue', label='Train data')
+axes[0].plot(x_line, b0_tt + b1_tt * x_line, 'b-', linewidth=2)
+axes[0].set_xlabel('Process upgrade spending ($K)')
+axes[0].set_ylabel('CO₂ reduction (ktCO₂e)')
+axes[0].set_title(f'Training set  |  MSE = {train_mse:.2f}')
+axes[0].grid(True, alpha=0.3)
+axes[0].legend()
+
+axes[1].scatter(X_test, y_test, s=15, alpha=0.5, color='tomato', label='Test data')
+axes[1].plot(x_line, b0_tt + b1_tt * x_line, 'b-', linewidth=2, label='Fitted on train')
+axes[1].set_xlabel('Process upgrade spending ($K)')
+axes[1].set_ylabel('CO₂ reduction (ktCO₂e)')
+axes[1].set_title(f'Test set  |  MSE = {test_mse:.2f}')
+axes[1].grid(True, alpha=0.3)
+axes[1].legend()
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#bias-variance-slr data-menu-title="SLR in the bias-variance framework"}
+
+[SLR in the bias-variance framework]{.slide-title}
+
+<hr>
+
+SLR has only **2 parameters** ($\hat{\beta}_0$, $\hat{\beta}_1$). It is a very rigid model:
+
+<br>
+
+::: {.body-text-m}
+- [**Low variance:**]{.teal-text} the fitted line generally changes little across different training samples drawn from the same population
+
+- [**Potentially high bias:**]{.teal-text} if the true $f$ is non-linear, a straight line will be systematically wrong regardless of how much data we collect
+:::
+
+---
+
+## {#inference-vs-prediction data-menu-title="Inference vs. prediction"}
+
+[Inference vs. prediction]{.slide-title}
+
+<hr>
+
+<br>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Inference**
+
+- Goal: *understand* the relationship
+
+- Use all available data
+
+- Report RSE, $R^2$, CIs, $p$-values
+- Example: "Does process spending drive CO₂ reductions?"
+:::
+
+::: {.column width="50%"}
+**Prediction**
+
+- Goal: *forecast* accurately for new observations
+
+- Hold out a test set
+
+- Report **test MSE**
+- Example: "Given spending levels, predict a firm's CO₂ reduction"
+:::
+
+::::
+
 
 ---
 

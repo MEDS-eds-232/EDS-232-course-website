@@ -303,6 +303,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#residual-standard-error-rse" id="toc-residual-standard-error-rse" class="nav-link" data-scroll-target="#residual-standard-error-rse">Residual Standard Error (RSE)</a></li>
   <li><a href="#r2-statistic" id="toc-r2-statistic" class="nav-link" data-scroll-target="#r2-statistic"><span class="math inline">\(R^2\)</span> statistic</a></li>
+  <li><a href="#training-and-test-performance" id="toc-training-and-test-performance" class="nav-link" data-scroll-target="#training-and-test-performance">Training and test performance</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -329,7 +330,7 @@ window.Quarto = {
 </header>
 
 
-<p><a href="../../notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html">📊 Slides</a> / <a href="">📊 Blank slides</a></p>
+<p><a href="../../notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html">📊 Slides</a> / <a href="../../notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html">📊 Blank slides</a></p>
 <p>In this lesson we introduce:</p>
 <ul>
 <li>The simple linear regression (SLR) model</li>
@@ -390,7 +391,7 @@ window.Quarto = {
 <p>Remember the “hat” notation (<span class="math inline">\(\hat{\ }\)</span>) throughout these notes indicates an estimated quantity, not the true, unknown population value.</p>
 <p>For the GreenAbate dataset, using <code>process</code> as the sole predictor, a linear model will model CO₂ reductions as</p>
 <p><span class="math display">\[\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}\]</span></p>
-<div id="da539502" class="cell" data-execution_count="3">
+<div id="37dcad3f" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -567,7 +568,7 @@ Check-in
 </div>
 <div class="callout-body-container callout-body">
 <p>The exact 95% confidence intervals for each coefficient is:</p>
-<div id="ef3c257d" class="cell" data-execution_count="5">
+<div id="fbd5e304" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-stdout">
 <pre><code>95% CI for β₀ (intercept): [6.823, 8.567]
 95% CI for β₁ (process):   [0.041, 0.051]</code></pre>
@@ -662,7 +663,7 @@ Check-in
 </div>
 <div class="callout-body-container callout-body">
 <p>The table below shows the regression output for the SLR of <code>co2_reduction</code> on <code>process</code>:</p>
-<div id="38a04431" class="cell" data-execution_count="6">
+<div id="e62b3dd3" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-stdout">
 <pre><code>          Coefficient Std. error t-statistic  p-value
 Intercept      7.6953     0.4421       17.41 &lt; 0.0001
@@ -767,7 +768,7 @@ Discussion
 </ul>
 <p>So</p>
 <p><span class="math display">\[\underbrace{TSS}_{\text{total variability in }Y} - \underbrace{RSS}_{\text{unexplained by regression}} = \text{variability explained by regression}\]</span></p>
-<p>We use this to define <span class="math display">\[R^2 = \frac{TSS - RSS}{TSS}.\]</span></p>
+<p>We use this to define <span class="math display">\[R^2 = \frac{TSS - RSS}{TSS} = 1 - \frac{RSS}{TSS}.\]</span></p>
 <p>So <span class="math inline">\(R^2\)</span> is the fraction of variability that the model accounts for:</p>
 <p><span class="math display">\[R^2 = \frac{\text{variability explained by regression}}{\text{total variability in }Y}.\]</span></p>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -844,6 +845,58 @@ Discussion
 </div>
 </div>
 </div>
+</section>
+<section id="training-and-test-performance" class="level3">
+<h3 class="anchored" data-anchor-id="training-and-test-performance">Training and test performance</h3>
+<p>RSE and <span class="math inline">\(R^2\)</span> are both computed on the same data used to fit the model — they are <strong>in-sample measures</strong>, directly analogous to the training MSE we studied in the previous lesson. Just like the training MSE, they can give an overly optimistic picture of how the model will perform on new, unseen observations.</p>
+<p>For <strong>prediction</strong> goals, the approach is the same one as before: hold out a test set before fitting anything, train the model on the training portion only, and evaluate on the held-out test set.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After using 30% of our available data for testing, we obtain the following metrics for the training and test MSE:</p>
+<div id="train-test-slr" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-stdout">
+<pre><code>Training MSE: 9.185
+Test MSE:  11.582</code></pre>
+</div>
+</div>
+<ol type="1">
+<li>A firm wants to use this model to predict CO₂ reductions for new firms not in this dataset. Which metric should they report, training MSE or test MSE? Why?</li>
+<li>Our SLR has only two parameters. Based on the bias-variance tradeoff from the previous lesson, would you expect this model to overfit?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-19" class="callout-19-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>Test MSE. The goal is prediction on new, unseen firms, not on the data the model was already trained on. The training MSE tells us how well the model fits the data it was optimized on, which is always an overly optimistic estimate of real-world performance.</p></li>
+<li><p>No.&nbsp;SLR sits at the low-flexibility end of the bias-variance tradeoff. It has <strong>low variance</strong> since the fitted line changes relatively little if we retrain on a different sample from the same population. But it has potentially high bias if the true relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> is non-linear, a straight line will be systematically wrong no matter how much data we give it.</p></li>
+</ol>
+</div>
+</div>
+</div>
+<p>This brings up an important distinction that guides how we use and report regression results:</p>
+<ul>
+<li><p><strong>Inference</strong>: the goal is to <em>understand the relationship</em>. This means interpret coefficients, compute confidence intervals, test hypotheses. You typically <strong>use all available data</strong>, and RSE and <span class="math inline">\(R^2\)</span> are appropriate summaries of model fit.</p></li>
+<li><p><strong>Prediction</strong>: the goal is to <em>generate accurate forecasts</em> for new observations. You should always <strong>hold out a test set and report test MSE</strong> as the primary accuracy measure. RSE and <span class="math inline">\(R^2\)</span> computed on training data can be misleading here.</p></li>
+</ul>
 <!-- ## Recap
 
 What we covered in this lesson:

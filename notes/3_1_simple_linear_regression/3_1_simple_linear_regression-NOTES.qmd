@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
 import statsmodels.api as sm
 
 plt.style.use('default')
@@ -53,7 +54,7 @@ df = pd.DataFrame({
 })
 ```
 
-[📊 Slides](3_1_simple_linear_regression-SLIDES.qmd) / [📊 Blank slides]()
+[📊 Slides](3_1_simple_linear_regression-SLIDES.qmd) / [📊 Blank slides](3_1_simple_linear_regression-SLIDES-BLANK.qmd)
 
 In this lesson we introduce:
 
@@ -464,7 +465,7 @@ So
 $$\underbrace{TSS}_{\text{total variability in }Y} - \underbrace{RSS}_{\text{unexplained by regression}} = \text{variability explained by regression}$$
 
 We use this to define
-$$R^2 = \frac{TSS - RSS}{TSS}.$$
+$$R^2 = \frac{TSS - RSS}{TSS} = 1 - \frac{RSS}{TSS}.$$
 
 So $R^2$ is the fraction of variability that the model accounts for:
 
@@ -527,6 +528,57 @@ For the GreenAbate SLR of `co2_reduction` on `process`, RSE = `{python} f"{RSE:.
 
 2. An RSE of `{python} f"{RSE:.2f}"` ktCO₂e (≈ `{python} f"{RSE*1000:.0f}"` metric tons) is large relative to, for example, a 5 ktCO₂e reduction target. A prediction error of that magnitude could meaningfully mislead decisions for a small-target firm. For a firm targeting 25 ktCO₂e, the same RSE represents roughly `{python} f"{RSE/25*100:.0f}"`% of the target, which may or may not be acceptable depending on how precise their planning needs to be.
 :::
+
+### Training and test performance
+
+RSE and $R^2$ are both computed on the same data used to fit the model — they are **in-sample measures**, directly analogous to the training MSE we studied in the previous lesson. Just like the training MSE, they can give an overly optimistic picture of how the model will perform on new, unseen observations.
+
+For **prediction** goals, the approach is the same one as before: hold out a test set before fitting anything, train the model on the training portion only, and evaluate on the held-out test set.
+
+:::{.callout-tip}
+## Check-in
+
+After using 30% of our available data for testing, we obtain the following metrics for the training and test MSE:
+
+```{python}
+#| label: train-test-slr
+
+X = df[['process']]
+y_series = df['co2_reduction']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y_series, test_size=0.3, random_state=42
+)
+
+model_train = LinearRegression().fit(X_train, y_train)
+
+train_mse = np.mean((y_train - model_train.predict(X_train))**2)
+test_mse  = np.mean((y_test  - model_train.predict(X_test))**2)
+
+print(f"Training MSE: {train_mse:.3f}")
+print(f"Test MSE:  {test_mse:.3f}")
+```
+
+
+1. A firm wants to use this model to predict CO₂ reductions for new firms not in this dataset. Which metric should they report, training MSE or test MSE? Why?
+2. Our SLR has only two parameters. Based on the bias-variance tradeoff from the previous lesson, would you expect this model to overfit?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1.  Test MSE. The goal is prediction on new, unseen firms, not on the data the model was already trained on. The training MSE tells us how well the model fits the data it was optimized on, which is always an overly optimistic estimate of real-world performance.
+
+2. No. SLR sits at the low-flexibility end of the bias-variance tradeoff. It has **low variance** since the fitted line changes relatively little if we retrain on a different sample from the same population. But it has potentially high bias if the true relationship between $X$ and $Y$ is non-linear, a straight line will be systematically wrong no matter how much data we give it.
+:::
+
+This brings up an important distinction that guides how we use and report regression results:
+
+- **Inference**: the goal is to *understand the relationship*. This means interpret coefficients, compute confidence intervals, test hypotheses. You typically **use all available data**, and RSE and $R^2$ are appropriate summaries of model fit.
+
+- **Prediction**: the goal is to *generate accurate forecasts* for new observations. You should always **hold out a test set and report test MSE** as the primary accuracy measure. RSE and $R^2$ computed on training data can be misleading here.
+
+
 
 <!-- ## Recap
 
