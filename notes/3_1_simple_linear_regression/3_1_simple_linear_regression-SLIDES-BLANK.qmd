@@ -203,6 +203,21 @@ plt.close()
 
 ---
 
+## {#slr-model-blank data-menu-title="The SLR model"}
+
+[The simple linear regression model]{.slide-title}
+
+<hr>
+
+**Simple linear regression (SLR)** assumes a linear relationship between a single predictor $X$ and a response $Y$:
+
+ <div style="position: absolute; bottom: 470px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+  </div>  
+
+
+---
+
 ## {#slr-model data-menu-title="The SLR model"}
 
 [The simple linear regression model]{.slide-title}
@@ -213,20 +228,52 @@ plt.close()
 
 $$Y \approx \beta_0 + \beta_1 X$$
 
-. . .
-
 ::: {.body-text-m}
 - $\beta_0 =$ **$y$-intercept**: expected value of $Y$ when $X = 0$
 - $\beta_1 =$ **slope**: average change in $Y$ for a one-unit increase in $X$
 :::
-
-. . .
 
 <br>
 
 Since $\beta_0$ and $\beta_1$ are unknown, we **estimate** them from data:
 
 $$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x = \hat{f}(x)$$
+
+---
+
+## {#slr-greenabate data-menu-title="SLR: fitted line"}
+
+[Using a linear model for our data]{.slide-title}
+
+<hr>
+
+Using `process` as the sole predictor, a linear model for our data would assume this functional form:
+
+ <div style="position: absolute; bottom: 470px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+  </div>  
+
+  <br>
+
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+plt.figure(figsize=(fig_size_x, fig_size_y - 0.5))
+plt.scatter(df['process'], df['co2_reduction'], s=15, alpha=0.5, color='steelblue', label='Observed data')
+plt.plot(x_line, b0 + b1 * x_line, 'b-', linewidth=2.5,
+         label=f'$\\hat{{y}} = {b0:.2f} + {b1:.4f}\\,x$')
+plt.xlabel('Process upgrade spending ($K)')
+plt.ylabel('CO₂ reduction (ktCO₂e)')
+plt.grid(True, alpha=0.3)
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
 
 ---
 
@@ -327,7 +374,7 @@ plt.close()
 
 - $\hat{\beta}_0 \approx$ `{python} f"{b0:.2f}"` ktCO₂e: predicted CO₂ reduction when a firm spends \$0 on process upgrades (baseline).
 
-- $\hat{\beta}_1 \approx$ `{python} f"{b1:.4f}"` ktCO₂e per \$K: each additional \$1K in process spending is associated with `{python} f"{b1:.4f}"` ktCO₂e of additional reduction.
+- $\hat{\beta}_1 \approx$ `{python} f"{b1:.4f}"` ktCO₂e per \$K: each additional \$1K in process spending is associated with `{python} f"{b1:.4f}"` ktCO₂e (46 metric tons) of additional reduction.
 
 - Just plug in 150 into the line equation!
 
@@ -365,6 +412,19 @@ plt.close()
 
 ---
 
+## {#residuals-def-blank data-menu-title="Residuals and RSS"}
+
+[Residuals and the RSS]{.slide-title}
+
+<hr>
+
+
+ <div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
+
+---
+
 ## {#residuals-def data-menu-title="Residuals and RSS"}
 
 [Residuals and the RSS]{.slide-title}
@@ -373,18 +433,13 @@ plt.close()
 
 Given $n$ training observations $(x_1, y_1), \ldots, (x_n, y_n)$, we want to find $\hat{\beta}_0$ and $\hat{\beta}_1$ such that the line $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x$ is as close as possible to the observed data.
 
-. . .
-
 The **residual** for observation $i$ is the difference between observed and predicted:
 
 $$e_i = y_i - \hat{y}_i = y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i$$
 
-
 The **residual sum of squares (RSS)** totals all squared residuals:
 
 $$RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2.$$
-
-. . .
 
 <br>
 
@@ -456,6 +511,18 @@ $$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">Accuracy of the coefficient estimates</p>
 </div>
+---
+
+## {#standard-error-blank data-menu-title="Standard errors"}
+
+[Standard errors]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
+
 
 ---
 
@@ -486,7 +553,39 @@ $\sigma^2 = \text{Var}(\epsilon)$ is the error variance (unknown in practice —
 
 . . .
 
+::: {.teal-text}
+
 **Check-in:** In these formulas, what do $n$, $x_i$, $\bar{x}$ represent?
+
+:::
+
+---
+
+## {#confidence-intervals data-menu-title="Confidence intervals"}
+
+[Confidence intervals]{.slide-title}
+
+<hr>
+
+Standard errors allow us to construct confidence intervals for the true coefficients.
+
+A **95% confidence interval** is a range of values such that, *if we repeated our experiment many times*, approximately 95% of the computed intervals would contain the true parameter value.
+
+A 95% confidence interval for a coefficient $\beta_i$ is:
+
+<br>
+
+<br>
+
+ <div style="position: absolute; bottom: 360px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+  </div>  
+
+::: {.body-text-s}
+*(the factor 2 is approximate, the exact value comes from the $t$-distribution with $n-2$ degrees of freedom so it depends on the sample size)*
+:::
+
+
 
 ---
 
@@ -505,12 +604,9 @@ A 95% confidence interval for a coefficient $\beta_i$ is:
 $$[\hat{\beta}_i - 2 \cdot SE(\hat{\beta}_i),\;\; \hat{\beta}_i + 2 \cdot SE(\hat{\beta}_i)]$$
 
 ::: {.body-text-s}
-*(the factor 2 is approximate, the exact value comes from the $t$-distribution with $n-2$ degrees of freedom)*
+*(the factor 2 is approximate, the exact value comes from the $t$-distribution with $n-2$ degrees of freedom so it depends on the sample size)*
 :::
 
-. . .
-
-<br>
 
 ::: {.body-text-s}
 **Interpretation:**
@@ -596,7 +692,7 @@ plt.close()
 :::: {.columns}
 
 ::: {.column width="50%"}
-The exact 95% confidence intervals for each coefficient is:
+The exact 95% confidence intervals for each coefficient are:
 ```{python}
 ci = res.conf_int(alpha=0.05)
 ci_b1_low  = ci.loc['process', 0]
@@ -659,6 +755,18 @@ plt.close()
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">Hypothesis testing</p>
 </div>
+---
+
+## {#hypotheses-blank data-menu-title="Null and alternative hypotheses"}
+
+[Is there a relationship between $X$ and $Y$?]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
+
 
 ---
 
@@ -682,7 +790,6 @@ In mathematical terms this means $\beta_1 \neq 0$:
 
   $$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X.$$
 
-. . .
 
 <br>
 
@@ -690,11 +797,12 @@ In mathematical terms this means $\beta_1 \neq 0$:
 To test $H_0$, we need to determine whether $\hat{\beta}_1$ is sufficiently far from 0 relative to its uncertainty.
 :::
 
+
 ---
 
 ## {#t-stat data-menu-title="t-statistic and p-value"}
 
-[The $t$-statistic and $p$-value]{.slide-title}
+[The $t$-statistic]{.slide-title}
 
 <hr>
 
@@ -708,11 +816,56 @@ If there truly is no relationship between the variables ($\beta_1 = 0$), then $t
 
 <br>
 
-. . .
+---
+
+## {#t-stat data-menu-title="t-statistic and p-value"}
+
+[The $p$-value]{.slide-title}
+
+<hr>
+
+The **$t$-statistic** measures how many standard deviations $\hat{\beta}_1$ is from 0.
 
 The **$p$-value** is the probability of obtaining a $t$-statistic at least as large as the observed $|t|$ in absolute value, *assuming $H_0$ is true.* 
 
 . . .
+
+::: {.teal-text}
+
+:::: {.columns}
+::: {.column width="50%"}
+$$
+\begin{aligned}
+&\text{Small } p\text{-value } (p < 0.05) \\
+&\Rightarrow \text{unlikely to observe } |\hat{\beta}_1| \\
+&\quad\text{this far from 0 by chance if } H_0 \text{ were true} \\
+&\Rightarrow \textbf{reject } H_0 \\
+&\Rightarrow \text{most likely } \beta_1 \neq 0 \\
+&\Rightarrow \text{evidence of a relationship}\\
+&\quad\text{between } X \text{ and } Y
+\end{aligned}
+$$
+:::
+::: {.column width="50%"}
+
+:::
+::::
+
+:::
+
+
+---
+
+## {#t-stat data-menu-title="t-statistic and p-value"}
+
+[The $p$-value]{.slide-title}
+
+<hr>
+
+The **$t$-statistic** measures how many standard deviations $\hat{\beta}_1$ is from 0.
+
+The **$p$-value** is the probability of obtaining a $t$-statistic at least as large as the observed $|t|$ in absolute value, *assuming $H_0$ is true.* 
+
 
 ::: {.teal-text}
 
@@ -780,7 +933,6 @@ print(coef_df.to_string(index=False))
 ::: {.teal-text}
 1. What does the $p$-value for `process` tell us about the relationship between process upgrade spending and CO₂ reductions?
 2. The intercept also has a very small $p$-value. What does this mean about the intercept estimate? What would be an equivalent $H_0$ for $\beta_0$?
-3. How would you interpret the coefficient for `process` in plain language?
 
 :::
 
@@ -826,7 +978,6 @@ print(coef_df.to_string(index=False))
 ::: {.teal-text}
 1. What does the $p$-value for `process` tell us about the relationship between process upgrade spending and CO₂ reductions?
 2. The intercept also has a very small $p$-value. What does this mean about the intercept estimate? What would be an equivalent $H_0$ for $\beta_0$?
-3. How would you interpret the coefficient for `process` in plain language?
 
 :::
 
@@ -839,7 +990,6 @@ print(coef_df.to_string(index=False))
 
 2. The $p$-value for the intercept tests $H_0: \beta_0 = 0$. A small $p$-value means the regression line does not pass through the origin. There is likely some baseline CO₂ reduction even at zero process spending.
 
-3. On average, each additional \$1K invested in production processes is associated with ~0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction.
 :::
 
 :::
@@ -862,19 +1012,27 @@ print(coef_df.to_string(index=False))
 
 <hr>
 
-$R^2$ measures the **proportion of variance in $Y$ explained by the model.**
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
 
-. . .
+
+---
+
+## {#r2-def data-menu-title="R² statistic"}
+
+[$R^2$ statistic]{.slide-title}
+
+<hr>
+
+$R^2$ measures the **proportion of variance in $Y$ explained by the model.**
 
 To compute it we need these ingredients:
 
 - $TSS = \sum_{i=1}^{n}(y_i - \bar{y})^2 =$  **Total Sum of Squares**: *how much do the observations vary from the mean $\bar{y}$: a way of measuring total variability in $Y$*
 
-. . .
-
 - Intuitively: $y_i = \hat{y}_i$ means a $y$-value is explained by the regression
 
-. . .
 
 - $RSS = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 =$ **Residual Sum of Squares**: *variability in $y$ unexplained by the regression*. 
 
@@ -882,10 +1040,9 @@ So
 
 $$\underbrace{TSS}_{\text{total variability in }Y} - \underbrace{RSS}_{\text{unexplained by regression}} = \text{variability explained by regression}$$
 
-. . .
 
 We use this to define
-$$R^2 = \frac{TSS - RSS}{TSS}.$$
+$$R^2 = \frac{TSS - RSS}{TSS} = 1 - \frac{RSS}{TSS}.$$
 
 
 ---
@@ -936,7 +1093,7 @@ R2    = 1 - RSS / TSS
 ::: {.teal-text}
 For our SLR model of `co2_reduction` on `process`, we have that $R^2$ = `{python} f"{R2:.3f}"`.
 
-How would you interpret the $R^2$ value in plain language?
+How would you interpret the $R^2$ value ?
 
 
 ```{python}
