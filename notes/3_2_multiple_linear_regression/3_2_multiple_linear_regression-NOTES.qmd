@@ -44,7 +44,6 @@ df = pd.DataFrame({
 In this lesson we introduce:
 
 - The **multiple linear regression (MLR) model** 
-- Estimating coefficients via **least squares** and interpreting them as partial effects
 - How MLR coefficient estimates can differ from SLR estimates
 - **The $F$-statistic** for testing whether any predictor is related to the response
 - **$R^2$** and **adjusted R^2** in multiple regression
@@ -131,7 +130,7 @@ In our example dataset:
 - $p = 3$ is the number of predictors
 - $X_1 =$ `process` is predictor 1
 - $X_2 =$ `efficiency` is predictor 2
-- $X_3 =$ `offset` is predictor 3
+- $X_3 =$ `offsets` is predictor 3
 
 So the MLR model takes the form:
 
@@ -142,7 +141,7 @@ $$\texttt{co2\_reduction} = \beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \
 
 As usual, our goal is to estimate the unknown coefficients $\beta_i$ using available data. This will give us a a function $\hat{f}$ we can use as a model for this scenario:
 
-$$\hat{f}(X_1, \ldots, X_p) = \hat{\beta_0} + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.$$
+$$\hat{f}(X_1, \ldots, X_p) = \hat{\beta}_0 + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.$$
 
 In this case, we have a training set $\{(x_1, y_1), \ldots, (x_n, y_n)\}$ with $n$ observations to fit the model. For each of the observations $(x_i, y_i)$ we have that:
 
@@ -154,8 +153,8 @@ Just as in a simple linear regression, we find $\hat{\beta}_0, \hat{\beta}_1, \l
 $$
 \begin{align}
 RSS &=& \sum_{i=1}^{n} (y_i - \hat{f}(x_i))^2 \\
-    &=& \sum_{i=1}^{n} (y_i - (\hat{\beta_0} + \hat{\beta}_1x_1 + \ldots + \hat{\beta}_px_p))^2 \\
-    &=& \sum_{i=1}^{n} (y_i - \hat{\beta_0} - \hat{\beta}_1x_1 - \ldots - \hat{\beta}_px_p)^2.
+    &=& \sum_{i=1}^{n} (y_i - (\hat{\beta}_0 + \hat{\beta}_1x_{i1} + \ldots + \hat{\beta}_px_{ip}))^2 \\
+    &=& \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1x_{i1} - \ldots - \hat{\beta}_px_{ip})^2.
 \end{align}
 $$
 
@@ -166,7 +165,7 @@ Notice that the RSS is a function of the coefficients $\hat{\beta}_i$. The value
 
 Once we have found coefficients that minimize the $RSS$ we obtain our model 
 
-$$\hat{f}(X_1, \ldots, X_p) = \hat{\beta_0} + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.$$
+$$\hat{f}(X_1, \ldots, X_p) = \hat{\beta}_0 + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.$$
 
 We can use $\hat{f}$ to predict what will be the value of $Y$ at a new observation $(x_1, \ldots, x_p)$ by simply plugging in each $x_i$ in the corresponding variable:
 
@@ -263,7 +262,7 @@ print(comp_df.to_string(index=False))
 
 We can interpret the $p$-value associated with the `process` variable as
 
-> there is a relationship between the `process` predictor and the response variable `co2_reduction`, when the `efficiency` and `offset` remain fixed. 
+> there is a relationship between the `process` predictor and the response variable `co2_reduction`, when the `efficiency` and `offsets` remain fixed. 
 
 :::{.callout-tip}
 ## Check-in
@@ -462,7 +461,7 @@ Once we decide to use multiple linear regression we follow the steps:
 2. Compute $F$-statistics and its $p$-value
 3. Check individual $p$-values for predictors. 
 
-If there's evidence that *some* predictors are associated with the variable, an important question is: *which predictors should we include in the model?* This is called **variable selection**. This is an important question to resolve since including unnecessary predictors does not help predictions and increases variance; leaving out important ones biases our estimates. 
+If there's evidence that *some* predictors are associated with the response, an important question is: *which predictors should we include in the model?* This is called **variable selection**. This is an important question to resolve since including unnecessary predictors does not help predictions and increases variance; leaving out important ones biases our estimates. 
 
 With $p$ predictors there are $2^p$ possible subsets of variables to consider. For even moderate $p$ (say, 30 or 40) this is completely infeasible to try exhaustively. Three common automated approaches are:
 

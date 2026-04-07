@@ -112,12 +112,107 @@ def fmt_p(p):
 <br>
 
 - The multiple linear regression (MLR) model
-- Estimating coefficients with least squares
-- Individual $p$-values: partial effects
 - Comparing MLR to individual SLRs
-- Hypothesis testing: the $F$-statistic
+- Hypothesis testing and the $F$-statistic
 - Model fit: $R^2$ in MLR and adjusted $R^2$
 - Variable selection: forward, backward, and mixed
+
+---
+
+## {#section-example data-menu-title="# A guiding example #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">A guiding example</p>
+</div>
+
+---
+
+## {#greenabate data-menu-title="The GreenAbate dataset"}
+
+[Our example dataset]{.slide-title}
+
+<hr>
+
+A research consortium tracks **200 manufacturing firms**. For each firm, they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:
+
+<br>
+
+::: {.body-text-m}
+- **`process`** — investment in cleaner production processes (\$K/year)
+- **`efficiency`** — investment in energy efficiency upgrades (\$K/year)
+- **`offsets`** — carbon offset purchases (\$K/year)
+- **`co2_reduction`** — annual CO₂ emissions reduced (ktCO₂e/year)
+:::
+
+<br>
+
+The researchers want to understand:
+
+::: {.center-text .body-text-m .teal-text}
+*Do these investments actually drive emissions reductions, and if so, by how much?*
+:::
+
+---
+
+## {#greenabate-plots data-menu-title="GreenAbate: data overview"}
+
+[CO₂ reduction vs. each predictor]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.5, fig_size_y))
+
+specs = [
+    ('process',    'steelblue',  'Process upgrades ($K)'),
+    ('efficiency', 'darkorange', 'Efficiency upgrades ($K)'),
+    ('offsets',    'seagreen',   'Carbon offsets ($K)'),
+]
+
+for ax, (col, color, xlabel) in zip(axes, specs):
+    ax.scatter(df[col], df['co2_reduction'], s=12, alpha=0.5, color=color)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel('CO₂ reduction (ktCO₂e)')
+    ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.center-text .body-text-s}
+*Synthetic data generated for educational purposes only*
+:::
+
+---
+
+## {#mlr-motivation data-menu-title="From SLR to MLR"}
+
+[From SLR to MLR]{.slide-title}
+
+<hr>
+
+In SLR we modelled the relationship between **one** predictor and a response: 
+
+$$\texttt{co2_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}.$$
+
+
+
+Our example dataset has three potential predictors. Running separate SLRs has two problems:
+
+- No single prediction combining all three predictors
+- Each SLR ignores the other predictors
+
+<br>
+
+::: {.center-text .teal-text .body-text-m}
+**Multiple linear regression** handles all predictors simultaneously.
+:::
+
 
 ---
 
@@ -129,117 +224,183 @@ def fmt_p(p):
 
 ---
 
-## {#mlr-motivation data-menu-title="From SLR to MLR"}
-
-[From SLR to MLR]{.slide-title}
-
-<hr>
-
-In SLR we modelled the relationship between **one** predictor and a response:
-
-$$\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}$$
-
-. . .
-
-<br>
-
-But the GreenAbate dataset has **three** potential predictors. Running separate SLRs has two problems:
-
-::: {.body-text-m}
-- No single prediction combining all three predictors
-- Each SLR ignores the other predictors — coefficients can be misleading when predictors are correlated
-:::
-
-. . .
-
-<br>
-
-::: {.center-text .teal-text .body-text-m}
-**Multiple linear regression** handles all predictors simultaneously.
-:::
-
----
-
 ## {#mlr-model data-menu-title="The MLR model"}
 
 [The MLR model]{.slide-title}
 
 <hr>
 
-With $p$ predictors $X_1, \ldots, X_p$ and response $Y$:
+With $p$ predictors $X_1, \ldots, X_p$ and response variable $Y$, the **multiple linear regression (MLR) model** assumes the predictors and response are related by:
 
-$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon$$
+$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon,$$
+
+each $\beta_i$ is a **coefficient** and $\epsilon$ is an error term. 
 
 . . .
 
-<br>
+In our example data
 
-::: {.body-text-m}
-The key phrase in interpreting each coefficient:
+:::: {.columns}
 
-> *$\hat{\beta}_j$ is the average change in $Y$ associated with a one-unit increase in $X_j$, **holding all other predictors constant**.*
+::: {.column width="50%"}
+- $Y =$ `co2_reduction` is the response variable
+- $p = 3$ is the number of predictors
 :::
 
-. . .
 
-<br>
+::: {.column width="50%"}
+- $X_1 =$ `process` is predictor 1
+- $X_2 =$ `efficiency` is predictor 2
+- $X_3 =$ `offset` is predictor 3
+:::
 
-For GreenAbate ($p = 3$):
+:::
 
-$$\texttt{co2\_reduction} = \beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \cdot \texttt{efficiency} + \beta_3 \cdot \texttt{offsets} + \epsilon$$
+So the MLR model takes the form:
+
+$$\texttt{co2_reduction} = \beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \cdot \texttt{efficiency} + \beta_3 \cdot \texttt{offsets} + \epsilon.$$
+
 
 ---
 
-## {#mlr-fit data-menu-title="MLR fitted coefficients"}
+## {#estimating-coefficients data-menu-title="The MLR model"}
 
-[Fitted MLR coefficients for GreenAbate]{.slide-title}
+[Estimating the MLR coefficients]{.slide-title}
 
 <hr>
 
-```{python}
-#| echo: false
+In the MLR model we assume:
 
-coef_df = pd.DataFrame({
-    '':             ['Intercept', 'process', 'efficiency', 'offsets'],
-    'Coefficient':  [f"{res_mlr.params[v]:.4f}" for v in ['const', 'process', 'efficiency', 'offsets']],
-    'Std. error':   [f"{res_mlr.bse[v]:.4f}"    for v in ['const', 'process', 'efficiency', 'offsets']],
-    't-statistic':  [f"{res_mlr.tvalues[v]:.2f}" for v in ['const', 'process', 'efficiency', 'offsets']],
-    'p-value':      [fmt_p(res_mlr.pvalues[v])   for v in ['const', 'process', 'efficiency', 'offsets']],
+$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon.$$
+
+Our goal is to estimate the coefficients and obtain a model
+
+$$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \hat{\beta}_2 X_2 + \cdots + \hat{\beta}_p X_p$$
+
+Our training set is $\{(x_1, y_1), \ldots, (x_n, y_n)\}$ with $n$ observations to fit the model. For each of the observations $(x_i, y_i)$ we have that:
+
+- $x_i = (x_{i1}, x_{i2}, \ldots, x_{ip})$ is a vector of $p$ predictor values, and 
+- $y_i$ is the response associated to $x_i$.
+
+We estimate the coefficients/fit the model by finding the $\hat{\beta}_i$ that minimize the residual sum of squares (same procedure as SLR!):
+
+$$
+RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1x_{i1} - \ldots - \hat{\beta}_px_{ip})^2 .
+$$
+
+
+---
+
+## {#mlr-coeffs data-menu-title="The MLR model"}
+
+[Interpreting the MLR coefficients]{.slide-title}
+
+<hr>
+
+<div class="page-center vertical-center">
+
+Once we find the coefficients that minimize the RSS we obtain a model:
+
+$$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \hat{\beta}_2 X_2 + \cdots + \hat{\beta}_p X_p$$
+
+We interpret each coefficient as
+
+> *$\hat{\beta}_j$ is the average change in $Y$ associated with a one-unit increase in $X_j$, **holding all other predictors constant**.*
+
+</div>
+
+---
+
+## {#check-in-coeffs data-menu-title="The MLR model"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+For our example data, the estimated coefficients are:
+
+```{python}
+comp_df = pd.DataFrame({
+    'Predictor':   ['process', 'efficiency', 'offsets'],
+    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+                    f"{res_mlr.params['efficiency']:.4f}",
+                    f"{res_mlr.params['offsets']:.4f}"]
 })
-print(coef_df.to_string(index=False))
+print(comp_df.to_string(index=False))
 ```
 
-. . .
+:::: {.columns}
 
-<br>
+::: {.column width="50%"}
 
-::: {.body-text-m}
-The fitted model is:
 
-$$\widehat{\texttt{co2}} = `{python} f"{b0_mlr:.3f}"` + `{python} f"{b1_mlr:.4f}"` \cdot \texttt{process} + `{python} f"{b2_mlr:.4f}"` \cdot \texttt{efficiency} `{python} f"{b3_mlr:.4f}"` \cdot \texttt{offsets}$$
+::: {.teal-text}
+1. What is the interpretation of the `efficiency` coefficient of `{python} f"{b2_mlr:.4f}"`?
+2. How do we calculate the predicted CO₂ reduction for a firm that spends $100K on process upgrades, $20K on efficiency, and $50K on offsets?
+3. The `offsets` coefficient is very small and negative. What does that mean?
+:::
+
+:::
+
+
+::: {.column width="50%"}
+
+:::
+
+
 :::
 
 ---
 
-## {#checkin-mlr-interp data-menu-title="Check-in: MLR coefficients" background="#053660"}
+## {#check-in-coeffs-answers data-menu-title="The MLR model"}
 
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">What is the interpretation of the `efficiency` coefficient of `{python} f"{b2_mlr:.4f}"`?</p>
-<p class="custom-subtitle3">A firm spends \$100K on process, \$20K on efficiency, \$50K on offsets. What is the predicted CO₂ reduction?</p>
-</div>
+[Check-in]{.slide-title}
+
+<hr>
+
+For our example data, the estimated coefficients are:
+
+```{python}
+comp_df = pd.DataFrame({
+    'Predictor':   ['process', 'efficiency', 'offsets'],
+    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+                    f"{res_mlr.params['efficiency']:.4f}",
+                    f"{res_mlr.params['offsets']:.4f}"]
+})
+print(comp_df.to_string(index=False))
+```
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+
+::: {.teal-text}
+1. What is the interpretation of the `efficiency` coefficient of `{python} f"{b2_mlr:.4f}"`?
+2. How do we calculate the predicted CO₂ reduction for a firm that spends $100K on process upgrades, $20K on efficiency, and $50K on offsets?
+3. The `offsets` coefficient is very small and negative. What does that mean?
+:::
+
+:::
+
+
+::: {.column width="50%"}
+
+::: {.body-text-s}
+1. Each additional \$1K in energy efficiency upgrades is associated with `{python} f"{b2_mlr:.4f}"` ktCO₂e of additional CO₂ reduction, *holding process and offset spending constant*.
+
+2. Using our model, the estimate is given by $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 \cdot 100 + \hat{\beta}_2 \cdot 20 + \hat{\beta}_3 \cdot 50 \approx 11.29$ ktCO₂e.
+
+3. It means if we hold process and efficiency spending constant, higher offset purchases are associated with a *slightly lower* CO₂ reduction.
+:::
+
+:::
+
+:::
+
 
 ---
 
-## {#checkin-mlr-answers data-menu-title="Check-in: MLR answers" background="#053660"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in — answers</p>
-<p class="custom-subtitle3">Each additional \$1K in efficiency upgrades is associated with `{python} f"{b2_mlr:.4f}"` ktCO₂e of additional CO₂ reduction, <em>holding process and offset spending constant</em>.</p>
-<p class="custom-subtitle3">$\hat{y} = `{python} f"{b0_mlr:.3f}"` + `{python} f"{b1_mlr:.4f}"` \times 100 + `{python} f"{b2_mlr:.4f}"` \times 20 `{python} f"{b3_mlr:.4f}"` \times 50 \approx `{python} f"{b0_mlr + b1_mlr*100 + b2_mlr*20 + b3_mlr*50:.2f}"`$ ktCO₂e</p>
-</div>
-
----
 
 ## {#section-pvalues data-menu-title="# p-values for coefficients #" background="#047C90"}
 
