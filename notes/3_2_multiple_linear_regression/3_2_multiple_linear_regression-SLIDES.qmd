@@ -1,0 +1,659 @@
+---
+format:
+    revealjs:
+        theme: ../../styles/meds-slides-styles.scss
+        slide-number: true
+        chalkboard: true
+        title-slide: false
+jupyter: eds232-env
+---
+
+```{python}
+#| echo: false
+from itertools import combinations
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+import statsmodels.api as sm
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+plt.rcParams['legend.fontsize'] = 'x-large'
+
+np.random.seed(7)
+n = 200
+
+process    = np.random.uniform(0, 300, n)
+efficiency = np.random.uniform(0,  50, n)
+offsets    = np.random.uniform(0, 100, n)
+
+co2_reduction = (2.939
+                 + 0.046  * process
+                 + 0.189  * efficiency
+                 - 0.001  * offsets
+                 + np.random.normal(0, 1.69, n))
+
+df = pd.DataFrame({
+    'process':       process,
+    'efficiency':    efficiency,
+    'offsets':       offsets,
+    'co2_reduction': co2_reduction
+})
+
+# Individual SLR fits
+X_proc = sm.add_constant(df['process'])
+res_proc = sm.OLS(df['co2_reduction'], X_proc).fit()
+
+X_eff = sm.add_constant(df['efficiency'])
+res_eff = sm.OLS(df['co2_reduction'], X_eff).fit()
+
+X_off = sm.add_constant(df['offsets'])
+res_off = sm.OLS(df['co2_reduction'], X_off).fit()
+
+# MLR fit
+X_mlr  = sm.add_constant(df[['process', 'efficiency', 'offsets']])
+res_mlr = sm.OLS(df['co2_reduction'], X_mlr).fit()
+
+b0_mlr = res_mlr.params['const']
+b1_mlr = res_mlr.params['process']
+b2_mlr = res_mlr.params['efficiency']
+b3_mlr = res_mlr.params['offsets']
+
+# R² / RSE comparison
+model_slr    = LinearRegression().fit(df[['process']], df['co2_reduction'])
+model_mlr_sk = LinearRegression().fit(df[['process', 'efficiency', 'offsets']], df['co2_reduction'])
+r2_slr  = model_slr.score(df[['process']], df['co2_reduction'])
+r2_mlr  = model_mlr_sk.score(df[['process', 'efficiency', 'offsets']], df['co2_reduction'])
+rse_slr = np.sqrt(np.sum((df['co2_reduction'] - model_slr.predict(df[['process']]))**2) / (n - 2))
+rse_mlr = np.sqrt(np.sum((df['co2_reduction'] - model_mlr_sk.predict(df[['process', 'efficiency', 'offsets']]))**2) / (n - 4))
+
+# All 8 models RSS
+predictors_list = ['process', 'efficiency', 'offsets']
+all_models_rows = []
+for r in range(0, len(predictors_list) + 1):
+    for subset in combinations(predictors_list, r):
+        if len(subset) == 0:
+            y_hat_null = np.full(n, df['co2_reduction'].mean())
+            rss = np.sum((df['co2_reduction'] - y_hat_null)**2)
+            all_models_rows.append({'Predictors': '(intercept only)', 'RSS': round(rss, 1)})
+        else:
+            X_tmp = sm.add_constant(df[list(subset)])
+            res_tmp = sm.OLS(df['co2_reduction'], X_tmp).fit()
+            rss = np.sum(res_tmp.resid**2)
+            all_models_rows.append({'Predictors': ' + '.join(subset), 'RSS': round(rss, 1)})
+
+all_models_df = pd.DataFrame(all_models_rows)
+
+def fmt_p(p):
+    return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
+```
+
+## {#title-slide data-menu-title="Title Slide" background="#053660"}
+
+[EDS 232]{.custom-title}
+
+<hr class="hr-teal">
+
+[Lesson 4]{.custom-subtitle}
+
+[*Multiple linear regression*]{.custom-subtitle}
+
+---
+
+## {#in-this-lesson data-menu-title="In this lesson"}
+
+[In this lesson]{.slide-title}
+
+<hr>
+
+<br>
+
+- The multiple linear regression (MLR) model
+- Estimating coefficients with least squares
+- Individual $p$-values: partial effects
+- Comparing MLR to individual SLRs
+- Hypothesis testing: the $F$-statistic
+- Model fit: $R^2$ in MLR and adjusted $R^2$
+- Variable selection: forward, backward, and mixed
+
+---
+
+## {#section-mlr data-menu-title="# The MLR model #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">The multiple linear regression model</p>
+</div>
+
+---
+
+## {#mlr-motivation data-menu-title="From SLR to MLR"}
+
+[From SLR to MLR]{.slide-title}
+
+<hr>
+
+In SLR we modelled the relationship between **one** predictor and a response:
+
+$$\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}$$
+
+. . .
+
+<br>
+
+But the GreenAbate dataset has **three** potential predictors. Running separate SLRs has two problems:
+
+::: {.body-text-m}
+- No single prediction combining all three predictors
+- Each SLR ignores the other predictors — coefficients can be misleading when predictors are correlated
+:::
+
+. . .
+
+<br>
+
+::: {.center-text .teal-text .body-text-m}
+**Multiple linear regression** handles all predictors simultaneously.
+:::
+
+---
+
+## {#mlr-model data-menu-title="The MLR model"}
+
+[The MLR model]{.slide-title}
+
+<hr>
+
+With $p$ predictors $X_1, \ldots, X_p$ and response $Y$:
+
+$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon$$
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+The key phrase in interpreting each coefficient:
+
+> *$\hat{\beta}_j$ is the average change in $Y$ associated with a one-unit increase in $X_j$, **holding all other predictors constant**.*
+:::
+
+. . .
+
+<br>
+
+For GreenAbate ($p = 3$):
+
+$$\texttt{co2\_reduction} = \beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \cdot \texttt{efficiency} + \beta_3 \cdot \texttt{offsets} + \epsilon$$
+
+---
+
+## {#mlr-fit data-menu-title="MLR fitted coefficients"}
+
+[Fitted MLR coefficients for GreenAbate]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+
+coef_df = pd.DataFrame({
+    '':             ['Intercept', 'process', 'efficiency', 'offsets'],
+    'Coefficient':  [f"{res_mlr.params[v]:.4f}" for v in ['const', 'process', 'efficiency', 'offsets']],
+    'Std. error':   [f"{res_mlr.bse[v]:.4f}"    for v in ['const', 'process', 'efficiency', 'offsets']],
+    't-statistic':  [f"{res_mlr.tvalues[v]:.2f}" for v in ['const', 'process', 'efficiency', 'offsets']],
+    'p-value':      [fmt_p(res_mlr.pvalues[v])   for v in ['const', 'process', 'efficiency', 'offsets']],
+})
+print(coef_df.to_string(index=False))
+```
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+The fitted model is:
+
+$$\widehat{\texttt{co2}} = `{python} f"{b0_mlr:.3f}"` + `{python} f"{b1_mlr:.4f}"` \cdot \texttt{process} + `{python} f"{b2_mlr:.4f}"` \cdot \texttt{efficiency} `{python} f"{b3_mlr:.4f}"` \cdot \texttt{offsets}$$
+:::
+
+---
+
+## {#checkin-mlr-interp data-menu-title="Check-in: MLR coefficients" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">What is the interpretation of the `efficiency` coefficient of `{python} f"{b2_mlr:.4f}"`?</p>
+<p class="custom-subtitle3">A firm spends \$100K on process, \$20K on efficiency, \$50K on offsets. What is the predicted CO₂ reduction?</p>
+</div>
+
+---
+
+## {#checkin-mlr-answers data-menu-title="Check-in: MLR answers" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in — answers</p>
+<p class="custom-subtitle3">Each additional \$1K in efficiency upgrades is associated with `{python} f"{b2_mlr:.4f}"` ktCO₂e of additional CO₂ reduction, <em>holding process and offset spending constant</em>.</p>
+<p class="custom-subtitle3">$\hat{y} = `{python} f"{b0_mlr:.3f}"` + `{python} f"{b1_mlr:.4f}"` \times 100 + `{python} f"{b2_mlr:.4f}"` \times 20 `{python} f"{b3_mlr:.4f}"` \times 50 \approx `{python} f"{b0_mlr + b1_mlr*100 + b2_mlr*20 + b3_mlr*50:.2f}"`$ ktCO₂e</p>
+</div>
+
+---
+
+## {#section-pvalues data-menu-title="# p-values for coefficients #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">p-values for the coefficients</p>
+</div>
+
+---
+
+## {#pvalues-mlr data-menu-title="Individual p-values in MLR"}
+
+[Individual $p$-values: partial effects]{.slide-title}
+
+<hr>
+
+In SLR, the $p$-value for $\hat{\beta}_1$ tests $H_0: \beta_1 = 0$ — is $X$ related to $Y$?
+
+. . .
+
+<br>
+
+In MLR, the $p$-value for each $\hat{\beta}_j$ tests the **partial effect** of $X_j$:
+
+::: {.center-text .body-text-m .teal-text}
+*Does $X_j$ add information beyond what the other predictors already explain?*
+:::
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+- Small $p$-value for $\hat{\beta}_j$ → $X_j$ is informative **given the other predictors are in the model**
+- Large $p$-value for $\hat{\beta}_j$ → $X_j$ adds little beyond what the others already capture
+:::
+
+---
+
+## {#checkin-offsets-pvalue data-menu-title="Check-in: offsets p-value" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in</p>
+<p class="custom-subtitle3">The `offsets` variable has a p-value of `{python} fmt_p(res_mlr.pvalues['offsets'])` in the MLR.</p>
+<p class="custom-subtitle3">Does this mean carbon offset purchases have no relationship with CO₂ reductions?</p>
+<p class="custom-subtitle3">What exactly does this p-value tell us?</p>
+</div>
+
+---
+
+## {#checkin-offsets-answers data-menu-title="Check-in: offsets answers" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in — answers</p>
+<p class="custom-subtitle3">Not necessarily. A large p-value means `offsets` adds little <em>beyond what `process` and `efficiency` already explain</em>.</p>
+<p class="custom-subtitle3">In a separate SLR of `co2_reduction` on `offsets` alone, the result could differ.</p>
+<p class="custom-subtitle3">Here, the true coefficient for `offsets` is $-0.001$ (near zero), so the model is correctly detecting it contributes almost nothing.</p>
+</div>
+
+---
+
+## {#section-comparison data-menu-title="# MLR vs. individual SLRs #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Comparing MLR to individual SLRs</p>
+</div>
+
+---
+
+## {#slr-vs-mlr data-menu-title="SLR vs. MLR coefficients"}
+
+[SLR vs. MLR: why not run separate regressions?]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+
+comp_df = pd.DataFrame({
+    'Predictor':   ['process', 'efficiency', 'offsets'],
+    'SLR coeff':   [f"{res_proc.params['process']:.4f}",
+                    f"{res_eff.params['efficiency']:.4f}",
+                    f"{res_off.params['offsets']:.4f}"],
+    'SLR p-value': [fmt_p(res_proc.pvalues['process']),
+                    fmt_p(res_eff.pvalues['efficiency']),
+                    fmt_p(res_off.pvalues['offsets'])],
+    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+                    f"{res_mlr.params['efficiency']:.4f}",
+                    f"{res_mlr.params['offsets']:.4f}"],
+    'MLR p-value': [fmt_p(res_mlr.pvalues['process']),
+                    fmt_p(res_mlr.pvalues['efficiency']),
+                    fmt_p(res_mlr.pvalues['offsets'])],
+})
+print(comp_df.to_string(index=False))
+```
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+- In this dataset, SLR ≈ MLR coefficients — because the predictors were drawn independently (uncorrelated by construction).
+- In real data, predictors are typically correlated. The divergence can be large, sometimes **reversing the sign** of a coefficient.
+- The MLR coefficient reflects the *direct* effect of each predictor, holding the others constant.
+:::
+
+---
+
+## {#section-fstat data-menu-title="# Hypothesis testing #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Hypothesis testing: the F-statistic</p>
+</div>
+
+---
+
+## {#hypotheses-mlr data-menu-title="Overall test in MLR"}
+
+[Is any predictor related to the response?]{.slide-title}
+
+<hr>
+
+In SLR we tested $H_0: \beta_1 = 0$. In MLR, the overall question is:
+
+$$H_0: \beta_1 = \beta_2 = \cdots = \beta_p = 0$$
+$$H_a: \text{at least one } \beta_j \neq 0$$
+
+. . .
+
+<br>
+
+We test this with the **$F$-statistic**:
+
+$$F = \frac{(TSS - RSS)/p}{RSS/(n - p - 1)}$$
+
+. . .
+
+::: {.body-text-m}
+- $F \approx 1$: no predictor is related to $Y$ (consistent with $H_0$)
+- $F \gg 1$: at least one predictor explains variance beyond noise → evidence against $H_0$
+:::
+
+---
+
+## {#fstat-greenabate data-menu-title="F-statistic: GreenAbate"}
+
+[F-statistic for the GreenAbate MLR]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+
+fstat_df = pd.DataFrame({
+    'Quantity': ['F-statistic', 'p-value'],
+    'Value':    [f'{res_mlr.fvalue:.2f}', fmt_p(res_mlr.f_pvalue)]
+})
+print(fstat_df.to_string(index=False))
+```
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+An $F$-statistic of `{python} f"{res_mlr.fvalue:.1f}"` with $p \ll 0.05$ gives very strong evidence that at least one predictor is associated with CO₂ reductions.
+:::
+
+. . .
+
+<br>
+
+**Why not just use the individual p-values?**
+
+When $p$ is large, some individual p-values will be small *by chance* even when no predictor is truly related to $Y$. With $p = 100$ truly null predictors, we expect ~5 to have $p < 0.05$ by random chance alone. The $F$-statistic tests all coefficients jointly and accounts for this.
+
+---
+
+## {#section-modelfit data-menu-title="# Model fit #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Model fit: R² in MLR</p>
+</div>
+
+---
+
+## {#r2-mlr data-menu-title="R² in MLR"}
+
+[$R^2$ in multiple regression]{.slide-title}
+
+<hr>
+
+The $R^2$ formula is the same as in SLR:
+
+$$R^2 = 1 - \frac{RSS}{TSS}$$
+
+. . .
+
+<br>
+
+::: {.body-text-m .teal-text}
+**Important caveat:** adding a predictor to an MLR model will **always** increase $R^2$ (or leave it unchanged), even if that predictor has no real relationship with $Y$.
+:::
+
+. . .
+
+<br>
+
+The **adjusted $R^2$** penalizes for the number of predictors:
+
+$$\bar{R}^2 = 1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}$$
+
+Adjusted $R^2$ can **decrease** when an irrelevant predictor is added — making it better for comparing models of different sizes.
+
+---
+
+## {#r2-comparison data-menu-title="R² comparison: SLR vs MLR"}
+
+[Comparing SLR and MLR model fit]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+
+acc_df = pd.DataFrame({
+    'Model':  ['SLR (process only)', 'MLR (all three predictors)'],
+    'R²':     [f'{r2_slr:.3f}', f'{r2_mlr:.3f}'],
+    'RSE (ktCO₂e)': [f'{rse_slr:.3f}', f'{rse_mlr:.3f}'],
+})
+print(acc_df.to_string(index=False))
+```
+
+. . .
+
+<br>
+
+::: {.body-text-m}
+- $R^2$ increased from `{python} f"{r2_slr:.3f}"` to `{python} f"{r2_mlr:.3f}"` — `efficiency` is genuinely predictive.
+- RSE decreased from `{python} f"{rse_slr:.3f}"` to `{python} f"{rse_mlr:.3f}"` ktCO₂e — predictions are more accurate with all three predictors.
+:::
+
+---
+
+## {#section-varsel data-menu-title="# Variable selection #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Variable selection</p>
+</div>
+
+---
+
+## {#varsel-problem data-menu-title="The variable selection problem"}
+
+[Which predictors should we include?]{.slide-title}
+
+<hr>
+
+With $p$ predictors there are $2^p$ possible subsets:
+
+::: {.body-text-m}
+- $p = 3$: **8 models** — feasible to compare exhaustively
+- $p = 10$: 1,024 models
+- $p = 30$: over 1 billion models — completely infeasible
+:::
+
+. . .
+
+<br>
+
+Three common automated approaches for large $p$:
+
+::: {.body-text-m}
+- [**Forward selection**]{.teal-text}: start with nothing, add one predictor at a time
+- [**Backward selection**]{.teal-text}: start with everything, remove one at a time
+- [**Mixed selection**]{.teal-text}: combine forward and backward steps
+:::
+
+---
+
+## {#all-8-models data-menu-title="All 8 GreenAbate models"}
+
+[RSS for all 8 possible GreenAbate models]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+print(all_models_df.to_string(index=False))
+```
+
+. . .
+
+<br>
+
+::: {.teal-text .body-text-m}
+**Check-in:** Trace through forward selection using this table.
+
+Which predictor would be added first? Second? Does adding `offsets` meaningfully reduce RSS?
+:::
+
+---
+
+## {#checkin-forward-sel data-menu-title="Check-in: forward selection" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in — forward selection answers</p>
+<p class="custom-subtitle3">Step 1: `process` has the lowest single-predictor RSS → added first.</p>
+<p class="custom-subtitle3">Step 2: `process + efficiency` has lower RSS than `process + offsets` → `efficiency` added second.</p>
+<p class="custom-subtitle3">Step 3: adding `offsets` gives only a tiny further reduction — whether it is included depends on the stopping criterion.</p>
+</div>
+
+---
+
+## {#forward-backward data-menu-title="Forward and backward selection"}
+
+[Forward and backward selection]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Forward selection**
+
+1. Start: null model (intercept only)
+2. Add the predictor with the largest RSS reduction
+3. Repeat until stopping criterion is met
+
+✓ Always applicable (works when $p > n$)
+
+✗ A variable added early may become redundant later
+:::
+
+::: {.column width="50%"}
+**Backward selection**
+
+1. Start: full model (all $p$ predictors)
+2. Remove the predictor with the largest $p$-value
+3. Repeat until all remaining predictors are significant
+
+✓ Considers all predictors from the start
+
+✗ Cannot be used when $p > n$
+:::
+
+::::
+
+---
+
+## {#mixed-selection data-menu-title="Mixed selection"}
+
+[Mixed selection]{.slide-title}
+
+<hr>
+
+**Mixed selection** (stepwise) combines forward and backward steps:
+
+<br>
+
+::: {.body-text-m}
+1. Start with the null model
+2. **Forward step**: add the variable with the largest RSS reduction
+3. **Backward step**: check if any included variable now has a large $p$-value — if so, remove it
+4. Continue until no variables are added or removed
+:::
+
+. . .
+
+<br>
+
+::: {.body-text-m .teal-text}
+This fixes the main weakness of forward selection: a variable added early can be *removed* once other, better variables are in the model.
+:::
+
+---
+
+## {#other-metrics data-menu-title="Other selection criteria"}
+
+[Other criteria for variable selection]{.slide-title}
+
+<hr>
+
+RSS alone always favors larger models — use criteria that **penalize complexity**:
+
+<br>
+
+::: {.body-text-m}
+| Criterion | Formula | Goal |
+|-----------|---------|------|
+| Adjusted $R^2$ | $1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}$ | Maximize |
+| AIC | $n\log(RSS/n) + 2p$ | Minimize |
+| BIC | $n\log(RSS/n) + p\log(n)$ | Minimize |
+| Test MSE (CV) | held-out set error | Minimize |
+:::
+
+. . .
+
+<br>
+
+::: {.body-text-s}
+BIC penalizes extra predictors more heavily than AIC (for $n > 7$), tending to select sparser models. Cross-validation is the most direct approach when the goal is prediction accuracy.
+:::
+
+---
+
+## {#recap data-menu-title="Recap"}
+
+[In this lesson we covered]{.slide-title}
+
+<hr>
+
+- **MLR model**: $Y = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p + \epsilon$ — coefficients interpreted *holding all else constant*
+- Least squares minimizes RSS; computer solves it
+- **Individual p-values**: test partial effects (does $X_j$ add beyond the others?)
+- **F-statistic**: tests $H_0: \beta_1 = \cdots = \beta_p = 0$ — use before relying on individual p-values
+- **$R^2$** always increases with predictors; use **adjusted $R^2$** to compare models of different sizes
+- **Variable selection**: forward, backward, mixed — use AIC, BIC, adjusted $R^2$, or CV as criteria

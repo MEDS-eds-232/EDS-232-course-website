@@ -270,6 +270,12 @@ window.Quarto = {
  <span class="menu-text">Simple linear regression</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/3_2_multiple_linear_regression/3_2_multiple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple linear regression</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -283,7 +289,7 @@ window.Quarto = {
    
   <ul>
   <li><a href="#motivating-questions" id="toc-motivating-questions" class="nav-link active" data-scroll-target="#motivating-questions">Motivating questions</a></li>
-  <li><a href="#a-guiding-example-the-greenabate-dataset" id="toc-a-guiding-example-the-greenabate-dataset" class="nav-link" data-scroll-target="#a-guiding-example-the-greenabate-dataset">A guiding example: the GreenAbate dataset</a></li>
+  <li><a href="#a-guiding-example-emissions-reduction-strategies-scenario" id="toc-a-guiding-example-emissions-reduction-strategies-scenario" class="nav-link" data-scroll-target="#a-guiding-example-emissions-reduction-strategies-scenario">A guiding example: emissions-reduction strategies scenario</a></li>
   <li><a href="#simple-linear-regression" id="toc-simple-linear-regression" class="nav-link" data-scroll-target="#simple-linear-regression">Simple linear regression</a></li>
   <li><a href="#estimating-the-coefficients" id="toc-estimating-the-coefficients" class="nav-link" data-scroll-target="#estimating-the-coefficients">Estimating the coefficients</a>
   <ul class="collapse">
@@ -354,9 +360,9 @@ window.Quarto = {
 <p>We do not need to answer all of these at once. We can select the questions that matter most for our specific goal, depending on whether we are doing <strong>inference</strong> or <strong>prediction</strong>.</p>
 <p><strong>Linear regression</strong> can be really useful for addressing all of these questions. Unlike more flexible methods that may prioritize prediction accuracy, linear regression supports direct inference: you can interpret the coefficients, compute confidence intervals, and test hypotheses about the relationship between variables.</p>
 </section>
-<section id="a-guiding-example-the-greenabate-dataset" class="level2">
-<h2 class="anchored" data-anchor-id="a-guiding-example-the-greenabate-dataset">A guiding example: the GreenAbate dataset</h2>
-<p>A research consortium tracks <strong>200 manufacturing firms</strong> across different industries and regions. For each firm they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:</p>
+<section id="a-guiding-example-emissions-reduction-strategies-scenario" class="level2">
+<h2 class="anchored" data-anchor-id="a-guiding-example-emissions-reduction-strategies-scenario">A guiding example: emissions-reduction strategies scenario</h2>
+<p>A research consortium tracks 200 manufacturing firms across different industries and regions. For each firm they record annual spending on three emissions-reduction strategies and the resulting CO₂ savings:</p>
 <ul>
 <li><strong><code>process</code></strong> — investment in cleaner production processes ($K/year)</li>
 <li><strong><code>efficiency</code></strong> — investment in energy efficiency upgrades ($K/year)</li>
@@ -391,7 +397,11 @@ window.Quarto = {
 <p>Remember the “hat” notation (<span class="math inline">\(\hat{\ }\)</span>) throughout these notes indicates an estimated quantity, not the true, unknown population value.</p>
 <p>For the GreenAbate dataset, using <code>process</code> as the sole predictor, a linear model will model CO₂ reductions as</p>
 <p><span class="math display">\[\texttt{co2\_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{process}\]</span></p>
+<<<<<<< HEAD
 <div id="37dcad3f" class="cell" data-execution_count="3">
+=======
+<div id="7363dbf7" class="cell" data-execution_count="3">
+>>>>>>> 3-2-notes
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -496,7 +506,7 @@ What is the relation between the RSS and the MSE?
 <p>where <span class="math inline">\(\epsilon\)</span> is an error term.</p>
 <p>The <strong>standard error</strong> of an estimate quantifies, on average, how far our estimates <span class="math inline">\(\hat{\beta}_i\)</span> are from the true coefficients <span class="math inline">\(\beta_i\)</span>. For the slope <span class="math inline">\(\hat{\beta}_1\)</span> the standard error is given by</p>
 <p><span class="math display">\[SE(\hat{\beta}_1)^2 = \frac{\sigma^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2},\]</span></p>
-<p>where <span class="math inline">\(\sigma^2 = \text{Var}(\epsilon)\)</span> is the variance of the error term (assuming that the errrors <span class="math inline">\(\epsilon_i\)</span> for each observation have common variance <span class="math inline">\(\sigma^2\)</span> and are uncorrelated), and <span class="math inline">\(\bar{x} =\frac{1}{n}\sum x_i\)</span> is the average of the <span class="math inline">\(x\)</span> values.</p>
+<p>where <span class="math inline">\(\sigma^2 = \text{Var}(\epsilon)\)</span> is the variance of the error term (assuming that the errrors <span class="math inline">\(\epsilon_i\)</span> for each observation have common variance <span class="math inline">\(\sigma^2\)</span> and are uncorrelated), and <span class="math inline">\(\bar{x} =\frac{1}{n}\sum_{i=1}^n x_i\)</span> is the average of the <span class="math inline">\(x\)</span> values.</p>
 <p>The standard error of the <span class="math inline">\(y\)</span>-intercept <span class="math inline">\(\hat{\beta}_0\)</span> is:</p>
 <p><span class="math display">\[SE(\hat{\beta}_0)^2 = \sigma^2 \left[\frac{1}{n} + \frac{\bar{x}^2}{\sum_{i=1}^{n}(x_i - \bar{x})^2}\right].\]</span></p>
 <p>In practice <span class="math inline">\(\sigma^2\)</span> is unknown and must also be estimated from the data using the <strong>residual standard error</strong>, which we will talk about in a moment.</p>
@@ -568,7 +578,11 @@ Check-in
 </div>
 <div class="callout-body-container callout-body">
 <p>The exact 95% confidence intervals for each coefficient is:</p>
+<<<<<<< HEAD
 <div id="fbd5e304" class="cell" data-execution_count="5">
+=======
+<div id="1d99fdf8" class="cell" data-execution_count="5">
+>>>>>>> 3-2-notes
 <div class="cell-output cell-output-stdout">
 <pre><code>95% CI for β₀ (intercept): [6.823, 8.567]
 95% CI for β₁ (process):   [0.041, 0.051]</code></pre>
@@ -663,7 +677,11 @@ Check-in
 </div>
 <div class="callout-body-container callout-body">
 <p>The table below shows the regression output for the SLR of <code>co2_reduction</code> on <code>process</code>:</p>
+<<<<<<< HEAD
 <div id="e62b3dd3" class="cell" data-execution_count="6">
+=======
+<div id="3832b5f4" class="cell" data-execution_count="6">
+>>>>>>> 3-2-notes
 <div class="cell-output cell-output-stdout">
 <pre><code>          Coefficient Std. error t-statistic  p-value
 Intercept      7.6953     0.4421       17.41 &lt; 0.0001
@@ -706,7 +724,7 @@ Discussion
 <section id="residual-standard-error-rse" class="level3">
 <h3 class="anchored" data-anchor-id="residual-standard-error-rse">Residual Standard Error (RSE)</h3>
 <p>The <strong>RSE</strong> estimates the standard deviation of the error term <span class="math inline">\(\epsilon\)</span> and is defined as:</p>
-<p><span class="math display">\[RSE = \sqrt{\frac{1}{n-2} RSS} = \sqrt{\frac{1}{n-2} \sum_{i=1}^{n}(y_i - \hat{y}_i)^2}.\]</span></p>
+<p><span class="math display">\[RSE = \sqrt{\frac{RSS}{n-2} } = \sqrt{\frac{1}{n-2} \sum_{i=1}^{n}(y_i - \hat{y}_i)^2}.\]</span></p>
 <p>It represents the average amount by which the response deviates from the true regression line. A smaller RSE means the model fits the data more closely.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -734,7 +752,7 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>For the GreenAbate data, the RSE of the SLR on <code>process</code> is approximately 3.26 ktCO₂e. This means predictions are off by about 3,260 metric tons on average. Is this a good or bad fit? What additional information would you need to judge this?</p>
+<p>For our example data data, the RSE of the SLR on <code>process</code> is approximately 3.26 ktCO₂e. This means predictions are off by about 3,260 metric tons on average. Is this a good or bad fit? What additional information would you need to judge this?</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -768,7 +786,11 @@ Discussion
 </ul>
 <p>So</p>
 <p><span class="math display">\[\underbrace{TSS}_{\text{total variability in }Y} - \underbrace{RSS}_{\text{unexplained by regression}} = \text{variability explained by regression}\]</span></p>
+<<<<<<< HEAD
 <p>We use this to define <span class="math display">\[R^2 = \frac{TSS - RSS}{TSS} = 1 - \frac{RSS}{TSS}.\]</span></p>
+=======
+<p>We use this to define <span class="math display">\[R^2 = \frac{TSS - RSS}{TSS} = 1 - \frac{TSS}{RSS}.\]</span></p>
+>>>>>>> 3-2-notes
 <p>So <span class="math inline">\(R^2\)</span> is the fraction of variability that the model accounts for:</p>
 <p><span class="math display">\[R^2 = \frac{\text{variability explained by regression}}{\text{total variability in }Y}.\]</span></p>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -819,7 +841,7 @@ Residual standard error  3.14
                      R² 0.611</code></pre>
 </div>
 </div>
-<p>For the GreenAbate SLR of <code>co2_reduction</code> on <code>process</code>, RSE = 3.14 ktCO₂e and <span class="math inline">\(R^2\)</span> = 0.611.</p>
+<p>For the SLR of <code>co2_reduction</code> on <code>process</code>, RSE = 3.14 ktCO₂e and <span class="math inline">\(R^2\)</span> = 0.611.</p>
 <ol type="1">
 <li>How would you interpret the <span class="math inline">\(R^2\)</span> value in plain language?</li>
 <li>The RSE is 3.14 ktCO₂e. Thinking back to the RSE check-in, is this model a good fit for a firm with an annual CO₂ reduction target of 5 ktCO₂e? What about a firm targeting 25 ktCO₂e?</li>
