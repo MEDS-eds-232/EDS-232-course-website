@@ -374,7 +374,6 @@ print(comp_df.to_string(index=False))
 
 ::: {.column width="50%"}
 
-
 ::: {.teal-text}
 1. What is the interpretation of the `efficiency` coefficient of `{python} f"{b2_mlr:.4f}"`?
 2. How do we calculate the predicted CO₂ reduction for a firm that spends $100K on process upgrades, $20K on efficiency, and $50K on offsets?
@@ -398,66 +397,123 @@ print(comp_df.to_string(index=False))
 
 :::
 
-
----
-
-
-## {#section-pvalues data-menu-title="# p-values for coefficients #" background="#047C90"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">p-values for the coefficients</p>
-</div>
-
 ---
 
 ## {#pvalues-mlr data-menu-title="Individual p-values in MLR"}
 
-[Individual $p$-values: partial effects]{.slide-title}
+[$p$-values for the coefficients]{.slide-title}
 
 <hr>
 
-In SLR, the $p$-value for $\hat{\beta}_1$ tests $H_0: \beta_1 = 0$ — is $X$ related to $Y$?
+In SLR, the $p$-value for $\hat{\beta}_1$ tests $H_0: \beta_1 = 0$, which means *is $X$ related to $Y$?*
 
-. . .
+In MLR, the $p$-value for each $\hat{\beta}_j$ tests $H_0: \beta_i =0$, which means *is $X_i$ related to $Y$ if all other predictor are in the model?* 
 
-<br>
 
-In MLR, the $p$-value for each $\hat{\beta}_j$ tests the **partial effect** of $X_j$:
+So $H_0$ for MLR is about the **partial effect** of $X_j$. We are trying to answer:
 
-::: {.center-text .body-text-m .teal-text}
+::: {.center-text}
 *Does $X_j$ add information beyond what the other predictors already explain?*
 :::
 
+<br>
+
 . . .
+
+We can interpret the individual $p$-values from the MLR as
+
+- Small $p$-value for $\hat{\beta}_j$ → $X_j$ is informative **given the other predictors are in the model**
+- Large $p$-value for $\hat{\beta}_j$ → $X_j$ adds little beyond what the others already capture
+
+---
+
+## {#check-in-p-values data-menu-title="Check-in"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+For our example data we have that:
+
+```{python}
+comp_df = pd.DataFrame({
+    'Predictor':   ['process', 'efficiency', 'offsets'],
+    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+                    f"{res_mlr.params['efficiency']:.4f}",
+                    f"{res_mlr.params['offsets']:.4f}"],
+    'MLR p-value': [fmt_p(res_mlr.pvalues['process']),
+                    fmt_p(res_mlr.pvalues['efficiency']),
+                    fmt_p(res_mlr.pvalues['offsets'])],
+})
+print(comp_df.to_string(index=False))
+```
+
 
 <br>
 
-::: {.body-text-m}
-- Small $p$-value for $\hat{\beta}_j$ → $X_j$ is informative **given the other predictors are in the model**
-- Large $p$-value for $\hat{\beta}_j$ → $X_j$ adds little beyond what the others already capture
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text}
+1. How can we interpret the $p$-value associated with the `process` variable?
+
+2. The `offsets` variable has a large $p$-value of `{python} fmt_p(res_mlr.pvalues['offsets'])`. What does it tell us in the context of this MLR model?
+:::
 :::
 
----
+::: {.column width="50%"}
 
-## {#checkin-offsets-pvalue data-menu-title="Check-in: offsets p-value" background="#053660"}
+:::
 
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in</p>
-<p class="custom-subtitle3">The `offsets` variable has a p-value of `{python} fmt_p(res_mlr.pvalues['offsets'])` in the MLR.</p>
-<p class="custom-subtitle3">Does this mean carbon offset purchases have no relationship with CO₂ reductions?</p>
-<p class="custom-subtitle3">What exactly does this p-value tell us?</p>
-</div>
+:::
+
 
 ---
 
-## {#checkin-offsets-answers data-menu-title="Check-in: offsets answers" background="#053660"}
+## {#check-in-p-values-answers data-menu-title="Check-in"}
 
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in — answers</p>
-<p class="custom-subtitle3">Not necessarily. A large p-value means `offsets` adds little <em>beyond what `process` and `efficiency` already explain</em>.</p>
-<p class="custom-subtitle3">In a separate SLR of `co2_reduction` on `offsets` alone, the result could differ.</p>
-<p class="custom-subtitle3">Here, the true coefficient for `offsets` is $-0.001$ (near zero), so the model is correctly detecting it contributes almost nothing.</p>
-</div>
+[Check-in]{.slide-title}
+
+<hr>
+
+For our example data we have that:
+
+```{python}
+comp_df = pd.DataFrame({
+    'Predictor':   ['process', 'efficiency', 'offsets'],
+    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+                    f"{res_mlr.params['efficiency']:.4f}",
+                    f"{res_mlr.params['offsets']:.4f}"],
+    'MLR p-value': [fmt_p(res_mlr.pvalues['process']),
+                    fmt_p(res_mlr.pvalues['efficiency']),
+                    fmt_p(res_mlr.pvalues['offsets'])],
+})
+print(comp_df.to_string(index=False))
+```
+
+
+<br>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text}
+1. How can we interpret the $p$-value associated with the `process` variable?
+
+2. The `offsets` variable has a large $p$-value of `{python} fmt_p(res_mlr.pvalues['offsets'])`. What does it tell us in the context of this MLR model?
+:::
+:::
+
+
+::: {.column width="50%"}
+1. There is a relationship between the `process` predictor and the response variable `co2_reduction`, when the `efficiency` and `offsets` remain fixed. 
+
+2. It is detecting that `offset` spending contributes almost nothing beyond what `process` and `efficiency` already capture.
+:::
+
+:::
 
 ---
 
@@ -469,11 +525,38 @@ In MLR, the $p$-value for each $\hat{\beta}_j$ tests the **partial effect** of $
 
 ---
 
-## {#slr-vs-mlr data-menu-title="SLR vs. MLR coefficients"}
+## {#slr-vs-mlr-1 data-menu-title="SLR vs. MLR coefficients"}
 
-[SLR vs. MLR: why not run separate regressions?]{.slide-title}
+[SLR vs. MLR: why not just run $p$ separate regressions?]{.slide-title}
 
 <hr>
+
+- **individual SLR coefficients can be misleading when predictors are correlated**
+- When two predictors are correlated, each one's SLR coefficient absorbs part of the other's effect. 
+
+*Example*
+
+Suppose firms that invest heavily in `process` upgrades tend to also invest heavily in `efficiency`.
+
+- An SLR of `co2_reduction` on `process` alone will give a coefficient that also reflects some of the `efficiency` effect.
+- The MLR coefficient for `process` strips out the `efficiency` effect and reflects only the direct relationship of `process`.
+
+---
+
+## {#slr-vs-mlr-2 data-menu-title="SLR vs. MLR coefficients"}
+
+[SLR vs. MLR: why not just run $p$ separate regressions?]{.slide-title}
+
+<hr>
+
+- **individual SLR coefficients can be misleading when predictors are correlated**
+- When two predictors are correlated, each one's SLR coefficient absorbs part of the other's effect. 
+
+*Example*
+
+::: {.body-text-s}
+In our example dataset, SLR ≈ MLR coefficients because the predictors were drawn independently (uncorrelated by construction).
+:::
 
 ```{python}
 #| echo: false
@@ -496,13 +579,8 @@ comp_df = pd.DataFrame({
 print(comp_df.to_string(index=False))
 ```
 
-. . .
-
-<br>
-
-::: {.body-text-m}
-- In this dataset, SLR ≈ MLR coefficients — because the predictors were drawn independently (uncorrelated by construction).
-- In real data, predictors are typically correlated. The divergence can be large, sometimes **reversing the sign** of a coefficient.
+::: {.body-text-s}
+- In real data, predictors can be correlated. The divergence between SLR and MLR coefficients can be large.
 - The MLR coefficient reflects the *direct* effect of each predictor, holding the others constant.
 :::
 
@@ -511,7 +589,7 @@ print(comp_df.to_string(index=False))
 ## {#section-fstat data-menu-title="# Hypothesis testing #" background="#047C90"}
 
 <div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Hypothesis testing: the F-statistic</p>
+<p class="custom-subtitle bottombr">Hypothesis testing & the F-statistic</p>
 </div>
 
 ---

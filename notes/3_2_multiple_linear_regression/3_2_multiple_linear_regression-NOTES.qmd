@@ -229,7 +229,7 @@ Looking at the MLR coefficients above:
 
 1. Each additional \$1K in energy efficiency upgrades is associated with `{python} f"{b2_mlr:.4f}"` ktCO₂e of additional CO₂ reduction, *holding process and offset spending constant*.
 
-2. Usin gour model, the estimate is given by $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 \cdot 100 + \hat{\beta}_2 \cdot 20 + \hat{\beta}_3 \cdot 50.$ Computing this we obtain:
+2. Using our model, the estimate is given by $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 \cdot 100 + \hat{\beta}_2 \cdot 20 + \hat{\beta}_3 \cdot 50.$ Computing this we obtain:
 
 ```{python}
 pred = b0_mlr + b1_mlr*100 + b2_mlr*20 + b3_mlr*50
@@ -244,6 +244,12 @@ print(f"Predicted CO₂ reduction: {pred:.2f} ktCO₂e")
 In standard linear regression (SLR) we have one variable and one response being modelled by $Y \approx \beta_0 + \beta_1X$. After we have found estimates for $\hat{\beta}_0$ and $\hat{\beta}_1$, we can examine whether there is a relationship between $X$ and $Y$ by computing the $p$-value associated to $\hat{\beta}_1$. If the $p$-value is small enough, we conclude the coefficient $\hat{\beta}_1$ is significantly different from 0 and there is evidence of a relationship between $X$ and $Y$.
 
 When we fit a MLR model, which has more than one variable, we can obtain the $p$-value for each parameter $\hat{\beta}_j$. In this case, we use the $p$-value associated to the coefficient $\beta_j$ to understand the *partial effect* of adding the variable $X_j$ into the model, when all other variables are held fixed. 
+
+::: {.callout-note}
+## Interpreting the $p$-value
+- Small $p$-value for $\hat{\beta}_j$ means $X_j$ is informative *given the other predictors are in the model*.
+- Large $p$-value for $\hat{\beta}_j$ means $X_j$ adds little beyond what the others already capture.
+:::
 
 For our example data we have that:
 
