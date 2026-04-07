@@ -39,11 +39,16 @@ df = pd.DataFrame({
 })
 ```
 
-[📊 Slides]() / [📊 Blank slides]()
+[📊 Slides](3_2_multiple_linear_regression-SLIDES.qmd) / [📊 Blank slides](3_2_multiple_linear_regression-SLIDES-BLANK.qmd)
 
 In this lesson we introduce:
 
-TO BE FILLED OUT AT THE END
+- The **multiple linear regression (MLR) model** 
+- Estimating coefficients via **least squares** and interpreting them as partial effects
+- How MLR coefficient estimates can differ from SLR estimates
+- **The $F$-statistic** for testing whether any predictor is related to the response
+- **$R^2$** and **adjusted R^2** in multiple regression
+- **Variable selection**: forward, backward, and mixed selection strategies
 
 These notes are based on chapter 3.2 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The **example data is synthetic** and was generated with the aid of Claude Code for the purpose of this lesson.
 
@@ -263,14 +268,15 @@ We can interpret the $p$-value associated with the `process` variable as
 :::{.callout-tip}
 ## Check-in
 
-Exercise
+The `offsets` variable has a large p-value of `{python} fmt_p(res_mlr.pvalues['offsets'])`. What does this $p$-value tell us in the context of this MLR model?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-Discussion
+The large $p$-value is detecting that `offset` spending contributes almost nothing beyond what `process` and `efficiency` already capture. In MLR, the $p$-value for a coefficient tests whether that variable adds information *beyond what the other predictors already explain*. A large p-value for `offsets` means that, given `process` and `efficiency` are already in the model, adding offset spending does not significantly improve the fit.
 
+This is different from asking whether `offsets` has any relationship with CO₂ reductions in general. If we ran an SLR of `co2_reduction` on `offsets` alone, the result might look different because the SLR coefficient would absorb any correlation between `offsets` and the other predictors.
 :::
 
 ## Comparing MLR to individual SLRs {#sec-comparison}
@@ -484,51 +490,62 @@ Backward selection cannot be used when $p > n$ (more predictors than observation
 
 ### Mixed selection
 
+Mixed selection combines the forward and backward approaches to avoid their respective limitations:
+
+1. Start with the null model.
+2. Forward step: add the variable that most improves the model (largest reduction in RSS).
+3. Backward step: after each addition, check if any currently included variable now has a $p$-value above the removal threshold. Adding a new variable can sometimes make a previously added one redundant. If so, remove it.
+4. Continue alternating forward and backward steps until no variables are added or removed.
+
+This addresses the main limitation of forward selection: a variable added early can become unnecessary once other variables are included. Mixed selection allows such variables to be dropped rather than staying in the model indefinitely.
 
 :::{.callout-tip}
 ## Check-in
 
-Below we implement forward selection on our example dataset:
+For our example dataset, there are $2^3 = 8$ possible subsets of the three predictors. The table below shows the RSS for every possible model:
 
 ```{python}
-#| label: forward-selection
-#| echo: true
-#| fold: true
+#| label: all-models-rss
+#| echo: false
+from itertools import combinations
 
-remaining = ['process', 'efficiency', 'offsets']
-selected  = []
+predictors = ['process', 'efficiency', 'offsets']
+rows = []
 
-print("Forward selection steps:")
-print("-" * 55)
-for step in range(1, len(remaining) + 1):
-    best_rss = np.inf
-    best_var = None
-    for var in remaining:
-        X_tmp = sm.add_constant(df[selected + [var]])
-        res_tmp = sm.OLS(df['co2_reduction'], X_tmp).fit()
-        rss_tmp = np.sum(res_tmp.resid**2)
-        if rss_tmp < best_rss:
-            best_rss = rss_tmp
-            best_var = var
-    selected.append(best_var)
-    remaining.remove(best_var)
-    print(f"Step {step}: Add '{best_var}'  →  RSS = {best_rss:.2f}")
+for r in range(0, len(predictors) + 1):
+    for subset in combinations(predictors, r):
+        if len(subset) == 0:
+            y_hat_null = np.full(n, df['co2_reduction'].mean())
+            rss = np.sum((df['co2_reduction'] - y_hat_null)**2)
+            rows.append({'Predictors in model': '(intercept only)', 'RSS': round(rss, 1)})
+        else:
+            X_tmp = sm.add_constant(df[list(subset)])
+            res_tmp = sm.OLS(df['co2_reduction'], X_tmp).fit()
+            rss = np.sum(res_tmp.resid**2)
+            rows.append({'Predictors in model': ' + '.join(subset), 'RSS': round(rss, 1)})
+
+all_models_df = pd.DataFrame(rows)
+print(all_models_df.to_string(index=False))
 ```
 
+Using the table above, manually trace through the three steps of forward selection:
 
-Looking at the forward selection output above:
-
-1. Which predictor was selected first? Does this match what you would expect from the scatter plots in lesson 3.1?
-2. How much does adding the second predictor reduce the RSS compared to adding the third?
+1. **Step 1** — Start with the null model. Which single predictor gives the largest reduction in RSS? What would be the RSS after adding it?
+2. **Step 2** — With that predictor already in the model, which of the remaining two predictors gives the largest further reduction in RSS?
+3. **Step 3** — Adding the final predictor, does it meaningfully reduce the RSS compared to the two-predictor model? What criteria could be used to decide whether to add or not the final predictor?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. `process` was selected first because it has the strongest individual linear association with CO₂ reductions. This is consistent with the scatter plots shown at the beginning of the lesson, where `process` showed the clearest positive trend.
+1. **Step 1**: Comparing the three single-predictor models, `process` gives the lowest RSS. Forward selection adds `process` first. This is consistent with the scatter plots seen earlier, where `process` showed the strongest linear association with CO₂ reductions.
 
-2. The RSS decreases substantially after adding `efficiency` in step 2 (reflecting a genuine association in the data-generating model), but only slightly when `offsets` is added in step 3. This is consistent with the near-zero true coefficient for `offsets` and its large $p$-value in the MLR output.
+2. **Step 2**: With `process` already included, we compare `process + efficiency` and `process + offsets`. The `process + efficiency` model has the lower RSS, so `efficiency` is added second. The reduction from step 1 to step 2 is substantial, reflecting that `efficiency` spending is genuinely associated with CO₂ reductions in the data-generating model.
+
+3. **Step 3**: Adding `offsets` to the two-predictor model produces only a very small further reduction in RSS. This matches its near-zero true coefficient ($-0.001$) and large $p$-value in the MLR output. Whether we include `offsets` at this step depends on the stopping criterion: if we require a minimum RSS improvement or a significant $p$-value, it would not be added.
 :::
+
+Forward and backward selection can be run using metrics other than RSS. In fact, using raw RSS as the sole criterion would always favor adding more predictors (RSS can only decrease or stay the same when a predictor is added). An alternative that penalizes model complexity is using the adjusted $R^2$.
 
 
 <!-- TODO: there's more topics 3.3+ that I would like to cover in the future -->
