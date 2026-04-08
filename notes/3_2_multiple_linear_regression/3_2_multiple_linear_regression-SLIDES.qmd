@@ -144,7 +144,6 @@ A research consortium tracks **200 manufacturing firms**. For each firm, they re
 - **`co2_reduction`** — annual CO₂ emissions reduced (ktCO₂e/year)
 :::
 
-<br>
 
 The researchers want to understand:
 
@@ -202,10 +201,9 @@ $$\texttt{co2_reduction} \approx \hat{\beta}_0 + \hat{\beta}_1 \cdot \texttt{pro
 
 
 
-Our example dataset has three potential predictors. Running separate SLRs has two problems:
+Our example dataset has three potential predictors. 
 
-- No single prediction combining all three predictors
-- Each SLR ignores the other predictors
+Running separate SLRs has the problem that each SLR ignores the other predictors.
 
 <br>
 
@@ -269,15 +267,15 @@ $$\texttt{co2_reduction} = \beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \c
 
 <hr>
 
-In the MLR model we assume:
-
-$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon.$$
+In the MLR model we assume: $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon.$
 
 Our goal is to estimate the coefficients and obtain a model
 
-$$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \hat{\beta}_2 X_2 + \cdots + \hat{\beta}_p X_p$$
+$$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \hat{\beta}_2 X_2 + \cdots + \hat{\beta}_p X_p.$$
 
-Our training set is $\{(x_1, y_1), \ldots, (x_n, y_n)\}$ with $n$ observations to fit the model. For each of the observations $(x_i, y_i)$ we have that:
+Our training set is $\{(x_1, y_1), \ldots, (x_n, y_n)\}$ with $n$ observations.
+
+For each of the observations $(x_i, y_i)$ we have that:
 
 - $x_i = (x_{i1}, x_{i2}, \ldots, x_{ip})$ is a vector of $p$ predictor values, and 
 - $y_i$ is the response associated to $x_i$.
@@ -396,6 +394,15 @@ print(comp_df.to_string(index=False))
 :::
 
 :::
+---
+
+## {#coefficients-accuracy data-menu-title="Accuracy of the coefficient estimates"}
+
+[Accuracy of the coefficient estimates]{.slide-title}
+
+<hr>
+
+Information about standard errors and confidence intervals for the MLR coefficients. 
 
 ---
 
@@ -406,6 +413,8 @@ print(comp_df.to_string(index=False))
 <hr>
 
 In SLR, the $p$-value for $\hat{\beta}_1$ tests $H_0: \beta_1 = 0$, which means *is $X$ related to $Y$?*
+
+. . .
 
 In MLR, the $p$-value for each $\hat{\beta}_j$ tests $H_0: \beta_i =0$, which means *is $X_i$ related to $Y$ if all other predictor are in the model?* 
 
@@ -594,37 +603,74 @@ print(comp_df.to_string(index=False))
 
 ---
 
-## {#hypotheses-mlr data-menu-title="Overall test in MLR"}
+## {#hypotheses-mlr data-menu-title="All coefficients test in MLR"}
 
 [Is any predictor related to the response?]{.slide-title}
 
 <hr>
 
-In SLR we tested $H_0: \beta_1 = 0$. In MLR, the overall question is:
+In SLR: $Y \approx \beta_0 + \beta_1 X$ and we tested
 
-$$H_0: \beta_1 = \beta_2 = \cdots = \beta_p = 0$$
-$$H_a: \text{at least one } \beta_j \neq 0$$
+- $H_0$: $\beta_1=0 \Rightarrow$ no relationship between response and predictor
+- $H_a$: $\beta_1\neq0 \Rightarrow$ some relationship between response and predictor. 
+
+<br>
 
 . . .
 
+For MLR: $Y \approx \beta_0 + \beta_1X_1 + \ldots + \beta_p X_p$ and we can test
+
+- $H_0$: $\beta_1 =... =\beta_p=0 \Rightarrow$ no relationship between $Y$ and *any* predictor $X_1, \ldots, X_p$
+- $H_a$: at least one $\beta_j \neq 0 \Rightarrow$ some relationship between response and *some* predictor. 
+
 <br>
+
+We are investigating the question *Is any predictor related to the response?*
+
+
+---
+
+## {#f-statistic data-menu-title="The F-statistic"}
+
+[The F-statistic]{.slide-title}
+
+<hr>
+
+We are investigating the question *Is any predictor related to the response?*
+
 
 We test this with the **$F$-statistic**:
 
 $$F = \frac{(TSS - RSS)/p}{RSS/(n - p - 1)}$$
 
+::: {.body-text-s}
+- $TSS = \sum(y_i - \bar{y})^2$ is the total variability in $Y$,
+- $RSS = \sum(y_i - \hat{y}_i)^2$ is the variability unexplained by the model,
+:::
+
 . . .
 
-::: {.body-text-m}
-- $F \approx 1$: no predictor is related to $Y$ (consistent with $H_0$)
+::: {.body-text-s}
+- *Numerator*: how much variance the predictors collectively explain 
+- *Denominator*: how much variance remains unexplained per degree of freedom
+:::
+
+. . .
+
+::: {.body-text-s}
+- $F \approx 1$: no predictor is related to $Y$ → consistent with $H_0$
 - $F \gg 1$: at least one predictor explains variance beyond noise → evidence against $H_0$
 :::
 
+. . .
+
+An associated $p$-value is then computed to assess the probability of observing an $F$-statistic this large or larger, assuming $H_0$ is true. 
+
 ---
 
-## {#fstat-greenabate data-menu-title="F-statistic: GreenAbate"}
+## {#fstat-greenabate data-menu-title="F-statistic example"}
 
-[F-statistic for the GreenAbate MLR]{.slide-title}
+[Example]{.slide-title}
 
 <hr>
 
@@ -638,21 +684,72 @@ fstat_df = pd.DataFrame({
 print(fstat_df.to_string(index=False))
 ```
 
-. . .
 
 <br>
 
-::: {.body-text-m}
 An $F$-statistic of `{python} f"{res_mlr.fvalue:.1f}"` with $p \ll 0.05$ gives very strong evidence that at least one predictor is associated with CO₂ reductions.
+
+<br>
+
+. . .
+
+::: {.teal-text}
+**Check-in**
+
+Pair up with someone. Have one person explain the hypothesis test for simple linear regression and the other explain the hypothesis test for multiple linear regression.
 :::
 
+---
+
+## {#hypothesis-testing data-menu-title="Hypothesis testing framework"}
+
+[Hypothesis testing steps]{.slide-title}
+
+<hr>
+
+::: {.body-text-s}
+From EDS 222.
+:::
+
+::: {.body-text-m}
+
+1. Identify the TEST STATISTIC
+
+2. State your NULL and ALTERNATIVE hypotheses
+
+3. Calculate the OBSERVED test statistic
+
+4. Estimate the NULL DISTRIBUTION
+
+5. Calculate P-VALUE
+
+6. Compare p-value to CRITICAL THRESHOLD
+
+:::
+
+---
+
+## {#individual-p-values-vs-f-stat data-menu-title="Individual p-values"}
+
+[Why not just use individual p-values?]{.slide-title}
+
+<hr>
+
+Earlier we saw that each coefficient of the MLR has an associated $p$-value. So one my ask: why do we need a $p$-value for the $F$-statistic, when we can just interpet each $p$-value individually?
+
 . . .
 
-<br>
+For an individual coefficient, a $p$-value of 0.05 means: 
 
-**Why not just use the individual p-values?**
+> "if there is truly no relationship ($H_0$ true), there is a 5% probability of getting a $t$-statistic this extreme just by random chance."
 
-When $p$ is large, some individual p-values will be small *by chance* even when no predictor is truly related to $Y$. With $p = 100$ truly null predictors, we expect ~5 to have $p < 0.05$ by random chance alone. The $F$-statistic tests all coefficients jointly and accounts for this.
+Suppose $p=100$ and there's truly no association between any predictor and the response. We would expect about 5% of our $t$-statistics to be "false positives" just by random chance. 
+
+. . .
+
+When $p$ is large, we run the risk of some individual $p$-values being small *by chance* even when no predictor is truly related to $Y$. 
+
+The $F$-statistic tests all coefficients jointly and accounts for this.
 
 ---
 
