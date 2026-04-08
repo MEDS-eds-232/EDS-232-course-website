@@ -323,6 +323,106 @@ $$
 
 ---
 
+## {#regression-plane-1 data-menu-title="The regression plane"}
+
+[From a line to a plane]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "85%"
+from mpl_toolkits.mplot3d import Axes3D
+
+# Fit 2-variable model: process + efficiency
+X_2var = sm.add_constant(df[['process', 'efficiency']])
+res_2var = sm.OLS(df['co2_reduction'], X_2var).fit()
+b0_2 = res_2var.params['const']
+b1_2 = res_2var.params['process']
+b2_2 = res_2var.params['efficiency']
+
+# Regression plane grid
+proc_grid = np.linspace(df['process'].min(),    df['process'].max(),    30)
+eff_grid  = np.linspace(df['efficiency'].min(), df['efficiency'].max(), 30)
+PP, EE = np.meshgrid(proc_grid, eff_grid)
+ZZ = b0_2 + b1_2 * PP + b2_2 * EE
+
+# Subsample 60 points for clarity
+rng = np.random.default_rng(42)
+idx = rng.choice(n, 60, replace=False)
+xs  = df['process'].values[idx]
+ys  = df['efficiency'].values[idx]
+zs  = df['co2_reduction'].values[idx]
+z_hat = b0_2 + b1_2 * xs + b2_2 * ys
+
+fig = plt.figure(figsize=(fig_size_x, fig_size_y * 1.4))
+ax  = fig.add_subplot(111, projection='3d')
+
+ax.scatter(xs, ys, zs, color='tomato', s=25, zorder=5)
+
+ax.set_xlabel('process ($K)', labelpad=6)
+ax.set_ylabel('efficiency ($K)', labelpad=6)
+ax.set_zlabel('CO₂ reduction', labelpad=6)
+ax.view_init(elev=18, azim=225)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+---
+
+## {#regression-plane-2 data-menu-title="The regression plane"}
+
+[From a line to a plane]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "85%"
+from mpl_toolkits.mplot3d import Axes3D
+
+# Fit 2-variable model: process + efficiency
+X_2var = sm.add_constant(df[['process', 'efficiency']])
+res_2var = sm.OLS(df['co2_reduction'], X_2var).fit()
+b0_2 = res_2var.params['const']
+b1_2 = res_2var.params['process']
+b2_2 = res_2var.params['efficiency']
+
+# Regression plane grid
+proc_grid = np.linspace(df['process'].min(),    df['process'].max(),    30)
+eff_grid  = np.linspace(df['efficiency'].min(), df['efficiency'].max(), 30)
+PP, EE = np.meshgrid(proc_grid, eff_grid)
+ZZ = b0_2 + b1_2 * PP + b2_2 * EE
+
+# Subsample 60 points for clarity
+rng = np.random.default_rng(42)
+idx = rng.choice(n, 60, replace=False)
+xs  = df['process'].values[idx]
+ys  = df['efficiency'].values[idx]
+zs  = df['co2_reduction'].values[idx]
+z_hat = b0_2 + b1_2 * xs + b2_2 * ys
+
+fig = plt.figure(figsize=(fig_size_x, fig_size_y * 1.4))
+ax  = fig.add_subplot(111, projection='3d')
+
+ax.scatter(xs, ys, zs, color='tomato', s=25, zorder=3)
+for x, y, z, zh in zip(xs, ys, zs, z_hat):
+    ax.plot([x, x], [y, y], [zh, z], color='#444444', linewidth=0.6)
+ax.plot_surface(PP, EE, ZZ, alpha=0.6, cmap='Blues', linewidth=0, antialiased=True)
+
+ax.set_xlabel('process ($K)', labelpad=6)
+ax.set_ylabel('efficiency ($K)', labelpad=6)
+ax.set_zlabel('CO₂ reduction', labelpad=6)
+ax.view_init(elev=18, azim=225)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
 ## {#mlr-coeffs-1 data-menu-title="The MLR model"}
 
 [Interpreting the MLR coefficients]{.slide-title}
@@ -1307,3 +1407,12 @@ We will later talk about **regularization** (lasso, ridge) over stepwise selecti
 - **F-statistic**: tests $H_0: \beta_1 = \cdots = \beta_p = 0$ 
 - **$R^2$** always increases with predictors; use **adjusted $R^2$** to compare models of different sizes
 - **Variable selection**: forward, backward, mixed 
+
+
+::: {.teal-text}
+
+There are may be many potential problems when we try to fit a linear model to our data. 
+
+You will be exploring some of the most common ones in homework 2. 
+
+:::
