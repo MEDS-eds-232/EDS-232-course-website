@@ -967,20 +967,22 @@ An $R^2$ of `{python} f"{R2:.3f}"` means that approximately `{python} f"{R2*100:
 
 ---
 
-## {#training-metrics data-menu-title="RSE and R² are training metrics"}
+## {#training-metrics data-menu-title="R² is a training metrics"}
 
-[RSE and $R^2$ are in-sample metrics]{.slide-title}
+[$R^2$ is an in-sample metric]{.slide-title}
 
 <hr>
 
-Both RSE and $R^2$ are computed on the **same data used to fit the model**.
+The $R^2$ is computed on the same data used to fit the model.
 
-They are in-sample measures, analogous to the **training MSE** from the previous lesson.
+This is an in-sample measures, analogous to the training MSE from the previous lesson.
 
 . . .
 
 ::: {.body-text-m}
-- They can give an overly optimistic picture of how the model generalizes to new data.
+Remember:
+- In-sample measures can give an overly optimistic picture of how the model generalizes to new data.
+- **For inference goals**: use all available data to understand relationships between the variables
 - **For prediction goals**: hold out a test set, fit on training data only, evaluate test MSE on the held-out set.
 :::
 
@@ -1042,7 +1044,7 @@ plt.close()
 
 <hr>
 
-SLR has only **2 parameters** ($\hat{\beta}_0$, $\hat{\beta}_1$). It is a very rigid model:
+SLR has only 2 parameters ($\hat{\beta}_0$, $\hat{\beta}_1$). It is a very rigid model:
 
 <br>
 
@@ -1071,7 +1073,7 @@ SLR has only **2 parameters** ($\hat{\beta}_0$, $\hat{\beta}_1$). It is a very r
 
 - Use all available data
 
-- Report RSE, $R^2$, CIs, $p$-values
+- Report $R^2$, RSE, CIs, $p$-values
 - Example: "Does process spending drive CO₂ reductions?"
 :::
 

@@ -145,10 +145,17 @@ window.Quarto = {
     <a class="nav-link active" href="../../notes/week-by-week/week-by-week.html" aria-current="page"> 
 <span class="menu-text">notes</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../#"> 
-<span class="menu-text">assignments</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">assignments</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-1.html">
+ <span class="dropdown-text">Assignment 1</span></a>
   </li>  
+    </ul>
+  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">weekly labs</span>
@@ -331,7 +338,6 @@ window.Quarto = {
 <p>In this lesson we introduce:</p>
 <ul>
 <li>The <strong>multiple linear regression (MLR) model</strong></li>
-<li>Estimating coefficients via <strong>least squares</strong> and interpreting them as partial effects</li>
 <li>How MLR coefficient estimates can differ from SLR estimates</li>
 <li><strong>The <span class="math inline">\(F\)</span>-statistic</strong> for testing whether any predictor is related to the response</li>
 <li><strong><span class="math inline">\(R^2\)</span></strong> and <strong>adjusted R^2</strong> in multiple regression</li>
@@ -392,7 +398,7 @@ where $f_1, \ldots, f_p$ can be any functions of the predictors. The $f_j$ might
 <li><span class="math inline">\(p = 3\)</span> is the number of predictors</li>
 <li><span class="math inline">\(X_1 =\)</span> <code>process</code> is predictor 1</li>
 <li><span class="math inline">\(X_2 =\)</span> <code>efficiency</code> is predictor 2</li>
-<li><span class="math inline">\(X_3 =\)</span> <code>offset</code> is predictor 3</li>
+<li><span class="math inline">\(X_3 =\)</span> <code>offsets</code> is predictor 3</li>
 </ul>
 <p>So the MLR model takes the form:</p>
 <p><span class="math display">\[\texttt{co2\_reduction} = \beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \cdot \texttt{efficiency} + \beta_3 \cdot \texttt{offsets} + \epsilon.\]</span></p>
@@ -400,7 +406,7 @@ where $f_1, \ldots, f_p$ can be any functions of the predictors. The $f_j$ might
 <section id="estimating-the-coefficients" class="level3">
 <h3 class="anchored" data-anchor-id="estimating-the-coefficients">Estimating the coefficients</h3>
 <p>As usual, our goal is to estimate the unknown coefficients <span class="math inline">\(\beta_i\)</span> using available data. This will give us a a function <span class="math inline">\(\hat{f}\)</span> we can use as a model for this scenario:</p>
-<p><span class="math display">\[\hat{f}(X_1, \ldots, X_p) = \hat{\beta_0} + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.\]</span></p>
+<p><span class="math display">\[\hat{f}(X_1, \ldots, X_p) = \hat{\beta}_0 + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.\]</span></p>
 <p>In this case, we have a training set <span class="math inline">\(\{(x_1, y_1), \ldots, (x_n, y_n)\}\)</span> with <span class="math inline">\(n\)</span> observations to fit the model. For each of the observations <span class="math inline">\((x_i, y_i)\)</span> we have that:</p>
 <ul>
 <li><span class="math inline">\(x_i = (x_{i1}, x_{i2}, \ldots, x_{ip})\)</span> is a vector of <span class="math inline">\(p\)</span> predictor values, and</li>
@@ -410,14 +416,14 @@ where $f_1, \ldots, f_p$ can be any functions of the predictors. The $f_j$ might
 <p><span class="math display">\[
 \begin{align}
 RSS &amp;=&amp; \sum_{i=1}^{n} (y_i - \hat{f}(x_i))^2 \\
-    &amp;=&amp; \sum_{i=1}^{n} (y_i - (\hat{\beta_0} + \hat{\beta}_1x_1 + \ldots + \hat{\beta}_px_p))^2 \\
-    &amp;=&amp; \sum_{i=1}^{n} (y_i - \hat{\beta_0} - \hat{\beta}_1x_1 - \ldots - \hat{\beta}_px_p)^2.
+    &amp;=&amp; \sum_{i=1}^{n} (y_i - (\hat{\beta}_0 + \hat{\beta}_1x_{i1} + \ldots + \hat{\beta}_px_{ip}))^2 \\
+    &amp;=&amp; \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1x_{i1} - \ldots - \hat{\beta}_px_{ip})^2.
 \end{align}
 \]</span></p>
 <p>Notice that the RSS is a function of the coefficients <span class="math inline">\(\hat{\beta}_i\)</span>. The values <span class="math inline">\(x_i\)</span> are fixed numbers that come from our training data. In practice, the computer finds the coefficients <span class="math inline">\(\hat{\beta}_i\)</span> that minimize the RSS for us.</p>
 <!-- TO DO: would be really nice to have a small example of an RSS on two variables and graph.  -->
 <p>Once we have found coefficients that minimize the <span class="math inline">\(RSS\)</span> we obtain our model</p>
-<p><span class="math display">\[\hat{f}(X_1, \ldots, X_p) = \hat{\beta_0} + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.\]</span></p>
+<p><span class="math display">\[\hat{f}(X_1, \ldots, X_p) = \hat{\beta}_0 + \hat{\beta}_1X_1 + \ldots + \hat{\beta}_pX_p.\]</span></p>
 <p>We can use <span class="math inline">\(\hat{f}\)</span> to predict what will be the value of <span class="math inline">\(Y\)</span> at a new observation <span class="math inline">\((x_1, \ldots, x_p)\)</span> by simply plugging in each <span class="math inline">\(x_i\)</span> in the corresponding variable:</p>
 <p><span class="math display">\[\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2 + \cdots + \hat{\beta}_p x_p.\]</span></p>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -438,7 +444,7 @@ Interpreting the MLR coefficients
 </div>
 </div>
 <p>For our example data, the estimated coefficients are:</p>
-<div id="68df228c" class="cell" data-execution_count="4">
+<div id="048a3aaa" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor MLR coeff
    process    0.0461
@@ -482,9 +488,9 @@ Discussion
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li><p>Each additional $1K in energy efficiency upgrades is associated with 0.1831 ktCO₂e of additional CO₂ reduction, <em>holding process and offset spending constant</em>.</p></li>
-<li><p>Usin gour model, the estimate is given by <span class="math inline">\(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 \cdot 100 + \hat{\beta}_2 \cdot 20 + \hat{\beta}_3 \cdot 50.\)</span> Computing this we obtain:</p></li>
+<li><p>Using our model, the estimate is given by <span class="math inline">\(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 \cdot 100 + \hat{\beta}_2 \cdot 20 + \hat{\beta}_3 \cdot 50.\)</span> Computing this we obtain:</p></li>
 </ol>
-<div id="d57107ff" class="cell" data-execution_count="5">
+<div id="d2b871c9" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-stdout">
 <pre><code>Predicted CO₂ reduction: 11.29 ktCO₂e</code></pre>
 </div>
@@ -500,8 +506,24 @@ Discussion
 <h3 class="anchored" data-anchor-id="p-values-for-the-coefficents"><span class="math inline">\(p\)</span>-values for the coefficents</h3>
 <p>In standard linear regression (SLR) we have one variable and one response being modelled by <span class="math inline">\(Y \approx \beta_0 + \beta_1X\)</span>. After we have found estimates for <span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span>, we can examine whether there is a relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> by computing the <span class="math inline">\(p\)</span>-value associated to <span class="math inline">\(\hat{\beta}_1\)</span>. If the <span class="math inline">\(p\)</span>-value is small enough, we conclude the coefficient <span class="math inline">\(\hat{\beta}_1\)</span> is significantly different from 0 and there is evidence of a relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</p>
 <p>When we fit a MLR model, which has more than one variable, we can obtain the <span class="math inline">\(p\)</span>-value for each parameter <span class="math inline">\(\hat{\beta}_j\)</span>. In this case, we use the <span class="math inline">\(p\)</span>-value associated to the coefficient <span class="math inline">\(\beta_j\)</span> to understand the <em>partial effect</em> of adding the variable <span class="math inline">\(X_j\)</span> into the model, when all other variables are held fixed.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Interpreting the <span class="math inline">\(p\)</span>-value
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Small <span class="math inline">\(p\)</span>-value for <span class="math inline">\(\hat{\beta}_j\)</span> means <span class="math inline">\(X_j\)</span> is informative <em>given the other predictors are in the model</em>.</li>
+<li>Large <span class="math inline">\(p\)</span>-value for <span class="math inline">\(\hat{\beta}_j\)</span> means <span class="math inline">\(X_j\)</span> adds little beyond what the others already capture.</li>
+</ul>
+</div>
+</div>
 <p>For our example data we have that:</p>
-<div id="7e69faad" class="cell" data-execution_count="6">
+<div id="c19ee8a5" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor MLR coeff MLR p-value
    process    0.0461    &lt; 0.0001
@@ -511,7 +533,7 @@ efficiency    0.1831    &lt; 0.0001
 </div>
 <p>We can interpret the <span class="math inline">\(p\)</span>-value associated with the <code>process</code> variable as</p>
 <blockquote class="blockquote">
-<p>there is a relationship between the <code>process</code> predictor and the response variable <code>co2_reduction</code>, when the <code>efficiency</code> and <code>offset</code> remain fixed.</p>
+<p>there is a relationship between the <code>process</code> predictor and the response variable <code>co2_reduction</code>, when the <code>efficiency</code> and <code>offsets</code> remain fixed.</p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -523,11 +545,11 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The <code>offsets</code> variable has a large p-value of 0.0193. What does this <span class="math inline">\(p\)</span>-value tell us in the context of this MLR model?</p>
+<p>The <code>offsets</code> variable has a large <span class="math inline">\(p\)</span>-value of 0.0193. What does this <span class="math inline">\(p\)</span>-value tell us in the context of this MLR model?</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -536,7 +558,7 @@ Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>The large <span class="math inline">\(p\)</span>-value is detecting that <code>offset</code> spending contributes almost nothing beyond what <code>process</code> and <code>efficiency</code> already capture. In MLR, the <span class="math inline">\(p\)</span>-value for a coefficient tests whether that variable adds information <em>beyond what the other predictors already explain</em>. A large p-value for <code>offsets</code> means that, given <code>process</code> and <code>efficiency</code> are already in the model, adding offset spending does not significantly improve the fit.</p>
 <p>This is different from asking whether <code>offsets</code> has any relationship with CO₂ reductions in general. If we ran an SLR of <code>co2_reduction</code> on <code>offsets</code> alone, the result might look different because the SLR coefficient would absorb any correlation between <code>offsets</code> and the other predictors.</p>
@@ -633,7 +655,7 @@ Check-in
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -642,7 +664,7 @@ Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>An <span class="math inline">\(F\)</span>-statistic of 612.1 (with <span class="math inline">\(p \ll 0.05\)</span>) gives very strong evidence that at least one of the three predictors is associated with CO₂ reductions. We reject <span class="math inline">\(H_0\)</span>.</p>
 </div>
@@ -660,7 +682,7 @@ Discussion
 
 For our example MLR, the $F$-statistic is 612\.1 with an associated $p$-value of < 0\.0001. In addition, when we run individual regressions of 
 
-::: {#08089f16 .cell execution_count=8}
+::: {#15f6754b .cell execution_count=8}
 
 ::: {.cell-output .cell-output-stdout}
 ```
@@ -704,7 +726,7 @@ efficiency      0.1831       24.37 < 0.0001
 <li>Compute <span class="math inline">\(F\)</span>-statistics and its <span class="math inline">\(p\)</span>-value</li>
 <li>Check individual <span class="math inline">\(p\)</span>-values for predictors.</li>
 </ol>
-<p>If there’s evidence that <em>some</em> predictors are associated with the variable, an important question is: <em>which predictors should we include in the model?</em> This is called <strong>variable selection</strong>. This is an important question to resolve since including unnecessary predictors does not help predictions and increases variance; leaving out important ones biases our estimates.</p>
+<p>If there’s evidence that <em>some</em> predictors are associated with the response, an important question is: <em>which predictors should we include in the model?</em> This is called <strong>variable selection</strong>. This is an important question to resolve since including unnecessary predictors does not help predictions and increases variance; leaving out important ones biases our estimates.</p>
 <p>With <span class="math inline">\(p\)</span> predictors there are <span class="math inline">\(2^p\)</span> possible subsets of variables to consider. For even moderate <span class="math inline">\(p\)</span> (say, 30 or 40) this is completely infeasible to try exhaustively. Three common automated approaches are:</p>
 <section id="forward-selection" class="level3">
 <h3 class="anchored" data-anchor-id="forward-selection">Forward selection</h3>
@@ -771,7 +793,7 @@ process + efficiency + offsets  483.8</code></pre>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -780,7 +802,7 @@ Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li><p><strong>Step 1</strong>: Comparing the three single-predictor models, <code>process</code> gives the lowest RSS. Forward selection adds <code>process</code> first. This is consistent with the scatter plots seen earlier, where <code>process</code> showed the strongest linear association with CO₂ reductions.</p></li>

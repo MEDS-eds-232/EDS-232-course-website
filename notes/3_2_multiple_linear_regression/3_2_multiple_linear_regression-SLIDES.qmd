@@ -69,6 +69,11 @@ r2_slr  = model_slr.score(df[['process']], df['co2_reduction'])
 r2_mlr  = model_mlr_sk.score(df[['process', 'efficiency', 'offsets']], df['co2_reduction'])
 rse_slr = np.sqrt(np.sum((df['co2_reduction'] - model_slr.predict(df[['process']]))**2) / (n - 2))
 rse_mlr = np.sqrt(np.sum((df['co2_reduction'] - model_mlr_sk.predict(df[['process', 'efficiency', 'offsets']]))**2) / (n - 4))
+TSS = np.sum((df['co2_reduction'] - df['co2_reduction'].mean())**2)
+RSS_slr = np.sum((df['co2_reduction'] - model_slr.predict(df[['process']]))**2)
+RSS_mlr_val = np.sum((df['co2_reduction'] - model_mlr_sk.predict(df[['process', 'efficiency', 'offsets']]))**2)
+adj_r2_slr = 1 - (RSS_slr / (n - 2))     / (TSS / (n - 1))
+adj_r2_mlr = 1 - (RSS_mlr_val / (n - 4)) / (TSS / (n - 1))
 
 # All 8 models RSS
 predictors_list = ['process', 'efficiency', 'offsets']
@@ -86,6 +91,10 @@ for r in range(0, len(predictors_list) + 1):
             all_models_rows.append({'Predictors': ' + '.join(subset), 'RSS': round(rss, 1)})
 
 all_models_df = pd.DataFrame(all_models_rows)
+
+# Backward selection p-value tables
+X_proc_eff = sm.add_constant(df[['process', 'efficiency']])
+res_proc_eff = sm.OLS(df['co2_reduction'], X_proc_eff).fit()
 
 def fmt_p(p):
     return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
@@ -775,7 +784,7 @@ It measures the proportion of variance in $Y$ explained by the model.
 
 <br>
 
-*Caveat*: adding a predictor to an MLR model will increase $R^2$ or leave it unchanged, even if that predictor has no real relationship with $Y$.
+**Important**: adding a predictor to an MLR model will increase $R^2$ or leave it unchanged, even if that predictor has no real relationship with $Y$.
 
 . . .
 
@@ -789,9 +798,9 @@ Adjusted $R^2$ can decrease when an irrelevant predictor is added. Better for co
 
 ---
 
-## {#r2-comparison data-menu-title="R² comparison: SLR vs MLR"}
+## {#r2-comparison data-menu-title="Check-in: R² SLR vs MLR"}
 
-[Comparing SLR and MLR model fit]{.slide-title}
+[Check-in]{.slide-title}
 
 <hr>
 
@@ -799,21 +808,26 @@ Adjusted $R^2$ can decrease when an irrelevant predictor is added. Better for co
 #| echo: false
 
 acc_df = pd.DataFrame({
-    'Model':  ['SLR (process only)', 'MLR (all three predictors)'],
-    'R²':     [f'{r2_slr:.3f}', f'{r2_mlr:.3f}'],
-    'RSE (ktCO₂e)': [f'{rse_slr:.3f}', f'{rse_mlr:.3f}'],
+    'Model':      ['SLR (process only)', 'MLR (all three predictors)'],
+    'R²':         [f'{r2_slr:.3f}', f'{r2_mlr:.3f}'],
+    'Adj. R²':    [f'{adj_r2_slr:.3f}', f'{adj_r2_mlr:.3f}'],
 })
 print(acc_df.to_string(index=False))
 ```
 
-. . .
-
 <br>
 
-::: {.body-text-m}
-- $R^2$ increased from `{python} f"{r2_slr:.3f}"` to `{python} f"{r2_mlr:.3f}"` — `efficiency` is genuinely predictive.
-- RSE decreased from `{python} f"{rse_slr:.3f}"` to `{python} f"{rse_mlr:.3f}"` ktCO₂e — predictions are more accurate with all three predictors.
+::: {.teal-text}
+1. $R^2$ increased when going from SLR to MLR. Does this mean the MLR is a better model?
+2. The adjusted $R^2$ also increased. What does this tell us?
 :::
+
+. . .
+
+
+1. Probably, but remember $R^2$ always increases (or stays flat) when predictors are added, even useless ones. It cannot be used alone to compare models of different sizes.
+
+2. Adjusted $R^2$ penalizes for each extra predictor. The fact that it also increased means `efficiency` (and possibly `offsets`) are contributing enough to justify their inclusion.
 
 ---
 
@@ -911,13 +925,15 @@ Can be run using other metrics instead of RSS (ex: adjusted $R^2$)
 ✓ Considers all predictors from the start
 
 ✗ Cannot be used when $p > n$
+
+Can be run using other metrics instead of $p$-values (ex: adjusted $R^2$)
 :::
 
 ::::
 
 ---
 
-## {#all-8-models data-menu-title="Check-on"}
+## {#all-8-models-1 data-menu-title="Check-on"}
 
 [Check-in]{.slide-title}
 
@@ -969,7 +985,7 @@ Trace through forward selection using this table.
 
 ---
 
-## {#all-8-models data-menu-title="Check-on"}
+## {#all-8-models-2 data-menu-title="Check-on"}
 
 [Check-in]{.slide-title}
 
@@ -1022,6 +1038,111 @@ Trace through forward selection using this table.
 :::
 
 :::
+
+---
+
+## {#backward-checkin data-menu-title="Check-in: backward selection"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Step 1 — full model**
+
+```{python}
+#| echo: false
+step1_df = pd.DataFrame({
+    'Predictor': ['process', 'efficiency', 'offsets'],
+    'p-value':   [fmt_p(res_mlr.pvalues['process']),
+                  fmt_p(res_mlr.pvalues['efficiency']),
+                  fmt_p(res_mlr.pvalues['offsets'])]
+})
+print(step1_df.to_string(index=False))
+```
+
+**Step 2 — after first removal**
+
+```{python}
+#| echo: false
+step2_df = pd.DataFrame({
+    'Predictor': ['process', 'efficiency'],
+    'p-value':   [fmt_p(res_proc_eff.pvalues['process']),
+                  fmt_p(res_proc_eff.pvalues['efficiency'])]
+})
+print(step2_df.to_string(index=False))
+```
+
+:::
+
+::: {.column width="50%"}
+
+**Backward selection**
+
+1. Start: full model (all $p$ predictors)
+2. Remove the predictor with the largest $p$-value
+3. Repeat until all remaining predictors are significant
+
+<br>
+
+::: {.teal-text}
+Using the $p$-value tables, trace through backward selection step by step.
+
+- Which predictor is removed first? Why?
+- Should we remove another predictor in step 2, or stop?
+:::
+
+:::
+
+::::
+
+---
+
+## {#backward-checkin-ans data-menu-title="Check-in: backward selection"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Step 1 — full model**
+
+```{python}
+#| echo: false
+print(step1_df.to_string(index=False))
+```
+
+**Step 2 — after first removal**
+
+```{python}
+#| echo: false
+print(step2_df.to_string(index=False))
+```
+
+:::
+
+::: {.column width="50%"}
+
+**Backward selection**
+
+1. Start: full model (all $p$ predictors)
+2. Remove the predictor with the largest $p$-value
+3. Repeat until all remaining predictors are significant
+
+<br>
+
+- **Step 1**: `offsets` has by far the largest $p$-value → remove it
+- **Step 2**: both `process` and `efficiency` have very small $p$-values → all remaining predictors are significant; stop
+
+:::
+
+::::
 
 ---
 
