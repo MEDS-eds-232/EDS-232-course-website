@@ -9,7 +9,7 @@
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.7.33">
 
-  <title>EDS 232 - Machine Learning for Environmental Science – multiple_linear_regression-slides</title>
+  <title>EDS 232 - Machine Learning for Environmental Science – multiple_linear_regression-slides-blank</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -179,11 +179,11 @@ A guiding example
 <h2></h2>
 <p><span class="slide-title">CO₂ reduction vs.&nbsp;each predictor</span></p>
 <hr>
-<div id="e3e876af" class="cell" data-execution_count="2">
+<div id="7a8ca440" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="3_2_multiple_linear_regression-SLIDES_files/figure-revealjs/cell-3-output-1.png" class="quarto-figure quarto-figure-center" width="1187" height="390"></p>
+<p><img data-src="3_2_multiple_linear_regression-SLIDES-BLANK_files/figure-revealjs/cell-3-output-1.png" class="quarto-figure quarto-figure-center" width="1187" height="390"></p>
 </figure>
 </div>
 </div>
@@ -213,14 +213,21 @@ The multiple linear regression model
 </p>
 </div>
 </section>
-<section id="mlr-model" class="slide level2" data-menu-title="The MLR model">
+<section id="mlr-model-1" class="slide level2" data-menu-title="The MLR model">
+<h2></h2>
+<p><span class="slide-title">The MLR model</span></p>
+<hr>
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">
+<p>✏️</p>
+</div>
+</section>
+<section id="mlr-model-2" class="slide level2" data-menu-title="The MLR model">
 <h2></h2>
 <p><span class="slide-title">The MLR model</span></p>
 <hr>
 <p>With <span class="math inline">\(p\)</span> predictors <span class="math inline">\(X_1, \ldots, X_p\)</span> and response variable <span class="math inline">\(Y\)</span>, the <strong>multiple linear regression (MLR) model</strong> assumes the predictors and response are related by:</p>
 <p><span class="math display">\[Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon,\]</span></p>
 <p>each <span class="math inline">\(\beta_i\)</span> is a <strong>coefficient</strong> and <span class="math inline">\(\epsilon\)</span> is an error term.</p>
-<div class="fragment">
 <p>In our example data</p>
 <div class="columns">
 <div class="column" style="width:50%;">
@@ -237,6 +244,13 @@ The multiple linear regression model
 </div></div>
 <p>So the MLR model takes the form:</p>
 <p><span class="math display">\[\texttt{co2_reduction} = \beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \cdot \texttt{efficiency} + \beta_3 \cdot \texttt{offsets} + \epsilon.\]</span></p>
+</section>
+<section id="estimating-coefficients-1" class="slide level2" data-menu-title="The MLR model">
+<h2></h2>
+<p><span class="slide-title">Estimating the MLR coefficients</span></p>
+<hr>
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">
+<p>✏️</p>
 </div>
 </section>
 <section id="estimating-coefficients" class="slide level2" data-menu-title="The MLR model">
@@ -257,6 +271,21 @@ The multiple linear regression model
 RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1x_{i1} - \ldots - \hat{\beta}_px_{ip})^2 .
 \]</span></p>
 </section>
+<section id="mlr-coeffs-1" class="slide level2" data-menu-title="The MLR model">
+<h2></h2>
+<p><span class="slide-title">Interpreting the MLR coefficients</span></p>
+<hr>
+<div class="page-center vertical-center">
+<p>Once we find the coefficients that minimize the RSS we obtain a model:</p>
+<p><span class="math display">\[\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \hat{\beta}_2 X_2 + \cdots + \hat{\beta}_p X_p\]</span></p>
+<p>We interpret each coefficient as</p>
+<p><br> <br> <br> <br> <br> <br></p>
+</div>
+<div style="position: absolute; bottom: 300px; right: 1000px; font-size: 1em;">
+✏️<br>
+
+</div>
+</section>
 <section id="mlr-coeffs" class="slide level2" data-menu-title="The MLR model">
 <h2></h2>
 <p><span class="slide-title">Interpreting the MLR coefficients</span></p>
@@ -275,7 +304,7 @@ RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 -
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <p>For our example data, the estimated coefficients are:</p>
-<div id="c01a6a09" class="cell" data-execution_count="3">
+<div id="c92b3cbe" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor MLR coeff
    process    0.0461
@@ -301,7 +330,7 @@ efficiency    0.1831
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <p>For our example data, the estimated coefficients are:</p>
-<div id="6bfbd1e5" class="cell" data-execution_count="4">
+<div id="d961e7cd" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor MLR coeff
    process    0.0461
@@ -327,12 +356,6 @@ efficiency    0.1831
 </ol>
 </div>
 </div></div>
-</section>
-<section id="coefficients-accuracy" class="slide level2" data-menu-title="Accuracy of the coefficient estimates">
-<h2></h2>
-<p><span class="slide-title">Accuracy of the coefficient estimates</span></p>
-<hr>
-<p>Information about standard errors and confidence intervals for the MLR coefficients.</p>
 </section>
 <section id="pvalues-mlr" class="slide level2" data-menu-title="Individual p-values in MLR">
 <h2></h2>
@@ -360,7 +383,7 @@ efficiency    0.1831
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <p>For our example data we have that:</p>
-<div id="c67f9b69" class="cell" data-execution_count="5">
+<div id="d3027af5" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor MLR coeff MLR p-value
    process    0.0461    &lt; 0.0001
@@ -386,7 +409,7 @@ efficiency    0.1831    &lt; 0.0001
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <p>For our example data we have that:</p>
-<div id="5880a697" class="cell" data-execution_count="6">
+<div id="b1c1526e" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor MLR coeff MLR p-value
    process    0.0461    &lt; 0.0001
@@ -426,12 +449,14 @@ Comparing MLR to individual SLRs
 <li><strong>individual SLR coefficients can be misleading when predictors are correlated</strong></li>
 <li>When two predictors are correlated, each one’s SLR coefficient absorbs part of the other’s effect.</li>
 </ul>
+<div class="fragment">
 <p><em>Example</em></p>
 <p>Suppose firms that invest heavily in <code>process</code> upgrades tend to also invest heavily in <code>efficiency</code>.</p>
 <ul>
 <li>An SLR of <code>co2_reduction</code> on <code>process</code> alone will give a coefficient that also reflects some of the <code>efficiency</code> effect.</li>
 <li>The MLR coefficient for <code>process</code> strips out the <code>efficiency</code> effect and reflects only the direct relationship of <code>process</code>.</li>
 </ul>
+</div>
 </section>
 <section id="slr-vs-mlr-2" class="slide level2" data-menu-title="SLR vs. MLR coefficients">
 <h2></h2>
@@ -445,7 +470,7 @@ Comparing MLR to individual SLRs
 <div class="body-text-s">
 <p>In our example dataset, SLR ≈ MLR coefficients because the predictors were drawn independently (uncorrelated by construction).</p>
 </div>
-<div id="fcf4a73e" class="cell" data-execution_count="7">
+<div id="50a1eb3b" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor SLR coeff SLR p-value MLR coeff MLR p-value
    process    0.0460    &lt; 0.0001    0.0461    &lt; 0.0001
@@ -468,6 +493,20 @@ Hypothesis testing &amp; the F-statistic
 </p>
 </div>
 </section>
+<section id="hypotheses-mlr-1" class="slide level2" data-menu-title="All coefficients test in MLR">
+<h2></h2>
+<p><span class="slide-title">Is any predictor related to the response?</span></p>
+<hr>
+<p>In SLR: <span class="math inline">\(Y \approx \beta_0 + \beta_1 X\)</span> and we tested</p>
+<ul>
+<li><span class="math inline">\(H_0\)</span>: <span class="math inline">\(\beta_1=0 \Rightarrow\)</span> no relationship between response and predictor</li>
+<li><span class="math inline">\(H_a\)</span>: <span class="math inline">\(\beta_1\neq0 \Rightarrow\)</span> some relationship between response and predictor.</li>
+</ul>
+<div style="position: absolute; bottom: 370px; right: 1000px; font-size: 1em;">
+✏️<br>
+
+</div>
+</section>
 <section id="hypotheses-mlr" class="slide level2" data-menu-title="All coefficients test in MLR">
 <h2></h2>
 <p><span class="slide-title">Is any predictor related to the response?</span></p>
@@ -478,7 +517,6 @@ Hypothesis testing &amp; the F-statistic
 <li><span class="math inline">\(H_a\)</span>: <span class="math inline">\(\beta_1\neq0 \Rightarrow\)</span> some relationship between response and predictor.</li>
 </ul>
 <p><br></p>
-<div class="fragment">
 <p>For MLR: <span class="math inline">\(Y \approx \beta_0 + \beta_1X_1 + \ldots + \beta_p X_p\)</span> and we can test</p>
 <ul>
 <li><span class="math inline">\(H_0\)</span>: <span class="math inline">\(\beta_1 =... =\beta_p=0 \Rightarrow\)</span> no relationship between <span class="math inline">\(Y\)</span> and <em>any</em> predictor <span class="math inline">\(X_1, \ldots, X_p\)</span></li>
@@ -486,6 +524,23 @@ Hypothesis testing &amp; the F-statistic
 </ul>
 <p><br></p>
 <p>We are investigating the question <em>Is any predictor related to the response?</em></p>
+</section>
+<section id="f-statistic-1" class="slide level2" data-menu-title="The F-statistic">
+<h2></h2>
+<p><span class="slide-title">The F-statistic</span></p>
+<hr>
+<p>We are investigating the question <em>Is any predictor related to the response?</em></p>
+<p>We test this with the <strong><span class="math inline">\(F\)</span>-statistic</strong>:</p>
+<p><span class="math display">\[F = \frac{(TSS - RSS)/p}{RSS/(n - p - 1)}\]</span></p>
+<div class="body-text-s">
+<ul>
+<li><span class="math inline">\(TSS = \sum(y_i - \bar{y})^2\)</span> is the total variability in <span class="math inline">\(Y\)</span>,</li>
+<li><span class="math inline">\(RSS = \sum(y_i - \hat{y}_i)^2\)</span> is the variability unexplained by the model,</li>
+</ul>
+</div>
+<div style="position: absolute; bottom: 270px; right: 1000px; font-size: 1em;">
+✏️<br>
+
 </div>
 </section>
 <section id="f-statistic" class="slide level2" data-menu-title="The F-statistic">
@@ -501,31 +556,25 @@ Hypothesis testing &amp; the F-statistic
 <li><span class="math inline">\(RSS = \sum(y_i - \hat{y}_i)^2\)</span> is the variability unexplained by the model,</li>
 </ul>
 </div>
-<div class="fragment">
 <div class="body-text-s">
 <ul>
 <li><em>Numerator</em>: how much variance the predictors collectively explain</li>
 <li><em>Denominator</em>: how much variance remains unexplained per degree of freedom</li>
 </ul>
 </div>
-</div>
-<div class="fragment">
 <div class="body-text-s">
 <ul>
 <li><span class="math inline">\(F \approx 1\)</span>: no predictor is related to <span class="math inline">\(Y\)</span> → consistent with <span class="math inline">\(H_0\)</span></li>
 <li><span class="math inline">\(F \gg 1\)</span>: at least one predictor explains variance beyond noise → evidence against <span class="math inline">\(H_0\)</span></li>
 </ul>
 </div>
-</div>
-<div class="fragment">
 <p>An associated <span class="math inline">\(p\)</span>-value is then computed to assess the probability of observing an <span class="math inline">\(F\)</span>-statistic this large or larger, assuming <span class="math inline">\(H_0\)</span> is true.</p>
-</div>
 </section>
 <section id="fstat-greenabate" class="slide level2" data-menu-title="F-statistic example">
 <h2></h2>
 <p><span class="slide-title">Example</span></p>
 <hr>
-<div id="29cb7e14" class="cell" data-execution_count="8">
+<div id="961be282" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-stdout">
 <pre><code>   Quantity    Value
 F-statistic   612.13
@@ -538,7 +587,8 @@ F-statistic   612.13
 <div class="fragment">
 <div class="teal-text">
 <p><strong>Check-in</strong></p>
-<p>Pair up with someone. Have one person explain the hypothesis test for simple linear regression and the other explain the hypothesis test for multiple linear regression.</p>
+<p>Pair up with someone.</p>
+<p>Have one person explain the hypothesis test for simple linear regression and the other explain the hypothesis test for multiple linear regression.</p>
 </div>
 </div>
 </section>
@@ -605,7 +655,7 @@ Model fit: R² and adjusted R²
 <h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
-<div id="71ac7169" class="cell" data-execution_count="9">
+<div id="87838912" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-stdout">
 <pre><code>                     Model    R² Adj. R²
         SLR (process only) 0.611   0.609
@@ -640,9 +690,9 @@ Variable selection
 <hr>
 <p>With <span class="math inline">\(p\)</span> predictors there are <span class="math inline">\(2^p\)</span> possible ways of choosing which predictors to use:</p>
 <ul>
-<li><span class="math inline">\(p = 3\)</span>: 8 models — feasible to compare exhaustively</li>
+<li><span class="math inline">\(p = 3\)</span>: 8 models,feasible to compare exhaustively</li>
 <li><span class="math inline">\(p = 10\)</span>: 1,024 models</li>
-<li><span class="math inline">\(p = 30\)</span>: over 1 billion models — completely infeasible</li>
+<li><span class="math inline">\(p = 30\)</span>: over 1 billion models, completely infeasible</li>
 </ul>
 <p><br></p>
 <div class="fragment">
@@ -668,7 +718,6 @@ Variable selection
 </ol>
 <p>✓ Always applicable</p>
 <p>✗ A variable added early may become redundant later</p>
-<p>Can be run using other metrics instead of RSS (ex: adjusted <span class="math inline">\(R^2\)</span>)</p>
 </div><div class="column" style="width:50%;">
 
 </div></div>
@@ -687,7 +736,6 @@ Variable selection
 </ol>
 <p>✓ Always applicable</p>
 <p>✗ A variable added early may become redundant later</p>
-<p>Can be run using other metrics instead of RSS (ex: adjusted <span class="math inline">\(R^2\)</span>)</p>
 </div><div class="column" style="width:50%;">
 <p><strong>Backward selection</strong></p>
 <ol type="1">
@@ -697,8 +745,8 @@ Variable selection
 </ol>
 <p>✓ Considers all predictors from the start</p>
 <p>✗ Cannot be used when <span class="math inline">\(p &gt; n\)</span></p>
-<p>Can be run using other metrics instead of <span class="math inline">\(p\)</span>-values (ex: adjusted <span class="math inline">\(R^2\)</span>)</p>
 </div></div>
+<p>Can be run using other metrics instead of RSS or <span class="math inline">\(p\)</span>-values.</p>
 </section>
 <section id="all-8-models-1" class="slide level2" data-menu-title="Check-on">
 <h2></h2>
@@ -706,7 +754,7 @@ Variable selection
 <hr>
 <div class="columns">
 <div class="column" style="width:50%;">
-<div id="5152c4cd" class="cell" data-execution_count="10">
+<div id="2c98545d" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-stdout">
 <pre><code>                    Predictors    RSS
               (intercept only) 5016.8
@@ -747,7 +795,7 @@ process + efficiency + offsets  483.8</code></pre>
 <hr>
 <div class="columns">
 <div class="column" style="width:50%;">
-<div id="8c11aee8" class="cell" data-execution_count="11">
+<div id="bdce0618" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-stdout">
 <pre><code>                    Predictors    RSS
               (intercept only) 5016.8
@@ -794,7 +842,7 @@ process + efficiency + offsets  483.8</code></pre>
 <div class="columns">
 <div class="column" style="width:50%;">
 <p><strong>Step 1 — full model</strong></p>
-<div id="f4e6bbb5" class="cell" data-execution_count="12">
+<div id="55fb2c3f" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor  p-value
    process &lt; 0.0001
@@ -803,7 +851,7 @@ efficiency &lt; 0.0001
 </div>
 </div>
 <p><strong>Step 2 — after first removal</strong></p>
-<div id="3fd34eb0" class="cell" data-execution_count="13">
+<div id="c9d123a8" class="cell" data-execution_count="13">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor  p-value
    process &lt; 0.0001
@@ -834,7 +882,7 @@ efficiency &lt; 0.0001</code></pre>
 <div class="columns">
 <div class="column" style="width:50%;">
 <p><strong>Step 1 — full model</strong></p>
-<div id="ae976d83" class="cell" data-execution_count="14">
+<div id="116dda58" class="cell" data-execution_count="14">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor  p-value
    process &lt; 0.0001
@@ -843,7 +891,7 @@ efficiency &lt; 0.0001
 </div>
 </div>
 <p><strong>Step 2 — after first removal</strong></p>
-<div id="1de7f457" class="cell" data-execution_count="15">
+<div id="58741358" class="cell" data-execution_count="15">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor  p-value
    process &lt; 0.0001
@@ -885,29 +933,27 @@ efficiency &lt; 0.0001</code></pre>
 <hr>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p><strong>Use forward when:</strong></p>
+<p><strong>Forward can be useful when:</strong></p>
 <ul>
-<li><span class="math inline">\(p\)</span> is large or <span class="math inline">\(p &gt; n\)</span> — backward requires fitting the full model, which is impossible when there are more predictors than observations</li>
-<li>You expect only a few predictors to matter</li>
-</ul>
-<p><strong>Use backward when:</strong></p>
-<ul>
-<li><span class="math inline">\(p\)</span> is small and <span class="math inline">\(n\)</span> is large enough to fit the full model comfortably <em>(the more common situation in environmental science)</em></li>
-<li>You are worried about missing a predictor that only becomes significant in the presence of others — backward sees all predictors simultaneously from the start</li>
+<li><span class="math inline">\(p\)</span> is large or <span class="math inline">\(p &gt; n\)</span>. Backward requires fitting the full model, which cannot be done if <span class="math inline">\(p&gt;n\)</span>.</li>
+<li>You expect only a few predictors to matter.</li>
 </ul>
 </div><div class="column" style="width:50%;">
-<p>. . .</p>
+<p><strong>Backward can be useful when:</strong></p>
+<ul>
+<li><span class="math inline">\(p\)</span> is small and <span class="math inline">\(n\)</span> is large enough to fit the full model</li>
+<li>Worry about missing a predictor that only becomes significant in the presence of others.</li>
+</ul>
+</div></div>
 <p><strong>In practice:</strong></p>
 <ul>
-<li>Mixed selection hedges against the weaknesses of both — many practitioners run all three and check whether they agree</li>
+<li>Mixed selection hedges against the weaknesses of both</li>
+<li>Practitioners may run all three and check whether they agree</li>
 <li>If all three disagree, that signals correlated predictors and no single “right” model</li>
 </ul>
-<p><br></p>
-<p>. . .</p>
-<div class="teal-text">
-<p>Modern practice often prefers <strong>regularization</strong> (lasso, ridge) over stepwise selection — these methods perform variable selection and coefficient estimation simultaneously and have better statistical properties. More on this later in the course.</p>
+<div class="teal-text body-text-s">
+<p>We will later talk about <strong>regularization</strong> (lasso, ridge) over stepwise selection. These methods perform variable selection and coefficient estimation simultaneously and have better statistical properties.</p>
 </div>
-</div></div>
 </section>
 <section id="recap" class="slide level2" data-menu-title="Recap">
 <h2></h2>

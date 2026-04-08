@@ -231,7 +231,20 @@ Running separate SLRs has the problem that each SLR ignores the other predictors
 
 ---
 
-## {#mlr-model data-menu-title="The MLR model"}
+## {#mlr-model-1 data-menu-title="The MLR model"}
+
+[The MLR model]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
+
+
+---
+
+## {#mlr-model-2 data-menu-title="The MLR model"}
 
 [The MLR model]{.slide-title}
 
@@ -243,7 +256,6 @@ $$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p + \epsilon,$$
 
 each $\beta_i$ is a **coefficient** and $\epsilon$ is an error term. 
 
-. . .
 
 In our example data
 
@@ -266,6 +278,19 @@ In our example data
 So the MLR model takes the form:
 
 $$\texttt{co2_reduction} = \beta_0 + \beta_1 \cdot \texttt{process} + \beta_2 \cdot \texttt{efficiency} + \beta_3 \cdot \texttt{offsets} + \epsilon.$$
+
+
+---
+
+## {#estimating-coefficients-1 data-menu-title="The MLR model"}
+
+[Estimating the MLR coefficients]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
 
 
 ---
@@ -295,6 +320,35 @@ $$
 RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1x_{i1} - \ldots - \hat{\beta}_px_{ip})^2 .
 $$
 
+
+---
+
+## {#mlr-coeffs-1 data-menu-title="The MLR model"}
+
+[Interpreting the MLR coefficients]{.slide-title}
+
+<hr>
+
+<div class="page-center vertical-center">
+
+Once we find the coefficients that minimize the RSS we obtain a model:
+
+$$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \hat{\beta}_2 X_2 + \cdots + \hat{\beta}_p X_p$$
+
+We interpret each coefficient as
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+</div>
+
+ <div style="position: absolute; bottom: 300px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+  </div>  
 
 ---
 
@@ -403,15 +457,6 @@ print(comp_df.to_string(index=False))
 :::
 
 :::
----
-
-## {#coefficients-accuracy data-menu-title="Accuracy of the coefficient estimates"}
-
-[Accuracy of the coefficient estimates]{.slide-title}
-
-<hr>
-
-Information about standard errors and confidence intervals for the MLR coefficients. 
 
 ---
 
@@ -552,6 +597,8 @@ print(comp_df.to_string(index=False))
 - **individual SLR coefficients can be misleading when predictors are correlated**
 - When two predictors are correlated, each one's SLR coefficient absorbs part of the other's effect. 
 
+. . .
+
 *Example*
 
 Suppose firms that invest heavily in `process` upgrades tend to also invest heavily in `efficiency`.
@@ -612,6 +659,23 @@ print(comp_df.to_string(index=False))
 
 ---
 
+## {#hypotheses-mlr-1 data-menu-title="All coefficients test in MLR"}
+
+[Is any predictor related to the response?]{.slide-title}
+
+<hr>
+
+In SLR: $Y \approx \beta_0 + \beta_1 X$ and we tested
+
+- $H_0$: $\beta_1=0 \Rightarrow$ no relationship between response and predictor
+- $H_a$: $\beta_1\neq0 \Rightarrow$ some relationship between response and predictor. 
+
+ <div style="position: absolute; bottom: 370px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+  </div>  
+
+---
+
 ## {#hypotheses-mlr data-menu-title="All coefficients test in MLR"}
 
 [Is any predictor related to the response?]{.slide-title}
@@ -625,7 +689,6 @@ In SLR: $Y \approx \beta_0 + \beta_1 X$ and we tested
 
 <br>
 
-. . .
 
 For MLR: $Y \approx \beta_0 + \beta_1X_1 + \ldots + \beta_p X_p$ and we can test
 
@@ -636,6 +699,30 @@ For MLR: $Y \approx \beta_0 + \beta_1X_1 + \ldots + \beta_p X_p$ and we can test
 
 We are investigating the question *Is any predictor related to the response?*
 
+
+---
+
+## {#f-statistic-1 data-menu-title="The F-statistic"}
+
+[The F-statistic]{.slide-title}
+
+<hr>
+
+We are investigating the question *Is any predictor related to the response?*
+
+
+We test this with the **$F$-statistic**:
+
+$$F = \frac{(TSS - RSS)/p}{RSS/(n - p - 1)}$$
+
+::: {.body-text-s}
+- $TSS = \sum(y_i - \bar{y})^2$ is the total variability in $Y$,
+- $RSS = \sum(y_i - \hat{y}_i)^2$ is the variability unexplained by the model,
+:::
+
+<div style="position: absolute; bottom: 270px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+  </div>  
 
 ---
 
@@ -657,21 +744,18 @@ $$F = \frac{(TSS - RSS)/p}{RSS/(n - p - 1)}$$
 - $RSS = \sum(y_i - \hat{y}_i)^2$ is the variability unexplained by the model,
 :::
 
-. . .
 
 ::: {.body-text-s}
 - *Numerator*: how much variance the predictors collectively explain 
 - *Denominator*: how much variance remains unexplained per degree of freedom
 :::
 
-. . .
 
 ::: {.body-text-s}
 - $F \approx 1$: no predictor is related to $Y$ → consistent with $H_0$
 - $F \gg 1$: at least one predictor explains variance beyond noise → evidence against $H_0$
 :::
 
-. . .
 
 An associated $p$-value is then computed to assess the probability of observing an $F$-statistic this large or larger, assuming $H_0$ is true. 
 
@@ -705,7 +789,9 @@ An $F$-statistic of `{python} f"{res_mlr.fvalue:.1f}"` with $p \ll 0.05$ gives v
 ::: {.teal-text}
 **Check-in**
 
-Pair up with someone. Have one person explain the hypothesis test for simple linear regression and the other explain the hypothesis test for multiple linear regression.
+Pair up with someone. 
+
+Have one person explain the hypothesis test for simple linear regression and the other explain the hypothesis test for multiple linear regression.
 :::
 
 ---
@@ -847,9 +933,9 @@ print(acc_df.to_string(index=False))
 
 With $p$ predictors there are $2^p$ possible ways of choosing which predictors to use:
 
-- $p = 3$: 8 models — feasible to compare exhaustively
+- $p = 3$: 8 models,feasible to compare exhaustively
 - $p = 10$: 1,024 models
-- $p = 30$: over 1 billion models — completely infeasible
+- $p = 30$: over 1 billion models, completely infeasible
 
 <br>
 
@@ -882,7 +968,6 @@ Three common automated approaches for large $p$:
 
 ✗ A variable added early may become redundant later
 
-Can be run using other metrics instead of RSS (ex: adjusted $R^2$)
 :::
 
 ::: {.column width="50%"}
@@ -911,8 +996,6 @@ Can be run using other metrics instead of RSS (ex: adjusted $R^2$)
 ✓ Always applicable 
 
 ✗ A variable added early may become redundant later
-
-Can be run using other metrics instead of RSS (ex: adjusted $R^2$)
 :::
 
 ::: {.column width="50%"}
@@ -925,11 +1008,12 @@ Can be run using other metrics instead of RSS (ex: adjusted $R^2$)
 ✓ Considers all predictors from the start
 
 ✗ Cannot be used when $p > n$
-
-Can be run using other metrics instead of $p$-values (ex: adjusted $R^2$)
 :::
 
 ::::
+
+Can be run using other metrics instead of RSS or $p$-values.
+
 
 ---
 
@@ -1177,37 +1261,37 @@ This fixes the main weakness of forward selection: a variable added early can be
 :::: {.columns}
 
 ::: {.column width="50%"}
-**Use forward when:**
+**Forward can be useful when:**
 
-- $p$ is large or $p > n$ — backward requires fitting the full model, which is impossible when there are more predictors than observations
-- You expect only a few predictors to matter
+- $p$ is large or $p > n$. Backward requires fitting the full model, which cannot be done if $p>n$.
+- You expect only a few predictors to matter.
 
-**Use backward when:**
-
-- $p$ is small and $n$ is large enough to fit the full model comfortably *(the more common situation in environmental science)*
-- You are worried about missing a predictor that only becomes significant in the presence of others — backward sees all predictors simultaneously from the start
 :::
 
 ::: {.column width="50%"}
+**Backward can be useful when:**
 
-. . .
+- $p$ is small and $n$ is large enough to fit the full model 
+- Worry about missing a predictor that only becomes significant in the presence of others. 
+
+:::
+
+
+:::
+
+
+
 
 **In practice:**
 
-- Mixed selection hedges against the weaknesses of both — many practitioners run all three and check whether they agree
+- Mixed selection hedges against the weaknesses of both
+- Practitioners may run all three and check whether they agree
 - If all three disagree, that signals correlated predictors and no single "right" model
 
-<br>
-
-. . .
-
-::: {.teal-text}
-Modern practice often prefers **regularization** (lasso, ridge) over stepwise selection — these methods perform variable selection and coefficient estimation simultaneously and have better statistical properties. More on this later in the course.
+::: {.teal-text .body-text-s}
+We will later talk about **regularization** (lasso, ridge) over stepwise selection. These methods perform variable selection and coefficient estimation simultaneously and have better statistical properties.
 :::
 
-:::
-
-::::
 
 ---
 
