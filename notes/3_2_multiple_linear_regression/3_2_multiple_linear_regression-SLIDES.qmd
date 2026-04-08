@@ -771,13 +771,11 @@ The $R^2$ formula is the same as in SLR:
 
 $$R^2 = 1 - \frac{RSS}{TSS}$$
 
-. . .
+It measures the proportion of variance in $Y$ explained by the model. 
 
 <br>
 
-::: {.body-text-m .teal-text}
-**Important caveat:** adding a predictor to an MLR model will **always** increase $R^2$ (or leave it unchanged), even if that predictor has no real relationship with $Y$.
-:::
+*Caveat*: adding a predictor to an MLR model will increase $R^2$ or leave it unchanged, even if that predictor has no real relationship with $Y$.
 
 . . .
 
@@ -787,7 +785,7 @@ The **adjusted $R^2$** penalizes for the number of predictors:
 
 $$\bar{R}^2 = 1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}$$
 
-Adjusted $R^2$ can **decrease** when an irrelevant predictor is added — making it better for comparing models of different sizes.
+Adjusted $R^2$ can decrease when an irrelevant predictor is added. Better for comparing models of different sizes.
 
 ---
 
@@ -833,63 +831,25 @@ print(acc_df.to_string(index=False))
 
 <hr>
 
-With $p$ predictors there are $2^p$ possible subsets:
+With $p$ predictors there are $2^p$ possible ways of choosing which predictors to use:
 
-::: {.body-text-m}
-- $p = 3$: **8 models** — feasible to compare exhaustively
+- $p = 3$: 8 models — feasible to compare exhaustively
 - $p = 10$: 1,024 models
 - $p = 30$: over 1 billion models — completely infeasible
-:::
-
-. . .
 
 <br>
+
+. . .
 
 Three common automated approaches for large $p$:
 
-::: {.body-text-m}
 - [**Forward selection**]{.teal-text}: start with nothing, add one predictor at a time
 - [**Backward selection**]{.teal-text}: start with everything, remove one at a time
 - [**Mixed selection**]{.teal-text}: combine forward and backward steps
-:::
 
 ---
 
-## {#all-8-models data-menu-title="All 8 GreenAbate models"}
-
-[RSS for all 8 possible GreenAbate models]{.slide-title}
-
-<hr>
-
-```{python}
-#| echo: false
-print(all_models_df.to_string(index=False))
-```
-
-. . .
-
-<br>
-
-::: {.teal-text .body-text-m}
-**Check-in:** Trace through forward selection using this table.
-
-Which predictor would be added first? Second? Does adding `offsets` meaningfully reduce RSS?
-:::
-
----
-
-## {#checkin-forward-sel data-menu-title="Check-in: forward selection" background="#053660"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in — forward selection answers</p>
-<p class="custom-subtitle3">Step 1: `process` has the lowest single-predictor RSS → added first.</p>
-<p class="custom-subtitle3">Step 2: `process + efficiency` has lower RSS than `process + offsets` → `efficiency` added second.</p>
-<p class="custom-subtitle3">Step 3: adding `offsets` gives only a tiny further reduction — whether it is included depends on the stopping criterion.</p>
-</div>
-
----
-
-## {#forward-backward data-menu-title="Forward and backward selection"}
+## {#forward-backward-1 data-menu-title="Forward and backward selection"}
 
 [Forward and backward selection]{.slide-title}
 
@@ -902,9 +862,37 @@ Which predictor would be added first? Second? Does adding `offsets` meaningfully
 
 1. Start: null model (intercept only)
 2. Add the predictor with the largest RSS reduction
-3. Repeat until stopping criterion is met
+3. Repeat until some stopping criterion is met
 
-✓ Always applicable (works when $p > n$)
+✓ Always applicable 
+
+✗ A variable added early may become redundant later
+:::
+
+::: {.column width="50%"}
+
+:::
+
+::::
+
+---
+
+## {#forward-backward-2 data-menu-title="Forward and backward selection"}
+
+[Forward and backward selection]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Forward selection**
+
+1. Start: null model (intercept only)
+2. Add the predictor with the largest RSS reduction
+3. Repeat until some stopping criterion is met
+
+✓ Always applicable 
 
 ✗ A variable added early may become redundant later
 :::
@@ -949,6 +937,44 @@ Which predictor would be added first? Second? Does adding `offsets` meaningfully
 ::: {.body-text-m .teal-text}
 This fixes the main weakness of forward selection: a variable added early can be *removed* once other, better variables are in the model.
 :::
+
+
+---
+
+## {#all-8-models data-menu-title="Check-on"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+print(all_models_df.to_string(index=False))
+```
+
+. . .
+
+<br>
+
+::: {.teal-text .body-text-m}
+Trace through forward selection using this table.
+
+- Which predictor would be added first? Second? Does adding `offsets` meaningfully reduce RSS? 
+
+- What criteria could be used to decide whether to add or not the final predictor?
+:::
+
+---
+
+## {#checkin-forward-sel data-menu-title="Check-in: forward selection" background="#053660"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Check-in — forward selection answers</p>
+<p class="custom-subtitle3">Step 1: `process` has the lowest single-predictor RSS → added first.</p>
+<p class="custom-subtitle3">Step 2: `process + efficiency` has lower RSS than `process + offsets` → `efficiency` added second.</p>
+<p class="custom-subtitle3">Step 3: adding `offsets` gives only a tiny further reduction — whether it is included depends on the stopping criterion.</p>
+</div>
+
 
 ---
 
