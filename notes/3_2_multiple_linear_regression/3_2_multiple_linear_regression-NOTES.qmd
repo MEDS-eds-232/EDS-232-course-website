@@ -536,7 +536,7 @@ print(all_models_df.to_string(index=False))
 Using the table above, manually trace through the three steps of forward selection:
 
 1. **Step 1** — Start with the null model. Which single predictor gives the largest reduction in RSS? What would be the RSS after adding it?
-2. **Step 2** — With that predictor already in the model, which of the remaining two predictors gives the largest further reduction in RSS?
+2. **Step 2** — With that predictor already in the model, which one would be added in second place?
 3. **Step 3** — Adding the final predictor, does it meaningfully reduce the RSS compared to the two-predictor model? What criteria could be used to decide whether to add or not the final predictor?
 :::
 
@@ -547,7 +547,7 @@ Using the table above, manually trace through the three steps of forward selecti
 
 2. **Step 2**: With `process` already included, we compare `process + efficiency` and `process + offsets`. The `process + efficiency` model has the lower RSS, so `efficiency` is added second. The reduction from step 1 to step 2 is substantial, reflecting that `efficiency` spending is genuinely associated with CO₂ reductions in the data-generating model.
 
-3. **Step 3**: Adding `offsets` to the two-predictor model produces only a very small further reduction in RSS. This matches its near-zero true coefficient ($-0.001$) and large $p$-value in the MLR output. Whether we include `offsets` at this step depends on the stopping criterion: if we require a minimum RSS improvement or a significant $p$-value, it would not be added.
+3. **Step 3**: Adding `offsets` to the two-predictor model produces only a very small further reduction in RSS. This matches its near-zero true coefficient ($-0.001$) and large $p$-value in the MLR output. Whether we include `offsets` at this step depends on the stopping criterion: if we require a minimum RSS improvement, it would likely not be added.
 :::
 
 Forward and backward selection can be run using metrics other than RSS. In fact, using raw RSS as the sole criterion would always favor adding more predictors (RSS can only decrease or stay the same when a predictor is added). An alternative that penalizes model complexity is using the adjusted $R^2$.

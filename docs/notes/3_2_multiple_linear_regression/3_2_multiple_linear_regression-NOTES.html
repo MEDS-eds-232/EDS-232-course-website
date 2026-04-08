@@ -444,7 +444,7 @@ Interpreting the MLR coefficients
 </div>
 </div>
 <p>For our example data, the estimated coefficients are:</p>
-<div id="048a3aaa" class="cell" data-execution_count="4">
+<div id="7e14c6b1" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor MLR coeff
    process    0.0461
@@ -490,7 +490,7 @@ Discussion
 <li><p>Each additional $1K in energy efficiency upgrades is associated with 0.1831 ktCO₂e of additional CO₂ reduction, <em>holding process and offset spending constant</em>.</p></li>
 <li><p>Using our model, the estimate is given by <span class="math inline">\(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 \cdot 100 + \hat{\beta}_2 \cdot 20 + \hat{\beta}_3 \cdot 50.\)</span> Computing this we obtain:</p></li>
 </ol>
-<div id="d2b871c9" class="cell" data-execution_count="5">
+<div id="8c021249" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-stdout">
 <pre><code>Predicted CO₂ reduction: 11.29 ktCO₂e</code></pre>
 </div>
@@ -523,7 +523,7 @@ Interpreting the <span class="math inline">\(p\)</span>-value
 </div>
 </div>
 <p>For our example data we have that:</p>
-<div id="c19ee8a5" class="cell" data-execution_count="6">
+<div id="5185fae7" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor MLR coeff MLR p-value
    process    0.0461    &lt; 0.0001
@@ -682,7 +682,7 @@ Discussion
 
 For our example MLR, the $F$-statistic is 612\.1 with an associated $p$-value of < 0\.0001. In addition, when we run individual regressions of 
 
-::: {#15f6754b .cell execution_count=8}
+::: {#3afd35d8 .cell execution_count=8}
 
 ::: {.cell-output .cell-output-stdout}
 ```
@@ -787,7 +787,7 @@ process + efficiency + offsets  483.8</code></pre>
 <p>Using the table above, manually trace through the three steps of forward selection:</p>
 <ol type="1">
 <li><strong>Step 1</strong> — Start with the null model. Which single predictor gives the largest reduction in RSS? What would be the RSS after adding it?</li>
-<li><strong>Step 2</strong> — With that predictor already in the model, which of the remaining two predictors gives the largest further reduction in RSS?</li>
+<li><strong>Step 2</strong> — With that predictor already in the model, which one would be added in second place?</li>
 <li><strong>Step 3</strong> — Adding the final predictor, does it meaningfully reduce the RSS compared to the two-predictor model? What criteria could be used to decide whether to add or not the final predictor?</li>
 </ol>
 </div>
@@ -807,7 +807,7 @@ Discussion
 <ol type="1">
 <li><p><strong>Step 1</strong>: Comparing the three single-predictor models, <code>process</code> gives the lowest RSS. Forward selection adds <code>process</code> first. This is consistent with the scatter plots seen earlier, where <code>process</code> showed the strongest linear association with CO₂ reductions.</p></li>
 <li><p><strong>Step 2</strong>: With <code>process</code> already included, we compare <code>process + efficiency</code> and <code>process + offsets</code>. The <code>process + efficiency</code> model has the lower RSS, so <code>efficiency</code> is added second. The reduction from step 1 to step 2 is substantial, reflecting that <code>efficiency</code> spending is genuinely associated with CO₂ reductions in the data-generating model.</p></li>
-<li><p><strong>Step 3</strong>: Adding <code>offsets</code> to the two-predictor model produces only a very small further reduction in RSS. This matches its near-zero true coefficient (<span class="math inline">\(-0.001\)</span>) and large <span class="math inline">\(p\)</span>-value in the MLR output. Whether we include <code>offsets</code> at this step depends on the stopping criterion: if we require a minimum RSS improvement or a significant <span class="math inline">\(p\)</span>-value, it would not be added.</p></li>
+<li><p><strong>Step 3</strong>: Adding <code>offsets</code> to the two-predictor model produces only a very small further reduction in RSS. This matches its near-zero true coefficient (<span class="math inline">\(-0.001\)</span>) and large <span class="math inline">\(p\)</span>-value in the MLR output. Whether we include <code>offsets</code> at this step depends on the stopping criterion: if we require a minimum RSS improvement, it would likely not be added.</p></li>
 </ol>
 </div>
 </div>
