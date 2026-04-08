@@ -756,7 +756,7 @@ The $F$-statistic tests all coefficients jointly and accounts for this.
 ## {#section-modelfit data-menu-title="# Model fit #" background="#047C90"}
 
 <div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Model fit: R² in MLR</p>
+<p class="custom-subtitle bottombr">Model fit: R² and adjusted R²</p>
 </div>
 
 ---
@@ -867,6 +867,8 @@ Three common automated approaches for large $p$:
 ✓ Always applicable 
 
 ✗ A variable added early may become redundant later
+
+Can be run using other metrics instead of RSS (ex: adjusted $R^2$)
 :::
 
 ::: {.column width="50%"}
@@ -895,6 +897,8 @@ Three common automated approaches for large $p$:
 ✓ Always applicable 
 
 ✗ A variable added early may become redundant later
+
+Can be run using other metrics instead of RSS (ex: adjusted $R^2$)
 :::
 
 ::: {.column width="50%"}
@@ -913,6 +917,114 @@ Three common automated approaches for large $p$:
 
 ---
 
+## {#all-8-models data-menu-title="Check-on"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{python}
+#| echo: false
+print(all_models_df.to_string(index=False))
+```
+:::
+
+
+::: {.column width="50%"}
+
+**Forward selection process**
+
+1. Start: null model (intercept only)
+2. Add the predictor with the largest RSS reduction
+3. Repeat until some stopping criterion is met
+:::
+
+
+:::
+
+<br>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text }
+Trace through forward selection using this table.
+
+- Which predictor would be added first? Second? Does adding `offsets` meaningfully reduce RSS? 
+
+- What criteria could be used to decide whether to add or not the final predictor?
+:::
+
+:::
+
+::: {.column width="50%"}
+
+:::
+
+:::
+
+---
+
+## {#all-8-models data-menu-title="Check-on"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{python}
+#| echo: false
+print(all_models_df.to_string(index=False))
+```
+:::
+
+
+::: {.column width="50%"}
+
+**Forward selection process**
+
+1. Start: null model (intercept only)
+2. Add the predictor with the largest RSS reduction
+3. Repeat until some stopping criterion is met
+:::
+
+
+:::
+
+<br>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text }
+Trace through forward selection using this table.
+
+- Which predictor would be added first? Second? Does adding `offsets` meaningfully reduce RSS? 
+
+- What criteria could be used to decide whether to add or not the final predictor?
+:::
+
+:::
+
+::: {.column width="50%"}
+
+- `process` is added 1st (lowest RSS)
+- `efficiency` is added 2nd: Substantial RSS reduction, `efficiency` spending is genuinely associated with CO₂ reductions.
+- Adding `offsets` to the two-predictor model produces only a very small reduction in RSS
+- A minimum RSS reduction at each step.
+:::
+
+:::
+
+---
+
 ## {#mixed-selection data-menu-title="Mixed selection"}
 
 [Mixed selection]{.slide-title}
@@ -923,87 +1035,15 @@ Three common automated approaches for large $p$:
 
 <br>
 
-::: {.body-text-m}
 1. Start with the null model
-2. **Forward step**: add the variable with the largest RSS reduction
-3. **Backward step**: check if any included variable now has a large $p$-value — if so, remove it
-4. Continue until no variables are added or removed
-:::
+2. *Forward step*: add the variable with the largest RSS reduction
+3. *Backward step*: check if any included variable now has a large $p$-value. If so, remove it
+4. Continue until all variables in the model have sufficiently low $p$-value, and all variables outside the model would have a large $p$-value if added. 
 
-. . .
 
 <br>
 
-::: {.body-text-m .teal-text}
 This fixes the main weakness of forward selection: a variable added early can be *removed* once other, better variables are in the model.
-:::
-
-
----
-
-## {#all-8-models data-menu-title="Check-on"}
-
-[Check-in]{.slide-title}
-
-<hr>
-
-```{python}
-#| echo: false
-print(all_models_df.to_string(index=False))
-```
-
-. . .
-
-<br>
-
-::: {.teal-text .body-text-m}
-Trace through forward selection using this table.
-
-- Which predictor would be added first? Second? Does adding `offsets` meaningfully reduce RSS? 
-
-- What criteria could be used to decide whether to add or not the final predictor?
-:::
-
----
-
-## {#checkin-forward-sel data-menu-title="Check-in: forward selection" background="#053660"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Check-in — forward selection answers</p>
-<p class="custom-subtitle3">Step 1: `process` has the lowest single-predictor RSS → added first.</p>
-<p class="custom-subtitle3">Step 2: `process + efficiency` has lower RSS than `process + offsets` → `efficiency` added second.</p>
-<p class="custom-subtitle3">Step 3: adding `offsets` gives only a tiny further reduction — whether it is included depends on the stopping criterion.</p>
-</div>
-
-
----
-
-## {#other-metrics data-menu-title="Other selection criteria"}
-
-[Other criteria for variable selection]{.slide-title}
-
-<hr>
-
-RSS alone always favors larger models — use criteria that **penalize complexity**:
-
-<br>
-
-::: {.body-text-m}
-| Criterion | Formula | Goal |
-|-----------|---------|------|
-| Adjusted $R^2$ | $1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}$ | Maximize |
-| AIC | $n\log(RSS/n) + 2p$ | Minimize |
-| BIC | $n\log(RSS/n) + p\log(n)$ | Minimize |
-| Test MSE (CV) | held-out set error | Minimize |
-:::
-
-. . .
-
-<br>
-
-::: {.body-text-s}
-BIC penalizes extra predictors more heavily than AIC (for $n > 7$), tending to select sparser models. Cross-validation is the most direct approach when the goal is prediction accuracy.
-:::
 
 ---
 
@@ -1014,8 +1054,8 @@ BIC penalizes extra predictors more heavily than AIC (for $n > 7$), tending to s
 <hr>
 
 - **MLR model**: $Y = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p + \epsilon$ — coefficients interpreted *holding all else constant*
-- Least squares minimizes RSS; computer solves it
+- Least squares minimizes RSS
 - **Individual p-values**: test partial effects (does $X_j$ add beyond the others?)
-- **F-statistic**: tests $H_0: \beta_1 = \cdots = \beta_p = 0$ — use before relying on individual p-values
+- **F-statistic**: tests $H_0: \beta_1 = \cdots = \beta_p = 0$ 
 - **$R^2$** always increases with predictors; use **adjusted $R^2$** to compare models of different sizes
-- **Variable selection**: forward, backward, mixed — use AIC, BIC, adjusted $R^2$, or CV as criteria
+- **Variable selection**: forward, backward, mixed 
