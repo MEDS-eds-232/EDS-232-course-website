@@ -418,14 +418,14 @@
     "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#ci-greenabate-checkin",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\nThe exact 95% confidence intervals for each coefficient are:\n\n\n95% CI for β₀ (intercept): [6.823, 8.567]\n95% CI for β₁ (process):   [0.041, 0.051]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhat does the CI [0.041, 0.051] tell us about the relationship between process upgrade spending and CO₂ reductions?\nWhat if the interval had been [-0.002, 0.051] instead?\n\n\n\nInterpretation:\n\na 95% CI for \\(\\beta_1\\) of \\([a_1, b_1]\\) means that, using a procedure that captures the true slope 95% of the time, we estimate that a one-unit increase of \\(x\\) is associated with an average increase in \\(y\\) between \\(a_1\\) and \\(b_1\\) units.\n\n\na 95% confidence inerval for \\(\\beta_0\\) is \\([a_0, b_0]\\) means that, using a procedure that captures the true intercept 95% of the time, we estimate the model’s \\(y\\)-intercept is between \\(a_0\\) and \\(b_0\\)."
+    "text": "Check-in\n\n\n\nThe exact 95% confidence intervals for each coefficient are:\n\nci = res.conf_int(alpha=0.05)\nci_b1_low  = ci.loc['process', 0]\nci_b1_high = ci.loc['process', 1]\nci_b0_low  = ci.loc['const', 0]\nci_b0_high = ci.loc['const', 1]\n\nprint(f\"95% CI for β₀ (intercept): [{ci_b0_low:.3f}, {ci_b0_high:.3f}]\")\nprint(f\"95% CI for β₁ (process):   [{ci_b1_low:.3f}, {ci_b1_high:.3f}]\")\n\n95% CI for β₀ (intercept): [6.823, 8.567]\n95% CI for β₁ (process):   [0.041, 0.051]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhat does the CI [0.041, 0.051] tell us about the relationship between process upgrade spending and CO₂ reductions?\nWhat if the interval had been [-0.002, 0.051] instead?\n\n\n\nInterpretation:\n\na 95% CI for \\(\\beta_1\\) of \\([a_1, b_1]\\) means that, using a procedure that captures the true slope 95% of the time, we estimate that a one-unit increase of \\(x\\) is associated with an average increase in \\(y\\) between \\(a_1\\) and \\(b_1\\) units.\n\n\na 95% confidence inerval for \\(\\beta_0\\) is \\([a_0, b_0]\\) means that, using a procedure that captures the true intercept 95% of the time, we estimate the model’s \\(y\\)-intercept is between \\(a_0\\) and \\(b_0\\)."
   },
   {
     "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#ci-greenabate-checkin-solution",
     "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#ci-greenabate-checkin-solution",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\nThe exact 95% confidence intervals for each coefficient are:\n\n\n95% CI for β₀ (intercept): [6.823, 8.567]\n95% CI for β₁ (process):   [0.041, 0.051]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhat does the CI [0.041, 0.051] tell us about the relationship between process upgrade spending and CO₂ reductions?\nWhat if the interval had been [-0.002, 0.051] instead?\n\n\n\nInterpretation:\n\nEach additional $1K in process spending is associated with a reduction of between 0.041 and 0.051 ktCO₂e per year on average.\nAlso, the entire interval [0.041, 0.051] is above 0 so our procedure points to a positive slope: firms that invest more in cleaner production processes achieve greater CO₂ reductions.\nAn interval of [-0.002, 0.051] includes 0. We cannot rule out that \\(\\beta_1 = 0\\), meaning we cannot confidently conclude that process spending drives reductions. Wider intervals generally arise from smaller samples or noisier data."
+    "text": "Check-in\n\n\n\nThe exact 95% confidence intervals for each coefficient are:\n\nci = res.conf_int(alpha=0.05)\nci_b1_low  = ci.loc['process', 0]\nci_b1_high = ci.loc['process', 1]\nci_b0_low  = ci.loc['const', 0]\nci_b0_high = ci.loc['const', 1]\n\nprint(f\"95% CI for β₀ (intercept): [{ci_b0_low:.3f}, {ci_b0_high:.3f}]\")\nprint(f\"95% CI for β₁ (process):   [{ci_b1_low:.3f}, {ci_b1_high:.3f}]\")\n\n95% CI for β₀ (intercept): [6.823, 8.567]\n95% CI for β₁ (process):   [0.041, 0.051]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhat does the CI [0.041, 0.051] tell us about the relationship between process upgrade spending and CO₂ reductions?\nWhat if the interval had been [-0.002, 0.051] instead?\n\n\n\nInterpretation:\n\nEach additional $1K in process spending is associated with a reduction of between 0.041 and 0.051 ktCO₂e per year on average.\nAlso, the entire interval [0.041, 0.051] is above 0 so our procedure points to a positive slope: firms that invest more in cleaner production processes achieve greater CO₂ reductions.\nAn interval of [-0.002, 0.051] includes 0. We cannot rule out that \\(\\beta_1 = 0\\), meaning we cannot confidently conclude that process spending drives reductions. Wider intervals generally arise from smaller samples or noisier data."
   },
   {
     "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#section-hypothesis",
@@ -453,14 +453,14 @@
     "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#p-values-checkin",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\nThe table below shows the regression output for the SLR of co2_reduction on process:\n\n\n          Coefficient Std. error t-statistic  p-value\nIntercept      7.6953     0.4421       17.41 &lt; 0.0001\n  process      0.0460     0.0026       17.64 &lt; 0.0001\n\n\n\n\n\n\n\nWhat does the \\(p\\)-value for process tell us about the relationship between process upgrade spending and CO₂ reductions?\nThe intercept also has a very small \\(p\\)-value. What does this mean about the intercept estimate? What would be an equivalent \\(H_0\\) for \\(\\beta_0\\)?\nHow would you interpret the coefficient for process in plain language?"
+    "text": "Check-in\n\nThe table below shows the regression output for the SLR of co2_reduction on process:\n\ndef fmt_p(p):\n    return '&lt; 0.0001' if p &lt; 0.0001 else f'{p:.4f}'\n\ncoef_df = pd.DataFrame({\n    '':              ['Intercept', 'process'],\n    'Coefficient':   [f\"{res.params['const']:.4f}\",   f\"{res.params['process']:.4f}\"],\n    'Std. error':    [f\"{res.bse['const']:.4f}\",       f\"{res.bse['process']:.4f}\"],\n    't-statistic':   [f\"{res.tvalues['const']:.2f}\",   f\"{res.tvalues['process']:.2f}\"],\n    'p-value':       [fmt_p(res.pvalues['const']),      fmt_p(res.pvalues['process'])],\n})\nprint(coef_df.to_string(index=False))\n\n          Coefficient Std. error t-statistic  p-value\nIntercept      7.6953     0.4421       17.41 &lt; 0.0001\n  process      0.0460     0.0026       17.64 &lt; 0.0001\n\n\n\n\n\n\n\nWhat does the \\(p\\)-value for process tell us about the relationship between process upgrade spending and CO₂ reductions?\nThe intercept also has a very small \\(p\\)-value. What does this mean about the intercept estimate? What would be an equivalent \\(H_0\\) for \\(\\beta_0\\)?\nHow would you interpret the coefficient for process in plain language?"
   },
   {
     "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#p-values-checkin-solution",
     "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#p-values-checkin-solution",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\nThe table below shows the regression output for the SLR of co2_reduction on process:\n\n\n          Coefficient Std. error t-statistic  p-value\nIntercept      7.6953     0.4421       17.41 &lt; 0.0001\n  process      0.0460     0.0026       17.64 &lt; 0.0001\n\n\n\n\n\n\n\nWhat does the \\(p\\)-value for process tell us about the relationship between process upgrade spending and CO₂ reductions?\nThe intercept also has a very small \\(p\\)-value. What does this mean about the intercept estimate? What would be an equivalent \\(H_0\\) for \\(\\beta_0\\)?\nHow would you interpret the coefficient for process in plain language?\n\n\n\n\n\nsmall \\(p\\)-value \\(\\Rightarrow\\) strong evidence that \\(\\beta_1 \\neq 0\\): there is evidence of a positive relationship between process upgrade investment and CO₂ emissions reductions.\nThe \\(p\\)-value for the intercept tests \\(H_0: \\beta_0 = 0\\). A small \\(p\\)-value means the regression line does not pass through the origin. There is likely some baseline CO₂ reduction even at zero process spending.\nOn average, each additional $1K invested in production processes is associated with ~0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction."
+    "text": "Check-in\n\nThe table below shows the regression output for the SLR of co2_reduction on process:\n\ndef fmt_p(p):\n    return '&lt; 0.0001' if p &lt; 0.0001 else f'{p:.4f}'\n\ncoef_df = pd.DataFrame({\n    '':              ['Intercept', 'process'],\n    'Coefficient':   [f\"{res.params['const']:.4f}\",   f\"{res.params['process']:.4f}\"],\n    'Std. error':    [f\"{res.bse['const']:.4f}\",       f\"{res.bse['process']:.4f}\"],\n    't-statistic':   [f\"{res.tvalues['const']:.2f}\",   f\"{res.tvalues['process']:.2f}\"],\n    'p-value':       [fmt_p(res.pvalues['const']),      fmt_p(res.pvalues['process'])],\n})\nprint(coef_df.to_string(index=False))\n\n          Coefficient Std. error t-statistic  p-value\nIntercept      7.6953     0.4421       17.41 &lt; 0.0001\n  process      0.0460     0.0026       17.64 &lt; 0.0001\n\n\n\n\n\n\n\nWhat does the \\(p\\)-value for process tell us about the relationship between process upgrade spending and CO₂ reductions?\nThe intercept also has a very small \\(p\\)-value. What does this mean about the intercept estimate? What would be an equivalent \\(H_0\\) for \\(\\beta_0\\)?\nHow would you interpret the coefficient for process in plain language?\n\n\n\n\n\nsmall \\(p\\)-value \\(\\Rightarrow\\) strong evidence that \\(\\beta_1 \\neq 0\\): there is evidence of a positive relationship between process upgrade investment and CO₂ emissions reductions.\nThe \\(p\\)-value for the intercept tests \\(H_0: \\beta_0 = 0\\). A small \\(p\\)-value means the regression line does not pass through the origin. There is likely some baseline CO₂ reduction even at zero process spending.\nOn average, each additional $1K invested in production processes is associated with ~0.046 ktCO₂e (46 metric tons) of additional CO₂ reduction."
   },
   {
     "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#section-model-accuracy",
@@ -488,14 +488,21 @@
     "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#accuracy-table-checkin",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\nFor our SLR model of co2_reduction on process, we have that \\(R^2\\) = 0.611.\nHow would you interpret the \\(R^2\\) value in plain language?\n\n\n\n\n\n\n\n\n\n\n\nAn \\(R^2\\) of 0.611 means that approximately 61.1% of the variability in CO₂ reductions across firms is explained by a linear variation in process upgrade spending alone. The remaining ~38.9% of variability is driven by other factors not included in this model."
+    "text": "Check-in\n\n\ny_hat = model_proc.predict(df[['process']])\ny_bar = df['co2_reduction'].mean()\nTSS   = np.sum((df['co2_reduction'] - y_bar)**2)\nRSS   = np.sum((df['co2_reduction'] - y_hat)**2)\nR2    = 1 - RSS / TSS\n\n\nFor our SLR model of co2_reduction on process, we have that \\(R^2\\) = 0.611.\nHow would you interpret the \\(R^2\\) value in plain language?\n\n\n\n\n\n\n\n\n\n\n\nAn \\(R^2\\) of 0.611 means that approximately 61.1% of the variability in CO₂ reductions across firms is explained by a linear variation in process upgrade spending alone. The remaining ~38.9% of variability is driven by other factors not included in this model."
+  },
+  {
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#rse",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#rse",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Residual Standard Error (RSE)\n\nThe RSE estimates the average amount the response deviates from the true regression line:\n\\[RSE = \\sqrt{\\frac{1}{n-2} RSS} = \\sqrt{\\frac{1}{n-2} \\sum_{i=1}^{n}(y_i - \\hat{y}_i)^2}\\]\n\n\n\nA smaller RSE means predictions are closer to observed values\nRSE is in the same units as \\(Y\\) → directly interpretable\n“Small” is context-dependent: compare relative to the range or mean of \\(Y\\)"
   },
   {
     "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#training-metrics",
     "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#training-metrics",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "\\(R^2\\) is an in-sample metric\n\nThe \\(R^2\\) is computed on the same data used to fit the model.\nThis is an in-sample measures, analogous to the training MSE from the previous lesson.\n\n\nRemember: - In-sample measures can give an overly optimistic picture of how the model generalizes to new data. - For inference goals: use all available data to understand relationships between the variables - For prediction goals: hold out a test set, fit on training data only, evaluate test MSE on the held-out set."
+    "text": "\\(RSE\\) and \\(R^2\\) are in-sample metrics\n\nThe \\(R^2\\) and \\(RSE\\) are computed on the same data used to fit the model.\nThese are in-sample measures, analogous to the training MSE from the previous lesson.\n\n\nRemember:\n\nIn-sample measures can give an overly optimistic picture of how the model generalizes to new data.\nFor inference goals: use all available data to understand relationships between the variables\nFor prediction goals: hold out a test set, fit on training data only, evaluate test MSE on the held-out set."
   },
   {
     "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES.html#train-test-slr",
@@ -2087,8 +2094,15 @@
     "text": "The simple linear regression model\n\nSimple linear regression (SLR) assumes a linear relationship between a single predictor \\(X\\) and a response \\(Y\\):\n\\[Y \\approx \\beta_0 + \\beta_1 X\\]\n\n\n\\(\\beta_0 =\\) \\(y\\)-intercept: expected value of \\(Y\\) when \\(X = 0\\)\n\\(\\beta_1 =\\) slope: average change in \\(Y\\) for a one-unit increase in \\(X\\)\n\n\n\nSince \\(\\beta_0\\) and \\(\\beta_1\\) are unknown, we estimate them from data:\n\\[\\hat{y} = \\hat{\\beta}_0 + \\hat{\\beta}_1 x = \\hat{f}(x)\\]"
   },
   {
-    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#slr-greenabate",
-    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#slr-greenabate",
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#slr-greenabate-1",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#slr-greenabate-1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Using a linear model for our data\n\nUsing process as the sole predictor, a linear model for our data would assume this functional form:\n\n✏️"
+  },
+  {
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#slr-greenabate-2",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#slr-greenabate-2",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
     "text": "Using a linear model for our data\n\nUsing process as the sole predictor, a linear model for our data would assume this functional form:\n\\[\\texttt{co2_reduction} \\approx \\hat{\\beta}_0 + \\hat{\\beta}_1 \\cdot \\texttt{process}\\]"
@@ -2164,8 +2178,15 @@
     "text": "Standard errors\n\nOur true function describing the relationship between predictor and response is given by \\(f(X) = \\beta_0 + \\beta_1 X\\). Our observed data is described by:\n\\[Y = f(X) + \\epsilon = \\beta_0 + \\beta_1 X + \\epsilon,\\]\nThe standard error quantifies how far \\(\\hat{\\beta}_i\\) is from the true \\(\\beta_i\\) on average.\nThe standard error for the slope \\(\\hat{\\beta}_1\\) is:\n\\[SE(\\hat{\\beta}_1)^2 = \\frac{\\sigma^2}{\\sum_{i=1}^{n}(x_i - \\bar{x})^2}\\]\nThe standard error of the \\(y\\)-intercept \\(\\hat{\\beta}_0\\) is:\n\\[SE(\\hat{\\beta}_0)^2 = \\sigma^2 \\left[\\frac{1}{n} + \\frac{\\bar{x}^2}{\\sum_{i=1}^{n}(x_i - \\bar{x})^2}\\right]\\]\n\n\\(\\sigma^2 = \\text{Var}(\\epsilon)\\) is the error variance (unknown in practice — estimated from the data).\n\n\n\nCheck-in: In these formulas, what do \\(n\\), \\(x_i\\), \\(\\bar{x}\\) represent?"
   },
   {
-    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#confidence-intervals",
-    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#confidence-intervals",
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#confidence-intervals-1",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#confidence-intervals-1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Confidence intervals\n\nStandard errors allow us to construct confidence intervals for the true coefficients.\nA 95% confidence interval is a range of values such that, if we repeated our experiment many times, approximately 95% of the computed intervals would contain the true parameter value.\nA 95% confidence interval for a coefficient \\(\\beta_i\\) is:\n\n\n\n✏️\n\n\n\n(the factor 2 is approximate, the exact value comes from the \\(t\\)-distribution with \\(n-2\\) degrees of freedom so it depends on the sample size)"
+  },
+  {
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#confidence-intervals-2",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#confidence-intervals-2",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
     "text": "Confidence intervals\n\nStandard errors allow us to construct confidence intervals for the true coefficients.\nA 95% confidence interval is a range of values such that, if we repeated our experiment many times, approximately 95% of the computed intervals would contain the true parameter value.\nA 95% confidence interval for a coefficient \\(\\beta_i\\) is:\n\\[[\\hat{\\beta}_i - 2 \\cdot SE(\\hat{\\beta}_i),\\;\\; \\hat{\\beta}_i + 2 \\cdot SE(\\hat{\\beta}_i)]\\]\n\n(the factor 2 is approximate, the exact value comes from the \\(t\\)-distribution with \\(n-2\\) degrees of freedom so it depends on the sample size)\n\n\nInterpretation:\n\na 95% CI for \\(\\beta_1\\) of \\([a_1, b_1]\\) means that, using a procedure that captures the true slope 95% of the time, we estimate that a one-unit increase of \\(x\\) is associated with an average increase in \\(y\\) between \\(a_1\\) and \\(b_1\\) units.\n\n\na 95% confidence inerval for \\(\\beta_0\\) is \\([a_0, b_0]\\) means that, using a procedure that captures the true intercept 95% of the time, we estimate the model’s \\(y\\)-intercept is between \\(a_0\\) and \\(b_0\\)."
@@ -2206,8 +2227,22 @@
     "text": "Is there a relationship between \\(X\\) and \\(Y\\)?\n\n\n\nNull hypothesis \\(H_0\\): no relationship between \\(X\\) and \\(Y\\).\n\nIn mathematical terms this means \\(\\beta_1 = 0\\):\n\\[\\hat{Y} = \\hat{\\beta}_0.\\]\n\nAlternative hypothesis \\(H_a\\): there is some relationship between \\(X\\) and \\(Y\\).\n\nIn mathematical terms this means \\(\\beta_1 \\neq 0\\):\n\\[\\hat{Y} = \\hat{\\beta}_0 + \\hat{\\beta}_1 X.\\]\n\n\nTo test \\(H_0\\), we need to determine whether \\(\\hat{\\beta}_1\\) is sufficiently far from 0 relative to its uncertainty."
   },
   {
-    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#t-stat",
-    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#t-stat",
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#t-stat-1",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#t-stat-1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "The \\(t\\)-statistic\n\nThe \\(t\\)-statistic measures how many standard deviations \\(\\hat{\\beta}_1\\) is from 0:\n\\[t = \\frac{\\hat{\\beta}_1}{SE(\\hat{\\beta}_1)}.\\]\n\nIf there truly is no relationship between the variables (\\(\\beta_1 = 0\\)), then \\(t\\) follows a \\(t\\)-distribution with \\(n - 2\\) degrees of freedom."
+  },
+  {
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#t-stat-2",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#t-stat-2",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "The \\(p\\)-value\n\nThe \\(t\\)-statistic measures how many standard deviations \\(\\hat{\\beta}_1\\) is from 0.\nThe \\(p\\)-value is the probability of obtaining a \\(t\\)-statistic at least as large as the observed \\(|t|\\) in absolute value, assuming \\(H_0\\) is true.\n\n\n\n\n\\[\n\\begin{aligned}\n&\\text{Small } p\\text{-value } (p &lt; 0.05) \\\\\n&\\Rightarrow \\text{unlikely to observe } |\\hat{\\beta}_1| \\\\\n&\\quad\\text{this far from 0 by chance if } H_0 \\text{ were true} \\\\\n&\\Rightarrow \\textbf{reject } H_0 \\\\\n&\\Rightarrow \\text{most likely } \\beta_1 \\neq 0 \\\\\n&\\Rightarrow \\text{evidence of a relationship}\\\\\n&\\quad\\text{between } X \\text{ and } Y\n\\end{aligned}\n\\]"
+  },
+  {
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#t-stat-3",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#t-stat-3",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
     "text": "The \\(p\\)-value\n\nThe \\(t\\)-statistic measures how many standard deviations \\(\\hat{\\beta}_1\\) is from 0.\nThe \\(p\\)-value is the probability of obtaining a \\(t\\)-statistic at least as large as the observed \\(|t|\\) in absolute value, assuming \\(H_0\\) is true.\n\n\n\n\\[\n\\begin{aligned}\n&\\text{Small } p\\text{-value } (p &lt; 0.05) \\\\\n&\\Rightarrow \\text{unlikely to observe } |\\hat{\\beta}_1| \\\\\n&\\quad\\text{this far from 0 by chance if } H_0 \\text{ were true} \\\\\n&\\Rightarrow \\textbf{reject } H_0 \\\\\n&\\Rightarrow \\text{most likely } \\beta_1 \\neq 0 \\\\\n&\\Rightarrow \\text{evidence of a relationship}\\\\\n&\\quad\\text{between } X \\text{ and } Y\n\\end{aligned}\n\\]\n\n\\[\n\\begin{aligned}\n&\\text{Large } p\\text{-value} \\\\\n&\\Rightarrow \\text{plausible to observe } |\\hat{\\beta}_1| \\\\\n&\\quad\\text{this far from 0 by chance if } H_0 \\text{ were true} \\\\\n&\\Rightarrow \\textbf{fail to reject } H_0 \\\\\n&\\Rightarrow \\beta_1 = 0 \\text{ is consistent with the data} \\\\\n&\\Rightarrow \\text{no evidence of a relationship}\\\\\n&\\quad\\text{between } X \\text{ and } Y\n\\end{aligned}\n\\]"
@@ -2238,6 +2273,13 @@
     "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#r2-def",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
+    "text": "\\(R^2\\) statistic\n\n\n✏️"
+  },
+  {
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#r2-def-1",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#r2-def-1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
     "text": "\\(R^2\\) statistic\n\n\\(R^2\\) measures the proportion of variance in \\(Y\\) explained by the model.\nTo compute it we need these ingredients:\n\n\\(TSS = \\sum_{i=1}^{n}(y_i - \\bar{y})^2 =\\) Total Sum of Squares: how much do the observations vary from the mean \\(\\bar{y}\\): a way of measuring total variability in \\(Y\\)\nIntuitively: \\(y_i = \\hat{y}_i\\) means a \\(y\\)-value is explained by the regression\n\\(RSS = \\sum_{i=1}^{n}(y_i - \\hat{y}_i)^2 =\\) Residual Sum of Squares: variability in \\(y\\) unexplained by the regression.\n\nSo\n\\[\\underbrace{TSS}_{\\text{total variability in }Y} - \\underbrace{RSS}_{\\text{unexplained by regression}} = \\text{variability explained by regression}\\]\nWe use this to define \\[R^2 = \\frac{TSS - RSS}{TSS} = 1 - \\frac{RSS}{TSS}.\\]"
   },
   {
@@ -2255,11 +2297,18 @@
     "text": "Check-in\n\n\nFor our SLR model of co2_reduction on process, we have that \\(R^2\\) = 0.611.\nHow would you interpret the \\(R^2\\) value ?\n\n\n\n\n\n\n\n\n\n\n\nAn \\(R^2\\) of 0.611 means that approximately 61.1% of the variability in CO₂ reductions across firms is explained by a linear variation in process upgrade spending alone. The remaining ~38.9% of variability is driven by other factors not included in this model."
   },
   {
+    "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#rse",
+    "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#rse",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Residual Standard Error (RSE)\n\nThe RSE estimates the average amount the response deviates from the true regression line:\n\\[RSE = \\sqrt{\\frac{1}{n-2} RSS} = \\sqrt{\\frac{1}{n-2} \\sum_{i=1}^{n}(y_i - \\hat{y}_i)^2}\\]\n\n\n\nA smaller RSE means predictions are closer to observed values\nRSE is in the same units as \\(Y\\) → directly interpretable\n“Small” is context-dependent: compare relative to the range or mean of \\(Y\\)"
+  },
+  {
     "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#training-metrics",
     "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#training-metrics",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "RSE and \\(R^2\\) are in-sample metrics\n\nBoth RSE and \\(R^2\\) are computed on the same data used to fit the model.\nThey are in-sample measures, analogous to the training MSE from the previous lesson.\n\n\n\nThey can give an overly optimistic picture of how the model generalizes to new data.\nFor prediction goals: hold out a test set, fit on training data only, evaluate test MSE on the held-out set."
+    "text": "\\(RSE\\) and \\(R^2\\) are in-sample metrics\n\nThe \\(R^2\\) and \\(RSE\\) are computed on the same data used to fit the model.\nThese are in-sample measures, analogous to the training MSE from the previous lesson.\n\n\nRemember:\n\nIn-sample measures can give an overly optimistic picture of how the model generalizes to new data.\nFor inference goals: use all available data to understand relationships between the variables\nFor prediction goals: hold out a test set, fit on training data only, evaluate test MSE on the held-out set."
   },
   {
     "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#train-test-slr",
@@ -2280,7 +2329,7 @@
     "href": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#inference-vs-prediction",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Inference vs. prediction\n\n\n\n\nInference\n\nGoal: understand the relationship\nUse all available data\nReport RSE, \\(R^2\\), CIs, \\(p\\)-values\nExample: “Does process spending drive CO₂ reductions?”\n\n\nPrediction\n\nGoal: forecast accurately for new observations\nHold out a test set\nReport test MSE\nExample: “Given spending levels, predict a firm’s CO₂ reduction”"
+    "text": "Inference vs. prediction\n\n\n\n\nInference\n\nGoal: understand the relationship\nUse all available data\nReport \\(R^2\\), RSE, CIs, \\(p\\)-values\nExample: “Does process spending drive CO₂ reductions?”\n\n\nPrediction\n\nGoal: forecast accurately for new observations\nHold out a test set\nReport test MSE\nExample: “Given spending levels, predict a firm’s CO₂ reduction”"
   },
   {
     "objectID": "notes/3_1_simple_linear_regression/3_1_simple_linear_regression-SLIDES-BLANK.html#recap",
@@ -2294,7 +2343,7 @@
     "href": "notes/3_2_multiple_linear_regression/3_2_multiple_linear_regression-NOTES.html",
     "title": "Multiple linear regression",
     "section": "",
-    "text": "In this lesson we introduce:\nThese notes are based on chapter 3.2 of An Introduction to Statistical Learning with Applications in Python (James et al. 2023). The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.",
+    "text": "📊 Slides / 📊 Blank slides\nIn this lesson we introduce:\nThese notes are based on chapter 3.2 of An Introduction to Statistical Learning with Applications in Python (James et al. 2023). The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.",
     "crumbs": [
       "notes",
       "Linear regression",

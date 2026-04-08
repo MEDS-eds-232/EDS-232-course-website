@@ -242,7 +242,7 @@ $$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x = \hat{f}(x)$$
 
 ---
 
-## {#slr-greenabate data-menu-title="SLR: fitted line"}
+## {#slr-greenabate-1 data-menu-title="SLR: fitted line"}
 
 [Using a linear model for our data]{.slide-title}
 
@@ -278,7 +278,7 @@ plt.close()
 
 ---
 
-## {#slr-greenabate data-menu-title="SLR: fitted line"}
+## {#slr-greenabate-2 data-menu-title="SLR: fitted line"}
 
 [Using a linear model for our data]{.slide-title}
 
@@ -562,7 +562,7 @@ $\sigma^2 = \text{Var}(\epsilon)$ is the error variance (unknown in practice —
 
 ---
 
-## {#confidence-intervals data-menu-title="Confidence intervals"}
+## {#confidence-intervals-1 data-menu-title="Confidence intervals"}
 
 [Confidence intervals]{.slide-title}
 
@@ -590,7 +590,7 @@ A 95% confidence interval for a coefficient $\beta_i$ is:
 
 ---
 
-## {#confidence-intervals data-menu-title="Confidence intervals"}
+## {#confidence-intervals-2 data-menu-title="Confidence intervals"}
 
 [Confidence intervals]{.slide-title}
 
@@ -801,7 +801,7 @@ To test $H_0$, we need to determine whether $\hat{\beta}_1$ is sufficiently far 
 
 ---
 
-## {#t-stat data-menu-title="t-statistic and p-value"}
+## {#t-stat-1 data-menu-title="t-statistic and p-value"}
 
 [The $t$-statistic]{.slide-title}
 
@@ -819,7 +819,7 @@ If there truly is no relationship between the variables ($\beta_1 = 0$), then $t
 
 ---
 
-## {#t-stat data-menu-title="t-statistic and p-value"}
+## {#t-stat-2 data-menu-title="t-statistic and p-value"}
 
 [The $p$-value]{.slide-title}
 
@@ -857,7 +857,7 @@ $$
 
 ---
 
-## {#t-stat data-menu-title="t-statistic and p-value"}
+## {#t-stat-3 data-menu-title="t-statistic and p-value"}
 
 [The $p$-value]{.slide-title}
 
@@ -1020,7 +1020,7 @@ print(coef_df.to_string(index=False))
 
 ---
 
-## {#r2-def data-menu-title="R² statistic"}
+## {#r2-def-1 data-menu-title="R² statistic"}
 
 [$R^2$ statistic]{.slide-title}
 
@@ -1123,23 +1123,45 @@ plt.close()
 An $R^2$ of `{python} f"{R2:.3f}"` means that approximately `{python} f"{R2*100:.1f}"`% of the variability in CO₂ reductions across firms is explained by a linear variation in process upgrade spending alone. The remaining ~`{python} f"{(1-R2)*100:.1f}"`% of variability is driven by other factors not included in this model.
 
 
----
+## {#rse data-menu-title="Residual Standard Error"}
 
-## {#training-metrics data-menu-title="RSE and R² are training metrics"}
-
-[RSE and $R^2$ are in-sample metrics]{.slide-title}
+[Residual Standard Error (RSE)]{.slide-title}
 
 <hr>
 
-Both RSE and $R^2$ are computed on the **same data used to fit the model**.
+The **RSE** estimates the average amount the response deviates from the true regression line:
 
-They are in-sample measures, analogous to the **training MSE** from the previous lesson.
+$$RSE = \sqrt{\frac{1}{n-2} RSS} = \sqrt{\frac{1}{n-2} \sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$$
+
+. . .
+
+<br>
+
+- A smaller RSE means predictions are closer to observed values
+- RSE is in the same units as $Y$ → directly interpretable
+- "Small" is context-dependent: compare relative to the range or mean of $Y$
+
+---
+
+## {#training-metrics data-menu-title="R² is a training metrics"}
+
+[$RSE$ and $R^2$ are in-sample metrics]{.slide-title}
+
+<hr>
+
+The $R^2$ and $RSE$ are computed on the same data used to fit the model.
+
+These are in-sample measures, analogous to the training MSE from the previous lesson.
 
 . . .
 
 ::: {.body-text-m}
-- They can give an overly optimistic picture of how the model generalizes to new data.
+Remember:
+
+- In-sample measures can give an overly optimistic picture of how the model generalizes to new data.
+- **For inference goals**: use all available data to understand relationships between the variables
 - **For prediction goals**: hold out a test set, fit on training data only, evaluate test MSE on the held-out set.
+
 :::
 
 ---
@@ -1200,7 +1222,7 @@ plt.close()
 
 <hr>
 
-SLR has only **2 parameters** ($\hat{\beta}_0$, $\hat{\beta}_1$). It is a very rigid model:
+SLR has only 2 parameters ($\hat{\beta}_0$, $\hat{\beta}_1$). It is a very rigid model:
 
 <br>
 
@@ -1229,7 +1251,7 @@ SLR has only **2 parameters** ($\hat{\beta}_0$, $\hat{\beta}_1$). It is a very r
 
 - Use all available data
 
-- Report RSE, $R^2$, CIs, $p$-values
+- Report $R^2$, RSE, CIs, $p$-values
 - Example: "Does process spending drive CO₂ reductions?"
 :::
 

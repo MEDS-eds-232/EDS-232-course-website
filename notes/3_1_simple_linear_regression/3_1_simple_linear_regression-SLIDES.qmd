@@ -965,25 +965,46 @@ plt.close()
 
 An $R^2$ of `{python} f"{R2:.3f}"` means that approximately `{python} f"{R2*100:.1f}"`% of the variability in CO₂ reductions across firms is explained by a linear variation in process upgrade spending alone. The remaining ~`{python} f"{(1-R2)*100:.1f}"`% of variability is driven by other factors not included in this model.
 
+
+## {#rse data-menu-title="Residual Standard Error"}
+
+[Residual Standard Error (RSE)]{.slide-title}
+
+<hr>
+
+The **RSE** estimates the average amount the response deviates from the true regression line:
+
+$$RSE = \sqrt{\frac{1}{n-2} RSS} = \sqrt{\frac{1}{n-2} \sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$$
+
+. . .
+
+<br>
+
+- A smaller RSE means predictions are closer to observed values
+- RSE is in the same units as $Y$ → directly interpretable
+- "Small" is context-dependent: compare relative to the range or mean of $Y$
+
 ---
 
 ## {#training-metrics data-menu-title="R² is a training metrics"}
 
-[$R^2$ is an in-sample metric]{.slide-title}
+[$RSE$ and $R^2$ are in-sample metrics]{.slide-title}
 
 <hr>
 
-The $R^2$ is computed on the same data used to fit the model.
+The $R^2$ and $RSE$ are computed on the same data used to fit the model.
 
-This is an in-sample measures, analogous to the training MSE from the previous lesson.
+These are in-sample measures, analogous to the training MSE from the previous lesson.
 
 . . .
 
 ::: {.body-text-m}
 Remember:
+
 - In-sample measures can give an overly optimistic picture of how the model generalizes to new data.
 - **For inference goals**: use all available data to understand relationships between the variables
 - **For prediction goals**: hold out a test set, fit on training data only, evaluate test MSE on the held-out set.
+
 :::
 
 ---
