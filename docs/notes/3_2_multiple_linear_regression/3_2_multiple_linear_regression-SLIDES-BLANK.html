@@ -179,7 +179,7 @@ A guiding example
 <h2></h2>
 <p><span class="slide-title">CO₂ reduction vs.&nbsp;each predictor</span></p>
 <hr>
-<div id="44f73faf" class="cell" data-execution_count="2">
+<div id="29fdb336" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -275,7 +275,7 @@ RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 -
 <h2></h2>
 <p><span class="slide-title">From a line to a plane</span></p>
 <hr>
-<div id="d01b634b" class="cell" data-execution_count="3">
+<div id="7f028941" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -289,7 +289,7 @@ RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 -
 <h2></h2>
 <p><span class="slide-title">From a line to a plane</span></p>
 <hr>
-<div id="fb013c59" class="cell" data-execution_count="4">
+<div id="f9661f22" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -314,32 +314,27 @@ RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 -
 
 </div>
 </section>
-<section id="mlr-coeffs" class="slide level2" data-menu-title="The MLR model">
-<h2></h2>
-<p><span class="slide-title">Interpreting the MLR coefficients</span></p>
-<hr>
-<div class="page-center vertical-center">
-<p>Once we find the coefficients that minimize the RSS we obtain a model:</p>
-<p><span class="math display">\[\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \hat{\beta}_2 X_2 + \cdots + \hat{\beta}_p X_p\]</span></p>
-<p>We interpret each coefficient as</p>
-<blockquote>
-<p><em><span class="math inline">\(\hat{\beta}_j\)</span> is the average change in <span class="math inline">\(Y\)</span> associated with a one-unit increase in <span class="math inline">\(X_j\)</span>, <strong>holding all other predictors constant</strong>.</em></p>
-</blockquote>
-</div>
-</section>
 <section id="check-in-coeffs" class="slide level2" data-menu-title="The MLR model">
 <h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <p>For our example data, the estimated coefficients are:</p>
-<div id="261d892b" class="cell" data-execution_count="5">
+<div class="columns">
+<div class="column" style="width:25%;">
+<div id="cb463b78" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-stdout">
-<pre><code> Predictor MLR coeff
+<pre><code>           MLR coeff
+ intercept    3.4543
    process    0.0461
 efficiency    0.1831
    offsets   -0.0088</code></pre>
 </div>
 </div>
+</div><div class="column" style="width:75%;">
+<div class="body-text-s">
+<p>And we obtain the model: <span class="math display">\[\text{co2_reduction} = 3.4543 + 0.0461*\text{process} + 0.1831*\text{efficiency} -0.0088*\text{offsets}\]</span></p>
+</div>
+</div></div>
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="teal-text">
@@ -358,14 +353,22 @@ efficiency    0.1831
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <p>For our example data, the estimated coefficients are:</p>
-<div id="b8cadba7" class="cell" data-execution_count="6">
+<div class="columns">
+<div class="column" style="width:25%;">
+<div id="b8a32c3d" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-stdout">
-<pre><code> Predictor MLR coeff
+<pre><code>           MLR coeff
+ intercept    3.4543
    process    0.0461
 efficiency    0.1831
    offsets   -0.0088</code></pre>
 </div>
 </div>
+</div><div class="column" style="width:75%;">
+<div class="body-text-s">
+<p>And we obtain the model: <span class="math display">\[\text{co2_reduction} = 3.4543 + 0.0461*\text{process} + 0.1831*\text{efficiency} -0.0088*\text{offsets}\]</span></p>
+</div>
+</div></div>
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="teal-text">
@@ -410,8 +413,8 @@ efficiency    0.1831
 <h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
-<p>For our example data we have that:</p>
-<div id="9f32f781" class="cell" data-execution_count="7">
+<p>For our example data we obtaing the following estimates and <span class="math inline">\(p\)</span>-values for the coefficients associated with the predictors</p>
+<div id="1b02ad47" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor MLR coeff MLR p-value
    process    0.0461    &lt; 0.0001
@@ -436,8 +439,8 @@ efficiency    0.1831    &lt; 0.0001
 <h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
-<p>For our example data we have that:</p>
-<div id="9bf7f176" class="cell" data-execution_count="8">
+<p>For our example data we obtaing the following estimates and <span class="math inline">\(p\)</span>-values for the coefficients associated with the predictors</p>
+<div id="1e5392e0" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor MLR coeff MLR p-value
    process    0.0461    &lt; 0.0001
@@ -498,7 +501,7 @@ Comparing MLR to individual SLRs
 <div class="body-text-s">
 <p>In our example dataset, SLR ≈ MLR coefficients because the predictors were drawn independently (uncorrelated by construction).</p>
 </div>
-<div id="f243d808" class="cell" data-execution_count="9">
+<div id="a45969ce" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor SLR coeff SLR p-value MLR coeff MLR p-value
    process    0.0460    &lt; 0.0001    0.0461    &lt; 0.0001
@@ -602,7 +605,7 @@ Hypothesis testing &amp; the F-statistic
 <h2></h2>
 <p><span class="slide-title">Example</span></p>
 <hr>
-<div id="c23479da" class="cell" data-execution_count="10">
+<div id="770ff6f2" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-stdout">
 <pre><code>   Quantity    Value
 F-statistic   612.13
@@ -683,7 +686,7 @@ Model fit: R² and adjusted R²
 <h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
-<div id="f9828f4f" class="cell" data-execution_count="11">
+<div id="d42b0d05" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-stdout">
 <pre><code>                     Model    R² Adj. R²
         SLR (process only) 0.611   0.609
@@ -782,7 +785,7 @@ Variable selection
 <hr>
 <div class="columns">
 <div class="column" style="width:50%;">
-<div id="e36c63c2" class="cell" data-execution_count="12">
+<div id="bb25631f" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-stdout">
 <pre><code>                    Predictors    RSS
               (intercept only) 5016.8
@@ -823,7 +826,7 @@ process + efficiency + offsets  483.8</code></pre>
 <hr>
 <div class="columns">
 <div class="column" style="width:50%;">
-<div id="c8581a39" class="cell" data-execution_count="13">
+<div id="a697a18d" class="cell" data-execution_count="13">
 <div class="cell-output cell-output-stdout">
 <pre><code>                    Predictors    RSS
               (intercept only) 5016.8
@@ -870,7 +873,7 @@ process + efficiency + offsets  483.8</code></pre>
 <div class="columns">
 <div class="column" style="width:50%;">
 <p><strong>Step 1 — full model</strong></p>
-<div id="7edf39cf" class="cell" data-execution_count="14">
+<div id="458db818" class="cell" data-execution_count="14">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor  p-value
    process &lt; 0.0001
@@ -879,7 +882,7 @@ efficiency &lt; 0.0001
 </div>
 </div>
 <p><strong>Step 2 — after first removal</strong></p>
-<div id="01888e02" class="cell" data-execution_count="15">
+<div id="6db03e15" class="cell" data-execution_count="15">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor  p-value
    process &lt; 0.0001
@@ -910,7 +913,7 @@ efficiency &lt; 0.0001</code></pre>
 <div class="columns">
 <div class="column" style="width:50%;">
 <p><strong>Step 1 — full model</strong></p>
-<div id="7b29ab0d" class="cell" data-execution_count="16">
+<div id="d75bdfcb" class="cell" data-execution_count="16">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor  p-value
    process &lt; 0.0001
@@ -919,7 +922,7 @@ efficiency &lt; 0.0001
 </div>
 </div>
 <p><strong>Step 2 — after first removal</strong></p>
-<div id="bf2c68c2" class="cell" data-execution_count="17">
+<div id="24575ad3" class="cell" data-execution_count="17">
 <div class="cell-output cell-output-stdout">
 <pre><code> Predictor  p-value
    process &lt; 0.0001
@@ -961,27 +964,27 @@ efficiency &lt; 0.0001</code></pre>
 <hr>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p><strong>Forward can be useful when:</strong></p>
+<p><strong>Use forward when:</strong></p>
 <ul>
-<li><span class="math inline">\(p\)</span> is large or <span class="math inline">\(p &gt; n\)</span>. Backward requires fitting the full model, which cannot be done if <span class="math inline">\(p&gt;n\)</span>.</li>
-<li>You expect only a few predictors to matter.</li>
+<li><span class="math inline">\(p\)</span> is large or <span class="math inline">\(p &gt; n\)</span>: backward requires fitting the full model, which is impossible when there are more predictors than observations</li>
+<li>You expect only a few predictors to matter</li>
+</ul>
+<p><strong>Use backward when:</strong></p>
+<ul>
+<li><span class="math inline">\(p\)</span> is small and <span class="math inline">\(n\)</span> is large enough to fit the full model comfortably <em>(the more common situation in environmental science)</em></li>
+<li>You are worried about missing a predictor that only becomes significant in the presence of others — backward sees all predictors simultaneously from the start</li>
 </ul>
 </div><div class="column" style="width:50%;">
-<p><strong>Backward can be useful when:</strong></p>
-<ul>
-<li><span class="math inline">\(p\)</span> is small and <span class="math inline">\(n\)</span> is large enough to fit the full model</li>
-<li>Worry about missing a predictor that only becomes significant in the presence of others.</li>
-</ul>
-</div></div>
 <p><strong>In practice:</strong></p>
 <ul>
-<li>Mixed selection hedges against the weaknesses of both</li>
-<li>Practitioners may run all three and check whether they agree</li>
+<li>Mixed selection hedges against the weaknesses of both. Many practitioners run all three and check whether they agree</li>
 <li>If all three disagree, that signals correlated predictors and no single “right” model</li>
 </ul>
-<div class="teal-text body-text-s">
-<p>We will later talk about <strong>regularization</strong> (lasso, ridge) over stepwise selection. These methods perform variable selection and coefficient estimation simultaneously and have better statistical properties.</p>
+<p><br></p>
+<div class="teal-text">
+<p>Modern practice often prefers <strong>regularization</strong> (lasso, ridge) over stepwise selection — these methods perform variable selection and coefficient estimation simultaneously and have better statistical properties. More on this later in the course.</p>
 </div>
+</div></div>
 </section>
 <section id="recap" class="slide level2" data-menu-title="Recap">
 <h2></h2>
@@ -995,10 +998,6 @@ efficiency &lt; 0.0001</code></pre>
 <li><strong><span class="math inline">\(R^2\)</span></strong> always increases with predictors; use <strong>adjusted <span class="math inline">\(R^2\)</span></strong> to compare models of different sizes</li>
 <li><strong>Variable selection</strong>: forward, backward, mixed</li>
 </ul>
-<div class="teal-text">
-<p>There are may be many potential problems when we try to fit a linear model to our data.</p>
-<p>You will be exploring some of the most common ones in homework 2.</p>
-</div>
 
 
 </section>

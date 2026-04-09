@@ -326,15 +326,31 @@ We interpret each coefficient as
 
 For our example data, the estimated coefficients are:
 
+:::: {.columns}
+
+::: {.column width="25%"}
 ```{python}
 comp_df = pd.DataFrame({
-    'Predictor':   ['process', 'efficiency', 'offsets'],
-    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+    '':   ['intercept', 'process', 'efficiency', 'offsets'],
+    'MLR coeff':   [f"{res_mlr.params['const']:.4f}",
+                    f"{res_mlr.params['process']:.4f}",
                     f"{res_mlr.params['efficiency']:.4f}",
                     f"{res_mlr.params['offsets']:.4f}"]
 })
 print(comp_df.to_string(index=False))
 ```
+
+:::
+
+::: {.column width="75%"}
+::: {.body-text-s}
+And we obtain the model:
+$$\text{co2_reduction} = 3.4543 + 0.0461*\text{process} + 0.1831*\text{efficiency} -0.0088*\text{offsets}$$
+:::
+:::
+
+:::
+
 
 :::: {.columns}
 
@@ -367,15 +383,30 @@ print(comp_df.to_string(index=False))
 
 For our example data, the estimated coefficients are:
 
+:::: {.columns}
+
+::: {.column width="25%"}
 ```{python}
 comp_df = pd.DataFrame({
-    'Predictor':   ['process', 'efficiency', 'offsets'],
-    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+    '':   ['intercept', 'process', 'efficiency', 'offsets'],
+    'MLR coeff':   [f"{res_mlr.params['const']:.4f}",
+                    f"{res_mlr.params['process']:.4f}",
                     f"{res_mlr.params['efficiency']:.4f}",
                     f"{res_mlr.params['offsets']:.4f}"]
 })
 print(comp_df.to_string(index=False))
 ```
+
+:::
+
+::: {.column width="75%"}
+::: {.body-text-s}
+And we obtain the model:
+$$\text{co2_reduction} = 3.4543 + 0.0461*\text{process} + 0.1831*\text{efficiency} -0.0088*\text{offsets}$$
+:::
+:::
+
+:::
 
 :::: {.columns}
 
@@ -403,6 +434,7 @@ print(comp_df.to_string(index=False))
 :::
 
 :::
+
 ---
 
 ## {#coefficients-accuracy data-menu-title="Accuracy of the coefficient estimates"}
@@ -451,7 +483,7 @@ We can interpret the individual $p$-values from the MLR as
 
 <hr>
 
-For our example data we have that:
+For our example data we obtaing the following estimates and $p$-values for the coefficients associated with the predictors
 
 ```{python}
 comp_df = pd.DataFrame({
@@ -476,7 +508,7 @@ print(comp_df.to_string(index=False))
 ::: {.teal-text}
 1. How can we interpret the $p$-value associated with the `process` variable?
 
-2. The `offsets` variable has a large $p$-value of `{python} fmt_p(res_mlr.pvalues['offsets'])`. What does it tell us in the context of this MLR model?
+2. Suppose your $p$-value threshold is 0.01. What does the `offsets` $p$-value tell us in the context of this MLR model?
 :::
 :::
 
@@ -495,7 +527,7 @@ print(comp_df.to_string(index=False))
 
 <hr>
 
-For our example data we have that:
+For our example data we obtaing the following estimates and $p$-values for the coefficients associated with the predictors
 
 ```{python}
 comp_df = pd.DataFrame({
@@ -520,7 +552,7 @@ print(comp_df.to_string(index=False))
 ::: {.teal-text}
 1. How can we interpret the $p$-value associated with the `process` variable?
 
-2. The `offsets` variable has a large $p$-value of `{python} fmt_p(res_mlr.pvalues['offsets'])`. What does it tell us in the context of this MLR model?
+2. Suppose your $p$-value threshold is 0.01. What does the `offsets` $p$-value tell us in the context of this MLR model?
 :::
 :::
 
@@ -1179,7 +1211,7 @@ This fixes the main weakness of forward selection: a variable added early can be
 ::: {.column width="50%"}
 **Use forward when:**
 
-- $p$ is large or $p > n$ — backward requires fitting the full model, which is impossible when there are more predictors than observations
+- $p$ is large or $p > n$: backward requires fitting the full model, which is impossible when there are more predictors than observations
 - You expect only a few predictors to matter
 
 **Use backward when:**
@@ -1190,16 +1222,14 @@ This fixes the main weakness of forward selection: a variable added early can be
 
 ::: {.column width="50%"}
 
-. . .
 
 **In practice:**
 
-- Mixed selection hedges against the weaknesses of both — many practitioners run all three and check whether they agree
+- Mixed selection hedges against the weaknesses of both. Many practitioners run all three and check whether they agree
 - If all three disagree, that signals correlated predictors and no single "right" model
 
 <br>
 
-. . .
 
 ::: {.teal-text}
 Modern practice often prefers **regularization** (lasso, ridge) over stepwise selection — these methods perform variable selection and coefficient estimation simultaneously and have better statistical properties. More on this later in the course.

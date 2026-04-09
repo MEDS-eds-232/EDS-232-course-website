@@ -452,26 +452,6 @@ We interpret each coefficient as
 
 ---
 
-## {#mlr-coeffs data-menu-title="The MLR model"}
-
-[Interpreting the MLR coefficients]{.slide-title}
-
-<hr>
-
-<div class="page-center vertical-center">
-
-Once we find the coefficients that minimize the RSS we obtain a model:
-
-$$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \hat{\beta}_2 X_2 + \cdots + \hat{\beta}_p X_p$$
-
-We interpret each coefficient as
-
-> *$\hat{\beta}_j$ is the average change in $Y$ associated with a one-unit increase in $X_j$, **holding all other predictors constant**.*
-
-</div>
-
----
-
 ## {#check-in-coeffs data-menu-title="The MLR model"}
 
 [Check-in]{.slide-title}
@@ -480,15 +460,31 @@ We interpret each coefficient as
 
 For our example data, the estimated coefficients are:
 
+:::: {.columns}
+
+::: {.column width="25%"}
 ```{python}
 comp_df = pd.DataFrame({
-    'Predictor':   ['process', 'efficiency', 'offsets'],
-    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+    '':   ['intercept', 'process', 'efficiency', 'offsets'],
+    'MLR coeff':   [f"{res_mlr.params['const']:.4f}",
+                    f"{res_mlr.params['process']:.4f}",
                     f"{res_mlr.params['efficiency']:.4f}",
                     f"{res_mlr.params['offsets']:.4f}"]
 })
 print(comp_df.to_string(index=False))
 ```
+
+:::
+
+::: {.column width="75%"}
+::: {.body-text-s}
+And we obtain the model:
+$$\text{co2_reduction} = 3.4543 + 0.0461*\text{process} + 0.1831*\text{efficiency} -0.0088*\text{offsets}$$
+:::
+:::
+
+:::
+
 
 :::: {.columns}
 
@@ -521,15 +517,30 @@ print(comp_df.to_string(index=False))
 
 For our example data, the estimated coefficients are:
 
+:::: {.columns}
+
+::: {.column width="25%"}
 ```{python}
 comp_df = pd.DataFrame({
-    'Predictor':   ['process', 'efficiency', 'offsets'],
-    'MLR coeff':   [f"{res_mlr.params['process']:.4f}",
+    '':   ['intercept', 'process', 'efficiency', 'offsets'],
+    'MLR coeff':   [f"{res_mlr.params['const']:.4f}",
+                    f"{res_mlr.params['process']:.4f}",
                     f"{res_mlr.params['efficiency']:.4f}",
                     f"{res_mlr.params['offsets']:.4f}"]
 })
 print(comp_df.to_string(index=False))
 ```
+
+:::
+
+::: {.column width="75%"}
+::: {.body-text-s}
+And we obtain the model:
+$$\text{co2_reduction} = 3.4543 + 0.0461*\text{process} + 0.1831*\text{efficiency} -0.0088*\text{offsets}$$
+:::
+:::
+
+:::
 
 :::: {.columns}
 
@@ -596,7 +607,7 @@ We can interpret the individual $p$-values from the MLR as
 
 <hr>
 
-For our example data we have that:
+For our example data we obtaing the following estimates and $p$-values for the coefficients associated with the predictors
 
 ```{python}
 comp_df = pd.DataFrame({
@@ -640,7 +651,7 @@ print(comp_df.to_string(index=False))
 
 <hr>
 
-For our example data we have that:
+For our example data we obtaing the following estimates and $p$-values for the coefficients associated with the predictors
 
 ```{python}
 comp_df = pd.DataFrame({
@@ -1361,37 +1372,35 @@ This fixes the main weakness of forward selection: a variable added early can be
 :::: {.columns}
 
 ::: {.column width="50%"}
-**Forward can be useful when:**
+**Use forward when:**
 
-- $p$ is large or $p > n$. Backward requires fitting the full model, which cannot be done if $p>n$.
-- You expect only a few predictors to matter.
+- $p$ is large or $p > n$: backward requires fitting the full model, which is impossible when there are more predictors than observations
+- You expect only a few predictors to matter
 
+**Use backward when:**
+
+- $p$ is small and $n$ is large enough to fit the full model comfortably *(the more common situation in environmental science)*
+- You are worried about missing a predictor that only becomes significant in the presence of others — backward sees all predictors simultaneously from the start
 :::
 
 ::: {.column width="50%"}
-**Backward can be useful when:**
-
-- $p$ is small and $n$ is large enough to fit the full model 
-- Worry about missing a predictor that only becomes significant in the presence of others. 
-
-:::
-
-
-:::
-
-
 
 
 **In practice:**
 
-- Mixed selection hedges against the weaknesses of both
-- Practitioners may run all three and check whether they agree
+- Mixed selection hedges against the weaknesses of both. Many practitioners run all three and check whether they agree
 - If all three disagree, that signals correlated predictors and no single "right" model
 
-::: {.teal-text .body-text-s}
-We will later talk about **regularization** (lasso, ridge) over stepwise selection. These methods perform variable selection and coefficient estimation simultaneously and have better statistical properties.
+<br>
+
+
+::: {.teal-text}
+Modern practice often prefers **regularization** (lasso, ridge) over stepwise selection — these methods perform variable selection and coefficient estimation simultaneously and have better statistical properties. More on this later in the course.
 :::
 
+:::
+
+::::
 
 ---
 
@@ -1407,12 +1416,3 @@ We will later talk about **regularization** (lasso, ridge) over stepwise selecti
 - **F-statistic**: tests $H_0: \beta_1 = \cdots = \beta_p = 0$ 
 - **$R^2$** always increases with predictors; use **adjusted $R^2$** to compare models of different sizes
 - **Variable selection**: forward, backward, mixed 
-
-
-::: {.teal-text}
-
-There are may be many potential problems when we try to fit a linear model to our data. 
-
-You will be exploring some of the most common ones in homework 2. 
-
-:::
