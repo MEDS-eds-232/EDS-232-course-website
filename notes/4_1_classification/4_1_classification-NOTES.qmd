@@ -1,5 +1,5 @@
 ---
-title: Classification
+title: KNN and accuracy metrics
 jupyter: eds232-env
 #echo: false
 ---
@@ -217,6 +217,27 @@ In the figure above, the star $\star$ marks a new test observation $x_0$. The da
 <!-- 3. Small $K$: the classifier can capture complex, irregular boundaries but is sensitive to individual training points and prone to overfitting. Large $K$ (high bias, low variance): the boundary is smoother and more stable, but may miss real patterns in the data. This is the same bias-variance tradeoff we saw in regression. -->
 :::
 
+### Pros and cons of KNN
+
+There are several pros and cons to using the KNN algorithm:
+
+**Pros:**
+
+- Non-parametric: makes no assumptions about the shape of the decision boundary.
+- Simple and intuitive: there's no explicit model to train, just store the training data.
+- It naturally handles multi-class problems.
+
+**Cons:**
+
+- Slow at prediction time: classifying each new point requires computing its distance to every training point.
+- Sensitive to the scale of predictors: variables with large ranges dominate the distance calculation, so features typically need to be standardized before applying KNN.
+- The choice of $K$ requires cross-validation and has a large impact on performance.
+- Its performance degrades as the number of predictors grows (the *curse of dimensionality*).
+
+<!-- TODO: I would like to include an activity on exercise 4.8-4 in ISLP. -->
+
+### Example
+
 We now apply KNN to our example data using `temp_anomaly` and `nitrate` as predictors. To do so, we use a 70-30 split in our observations and obtain a training set with 210 points and a test set with 90 points. The plot below shows the training and test sets along with the **decision boundary** learned by KNN with $K = 10$.
 
 ```{python}
@@ -254,26 +275,6 @@ plt.close()
 ```
 
 The shaded regions show where the model predicts *healthy* (blue) and *degraded* (red). Points plotted on top are the true labels. A point is misclassified if it appears in the "wrong" shaded region.
-
-### Pros and cons of KNN
-
-There are several pros and cons to using the KNN algorithm:
-
-**Pros:**
-
-- Non-parametric: makes no assumptions about the shape of the decision boundary.
-- Simple and intuitive: there's no explicit model to train, just store the training data.
-- It naturally handles multi-class problems.
-
-**Cons:**
-
-- Slow at prediction time: classifying each new point requires computing its distance to every training point.
-- Sensitive to the scale of predictors: variables with large ranges dominate the distance calculation, so features typically need to be standardized before applying KNN.
-- The choice of $K$ requires cross-validation and has a large impact on performance.
-- Its performance degrades as the number of predictors grows (the *curse of dimensionality*).
-
-<!-- TODO: I would like to include an activity on exercise 4.8-4 in ISLP. -->
-
 
 ## Accuracy assessment for classifiers
 
