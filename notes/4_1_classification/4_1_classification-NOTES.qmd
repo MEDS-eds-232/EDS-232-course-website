@@ -58,8 +58,8 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # Decision boundary grid (reused across several plots)
-x1_range = np.linspace(X[:, 0].min() - 0.5, X[:, 0].max() + 0.5, 300)
-x2_range = np.linspace(X[:, 1].min() - 1,   X[:, 1].max() + 1,   300)
+x1_range = np.linspace(-2, 4, 300)
+x2_range = np.linspace(X[:, 1].min() - 1, X[:, 1].max() + 1, 300)
 xx1, xx2 = np.meshgrid(x1_range, x2_range)
 ```
 
@@ -98,44 +98,41 @@ The central question is: *can we predict whether a kelp forest site is healthy o
 ```{python}
 #| label: initial-data-plotting
 
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x, fig_size_y))
-
-colors = {'healthy': 'steelblue', 'degraded': 'tomato'}
-
-# Left: all points, colored by status
-axes[0].scatter(df['temp_anomaly'], df['nitrate'],
-                c=[colors[s] for s in df['status']],
-                s=20, alpha=0.5, edgecolors='none')
-for label, col in colors.items():
-    axes[0].scatter([], [], c=col, s=40, label=label)
-axes[0].legend(title='Status', fontsize=9)
-axes[0].set_xlabel('Temp. anomaly (°C)')
-axes[0].set_ylabel('Nitrate (μmol/L)')
-axes[0].set_title('All stations')
-axes[0].grid(True, alpha=0.3)
-
-# Right: split by upwelling
+colors  = {'healthy': 'steelblue', 'degraded': 'tomato'}
 markers = {1: 'o', 0: 's'}
-labels_up = {1: 'upwelling detected', 0: 'no upwelling'}
-for up_val in [1, 0]:
-    mask = df['upwelling'] == up_val
-    axes[1].scatter(
-        df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
-        c=[colors[s] for s in df.loc[mask, 'status']],
-        marker=markers[up_val], s=20, alpha=0.5, edgecolors='none',
-        label=labels_up[up_val]
-    )
-axes[1].legend(fontsize=8)
-axes[1].set_xlabel('Temp. anomaly (°C)')
-axes[1].set_ylabel('Nitrate (μmol/L)')
-axes[1].set_title('Stations by upwelling status\n(○ = upwelling, □ = no upwelling)')
-axes[1].grid(True, alpha=0.3)
 
-fig.suptitle(
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.75, fig_size_y + 0.5))
+
+for up_val in [1, 0]:
+    for status_val, col in colors.items():
+        mask = (df['upwelling'] == up_val) & (df['status'] == status_val)
+        ax.scatter(
+            df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
+            c=col, marker=markers[up_val], s=20, alpha=0.5, edgecolors='none'
+        )
+
+# Legend 1: kelp status (colors)
+status_handles = [
+    plt.scatter([], [], c=col, s=50, label=lab)
+    for lab, col in colors.items()
+]
+leg1 = ax.legend(handles=status_handles, title='Status', fontsize=9, loc='upper left')
+
+# Legend 2: upwelling (shapes)
+shape_handles = [
+    plt.scatter([], [], c='gray', marker='o', s=50, label='upwelling detected'),
+    plt.scatter([], [], c='gray', marker='s', s=50, label='no upwelling'),
+]
+ax.legend(handles=shape_handles, title='Upwelling', fontsize=9, loc='upper right')
+ax.add_artist(leg1)
+
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title(
     'KelpWatch: kelp status vs. oceanographic conditions\n'
-    '*Synthetic data generated for educational purposes only*',
-    y=1.01
+    '*Synthetic data generated for educational purposes only*'
 )
+ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -154,6 +151,7 @@ Given a training set and a new test observation $x_0$:
 2. **Identify the $K$ points** in the training data that are closest to $x_0$ (typically using Euclidean distance).
 3. **Identify the majority class** among those $K$ nearest neighbors.
 4. **Assign that majority class** as the predicted class for $x_0$.
+
 
 ```{python}
 #| label: knn-illustration
@@ -203,6 +201,8 @@ plt.show()
 plt.close()
 ```
 
+
+
 :::{.callout-tip}
 ## Check-in
 
@@ -236,27 +236,50 @@ knn10.fit(X_train, y_train)
 grid_pred = knn10.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)
 grid_num  = (grid_pred == 'healthy').astype(int)
 
-fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 1))
-ax.contourf(xx1, xx2, grid_num, alpha=0.15,
-            cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
-ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
+col_map  = {'healthy': 'steelblue', 'degraded': 'tomato'}
+datasets = [('Training data', X_train, y_train), ('Test data', X_test, y_test)]
 
-for label, col in {'healthy': 'steelblue', 'degraded': 'tomato'}.items():
-    mask = y_test == label
-    ax.scatter(X_test[mask, 0], X_test[mask, 1],
-               c=col, s=25, alpha=0.7, label=label, edgecolors='none')
+fig, axes = plt.subplots(2, 1, figsize=(fig_size_x, (fig_size_y + 0.5) * 2), sharex=True)
 
-ax.set_xlabel('Temp. anomaly (°C)')
-ax.set_ylabel('Nitrate (μmol/L)')
-ax.set_title('KNN decision boundary (K = 10) — test observations shown')
-ax.legend(title='True status', fontsize=9)
-ax.grid(True, alpha=0.3)
+for ax, (title, X_data, y_data) in zip(axes, datasets):
+    ax.contourf(xx1, xx2, grid_num, alpha=0.15,
+                cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+    ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
+    for label, col in col_map.items():
+        mask = y_data == label
+        ax.scatter(X_data[mask, 0], X_data[mask, 1],
+                   c=col, s=20, alpha=0.7, label=label, edgecolors='none')
+    ax.set_xlim(-2, 4)
+    ax.set_ylabel('Nitrate (μmol/L)')
+    ax.set_title(f'KNN (K = 10): {title}')
+    ax.legend(title='True status', fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+axes[1].set_xlabel('Temp. anomaly (°C)')
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
-The shaded regions show where the model predicts *healthy* (blue) and *degraded* (red). Points plotted on top are the true test labels — misclassified points appear in the "wrong" region.
+The shaded regions show where the model predicts *healthy* (blue) and *degraded* (red). Points plotted on top are the true labels — misclassified points appear in the "wrong" shaded region.
+
+### Pros and cons 
+
+There are several pros and cons to using the KNN algorithm:
+
+**Pros:**
+
+- Simple and intuitive — no explicit model to train, just store the training data.
+- Non-parametric: makes no assumptions about the shape of the decision boundary.
+- Naturally handles multi-class problems.
+
+**Cons:**
+
+- Slow at prediction time: classifying each new point requires computing its distance to every training point.
+- Sensitive to the scale of predictors: variables with large ranges dominate the distance calculation, so features typically need to be standardized before applying KNN.
+- The choice of $K$ requires cross-validation and has a large impact on performance.
+- Performance degrades as the number of predictors grows (the *curse of dimensionality*): in high-dimensional spaces, all points tend to be roughly equidistant, making "nearest" neighbors meaningless.
+
 
 ## Accuracy assessment for classifiers
 
@@ -317,6 +340,7 @@ for label, col in {'healthy': 'steelblue', 'degraded': 'tomato'}.items():
     ax.scatter(X_test[mask, 0], X_test[mask, 1],
                c=col, s=25, alpha=0.7, label=label, edgecolors='none')
 
+ax.set_xlim(-2, 4)
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
 ax.set_title('KNN decision boundary (K = 10) — test observations shown')
@@ -410,12 +434,14 @@ All of these accuracy metrics take on values between 0 and 1, with 1 being the h
 ## Check-in
 1. Imagine you use a classifier that always predicts positive. What would recall be like? What about precision?
 2. Imagine you use a classifier that rarely predicts positive but, when it does, it is spot on. What would recall be like? What about precision?
+3. If you are a conservation manager who needs to allocate resources to degraded sites, which metric would you prioritize? 
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 1. A classifier that always predicts positive will have *perfect recall* (it never misses a positive) but *low precision* (many of its positive predictions are wrong).
 2. A classifier that rarely predicts positive will have *high precision* (when it does predict positive, it is usually right) but *low recall* (it misses many true positives).
+3. A conservation manager should likely prioritize *recall*: the goal is to correctly identify as many truly degraded sites as possible so they can receive intervention. Missing a degraded site (False Negative) could have direct ecological consequences. 
 :::
 
 Precision and recall capture different aspects of classifier performance and often trade off against each other.
@@ -431,11 +457,22 @@ $$F_1 = \frac{2 \cdot \text{precision} \times \text{recall}}{\text{precision} + 
 - It **favors classifiers with balanced precision and recall**: a model with high precision but very low recall (or vice versa) receives a low $F_1$ score.
 - It is a simple way to compare classifiers with one number, but you should always examine precision and recall individually to understand the underlying trade-off.
 
+
+:::{.callout-tip}
+## Check-in
+
+Suppose we also implement a **null classifier** which always predicts the majority class regardless of the predictors. The table below compares all four metrics for the null classifier and our KNN model:
+
 ```{python}
 #| label: accuracy-metrics
 
 majority_class = pd.Series(y_test).value_counts().idxmax()
-null_acc  = pd.Series(y_test).value_counts(normalize=True).max()
+null_preds     = np.full(len(y_test), majority_class)
+
+null_acc  = accuracy_score(y_test, null_preds)
+null_prec = precision_score(y_test, null_preds, pos_label='healthy', zero_division=0)
+null_rec  = recall_score(y_test, null_preds, pos_label='healthy', zero_division=0)
+null_f1   = f1_score(y_test, null_preds, pos_label='healthy', zero_division=0)
 
 acc  = accuracy_score(y_test, y_pred)
 prec = precision_score(y_test, y_pred, pos_label='healthy')
@@ -443,38 +480,31 @@ rec  = recall_score(y_test, y_pred, pos_label='healthy')
 f1   = f1_score(y_test, y_pred, pos_label='healthy')
 
 metrics_df = pd.DataFrame({
-    'Metric': ['Null classifier accuracy', 'KNN accuracy',
-               'Precision', 'Recall', 'F₁ score'],
-    'Value':  [f'{null_acc:.3f}', f'{acc:.3f}',
-               f'{prec:.3f}',     f'{rec:.3f}', f'{f1:.3f}']
+    'Model':     ['Null classifier', 'KNN (K = 10)'],
+    'Accuracy':  [f'{null_acc:.3f}',  f'{acc:.3f}'],
+    'Precision': [f'{null_prec:.3f}', f'{prec:.3f}'],
+    'Recall':    [f'{null_rec:.3f}',  f'{rec:.3f}'],
+    'F₁ score':  [f'{null_f1:.3f}',  f'{f1:.3f}'],
 })
 print(metrics_df.to_string(index=False))
 ```
 
+Looking at the comparison table:
 
-A useful baseline is the **null classifier**: a classifier that always predicts the majority class regardless of the predictors. Its accuracy equals the proportion of the most common class in the test set. Any useful model should outperform this trivial baseline.
-
-
-
-:::{.callout-tip}
-## Check-in
-
-Looking at the metrics table above:
-
-1. The null classifier achieves accuracy `{python} f"{null_acc:.3f}"` by always predicting *`{python} majority_class`*. Why is comparing to this baseline useful?
-2. KNN achieves accuracy `{python} f"{acc:.3f}"`. Is this an improvement?
-3. Precision is `{python} f"{prec:.3f}"` and recall is `{python} f"{rec:.3f}"`. If you are a conservation manager who needs to allocate resources to degraded sites, which metric should you prioritize? Why?
+1. The null classifier always predicts *`{python} majority_class`*. Why does it have a recall of `{python} f"{null_rec:.3f}"` but a lower $F_1$ score?
+2. KNN achieves accuracy `{python} f"{acc:.3f}"` vs. the null's `{python} f"{null_acc:.3f}"`. Is accuracy alone a good summary to assess whether KNN improves over the null?
+3. Is this KNN model with K=10 good enough or would it be worth it to explore other alternatives?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. The null classifier requires no predictors at all. If our model cannot beat this trivial baseline, it is not extracting any useful information from the data. The baseline also reveals class imbalance: when one class strongly dominates, high accuracy can be misleading (e.g., a 90% accurate model might just be predicting the majority class every time).
+1. Because the null classifier always predicts *`{python} majority_class`* (positive), it never produces a false negative. Every truly positive site gets predicted as positive, so recall is perfect. However, it also misclassifies every negative site as positive, which drives down precision and therefore $F_1$.
 
-2. Yes. KNN accuracy `{python} f"{acc:.3f}"` exceeds the null classifier's `{python} f"{null_acc:.3f}"`, meaning the predictors do provide useful information about kelp status.
-
-3. A conservation manager should prioritize **recall**: the goal is to correctly identify as many of the truly degraded sites as possible so they can receive intervention. A low recall means degraded sites are being missed (False Negatives), which has direct ecological consequences. Precision matters too, but failing to detect real degradation is typically the costlier error here.
+2. No. The two classifiers have similar accuracy (`{python} f"{null_acc:.3f}"` vs. `{python} f"{acc:.3f}"`), yet KNN has some evidence of distinguishing between classes rather than blindly predicting the majority. 
 :::
+
+The null classifier is a useful baseline. Its accuracy equals the proportion of the most common class in the test set. Any useful model should outperform this trivial baseline. Looking at precision, recall, and $F_1$ together gives a much fuller picture than accuracy alone.
 
 ## Overfitting in classification
 
