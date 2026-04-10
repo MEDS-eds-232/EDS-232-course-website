@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.33">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>KNN and accuracy metrics – EDS 232 - Machine Learning for Environmental Science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../../notes/week-by-week/week-by-week.html" aria-current="page"> 
+<span class="menu-text">notes</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">assignments</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-1.html">
+ <span class="dropdown-text">Assignment 1</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">weekly labs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
+        <li>
+    <a class="dropdown-item" href="../../lab/lab1.html">
+ <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab2.html">
+ <span class="dropdown-text">Lab 2: No lab this week!</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website">
+ <span class="dropdown-text">Source code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website/issues">
+ <span class="dropdown-text">Report a bug</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics.html">Classification</a></li><li class="breadcrumb-item"><a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics.html">KNN and accuracy metrics</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+  <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p>This wesbite is under construction.</p>
+</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/week-by-week/week-by-week.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week by week</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/setup/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What is machine learning?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Learning from data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Training and test errors, and model flexibility</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Linear regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simple linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/3_2_multiple_linear_regression/3_2_multiple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple linear regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Classification</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">KNN and accuracy metrics</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#from-regression-to-classification" id="toc-from-regression-to-classification" class="nav-link active" data-scroll-target="#from-regression-to-classification">From regression to classification</a></li>
+  <li><a href="#a-guiding-example-kelp-forest-monitoring" id="toc-a-guiding-example-kelp-forest-monitoring" class="nav-link" data-scroll-target="#a-guiding-example-kelp-forest-monitoring">A guiding example: kelp forest monitoring</a></li>
+  <li><a href="#k-nearest-neighbors-knn" id="toc-k-nearest-neighbors-knn" class="nav-link" data-scroll-target="#k-nearest-neighbors-knn">K-Nearest Neighbors (KNN)</a>
+  <ul class="collapse">
+  <li><a href="#the-algorithm" id="toc-the-algorithm" class="nav-link" data-scroll-target="#the-algorithm">The algorithm</a></li>
+  <li><a href="#pros-and-cons-of-knn" id="toc-pros-and-cons-of-knn" class="nav-link" data-scroll-target="#pros-and-cons-of-knn">Pros and cons of KNN</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  </ul></li>
+  <li><a href="#accuracy-assessment-for-classifiers" id="toc-accuracy-assessment-for-classifiers" class="nav-link" data-scroll-target="#accuracy-assessment-for-classifiers">Accuracy assessment for classifiers</a>
+  <ul class="collapse">
+  <li><a href="#the-confusion-matrix" id="toc-the-confusion-matrix" class="nav-link" data-scroll-target="#the-confusion-matrix">The confusion matrix</a></li>
+  <li><a href="#accuracy-metrics" id="toc-accuracy-metrics" class="nav-link" data-scroll-target="#accuracy-metrics">Accuracy metrics</a></li>
+  <li><a href="#the-f_1-score" id="toc-the-f_1-score" class="nav-link" data-scroll-target="#the-f_1-score">The <span class="math inline">\(F_1\)</span> score</a></li>
+  </ul></li>
+  <li><a href="#overfitting-in-classification" id="toc-overfitting-in-classification" class="nav-link" data-scroll-target="#overfitting-in-classification">Overfitting in classification</a>
+  <ul class="collapse">
+  <li><a href="#the-bias-variance-tradeoff" id="toc-the-bias-variance-tradeoff" class="nav-link" data-scroll-target="#the-bias-variance-tradeoff">The Bias-Variance tradeoff</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics.html">Classification</a></li><li class="breadcrumb-item"><a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics.html">KNN and accuracy metrics</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">KNN and accuracy metrics</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="09473f92" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> KNeighborsClassifier</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> (confusion_matrix, precision_score,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                              recall_score, f1_score, accuracy_score)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'default'</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>fig_size_x <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>fig_size_y <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'font.size'</span>] <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># ── KelpWatch synthetic dataset ────────────────────────────────────────────────</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 300 coastal monitoring stations, each characterized by:</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#   temp_anomaly – sea surface temperature anomaly (°C)</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#   nitrate      – nitrate concentration (μmol/L)</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   upwelling    – whether upwelling was detected (yes / no)</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#   status       – kelp forest condition: 'healthy' or 'degraded'</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># True data-generating model (logistic):</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#   log-odds(healthy) = -0.8 − 1.5·temp_anomaly + 0.10·nitrate + 1.8·upwelling</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co"># ──────────────────────────────────────────────────────────────────────────────</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">300</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>temp_anomaly <span class="op">=</span> np.random.normal(<span class="fl">0.4</span>, <span class="fl">1.0</span>, n)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>nitrate      <span class="op">=</span> np.random.normal(<span class="dv">14</span>, <span class="dv">4</span>, n)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>upwelling    <span class="op">=</span> np.random.binomial(<span class="dv">1</span>, <span class="fl">0.5</span>, n)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>log_odds     <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span> <span class="op">+</span> (<span class="op">-</span><span class="fl">1.5</span> <span class="op">*</span> temp_anomaly) <span class="op">+</span> (<span class="fl">0.10</span> <span class="op">*</span> nitrate) <span class="op">+</span> (<span class="fl">1.8</span> <span class="op">*</span> upwelling)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>prob_healthy <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>log_odds))</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>status_num   <span class="op">=</span> np.random.binomial(<span class="dv">1</span>, prob_healthy, n)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>status       <span class="op">=</span> np.where(status_num <span class="op">==</span> <span class="dv">1</span>, <span class="st">'healthy'</span>, <span class="st">'degraded'</span>)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="st">'temp_anomaly'</span>:    temp_anomaly,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="st">'nitrate'</span>:         nitrate,</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">'upwelling'</span>:       upwelling,</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">'upwelling_label'</span>: np.where(upwelling <span class="op">==</span> <span class="dv">1</span>, <span class="st">'yes'</span>, <span class="st">'no'</span>),</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">'status'</span>:          status,</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="st">'status_num'</span>:      status_num,</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Train/test split used throughout this lesson</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[[<span class="st">'temp_anomaly'</span>, <span class="st">'nitrate'</span>]].values</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">'status'</span>].values</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.3</span>, random_state<span class="op">=</span><span class="dv">42</span>, stratify<span class="op">=</span>y</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Decision boundary grid (reused across several plots)</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>x1_range <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">300</span>)</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>x2_range <span class="op">=</span> np.linspace(X[:, <span class="dv">1</span>].<span class="bu">min</span>() <span class="op">-</span> <span class="dv">1</span>, X[:, <span class="dv">1</span>].<span class="bu">max</span>() <span class="op">+</span> <span class="dv">1</span>, <span class="dv">300</span>)</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>xx1, xx2 <span class="op">=</span> np.meshgrid(x1_range, x2_range)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><a href="4_1_classification-SLIDES.qmd">📊 Slides</a> / <a href="4_1_classification-SLIDES-BLANK.qmd">📊 Blank slides</a></p>
+<p>In this lesson we introduce:</p>
+<ul>
+<li>The classification setting and how it differs from regression</li>
+<li>Nearest Neighbors (KNN) as a simple, intuitive classification method</li>
+<li>Accuracy assessment for classifiers: the confusion matrix, precision, recall, and <span class="math inline">\(F_1\)</span> score</li>
+<li>Overfitting in classification and the bias-variance tradeoff for classifiers</li>
+</ul>
+<p>These notes are based on chapters 2.2.3 and 4 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.</p>
+<section id="from-regression-to-classification" class="level2">
+<h2 class="anchored" data-anchor-id="from-regression-to-classification">From regression to classification</h2>
+<p>So far we have studied regression methods, which assume the response variable is <strong>quantitative</strong>: a number that can take a continuous range of values. In many situations, however, the response is <strong>qualitative</strong> (also called <strong>categorical</strong>): it takes values in one of a discrete set of categories, or <em>classes</em>.</p>
+<p><strong>Classifying</strong> means predicting the qualitative response for an observation. Examples from environmental science include:</p>
+<ul>
+<li>Predicting whether a habitat is <em>healthy</em> or <em>degraded</em> based on environmental conditions</li>
+<li>Determining whether a water sample <em>exceeds</em> or <em>does not exceed</em> a contamination threshold</li>
+<li>Predicting whether a species is <em>present</em> or <em>absent</em> at a given location</li>
+</ul>
+</section>
+<section id="a-guiding-example-kelp-forest-monitoring" class="level2">
+<h2 class="anchored" data-anchor-id="a-guiding-example-kelp-forest-monitoring">A guiding example: kelp forest monitoring</h2>
+<p>In this lesson we use a synthetic dataset that tracks 300 coastal monitoring stations. For each station we record:</p>
+<ul>
+<li><strong><code>temp_anomaly</code></strong> — sea surface temperature anomaly (°C); positive values indicate warmer-than-average conditions</li>
+<li><strong><code>nitrate</code></strong> — nitrate concentration (μmol/L); higher values generally support kelp growth</li>
+<li><strong><code>status</code></strong> — observed kelp forest condition: <em>healthy</em> or <em>degraded</em></li>
+</ul>
+<p>The central question is: <em>can we predict whether a kelp forest site is healthy or degraded from its oceanographic conditions?</em></p>
+<div id="cell-initial-data-plotting" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>colors  <span class="op">=</span> {<span class="st">'healthy'</span>: <span class="st">'steelblue'</span>, <span class="st">'degraded'</span>: <span class="st">'tomato'</span>}</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>markers <span class="op">=</span> {<span class="dv">1</span>: <span class="st">'o'</span>, <span class="dv">0</span>: <span class="st">'s'</span>}</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(fig_size_x <span class="op">*</span> <span class="fl">0.75</span>, fig_size_y <span class="op">+</span> <span class="fl">0.5</span>))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> up_val <span class="kw">in</span> [<span class="dv">1</span>, <span class="dv">0</span>]:</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> status_val, col <span class="kw">in</span> colors.items():</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> (df[<span class="st">'upwelling'</span>] <span class="op">==</span> up_val) <span class="op">&amp;</span> (df[<span class="st">'status'</span>] <span class="op">==</span> status_val)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        ax.scatter(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>            df.loc[mask, <span class="st">'temp_anomaly'</span>], df.loc[mask, <span class="st">'nitrate'</span>],</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>            c<span class="op">=</span>col, s<span class="op">=</span><span class="dv">20</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, edgecolors<span class="op">=</span><span class="st">'none'</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Legend 1: kelp status (colors)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>status_handles <span class="op">=</span> [</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    plt.scatter([], [], c<span class="op">=</span>col, s<span class="op">=</span><span class="dv">50</span>, label<span class="op">=</span>lab)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> lab, col <span class="kw">in</span> colors.items()</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>leg1 <span class="op">=</span> ax.legend(handles<span class="op">=</span>status_handles, title<span class="op">=</span><span class="st">'Status'</span>, fontsize<span class="op">=</span><span class="dv">9</span>, loc<span class="op">=</span><span class="st">'upper left'</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>ax.add_artist(leg1)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Temp. anomaly (°C)'</span>)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Nitrate (μmol/L)'</span>)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>ax.set_title(</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">'KelpWatch: kelp status vs. oceanographic conditions</span><span class="ch">\n</span><span class="st">'</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">'*Synthetic data generated for educational purposes only*'</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="4_1_knn_accuracy_metrics_files/figure-html/initial-data-plotting-output-1.png" id="initial-data-plotting" width="589" height="442" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="k-nearest-neighbors-knn" class="level2">
+<h2 class="anchored" data-anchor-id="k-nearest-neighbors-knn">K-Nearest Neighbors (KNN)</h2>
+<p><strong>K-Nearest Neighbors (KNN)</strong> is one of the simplest classification methods. The intuition is straightforward: classify a new observation by majority vote among its nearest neighbors in the training data.</p>
+<section id="the-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="the-algorithm">The algorithm</h3>
+<p>Given a training set and a new test observation <span class="math inline">\(x_0\)</span>:</p>
+<ol type="1">
+<li>Choose an integer <span class="math inline">\(K \geq 1\)</span>.</li>
+<li><strong>Identify the <span class="math inline">\(K\)</span> points</strong> in the training data that are closest to <span class="math inline">\(x_0\)</span> (typically using Euclidean distance).</li>
+<li><strong>Identify the majority class</strong> among those <span class="math inline">\(K\)</span> nearest neighbors.</li>
+<li><strong>Assign that majority class</strong> as the predicted class for <span class="math inline">\(x_0\)</span>.</li>
+</ol>
+<div id="cell-knn-illustration" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Small illustrative dataset for the manual KNN exercise</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">14</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>n_ill <span class="op">=</span> <span class="dv">18</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>x1_ill <span class="op">=</span> np.random.uniform(<span class="fl">0.5</span>, <span class="fl">5.5</span>, n_ill)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>x2_ill <span class="op">=</span> np.random.uniform(<span class="fl">0.5</span>, <span class="fl">5.5</span>, n_ill)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># healthy = 1 roughly in the upper-left; degraded = 0 roughly lower-right</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>y_ill <span class="op">=</span> ((<span class="op">-</span><span class="fl">0.8</span> <span class="op">*</span> x1_ill <span class="op">+</span> x2_ill <span class="op">+</span> np.random.normal(<span class="dv">0</span>, <span class="fl">0.5</span>, n_ill)) <span class="op">&gt;</span> <span class="fl">0.5</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>y_ill_label <span class="op">=</span> np.where(y_ill <span class="op">==</span> <span class="dv">1</span>, <span class="st">'healthy'</span>, <span class="st">'degraded'</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Test point</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>x0 <span class="op">=</span> np.array([<span class="fl">2.8</span>, <span class="fl">2.8</span>])</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># K = 3 neighborhood</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>dists  <span class="op">=</span> np.sqrt((x1_ill <span class="op">-</span> x0[<span class="dv">0</span>])<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> (x2_ill <span class="op">-</span> x0[<span class="dv">1</span>])<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>k3_idx <span class="op">=</span> np.argsort(dists)[:<span class="dv">3</span>]</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>radius <span class="op">=</span> dists[k3_idx[<span class="op">-</span><span class="dv">1</span>]] <span class="op">+</span> <span class="fl">0.07</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">4.5</span>, <span class="fl">4.5</span>))</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>col_map <span class="op">=</span> {<span class="st">'healthy'</span>: <span class="st">'steelblue'</span>, <span class="st">'degraded'</span>: <span class="st">'tomato'</span>}</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, col <span class="kw">in</span> col_map.items():</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> y_ill_label <span class="op">==</span> label</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x1_ill[mask], x2_ill[mask], c<span class="op">=</span>col, s<span class="op">=</span><span class="dv">90</span>,</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>               edgecolors<span class="op">=</span><span class="st">'k'</span>, linewidths<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span>label, zorder<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>ax.scatter(<span class="op">*</span>x0, c<span class="op">=</span><span class="st">'gold'</span>, s<span class="op">=</span><span class="dv">200</span>, marker<span class="op">=</span><span class="st">'*'</span>, edgecolors<span class="op">=</span><span class="st">'k'</span>,</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>           linewidths<span class="op">=</span><span class="fl">0.8</span>, label<span class="op">=</span><span class="st">'test point $x_0$'</span>, zorder<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>circle <span class="op">=</span> plt.Circle(x0, radius, color<span class="op">=</span><span class="st">'dimgray'</span>, fill<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>                    linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="fl">1.8</span>, label<span class="op">=</span><span class="st">'K = 3 neighborhood'</span>)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>ax.add_patch(circle)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="dv">0</span>, <span class="dv">6</span>)</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="dv">6</span>)</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Temp. anomaly (normalized)'</span>)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Nitrate (normalized)'</span>)</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, loc<span class="op">=</span><span class="st">'upper left'</span>)</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'KNN illustration (K = 3)'</span>)</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>ax.set_aspect(<span class="st">'equal'</span>)</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="4_1_knn_accuracy_metrics_files/figure-html/knn-illustration-output-1.png" id="knn-illustration" width="418" height="441" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In the figure above, the star <span class="math inline">\(\star\)</span> marks a new test observation <span class="math inline">\(x_0\)</span>. The dashed circle encloses its <span class="math inline">\(K = 3\)</span> nearest neighbors.</p>
+<ol type="1">
+<li>Look at the three points inside the circle. What class would KNN assign to <span class="math inline">\(x_0\)</span>?</li>
+<li>What would change if we used <span class="math inline">\(K = 1\)</span> instead?</li>
+<li>What would change if we used <span class="math inline">\(K=\)</span> number of observations in the training set?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>We can see that two out of the three training points inside the dashed circle belong to the healthy class (blue points). Since healthy is the majority class within the neighborhood, we predict that the test point <span class="math inline">\(x_0\)</span> is in the healthy class too.</p></li>
+<li><p>With <span class="math inline">\(K = 1\)</span> the prediction is determined entirely by the single closest training point. Highly sensitive to local noise.</p></li>
+<li><p>If we use the whole dataset to compute the vote, we will just assign the majority class to every test point.</p></li>
+</ol>
+<!-- 3. Small $K$: the classifier can capture complex, irregular boundaries but is sensitive to individual training points and prone to overfitting. Large $K$ (high bias, low variance): the boundary is smoother and more stable, but may miss real patterns in the data. This is the same bias-variance tradeoff we saw in regression. -->
+</div>
+</div>
+</div>
+</section>
+<section id="pros-and-cons-of-knn" class="level3">
+<h3 class="anchored" data-anchor-id="pros-and-cons-of-knn">Pros and cons of KNN</h3>
+<p>There are several pros and cons to using the KNN algorithm:</p>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Non-parametric: makes no assumptions about the shape of the decision boundary.</li>
+<li>Simple and intuitive: there’s no explicit model to train, just store the training data.</li>
+<li>It naturally handles multi-class problems.</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Slow at prediction time: classifying each new point requires computing its distance to every training point.</li>
+<li>Sensitive to the scale of predictors: variables with large ranges dominate the distance calculation, so features typically need to be standardized before applying KNN.</li>
+<li>The choice of <span class="math inline">\(K\)</span> requires cross-validation and has a large impact on performance.</li>
+<li>Its performance degrades as the number of predictors grows (the <em>curse of dimensionality</em>).</li>
+</ul>
+<!-- TODO: I would like to include an activity on exercise 4.8-4 in ISLP. -->
+</section>
+<section id="example" class="level3">
+<h3 class="anchored" data-anchor-id="example">Example</h3>
+<p>We now apply KNN to our example data using <code>temp_anomaly</code> and <code>nitrate</code> as predictors. To do so, we use a 70-30 split in our observations and obtain a training set with 210 points and a test set with 90 points. The plot below shows the training and test sets along with the <strong>decision boundary</strong> learned by KNN with <span class="math inline">\(K = 10\)</span>.</p>
+<div id="cell-knn-decision-boundary" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>knn10 <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>knn10.fit(X_train, y_train)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>grid_pred <span class="op">=</span> knn10.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>grid_num  <span class="op">=</span> (grid_pred <span class="op">==</span> <span class="st">'healthy'</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>col_map  <span class="op">=</span> {<span class="st">'healthy'</span>: <span class="st">'steelblue'</span>, <span class="st">'degraded'</span>: <span class="st">'tomato'</span>}</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>datasets <span class="op">=</span> [(<span class="st">'Training data'</span>, X_train, y_train), (<span class="st">'Test data'</span>, X_test, y_test)]</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(fig_size_x <span class="op">*</span> <span class="fl">0.7</span>, (fig_size_y <span class="op">+</span> <span class="fl">0.5</span>) <span class="op">*</span> <span class="fl">1.4</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (title, X_data, y_data) <span class="kw">in</span> <span class="bu">zip</span>(axes, datasets):</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    ax.contourf(xx1, xx2, grid_num, alpha<span class="op">=</span><span class="fl">0.15</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                cmap<span class="op">=</span><span class="st">'coolwarm_r'</span>, levels<span class="op">=</span>[<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">1.5</span>])</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    ax.contour(xx1, xx2, grid_num, colors<span class="op">=</span><span class="st">'gray'</span>, linewidths<span class="op">=</span><span class="fl">1.2</span>, levels<span class="op">=</span>[<span class="fl">0.5</span>])</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> label, col <span class="kw">in</span> col_map.items():</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> y_data <span class="op">==</span> label</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X_data[mask, <span class="dv">0</span>], X_data[mask, <span class="dv">1</span>],</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>                   c<span class="op">=</span>col, s<span class="op">=</span><span class="dv">20</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span>label, edgecolors<span class="op">=</span><span class="st">'none'</span>)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    ax.set_xlim(<span class="op">-</span><span class="dv">2</span>, <span class="dv">4</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="st">'Nitrate (μmol/L)'</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f'KNN (K = 10): </span><span class="sc">{</span>title<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    ax.legend(title<span class="op">=</span><span class="st">'True status'</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'Temp. anomaly (°C)'</span>)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="4_1_knn_accuracy_metrics_files/figure-html/knn-decision-boundary-output-1.png" id="knn-decision-boundary" width="549" height="621" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The shaded regions show where the model predicts <em>healthy</em> (blue) and <em>degraded</em> (red). Points plotted on top are the true labels. A point is misclassified if it appears in the “wrong” shaded region.</p>
+</section>
+</section>
+<section id="accuracy-assessment-for-classifiers" class="level2">
+<h2 class="anchored" data-anchor-id="accuracy-assessment-for-classifiers">Accuracy assessment for classifiers</h2>
+<p>To assess how well a classifier performs, we compare its predictions on the <strong>test set</strong> to the true labels. For a <strong>binary classifier</strong> with two possible classes we call the classes <strong>positive</strong> and <strong>negative</strong>. Given an observation <span class="math inline">\((x_0, y_0)\)</span> in the test set, we have the following possibilities depending on what prediction was given to <span class="math inline">\(x_0\)</span> and what class <span class="math inline">\(y_0\)</span> it is really associated with:</p>
+<ul>
+<li><strong>True Positive</strong>: the observation is positive and we correctly predicted positive.</li>
+<li><strong>True Negative</strong>: the observation is negative and we correctly predicted negative.</li>
+<li><strong>False Positive</strong>: the observation is negative but we incorrectly predicted positive.</li>
+<li><strong>False Negative</strong>: the observation is positive but we incorrectly predicted negative.</li>
+</ul>
+<!-- 
+|  | $x_0$ predicted positive | $x_0$ predicted negative |
+|---|---|---|
+| $y_0$ is positive class | True positive | False negative |
+| $y_0$ is negative class | False positive  | True negative  | -->
+<p>So each of our observations in the test set can be classified as true/false positive or true/false negative.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Consider the following predictions for five test observations:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Observation</th>
+<th>True status</th>
+<th>Predicted status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>healthy</td>
+<td>healthy</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td>degraded</td>
+<td>healthy</td>
+</tr>
+<tr class="odd">
+<td>C</td>
+<td>healthy</td>
+<td>degraded</td>
+</tr>
+<tr class="even">
+<td>D</td>
+<td>degraded</td>
+<td>degraded</td>
+</tr>
+<tr class="odd">
+<td>E</td>
+<td>healthy</td>
+<td>healthy</td>
+</tr>
+</tbody>
+</table>
+<p>We will treat healthy as the positive class and degraded as the negative class. Classify each observation as true positive, false positive, true negative, or false negative, using <code>healthy</code> as the positive class.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>A: True status = healthy (positive), predicted = healthy (positive) → <strong>TP</strong></li>
+<li>B: True status = degraded (negative), predicted = healthy (positive) → <strong>FP</strong></li>
+<li>C: True status = healthy (positive), predicted = degraded (negative) → <strong>FN</strong></li>
+<li>D: True status = degraded (negative), predicted = degraded (negative) → <strong>TN</strong></li>
+<li>E: True status = healthy (positive), predicted = healthy (positive) → <strong>TP</strong></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Identify one true positive point, one true negative point, one false positive point, and one false negative point.</p>
+<div id="cell-identify-points" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(fig_size_x <span class="op">*</span> <span class="fl">0.7</span>, (fig_size_y <span class="op">+</span> <span class="dv">1</span>) <span class="op">*</span> <span class="fl">0.7</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ax.contourf(xx1, xx2, grid_num, alpha<span class="op">=</span><span class="fl">0.15</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>            cmap<span class="op">=</span><span class="st">'coolwarm_r'</span>, levels<span class="op">=</span>[<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">1.5</span>])</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ax.contour(xx1, xx2, grid_num, colors<span class="op">=</span><span class="st">'gray'</span>, linewidths<span class="op">=</span><span class="fl">1.2</span>, levels<span class="op">=</span>[<span class="fl">0.5</span>])</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, col <span class="kw">in</span> {<span class="st">'healthy'</span>: <span class="st">'steelblue'</span>, <span class="st">'degraded'</span>: <span class="st">'tomato'</span>}.items():</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> y_test <span class="op">==</span> label</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    ax.scatter(X_test[mask, <span class="dv">0</span>], X_test[mask, <span class="dv">1</span>],</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>               c<span class="op">=</span>col, s<span class="op">=</span><span class="dv">25</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span>label, edgecolors<span class="op">=</span><span class="st">'none'</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="op">-</span><span class="dv">2</span>, <span class="dv">4</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Temp. anomaly (°C)'</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Nitrate (μmol/L)'</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'KNN decision boundary (K = 10) — test observations shown'</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>ax.legend(title<span class="op">=</span><span class="st">'True status'</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="4_1_knn_accuracy_metrics_files/figure-html/identify-points-output-1.png" id="identify-points" width="556" height="341" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>You may have identified other points, these are some examples!</p>
+<p><img src="point-classification.png" class="img-fluid"></p>
+</div>
+</div>
+</div>
+<section id="the-confusion-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="the-confusion-matrix">The confusion matrix</h3>
+<p>Once we have predicted the class for every point in our test set and compared it agains its true class, we can count the total number of true/false positives and true/false negatives we obtained. We use the notation:</p>
+<ul>
+<li>TP = total number of true positives</li>
+<li>TN = total number of true negatives</li>
+<li>FP = total number of false positives</li>
+<li>FN = total number of false negatives</li>
+</ul>
+<p>These four counts are organized into a <strong>confusion matrix</strong>, which gives a concise summary of where the classifier is correct and what types of errors it makes:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Predicted positive</th>
+<th>Predicted negative</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>True positive</strong></td>
+<td>TP</td>
+<td>FN</td>
+</tr>
+<tr class="even">
+<td><strong>True negative</strong></td>
+<td>FP</td>
+<td>TN</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The confusion matrix for our KNN model is</p>
+<div id="confusion-matrix" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> knn10.predict(X_test)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>cm     <span class="op">=</span> confusion_matrix(y_test, y_pred, labels<span class="op">=</span>[<span class="st">'healthy'</span>, <span class="st">'degraded'</span>])</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>TP, FN, FP, TN <span class="op">=</span> cm[<span class="dv">0</span>, <span class="dv">0</span>], cm[<span class="dv">0</span>, <span class="dv">1</span>], cm[<span class="dv">1</span>, <span class="dv">0</span>], cm[<span class="dv">1</span>, <span class="dv">1</span>]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>cm_df <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    [[<span class="ss">f'TP = </span><span class="sc">{</span>TP<span class="sc">}</span><span class="ss">'</span>, <span class="ss">f'FN = </span><span class="sc">{</span>FN<span class="sc">}</span><span class="ss">'</span>],</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>     [<span class="ss">f'FP = </span><span class="sc">{</span>FP<span class="sc">}</span><span class="ss">'</span>, <span class="ss">f'TN = </span><span class="sc">{</span>TN<span class="sc">}</span><span class="ss">'</span>]],</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    index   <span class="op">=</span> [<span class="st">'True: healthy'</span>,  <span class="st">'True: degraded'</span>],</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    columns <span class="op">=</span> [<span class="st">'Predicted: healthy'</span>, <span class="st">'Predicted: degraded'</span>]</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cm_df.to_string())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>               Predicted: healthy Predicted: degraded
+True: healthy             TP = 49             FN = 11
+True: degraded            FP = 20             TN = 10</code></pre>
+</div>
+</div>
+<p>Using the confusion matrix above:</p>
+<ol type="1">
+<li>How many healthy sites were correctly identified?</li>
+<li>How many degraded sites were incorrectly classified as healthy? What type of error is this: false positive or false negative?</li>
+<li>From an ecological monitoring perspective, which type of error do you think could be more costly? Why?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>That is the True Positive count: the top-left cell of the confusion matrix.</p></li>
+<li><p>The bottom-left cell gives the count of degraded sites predicted as healthy, these are False Positives. The classifier declared a site healthy when it was actually degraded.</p></li>
+<li><p>One could argue that False Positives (predicting <em>healthy</em> when the site is <em>degraded</em>) are likely more costly: a truly degraded site would go undetected and receive no intervention. A False Negative (predicting <em>degraded</em> when the site is actually healthy) might trigger unnecessary action, but the ecological harm is lower than missing real degradation. The relative cost always depends on the specific application!</p></li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+<section id="accuracy-metrics" class="level3">
+<h3 class="anchored" data-anchor-id="accuracy-metrics">Accuracy metrics</h3>
+<p>Given the confusion matrix counts, we can compute several summary metrics.</p>
+<p><strong>Overall accuracy</strong> is the fraction of test observations correctly classified:</p>
+<p><span class="math display">\[\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}.\]</span></p>
+<p><strong>Precision</strong> answers: <em>of the observations predicted as positive, what fraction are truly positive?</em> It is given by</p>
+<p><span class="math display">\[\text{precision} = \frac{TP}{TP + FP}.\]</span></p>
+<p><strong>Recall</strong> (also called <em>sensitivity</em>) answers: <em>of all the truly positive observations, what fraction did we correctly identify?</em> It is defined as</p>
+<p><span class="math display">\[\text{recall} = \frac{TP}{TP + FN}.\]</span></p>
+<p>All of these accuracy metrics take on values between 0 and 1, with 1 being the highest accuracy and 0 the lowest.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>Imagine you use a classifier that always predicts positive. What would recall be like? What about precision?</li>
+<li>Imagine you use a classifier that rarely predicts positive but, when it does, it is spot on. What would recall be like? What about precision?</li>
+<li>If you are a conservation manager who needs to allocate resources to degraded sites, which metric would you prioritize?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>A classifier that always predicts positive will have <em>perfect recall</em> (it never misses a positive) but <em>low precision</em> (many of its positive predictions are wrong).</li>
+<li>A classifier that rarely predicts positive will have <em>high precision</em> (when it does predict positive, it is usually right) but <em>low recall</em> (it misses many true positives).</li>
+<li>A conservation manager should likely prioritize <em>recall</em>: the goal is to correctly identify as many truly degraded sites as possible so they can receive intervention. Missing a degraded site (False Negative) could have direct ecological consequences.</li>
+</ol>
+</div>
+</div>
+</div>
+<p>Precision and recall capture different aspects of classifier performance and often trade off against each other. The right balance depends on the application and the relative costs of false positives and false negatives.</p>
+</section>
+<section id="the-f_1-score" class="level3">
+<h3 class="anchored" data-anchor-id="the-f_1-score">The <span class="math inline">\(F_1\)</span> score</h3>
+<p>When we want to summarize both precision and recall in a single number, we can use the <strong><span class="math inline">\(F_1\)</span> score</strong>, defined as their harmonic mean:</p>
+<p><span class="math display">\[F_1 = \frac{2 \cdot \text{precision} \times \text{recall}}{\text{precision} + \text{recall}}\]</span></p>
+<p>Some properties of the <span class="math inline">\(F_1\)</span> score:</p>
+<ul>
+<li>Ranges from 0 (worst) to 1 (best).</li>
+<li>It <strong>favors classifiers with balanced precision and recall</strong>: a model with high precision but very low recall (or vice versa) receives a low <span class="math inline">\(F_1\)</span> score.</li>
+<li>It is a simple way to compare classifiers with one number, but you should always examine precision and recall individually to understand the underlying trade-off.</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Back in our kelp forest health classification, suppose we also implement a <strong>null classifier</strong> which always predicts the majority class regardless of the predictors. The table below compares all four metrics for the null classifier and the KNN model:</p>
+<div id="accuracy-metrics" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>majority_class <span class="op">=</span> pd.Series(y_test).value_counts().idxmax()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>null_preds     <span class="op">=</span> np.full(<span class="bu">len</span>(y_test), majority_class)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>null_acc  <span class="op">=</span> accuracy_score(y_test, null_preds)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>null_prec <span class="op">=</span> precision_score(y_test, null_preds, pos_label<span class="op">=</span><span class="st">'healthy'</span>, zero_division<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>null_rec  <span class="op">=</span> recall_score(y_test, null_preds, pos_label<span class="op">=</span><span class="st">'healthy'</span>, zero_division<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>null_f1   <span class="op">=</span> f1_score(y_test, null_preds, pos_label<span class="op">=</span><span class="st">'healthy'</span>, zero_division<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>acc  <span class="op">=</span> accuracy_score(y_test, y_pred)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>prec <span class="op">=</span> precision_score(y_test, y_pred, pos_label<span class="op">=</span><span class="st">'healthy'</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>rec  <span class="op">=</span> recall_score(y_test, y_pred, pos_label<span class="op">=</span><span class="st">'healthy'</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>f1   <span class="op">=</span> f1_score(y_test, y_pred, pos_label<span class="op">=</span><span class="st">'healthy'</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>metrics_df <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Model'</span>:     [<span class="st">'Null classifier'</span>, <span class="st">'KNN (K = 10)'</span>],</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Accuracy'</span>:  [<span class="ss">f'</span><span class="sc">{</span>null_acc<span class="sc">:.3f}</span><span class="ss">'</span>,  <span class="ss">f'</span><span class="sc">{</span>acc<span class="sc">:.3f}</span><span class="ss">'</span>],</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Precision'</span>: [<span class="ss">f'</span><span class="sc">{</span>null_prec<span class="sc">:.3f}</span><span class="ss">'</span>, <span class="ss">f'</span><span class="sc">{</span>prec<span class="sc">:.3f}</span><span class="ss">'</span>],</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Recall'</span>:    [<span class="ss">f'</span><span class="sc">{</span>null_rec<span class="sc">:.3f}</span><span class="ss">'</span>,  <span class="ss">f'</span><span class="sc">{</span>rec<span class="sc">:.3f}</span><span class="ss">'</span>],</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">'F₁ score'</span>:  [<span class="ss">f'</span><span class="sc">{</span>null_f1<span class="sc">:.3f}</span><span class="ss">'</span>,  <span class="ss">f'</span><span class="sc">{</span>f1<span class="sc">:.3f}</span><span class="ss">'</span>],</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(metrics_df.to_string(index<span class="op">=</span><span class="va">False</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Model Accuracy Precision Recall F₁ score
+Null classifier    0.667     0.667  1.000    0.800
+   KNN (K = 10)    0.656     0.710  0.817    0.760</code></pre>
+</div>
+</div>
+<p>Looking at the comparison table:</p>
+<ol type="1">
+<li>The null classifier always predicts <em>healthy</em>. Why does it have a recall of 1.000 but a lower <span class="math inline">\(F_1\)</span> score?</li>
+<li>KNN achieves accuracy 0.656 vs.&nbsp;the null’s 0.667. Is accuracy alone a good summary to assess whether KNN is no better than the null classifier?</li>
+<li>Is this KNN model with K=10 good enough or would it be worth it to explore other alternatives?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>Because the null classifier always predicts <em>healthy</em> (positive), it never produces a false negative. Every truly positive site gets predicted as positive, so recall is perfect. However, it also misclassifies every negative site as positive, which drives down precision and therefore <span class="math inline">\(F_1\)</span>.</p></li>
+<li><p>No.&nbsp;The two classifiers have similar accuracy (0.667 vs.&nbsp;0.656), yet KNN has some evidence of distinguishing between classes rather than blindly predicting the majority.</p></li>
+<li><p>Definitely explore other alternatives!</p></li>
+</ol>
+</div>
+</div>
+</div>
+<p>The null classifier is a useful baseline. Its accuracy equals the proportion of the most common class in the test set. Any useful model should outperform this trivial baseline. Looking at precision, recall, and <span class="math inline">\(F_1\)</span> together gives a much fuller picture than accuracy alone.</p>
+</section>
+</section>
+<section id="overfitting-in-classification" class="level2">
+<h2 class="anchored" data-anchor-id="overfitting-in-classification">Overfitting in classification</h2>
+<p>In classification we can consdider the overall <strong>error rate</strong> as a simple metric to compare model performance across models:</p>
+<p><span class="math display">\[\text{error rate} = \frac{\text{number of misclassified observations}}{\text{total observations}} = \frac{FP + FN}{TP + FP + TN + FN}.\]</span></p>
+<p>We get the <strong>training and test error rates</strong> for a classifier when we calculate the error rate of the classifier on the training and test sets, respectively.</p>
+<p>As in regression, classifiers can also <strong>overfit</strong> the training data. Recall that:</p>
+<blockquote class="blockquote">
+<p>A model is overfitting when it has a small training error but a large test error.</p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The parameter <span class="math inline">\(K\)</span> directly controls the flexibility of the KNN classifier. The plot below shows training and test error across a range of <span class="math inline">\(K\)</span> values.</p>
+<div id="cell-train-test-error-curve" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>k_range      <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">151</span>, <span class="dv">2</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>train_errors <span class="op">=</span> []</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>test_errors  <span class="op">=</span> []</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> k_range:</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    knn_k <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>k)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    knn_k.fit(X_train, y_train)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    train_errors.append(<span class="dv">1</span> <span class="op">-</span> knn_k.score(X_train, y_train))</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    test_errors.append(<span class="dv">1</span> <span class="op">-</span> knn_k.score(X_test,  y_test))</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>null_error <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> null_acc</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(fig_size_x, fig_size_y))</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>ax.plot(k_range, train_errors, <span class="st">'b-o'</span>, markersize<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">'Training error'</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>ax.plot(k_range, test_errors,  <span class="st">'r-o'</span>, markersize<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">'Test error'</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>ax.axhline(null_error, color<span class="op">=</span><span class="st">'gray'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="ss">f'Null classifier error (</span><span class="sc">{</span>null_error<span class="sc">:.3f}</span><span class="ss">)'</span>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'K (number of neighbors)'</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Classification error rate'</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'KNN: training and test error vs. K'</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="4_1_knn_accuracy_metrics_files/figure-html/train-test-error-curve-output-1.png" id="train-test-error-curve" width="789" height="390" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Looking at the error curves:</p>
+<ol type="1">
+<li>At <span class="math inline">\(K = 1\)</span>, what is the training error and why?</li>
+<li>Identify the region of the plot where the classifier is overfitting. What features of the curve indicate this?</li>
+<li>Where would you choose <span class="math inline">\(K\)</span> to get the best generalization performance?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>At <span class="math inline">\(K = 1\)</span> the training error is 0 . With a single nearest neighbor, every training point’s closest neighbor is itself, so it is always classified correctly. This is the clearest possible sign of overfitting.</p></li>
+<li><p>Overfitting occurs on the left side of the plot (small <span class="math inline">\(K\)</span>). Here training error is very low but test error is notably higher. The gap between the two curves is the signature of overfitting: the model has learned the noise in the training data rather than the true underlying pattern.</p></li>
+<li><p>The best generalization performance is near the value of <span class="math inline">\(K\)</span> where test error is minimized, before it rises again for very large <span class="math inline">\(K\)</span> (where the model underfits). In practice this optimal <span class="math inline">\(K\)</span> is selected via cross-validation rather than by looking at the test set directly.</p></li>
+</ol>
+</div>
+</div>
+</div>
+<section id="the-bias-variance-tradeoff" class="level3">
+<h3 class="anchored" data-anchor-id="the-bias-variance-tradeoff">The Bias-Variance tradeoff</h3>
+<p>Recall that <strong>model variance</strong> refers to how much our model would change if we trained it on a different data set.</p>
+<p>In the figure below we examine the variance of a KNN classifier with different values of <span class="math inline">\(k\)</span> when applied to two training sets from the same population:</p>
+<div id="cell-variance-bias-knn" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a second training set from the same data-generating process</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">99</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>n2           <span class="op">=</span> <span class="bu">len</span>(X_train)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>temp2        <span class="op">=</span> np.random.normal(<span class="fl">0.4</span>, <span class="fl">1.0</span>, n2)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>nit2         <span class="op">=</span> np.random.normal(<span class="dv">14</span>, <span class="dv">4</span>, n2)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>up2          <span class="op">=</span> np.random.binomial(<span class="dv">1</span>, <span class="fl">0.5</span>, n2)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>log_odds2    <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span> <span class="op">+</span> (<span class="op">-</span><span class="fl">1.5</span> <span class="op">*</span> temp2) <span class="op">+</span> (<span class="fl">0.10</span> <span class="op">*</span> nit2) <span class="op">+</span> (<span class="fl">1.8</span> <span class="op">*</span> up2)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>prob2        <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>log_odds2))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>status2      <span class="op">=</span> np.where(np.random.binomial(<span class="dv">1</span>, prob2, n2) <span class="op">==</span> <span class="dv">1</span>, <span class="st">'healthy'</span>, <span class="st">'degraded'</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>X_train2     <span class="op">=</span> np.column_stack([temp2, nit2])</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>y_train2     <span class="op">=</span> status2</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>k_bv       <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">30</span>]</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>train_sets <span class="op">=</span> [(<span class="st">'Training set A'</span>, X_train,  y_train,  <span class="st">'o'</span>),</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>              (<span class="st">'Training set B'</span>, X_train2, y_train2, <span class="st">'^'</span>)]</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>col_map    <span class="op">=</span> {<span class="st">'healthy'</span>: <span class="st">'steelblue'</span>, <span class="st">'degraded'</span>: <span class="st">'tomato'</span>}</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>,</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>                         figsize<span class="op">=</span>(fig_size_x <span class="op">*</span> <span class="fl">0.91</span>, (fig_size_y <span class="op">+</span> <span class="fl">0.5</span>) <span class="op">*</span> <span class="fl">1.4</span>),</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>                         sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row, k <span class="kw">in</span> <span class="bu">enumerate</span>(k_bv):</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> col, (set_name, X_tr, y_tr, mkr) <span class="kw">in</span> <span class="bu">enumerate</span>(train_sets):</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>        ax <span class="op">=</span> axes[row, col]</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>        knn_bv <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>k)</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>        knn_bv.fit(X_tr, y_tr)</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>        gp <span class="op">=</span> knn_bv.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>        gn <span class="op">=</span> (gp <span class="op">==</span> <span class="st">'healthy'</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>        ax.contourf(xx1, xx2, gn, alpha<span class="op">=</span><span class="fl">0.15</span>, cmap<span class="op">=</span><span class="st">'coolwarm_r'</span>, levels<span class="op">=</span>[<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">1.5</span>])</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>        ax.contour(xx1, xx2, gn, colors<span class="op">=</span><span class="st">'gray'</span>, linewidths<span class="op">=</span><span class="fl">1.0</span>, levels<span class="op">=</span>[<span class="fl">0.5</span>])</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> label, c <span class="kw">in</span> col_map.items():</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>            mask <span class="op">=</span> y_tr <span class="op">==</span> label</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>            ax.scatter(X_tr[mask, <span class="dv">0</span>], X_tr[mask, <span class="dv">1</span>],</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>                       color<span class="op">=</span>c, marker<span class="op">=</span>mkr, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, edgecolors<span class="op">=</span><span class="st">'none'</span>)</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>        ax.set_xlim(<span class="op">-</span><span class="dv">2</span>, <span class="dv">4</span>)</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>        ax.set_title(<span class="ss">f'K = </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss"> — </span><span class="sc">{</span>set_name<span class="sc">}</span><span class="ss">'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>        ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> col <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>            ax.set_ylabel(<span class="st">'Nitrate (μmol/L)'</span>)</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> row <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>            ax.set_xlabel(<span class="st">'Temp. anomaly (°C)'</span>)</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>fig.suptitle(</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Decision boundaries across two training sets for k=1 and k=30'</span>,</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>     y<span class="op">=</span><span class="fl">1.02</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="4_1_knn_accuracy_metrics_files/figure-html/variance-bias-knn-output-1.png" id="variance-bias-knn" width="717" height="647" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Looking at the plots above, which value of <span class="math inline">\(k\)</span> do you think gives a model with higher variance? Why?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-16" class="callout-16-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The decision boundaries created by both models (<span class="math inline">\(K=1\)</span> and <span class="math inline">\(K=10\)</span>) change when trained on different datasets. However, we could say that the <span class="math inline">\(k=1\)</span> KNN model exhibits higher variance since there’s a lot of small classiffication regions (fitting noise) that change substantially as we move from training set A to B.</p>
+</div>
+</div>
+</div>
+<p>On the other hand, <strong>model bias</strong> refers to the error introduced by the assumptions built into the model. Models with high bias will be systematically wrong, no matter how much training data we give it. In our example, when <span class="math inline">\(k\)</span> is really big, all points will be classified as the majority class. If both training sets are sampled from the same popuplation, we expect this model to remain constant across training sets.</p>
+<div id="cell-high-bias-knn" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                         figsize<span class="op">=</span>(fig_size_x <span class="op">*</span> <span class="fl">0.91</span>, (fig_size_y <span class="op">+</span> <span class="fl">0.5</span>) <span class="op">*</span> <span class="fl">0.7</span>),</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                         sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> <span class="dv">120</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col, (set_name, X_tr, y_tr, mkr) <span class="kw">in</span> <span class="bu">enumerate</span>(train_sets):</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    ax <span class="op">=</span> axes[col]</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    knn_bv <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>k)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    knn_bv.fit(X_tr, y_tr)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    gp <span class="op">=</span> knn_bv.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    gn <span class="op">=</span> (gp <span class="op">==</span> <span class="st">'healthy'</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    ax.contourf(xx1, xx2, gn, alpha<span class="op">=</span><span class="fl">0.15</span>, cmap<span class="op">=</span><span class="st">'coolwarm_r'</span>, levels<span class="op">=</span>[<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">1.5</span>])</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    ax.contour(xx1, xx2, gn, colors<span class="op">=</span><span class="st">'gray'</span>, linewidths<span class="op">=</span><span class="fl">1.0</span>, levels<span class="op">=</span>[<span class="fl">0.5</span>])</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> label, c <span class="kw">in</span> col_map.items():</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> y_tr <span class="op">==</span> label</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X_tr[mask, <span class="dv">0</span>], X_tr[mask, <span class="dv">1</span>],</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                   color<span class="op">=</span>c, marker<span class="op">=</span>mkr, s<span class="op">=</span><span class="dv">12</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, edgecolors<span class="op">=</span><span class="st">'none'</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    ax.set_xlim(<span class="op">-</span><span class="dv">2</span>, <span class="dv">4</span>)</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f'K = </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss"> — </span><span class="sc">{</span>set_name<span class="sc">}</span><span class="ss">'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">'Temp. anomaly (°C)'</span>)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> col <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        ax.set_ylabel(<span class="st">'Nitrate (μmol/L)'</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">'Decision boundaries across two training sets'</span>, y<span class="op">=</span><span class="fl">1.02</span>)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="4_1_knn_accuracy_metrics_files/figure-html/high-bias-knn-output-1.png" id="high-bias-knn" width="717" height="326" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The same bias-variance tradeoff discussed for regression in <a href="../../notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html">previous notes</a> applies here:</p>
+<ul>
+<li>A high flexibility model often shows low bias and high variance. The flexible boundary can capture complex patterns but changes a lot from one training sample to another.</li>
+<li>A low flexibility model often shows high bias and low variance. The rigid boundary is stable but may systematically miss real structure in the data.</li>
+</ul>
+<p>Increasing model flexibility always reduces training error, but test error has a characteristic U-shape we’d seen previously.</p>
+
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-islp_2023" class="csl-entry" role="listitem">
+James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E. Taylor. 2023. <em>An Introduction to Statistical Learning: With Applications in <span>Python</span></em>. Springer Texts in Statistics. Cham: Springer.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>This work is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License</a></p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This website is built with <a href="https://quarto.org/">Quarto</a> and <a href="https://github.com/MEDS-eds-220/MEDS-eds-220-course">GitHub pages</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
