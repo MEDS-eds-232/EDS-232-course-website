@@ -80,11 +80,9 @@ So far we have studied regression methods, which assume the response variable is
 
 **Classifying** means predicting the qualitative response for an observation. Examples from environmental science include:
 
-- Predicting whether a kelp forest site is *healthy* or *degraded* based on oceanographic conditions
+- Predicting whether a habitat *healthy* or *degraded* based on environmental conditions
 - Determining whether a water sample *exceeds* or *does not exceed* a contamination threshold
 - Predicting whether a species is *present* or *absent* at a given location
-
-Our general setup is the same as before: we have a training set $\{(x_1, y_1), \ldots, (x_n, y_n)\}$ where the $x_i$ are predictors (which can be a mix of quantitative and categorical variables) and $y_i$ is the **class** associated with observation $x_i$.
 
 ## A guiding example: kelp forest monitoring
 
@@ -146,6 +144,7 @@ plt.close()
 ## K-Nearest Neighbors (KNN)
 
 **K-Nearest Neighbors (KNN)** is one of the simplest classification methods. The intuition is straightforward: classify a new observation by majority vote among its nearest neighbors in the training data.
+
 
 ### The algorithm
 
@@ -210,23 +209,23 @@ plt.close()
 In the figure above, the $\star$ marks a new test observation $x_0$. The dashed circle encloses its $K = 3$ nearest neighbors.
 
 1. Look at the three points inside the circle. What class would KNN assign to $x_0$?
-2. What would change if we used $K = 1$ instead? What about $K = 15$?
-3. What are the trade-offs of choosing a very small vs. a very large $K$?
+2. What would change if we used $K = 1$ instead? 
+3. What would change if we used $K=$ number of observations in the training set?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. Count the classes of the three points inside the dashed circle. The majority class among those neighbors is the predicted class for $x_0$.
+1. We can see there two out of the three training points inside the dashed circle belong to the healthy class (blue points). Since healthy is the majority class, we predict that the test point $x_0$ is in the healthy class too. 
 
-2. With $K = 1$ the prediction is determined entirely by the single closest training point — highly sensitive to local noise. With $K = 15$ the neighborhood is much larger and the prediction is based on a broader vote, smoothing out noise but potentially ignoring fine local structure.
+2. With $K = 1$ the prediction is determined entirely by the single closest training point. Highly sensitive to local noise. 
 
-3. Small $K$ (low bias, high variance): the classifier can capture complex, irregular boundaries but is sensitive to individual training points and prone to overfitting. Large $K$ (high bias, low variance): the boundary is smoother and more stable, but may miss real patterns in the data. This is the same bias-variance tradeoff we saw in regression.
+3. If we use the whole dataset to compute the vote, we will just assign the majority class to every test point.
+
+<!-- 3. Small $K$: the classifier can capture complex, irregular boundaries but is sensitive to individual training points and prone to overfitting. Large $K$ (high bias, low variance): the boundary is smoother and more stable, but may miss real patterns in the data. This is the same bias-variance tradeoff we saw in regression. -->
 :::
 
-### Applying KNN to the KelpWatch dataset
-
-We now apply KNN to the KelpWatch data using `temp_anomaly` and `nitrate` as predictors. The plot below shows the decision boundary learned by KNN with $K = 10$ on the test set.
+We now apply KNN to our example data using `temp_anomaly` and `nitrate` as predictors. The plot below shows the training and test sets along with the **decision boundary** learned by KNN with $K = 10$.
 
 ```{python}
 #| label: knn-decision-boundary
@@ -261,26 +260,26 @@ The shaded regions show where the model predicts *healthy* (blue) and *degraded*
 
 ## Accuracy assessment for classifiers
 
-### The confusion matrix
+To assess how well a classifier performs, we compare its predictions on the **test set** to the true labels. For a **binary classifier** with two possible classes we call the classes **positive** and **negative**. Given an observation $(x_0, y_0)$ in the test set, we have the following possibilities depending on what prediction was given to $x_0$ and what class $y_0$ it is really associated with:
 
-To assess how well a classifier performs, we compare its predictions on the **test set** to the true labels. For a **binary classifier** with two possible classes — which we call **positive** and **negative** — each test observation falls into one of four categories:
+- **True Positive**: the observation is positive and we correctly predicted positive.
+- **True Negative**: the observation is negative and we correctly predicted negative.
+- **False Positive**: the observation is negative but we incorrectly predicted positive.
+- **False Negative**: the observation is positive but we incorrectly predicted negative.
 
-|  | Predicted positive | Predicted negative |
+
+<!-- 
+|  | $x_0$ predicted positive | $x_0$ predicted negative |
 |---|---|---|
-| **True positive** | True Positive (TP) | False Negative (FN) |
-| **True negative** | False Positive (FP) | True Negative (TN) |
+| $y_0$ is positive class | True positive | False negative |
+| $y_0$ is negative class | False positive  | True negative  | -->
 
-- **True Positive (TP)**: the observation is positive and we correctly predicted positive.
-- **True Negative (TN)**: the observation is negative and we correctly predicted negative.
-- **False Positive (FP)**: the observation is negative but we incorrectly predicted positive.
-- **False Negative (FN)**: the observation is positive but we incorrectly predicted negative.
-
-These four counts are organized into a **confusion matrix**, which gives a concise summary of where the classifier is correct and what types of errors it makes. In our dataset, we treat **healthy** as the positive class and **degraded** as the negative class.
+So each of our observations in the test set can be classified as true/false positive or true/false negative.
 
 :::{.callout-tip}
 ## Check-in
 
-Before computing anything, consider the following predictions for five test observations:
+Consider the following predictions for five test observations:
 
 | Observation | True status | Predicted status |
 |---|---|---|
@@ -290,7 +289,7 @@ Before computing anything, consider the following predictions for five test obse
 | D | degraded  | degraded  |
 | E | healthy   | healthy   |
 
-Classify each observation as TP, TN, FP, or FN.
+Classify each observation as true positive, false positive, true negative, or false negative, using `healthy` as the positive class.
 :::
 
 :::{.callout-tip collapse="true"}
@@ -303,7 +302,58 @@ Classify each observation as TP, TN, FP, or FN.
 - E: True status = healthy (positive), predicted = healthy (positive) → **TP**
 :::
 
-Now let's compute the confusion matrix for our KNN model:
+:::{.callout-tip}
+## Check-in
+Identify one true positive point, one true negative point, one false positive point, and one false negative point. 
+
+```{python}
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 1))
+ax.contourf(xx1, xx2, grid_num, alpha=0.15,
+            cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
+
+for label, col in {'healthy': 'steelblue', 'degraded': 'tomato'}.items():
+    mask = y_test == label
+    ax.scatter(X_test[mask, 0], X_test[mask, 1],
+               c=col, s=25, alpha=0.7, label=label, edgecolors='none')
+
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('KNN decision boundary (K = 10) — test observations shown')
+ax.legend(title='True status', fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+:::
+
+### The confusion matrix
+
+Once we have predicted the class for every point in our test set, we can count the total number of true/false positives and true/false negatives we obtained. We use the notation:
+
+- TP = total number of true positives
+- TN = total number of true negatives
+- FP = total number of false positives
+- FN = total number of false negatives
+
+These four counts are organized into a **confusion matrix**, which gives a concise summary of where the classifier is correct and what types of errors it makes:
+
+
+|  | Predicted positive | Predicted negative |
+|---|---|---|
+| **True positive** | TP | FN |
+| **True negative** | FP | TN |
+
+In our dataset, we treat **healthy** as the positive class and **degraded** as the negative class.
+
+
+
+
+:::{.callout-tip}
+## Check-in
+
+The confusion matrix for our KNN model is
 
 ```{python}
 #| label: confusion-matrix
@@ -321,24 +371,21 @@ cm_df = pd.DataFrame(
 print(cm_df.to_string())
 ```
 
-:::{.callout-tip}
-## Check-in
-
 Using the confusion matrix above:
 
 1. How many healthy sites were correctly identified?
-2. How many degraded sites were incorrectly classified as healthy? What type of error is this?
-3. From an ecological monitoring perspective, which type of error — false positive or false negative — is more costly? Why?
+2. How many degraded sites were incorrectly classified as healthy? What type of error is this: false positive or false negative?
+3. From an ecological monitoring perspective, which type of error do you think could be more costly? Why?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. That is the **True Positive** count: the top-left cell of the confusion matrix.
+1. That is the True Positive count: the top-left cell of the confusion matrix.
 
-2. The bottom-left cell gives the count of degraded sites predicted as healthy — these are **False Positives**. The classifier declared a site healthy when it was actually degraded.
+2. The bottom-left cell gives the count of degraded sites predicted as healthy, these are False Positives. The classifier declared a site healthy when it was actually degraded.
 
-3. From an ecological monitoring perspective, **False Positives** (predicting *healthy* when the site is *degraded*) are likely more costly: a truly degraded site would go undetected and receive no intervention. A False Negative (predicting *degraded* when the site is actually healthy) might trigger unnecessary action, but the ecological harm is lower than missing real degradation. The relative cost always depends on the specific application.
+3. One could argue that False Positives (predicting *healthy* when the site is *degraded*) are likely more costly: a truly degraded site would go undetected and receive no intervention. A False Negative (predicting *degraded* when the site is actually healthy) might trigger unnecessary action, but the ecological harm is lower than missing real degradation. The relative cost always depends on the specific application!
 :::
 
 ### Accuracy metrics
@@ -349,26 +396,30 @@ Given the confusion matrix counts, we can compute several summary metrics.
 
 $$\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}$$
 
-A useful baseline is the **null classifier**: a classifier that always predicts the majority class regardless of the predictors. Its accuracy equals the proportion of the most common class in the test set. Any useful model should outperform this trivial baseline.
-
-**Precision** (also called *positive predictive value*) answers: *of the observations predicted as positive, what fraction are truly positive?*
+**Precision** answers: *of the observations predicted as positive, what fraction are truly positive?*
 
 $$\text{precision} = \frac{TP}{TP + FP}$$
 
-**Recall** (also called *sensitivity* or *true positive rate*) answers: *of all the truly positive observations, what fraction did we correctly identify?*
+**Recall** (also called *sensitivity*) answers: *of all the truly positive observations, what fraction did we correctly identify?*
 
 $$\text{recall} = \frac{TP}{TP + FN}$$
 
-::: {.callout-note}
-## Precision vs. recall trade-off
+All of these accuracy metrics take on values between 0 and 1, with 1 being the highest accuracy.
 
-Precision and recall capture different aspects of classifier performance and often trade off against each other:
-
-- A classifier that rarely predicts positive will have **high precision** (when it does predict positive, it is usually right) but **low recall** (it misses many true positives).
-- A classifier that always predicts positive will have **perfect recall** (it never misses a positive) but **low precision** (many of its positive predictions are wrong).
-
-The right balance depends on the application and the relative costs of false positives and false negatives.
+:::{.callout-tip}
+## Check-in
+1. Imagine you use a classifier that always predicts positive. What would recall be like? What about precision?
+2. Imagine you use a classifier that rarely predicts positive but, when it does, it is spot on. What would recall be like? What about precision?
 :::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+1. A classifier that always predicts positive will have *perfect recall* (it never misses a positive) but *low precision* (many of its positive predictions are wrong).
+2. A classifier that rarely predicts positive will have *high precision* (when it does predict positive, it is usually right) but *low recall* (it misses many true positives).
+:::
+
+Precision and recall capture different aspects of classifier performance and often trade off against each other.
+The right balance depends on the application and the relative costs of false positives and false negatives.
 
 ### The $F_1$ score
 
@@ -399,6 +450,11 @@ metrics_df = pd.DataFrame({
 })
 print(metrics_df.to_string(index=False))
 ```
+
+
+A useful baseline is the **null classifier**: a classifier that always predicts the majority class regardless of the predictors. Its accuracy equals the proportion of the most common class in the test set. Any useful model should outperform this trivial baseline.
+
+
 
 :::{.callout-tip}
 ## Check-in
