@@ -80,17 +80,16 @@ So far we have studied regression methods, which assume the response variable is
 
 **Classifying** means predicting the qualitative response for an observation. Examples from environmental science include:
 
-- Predicting whether a habitat *healthy* or *degraded* based on environmental conditions
+- Predicting whether a habitat is *healthy* or *degraded* based on environmental conditions
 - Determining whether a water sample *exceeds* or *does not exceed* a contamination threshold
 - Predicting whether a species is *present* or *absent* at a given location
 
 ## A guiding example: kelp forest monitoring
 
-In this lesson we use a synthetic dataset called **KelpWatch** that tracks 300 coastal monitoring stations. For each station we record:
+In this lesson we use a synthetic dataset that tracks 300 coastal monitoring stations. For each station we record:
 
 - **`temp_anomaly`** — sea surface temperature anomaly (°C); positive values indicate warmer-than-average conditions
 - **`nitrate`** — nitrate concentration (μmol/L); higher values generally support kelp growth
-- **`upwelling`** — whether upwelling was detected at the site (yes / no)
 - **`status`** — observed kelp forest condition: *healthy* or *degraded*
 
 The central question is: *can we predict whether a kelp forest site is healthy or degraded from its oceanographic conditions?*
@@ -108,7 +107,7 @@ for up_val in [1, 0]:
         mask = (df['upwelling'] == up_val) & (df['status'] == status_val)
         ax.scatter(
             df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
-            c=col, marker=markers[up_val], s=20, alpha=0.5, edgecolors='none'
+            c=col, s=20, alpha=0.5, edgecolors='none'
         )
 
 # Legend 1: kelp status (colors)
@@ -117,13 +116,6 @@ status_handles = [
     for lab, col in colors.items()
 ]
 leg1 = ax.legend(handles=status_handles, title='Status', fontsize=9, loc='upper left')
-
-# Legend 2: upwelling (shapes)
-shape_handles = [
-    plt.scatter([], [], c='gray', marker='o', s=50, label='upwelling detected'),
-    plt.scatter([], [], c='gray', marker='s', s=50, label='no upwelling'),
-]
-ax.legend(handles=shape_handles, title='Upwelling', fontsize=9, loc='upper right')
 ax.add_artist(leg1)
 
 ax.set_xlabel('Temp. anomaly (°C)')
@@ -192,7 +184,7 @@ ax.set_xlim(0, 6)
 ax.set_ylim(0, 6)
 ax.set_xlabel('Temp. anomaly (normalized)')
 ax.set_ylabel('Nitrate (normalized)')
-ax.legend(fontsize=8, loc='upper right')
+ax.legend(fontsize=8, loc='upper left')
 ax.set_title('KNN illustration (K = 3)')
 ax.set_aspect('equal')
 ax.grid(True, alpha=0.3)
@@ -206,7 +198,7 @@ plt.close()
 :::{.callout-tip}
 ## Check-in
 
-In the figure above, the $\star$ marks a new test observation $x_0$. The dashed circle encloses its $K = 3$ nearest neighbors.
+In the figure above, the star $\star$ marks a new test observation $x_0$. The dashed circle encloses its $K = 3$ nearest neighbors.
 
 1. Look at the three points inside the circle. What class would KNN assign to $x_0$?
 2. What would change if we used $K = 1$ instead? 
@@ -216,7 +208,7 @@ In the figure above, the $\star$ marks a new test observation $x_0$. The dashed 
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. We can see there two out of the three training points inside the dashed circle belong to the healthy class (blue points). Since healthy is the majority class, we predict that the test point $x_0$ is in the healthy class too. 
+1. We can see that two out of the three training points inside the dashed circle belong to the healthy class (blue points). Since healthy is the majority class within the neighborhood, we predict that the test point $x_0$ is in the healthy class too. 
 
 2. With $K = 1$ the prediction is determined entirely by the single closest training point. Highly sensitive to local noise. 
 
@@ -225,7 +217,7 @@ In the figure above, the $\star$ marks a new test observation $x_0$. The dashed 
 <!-- 3. Small $K$: the classifier can capture complex, irregular boundaries but is sensitive to individual training points and prone to overfitting. Large $K$ (high bias, low variance): the boundary is smoother and more stable, but may miss real patterns in the data. This is the same bias-variance tradeoff we saw in regression. -->
 :::
 
-We now apply KNN to our example data using `temp_anomaly` and `nitrate` as predictors. The plot below shows the training and test sets along with the **decision boundary** learned by KNN with $K = 10$.
+We now apply KNN to our example data using `temp_anomaly` and `nitrate` as predictors. To do so, we use a 70-30 split in our observations and obtain a training set with 210 points and a test set with 90 points. The plot below shows the training and test sets along with the **decision boundary** learned by KNN with $K = 10$.
 
 ```{python}
 #| label: knn-decision-boundary
@@ -261,24 +253,26 @@ plt.show()
 plt.close()
 ```
 
-The shaded regions show where the model predicts *healthy* (blue) and *degraded* (red). Points plotted on top are the true labels — misclassified points appear in the "wrong" shaded region.
+The shaded regions show where the model predicts *healthy* (blue) and *degraded* (red). Points plotted on top are the true labels. A point is misclassified if it appears in the "wrong" shaded region.
 
-### Pros and cons 
+### Pros and cons of KNN
 
 There are several pros and cons to using the KNN algorithm:
 
 **Pros:**
 
-- Simple and intuitive — no explicit model to train, just store the training data.
 - Non-parametric: makes no assumptions about the shape of the decision boundary.
-- Naturally handles multi-class problems.
+- Simple and intuitive: there's no explicit model to train, just store the training data.
+- It naturally handles multi-class problems.
 
 **Cons:**
 
 - Slow at prediction time: classifying each new point requires computing its distance to every training point.
 - Sensitive to the scale of predictors: variables with large ranges dominate the distance calculation, so features typically need to be standardized before applying KNN.
 - The choice of $K$ requires cross-validation and has a large impact on performance.
-- Performance degrades as the number of predictors grows (the *curse of dimensionality*): in high-dimensional spaces, all points tend to be roughly equidistant, making "nearest" neighbors meaningless.
+- Its performance degrades as the number of predictors grows (the *curse of dimensionality*).
+
+<!-- TODO: I would like to include an activity on exercise 4.8-4 in ISLP. -->
 
 
 ## Accuracy assessment for classifiers
@@ -312,6 +306,7 @@ Consider the following predictions for five test observations:
 | D | degraded  | degraded  |
 | E | healthy   | healthy   |
 
+We will treat healthy as the positive class and degraded as the negative class.
 Classify each observation as true positive, false positive, true negative, or false negative, using `healthy` as the positive class.
 :::
 
@@ -352,9 +347,16 @@ plt.close()
 ```
 :::
 
+:::{.callout-tip collapse="true"}
+## Discussion
+You may have identified other points, these are some examples!
+
+![](point-classification.png)
+:::
+
 ### The confusion matrix
 
-Once we have predicted the class for every point in our test set, we can count the total number of true/false positives and true/false negatives we obtained. We use the notation:
+Once we have predicted the class for every point in our test set and compared it agains its true class, we can count the total number of true/false positives and true/false negatives we obtained. We use the notation:
 
 - TP = total number of true positives
 - TN = total number of true negatives
@@ -368,9 +370,6 @@ These four counts are organized into a **confusion matrix**, which gives a conci
 |---|---|---|
 | **True positive** | TP | FN |
 | **True negative** | FP | TN |
-
-In our dataset, we treat **healthy** as the positive class and **degraded** as the negative class.
-
 
 
 
@@ -418,17 +417,17 @@ Given the confusion matrix counts, we can compute several summary metrics.
 
 **Overall accuracy** is the fraction of test observations correctly classified:
 
-$$\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}$$
+$$\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}.$$
 
-**Precision** answers: *of the observations predicted as positive, what fraction are truly positive?*
+**Precision** answers: *of the observations predicted as positive, what fraction are truly positive?* It is given by
 
-$$\text{precision} = \frac{TP}{TP + FP}$$
+$$\text{precision} = \frac{TP}{TP + FP}.$$
 
-**Recall** (also called *sensitivity*) answers: *of all the truly positive observations, what fraction did we correctly identify?*
+**Recall** (also called *sensitivity*) answers: *of all the truly positive observations, what fraction did we correctly identify?* It is defined as
 
-$$\text{recall} = \frac{TP}{TP + FN}$$
+$$\text{recall} = \frac{TP}{TP + FN}.$$
 
-All of these accuracy metrics take on values between 0 and 1, with 1 being the highest accuracy.
+All of these accuracy metrics take on values between 0 and 1, with 1 being the highest accuracy and 0 the lowest.
 
 :::{.callout-tip}
 ## Check-in
@@ -449,11 +448,13 @@ The right balance depends on the application and the relative costs of false pos
 
 ### The $F_1$ score
 
-When we want to summarize both precision and recall in a single number, we use the **$F_1$ score**, defined as their harmonic mean:
+When we want to summarize both precision and recall in a single number, we can use the **$F_1$ score**, defined as their harmonic mean:
 
 $$F_1 = \frac{2 \cdot \text{precision} \times \text{recall}}{\text{precision} + \text{recall}}$$
 
-- $F_1$ ranges from 0 (worst) to 1 (best).
+Some properties of the $F_1$ score:
+
+- Ranges from 0 (worst) to 1 (best).
 - It **favors classifiers with balanced precision and recall**: a model with high precision but very low recall (or vice versa) receives a low $F_1$ score.
 - It is a simple way to compare classifiers with one number, but you should always examine precision and recall individually to understand the underlying trade-off.
 
@@ -461,7 +462,7 @@ $$F_1 = \frac{2 \cdot \text{precision} \times \text{recall}}{\text{precision} + 
 :::{.callout-tip}
 ## Check-in
 
-Suppose we also implement a **null classifier** which always predicts the majority class regardless of the predictors. The table below compares all four metrics for the null classifier and our KNN model:
+Back in our kelp forest health classification, suppose we also implement a **null classifier** which always predicts the majority class regardless of the predictors. The table below compares all four metrics for the null classifier and the KNN model:
 
 ```{python}
 #| label: accuracy-metrics
@@ -492,7 +493,7 @@ print(metrics_df.to_string(index=False))
 Looking at the comparison table:
 
 1. The null classifier always predicts *`{python} majority_class`*. Why does it have a recall of `{python} f"{null_rec:.3f}"` but a lower $F_1$ score?
-2. KNN achieves accuracy `{python} f"{acc:.3f}"` vs. the null's `{python} f"{null_acc:.3f}"`. Is accuracy alone a good summary to assess whether KNN improves over the null?
+2. KNN achieves accuracy `{python} f"{acc:.3f}"` vs. the null's `{python} f"{null_acc:.3f}"`. Is accuracy alone a good summary to assess whether KNN is no better than the null classifier?
 3. Is this KNN model with K=10 good enough or would it be worth it to explore other alternatives?
 :::
 
@@ -502,28 +503,102 @@ Looking at the comparison table:
 1. Because the null classifier always predicts *`{python} majority_class`* (positive), it never produces a false negative. Every truly positive site gets predicted as positive, so recall is perfect. However, it also misclassifies every negative site as positive, which drives down precision and therefore $F_1$.
 
 2. No. The two classifiers have similar accuracy (`{python} f"{null_acc:.3f}"` vs. `{python} f"{acc:.3f}"`), yet KNN has some evidence of distinguishing between classes rather than blindly predicting the majority. 
+
+3. Definitely explore other alternatives!
 :::
 
 The null classifier is a useful baseline. Its accuracy equals the proportion of the most common class in the test set. Any useful model should outperform this trivial baseline. Looking at precision, recall, and $F_1$ together gives a much fuller picture than accuracy alone.
 
 ## Overfitting in classification
 
-As in regression, classifiers can **overfit** the training data. Recall the definition:
+As in regression, classifiers can also **overfit** the training data. Recall that:
 
 > A model is overfitting when it has a small training error but a large test error. 
 
-The training and test error rates for a classifier are defined analogously to training and test MSE:
+In classification we can consdider the overall **error rate** as a simple metric to compare model performance across models:
 
-$$\text{error rate} = \frac{\text{number of misclassified observations}}{\text{total observations}}$$
+$$\text{error rate} = \frac{\text{number of misclassified observations}}{\text{total observations}} = \frac{FP + FN}{TP + FP + TN + FN}.$$
 
-Test error is usually the measure of interest for evaluating real-world performance, just as we saw in regression.
+We get the **training and test error rates** for a classifier when we calculate the error rate of the classifier on the training and test sets, respectively. 
 
-### KNN and overfitting: the role of $K$
+:::{.callout-tip}
+## Check-in
 
-The parameter $K$ directly controls the **flexibility** of the KNN classifier:
+The plot below shows training and test error across a range of $K$ values. 
+
+```{python}
+#| label: train-test-error-curve
+
+k_range      = list(range(1, 151, 2))
+train_errors = []
+test_errors  = []
+
+for k in k_range:
+    knn_k = KNeighborsClassifier(n_neighbors=k)
+    knn_k.fit(X_train, y_train)
+    train_errors.append(1 - knn_k.score(X_train, y_train))
+    test_errors.append(1 - knn_k.score(X_test,  y_test))
+
+null_error = 1 - null_acc
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
+ax.plot(k_range, train_errors, 'b-o', markersize=3, label='Training error')
+ax.plot(k_range, test_errors,  'r-o', markersize=3, label='Test error')
+ax.axhline(null_error, color='gray', linestyle='--', linewidth=1.5,
+           label=f'Null classifier error ({null_error:.3f})')
+ax.set_xlabel('K (number of neighbors)  ← more flexible | less flexible →')
+ax.set_ylabel('Classification error rate')
+ax.set_title('KNN: training and test error vs. K')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+Looking at the error curves:
+
+1. What happens to training error as $K$ increases? Why does this make sense?
+2. Identify the region of the plot where the classifier is overfitting. What features of the curve indicate this?
+3. Where would you choose $K$ to get the best generalization performance?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. Training error generally **increases** as $K$ grows. With larger $K$, the classifier becomes less flexible and can no longer perfectly memorize the training data — it must rely on more distant neighbors that may have different classes.
+
+2. Overfitting occurs on the **left side** of the plot (small $K$). Here training error is very low but test error is notably higher. The gap between the two curves is the signature of overfitting: the model has learned the noise in the training data rather than the true underlying pattern.
+
+3. The best generalization performance is near the value of $K$ where **test error is minimized**, before it rises again for very large $K$ (where the model underfits). In practice this optimal $K$ is selected via cross-validation rather than by looking at the test set directly.
+:::
+
+### The Bias-Variance tradeoff
+
+Recall  that **model variance** refers to how much our estimate of $\hat{f}$ would change if we trained it on a different data set while **model bias** refers to the error introduced by the assumptions built into the model. 
+
+
+
+```{python}
+#| label: variance-bias-knn
+
+
+```
+
+
+The same bias-variance tradeoff discussed for regression in [previous notes](/notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.qmd) applies here:
+
+- A high flexibility model often shows low bias and high variance. The flexible boundary can capture complex patterns but changes a lot from one training sample to another.
+- A low flexibility model often shows high bias and low variance. The rigid boundary is stable but may systematically miss real structure in the data.
+
+Increasing model flexibility always reduces training error, but test error has a characteristic U-shape we'd seen previously. 
+
+Test error is minimized at an intermediate $K$ that balances these two sources of error. 
+
+The parameter $K$ directly controls the flexibility of the KNN classifier:
 
 - **Small $K$** (e.g., $K = 1$): the decision boundary closely follows every local pattern in the training data, including noise. Very flexible.
-- **Large $K$**: the boundary becomes very smooth, determined by a large neighborhood. Very rigid.
+- **Large $K$**: the boundary becomes very smooth, determined by a large neighborhood. 
 
 ```{python}
 #| label: knn-decision-boundaries
@@ -574,72 +649,10 @@ Looking at the three panels above:
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. As $K$ increases, the decision boundary becomes smoother and less wiggly. At $K = 1$ the boundary is highly irregular, closely following individual training points. At $K = 500$ it is nearly linear.
+1. As $K$ increases, the decision boundary becomes more connectedm encompassing larger areas. At $K = 1$ the boundary is highly irregular, closely following individual training points. At $K = 120$ there's no more boundary since everything has been classified as the majority class. 
 
-2. At $K = 1$ the training error is **0** (or very close to it). With a single nearest neighbor, every training point's closest neighbor is itself, so it is always classified correctly. This is the clearest possible sign of overfitting.
+2. At $K = 1$ the training error is 0 . With a single nearest neighbor, every training point's closest neighbor is itself, so it is always classified correctly. This is the clearest possible sign of overfitting.
 
-3. $K = 1$ is most overfit: the boundary is extremely irregular (fitting noise) and the training error is near zero while the test error is noticeably higher. The gap between training and test error is the hallmark of overfitting.
+3. $K = 1$ is the most overfit: there's a lot of small classiffication regions (fitting noise) and the training error is zero while the test error is noticeably higher. The gap between training and test error is an indication of overfitting!
 :::
 
-The plot below shows training and test error across a wide range of $K$ values — analogous to the train/test MSE curves from our regression lessons.
-
-```{python}
-#| label: train-test-error-curve
-
-k_range      = list(range(1, 151, 2))
-train_errors = []
-test_errors  = []
-
-for k in k_range:
-    knn_k = KNeighborsClassifier(n_neighbors=k)
-    knn_k.fit(X_train, y_train)
-    train_errors.append(1 - knn_k.score(X_train, y_train))
-    test_errors.append(1 - knn_k.score(X_test,  y_test))
-
-null_error = 1 - null_acc
-
-fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
-ax.plot(k_range, train_errors, 'b-o', markersize=3, label='Training error')
-ax.plot(k_range, test_errors,  'r-o', markersize=3, label='Test error')
-ax.axhline(null_error, color='gray', linestyle='--', linewidth=1.5,
-           label=f'Null classifier error ({null_error:.3f})')
-ax.set_xlabel('K (number of neighbors)  ← more flexible | less flexible →')
-ax.set_ylabel('Classification error rate')
-ax.set_title('KNN: training and test error vs. K')
-ax.legend()
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-:::{.callout-tip}
-## Check-in
-
-Looking at the error curve:
-
-1. What happens to training error as $K$ increases? Why does this make sense?
-2. Identify the region of the plot where the classifier is overfitting. What features of the curve indicate this?
-3. Where would you choose $K$ to get the best generalization performance?
-:::
-
-:::{.callout-tip collapse="true"}
-## Discussion
-
-1. Training error generally **increases** as $K$ grows. With larger $K$, the classifier becomes less flexible and can no longer perfectly memorize the training data — it must rely on more distant neighbors that may have different classes.
-
-2. Overfitting occurs on the **left side** of the plot (small $K$). Here training error is very low but test error is notably higher. The gap between the two curves is the signature of overfitting: the model has learned the noise in the training data rather than the true underlying pattern.
-
-3. The best generalization performance is near the value of $K$ where **test error is minimized**, before it rises again for very large $K$ (where the model underfits). In practice this optimal $K$ is selected via cross-validation rather than by looking at the test set directly.
-:::
-
-::: {.callout-note}
-## Bias-variance tradeoff for classifiers
-
-The same bias-variance tradeoff from regression applies here:
-
-- **Small $K$** → low bias, high variance. The flexible boundary can capture complex patterns but changes a lot from one training sample to another.
-- **Large $K$** → high bias, low variance. The rigid boundary is stable but may systematically miss real structure in the data.
-
-Test error is minimized at an intermediate $K$ that balances these two sources of error. Increasing model flexibility always reduces training error, but test error has a characteristic U-shape.
-:::
