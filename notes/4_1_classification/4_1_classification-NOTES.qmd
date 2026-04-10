@@ -231,7 +231,7 @@ grid_num  = (grid_pred == 'healthy').astype(int)
 col_map  = {'healthy': 'steelblue', 'degraded': 'tomato'}
 datasets = [('Training data', X_train, y_train), ('Test data', X_test, y_test)]
 
-fig, axes = plt.subplots(2, 1, figsize=(fig_size_x, (fig_size_y + 0.5) * 2), sharex=True)
+fig, axes = plt.subplots(2, 1, figsize=(fig_size_x * 0.7, (fig_size_y + 0.5) * 1.4), sharex=True)
 
 for ax, (title, X_data, y_data) in zip(axes, datasets):
     ax.contourf(xx1, xx2, grid_num, alpha=0.15,
@@ -325,7 +325,8 @@ Classify each observation as true positive, false positive, true negative, or fa
 Identify one true positive point, one true negative point, one false positive point, and one false negative point. 
 
 ```{python}
-fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 1))
+#| label: identify-points
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, (fig_size_y + 1) * 0.7))
 ax.contourf(xx1, xx2, grid_num, alpha=0.15,
             cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
 ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
@@ -511,9 +512,6 @@ The null classifier is a useful baseline. Its accuracy equals the proportion of 
 
 ## Overfitting in classification
 
-As in regression, classifiers can also **overfit** the training data. Recall that:
-
-> A model is overfitting when it has a small training error but a large test error. 
 
 In classification we can consdider the overall **error rate** as a simple metric to compare model performance across models:
 
@@ -521,10 +519,14 @@ $$\text{error rate} = \frac{\text{number of misclassified observations}}{\text{t
 
 We get the **training and test error rates** for a classifier when we calculate the error rate of the classifier on the training and test sets, respectively. 
 
+As in regression, classifiers can also **overfit** the training data. Recall that:
+
+> A model is overfitting when it has a small training error but a large test error. 
+
 :::{.callout-tip}
 ## Check-in
 
-The plot below shows training and test error across a range of $K$ values. 
+The parameter $K$ directly controls the flexibility of the KNN classifier. The plot below shows training and test error across a range of $K$ values. 
 
 ```{python}
 #| label: train-test-error-curve
@@ -546,7 +548,7 @@ ax.plot(k_range, train_errors, 'b-o', markersize=3, label='Training error')
 ax.plot(k_range, test_errors,  'r-o', markersize=3, label='Test error')
 ax.axhline(null_error, color='gray', linestyle='--', linewidth=1.5,
            label=f'Null classifier error ({null_error:.3f})')
-ax.set_xlabel('K (number of neighbors)  ← more flexible | less flexible →')
+ax.set_xlabel('K (number of neighbors)')
 ax.set_ylabel('Classification error rate')
 ax.set_title('KNN: training and test error vs. K')
 ax.legend()
@@ -558,7 +560,7 @@ plt.close()
 
 Looking at the error curves:
 
-1. What happens to training error as $K$ increases? Why does this make sense?
+1. At $K = 1$, what is the training error and why?
 2. Identify the region of the plot where the classifier is overfitting. What features of the curve indicate this?
 3. Where would you choose $K$ to get the best generalization performance?
 :::
@@ -566,23 +568,116 @@ Looking at the error curves:
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. Training error generally **increases** as $K$ grows. With larger $K$, the classifier becomes less flexible and can no longer perfectly memorize the training data — it must rely on more distant neighbors that may have different classes.
+1. At $K = 1$ the training error is 0 . With a single nearest neighbor, every training point's closest neighbor is itself, so it is always classified correctly. This is the clearest possible sign of overfitting.
 
-2. Overfitting occurs on the **left side** of the plot (small $K$). Here training error is very low but test error is notably higher. The gap between the two curves is the signature of overfitting: the model has learned the noise in the training data rather than the true underlying pattern.
 
-3. The best generalization performance is near the value of $K$ where **test error is minimized**, before it rises again for very large $K$ (where the model underfits). In practice this optimal $K$ is selected via cross-validation rather than by looking at the test set directly.
+2. Overfitting occurs on the left side of the plot (small $K$). Here training error is very low but test error is notably higher. The gap between the two curves is the signature of overfitting: the model has learned the noise in the training data rather than the true underlying pattern.
+
+3. The best generalization performance is near the value of $K$ where test error is minimized, before it rises again for very large $K$ (where the model underfits). In practice this optimal $K$ is selected via cross-validation rather than by looking at the test set directly.
 :::
 
 ### The Bias-Variance tradeoff
 
-Recall  that **model variance** refers to how much our estimate of $\hat{f}$ would change if we trained it on a different data set while **model bias** refers to the error introduced by the assumptions built into the model. 
+Recall  that **model variance** refers to how much our model would change if we trained it on a different data set. 
 
-
+In the figure below we examine the variance of a KNN classifier with different values of $k$ when applied to two training sets from the same population:
 
 ```{python}
 #| label: variance-bias-knn
 
+# Generate a second training set from the same data-generating process
+np.random.seed(99)
+n2           = len(X_train)
+temp2        = np.random.normal(0.4, 1.0, n2)
+nit2         = np.random.normal(14, 4, n2)
+up2          = np.random.binomial(1, 0.5, n2)
+log_odds2    = -0.8 + (-1.5 * temp2) + (0.10 * nit2) + (1.8 * up2)
+prob2        = 1 / (1 + np.exp(-log_odds2))
+status2      = np.where(np.random.binomial(1, prob2, n2) == 1, 'healthy', 'degraded')
+X_train2     = np.column_stack([temp2, nit2])
+y_train2     = status2
 
+k_bv       = [1, 30]
+train_sets = [('Training set A', X_train,  y_train,  'o'),
+              ('Training set B', X_train2, y_train2, '^')]
+col_map    = {'healthy': 'steelblue', 'degraded': 'tomato'}
+
+fig, axes = plt.subplots(2, 2,
+                         figsize=(fig_size_x * 0.91, (fig_size_y + 0.5) * 1.4),
+                         sharex=True, sharey=True)
+
+for row, k in enumerate(k_bv):
+    for col, (set_name, X_tr, y_tr, mkr) in enumerate(train_sets):
+        ax = axes[row, col]
+        knn_bv = KNeighborsClassifier(n_neighbors=k)
+        knn_bv.fit(X_tr, y_tr)
+        gp = knn_bv.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)
+        gn = (gp == 'healthy').astype(int)
+        ax.contourf(xx1, xx2, gn, alpha=0.15, cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+        ax.contour(xx1, xx2, gn, colors='gray', linewidths=1.0, levels=[0.5])
+        for label, c in col_map.items():
+            mask = y_tr == label
+            ax.scatter(X_tr[mask, 0], X_tr[mask, 1],
+                       color=c, marker=mkr, s=12, alpha=0.5, edgecolors='none')
+        ax.set_xlim(-2, 4)
+        ax.set_title(f'K = {k} — {set_name}', fontsize=10)
+        ax.grid(True, alpha=0.2)
+        if col == 0:
+            ax.set_ylabel('Nitrate (μmol/L)')
+        if row == 1:
+            ax.set_xlabel('Temp. anomaly (°C)')
+
+fig.suptitle(
+    'Decision boundaries across two training sets for k=1 and k=30',
+     y=1.02
+)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Check-in
+Looking at the plots above, which value of $k$ do you think gives a model with higher variance? Why?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+The decision boundaries created by both models ($K=1$ and $K=10$) change when trained on different datasets. However, we could say that the $k=1$ KNN model exhibits higher variance since there's a lot of small classiffication regions (fitting noise) that change substantially as we move from training set A to B. 
+:::
+
+On the other hand, **model bias** refers to the error introduced by the assumptions built into the model. Models with high bias will be systematically wrong, no matter how much training data we give it. In our example, when $k$ is really big, all points will be classified as the majority class. If both training sets are sampled from the same popuplation, we expect this model to remain constant across training sets. 
+
+```{python}
+#| label: high-bias-knn
+
+fig, axes = plt.subplots(1, 2,
+                         figsize=(fig_size_x * 0.91, (fig_size_y + 0.5) * 0.7),
+                         sharex=True, sharey=True)
+
+k = 120
+for col, (set_name, X_tr, y_tr, mkr) in enumerate(train_sets):
+    ax = axes[col]
+    knn_bv = KNeighborsClassifier(n_neighbors=k)
+    knn_bv.fit(X_tr, y_tr)
+    gp = knn_bv.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)
+    gn = (gp == 'healthy').astype(int)
+    ax.contourf(xx1, xx2, gn, alpha=0.15, cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+    ax.contour(xx1, xx2, gn, colors='gray', linewidths=1.0, levels=[0.5])
+    for label, c in col_map.items():
+        mask = y_tr == label
+        ax.scatter(X_tr[mask, 0], X_tr[mask, 1],
+                   color=c, marker=mkr, s=12, alpha=0.5, edgecolors='none')
+    ax.set_xlim(-2, 4)
+    ax.set_title(f'K = {k} — {set_name}', fontsize=10)
+    ax.set_xlabel('Temp. anomaly (°C)')
+    ax.grid(True, alpha=0.2)
+    if col == 0:
+        ax.set_ylabel('Nitrate (μmol/L)')
+
+fig.suptitle('Decision boundaries across two training sets', y=1.02)
+plt.tight_layout()
+plt.show()
+plt.close()
 ```
 
 
@@ -592,67 +687,3 @@ The same bias-variance tradeoff discussed for regression in [previous notes](/no
 - A low flexibility model often shows high bias and low variance. The rigid boundary is stable but may systematically miss real structure in the data.
 
 Increasing model flexibility always reduces training error, but test error has a characteristic U-shape we'd seen previously. 
-
-Test error is minimized at an intermediate $K$ that balances these two sources of error. 
-
-The parameter $K$ directly controls the flexibility of the KNN classifier:
-
-- **Small $K$** (e.g., $K = 1$): the decision boundary closely follows every local pattern in the training data, including noise. Very flexible.
-- **Large $K$**: the boundary becomes very smooth, determined by a large neighborhood. 
-
-```{python}
-#| label: knn-decision-boundaries
-
-k_vals = [1, 20, 120]
-fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.5, fig_size_y + 0.5), sharey=True)
-
-for ax, k in zip(axes, k_vals):
-    knn_k = KNeighborsClassifier(n_neighbors=k)
-    knn_k.fit(X_train, y_train)
-
-    grid_pred_k = knn_k.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)
-    grid_num_k  = (grid_pred_k == 'healthy').astype(int)
-
-    ax.contourf(xx1, xx2, grid_num_k, alpha=0.15,
-                cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
-    ax.contour(xx1, xx2, grid_num_k, colors='gray', linewidths=1.0, levels=[0.5])
-
-    for label, col in {'healthy': 'steelblue', 'degraded': 'tomato'}.items():
-        mask = y_train == label
-        ax.scatter(X_train[mask, 0], X_train[mask, 1],
-                   c=col, s=12, alpha=0.5, edgecolors='none')
-
-    train_err = 1 - knn_k.score(X_train, y_train)
-    test_err  = 1 - knn_k.score(X_test,  y_test)
-    ax.set_title(f'K = {k}\nTrain err: {train_err:.3f}  |  Test err: {test_err:.3f}',
-                 fontsize=10)
-    ax.set_xlabel('Temp. anomaly (°C)')
-    ax.grid(True, alpha=0.2)
-
-axes[0].set_ylabel('Nitrate (μmol/L)')
-fig.suptitle('KNN decision boundaries for different K values (training data shown)', y=1.02)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-:::{.callout-tip}
-## Check-in
-
-Looking at the three panels above:
-
-1. How does the shape of the decision boundary change as $K$ increases?
-2. At $K = 1$, what is the training error and why?
-3. Which value of $K$ looks most overfit? How can you tell from the boundary and from the error rates?
-:::
-
-:::{.callout-tip collapse="true"}
-## Discussion
-
-1. As $K$ increases, the decision boundary becomes more connectedm encompassing larger areas. At $K = 1$ the boundary is highly irregular, closely following individual training points. At $K = 120$ there's no more boundary since everything has been classified as the majority class. 
-
-2. At $K = 1$ the training error is 0 . With a single nearest neighbor, every training point's closest neighbor is itself, so it is always classified correctly. This is the clearest possible sign of overfitting.
-
-3. $K = 1$ is the most overfit: there's a lot of small classiffication regions (fitting noise) and the training error is zero while the test error is noticeably higher. The gap between training and test error is an indication of overfitting!
-:::
-
