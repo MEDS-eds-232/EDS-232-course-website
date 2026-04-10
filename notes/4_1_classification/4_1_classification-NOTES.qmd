@@ -510,25 +510,25 @@ The null classifier is a useful baseline. Its accuracy equals the proportion of 
 
 As in regression, classifiers can **overfit** the training data. Recall the definition:
 
-> A model is overfitting when it has a small training error but a large test error — it has memorized the training data rather than learned the underlying pattern.
+> A model is overfitting when it has a small training error but a large test error. 
 
 The training and test error rates for a classifier are defined analogously to training and test MSE:
 
 $$\text{error rate} = \frac{\text{number of misclassified observations}}{\text{total observations}}$$
 
-Test error is always the measure of interest for evaluating real-world performance, just as we saw in regression.
+Test error is usually the measure of interest for evaluating real-world performance, just as we saw in regression.
 
 ### KNN and overfitting: the role of $K$
 
 The parameter $K$ directly controls the **flexibility** of the KNN classifier:
 
 - **Small $K$** (e.g., $K = 1$): the decision boundary closely follows every local pattern in the training data, including noise. Very flexible.
-- **Large $K$** (e.g., $K = 500$): the boundary becomes very smooth, determined by a large neighborhood. Very rigid.
+- **Large $K$**: the boundary becomes very smooth, determined by a large neighborhood. Very rigid.
 
-```python
+```{python}
 #| label: knn-decision-boundaries
 
-k_vals = [1, 20, 500]
+k_vals = [1, 20, 120]
 fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.5, fig_size_y + 0.5), sharey=True)
 
 for ax, k in zip(axes, k_vals):
@@ -583,7 +583,7 @@ Looking at the three panels above:
 
 The plot below shows training and test error across a wide range of $K$ values — analogous to the train/test MSE curves from our regression lessons.
 
-```python
+```{python}
 #| label: train-test-error-curve
 
 k_range      = list(range(1, 151, 2))
