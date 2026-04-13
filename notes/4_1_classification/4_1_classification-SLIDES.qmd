@@ -564,25 +564,6 @@ Points in the "wrong" region are misclassified.
 - **False Positive**: the observation is negative but we incorrectly predicted positive.
 - **False Negative**: the observation is positive but we incorrectly predicted negative.
 
-
----
-
-<br>
-
-|  | Predicted **positive** | Predicted **negative** |
-|---|:---:|:---:|
-| **True positive** | True Positive (TP) | False Negative (FN) |
-| **True negative** | False Positive (FP) | True Negative (TN) |
-
-<br>
-
-::: {.body-text-m}
-- **TP**: correctly predicted positive
-- **TN**: correctly predicted negative
-- **FP**: negative observation predicted as positive
-- **FN**: positive observation predicted as negative
-:::
-
 ---
 
 ## {#checkin-tpfp data-menu-title="Check-in: TP/FP/TN/FN"}
@@ -664,7 +645,9 @@ Using **healthy = positive class**, classify each observation as true positive, 
 
 <hr>
 
+::: {.body-text-s .teal-text}
 Identify one true positive point, one true negative point, one false positive point, and one false negative point. 
+:::
 
 ```{python}
 #| label: identify-points
@@ -697,25 +680,34 @@ plt.close()
 
 <hr>
 
-Count TP, TN, FP, FN across all test observations and arrange them in a **confusion matrix**:
+1. Predict the class for every point in our test set and compared it against its true class
+2. Count the number of true/false positives and true/false negatives we obtained:
+
+:::: {.columns}
+
+::: {.column width="40%"}
+- **TP**: correctly predicted positives
+- **TN**: correctly predicted negatives
+:::
+::: {.column width="60%"}
+- **FP**: negative observations predicted as positive
+- **FN**: positive observations predicted as negative
+:::
+
+:::
+
+. . .
+
+and arrange them in a **confusion matrix**:
+
+|  | Predicted positive | Predicted negative |
+|---|:---:|:---:|
+| **True positive** | TP | FN |
+| **True negative** | FP | TN |
 
 <br>
 
-```{python}
-#| echo: false
-
-cm_df = pd.DataFrame(
-    [[f'TP = {TP}', f'FN = {FN}'],
-     [f'FP = {FP}', f'TN = {TN}']],
-    index   = ['True: healthy',  'True: degraded'],
-    columns = ['Predicted: healthy', 'Predicted: degraded']
-)
-print(cm_df.to_string())
-```
-
-<br>
-
-::: {.body-text-m}
+::: {.teal-text}
 The confusion matrix shows at a glance **where** the classifier makes mistakes and **what kinds** of errors it makes.
 :::
 
@@ -731,33 +723,27 @@ The confusion matrix shows at a glance **where** the classifier makes mistakes a
 
 ::: {.column width="55%"}
 
-**Overall accuracy**
+**Overall accuracy**: *fraction of correctly classified observations*
 $$\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}$$
 
-**Precision** — of predicted positives, how many are truly positive?
+**Precision**: *of predicted positives, how many are truly positive?*
 $$\text{precision} = \frac{TP}{TP + FP}$$
 
-**Recall** (sensitivity) — of all true positives, how many did we catch?
+**Recall** (sensitivity): *of all true positives, how many did we correctly identify?*
 $$\text{recall} = \frac{TP}{TP + FN}$$
 
 :::
 
 ::: {.column width="45%"}
 
-::: {.body-text-s}
 All metrics range from **0** (worst) to **1** (best).
-
-<br>
 
 Precision and recall **trade off** against each other:
 
 - High recall → catch almost everything, but may have many false alarms
 - High precision → predictions are reliable, but may miss many positives
 
-<br>
-
 The right balance depends on the **cost of each error type**.
-:::
 
 :::
 
@@ -776,14 +762,25 @@ The right balance depends on the **cost of each error type**.
 ::: {.column width="50%"}
 
 ::: {.teal-text .body-text-m}
-1. A classifier always predicts *positive*. What is its recall? What is its precision?
+1. A classifier always predicts positive. What is its recall? What is its precision?
 
-2. You are a conservation manager allocating resources to degraded sites. Would you prioritize precision or recall? Why?
+2. A classifier rarely predicts positve but, when it does, it is always correct. What would recall be like? And precision?
+
+3. You are a conservation manager allocating resources to degraded sites. Would you prioritize precision or recall? Why?
 :::
 
 :::
 
 ::: {.column width="50%"}
+**Overall accuracy**: *fraction of correctly classified observations*
+$$\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}$$
+
+**Precision**: *of predicted positives, how many are truly positive?*
+$$\text{precision} = \frac{TP}{TP + FP}$$
+
+**Recall** (sensitivity): *of all true positives, how many did we correctly identify?*
+$$\text{recall} = \frac{TP}{TP + FN}$$
+
 :::
 
 ::::
@@ -801,18 +798,26 @@ The right balance depends on the **cost of each error type**.
 ::: {.column width="50%"}
 
 ::: {.teal-text .body-text-m}
-1. A classifier always predicts *positive*. What is its recall? What is its precision?
+1. A classifier always predicts positive. What is its recall? What is its precision?
 
-2. You are a conservation manager allocating resources to degraded sites. Would you prioritize precision or recall? Why?
+<br>
+
+2. A classifier rarely predicts positve but, when it does, it is always correct. What would recall be like? And precision?
+
+<br>
+
+3. You are a conservation manager allocating resources to degraded sites. Would you prioritize precision or recall? Why?
 :::
 
 :::
 
 ::: {.column width="50%"}
 
-1. **Recall = 1.0** (no true positive is ever missed). **Precision is low** — it predicts positive for every observation, including negatives.
+1. Recall = 1.0 (no true positive is ever missed). Precision is low: it predicts positive for every observation, including negatives.
 
-2. **Recall** — you want to catch as many truly degraded sites as possible. A missed degraded site (FN) means no intervention, which has direct ecological consequences.
+2. High precision and low recall. 
+
+3. Likely recall since you want to catch as many truly degraded sites as possible. A missed degraded site (FN) means no intervention, which can have direct consequences.
 
 :::
 
@@ -826,23 +831,18 @@ The right balance depends on the **cost of each error type**.
 
 <hr>
 
-When you want to summarize precision and recall in **one number**:
+One way of summarzing precision and recall into a single metric:
 
 $$F_1 = \frac{2 \cdot \text{precision} \times \text{recall}}{\text{precision} + \text{recall}}$$
 
-<br>
-
-::: {.body-text-m}
-- Ranges from **0** (worst) to **1** (best)
-- Favors classifiers with **balanced** precision and recall
-- A model with high precision but very low recall (or vice versa) gets a **low** $F_1$
-:::
-
 . . .
 
-<br>
-
-A useful baseline: the **null classifier** always predicts the majority class, ignoring all predictors. Any useful model should outperform it.
+::: {.body-text-m}
+- Ranges from 0 (worst) to 1 (best)
+- Favors classifiers with **balanced** precision and recall
+- A model with high precision but very low recall (or vice versa) gets a low $F_1$
+- Simple way to compare classifiers, but you should eamine all metrics individually!
+:::
 
 ---
 
@@ -851,6 +851,9 @@ A useful baseline: the **null classifier** always predicts the majority class, i
 [Check-in]{.slide-title}
 
 <hr>
+
+
+A useful baseline: the **null classifier** always predicts the majority class, ignoring all predictors. Any useful model should outperform it.
 
 ```{python}
 #| echo: false
