@@ -104,7 +104,7 @@ train_sets = [('Training set A', X_train,  y_train,  'o'),
 
 [Lesson 5]{.custom-subtitle}
 
-[*Classification*]{.custom-subtitle}
+[*KNN and accuracy metrics*]{.custom-subtitle}
 
 ---
 
@@ -139,9 +139,7 @@ train_sets = [('Training set A', X_train,  y_train,  'o'),
 
 So far, our response variable $Y$ has always been **quantitative**.
 
-. . .
-
-In many real-world problems the response is **qualitative** (categorical) — it takes a value in a discrete set of *classes*.
+In many real-world problems the response is **qualitative** (categorical): meaning the response takes a value in a discrete set of **classes**.
 
 <br>
 
@@ -151,37 +149,54 @@ In many real-world problems the response is **qualitative** (categorical) — it
 
 <br>
 
-::: {.body-text-m}
+::: {.body-text-s}
+Classic examples:
+
+- Is this email spam or not?
+- Handwritten character recognition
+- Image classification
+
 Environmental science examples:
 
-- Is a kelp forest site *healthy* or *degraded*?
 - Does a water sample *exceed* a contamination threshold?
 - Is a species *present* or *absent* at a given location?
+- Is a certain study site *healthy* or *degraded*?
+
 :::
+
+---
+
+## {#section-example data-menu-title="# A guiding example #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">A guiding example</p>
+</div>
+
 
 ---
 
 ## {#kelpwatch data-menu-title="The KelpWatch dataset"}
 
-[A guiding example: KelpWatch]{.slide-title}
+[Our example dataset]{.slide-title}
 
 <hr>
 
-A synthetic dataset tracking **300 coastal monitoring stations**:
+A synthetic dataset "tracking" 300 coastal monitoring stations along CA coast:
 
 <br>
 
 ::: {.body-text-m}
-- **`temp_anomaly`** — sea surface temperature anomaly (°C)
+- **`temp_anomaly`** — sea surface temperature anomaly (°C): deviation of ocena's temperature from long-term average
 - **`nitrate`** — nitrate concentration (μmol/L)
-- **`upwelling`** — whether upwelling was detected (yes / no)
 - **`status`** — kelp forest condition: *healthy* or *degraded*
 :::
 
 <br>
 
 ::: {.center-text .teal-text .body-text-m}
-*Can we predict whether a site is healthy or degraded from its oceanographic conditions?*
+*Can we predict whether a site is healthy or degraded* 
+
+*based on its oceanographic conditions?*
 :::
 
 ---
@@ -193,6 +208,7 @@ A synthetic dataset tracking **300 coastal monitoring stations**:
 <hr>
 
 ```{python}
+#| label: example-data-plot
 #| echo: false
 #| fig-align: center
 #| out-width: "70%"
@@ -212,7 +228,7 @@ status_handles = [plt.scatter([], [], c=col, s=50, label=lab) for lab, col in co
 leg1 = ax.legend(handles=status_handles, title='Status', fontsize=9, loc='upper left')
 ax.add_artist(leg1)
 
-shape_handles = [plt.scatter([], [], c='gray', marker='o', s=50, label='upwelling detected'),
+shape_handles = [
                  plt.scatter([], [], c='gray', marker='s', s=50, label='no upwelling')]
 ax.legend(handles=shape_handles, title='Upwelling', fontsize=9, loc='upper right')
 
@@ -244,32 +260,110 @@ plt.close()
 
 <hr>
 
-Given a training set and a new test observation $x_0$:
+ - One of the simplest classification methods.
+ - Classify a new observation by majority vote among its nearest neighbors in the training data.
 
 <br>
 
-::: {.body-text-m}
+Given a training set and a new test observation $x_0$:
+
 1. Choose an integer $K \geq 1$.
 2. **Identify the $K$ points** in the training data closest to $x_0$.
 3. **Identify the majority class** among those $K$ neighbors.
 4. **Assign that class** as the prediction for $x_0$.
-:::
 
 . . .
 
 <br>
 
 ::: {.center-text .teal-text .body-text-m}
-No model is trained — just store the data and vote at prediction time.
+There is no model training or fitting. Just store the data and vote at prediction time.
 :::
 
 ---
 
-## {#knn-illustration data-menu-title="KNN illustration"}
+## {#knn-checkin-1 data-menu-title="Check-in: KNN illustration"}
 
-[KNN illustration (K = 3)]{.slide-title}
+[Check-in]{.slide-title}
 
 <hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{python}
+
+#| label: knn-illustration
+#| echo: false
+#| fig-align: center
+#| out-width: "55%"
+
+np.random.seed(14)
+n_ill  = 18
+x1_ill = np.random.uniform(0.5, 5.5, n_ill)
+x2_ill = np.random.uniform(0.5, 5.5, n_ill)
+y_ill  = ((-0.8 * x1_ill + x2_ill + np.random.normal(0, 0.5, n_ill)) > 0.5).astype(int)
+y_ill_label = np.where(y_ill == 1, 'healthy', 'degraded')
+
+x0    = np.array([2.8, 2.8])
+dists = np.sqrt((x1_ill - x0[0])**2 + (x2_ill - x0[1])**2)
+k3_idx = np.argsort(dists)[:3]
+radius = dists[k3_idx[-1]] + 0.07
+
+fig, ax = plt.subplots(figsize=(4.5, 4.5))
+for label, col in col_map.items():
+    mask = y_ill_label == label
+    ax.scatter(x1_ill[mask], x2_ill[mask], c=col, s=90,
+               edgecolors='k', linewidths=0.6, label=label, zorder=3)
+ax.scatter(*x0, c='gold', s=200, marker='*', edgecolors='k',
+           linewidths=0.8, label='test point $x_0$', zorder=4)
+circle = plt.Circle(x0, radius, color='dimgray', fill=False,
+                    linestyle='--', linewidth=1.8, label='K = 3 neighborhood')
+ax.add_patch(circle)
+ax.set_xlim(0, 6); ax.set_ylim(0, 6)
+ax.set_xlabel('Temp. anomaly (normalized)')
+ax.set_ylabel('Nitrate (normalized)')
+ax.legend(fontsize=8, loc='upper left')
+ax.set_aspect('equal')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+:::
+
+
+::: {.column width="50%"}
+KNN algorithm:
+
+::: {.body-text-s}
+1.  Choose an integer $K \geq 1$. *In this case k=3*. 
+2. **Identify the $K$ points** in the training data closest to $x_0$.
+3. **Identify the majority class** among those $K$ neighbors.
+4. **Assign that class** as the prediction for $x_0$.
+:::
+
+::: {.teal-text}
+1. What class would KNN assign to $x_0$? Why?
+2. What would change if we used $K=1$ instead?
+3. What would happen if $K =$ total number of training observations?
+:::
+:::
+
+:::
+
+---
+
+## {#knn-checkin-2 data-menu-title="Check-in: KNN illustration"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
 
 ```{python}
 #| echo: false
@@ -301,112 +395,50 @@ ax.add_patch(circle)
 ax.set_xlim(0, 6); ax.set_ylim(0, 6)
 ax.set_xlabel('Temp. anomaly (normalized)')
 ax.set_ylabel('Nitrate (normalized)')
-ax.legend(fontsize=8, loc='upper right')
+ax.legend(fontsize=8, loc='upper left')
 ax.set_aspect('equal')
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
+:::
+
+
+::: {.column width="50%"}
+KNN algorithm:
+
+::: {.body-text-s}
+1.  Choose an integer $K \geq 1$. *In this case k=3*. 
+2. **Identify the $K$ points** in the training data closest to $x_0$.
+3. **Identify the majority class** among those $K$ neighbors.
+4. **Assign that class** as the prediction for $x_0$.
+:::
+
+1. Healthy. Two of the three neighbors are blue (healthy), so healthy wins the majority vote.
+2. With $K=1$ the predictions are determined by the single closest training point.
+2. We would always predict the majority class for every observation.
+
+:::
+
+:::
+
 
 ---
 
-## {#knn-checkin data-menu-title="Check-in: KNN illustration"}
+## {#knn-decision-boundary-1 data-menu-title="KNN decision boundary"}
 
-[Check-in]{.slide-title}
+[Applying KNN to example data (K = 10)]{.slide-title}
 
 <hr>
 
 ```{python}
-#| echo: false
-#| fig-align: center
-#| out-width: "40%"
-
-fig, ax = plt.subplots(figsize=(4.0, 4.0))
-for label, col in col_map.items():
-    mask = y_ill_label == label
-    ax.scatter(x1_ill[mask], x2_ill[mask], c=col, s=90,
-               edgecolors='k', linewidths=0.6, label=label, zorder=3)
-ax.scatter(*x0, c='gold', s=200, marker='*', edgecolors='k',
-           linewidths=0.8, label='test point $x_0$', zorder=4)
-circle = plt.Circle(x0, radius, color='dimgray', fill=False,
-                    linestyle='--', linewidth=1.8)
-ax.add_patch(circle)
-ax.set_xlim(0, 6); ax.set_ylim(0, 6)
-ax.set_xlabel('Temp. anomaly (normalized)')
-ax.set_ylabel('Nitrate (normalized)')
-ax.legend(fontsize=8, loc='upper right')
-ax.set_aspect('equal')
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-:::: {.columns}
-::: {.column width="100%"}
-::: {.teal-text .body-text-m}
-1. What class would KNN assign to $x_0$? Why?
-2. What would happen if $K =$ total number of training observations?
-:::
-:::
-::::
-
----
-
-## {#knn-checkin-answers data-menu-title="Check-in: KNN illustration (answers)"}
-
-[Check-in]{.slide-title}
-
-<hr>
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| out-width: "40%"
-
-fig, ax = plt.subplots(figsize=(4.0, 4.0))
-for label, col in col_map.items():
-    mask = y_ill_label == label
-    ax.scatter(x1_ill[mask], x2_ill[mask], c=col, s=90,
-               edgecolors='k', linewidths=0.6, label=label, zorder=3)
-ax.scatter(*x0, c='gold', s=200, marker='*', edgecolors='k',
-           linewidths=0.8, label='test point $x_0$', zorder=4)
-circle = plt.Circle(x0, radius, color='dimgray', fill=False,
-                    linestyle='--', linewidth=1.8)
-ax.add_patch(circle)
-ax.set_xlim(0, 6); ax.set_ylim(0, 6)
-ax.set_xlabel('Temp. anomaly (normalized)')
-ax.set_ylabel('Nitrate (normalized)')
-ax.legend(fontsize=8, loc='upper right')
-ax.set_aspect('equal')
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-:::: {.columns}
-::: {.column width="100%"}
-1. **Healthy** — two of the three neighbors are blue (healthy), so healthy wins the majority vote.
-2. We would always predict the **majority class** for every observation, ignoring the predictors.
-:::
-::::
-
----
-
-## {#knn-decision-boundary data-menu-title="KNN decision boundary"}
-
-[KNN decision boundary (K = 10)]{.slide-title}
-
-<hr>
-
-```{python}
+#| label: training-knn
 #| echo: false
 #| fig-align: center
 #| out-width: "90%"
 
-datasets = [('Training data', X_train, y_train), ('Test data', X_test, y_test)]
+datasets = [('Training data (210 pts)', X_train, y_train), ('Test data (90 pts)', X_test, y_test)]
 fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.4, fig_size_y), sharey=True)
 
 for ax, (title, X_data, y_data) in zip(axes, datasets):
@@ -430,7 +462,52 @@ plt.close()
 ```
 
 ::: {.body-text-s .center-text}
-Shaded regions = predicted class. Points in the "wrong" region are misclassified.
+Shaded regions = predicted class. Decision boundary = boundary between predicted class regions. 
+
+Points in the "wrong" region are misclassified.
+:::
+
+---
+
+## {#knn-decision-boundary data-menu-title="KNN decision boundary"}
+
+[Applying KNN to example data (K = 10)]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: training-and-test-knn
+#| echo: false
+#| fig-align: center
+#| out-width: "90%"
+
+datasets = [('Training data (210 pts)', X_train, y_train), ('Test data (90 pts)', X_test, y_test)]
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.4, fig_size_y), sharey=True)
+
+for ax, (title, X_data, y_data) in zip(axes, datasets):
+    ax.contourf(xx1, xx2, grid_num, alpha=0.15,
+                cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+    ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
+    for label, col in col_map.items():
+        mask = y_data == label
+        ax.scatter(X_data[mask, 0], X_data[mask, 1],
+                   c=col, s=15, alpha=0.7, label=label, edgecolors='none')
+    ax.set_xlim(-2, 4)
+    ax.set_xlabel('Temp. anomaly (°C)')
+    ax.set_title(title)
+    ax.legend(title='True status', fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+axes[0].set_ylabel('Nitrate (μmol/L)')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s .center-text}
+Shaded regions = predicted class. Decision boundary = boundary between predicted class regions. 
+
+Points in the "wrong" region are misclassified.
 :::
 
 ---
@@ -446,8 +523,8 @@ Shaded regions = predicted class. Points in the "wrong" region are misclassified
 ::: {.column width="50%"}
 **Pros**
 
-- Non-parametric: no assumptions about the decision boundary shape
-- Simple and intuitive — no explicit model to train
+- Non-parametric: no assumptions about the model's functional form
+- Simple and intuitive: no explicit model to train
 - Naturally handles multi-class problems
 :::
 
@@ -455,9 +532,8 @@ Shaded regions = predicted class. Points in the "wrong" region are misclassified
 **Cons**
 
 - Slow at prediction time: must compute distance to every training point
-- Sensitive to predictor scale — standardization usually required
-- Performance degrades as number of predictors grows (*curse of dimensionality*)
-- Choice of $K$ requires cross-validation
+- Performance degrades as number of predictors grows 
+- Choice of $K$ requires cross-validation (*we will talk about this next week*)
 :::
 
 ::::
@@ -478,7 +554,18 @@ Shaded regions = predicted class. Points in the "wrong" region are misclassified
 
 <hr>
 
-For a **binary classifier** (two classes: *positive* and *negative*), each test observation falls into one of four categories:
+- **Binary classifier**: two classes, *positive* and *negative*.
+- Each test observation falls into one of four categories:
+
+<br>
+
+- **True Positive**: the observation is positive and we correctly predicted positive.
+- **True Negative**: the observation is negative and we correctly predicted negative.
+- **False Positive**: the observation is negative but we incorrectly predicted positive.
+- **False Negative**: the observation is positive but we incorrectly predicted negative.
+
+
+---
 
 <br>
 
@@ -504,7 +591,11 @@ For a **binary classifier** (two classes: *positive* and *negative*), each test 
 
 <hr>
 
-Using **healthy = positive class**, classify each observation as TP, FP, TN, or FN:
+::: {.teal-text}
+
+Using **healthy = positive class**, classify each observation as true positive, true negative, false positive, or false negative:
+
+:::
 
 <br>
 
@@ -518,15 +609,10 @@ Using **healthy = positive class**, classify each observation as TP, FP, TN, or 
 | B | degraded  | healthy  |
 | C | healthy   | degraded |
 | D | degraded  | degraded |
-| E | healthy   | healthy  |
 
 :::
 
 ::: {.column width="50%"}
-
-::: {.teal-text .body-text-m}
-What is A? B? C? D? E?
-:::
 
 :::
 
@@ -534,13 +620,17 @@ What is A? B? C? D? E?
 
 ---
 
-## {#checkin-tpfp-answers data-menu-title="Check-in: TP/FP/TN/FN (answers)"}
+## {#checkin-tpfp-2 data-menu-title="Check-in: TP/FP/TN/FN"}
 
 [Check-in]{.slide-title}
 
 <hr>
 
-Using **healthy = positive class**, classify each observation as TP, FP, TN, or FN:
+::: {.teal-text}
+
+Using **healthy = positive class**, classify each observation as true positive, true negative, false positive, or false negative:
+
+:::
 
 <br>
 
@@ -554,21 +644,50 @@ Using **healthy = positive class**, classify each observation as TP, FP, TN, or 
 | B | degraded  | healthy  |
 | C | healthy   | degraded |
 | D | degraded  | degraded |
-| E | healthy   | healthy  |
 
 :::
 
 ::: {.column width="50%"}
-
-- A → **TP**
-- B → **FP**
-- C → **FN**
-- D → **TN**
-- E → **TP**
-
+- A → true positive
+- B → false positive
+- C → false negative
+- D → true negative
 :::
 
 ::::
+
+---
+
+## {#checkin-tpfp-visual data-menu-title="Check-in: TP/FP/TN/FN"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+Identify one true positive point, one true negative point, one false positive point, and one false negative point. 
+
+```{python}
+#| label: identify-points
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, (fig_size_y + 1) * 0.7))
+ax.contourf(xx1, xx2, grid_num, alpha=0.15,
+            cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
+
+for label, col in {'healthy': 'steelblue', 'degraded': 'tomato'}.items():
+    mask = y_test == label
+    ax.scatter(X_test[mask, 0], X_test[mask, 1],
+               c=col, s=25, alpha=0.7, label=label, edgecolors='none')
+
+ax.set_xlim(-2, 4)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('KNN decision boundary (K = 10) — test observations shown')
+ax.legend(title='True status', fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
 ---
 
