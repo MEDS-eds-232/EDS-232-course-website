@@ -149,15 +149,23 @@ Then, we select a threshold to classify a site as healthy or degraded given the 
 - If $p(\text{temp}) \geq 0.8$, then predict the site is *healthy*.
 - If $p(\text{temp}) < 0.8$, then predict the site is *degraded*.
 
+:::{.callout-tip}
+## Check-in
+If we were to use `nitrate` as our predictor, what would the function $p(X)$ be modeling?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+*FILL OUT DISCUSSION*
+:::
 
 
-## The logistic function
+### The logistic function
 
-Why not use linear regression to model $p(X)$ directly? The problem is that a linear model can produce probabilities outside $[0, 1]$. Instead, logistic regression models $p(X)$ using the **logistic function** (also called the sigmoid):
+Logistic regression models the probability $p(X)$ using the **logistic function** (also called the sigmoid):
 
-$$p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}}$$
+$$p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}},$$
 
-where $\beta_0$ and $\beta_1$ are coefficients to be estimated. This function always returns values between 0 and 1, making it a valid probability model.
+where $\beta_0$ and $\beta_1$ are coefficients to be estimated to fit the model. This function always returns values between 0 and 1, making it a valid probability model.
 
 ```{python}
 #| label: logistic-curve
@@ -196,7 +204,7 @@ plt.close()
 
 Notice the characteristic **S-shape**: as temperature anomaly increases (warmer conditions), the probability of a healthy site decreases. The curve is bounded between 0 and 1 and smoothly transitions between the two classes.
 
-## Maximum likelihood
+### Maximum likelihood
 
 How do we estimate $\beta_0$ and $\beta_1$? Unlike linear regression, there is no closed-form solution. Instead, we use **maximum likelihood estimation (MLE)**.
 
@@ -245,7 +253,7 @@ plt.close()
 
 The MLE fit (left) tracks the data well — high probabilities where healthy sites are dense and low probabilities where degraded sites are dense. The poor fit (right) uses a flat curve that barely separates the two classes, and would have a lower likelihood.
 
-## Interpreting the coefficients
+### Interpreting the coefficients
 
 ### The log-odds
 
