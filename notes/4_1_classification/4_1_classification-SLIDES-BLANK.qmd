@@ -1,0 +1,1208 @@
+---
+format:
+    revealjs:
+        theme: ../../styles/meds-slides-styles.scss
+        slide-number: true
+        chalkboard: true
+        title-slide: false
+jupyter: eds232-env
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import (confusion_matrix, precision_score,
+                              recall_score, f1_score, accuracy_score)
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 11
+plt.rcParams['legend.fontsize'] = 'large'
+
+# ── KelpWatch synthetic dataset ────────────────────────────────────────────────
+np.random.seed(42)
+n = 300
+
+temp_anomaly = np.random.normal(0.4, 1.0, n)
+nitrate      = np.random.normal(14, 4, n)
+upwelling    = np.random.binomial(1, 0.5, n)
+
+log_odds     = -0.8 + (-1.5 * temp_anomaly) + (0.10 * nitrate) + (1.8 * upwelling)
+prob_healthy = 1 / (1 + np.exp(-log_odds))
+status_num   = np.random.binomial(1, prob_healthy, n)
+status       = np.where(status_num == 1, 'healthy', 'degraded')
+
+df = pd.DataFrame({
+    'temp_anomaly':    temp_anomaly,
+    'nitrate':         nitrate,
+    'upwelling':       upwelling,
+    'status':          status,
+})
+
+X = df[['temp_anomaly', 'nitrate']].values
+y = df['status'].values
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42, stratify=y
+)
+
+# Decision boundary grid
+x1_range = np.linspace(-2, 4, 300)
+x2_range = np.linspace(X[:, 1].min() - 1, X[:, 1].max() + 1, 300)
+xx1, xx2 = np.meshgrid(x1_range, x2_range)
+
+# KNN K=10 fit (used throughout)
+knn10     = KNeighborsClassifier(n_neighbors=10)
+knn10.fit(X_train, y_train)
+grid_pred = knn10.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)
+grid_num  = (grid_pred == 'healthy').astype(int)
+col_map   = {'healthy': 'steelblue', 'degraded': 'tomato'}
+
+# Metrics
+y_pred    = knn10.predict(X_test)
+cm        = confusion_matrix(y_test, y_pred, labels=['healthy', 'degraded'])
+TP, FN, FP, TN = cm[0,0], cm[0,1], cm[1,0], cm[1,1]
+
+majority_class = pd.Series(y_test).value_counts().idxmax()
+null_preds     = np.full(len(y_test), majority_class)
+null_acc  = accuracy_score(y_test, null_preds)
+null_prec = precision_score(y_test, null_preds, pos_label='healthy', zero_division=0)
+null_rec  = recall_score(y_test, null_preds, pos_label='healthy', zero_division=0)
+null_f1   = f1_score(y_test, null_preds, pos_label='healthy', zero_division=0)
+
+acc  = accuracy_score(y_test, y_pred)
+prec = precision_score(y_test, y_pred, pos_label='healthy')
+rec  = recall_score(y_test, y_pred, pos_label='healthy')
+f1   = f1_score(y_test, y_pred, pos_label='healthy')
+
+# Second training set for bias-variance plots
+np.random.seed(99)
+n2        = len(X_train)
+temp2     = np.random.normal(0.4, 1.0, n2)
+nit2      = np.random.normal(14, 4, n2)
+up2       = np.random.binomial(1, 0.5, n2)
+lo2       = -0.8 + (-1.5 * temp2) + (0.10 * nit2) + (1.8 * up2)
+p2        = 1 / (1 + np.exp(-lo2))
+status2   = np.where(np.random.binomial(1, p2, n2) == 1, 'healthy', 'degraded')
+X_train2  = np.column_stack([temp2, nit2])
+y_train2  = status2
+
+train_sets = [('Training set A', X_train,  y_train,  'o'),
+              ('Training set B', X_train2, y_train2, '^')]
+```
+
+## {#title-slide data-menu-title="Title Slide" background="#053660"}
+
+[EDS 232]{.custom-title}
+
+<hr class="hr-teal">
+
+[Lesson 5]{.custom-subtitle}
+
+[*KNN and accuracy metrics*]{.custom-subtitle}
+
+---
+
+## {#in-this-lesson data-menu-title="In this lesson"}
+
+[In this lesson]{.slide-title}
+
+<hr>
+
+<br>
+
+- The **classification** setting and how it differs from regression
+- **K-Nearest Neighbors (KNN)** as a simple classification method
+- **Accuracy assessment**: the confusion matrix, precision, recall, and $F_1$ score
+- **Overfitting** in classification and the bias-variance tradeoff
+
+---
+
+## {#section-classification data-menu-title="# Classification #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">From regression to classification</p>
+</div>
+
+---
+
+## {#what-is-classification data-menu-title="What is classification?"}
+
+[From regression to classification]{.slide-title}
+
+<hr>
+
+So far, our response variable $Y$ has always been **quantitative**.
+
+In many real-world problems the response is **qualitative** (categorical): meaning the response takes a value in a discrete set of **classes**.
+
+<br>
+
+**Classifying** = predicting the class of a new observation.
+
+. . .
+
+<br>
+
+
+:::: {.columns}
+
+::: {.column width="40%"}
+Classic examples:
+
+- Is this email spam or not?
+- Handwritten character recognition
+- Image classification
+:::
+
+::: {.column width="60%"}
+Environmental examples:
+
+- Does a water sample *exceed* a contamination threshold?
+- Is a species *present* or *absent* at a given location?
+- Is a certain study site *healthy* or *degraded*?
+:::
+
+:::
+
+
+---
+
+## {#section-example data-menu-title="# A guiding example #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">A guiding example</p>
+</div>
+
+
+---
+
+## {#kelpwatch data-menu-title="The KelpWatch dataset"}
+
+[Our example dataset]{.slide-title}
+
+<hr>
+
+A synthetic dataset "tracking" 300 coastal monitoring stations along CA coast:
+
+<br>
+
+::: {.body-text-m}
+- **`temp_anomaly`** — sea surface temperature anomaly (°C): deviation of ocean's temperature from long-term average
+- **`nitrate`** — nitrate concentration (μmol/L)
+- **`status`** — kelp forest condition: *healthy* or *degraded*
+:::
+
+<br>
+
+::: {.center-text .teal-text .body-text-m}
+*Can we predict whether a site is healthy or degraded* 
+
+*based on its oceanographic conditions?*
+:::
+
+---
+
+## {#kelpwatch-plot data-menu-title="KelpWatch: data overview"}
+
+[Data overview]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: example-data-plot
+#| echo: false
+#| fig-align: center
+#| out-width: "80%"
+
+colors = {'healthy': 'steelblue', 'degraded': 'tomato'}
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5 * 0.8, (fig_size_y + 1.5) * 0.8))
+
+for status_val, col in colors.items():
+    mask = df['status'] == status_val
+    ax.scatter(df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
+               c=col, s=25, alpha=0.6, edgecolors='none', label=status_val)
+
+counts = df['status'].value_counts()
+legend_labels = {s: f'{s} (n={counts[s]})' for s in colors}
+handles = [plt.scatter([], [], c=col, s=50, label=legend_labels[s]) for s, col in colors.items()]
+ax.legend(handles=handles, title='Status', fontsize=13, loc='upper left')
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.center-text .body-text-s}
+*Synthetic data generated for educational purposes only*
+:::
+
+---
+
+## {#section-knn data-menu-title="# K-Nearest Neighbors #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">K-Nearest Neighbors</p>
+</div>
+
+---
+
+## {#knn-algorithm data-menu-title="The KNN algorithm"}
+
+[The KNN algorithm]{.slide-title}
+
+<hr>
+
+ - One of the simplest classification methods
+ - Classify a new observation by majority vote among its nearest neighbors in the training data
+
+<br>
+
+Given a training set and a new test observation $x_0$:
+
+1. Choose an integer $K \geq 1$.
+2. **Identify the $K$ points** in the training data closest to $x_0$.
+3. **Identify the majority class** among those $K$ neighbors.
+4. **Assign that class** as the prediction for $x_0$.
+
+. . .
+
+<br>
+
+::: {.center-text .teal-text .body-text-m}
+There is no model training or fitting. 
+
+Just store the data and vote at prediction time.
+:::
+
+---
+
+## {#knn-checkin-1 data-menu-title="Check-in: KNN illustration"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{python}
+
+#| label: knn-illustration
+#| echo: false
+#| fig-align: center
+#| out-width: "55%"
+
+np.random.seed(14)
+n_ill  = 18
+x1_ill = np.random.uniform(0.5, 5.5, n_ill)
+x2_ill = np.random.uniform(0.5, 5.5, n_ill)
+y_ill  = ((-0.8 * x1_ill + x2_ill + np.random.normal(0, 0.5, n_ill)) > 0.5).astype(int)
+y_ill_label = np.where(y_ill == 1, 'healthy', 'degraded')
+
+x0    = np.array([2.8, 2.8])
+dists = np.sqrt((x1_ill - x0[0])**2 + (x2_ill - x0[1])**2)
+k3_idx = np.argsort(dists)[:3]
+radius = dists[k3_idx[-1]] + 0.07
+
+fig, ax = plt.subplots(figsize=(4.5, 4.5))
+for label, col in col_map.items():
+    mask = y_ill_label == label
+    ax.scatter(x1_ill[mask], x2_ill[mask], c=col, s=90,
+               edgecolors='k', linewidths=0.6, label=label, zorder=3)
+ax.scatter(*x0, c='gold', s=200, marker='*', edgecolors='k',
+           linewidths=0.8, label='test point $x_0$', zorder=4)
+circle = plt.Circle(x0, radius, color='dimgray', fill=False,
+                    linestyle='--', linewidth=1.8, label='K = 3 neighborhood')
+ax.add_patch(circle)
+ax.set_xlim(0, 6); ax.set_ylim(0, 6)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.legend(fontsize=8, loc='upper left')
+ax.set_aspect('equal')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+:::
+
+
+::: {.column width="50%"}
+KNN algorithm:
+
+::: {.body-text-s}
+1.  Choose an integer $K \geq 1$.
+2. **Identify the $K$ points** in the training data closest to $x_0$.
+3. **Identify the majority class** among those $K$ neighbors.
+4. **Assign that class** as the prediction for $x_0$.
+:::
+
+::: {.teal-text}
+Using K=3:
+
+1. What class would KNN assign to $x_0$? Why?
+2. What would change if we used $K=1$ instead?
+3. What would happen if $K =$ total number of training observations?
+:::
+:::
+
+:::
+
+---
+
+## {#knn-checkin-2 data-menu-title="Check-in: KNN illustration"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "55%"
+
+np.random.seed(14)
+n_ill  = 18
+x1_ill = np.random.uniform(0.5, 5.5, n_ill)
+x2_ill = np.random.uniform(0.5, 5.5, n_ill)
+y_ill  = ((-0.8 * x1_ill + x2_ill + np.random.normal(0, 0.5, n_ill)) > 0.5).astype(int)
+y_ill_label = np.where(y_ill == 1, 'healthy', 'degraded')
+
+x0    = np.array([2.8, 2.8])
+dists = np.sqrt((x1_ill - x0[0])**2 + (x2_ill - x0[1])**2)
+k3_idx = np.argsort(dists)[:3]
+radius = dists[k3_idx[-1]] + 0.07
+
+fig, ax = plt.subplots(figsize=(4.5, 4.5))
+for label, col in col_map.items():
+    mask = y_ill_label == label
+    ax.scatter(x1_ill[mask], x2_ill[mask], c=col, s=90,
+               edgecolors='k', linewidths=0.6, label=label, zorder=3)
+ax.scatter(*x0, c='gold', s=200, marker='*', edgecolors='k',
+           linewidths=0.8, label='test point $x_0$', zorder=4)
+circle = plt.Circle(x0, radius, color='dimgray', fill=False,
+                    linestyle='--', linewidth=1.8, label='K = 3 neighborhood')
+ax.add_patch(circle)
+ax.set_xlim(0, 6); ax.set_ylim(0, 6)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.legend(fontsize=8, loc='upper left')
+ax.set_aspect('equal')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+:::
+
+
+::: {.column width="50%"}
+KNN algorithm:
+
+::: {.body-text-s}
+1.  Choose an integer $K \geq 1$. 
+2. **Identify the $K$ points** in the training data closest to $x_0$.
+3. **Identify the majority class** among those $K$ neighbors.
+4. **Assign that class** as the prediction for $x_0$.
+:::
+
+1. Healthy. Two of the three neighbors are blue (healthy), so healthy wins the majority vote.
+2. With $K=1$ the predictions are determined by the single closest training point.
+2. We would always predict the majority class for every observation.
+
+:::
+
+:::
+
+
+---
+
+## {#knn-decision-boundary-1 data-menu-title="KNN decision boundary"}
+
+[Applying KNN to example data (K = 10)]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: training-knn
+#| echo: false
+#| fig-align: center
+#| out-width: "70%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
+
+ax.contourf(xx1, xx2, grid_num, alpha=0.15,
+            cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
+for label, col in col_map.items():
+    mask = y_train == label
+    ax.scatter(X_train[mask, 0], X_train[mask, 1],
+               c=col, s=15, alpha=0.7, label=label, edgecolors='none')
+ax.set_xlim(-2, 4)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('Training data (210 pts)')
+ax.legend(title='True status', fontsize=12)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s .center-text}
+Shaded regions = predicted class. Decision boundary = boundary between predicted class regions. 
+
+Points in the "wrong" region are misclassified.
+:::
+
+---
+
+## {#knn-decision-boundary data-menu-title="KNN decision boundary"}
+
+[Applying KNN to example data (K = 10)]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: training-and-test-knn
+#| echo: false
+#| fig-align: center
+#| out-width: "90%"
+
+datasets = [('Training data (210 pts)', X_train, y_train), ('Test data (90 pts)', X_test, y_test)]
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.4, fig_size_y), sharey=True)
+
+for ax, (title, X_data, y_data) in zip(axes, datasets):
+    ax.contourf(xx1, xx2, grid_num, alpha=0.15,
+                cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+    ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
+    for label, col in col_map.items():
+        mask = y_data == label
+        ax.scatter(X_data[mask, 0], X_data[mask, 1],
+                   c=col, s=15, alpha=0.7, label=label, edgecolors='none')
+    ax.set_xlim(-2, 4)
+    ax.set_xlabel('Temp. anomaly (°C)')
+    ax.set_title(title)
+    ax.legend(title='True status', fontsize=12)
+    ax.grid(True, alpha=0.3)
+
+axes[0].set_ylabel('Nitrate (μmol/L)')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s .center-text}
+Shaded regions = predicted class. Decision boundary = boundary between predicted class regions. 
+
+Points in the "wrong" region are misclassified.
+:::
+
+---
+
+## {#knn-pros-cons data-menu-title="KNN: pros and cons"}
+
+[KNN: pros and cons]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Pros**
+
+- Non-parametric: no assumptions about the model's functional form
+- Simple and intuitive: no explicit model to train
+- Naturally handles multi-class problems
+:::
+
+::: {.column width="50%"}
+**Cons**
+
+- Slow at prediction time: must compute distance to every training point
+- Performance degrades as number of predictors grows 
+:::
+
+::::
+
+**Other considerations**
+
+- Sensitive to predictor scale, standardization usually required
+- Choice of $K$ requires cross-validation (*we will talk about this next week*)
+
+---
+
+## {#section-accuracy data-menu-title="# Accuracy assessment #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Accuracy assessment for classifiers</p>
+</div>
+
+---
+
+## {#tp-tn-fp-fn data-menu-title="TP / TN / FP / FN"}
+
+[True and false positives and negatives]{.slide-title}
+
+<hr>
+
+- **Binary classifier**: two classes, **positive** and **negative**.
+- Each test observation falls into one of four categories:
+
+<br>
+
+| Category | True label | Predicted label | Correct? |
+|---|---|---|:---:|
+| **True Positive** | Positive | Positive | Yes |
+| **True Negative** | Negative | Negative | Yes |
+| **False Positive** | Negative | Positive | No |
+| **False Negative** | Positive | Negative | No |
+
+---
+
+## {#checkin-tpfp data-menu-title="Check-in: TP/FP/TN/FN"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+::: {.teal-text}
+
+Using **healthy = positive class**, classify each observation as true positive, true negative, false positive, or false negative:
+
+:::
+
+<br>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+| Obs | True status | Predicted |
+|---|---|---|
+| A | healthy   | healthy  |
+| B | degraded  | healthy  |
+| C | healthy   | degraded |
+| D | degraded  | degraded |
+
+:::
+
+::: {.column width="50%"}
+
+:::
+
+::::
+
+---
+
+## {#checkin-tpfp-2 data-menu-title="Check-in: TP/FP/TN/FN"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+::: {.teal-text}
+
+Using **healthy = positive class**, classify each observation as true positive, true negative, false positive, or false negative:
+
+:::
+
+<br>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+| Obs | True status | Predicted |
+|---|---|---|
+| A | healthy   | healthy  |
+| B | degraded  | healthy  |
+| C | healthy   | degraded |
+| D | degraded  | degraded |
+
+:::
+
+::: {.column width="50%"}
+- A → true positive
+- B → false positive
+- C → false negative
+- D → true negative
+:::
+
+::::
+
+---
+
+## {#checkin-tpfp-visual data-menu-title="Check-in: TP/FP/TN/FN"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+::: {.body-text-s .teal-text}
+Identify one true positive point, one true negative point, one false positive point, and one false negative point. 
+:::
+
+```{python}
+#| label: identify-points
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 2))
+ax.contourf(xx1, xx2, grid_num, alpha=0.15,
+            cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
+
+for label, col in {'healthy': 'steelblue', 'degraded': 'tomato'}.items():
+    mask = y_test == label
+    ax.scatter(X_test[mask, 0], X_test[mask, 1],
+               c=col, s=25, alpha=0.7, label=label, edgecolors='none')
+
+ax.set_xlim(-2, 4)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('KNN decision boundary (K = 10) — test observations shown')
+ax.legend(title='True status', fontsize=12)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#confusion-matrix data-menu-title="The confusion matrix"}
+
+[The confusion matrix]{.slide-title}
+
+<hr>
+
+1. Predict the class for every point in our test set and compare it against its true class
+2. Count the number of true/false positives and true/false negatives we obtained:
+
+:::: {.columns}
+
+::: {.column width="40%"}
+- **TP**: correctly predicted positives
+- **TN**: correctly predicted negatives
+:::
+::: {.column width="60%"}
+- **FP**: negative observations predicted as positive
+- **FN**: positive observations predicted as negative
+:::
+
+:::
+
+. . .
+
+and arrange them in a **confusion matrix**:
+
+|  | Predicted positive | Predicted negative |
+|---|:---:|:---:|
+| **True positive** | TP | FN |
+| **True negative** | FP | TN |
+
+<br>
+
+::: {.teal-text}
+The confusion matrix shows at a glance where the classifier makes mistakes and what kinds of errors it makes.
+:::
+
+---
+
+## {#accuracy-metrics-1 data-menu-title="Accuracy metrics"}
+
+[Accuracy metrics]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
+
+---
+
+## {#accuracy-metrics data-menu-title="Accuracy metrics"}
+
+[Accuracy metrics]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="55%"}
+
+**Overall accuracy**: *fraction of correctly classified observations*
+$$\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}$$
+
+**Precision**: *of predicted positives, how many are truly positive?*
+$$\text{precision} = \frac{TP}{TP + FP}$$
+
+**Recall** (sensitivity): *of all true positives, how many did we correctly identify?*
+$$\text{recall} = \frac{TP}{TP + FN}$$
+
+:::
+
+::: {.column width="45%"}
+
+All metrics range from **0** (worst) to **1** (best).
+
+Precision and recall **trade off** against each other:
+
+- High recall → catch almost everything, but may have many false alarms
+- High precision → predictions are reliable, but may miss many positives
+
+The right balance depends on the **cost of each error type**.
+
+:::
+
+::::
+
+---
+
+## {#checkin-precision-recall data-menu-title="Check-in: precision vs. recall"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text .body-text-m}
+1. A classifier always predicts positive. What is its recall? What is its precision?
+
+2. A classifier rarely predicts positve but, when it does, it is always correct. What would recall be like? And precision?
+
+3. You are a conservation manager allocating resources to degraded sites. Would you prioritize precision or recall? Why?
+:::
+
+:::
+
+::: {.column width="50%"}
+**Overall accuracy**: *fraction of correctly classified observations*
+$$\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}$$
+
+**Precision**: *of predicted positives, how many are truly positive?*
+$$\text{precision} = \frac{TP}{TP + FP}$$
+
+**Recall** (sensitivity): *of all true positives, how many did we correctly identify?*
+$$\text{recall} = \frac{TP}{TP + FN}$$
+
+:::
+
+::::
+
+---
+
+## {#checkin-precision-recall-answers data-menu-title="Check-in: precision vs. recall (answers)"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text .body-text-m}
+1. A classifier always predicts positive. What is its recall? What is its precision?
+
+2. A classifier rarely predicts positve but, when it does, it is always correct. What would recall be like? And precision?
+
+3. You are a conservation manager allocating resources to degraded sites. Would you prioritize precision or recall? Why?
+:::
+
+:::
+
+::: {.column width="50%"}
+
+1. Recall = 1.0 (no true positive is ever missed). Precision is low: it predicts positive for every observation, including negatives.
+
+2. High precision and low recall. 
+
+3. Likely recall since you want to catch as many truly degraded sites as possible. A missed degraded site (FN) means no intervention, which can have direct consequences.
+
+:::
+
+::::
+
+---
+
+## {#f1-score data-menu-title="The F1 score"}
+
+[The $F_1$ score]{.slide-title}
+
+<hr>
+
+One way of summarzing precision and recall into a single metric:
+
+$$F_1 = \frac{2 \cdot \text{precision} \times \text{recall}}{\text{precision} + \text{recall}}$$
+
+. . .
+
+::: {.body-text-m}
+- Ranges from 0 (worst) to 1 (best)
+- Favors classifiers with **balanced** precision and recall
+- A model with high precision but very low recall (or vice versa) gets a low $F_1$
+- Simple way to compare classifiers, but you should examine all metrics individually!
+:::
+
+---
+
+## {#checkin-metrics-table data-menu-title="Check-in: metrics table"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+
+The **null classifier** always predicts the majority class, ignoring all predictors. 
+Any useful model should outperform it!
+The following table shows accuracy metrics for tne KNN (K=10) classifier and the null classifier:
+
+```{python}
+#| echo: false
+
+metrics_df = pd.DataFrame({
+    'Model':     ['Null classifier', 'KNN (K = 10)'],
+    'Accuracy':  [f'{null_acc:.3f}',  f'{acc:.3f}'],
+    'Precision': [f'{null_prec:.3f}', f'{prec:.3f}'],
+    'Recall':    [f'{null_rec:.3f}',  f'{rec:.3f}'],
+    'F₁ score':  [f'{null_f1:.3f}',  f'{f1:.3f}'],
+})
+print(metrics_df.to_string(index=False))
+```
+
+<br>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+::: {.teal-text }
+1. The null classifier has recall = `{python} f"{null_rec:.3f}"` but a lower $F_1$. Why?
+2. Both models have similar overall accuracy. Is OA alone a good summary to assess whether KNN is no better than the null classifier?
+
+:::
+:::
+
+
+::: {.column width="50%"}
+::: {.body-text-s}
+
+- The null always predicts *healthy* (positive), so it never misses a true positive → perfect recall. But it misclassifies every degraded site, bringing down precision and $F_1$.
+
+- The two classifiers have similar accuracy, yet KNN has some evidence of distinguishing between classes rather than blindly predicting the majority.
+:::
+
+:::
+
+:::
+
+---
+
+## {#section-overfitting data-menu-title="# Overfitting #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Overfitting and the bias-variance tradeoff</p>
+</div>
+
+---
+
+## {#error-rate-blank data-menu-title="Classification error rate"}
+
+[Classification error rate]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                       
+  ✏️                    
+</div>  
+
+---
+
+## {#error-rate data-menu-title="Classification error rate"}
+
+[Classification error rate]{.slide-title}
+
+<hr>
+
+In classification we use the **error rate** as a simple measure of model performance:
+
+$$\text{error rate} = \frac{\text{# misclassified observations}}{\text{total observations}} = \frac{FP + FN}{TP + FP + TN + FN}$$
+
+<br>
+
+We compute both a **training error rate** and a **test error rate** by calculating the error rate on the training and test sets (similarly to how we calcualted the MSE for regression problems). 
+
+<br>
+
+::: {.center-text .teal-text .body-text-m}
+As in regression, a model is **overfitting** when it has a small training error but a large test error.
+:::
+
+---
+
+## {#checkin-error-curve-1 data-menu-title="Check-in: error curve"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "80%"
+
+k_range      = list(range(1, 141, 2))
+train_errors = []
+test_errors  = []
+for k in k_range:
+    knn_k = KNeighborsClassifier(n_neighbors=k)
+    knn_k.fit(X_train, y_train)
+    train_errors.append(1 - knn_k.score(X_train, y_train))
+    test_errors.append(1 - knn_k.score(X_test,  y_test))
+
+null_error = 1 - null_acc
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
+ax.plot(k_range, train_errors, 'b-o', markersize=3, label='Training error')
+ax.plot(k_range, test_errors,  'r-o', markersize=3, label='Test error')
+ax.axhline(null_error, color='gray', linestyle='--', linewidth=1.5,
+           label=f'Null classifier error ({null_error:.3f})')
+ax.set_xlabel('K (number of neighbors) ← more flexible  |  less flexible →')
+ax.set_ylabel('Classification error rate')
+ax.set_title('KNN: training and test error vs. K')
+ax.legend(fontsize=12)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.teal-text }
+1. At $K = 1$, what is the training error? Why?
+2. Where is the classifier overfitting?
+3. Where would you choose $K$ to get the best generalization performance?
+:::
+
+---
+
+## {#checkin-error-curve-2 data-menu-title="Check-in: error curve"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "80%"
+
+k_range      = list(range(1, 141, 2))
+train_errors = []
+test_errors  = []
+for k in k_range:
+    knn_k = KNeighborsClassifier(n_neighbors=k)
+    knn_k.fit(X_train, y_train)
+    train_errors.append(1 - knn_k.score(X_train, y_train))
+    test_errors.append(1 - knn_k.score(X_test,  y_test))
+
+null_error = 1 - null_acc
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
+ax.plot(k_range, train_errors, 'b-o', markersize=3, label='Training error')
+ax.plot(k_range, test_errors,  'r-o', markersize=3, label='Test error')
+ax.axhline(null_error, color='gray', linestyle='--', linewidth=1.5,
+           label=f'Null classifier error ({null_error:.3f})')
+ax.set_xlabel('K (number of neighbors) ← more flexible  |  less flexible →')
+ax.set_ylabel('Classification error rate')
+ax.set_title('KNN: training and test error vs. K')
+ax.legend(fontsize=12)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s}
+1. Training error = 0. With K = 1, every point's nearest neighbor is itself: always classified correctly.
+2. Left side (small K): training error is near zero but test error is noticeably higher. Gap indicates overfitting.
+3. Near where the error rate is minimized 
+:::
+
+---
+
+## {#knn-boundaries-k data-menu-title="KNN boundaries vs. K"}
+
+[KNN boundaries for different K]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+k_vals = [1, 20, 120]
+fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.6, fig_size_y), sharey=True)
+
+for ax, k in zip(axes, k_vals):
+    knn_k = KNeighborsClassifier(n_neighbors=k)
+    knn_k.fit(X_train, y_train)
+    gp = knn_k.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)
+    gn = (gp == 'healthy').astype(int)
+    ax.contourf(xx1, xx2, gn, alpha=0.15, cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+    ax.contour(xx1, xx2, gn, colors='gray', linewidths=1.0, levels=[0.5])
+    for label, col in col_map.items():
+        mask = y_train == label
+        ax.scatter(X_train[mask, 0], X_train[mask, 1],
+                   c=col, s=10, alpha=0.5, edgecolors='none')
+    train_err = 1 - knn_k.score(X_train, y_train)
+    test_err  = 1 - knn_k.score(X_test,  y_test)
+    ax.set_title(f'K = {k}\nTrain: {train_err:.3f} | Test: {test_err:.3f}', fontsize=10)
+    ax.set_xlabel('Temp. anomaly (°C)')
+    ax.set_xlim(-2, 4)
+    ax.grid(True, alpha=0.2)
+
+axes[0].set_ylabel('Nitrate (μmol/L)')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#variance-plot data-menu-title="Variance: K=1 vs K=30"}
+
+[Model variance]{.slide-title}
+
+<hr>
+
+**Model variance**: how much our model would change if trained on a different dataset. 
+
+```{python}
+#| echo: false
+#| label: knn-variance
+#| fig-align: center
+
+k_bv = [1, 30]
+fig, axes = plt.subplots(2, 2, figsize=(fig_size_x * 1.1 * 0.75, (fig_size_y + 0.5) * 1.4 * 0.75),
+                         sharex=True, sharey=True)
+
+for row, k in enumerate(k_bv):
+    for col, (set_name, X_tr, y_tr, mkr) in enumerate(train_sets):
+        ax = axes[row, col]
+        knn_bv = KNeighborsClassifier(n_neighbors=k)
+        knn_bv.fit(X_tr, y_tr)
+        gp = knn_bv.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)
+        gn = (gp == 'healthy').astype(int)
+        ax.contourf(xx1, xx2, gn, alpha=0.15, cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+        ax.contour(xx1, xx2, gn, colors='gray', linewidths=1.0, levels=[0.5])
+        for label, c in col_map.items():
+            mask = y_tr == label
+            ax.scatter(X_tr[mask, 0], X_tr[mask, 1],
+                       color=c, marker=mkr, s=10, alpha=0.5, edgecolors='none')
+        ax.set_xlim(-2, 4)
+        ax.set_title(f'K = {k} — {set_name}', fontsize=10)
+        ax.grid(True, alpha=0.2)
+        if col == 0:
+            ax.set_ylabel('Nitrate (μmol/L)')
+        if row == 1:
+            ax.set_xlabel('Temp. anomaly (°C)')
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.teal-text}
+**Check-in:** Whick $K$ do you think gives a model with higher variance? 
+:::
+
+---
+
+## {#bias-plot data-menu-title="High-bias: K=120"}
+
+[Model bias]{.slide-title}
+
+<hr>
+
+**Model bias** refers to the error introduced by the assumptions built into the model. Models with high bias will be systematically wrong, no matter how much training data we give it.
+
+```{python}
+#| echo: false
+#| label: model-bias
+#| fig-align: center
+#| out-width: "80%"
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.1, fig_size_y), sharex=True, sharey=True)
+k = 120
+for col, (set_name, X_tr, y_tr, mkr) in enumerate(train_sets):
+    ax = axes[col]
+    knn_bv = KNeighborsClassifier(n_neighbors=k)
+    knn_bv.fit(X_tr, y_tr)
+    gp = knn_bv.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)
+    gn = (gp == 'healthy').astype(int)
+    ax.contourf(xx1, xx2, gn, alpha=0.15, cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+    ax.contour(xx1, xx2, gn, colors='gray', linewidths=1.0, levels=[0.5])
+    for label, c in col_map.items():
+        mask = y_tr == label
+        ax.scatter(X_tr[mask, 0], X_tr[mask, 1],
+                   color=c, marker=mkr, s=30, alpha=0.5, edgecolors='none')
+    ax.set_xlim(-2, 4)
+    ax.set_title(f'K = {k} — {set_name}', fontsize=10)
+    ax.set_xlabel('Temp. anomaly (°C)')
+    ax.grid(True, alpha=0.2)
+    if col == 0: ax.set_ylabel('Nitrate (μmol/L)')
+plt.tight_layout(); plt.show(); plt.close()
+```
+
+::: {.teal-text .body-text-m .center-text}
+What do you notice about the two boundaries? What does this tell us?
+:::
+
+---
+
+## {#bias-variance-summary data-menu-title="Bias-variance summary"}
+
+[The bias-variance tradeoff: classification]{.slide-title}
+
+<hr>
+
+**High flexibility model often shows low bias and high variance.**
+
+- The flexible classification boundary can capture complex patterns but changes a lot from one training sample to another.
+
+
+**Low flexibility model often shows high bias and low variance.** 
+
+- The rigid boundary is stable but may systematically miss real structure in the data.
+
+. . .
+
+In the case of KNN: 
+
+| | Small K | Large K |
+|---|:---:|:---:|
+| **Flexibility** | High | Low |
+| **Bias** | Lower | Higher |
+| **Variance** | Higher | Lower |
+
+Test error is minimized at an **intermediate K** that balances bias and variance.
+

@@ -152,7 +152,7 @@ In many real-world problems the response is **qualitative** (categorical): meani
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column width="40%"}
 Classic examples:
 
 - Is this email spam or not?
@@ -160,7 +160,7 @@ Classic examples:
 - Image classification
 :::
 
-::: {.column width="50%"}
+::: {.column width="60%"}
 Environmental examples:
 
 - Does a water sample *exceed* a contamination threshold?
@@ -229,7 +229,10 @@ for status_val, col in colors.items():
     ax.scatter(df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
                c=col, s=25, alpha=0.6, edgecolors='none', label=status_val)
 
-ax.legend(title='Status', fontsize=10, loc='upper left')
+counts = df['status'].value_counts()
+legend_labels = {s: f'{s} (n={counts[s]})' for s in colors}
+handles = [plt.scatter([], [], c=col, s=50, label=legend_labels[s]) for s, col in colors.items()]
+ax.legend(handles=handles, title='Status', fontsize=10, loc='upper left')
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
 ax.grid(True, alpha=0.3)
@@ -275,7 +278,9 @@ Given a training set and a new test observation $x_0$:
 <br>
 
 ::: {.center-text .teal-text .body-text-m}
-There is no model training or fitting. Just store the data and vote at prediction time.
+There is no model training or fitting. 
+
+Just store the data and vote at prediction time.
 :::
 
 ---
@@ -686,7 +691,7 @@ plt.close()
 
 <hr>
 
-1. Predict the class for every point in our test set and compared it against its true class
+1. Predict the class for every point in our test set and  it against its true class
 2. Count the number of true/false positives and true/false negatives we obtained:
 
 :::: {.columns}
@@ -714,7 +719,7 @@ and arrange them in a **confusion matrix**:
 <br>
 
 ::: {.teal-text}
-The confusion matrix shows at a glance **where** the classifier makes mistakes and **what kinds** of errors it makes.
+The confusion matrix shows at a glance where the classifier makes mistakes and what kinds of errors it makes.
 :::
 
 ---
@@ -1054,7 +1059,7 @@ plt.close()
 
 ---
 
-## {#checkin-error-curve-1 data-menu-title="Check-in: error curve"}
+## {#checkin-error-curve-2 data-menu-title="Check-in: error curve"}
 
 [Check-in]{.slide-title}
 
@@ -1153,7 +1158,7 @@ plt.close()
 #| fig-align: center
 
 k_bv = [1, 30]
-fig, axes = plt.subplots(2, 2, figsize=(fig_size_x * 1.1, (fig_size_y + 0.5) * 1.4),
+fig, axes = plt.subplots(2, 2, figsize=(fig_size_x * 1.1 * 0.75, (fig_size_y + 0.5) * 1.4 * 0.75),
                          sharex=True, sharey=True)
 
 for row, k in enumerate(k_bv):
@@ -1215,7 +1220,7 @@ for col, (set_name, X_tr, y_tr, mkr) in enumerate(train_sets):
     for label, c in col_map.items():
         mask = y_tr == label
         ax.scatter(X_tr[mask, 0], X_tr[mask, 1],
-                   color=c, marker=mkr, s=10, alpha=0.5, edgecolors='none')
+                   color=c, marker=mkr, s=30, alpha=0.5, edgecolors='none')
     ax.set_xlim(-2, 4)
     ax.set_title(f'K = {k} — {set_name}', fontsize=10)
     ax.set_xlabel('Temp. anomaly (°C)')
