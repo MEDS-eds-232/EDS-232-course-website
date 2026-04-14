@@ -217,24 +217,6 @@ In the figure above, the star $\star$ marks a new test observation $x_0$. The da
 <!-- 3. Small $K$: the classifier can capture complex, irregular boundaries but is sensitive to individual training points and prone to overfitting. Large $K$ (high bias, low variance): the boundary is smoother and more stable, but may miss real patterns in the data. This is the same bias-variance tradeoff we saw in regression. -->
 :::
 
-### Pros and cons of KNN
-
-There are several pros and cons to using the KNN algorithm:
-
-**Pros:**
-
-- Non-parametric: makes no assumptions about the shape of the decision boundary.
-- Simple and intuitive: there's no explicit model to train, just store the training data.
-- It naturally handles multi-class problems.
-
-**Cons:**
-
-- Slow at prediction time: classifying each new point requires computing its distance to every training point.
-- Sensitive to the scale of predictors: variables with large ranges dominate the distance calculation, so features typically need to be standardized before applying KNN.
-- The choice of $K$ requires cross-validation and has a large impact on performance.
-- Its performance degrades as the number of predictors grows (the *curse of dimensionality*).
-
-<!-- TODO: I would like to include an activity on exercise 4.8-4 in ISLP. -->
 
 ### Example
 
@@ -276,6 +258,25 @@ plt.close()
 
 The shaded regions show where the model predicts *healthy* (blue) and *degraded* (red). Points plotted on top are the true labels. A point is misclassified if it appears in the "wrong" shaded region.
 
+### Pros and cons of KNN
+
+There are several pros and cons to using the KNN algorithm:
+
+**Pros:**
+
+- Non-parametric: makes no assumptions about the shape of the decision boundary.
+- Simple and intuitive: there's no explicit model to train, just store the training data.
+- It naturally handles multi-class problems.
+
+**Cons:**
+
+- Slow at prediction time: classifying each new point requires computing its distance to every training point.
+- Sensitive to the scale of predictors: variables with large ranges dominate the distance calculation, so features typically need to be standardized before applying KNN.
+- The choice of $K$ requires cross-validation and has a large impact on performance.
+- Its performance degrades as the number of predictors grows (the *curse of dimensionality*).
+
+<!-- TODO: I would like to include an activity on exercise 4.8-4 in ISLP. -->
+
 ## Accuracy assessment for classifiers
 
 To assess how well a classifier performs, we compare its predictions on the **test set** to the true labels. For a **binary classifier** with two possible classes we call the classes **positive** and **negative**. Given an observation $(x_0, y_0)$ in the test set, we have the following possibilities depending on what prediction was given to $x_0$ and what class $y_0$ it is really associated with:
@@ -305,7 +306,6 @@ Consider the following predictions for five test observations:
 | B | degraded  | healthy   |
 | C | healthy   | degraded  |
 | D | degraded  | degraded  |
-| E | healthy   | healthy   |
 
 We will treat healthy as the positive class and degraded as the negative class.
 Classify each observation as true positive, false positive, true negative, or false negative, using `healthy` as the positive class.
@@ -318,7 +318,6 @@ Classify each observation as true positive, false positive, true negative, or fa
 - B: True status = degraded (negative), predicted = healthy (positive) → **FP**
 - C: True status = healthy (positive), predicted = degraded (negative) → **FN**
 - D: True status = degraded (negative), predicted = degraded (negative) → **TN**
-- E: True status = healthy (positive), predicted = healthy (positive) → **TP**
 :::
 
 :::{.callout-tip}
@@ -358,7 +357,7 @@ You may have identified other points, these are some examples!
 
 ### The confusion matrix
 
-Once we have predicted the class for every point in our test set and compared it agains its true class, we can count the total number of true/false positives and true/false negatives we obtained. We use the notation:
+Once we have predicted the class for every point in our test set and compared it t its true class, we can count the total number of true/false positives and true/false negatives we obtained. We use the notation:
 
 - TP = total number of true positives
 - TN = total number of true negatives

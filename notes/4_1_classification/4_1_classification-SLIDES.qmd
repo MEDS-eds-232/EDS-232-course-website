@@ -149,20 +149,27 @@ In many real-world problems the response is **qualitative** (categorical): meani
 
 <br>
 
-::: {.body-text-s}
+
+:::: {.columns}
+
+::: {.column width="50%"}
 Classic examples:
 
 - Is this email spam or not?
 - Handwritten character recognition
 - Image classification
+:::
 
-Environmental science examples:
+::: {.column width="50%"}
+Environmental examples:
 
 - Does a water sample *exceed* a contamination threshold?
 - Is a species *present* or *absent* at a given location?
 - Is a certain study site *healthy* or *degraded*?
+:::
 
 :::
+
 
 ---
 
@@ -186,7 +193,7 @@ A synthetic dataset "tracking" 300 coastal monitoring stations along CA coast:
 <br>
 
 ::: {.body-text-m}
-- **`temp_anomaly`** — sea surface temperature anomaly (°C): deviation of ocena's temperature from long-term average
+- **`temp_anomaly`** — sea surface temperature anomaly (°C): deviation of ocean's temperature from long-term average
 - **`nitrate`** — nitrate concentration (μmol/L)
 - **`status`** — kelp forest condition: *healthy* or *degraded*
 :::
@@ -260,8 +267,8 @@ plt.close()
 
 <hr>
 
- - One of the simplest classification methods.
- - Classify a new observation by majority vote among its nearest neighbors in the training data.
+ - One of the simplest classification methods
+ - Classify a new observation by majority vote among its nearest neighbors in the training data
 
 <br>
 
@@ -338,13 +345,14 @@ plt.close()
 KNN algorithm:
 
 ::: {.body-text-s}
-1.  Choose an integer $K \geq 1$. *In this case k=3*. 
+1.  Choose an integer $K \geq 1$.
 2. **Identify the $K$ points** in the training data closest to $x_0$.
 3. **Identify the majority class** among those $K$ neighbors.
 4. **Assign that class** as the prediction for $x_0$.
 :::
 
 ::: {.teal-text}
+Using K=3*:
 1. What class would KNN assign to $x_0$? Why?
 2. What would change if we used $K=1$ instead?
 3. What would happen if $K =$ total number of training observations?
@@ -533,10 +541,14 @@ Points in the "wrong" region are misclassified.
 
 - Slow at prediction time: must compute distance to every training point
 - Performance degrades as number of predictors grows 
-- Choice of $K$ requires cross-validation (*we will talk about this next week*)
 :::
 
 ::::
+
+**Other considerations**
+
+- Sensitive to predictor scale, standardization usually required
+- Choice of $K$ requires cross-validation (*we will talk about this next week*)
 
 ---
 
@@ -713,6 +725,84 @@ The confusion matrix shows at a glance **where** the classifier makes mistakes a
 
 ---
 
+## {#accuracy-metrics-1 data-menu-title="Accuracy metrics"}
+
+[Accuracy metrics]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="55%"}
+
+**Overall accuracy**: *fraction of correctly classified observations*
+$$\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}$$
+:::
+
+::: {.column width="45%"}
+
+:::
+
+::::
+
+---
+
+## {#accuracy-metrics-2 data-menu-title="Accuracy metrics"}
+
+[Accuracy metrics]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="55%"}
+
+**Overall accuracy**: *fraction of correctly classified observations*
+$$\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}$$
+
+**Precision**: *of predicted positives, how many are truly positive?*
+$$\text{precision} = \frac{TP}{TP + FP}$$
+
+:::
+
+::: {.column width="45%"}
+
+:::
+
+::::
+
+---
+
+## {#accuracy-metrics-3 data-menu-title="Accuracy metrics"}
+
+[Accuracy metrics]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="55%"}
+
+**Overall accuracy**: *fraction of correctly classified observations*
+$$\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}$$
+
+**Precision**: *of predicted positives, how many are truly positive?*
+$$\text{precision} = \frac{TP}{TP + FP}$$
+
+**Recall** (sensitivity): *of all true positives, how many did we correctly identify?*
+$$\text{recall} = \frac{TP}{TP + FN}$$
+
+:::
+
+::: {.column width="45%"}
+
+:::
+
+::::
+
+
+---
+
 ## {#accuracy-metrics data-menu-title="Accuracy metrics"}
 
 [Accuracy metrics]{.slide-title}
@@ -800,11 +890,7 @@ $$\text{recall} = \frac{TP}{TP + FN}$$
 ::: {.teal-text .body-text-m}
 1. A classifier always predicts positive. What is its recall? What is its precision?
 
-<br>
-
 2. A classifier rarely predicts positve but, when it does, it is always correct. What would recall be like? And precision?
-
-<br>
 
 3. You are a conservation manager allocating resources to degraded sites. Would you prioritize precision or recall? Why?
 :::
@@ -841,7 +927,7 @@ $$F_1 = \frac{2 \cdot \text{precision} \times \text{recall}}{\text{precision} + 
 - Ranges from 0 (worst) to 1 (best)
 - Favors classifiers with **balanced** precision and recall
 - A model with high precision but very low recall (or vice versa) gets a low $F_1$
-- Simple way to compare classifiers, but you should eamine all metrics individually!
+- Simple way to compare classifiers, but you should examine all metrics individually!
 :::
 
 ---
@@ -853,7 +939,9 @@ $$F_1 = \frac{2 \cdot \text{precision} \times \text{recall}}{\text{precision} + 
 <hr>
 
 
-A useful baseline: the **null classifier** always predicts the majority class, ignoring all predictors. Any useful model should outperform it.
+The **null classifier** always predicts the majority class, ignoring all predictors. 
+Any useful model should outperform it!
+The following table shows accuracy metrics for tne KNN (K=10) classifier and the null classifier:
 
 ```{python}
 #| echo: false
@@ -871,33 +959,27 @@ print(metrics_df.to_string(index=False))
 <br>
 
 :::: {.columns}
-::: {.column width="100%"}
-::: {.teal-text .body-text-m}
+
+::: {.column width="50%"}
+::: {.teal-text }
 1. The null classifier has recall = `{python} f"{null_rec:.3f}"` but a lower $F_1$. Why?
-2. The two models have similar accuracy. Is accuracy a good summary of how much KNN improves over the null?
+2. Both models have similar overall accuracy. Is OA alone a good summary to assess whether KNN is no better than the null classifier?
+
 :::
 :::
-::::
 
----
 
-## {#checkin-metrics-table-answers data-menu-title="Check-in: metrics table (answers)"}
+::: {.column width="50%"}
+::: {.body-text-s}
 
-[Check-in]{.slide-title}
+- The null always predicts *healthy* (positive), so it never misses a true positive → perfect recall. But it misclassifies every degraded site, bringing down precision and $F_1$.
 
-<hr>
+- The two classifiers have similar accuracy, yet KNN has some evidence of distinguishing between classes rather than blindly predicting the majority.
+:::
 
-```{python}
-#| echo: false
+:::
 
-print(metrics_df.to_string(index=False))
-```
-
-<br>
-
-1. The null always predicts *healthy* (positive), so it never misses a true positive → perfect recall. But it misclassifies every degraded site, driving down precision and $F_1$.
-
-2. **No.** Similar accuracy can mask very different behavior. Precision, recall, and $F_1$ together reveal that KNN is actually learning something, not just predicting the majority class.
+:::
 
 ---
 
