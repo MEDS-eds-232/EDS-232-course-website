@@ -210,7 +210,7 @@ A synthetic dataset "tracking" 300 coastal monitoring stations along CA coast:
 
 ## {#kelpwatch-plot data-menu-title="KelpWatch: data overview"}
 
-[KelpWatch: data overview]{.slide-title}
+[Data overview]{.slide-title}
 
 <hr>
 
@@ -218,27 +218,18 @@ A synthetic dataset "tracking" 300 coastal monitoring stations along CA coast:
 #| label: example-data-plot
 #| echo: false
 #| fig-align: center
-#| out-width: "70%"
+#| out-width: "100%"
 
-colors  = {'healthy': 'steelblue', 'degraded': 'tomato'}
-markers = {1: 'o', 0: 's'}
+colors = {'healthy': 'steelblue', 'degraded': 'tomato'}
 
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.75, fig_size_y + 0.5))
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 1.5))
 
-for up_val in [1, 0]:
-    for status_val, col in colors.items():
-        mask = (df['upwelling'] == up_val) & (df['status'] == status_val)
-        ax.scatter(df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
-                   c=col, marker=markers[up_val], s=20, alpha=0.5, edgecolors='none')
+for status_val, col in colors.items():
+    mask = df['status'] == status_val
+    ax.scatter(df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
+               c=col, s=25, alpha=0.6, edgecolors='none', label=status_val)
 
-status_handles = [plt.scatter([], [], c=col, s=50, label=lab) for lab, col in colors.items()]
-leg1 = ax.legend(handles=status_handles, title='Status', fontsize=9, loc='upper left')
-ax.add_artist(leg1)
-
-shape_handles = [
-                 plt.scatter([], [], c='gray', marker='s', s=50, label='no upwelling')]
-ax.legend(handles=shape_handles, title='Upwelling', fontsize=9, loc='upper right')
-
+ax.legend(title='Status', fontsize=10, loc='upper left')
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
 ax.grid(True, alpha=0.3)
@@ -329,8 +320,8 @@ circle = plt.Circle(x0, radius, color='dimgray', fill=False,
                     linestyle='--', linewidth=1.8, label='K = 3 neighborhood')
 ax.add_patch(circle)
 ax.set_xlim(0, 6); ax.set_ylim(0, 6)
-ax.set_xlabel('Temp. anomaly (normalized)')
-ax.set_ylabel('Nitrate (normalized)')
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
 ax.legend(fontsize=8, loc='upper left')
 ax.set_aspect('equal')
 ax.grid(True, alpha=0.3)
@@ -352,7 +343,8 @@ KNN algorithm:
 :::
 
 ::: {.teal-text}
-Using K=3*:
+Using K=3:
+
 1. What class would KNN assign to $x_0$? Why?
 2. What would change if we used $K=1$ instead?
 3. What would happen if $K =$ total number of training observations?
@@ -401,8 +393,8 @@ circle = plt.Circle(x0, radius, color='dimgray', fill=False,
                     linestyle='--', linewidth=1.8, label='K = 3 neighborhood')
 ax.add_patch(circle)
 ax.set_xlim(0, 6); ax.set_ylim(0, 6)
-ax.set_xlabel('Temp. anomaly (normalized)')
-ax.set_ylabel('Nitrate (normalized)')
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
 ax.legend(fontsize=8, loc='upper left')
 ax.set_aspect('equal')
 ax.grid(True, alpha=0.3)
@@ -417,7 +409,7 @@ plt.close()
 KNN algorithm:
 
 ::: {.body-text-s}
-1.  Choose an integer $K \geq 1$. *In this case k=3*. 
+1.  Choose an integer $K \geq 1$. 
 2. **Identify the $K$ points** in the training data closest to $x_0$.
 3. **Identify the majority class** among those $K$ neighbors.
 4. **Assign that class** as the prediction for $x_0$.
@@ -444,26 +436,23 @@ KNN algorithm:
 #| label: training-knn
 #| echo: false
 #| fig-align: center
-#| out-width: "90%"
+#| out-width: "70%"
 
-datasets = [('Training data (210 pts)', X_train, y_train), ('Test data (90 pts)', X_test, y_test)]
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.4, fig_size_y), sharey=True)
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
 
-for ax, (title, X_data, y_data) in zip(axes, datasets):
-    ax.contourf(xx1, xx2, grid_num, alpha=0.15,
-                cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
-    ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
-    for label, col in col_map.items():
-        mask = y_data == label
-        ax.scatter(X_data[mask, 0], X_data[mask, 1],
-                   c=col, s=15, alpha=0.7, label=label, edgecolors='none')
-    ax.set_xlim(-2, 4)
-    ax.set_xlabel('Temp. anomaly (°C)')
-    ax.set_title(title)
-    ax.legend(title='True status', fontsize=9)
-    ax.grid(True, alpha=0.3)
-
-axes[0].set_ylabel('Nitrate (μmol/L)')
+ax.contourf(xx1, xx2, grid_num, alpha=0.15,
+            cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
+ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
+for label, col in col_map.items():
+    mask = y_train == label
+    ax.scatter(X_train[mask, 0], X_train[mask, 1],
+               c=col, s=15, alpha=0.7, label=label, edgecolors='none')
+ax.set_xlim(-2, 4)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('Training data (210 pts)')
+ax.legend(title='True status', fontsize=9)
+ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -571,10 +560,12 @@ Points in the "wrong" region are misclassified.
 
 <br>
 
-- **True Positive**: the observation is positive and we correctly predicted positive.
-- **True Negative**: the observation is negative and we correctly predicted negative.
-- **False Positive**: the observation is negative but we incorrectly predicted positive.
-- **False Negative**: the observation is positive but we incorrectly predicted negative.
+| Category | True label | Predicted label | Correct? |
+|---|---|---|:---:|
+| **True Positive** | Positive | Positive | Yes |
+| **True Negative** | Negative | Negative | Yes |
+| **False Positive** | Negative | Positive | No |
+| **False Negative** | Positive | Negative | No |
 
 ---
 
@@ -663,7 +654,10 @@ Identify one true positive point, one true negative point, one false positive po
 
 ```{python}
 #| label: identify-points
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, (fig_size_y + 1) * 0.7))
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 2))
 ax.contourf(xx1, xx2, grid_num, alpha=0.15,
             cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
 ax.contour(xx1, xx2, grid_num, colors='gray', linewidths=1.2, levels=[0.5])
@@ -1003,14 +997,104 @@ $$\text{error rate} = \frac{\text{# misclassified observations}}{\text{total obs
 
 <br>
 
-We compute both a **training error rate** and a **test error rate**.
-
 . . .
+
+We compute both a **training error rate** and a **test error rate** by calculating the error rate on the training and test sets (similarly to how we calcualted the MSE for regression problems). 
 
 <br>
 
 ::: {.center-text .teal-text .body-text-m}
 As in regression, a model is **overfitting** when it has a small training error but a large test error.
+:::
+
+---
+
+## {#checkin-error-curve-1 data-menu-title="Check-in: error curve"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "80%"
+
+k_range      = list(range(1, 141, 2))
+train_errors = []
+test_errors  = []
+for k in k_range:
+    knn_k = KNeighborsClassifier(n_neighbors=k)
+    knn_k.fit(X_train, y_train)
+    train_errors.append(1 - knn_k.score(X_train, y_train))
+    test_errors.append(1 - knn_k.score(X_test,  y_test))
+
+null_error = 1 - null_acc
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
+ax.plot(k_range, train_errors, 'b-o', markersize=3, label='Training error')
+ax.plot(k_range, test_errors,  'r-o', markersize=3, label='Test error')
+ax.axhline(null_error, color='gray', linestyle='--', linewidth=1.5,
+           label=f'Null classifier error ({null_error:.3f})')
+ax.set_xlabel('K (number of neighbors) ← more flexible  |  less flexible →')
+ax.set_ylabel('Classification error rate')
+ax.set_title('KNN: training and test error vs. K')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.teal-text }
+1. At $K = 1$, what is the training error? Why?
+2. Where is the classifier overfitting?
+3. Where would you choose $K$ to get the best generalization performance?
+:::
+
+---
+
+## {#checkin-error-curve-1 data-menu-title="Check-in: error curve"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "80%"
+
+k_range      = list(range(1, 141, 2))
+train_errors = []
+test_errors  = []
+for k in k_range:
+    knn_k = KNeighborsClassifier(n_neighbors=k)
+    knn_k.fit(X_train, y_train)
+    train_errors.append(1 - knn_k.score(X_train, y_train))
+    test_errors.append(1 - knn_k.score(X_test,  y_test))
+
+null_error = 1 - null_acc
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
+ax.plot(k_range, train_errors, 'b-o', markersize=3, label='Training error')
+ax.plot(k_range, test_errors,  'r-o', markersize=3, label='Test error')
+ax.axhline(null_error, color='gray', linestyle='--', linewidth=1.5,
+           label=f'Null classifier error ({null_error:.3f})')
+ax.set_xlabel('K (number of neighbors) ← more flexible  |  less flexible →')
+ax.set_ylabel('Classification error rate')
+ax.set_title('KNN: training and test error vs. K')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s}
+1. Training error = 0. With K = 1, every point's nearest neighbor is itself: always classified correctly.
+2. Left side (small K): training error is near zero but test error is noticeably higher. Gap indicates overfitting.
+3. Near where the error rate is minimized 
 :::
 
 ---
@@ -1055,121 +1139,18 @@ plt.close()
 
 ---
 
-## {#train-test-error-curve data-menu-title="Train-test error curve"}
-
-[Train and test error vs. K]{.slide-title}
-
-<hr>
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| out-width: "80%"
-
-k_range      = list(range(1, 141, 2))
-train_errors = []
-test_errors  = []
-for k in k_range:
-    knn_k = KNeighborsClassifier(n_neighbors=k)
-    knn_k.fit(X_train, y_train)
-    train_errors.append(1 - knn_k.score(X_train, y_train))
-    test_errors.append(1 - knn_k.score(X_test,  y_test))
-
-null_error = 1 - null_acc
-
-fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
-ax.plot(k_range, train_errors, 'b-o', markersize=3, label='Training error')
-ax.plot(k_range, test_errors,  'r-o', markersize=3, label='Test error')
-ax.axhline(null_error, color='gray', linestyle='--', linewidth=1.5,
-           label=f'Null classifier error ({null_error:.3f})')
-ax.set_xlabel('K  ← more flexible  |  less flexible →')
-ax.set_ylabel('Classification error rate')
-ax.set_title('KNN: training and test error vs. K')
-ax.legend()
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
----
-
-## {#checkin-error-curve data-menu-title="Check-in: error curve"}
-
-[Check-in]{.slide-title}
-
-<hr>
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| out-width: "65%"
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.8, fig_size_y * 0.8))
-ax.plot(k_range, train_errors, 'b-o', markersize=3, label='Training error')
-ax.plot(k_range, test_errors,  'r-o', markersize=3, label='Test error')
-ax.axhline(null_error, color='gray', linestyle='--', linewidth=1.5,
-           label=f'Null error ({null_error:.3f})')
-ax.set_xlabel('K'); ax.set_ylabel('Error rate')
-ax.legend(fontsize=9); ax.grid(True, alpha=0.3)
-plt.tight_layout(); plt.show(); plt.close()
-```
-
-:::: {.columns}
-::: {.column width="100%"}
-::: {.teal-text .body-text-m}
-1. At $K = 1$, what is the training error? Why?
-2. Where is the classifier overfitting? How can you tell from the plot?
-:::
-:::
-::::
-
----
-
-## {#checkin-error-curve-answers data-menu-title="Check-in: error curve (answers)"}
-
-[Check-in]{.slide-title}
-
-<hr>
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| out-width: "65%"
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.8, fig_size_y * 0.8))
-ax.plot(k_range, train_errors, 'b-o', markersize=3, label='Training error')
-ax.plot(k_range, test_errors,  'r-o', markersize=3, label='Test error')
-ax.axhline(null_error, color='gray', linestyle='--', linewidth=1.5,
-           label=f'Null error ({null_error:.3f})')
-ax.set_xlabel('K'); ax.set_ylabel('Error rate')
-ax.legend(fontsize=9); ax.grid(True, alpha=0.3)
-plt.tight_layout(); plt.show(); plt.close()
-```
-
-1. **Training error = 0.** With K = 1, every point's nearest neighbor is itself — always classified correctly.
-2. **Left side (small K):** training error is near zero but test error is noticeably higher. That gap is the signature of overfitting.
-
----
-
-## {#section-bias-variance data-menu-title="# Bias-variance tradeoff #" background="#047C90"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">The bias-variance tradeoff</p>
-</div>
-
----
-
 ## {#variance-plot data-menu-title="Variance: K=1 vs K=30"}
 
-[Model variance: how much does the boundary change?]{.slide-title}
+[Model variance]{.slide-title}
 
 <hr>
 
+**Model variance**: how much our model would change if trained on a different dataset. 
+
 ```{python}
 #| echo: false
+#| label: knn-variance
 #| fig-align: center
-#| out-width: "85%"
 
 k_bv = [1, 30]
 fig, axes = plt.subplots(2, 2, figsize=(fig_size_x * 1.1, (fig_size_y + 0.5) * 1.4),
@@ -1201,78 +1182,23 @@ plt.show()
 plt.close()
 ```
 
----
-
-## {#checkin-variance data-menu-title="Check-in: variance"}
-
-[Check-in]{.slide-title}
-
-<hr>
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| out-width: "70%"
-
-fig, axes = plt.subplots(2, 2, figsize=(fig_size_x * 0.85, (fig_size_y + 0.5) * 1.1),
-                         sharex=True, sharey=True)
-for row, k in enumerate(k_bv):
-    for col, (set_name, X_tr, y_tr, mkr) in enumerate(train_sets):
-        ax = axes[row, col]
-        knn_bv = KNeighborsClassifier(n_neighbors=k)
-        knn_bv.fit(X_tr, y_tr)
-        gp = knn_bv.predict(np.c_[xx1.ravel(), xx2.ravel()]).reshape(xx1.shape)
-        gn = (gp == 'healthy').astype(int)
-        ax.contourf(xx1, xx2, gn, alpha=0.15, cmap='coolwarm_r', levels=[-0.5, 0.5, 1.5])
-        ax.contour(xx1, xx2, gn, colors='gray', linewidths=1.0, levels=[0.5])
-        for label, c in col_map.items():
-            mask = y_tr == label
-            ax.scatter(X_tr[mask, 0], X_tr[mask, 1],
-                       color=c, marker=mkr, s=8, alpha=0.5, edgecolors='none')
-        ax.set_xlim(-2, 4)
-        ax.set_title(f'K = {k} — {set_name}', fontsize=9)
-        ax.grid(True, alpha=0.2)
-        if col == 0: ax.set_ylabel('Nitrate (μmol/L)', fontsize=9)
-        if row == 1: ax.set_xlabel('Temp. anomaly (°C)', fontsize=9)
-plt.tight_layout(); plt.show(); plt.close()
-```
-
-::: {.teal-text .body-text-m}
-Which value of K shows higher variance? What is the visual evidence?
+::: {.teal-text}
+**Check-in:** Whick $K$ do you think gives a model with higher variance? 
 :::
-
----
-
-## {#checkin-variance-answers data-menu-title="Check-in: variance (answers)"}
-
-[Check-in]{.slide-title}
-
-<hr>
-
-:::: {.columns}
-
-::: {.column width="50%"}
-::: {.teal-text .body-text-m}
-Which value of K shows higher variance? What is the visual evidence?
-:::
-:::
-
-::: {.column width="50%"}
-**K = 1** shows higher variance. The decision boundary changes dramatically between training sets A and B — many small classification regions appear and disappear. With K = 30 the boundaries are much more similar across the two sets.
-:::
-
-::::
 
 ---
 
 ## {#bias-plot data-menu-title="High-bias: K=120"}
 
-[High bias: K = 120]{.slide-title}
+[Model bias]{.slide-title}
 
 <hr>
 
+**Model bias** refers to the error introduced by the assumptions built into the model. Models with high bias will be systematically wrong, no matter how much training data we give it.
+
 ```{python}
 #| echo: false
+#| label: model-bias
 #| fig-align: center
 #| out-width: "80%"
 
@@ -1306,22 +1232,28 @@ What do you notice about the two boundaries? What does this tell us?
 
 ## {#bias-variance-summary data-menu-title="Bias-variance summary"}
 
-[The bias-variance tradeoff for KNN]{.slide-title}
+[The bias-variance tradeoff: classification]{.slide-title}
 
 <hr>
 
-<br>
+**High flexibility model often shows low bias and high variance.**
+
+- The flexible classification boundary can capture complex patterns but changes a lot from one training sample to another.
+
+
+**Low flexibility model often shows high bias and low variance.** 
+
+- The rigid boundary is stable but may systematically miss real structure in the data.
+
+. . .
+
+In the case of KNN: 
 
 | | Small K | Large K |
 |---|:---:|:---:|
 | **Flexibility** | High | Low |
-| **Bias** | Low | High |
-| **Variance** | High | Low |
-| **Training error** | Low (→ 0 at K=1) | High |
-| **Test error** | High (overfit) | High (underfit) |
+| **Bias** | Lower | Higher |
+| **Variance** | Higher | Lower |
 
-<br>
-
-::: {.center-text .teal-text .body-text-m}
 Test error is minimized at an **intermediate K** that balances bias and variance.
-:::
+
