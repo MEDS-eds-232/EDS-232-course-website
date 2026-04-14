@@ -534,6 +534,7 @@ $$[\hat{\beta}_i - 2 \cdot SE(\hat{\beta}_i),\;\; \hat{\beta}_i + 2 \cdot SE(\ha
 ::: {.column width="50%"}
 The exact 95% confidence intervals for each coefficient are:
 ```{python}
+#| echo: false
 ci = res.conf_int(alpha=0.05)
 ci_b1_low  = ci.loc['process', 0]
 ci_b1_high = ci.loc['process', 1]
@@ -599,6 +600,8 @@ plt.close()
 ::: {.column width="50%"}
 The exact 95% confidence intervals for each coefficient are:
 ```{python}
+#| echo: false
+
 ci = res.conf_int(alpha=0.05)
 ci_b1_low  = ci.loc['process', 0]
 ci_b1_high = ci.loc['process', 1]
@@ -759,6 +762,8 @@ $$
 The table below shows the regression output for the SLR of `co2_reduction` on `process`:
 
 ```{python}
+#| echo: false
+
 def fmt_p(p):
     return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
 
@@ -805,6 +810,8 @@ print(coef_df.to_string(index=False))
 The table below shows the regression output for the SLR of `co2_reduction` on `process`:
 
 ```{python}
+#| echo: false
+
 def fmt_p(p):
     return '< 0.0001' if p < 0.0001 else f'{p:.4f}'
 

@@ -300,7 +300,7 @@ K-Nearest Neighbors
 <hr>
 <div class="columns">
 <div class="column" style="width:50%;">
-<div id="1608c1fd" class="cell" data-execution_count="4">
+<div id="adfaf37e" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -408,8 +408,8 @@ Accuracy assessment for classifiers
 <thead>
 <tr class="header">
 <th>Category</th>
-<th>True label</th>
-<th>Predicted label</th>
+<th>True class</th>
+<th>Predicted class</th>
 <th style="text-align: center;">Correct?</th>
 </tr>
 </thead>
@@ -557,6 +557,7 @@ Accuracy assessment for classifiers
 <h2></h2>
 <p><span class="slide-title">The confusion matrix</span></p>
 <hr>
+<p>To summarize the accuracy of our classifier we</p>
 <ol type="1">
 <li>Predict the class for every point in our test set and compare it against its true class</li>
 <li>Count the number of true/false positives and true/false negatives we obtained:</li>
@@ -579,18 +580,18 @@ Accuracy assessment for classifiers
 <thead>
 <tr class="header">
 <th></th>
-<th style="text-align: center;">Predicted positive</th>
-<th style="text-align: center;">Predicted negative</th>
+<th style="text-align: center;">Predicted class is positive</th>
+<th style="text-align: center;">Predicted class is negative</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>True positive</strong></td>
+<td><strong>True class is positive</strong></td>
 <td style="text-align: center;">TP</td>
 <td style="text-align: center;">FN</td>
 </tr>
 <tr class="even">
-<td><strong>True negative</strong></td>
+<td><strong>True class is negative</strong></td>
 <td style="text-align: center;">FP</td>
 <td style="text-align: center;">TN</td>
 </tr>
@@ -617,8 +618,8 @@ Accuracy assessment for classifiers
 <div class="columns">
 <div class="column" style="width:55%;">
 <p><strong>Overall accuracy</strong>: <em>fraction of correctly classified observations</em> <span class="math display">\[\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}\]</span></p>
-<p><strong>Precision</strong>: <em>of predicted positives, how many are truly positive?</em> <span class="math display">\[\text{precision} = \frac{TP}{TP + FP}\]</span></p>
-<p><strong>Recall</strong> (sensitivity): <em>of all true positives, how many did we correctly identify?</em> <span class="math display">\[\text{recall} = \frac{TP}{TP + FN}\]</span></p>
+<p><strong>Precision</strong>: <em>of all the predicted positives, how many are truly positive?</em> <span class="math display">\[\text{precision} = \frac{TP}{TP + FP}\]</span></p>
+<p><strong>Recall</strong> (sensitivity): <em>of all observations whose true class is positive, how many did we correctly identify?</em> <span class="math display">\[\text{recall} = \frac{TP}{TP + FN}\]</span></p>
 </div><div class="column" style="width:45%;">
 <p>All metrics range from <strong>0</strong> (worst) to <strong>1</strong> (best).</p>
 <p>Precision and recall <strong>trade off</strong> against each other:</p>
@@ -644,8 +645,8 @@ Accuracy assessment for classifiers
 </div>
 </div><div class="column" style="width:50%;">
 <p><strong>Overall accuracy</strong>: <em>fraction of correctly classified observations</em> <span class="math display">\[\text{accuracy} = \frac{TP + TN}{TP + FP + TN + FN}\]</span></p>
-<p><strong>Precision</strong>: <em>of predicted positives, how many are truly positive?</em> <span class="math display">\[\text{precision} = \frac{TP}{TP + FP}\]</span></p>
-<p><strong>Recall</strong> (sensitivity): <em>of all true positives, how many did we correctly identify?</em> <span class="math display">\[\text{recall} = \frac{TP}{TP + FN}\]</span></p>
+<p><strong>Precision</strong>: <em>of all the predicted positives, how many are truly positive?</em> <span class="math display">\[\text{precision} = \frac{TP}{TP + FP}\]</span></p>
+<p><strong>Recall</strong> (sensitivity): <em>of all observations whose true class is positive, how many did we correctly identify?</em> <span class="math display">\[\text{recall} = \frac{TP}{TP + FN}\]</span></p>
 </div></div>
 </section>
 <section id="checkin-precision-recall-answers" class="slide level2" data-menu-title="Check-in: precision vs. recall (answers)">
@@ -686,12 +687,39 @@ Accuracy assessment for classifiers
 </div>
 </div>
 </section>
-<section id="checkin-metrics-table" class="slide level2" data-menu-title="Check-in: metrics table">
+<section id="checkin-metrics-table-1" class="slide level2" data-menu-title="Check-in: metrics table">
 <h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <p>The <strong>null classifier</strong> always predicts the majority class, ignoring all predictors. Any useful model should outperform it! The following table shows accuracy metrics for tne KNN (K=10) classifier and the null classifier:</p>
-<div id="b932dc46" class="cell" data-execution_count="8">
+<div id="f39616c6" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-stdout">
+<pre><code>          Model Accuracy Precision Recall F₁ score
+Null classifier    0.667     0.667  1.000    0.800
+   KNN (K = 10)    0.656     0.710  0.817    0.760</code></pre>
+</div>
+</div>
+<p><br></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="teal-text">
+<ol type="1">
+<li>The null classifier has recall = 1.000 but a lower <span class="math inline">\(F_1\)</span>. Why?</li>
+<li>Both models have similar overall accuracy. Is OA alone a good summary to assess whether KNN is no better than the null classifier?</li>
+</ol>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="body-text-s">
+
+</div>
+</div></div>
+</section>
+<section id="checkin-metrics-table-2" class="slide level2" data-menu-title="Check-in: metrics table">
+<h2></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<p>The <strong>null classifier</strong> always predicts the majority class, ignoring all predictors. Any useful model should outperform it! The following table shows accuracy metrics for tne KNN (K=10) classifier and the null classifier:</p>
+<div id="f9239962" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-stdout">
 <pre><code>          Model Accuracy Precision Recall F₁ score
 Null classifier    0.667     0.667  1.000    0.800
@@ -745,15 +773,29 @@ Overfitting and the bias-variance tradeoff
 <p>As in regression, a model is <strong>overfitting</strong> when it has a small training error but a large test error.</p>
 </div>
 </section>
+<section id="knn-boundaries-k" class="slide level2" data-menu-title="KNN boundaries vs. K">
+<h2></h2>
+<p><span class="slide-title">KNN boundaries for different K</span></p>
+<hr>
+<div id="40078753" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="4_1_classification-SLIDES-BLANK_files/figure-revealjs/cell-11-output-1.png" class="quarto-figure quarto-figure-center" width="1266" height="385"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 <section id="checkin-error-curve-1" class="slide level2" data-menu-title="Check-in: error curve">
 <h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
-<div id="21e5b2da" class="cell" data-execution_count="9">
+<div id="ac85586d" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="4_1_classification-SLIDES-BLANK_files/figure-revealjs/cell-10-output-1.png" class="quarto-figure quarto-figure-center" width="786" height="385"></p>
+<p><img data-src="4_1_classification-SLIDES-BLANK_files/figure-revealjs/cell-12-output-1.png" class="quarto-figure quarto-figure-center" width="786" height="385"></p>
 </figure>
 </div>
 </div>
@@ -770,11 +812,11 @@ Overfitting and the bias-variance tradeoff
 <h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
-<div id="47e4635a" class="cell" data-execution_count="10">
+<div id="521cd7f5" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="4_1_classification-SLIDES-BLANK_files/figure-revealjs/cell-11-output-1.png" class="quarto-figure quarto-figure-center" width="786" height="385"></p>
+<p><img data-src="4_1_classification-SLIDES-BLANK_files/figure-revealjs/cell-13-output-1.png" class="quarto-figure quarto-figure-center" width="786" height="385"></p>
 </figure>
 </div>
 </div>
@@ -787,26 +829,12 @@ Overfitting and the bias-variance tradeoff
 </ol>
 </div>
 </section>
-<section id="knn-boundaries-k" class="slide level2" data-menu-title="KNN boundaries vs. K">
-<h2></h2>
-<p><span class="slide-title">KNN boundaries for different K</span></p>
-<hr>
-<div id="5a4becb8" class="cell" data-execution_count="11">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="4_1_classification-SLIDES-BLANK_files/figure-revealjs/cell-12-output-1.png" class="quarto-figure quarto-figure-center" width="1266" height="385"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
 <section id="variance-plot" class="slide level2" data-menu-title="Variance: K=1 vs K=30">
 <h2></h2>
 <p><span class="slide-title">Model variance</span></p>
 <hr>
 <p><strong>Model variance</strong>: how much our model would change if trained on a different dataset.</p>
-<div id="cell-knn-variance" class="cell" data-execution_count="12">
+<div id="cell-knn-variance" class="cell" data-execution_count="13">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -824,7 +852,7 @@ Overfitting and the bias-variance tradeoff
 <p><span class="slide-title">Model bias</span></p>
 <hr>
 <p><strong>Model bias</strong> refers to the error introduced by the assumptions built into the model. Models with high bias will be systematically wrong, no matter how much training data we give it.</p>
-<div id="cell-model-bias" class="cell" data-execution_count="13">
+<div id="cell-model-bias" class="cell" data-execution_count="14">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
