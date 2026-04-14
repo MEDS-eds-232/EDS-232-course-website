@@ -1,0 +1,600 @@
+---
+title: Logistic regression
+jupyter: eds232-env
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import (confusion_matrix, precision_score, recall_score,
+                              f1_score, accuracy_score, roc_curve, auc)
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+# ── KelpWatch synthetic dataset ────────────────────────────────────────────────
+# 300 coastal monitoring stations, each characterized by:
+#   temp_anomaly – sea surface temperature anomaly (°C)
+#   nitrate      – nitrate concentration (μmol/L)
+#   upwelling    – whether upwelling was detected (yes / no)
+#   status       – kelp forest condition: 'healthy' or 'degraded'
+#
+# True data-generating model (logistic):
+#   log-odds(healthy) = -0.8 − 1.5·temp_anomaly + 0.10·nitrate + 1.8·upwelling
+# ──────────────────────────────────────────────────────────────────────────────
+np.random.seed(42)
+n = 300
+
+temp_anomaly = np.random.normal(0.4, 1.0, n)
+nitrate      = np.random.normal(14, 4, n)
+upwelling    = np.random.binomial(1, 0.5, n)
+
+log_odds     = -0.8 + (-1.5 * temp_anomaly) + (0.10 * nitrate) + (1.8 * upwelling)
+prob_healthy = 1 / (1 + np.exp(-log_odds))
+status_num   = np.random.binomial(1, prob_healthy, n)
+status       = np.where(status_num == 1, 'healthy', 'degraded')
+
+df = pd.DataFrame({
+    'temp_anomaly':    temp_anomaly,
+    'nitrate':         nitrate,
+    'upwelling':       upwelling,
+    'upwelling_label': np.where(upwelling == 1, 'yes', 'no'),
+    'status':          status,
+    'status_num':      status_num,
+})
+
+# Train/test split used throughout this lesson
+X = df[['temp_anomaly', 'nitrate']].values
+y = df['status'].values
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42, stratify=y
+)
+
+col_map = {'healthy': 'steelblue', 'degraded': 'tomato'}
+
+# Decision boundary grid
+x1_range = np.linspace(-2, 4, 300)
+x2_range = np.linspace(X[:, 1].min() - 1, X[:, 1].max() + 1, 300)
+xx1, xx2 = np.meshgrid(x1_range, x2_range)
+```
+
+[📊 Slides](4_3_logistic_regression-SLIDES.qmd) / [📊 Blank slides](4_3_logistic_regression-SLIDES-BLANK.qmd)
+
+In this lesson we introduce:
+
+- The logistic function and why we prefer it over linear regression for classification
+- Maximum likelihood estimation as the fitting method for logistic regression
+- Interpreting logistic regression coefficients through log-odds
+- Adjusting the classification threshold and its effect on precision and recall
+- ROC curves and the AUC as tools for evaluating classifier performance across thresholds
+
+These notes are based on chapter 4 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
+
+## A guiding example: kelp forest monitoring
+
+In this lesson we use the same example dataset as in our KNN lesson: a synthetic dataset that "tracks" 300 coastal monitoring stations. For each station we record:
+
+- **`temp_anomaly`** — sea surface temperature anomaly (°C); positive values indicate warmer-than-average conditions
+- **`nitrate`** — nitrate concentration (μmol/L); higher values generally support kelp growth
+- **`status`** — observed kelp forest condition: *healthy* or *degraded*
+
+The central question is: *can we predict whether a kelp forest site is healthy or degraded from its oceanographic conditions?*
+
+```{python}
+#| label: initial-data-plotting
+
+colors = {'healthy': 'steelblue', 'degraded': 'tomato'}
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5 * 0.8, (fig_size_y + 1.5) * 0.8))
+
+for status_val, col in colors.items():
+    mask = df['status'] == status_val
+    ax.scatter(df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
+               c=col, s=25, alpha=0.6, edgecolors='none', label=status_val)
+
+counts = df['status'].value_counts()
+legend_labels = {s: f'{s} (n={counts[s]})' for s in colors}
+handles = [plt.scatter([], [], c=col, s=50, label=legend_labels[s]) for s, col in colors.items()]
+ax.legend(handles=handles, title='Status', fontsize=13, loc='upper left')
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+In the [previous lesson](../4_1_classification/4_1_knn_accuracy_metrics-NOTES.qmd) we introduced classification and used K-Nearest Neighbors to predict kelp forest status in this dataset. In this lesson we study logistic regression for the same task.
+
+## Logistic regression
+
+**Logistic regression** is a parametric classification method. To begin with, we will see how it works in a binary classification task with a single quantitative predictor. So our setup is
+
+- one quantitative predictor $X$,
+- one qualitative response $Y$ with two classes, and
+- the classes are 1 (positive) and 0 (negative). 
+
+
+Rather than predicting the class directly, logistic regression models the **probability** that an observation belongs to the positive class given the predictor:
+
+$$P(Y = 1 \mid X) = p(X) = \text{probability of being class 1 given } X.$$
+
+Once we have the model $p(X)$, we classify by selecting a **threshold** $\alpha$ and asserting:
+
+$$
+\hat{y} = \begin{cases} 1 & \text{if } p(X) \geq \alpha \\ 0 & \text{if } p(X) < \alpha \end{cases}.
+$$
+
+
+The choice of threshold is something we control and can tune, we will discuss this in detail later.
+
+In our running example:
+
+- **Predictor**: `temp_anomaly`: sea surface temperature anomaly (°C)
+- **Response**: `status`: kelp forest condition: *healthy* (class 1/positive) or *degraded* (class 0/negative)
+
+Using logistic regression we can model the probability of a site having a healthy status given a certain temperature anomaly:
+
+$$P(\text{status} = \text{healthy} \mid \text{temp\_anomaly}) = p(\text{temp\_anomaly}).$$
+
+Then, we select a threshold to classify a site as healthy or degraded given the probability that it is degraded based on the observed temperature anomaly. For example, if we use $\alpha = 0.8$ we can make the predictions:
+
+- If $p(\text{temp}) \geq 0.8$, then predict the site is *healthy*.
+- If $p(\text{temp}) < 0.8$, then predict the site is *degraded*.
+
+
+
+## The logistic function
+
+Why not use linear regression to model $p(X)$ directly? The problem is that a linear model can produce probabilities outside $[0, 1]$. Instead, logistic regression models $p(X)$ using the **logistic function** (also called the sigmoid):
+
+$$p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}}$$
+
+where $\beta_0$ and $\beta_1$ are coefficients to be estimated. This function always returns values between 0 and 1, making it a valid probability model.
+
+```{python}
+#| label: logistic-curve
+
+# Fit a simple logistic regression on temp_anomaly alone to illustrate the S-curve
+X_simple = df[['temp_anomaly']].values
+y_simple  = df['status_num'].values
+
+lr_simple = LogisticRegression()
+lr_simple.fit(X_simple, y_simple)
+
+temp_range  = np.linspace(-3, 4, 300)
+prob_curve  = lr_simple.predict_proba(temp_range.reshape(-1, 1))[:, 1]
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.8, fig_size_y))
+
+ax.scatter(df['temp_anomaly'], df['status_num'],
+           c=[col_map[s] for s in df['status']], alpha=0.25, s=15,
+           edgecolors='none', label='_nolegend_')
+ax.plot(temp_range, prob_curve, color='black', linewidth=2,
+        label='p(healthy | temp_anomaly)')
+ax.axhline(0.5, color='gray', linestyle='--', linewidth=1, label='threshold = 0.5')
+
+for s, col in col_map.items():
+    ax.scatter([], [], c=col, s=30, label=s, edgecolors='none')
+
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('P(status = healthy)')
+ax.set_title('Logistic regression: fitted probability curve')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+Notice the characteristic **S-shape**: as temperature anomaly increases (warmer conditions), the probability of a healthy site decreases. The curve is bounded between 0 and 1 and smoothly transitions between the two classes.
+
+## Maximum likelihood
+
+How do we estimate $\beta_0$ and $\beta_1$? Unlike linear regression, there is no closed-form solution. Instead, we use **maximum likelihood estimation (MLE)**.
+
+Given our training data $\{(X_1, y_1), \ldots, (X_n, y_n)\}$, where each $y_i \in \{0, 1\}$, the idea is to find the coefficients that make the observed data as probable as possible:
+
+- For a training point $X_i$ where $y_i = 1$ (positive class), we want $p(X_i)$ to be **close to 1**.
+- For a training point $X_i$ where $y_i = 0$ (negative class), we want $p(X_i)$ to be **close to 0**.
+
+This is formalized through the **likelihood function**, which is the joint probability of observing all the training labels under the model:
+
+$$\mathcal{L}(\beta_0, \beta_1) = \prod_{i:\, y_i = 1} p(X_i) \cdot \prod_{i:\, y_i = 0} \bigl(1 - p(X_i)\bigr).$$
+
+We choose the coefficient values $\hat{\beta}_0, \hat{\beta}_1$ that **maximize** this function. In practice the log-likelihood is maximized instead (it is numerically more stable and turns the product into a sum), but the resulting estimates are identical.
+
+```{python}
+#| label: likelihood-intuition
+
+# Show two candidate curves with different β₁ and visualize how well they fit the data
+beta0  = lr_simple.intercept_[0]
+beta1  = lr_simple.coef_[0][0]
+
+def logistic(x, b0, b1):
+    return 1 / (1 + np.exp(-(b0 + b1 * x)))
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.1, fig_size_y), sharey=True)
+
+configs = [
+    (beta0, beta1,       'MLE fit (maximizes likelihood)',   'steelblue'),
+    (beta0, beta1 * 0.1, 'Poor fit (low likelihood)',        'tomato'),
+]
+
+for ax, (b0, b1, title, lc) in zip(axes, configs):
+    ax.scatter(df['temp_anomaly'], df['status_num'],
+               c=[col_map[s] for s in df['status']], alpha=0.25, s=12,
+               edgecolors='none')
+    ax.plot(temp_range, logistic(temp_range, b0, b1), color=lc, linewidth=2)
+    ax.set_xlabel('Temp. anomaly (°C)')
+    ax.set_title(title)
+    ax.grid(True, alpha=0.3)
+
+axes[0].set_ylabel('P(status = healthy)')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The MLE fit (left) tracks the data well — high probabilities where healthy sites are dense and low probabilities where degraded sites are dense. The poor fit (right) uses a flat curve that barely separates the two classes, and would have a lower likelihood.
+
+## Interpreting the coefficients
+
+### The log-odds
+
+Once we have our fitted coefficients, how do we interpret them? The key is to rewrite the logistic function in terms of the **odds** and then the **log-odds**.
+
+Starting from:
+
+$$p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}}$$
+
+we can rearrange to get the **odds**:
+
+$$\frac{p(X)}{1 - p(X)} = e^{\beta_0 + \beta_1 X}$$
+
+Taking the natural log gives the **log-odds** (also called the *logit*):
+
+$$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X$$
+
+This tells us that **the log-odds is linear in $X$**, just like the linear regression model. Crucially:
+
+- If $\beta_1 > 0$: increasing $X$ increases the log-odds, which increases $p(X)$ → the larger $X$, the higher the probability of belonging to class 1.
+- If $\beta_1 < 0$: increasing $X$ decreases the log-odds, which decreases $p(X)$ → the larger $X$, the lower the probability of belonging to class 1.
+
+```{python}
+#| label: log-odds-plot
+
+log_odds_vals = beta0 + beta1 * temp_range
+prob_vals     = logistic(temp_range, beta0, beta1)
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.1, fig_size_y))
+
+axes[0].plot(temp_range, log_odds_vals, color='steelblue', linewidth=2)
+axes[0].axhline(0, color='gray', linestyle='--', linewidth=1)
+axes[0].set_xlabel('Temp. anomaly (°C)')
+axes[0].set_ylabel('Log-odds')
+axes[0].set_title('Log-odds: linear in X')
+axes[0].grid(True, alpha=0.3)
+
+axes[1].plot(temp_range, prob_vals, color='steelblue', linewidth=2)
+axes[1].axhline(0.5, color='gray', linestyle='--', linewidth=1, label='p = 0.5')
+axes[1].set_xlabel('Temp. anomaly (°C)')
+axes[1].set_ylabel('P(status = healthy)')
+axes[1].set_title('Probability: nonlinear S-curve')
+axes[1].legend(fontsize=9)
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+Notice that the log-odds is exactly linear in $X$ (left panel), but when we transform back to the probability scale we get the familiar S-shape (right panel). The two representations contain identical information — they are just different scales.
+
+:::{.callout-tip}
+## Check-in
+
+In our fitted model, `temp_anomaly` has a negative coefficient ($\hat{\beta}_1 < 0$).
+
+1. What does this tell us about the relationship between temperature anomaly and kelp forest health?
+2. A site has a temperature anomaly of 2°C. The fitted model gives log-odds = −1.5. What is the predicted probability of *healthy* status? Is this above or below the default threshold of 0.5?
+3. What does a log-odds of 0 correspond to in terms of probability?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. A negative coefficient means that as temperature anomaly increases (warmer ocean conditions), the log-odds of a healthy site decrease, and therefore the probability of healthy status decreases. Warmer-than-average temperatures are associated with kelp stress.
+
+2. $p = \frac{e^{-1.5}}{1 + e^{-1.5}} \approx 0.18$. This is below the default threshold of 0.5, so the site would be predicted as *degraded*.
+
+3. A log-odds of 0 means $\log(p/(1-p)) = 0$, so $p/(1-p) = 1$, giving $p = 0.5$. This is exactly the decision boundary for the default threshold.
+:::
+
+### Hypothesis testing
+
+Once we have estimated our coefficients, we can ask: *is there truly a relationship between $X$ and $Y$?*
+
+If $\beta_1 = 0$, then:
+
+$$p(X) = \frac{e^{\beta_0}}{1 + e^{\beta_0}} = \text{constant}$$
+
+meaning the probability of the positive class does not depend on $X$ at all. The hypotheses are:
+
+$$H_0: \beta_1 = 0 \qquad H_1: \beta_1 \neq 0$$
+
+We test this using a **Z-statistic** (the analogue of the t-statistic in linear regression), defined as:
+
+$$Z = \frac{\hat{\beta}_1}{\text{SE}(\hat{\beta}_1)}$$
+
+A large $|Z|$ value provides evidence against $H_0$. The corresponding **p-value** quantifies how likely we would observe a Z-statistic this extreme if $H_0$ were true.
+
+```{python}
+#| label: hypothesis-test
+
+from scipy import stats
+
+lr_full = LogisticRegression(max_iter=1000)
+lr_full.fit(df[['temp_anomaly', 'nitrate']], df['status_num'])
+
+# Approximate standard errors via the Hessian of the log-likelihood
+X_mat = np.column_stack([np.ones(n), df['temp_anomaly'], df['nitrate']])
+beta_hat = np.concatenate([[lr_full.intercept_[0]], lr_full.coef_[0]])
+
+p_hat = lr_full.predict_proba(df[['temp_anomaly', 'nitrate']])[:, 1]
+W = np.diag(p_hat * (1 - p_hat))
+cov = np.linalg.inv(X_mat.T @ W @ X_mat)
+se = np.sqrt(np.diag(cov))
+
+names = ['Intercept', 'temp_anomaly', 'nitrate']
+z_stats = beta_hat / se
+p_vals  = 2 * (1 - stats.norm.cdf(np.abs(z_stats)))
+
+results = pd.DataFrame({
+    'Coefficient': names,
+    'Estimate':    np.round(beta_hat, 4),
+    'Std. Error':  np.round(se, 4),
+    'Z-statistic': np.round(z_stats, 3),
+    'p-value':     [f'{p:.4f}' for p in p_vals],
+})
+print(results.to_string(index=False))
+```
+
+Both `temp_anomaly` and `nitrate` have small p-values, providing strong evidence that each predictor is associated with kelp forest status.
+
+## Multiple logistic regression
+
+The logistic model extends naturally to multiple predictors $X_1, X_2, \ldots, X_p$:
+
+$$p(X) = \frac{e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}{1 + e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}$$
+
+The log-odds remain linear in all predictors:
+
+$$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p$$
+
+We now fit a logistic regression using both `temp_anomaly` and `nitrate` as predictors:
+
+```{python}
+#| label: multi-logistic-fit
+
+lr_multi = LogisticRegression(max_iter=1000)
+lr_multi.fit(X_train, (y_train == 'healthy').astype(int))
+
+grid_prob = lr_multi.predict_proba(np.c_[xx1.ravel(), xx2.ravel()])[:, 1].reshape(xx1.shape)
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.3, fig_size_y), sharey=True)
+
+datasets = [('Training data (210 pts)', X_train, y_train),
+            ('Test data (90 pts)',      X_test,  y_test)]
+
+for ax, (title, X_data, y_data) in zip(axes, datasets):
+    cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='coolwarm_r', alpha=0.25,
+                     vmin=0, vmax=1)
+    ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
+    for label, col in col_map.items():
+        mask = y_data == label
+        ax.scatter(X_data[mask, 0], X_data[mask, 1],
+                   c=col, s=15, alpha=0.7, label=label, edgecolors='none')
+    ax.set_xlim(-2, 4)
+    ax.set_xlabel('Temp. anomaly (°C)')
+    ax.set_title(title)
+    ax.legend(title='True status', fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+axes[0].set_ylabel('Nitrate (μmol/L)')
+fig.colorbar(cf, ax=axes[1], label='P(healthy)', shrink=0.85)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The shading now represents the **predicted probability** of healthy status: darker blue regions indicate higher probability of healthy, darker red indicate higher probability of degraded. The gray line is the **decision boundary** at $p = 0.5$.
+
+Unlike KNN, the logistic regression boundary is always a straight line (or a hyperplane in higher dimensions), reflecting the linear structure of the log-odds model.
+
+## Adjusting the threshold
+
+So far we have used the default threshold of $\alpha = 0.5$: an observation is predicted as positive if $p(X) \geq 0.5$. But this is just a convention — we can choose any threshold between 0 and 1.
+
+Changing the threshold shifts the tradeoff between recall and precision:
+
+- **Lowering** $\alpha$: more observations get predicted as positive → **recall increases**, precision decreases (more false positives).
+- **Raising** $\alpha$: fewer observations get predicted as positive → precision increases, **recall decreases** (more false negatives).
+
+The right threshold depends on the application and the **cost of each error type**, not just overall accuracy.
+
+```{python}
+#| label: threshold-effect
+
+y_test_num  = (y_test == 'healthy').astype(int)
+y_prob_test = lr_multi.predict_proba(X_test)[:, 1]
+
+thresholds = np.linspace(0.01, 0.99, 200)
+precisions, recalls, accuracies = [], [], []
+
+for t in thresholds:
+    y_hat = (y_prob_test >= t).astype(int)
+    precisions.append(precision_score(y_test_num, y_hat, zero_division=0))
+    recalls.append(recall_score(y_test_num, y_hat, zero_division=0))
+    accuracies.append(accuracy_score(y_test_num, y_hat))
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y))
+ax.plot(thresholds, precisions,  label='Precision',        color='steelblue',  linewidth=2)
+ax.plot(thresholds, recalls,     label='Recall',           color='tomato',     linewidth=2)
+ax.plot(thresholds, accuracies,  label='Overall accuracy', color='seagreen',   linewidth=2, linestyle='--')
+ax.axvline(0.5, color='gray', linestyle=':', linewidth=1.2, label='Default threshold (0.5)')
+ax.set_xlabel('Classification threshold (α)')
+ax.set_ylabel('Metric value')
+ax.set_title('Precision, recall, and accuracy vs. threshold')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Check-in
+
+Looking at the plot above:
+
+1. What happens to recall as the threshold increases toward 1? Why?
+2. At a threshold close to 0, almost everything is predicted as positive. What does that do to precision?
+3. You are managing kelp restoration resources and can only intervene at sites you predict as degraded. Would you want a high or low threshold? Which metric does this prioritize?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. As the threshold rises, fewer sites are classified as healthy (positive). This means more truly healthy sites get classified as degraded → more false negatives → recall falls toward 0.
+
+2. At a near-zero threshold everything is classified as positive. Recall approaches 1 (every true positive is caught), but precision falls because many negative observations are also classified as positive.
+
+3. A lower threshold means you flag more sites as degraded, so you are less likely to miss a truly degraded site. This prioritizes **recall** — the same reasoning we discussed for conservation applications in the KNN lesson. The cost of a missed degraded site (false negative) is higher than the cost of deploying resources to a healthy site by mistake.
+:::
+
+### How to select the best threshold?
+
+There is no single correct answer — the threshold selection must be guided by:
+
+- **Domain knowledge**: what is the ecological or operational consequence of each error type?
+- **The precision–recall tradeoff**: understanding what you gain and lose at each threshold.
+- **Cross-validation**: evaluating threshold performance on held-out data rather than the test set.
+
+## ROC curves
+
+The **Receiver Operating Characteristic (ROC) curve** is a tool that visualizes classifier performance **across all possible thresholds** simultaneously. Rather than committing to a single threshold, it sweeps the threshold from 1 down to 0 and traces out the resulting:
+
+- **True Positive Rate (TPR)** = $\frac{TP}{TP + FN}$ = recall
+- **False Positive Rate (FPR)** = $\frac{FP}{FP + TN}$ = fraction of true negatives incorrectly classified as positive
+
+At the extremes:
+
+| Threshold | Behavior | TPR | FPR |
+|---|---|:---:|:---:|
+| 1.0 | Everything predicted negative | 0 | 0 |
+| 0.5 | Default classifier | intermediate | intermediate |
+| 0.0 | Everything predicted positive | 1 | 1 |
+
+The ROC curve traces a path from (0, 0) to (1, 1). A **perfect classifier** would pass through the upper-left corner (0, 1): zero false positives with perfect recall. A **random classifier** produces a diagonal line from corner to corner.
+
+```{python}
+#| label: roc-curve
+
+fpr, tpr, roc_thresholds = roc_curve(y_test_num, y_prob_test)
+roc_auc = auc(fpr, tpr)
+
+# Mark a few threshold values on the curve
+highlight_thresholds = [0.7, 0.5, 0.3]
+ht_fpr, ht_tpr = [], []
+for ht in highlight_thresholds:
+    idx = np.argmin(np.abs(roc_thresholds - ht))
+    ht_fpr.append(fpr[idx])
+    ht_tpr.append(tpr[idx])
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
+
+ax.plot(fpr, tpr, color='steelblue', linewidth=2,
+        label=f'Logistic regression (AUC = {roc_auc:.3f})')
+ax.plot([0, 1], [0, 1], 'k--', linewidth=1, label='Random classifier (AUC = 0.5)')
+
+for ht, hf, htpr in zip(highlight_thresholds, ht_fpr, ht_tpr):
+    ax.scatter(hf, htpr, s=60, zorder=5, color='tomato')
+    ax.annotate(f'α = {ht}', xy=(hf, htpr),
+                xytext=(hf + 0.05, htpr - 0.07), fontsize=8,
+                arrowprops=dict(arrowstyle='->', color='gray', lw=0.8))
+
+ax.set_xlabel('False Positive Rate (FPR)')
+ax.set_ylabel('True Positive Rate (TPR)')
+ax.set_title('ROC curve — Logistic regression on KelpWatch data')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+Each point on the ROC curve corresponds to one threshold value. Moving along the curve from lower-left to upper-right corresponds to lowering the threshold. The annotated points show the TPR/FPR tradeoff at three specific thresholds.
+
+A curve **closer to the upper-left corner** represents a better classifier: it achieves high TPR while keeping FPR low.
+
+### Area under the curve (AUC)
+
+The **AUC** (area under the ROC curve) summarizes the entire ROC curve in a single number:
+
+- **AUC = 1.0**: perfect classifier — the ROC curve passes through (0, 1).
+- **AUC = 0.5**: random classifier — no better than flipping a coin.
+- **AUC between 0.5 and 1**: the classifier has some discriminating ability.
+
+```{python}
+#| label: auc-comparison
+
+# Compare logistic regression AUC to a null classifier
+null_probs = np.full(len(y_test_num), y_test_num.mean())
+fpr_null, tpr_null, _ = roc_curve(y_test_num, null_probs)
+auc_null = auc(fpr_null, tpr_null)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
+
+ax.fill_between(fpr, tpr, alpha=0.15, color='steelblue')
+ax.plot(fpr, tpr, color='steelblue', linewidth=2,
+        label=f'Logistic regression (AUC = {roc_auc:.3f})')
+ax.plot([0, 1], [0, 1], 'k--', linewidth=1,
+        label=f'Random classifier (AUC = 0.50)')
+
+ax.set_xlabel('False Positive Rate (FPR)')
+ax.set_ylabel('True Positive Rate (TPR)')
+ax.set_title('AUC: area under the ROC curve')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Check-in
+
+Back in our kelp forest example, the logistic regression model gives an AUC of `{python} f"{roc_auc:.3f}"`.
+
+1. What does this AUC tell us about the model's ability to discriminate between healthy and degraded sites?
+2. Suppose a colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?
+3. The AUC does not depend on the threshold. In what situation would you want to look at the ROC curve rather than just the AUC?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. An AUC of `{python} f"{roc_auc:.3f}"` means that if we randomly pick one healthy and one degraded site, the model assigns a higher probability of being healthy to the healthy site roughly `{python} f"{roc_auc*100:.0f}"` % of the time. This is substantially better than random.
+
+2. A model with AUC = 0.52 is barely better than random and almost certainly not useful in practice. The logistic regression would be preferred.
+
+3. The AUC summarizes performance across all thresholds equally. In practice, not all thresholds are equally relevant — we may only care about behavior at low FPR (e.g., if false alarms are very costly) or at high TPR (if missing a positive is very costly). Examining the ROC curve in the region of interest gives more targeted information than the AUC alone.
+:::
