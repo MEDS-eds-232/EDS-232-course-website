@@ -1,5 +1,5 @@
 ---
-title: Logistic regression
+title: Logistic regression and ROC curves
 jupyter: eds232-env
 ---
 
@@ -144,14 +144,15 @@ Using logistic regression we can model the probability of a site having a health
 
 $$P(\text{status} = \text{healthy} \mid \text{temp\_anomaly}) = p(\text{temp\_anomaly}).$$
 
-Then, we select a threshold to classify a site as healthy or degraded given the probability that it is degraded based on the observed temperature anomaly. For example, if we use $\alpha = 0.8$ we can make the predictions:
+Then, we select a threshold to classify a site as healthy or degraded given the probability that it is degraded based on the observed temperature anomaly. For example, if we use $\alpha = 0.5$ we can make the predictions:
 
-- If $p(\text{temp}) \geq 0.8$, then predict the site is *healthy*.
-- If $p(\text{temp}) < 0.8$, then predict the site is *degraded*.
+- If $p(\text{temp}) \geq 0.5$, then predict the site is *healthy*.
+- If $p(\text{temp}) < 0.5$, then predict the site is *degraded*.
 
 :::{.callout-tip}
 ## Check-in
-If we were to use `nitrate` as our predictor, what would the function $p(X)$ be modeling?
+1. If we have a new observation with an observed temperature anomaly of $3$ degrees Celsius, what steps would be needed to predict its class using $p(X)$?
+2. If we were to use `nitrate` as our predictor, what would the function $p(X)$ be modeling?
 :::
 :::{.callout-tip collapse="true"}
 ## Discussion
@@ -159,13 +160,26 @@ If we were to use `nitrate` as our predictor, what would the function $p(X)$ be 
 :::
 
 
-### The logistic function
+### The logistic function and maximum likelihood
 
-Logistic regression models the probability $p(X)$ using the **logistic function** (also called the sigmoid):
+Logistic regression models the probability $p(X)$ using the **logistic function** (also called the sigmoid)
 
 $$p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}},$$
 
 where $\beta_0$ and $\beta_1$ are coefficients to be estimated to fit the model. This function always returns values between 0 and 1, making it a valid probability model.
+
+To estimate $\beta_0$ and $\beta_1$ we use **maximum likelihood estimation (MLE)**. Given our training data $\{(x_1, y_1), \ldots, (x_n, y_n)\}$, where each $y_i \in \{0, 1\}$, the idea is to find the coefficients $\hat{\beta}_0$ and $\hat{\beta}_1$ that make the observed data as probable as possible:
+
+- For a training point $x_i$ where $y_i = 1$ (positive class), we want $p(x_i)$ to be **close to 1**.
+- For a training point $x_i$ where $y_i = 0$ (negative class), we want $p(x_i)$ to be **close to 0**.
+
+This is equivalent to **maximizing the likelihood function**, which is the joint probability of observing all the training labels under the model:
+
+$$\mathcal{L}(\beta_0, \beta_1) = \prod_{i:\, y_i = 1} p(X_i) \cdot \prod_{i:\, y_i = 0} \bigl(1 - p(X_i)\bigr).$$
+
+
+In our example, we use the training data and the MLE method to fit a logistic regression model, represented below by the solid black line. We can see the probability is higher in regions where healthy sites are dense and as temperature anomaly increases, the probability of a healthy site decreases. Notice too, the characteristic S-shape of the logistic function. 
+
 
 ```{python}
 #| label: logistic-curve
@@ -202,82 +216,47 @@ plt.show()
 plt.close()
 ```
 
-Notice the characteristic **S-shape**: as temperature anomaly increases (warmer conditions), the probability of a healthy site decreases. The curve is bounded between 0 and 1 and smoothly transitions between the two classes.
 
-### Maximum likelihood
+:::{.callout-tip}
+## Check-in
+Given the logistic model above, what would be the predicted status of an observation with temperature anomaly of 0.5 degrees Celsius? 
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+*FILL OUT DISCUSSION*
+:::
 
-How do we estimate $\beta_0$ and $\beta_1$? Unlike linear regression, there is no closed-form solution. Instead, we use **maximum likelihood estimation (MLE)**.
 
-Given our training data $\{(X_1, y_1), \ldots, (X_n, y_n)\}$, where each $y_i \in \{0, 1\}$, the idea is to find the coefficients that make the observed data as probable as possible:
+### Interpreting the coefficients
 
-- For a training point $X_i$ where $y_i = 1$ (positive class), we want $p(X_i)$ to be **close to 1**.
-- For a training point $X_i$ where $y_i = 0$ (negative class), we want $p(X_i)$ to be **close to 0**.
+Logistic regression is a classification method that allows us to do both classification and inference. Once we have fitted our model and estimated the coefficients $\hat{\beta}_i$, we can interpret them to understand relations between the predictor and response variables.
+To understand these relationships we can rewrite the logistic function in terms of the odds and then the log-odds.
 
-This is formalized through the **likelihood function**, which is the joint probability of observing all the training labels under the model:
+Starting from the logistic function
 
-$$\mathcal{L}(\beta_0, \beta_1) = \prod_{i:\, y_i = 1} p(X_i) \cdot \prod_{i:\, y_i = 0} \bigl(1 - p(X_i)\bigr).$$
+$$p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}},$$
 
-We choose the coefficient values $\hat{\beta}_0, \hat{\beta}_1$ that **maximize** this function. In practice the log-likelihood is maximized instead (it is numerically more stable and turns the product into a sum), but the resulting estimates are identical.
+we can rearrange it to get what is called the **odds**:
+
+$$\frac{p(X)}{1 - p(X)} = e^{\beta_0 + \beta_1 X}.$$
+
+Taking the natural logarithm on both sides gives the **log-odds** (also called the *logit*):
+
+$$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X$$
+
+This tells us that **the log-odds is linear in $X$**. This, together with the fact that $p(X)$ changes in the same direction as the log-odds, gives us the following interpretations:
+
+- If $\beta_1 > 0$: the larger $X$, the higher the probability of belonging to class 1. This is because if $\beta_1>0$ then increasing $X$ increases the log-odds, which increases $p(X)$.
+- If $\beta_1 < 0$: the larger $X$, the lower the probability of belonging to class 1. This is because if $\beta_1<0$ increasing $X$ decreases the log-odds, which decreases $p(X)$.
 
 ```{python}
-#| label: likelihood-intuition
+#| label: log-odds-plot
 
-# Show two candidate curves with different β₁ and visualize how well they fit the data
 beta0  = lr_simple.intercept_[0]
 beta1  = lr_simple.coef_[0][0]
 
 def logistic(x, b0, b1):
     return 1 / (1 + np.exp(-(b0 + b1 * x)))
-
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.1, fig_size_y), sharey=True)
-
-configs = [
-    (beta0, beta1,       'MLE fit (maximizes likelihood)',   'steelblue'),
-    (beta0, beta1 * 0.1, 'Poor fit (low likelihood)',        'tomato'),
-]
-
-for ax, (b0, b1, title, lc) in zip(axes, configs):
-    ax.scatter(df['temp_anomaly'], df['status_num'],
-               c=[col_map[s] for s in df['status']], alpha=0.25, s=12,
-               edgecolors='none')
-    ax.plot(temp_range, logistic(temp_range, b0, b1), color=lc, linewidth=2)
-    ax.set_xlabel('Temp. anomaly (°C)')
-    ax.set_title(title)
-    ax.grid(True, alpha=0.3)
-
-axes[0].set_ylabel('P(status = healthy)')
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-The MLE fit (left) tracks the data well — high probabilities where healthy sites are dense and low probabilities where degraded sites are dense. The poor fit (right) uses a flat curve that barely separates the two classes, and would have a lower likelihood.
-
-### Interpreting the coefficients
-
-### The log-odds
-
-Once we have our fitted coefficients, how do we interpret them? The key is to rewrite the logistic function in terms of the **odds** and then the **log-odds**.
-
-Starting from:
-
-$$p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}}$$
-
-we can rearrange to get the **odds**:
-
-$$\frac{p(X)}{1 - p(X)} = e^{\beta_0 + \beta_1 X}$$
-
-Taking the natural log gives the **log-odds** (also called the *logit*):
-
-$$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X$$
-
-This tells us that **the log-odds is linear in $X$**, just like the linear regression model. Crucially:
-
-- If $\beta_1 > 0$: increasing $X$ increases the log-odds, which increases $p(X)$ → the larger $X$, the higher the probability of belonging to class 1.
-- If $\beta_1 < 0$: increasing $X$ decreases the log-odds, which decreases $p(X)$ → the larger $X$, the lower the probability of belonging to class 1.
-
-```{python}
-#| label: log-odds-plot
 
 log_odds_vals = beta0 + beta1 * temp_range
 prob_vals     = logistic(temp_range, beta0, beta1)
@@ -311,38 +290,44 @@ Notice that the log-odds is exactly linear in $X$ (left panel), but when we tran
 
 In our fitted model, `temp_anomaly` has a negative coefficient ($\hat{\beta}_1 < 0$).
 
-1. What does this tell us about the relationship between temperature anomaly and kelp forest health?
-2. A site has a temperature anomaly of 2°C. The fitted model gives log-odds = −1.5. What is the predicted probability of *healthy* status? Is this above or below the default threshold of 0.5?
-3. What does a log-odds of 0 correspond to in terms of probability?
+What does this tell us about the relationship between temperature anomaly and kelp forest health?
+<!-- 2. A site has a temperature anomaly of 2°C. The fitted model gives log-odds = −1.5. What is the predicted probability of *healthy* status? Is this above or below the default threshold of 0.5?
+3. What does a log-odds of 0 correspond to in terms of probability? -->
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. A negative coefficient means that as temperature anomaly increases (warmer ocean conditions), the log-odds of a healthy site decrease, and therefore the probability of healthy status decreases. Warmer-than-average temperatures are associated with kelp stress.
+A negative coefficient means that as temperature anomaly increases (warmer ocean conditions), the log-odds of a healthy site decrease, and therefore the probability of healthy status decreases. Warmer-than-average temperatures are associated with kelp stress.
 
-2. $p = \frac{e^{-1.5}}{1 + e^{-1.5}} \approx 0.18$. This is below the default threshold of 0.5, so the site would be predicted as *degraded*.
+<!-- 2. $p = \frac{e^{-1.5}}{1 + e^{-1.5}} \approx 0.18$. This is below the default threshold of 0.5, so the site would be predicted as *degraded*.
 
-3. A log-odds of 0 means $\log(p/(1-p)) = 0$, so $p/(1-p) = 1$, giving $p = 0.5$. This is exactly the decision boundary for the default threshold.
+3. A log-odds of 0 means $\log(p/(1-p)) = 0$, so $p/(1-p) = 1$, giving $p = 0.5$. This is exactly the decision boundary for the default threshold. -->
 :::
 
 ### Hypothesis testing
 
-Once we have estimated our coefficients, we can ask: *is there truly a relationship between $X$ and $Y$?*
+Once we have estimated our coefficients, we can ask: *is there actual evidence for a relationship between $X$ and $Y$?*
 
 If $\beta_1 = 0$, then:
 
 $$p(X) = \frac{e^{\beta_0}}{1 + e^{\beta_0}} = \text{constant}$$
 
-meaning the probability of the positive class does not depend on $X$ at all. The hypotheses are:
+meaning the probability of the positive class does not depend on $X$ at all. The hypotheses thus are:
 
-$$H_0: \beta_1 = 0 \qquad H_1: \beta_1 \neq 0$$
+- **Null hypothesis** $H_0$: there is no relationship between $X$ and $Y$, i.e., $\beta_1 = 0$.
+- **Alternative hypothesis** $H_a$: there is some relationship between $X$ and $Y$, i.e., $\beta_1 \neq 0$.
 
-We test this using a **Z-statistic** (the analogue of the t-statistic in linear regression), defined as:
+Once we have computed the estimate e test this using a **Z-statistic** (the analogue of the t-statistic in linear regression), defined as:
 
 $$Z = \frac{\hat{\beta}_1}{\text{SE}(\hat{\beta}_1)}$$
 
 A large $|Z|$ value provides evidence against $H_0$. The corresponding **p-value** quantifies how likely we would observe a Z-statistic this extreme if $H_0$ were true.
+
+
+:::{.callout-tip}
+## Check-in
+The table below shows the statistics for the fitted model of `status` on `temp_anomaly`:
 
 ```{python}
 #| label: hypothesis-test
@@ -375,7 +360,15 @@ results = pd.DataFrame({
 print(results.to_string(index=False))
 ```
 
-Both `temp_anomaly` and `nitrate` have small p-values, providing strong evidence that each predictor is associated with kelp forest status.
+What does the $p$-value for `temp_anomaly` tell us about the relationship between temperature anomalies and kelp forest health?
+
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+`temp_anomaly`has a small $p$-values, providing  evidence that this predictor is associated with kelp forest status. Notice, though that this model ignores the existence of a second predictor. 
+:::
+
+
 
 ## Multiple logistic regression
 
