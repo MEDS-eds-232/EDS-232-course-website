@@ -87,24 +87,37 @@ In this lesson we use the same example dataset as in our KNN lesson: a synthetic
 
 The central question is: *can we predict whether a kelp forest site is healthy or degraded from its oceanographic conditions?*
 
+
 ```{python}
 #| label: initial-data-plotting
 
-colors = {'healthy': 'steelblue', 'degraded': 'tomato'}
+colors  = {'healthy': 'steelblue', 'degraded': 'tomato'}
+markers = {1: 'o', 0: 's'}
 
-fig, ax = plt.subplots(figsize=(fig_size_x * 1.5 * 0.8, (fig_size_y + 1.5) * 0.8))
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.75, fig_size_y + 0.5))
 
-for status_val, col in colors.items():
-    mask = df['status'] == status_val
-    ax.scatter(df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
-               c=col, s=25, alpha=0.6, edgecolors='none', label=status_val)
+for up_val in [1, 0]:
+    for status_val, col in colors.items():
+        mask = (df['upwelling'] == up_val) & (df['status'] == status_val)
+        ax.scatter(
+            df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
+            c=col, s=20, alpha=0.5, edgecolors='none'
+        )
 
-counts = df['status'].value_counts()
-legend_labels = {s: f'{s} (n={counts[s]})' for s in colors}
-handles = [plt.scatter([], [], c=col, s=50, label=legend_labels[s]) for s, col in colors.items()]
-ax.legend(handles=handles, title='Status', fontsize=13, loc='upper left')
+# Legend 1: kelp status (colors)
+status_handles = [
+    plt.scatter([], [], c=col, s=50, label=lab)
+    for lab, col in colors.items()
+]
+leg1 = ax.legend(handles=status_handles, title='Status', fontsize=9, loc='upper left')
+ax.add_artist(leg1)
+
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title(
+    'KelpWatch: kelp status vs. oceanographic conditions\n'
+    '*Synthetic data generated for educational purposes only*'
+)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
@@ -151,12 +164,14 @@ Then, we select a threshold to classify a site as healthy or degraded given the 
 
 :::{.callout-tip}
 ## Check-in
-1. If we have a new observation with an observed temperature anomaly of $3$ degrees Celsius, what steps would be needed to predict its class using $p(X)$?
-2. If we were to use `nitrate` as our predictor, what would the function $p(X)$ be modeling?
+1. A new site has `temp_anomaly` = 3°C. Walk through the steps to predict its class using $p(X)$ with threshold $\alpha = 0.5$.
+2. If we used `nitrate` as the predictor instead, what would $p(X)$ be modeling?
 :::
 :::{.callout-tip collapse="true"}
 ## Discussion
-*FILL OUT DISCUSSION*
+1. Plug $X = 3$ into the fitted logistic function to obtain $p(3) = \frac{e^{\hat{\beta}_0 + \hat{\beta}_1 \cdot 3}}{1 + e^{\hat{\beta}_0 + \hat{\beta}_1 \cdot 3}}$. Because $\hat{\beta}_1 < 0$ and 3°C is a relatively high temperature anomaly, the log-odds will be strongly negative, giving a small probability. Since $p(3) < 0.5$, the site would be predicted as *degraded*.
+
+2. $p(X)$ would model $P(\text{status} = \text{healthy} \mid \text{nitrate})$ — the probability that a site is healthy given its nitrate concentration.
 :::
 
 
@@ -191,6 +206,9 @@ y_simple  = df['status_num'].values
 lr_simple = LogisticRegression()
 lr_simple.fit(X_simple, y_simple)
 
+beta0_s = lr_simple.intercept_[0]
+beta1_s = lr_simple.coef_[0][0]
+
 temp_range  = np.linspace(-3, 4, 300)
 prob_curve  = lr_simple.predict_proba(temp_range.reshape(-1, 1))[:, 1]
 
@@ -219,11 +237,11 @@ plt.close()
 
 :::{.callout-tip}
 ## Check-in
-Given the logistic model above, what would be the predicted status of an observation with temperature anomaly of 0.5 degrees Celsius? 
+Using the fitted model above ($\hat{\beta}_0 =$ `{python} f"{beta0_s:.4f}"`, $\hat{\beta}_1 =$ `{python} f"{beta1_s:.4f}"`), what is the predicted status of a site with `temp_anomaly` = 0.5°C? Use the default threshold $\alpha = 0.5$.
 :::
 :::{.callout-tip collapse="true"}
 ## Discussion
-*FILL OUT DISCUSSION*
+The log-odds at $X = 0.5$ is $\hat{\beta}_0 + \hat{\beta}_1 \times 0.5 =$ `{python} f"{beta0_s + beta1_s * 0.5:.4f}"`. Converting to probability: $p(0.5) =$ `{python} f"{1 / (1 + np.exp(-(beta0_s + beta1_s * 0.5))):.4f}"`. Since this is `{python} "above" if 1 / (1 + np.exp(-(beta0_s + beta1_s * 0.5))) >= 0.5 else "below"` the threshold of 0.5, the site is predicted as `{python} "'healthy'" if 1 / (1 + np.exp(-(beta0_s + beta1_s * 0.5))) >= 0.5 else "'degraded'"`.
 :::
 
 
@@ -261,11 +279,10 @@ def logistic(x, b0, b1):
 log_odds_vals = beta0 + beta1 * temp_range
 prob_vals     = logistic(temp_range, beta0, beta1)
 
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.1, fig_size_y))
+fig, axes = plt.subplots(2, 1, figsize=(fig_size_x * 0.8 * 0.8, fig_size_y * 2 * 0.8), sharex=True)
 
 axes[0].plot(temp_range, log_odds_vals, color='steelblue', linewidth=2)
 axes[0].axhline(0, color='gray', linestyle='--', linewidth=1)
-axes[0].set_xlabel('Temp. anomaly (°C)')
 axes[0].set_ylabel('Log-odds')
 axes[0].set_title('Log-odds: linear in X')
 axes[0].grid(True, alpha=0.3)
@@ -283,14 +300,14 @@ plt.show()
 plt.close()
 ```
 
-Notice that the log-odds is exactly linear in $X$ (left panel), but when we transform back to the probability scale we get the familiar S-shape (right panel). The two representations contain identical information — they are just different scales.
+Notice that the log-odds is exactly linear in $X$ (top panel), but when we transform back to the probability scale we get the familiar S-shape (bottom panel). The two representations contain identical information — they are just different scales.
 
 :::{.callout-tip}
 ## Check-in
 
-In our fitted model, `temp_anomaly` has a negative coefficient ($\hat{\beta}_1 < 0$).
+In our fitted model, the estimated coefficients are $\hat{\beta}_0 =$ `{python} f"{beta0:.4f}"` and $\hat{\beta}_1 =$ `{python} f"{beta1:.4f}"`.
 
-What does this tell us about the relationship between temperature anomaly and kelp forest health?
+What does the sign of $\hat{\beta}_1$ tell us about the relationship between temperature anomaly and kelp forest health?
 <!-- 2. A site has a temperature anomaly of 2°C. The fitted model gives log-odds = −1.5. What is the predicted probability of *healthy* status? Is this above or below the default threshold of 0.5?
 3. What does a log-odds of 0 correspond to in terms of probability? -->
 :::
@@ -334,19 +351,16 @@ The table below shows the statistics for the fitted model of `status` on `temp_a
 
 from scipy import stats
 
-lr_full = LogisticRegression(max_iter=1000)
-lr_full.fit(df[['temp_anomaly', 'nitrate']], df['status_num'])
-
 # Approximate standard errors via the Hessian of the log-likelihood
-X_mat = np.column_stack([np.ones(n), df['temp_anomaly'], df['nitrate']])
-beta_hat = np.concatenate([[lr_full.intercept_[0]], lr_full.coef_[0]])
+X_mat    = np.column_stack([np.ones(n), df['temp_anomaly']])
+beta_hat = np.concatenate([[lr_simple.intercept_[0]], lr_simple.coef_[0]])
 
-p_hat = lr_full.predict_proba(df[['temp_anomaly', 'nitrate']])[:, 1]
-W = np.diag(p_hat * (1 - p_hat))
-cov = np.linalg.inv(X_mat.T @ W @ X_mat)
-se = np.sqrt(np.diag(cov))
+p_hat = lr_simple.predict_proba(df[['temp_anomaly']])[:, 1]
+W     = np.diag(p_hat * (1 - p_hat))
+cov   = np.linalg.inv(X_mat.T @ W @ X_mat)
+se    = np.sqrt(np.diag(cov))
 
-names = ['Intercept', 'temp_anomaly', 'nitrate']
+names   = ['Intercept', 'temp_anomaly']
 z_stats = beta_hat / se
 p_vals  = 2 * (1 - stats.norm.cdf(np.abs(z_stats)))
 
@@ -372,15 +386,17 @@ What does the $p$-value for `temp_anomaly` tell us about the relationship betwee
 
 ## Multiple logistic regression
 
-The logistic model extends naturally to multiple predictors $X_1, X_2, \ldots, X_p$:
+The logistic model extends naturally to predicting a binary response variable $Y$ using multiple predictors $X_1, X_2, \ldots, X_p$. In this case, the logistic function is generalized to
 
 $$p(X) = \frac{e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}{1 + e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}$$
 
-The log-odds remain linear in all predictors:
+and the coefficients $\hat{\beta}_i$ are estimated using the maximum likelihood estimation. 
+
+Notice the log-odds remain linear in all predictors:
 
 $$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p$$
 
-We now fit a logistic regression using both `temp_anomaly` and `nitrate` as predictors:
+Four our example data, we can now fit a logistic regression using both `temp_anomaly` and `nitrate` as predictors:
 
 ```{python}
 #| label: multi-logistic-fit
@@ -390,7 +406,8 @@ lr_multi.fit(X_train, (y_train == 'healthy').astype(int))
 
 grid_prob = lr_multi.predict_proba(np.c_[xx1.ravel(), xx2.ravel()])[:, 1].reshape(xx1.shape)
 
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.3, fig_size_y), sharey=True)
+fig, axes = plt.subplots(2, 1, figsize=(fig_size_x * 0.8, fig_size_y * 2),
+                         sharex=True, constrained_layout=True)
 
 datasets = [('Training data (210 pts)', X_train, y_train),
             ('Test data (90 pts)',      X_test,  y_test)]
@@ -404,14 +421,13 @@ for ax, (title, X_data, y_data) in zip(axes, datasets):
         ax.scatter(X_data[mask, 0], X_data[mask, 1],
                    c=col, s=15, alpha=0.7, label=label, edgecolors='none')
     ax.set_xlim(-2, 4)
-    ax.set_xlabel('Temp. anomaly (°C)')
+    ax.set_ylabel('Nitrate (μmol/L)')
     ax.set_title(title)
     ax.legend(title='True status', fontsize=9)
     ax.grid(True, alpha=0.3)
 
-axes[0].set_ylabel('Nitrate (μmol/L)')
-fig.colorbar(cf, ax=axes[1], label='P(healthy)', shrink=0.85)
-plt.tight_layout()
+axes[1].set_xlabel('Temp. anomaly (°C)')
+fig.colorbar(cf, ax=axes, label='P(healthy)', location='bottom', shrink=0.6, pad=0.05)
 plt.show()
 plt.close()
 ```
@@ -420,7 +436,57 @@ The shading now represents the **predicted probability** of healthy status: dark
 
 Unlike KNN, the logistic regression boundary is always a straight line (or a hyperplane in higher dimensions), reflecting the linear structure of the log-odds model.
 
-## Adjusting the threshold
+<!--TODO in a future iteration, include interpretations for the coefficients in the multiple logistic regression-->
+
+:::{.callout-tip}
+## Check-in
+Before exploring how the threshold affects performance, let's evaluate both models using the accuracy metrics introduced in the [previous lesson](../4_1_classification/4_1_knn_accuracy_metrics-NOTES.qmd): overall accuracy, error rate, precision, recall, and $F_1$ score. All metrics below use `healthy` as the positive class and the default threshold $\alpha = 0.5$.
+
+```{python}
+#| label: accuracy-recap
+
+# Single-predictor model on training data
+lr_single_train = LogisticRegression(max_iter=1000)
+lr_single_train.fit(X_train[:, [0]], (y_train == 'healthy').astype(int))
+y_pred_s = lr_single_train.predict(X_test[:, [0]])
+y_pred_s_label = np.where(y_pred_s == 1, 'healthy', 'degraded')
+
+# Two-predictor model (already fitted as lr_multi)
+y_pred_m = lr_multi.predict(X_test)
+y_pred_m_label = np.where(y_pred_m == 1, 'healthy', 'degraded')
+
+def metrics_row(y_true, y_pred):
+    acc  = accuracy_score(y_true, y_pred)
+    prec = precision_score(y_true, y_pred, pos_label='healthy', zero_division=0)
+    rec  = recall_score(y_true, y_pred, pos_label='healthy', zero_division=0)
+    f1   = f1_score(y_true, y_pred, pos_label='healthy', zero_division=0)
+    return acc, 1 - acc, prec, rec, f1
+
+s_acc, s_err, s_prec, s_rec, s_f1 = metrics_row(y_test, y_pred_s_label)
+m_acc, m_err, m_prec, m_rec, m_f1 = metrics_row(y_test, y_pred_m_label)
+
+recap_df = pd.DataFrame({
+    'Model':            ['Logistic (temp_anomaly only)', 'Logistic (temp_anomaly + nitrate)'],
+    'Overall accuracy': [f'{s_acc:.3f}', f'{m_acc:.3f}'],
+    'Error rate':       [f'{s_err:.3f}', f'{m_err:.3f}'],
+    'Precision':        [f'{s_prec:.3f}', f'{m_prec:.3f}'],
+    'Recall':           [f'{s_rec:.3f}', f'{m_rec:.3f}'],
+    'F₁ score':         [f'{s_f1:.3f}', f'{m_f1:.3f}'],
+})
+print(recap_df.to_string(index=False))
+```
+
+Discuss how the model's performance changes as we add `nitrate` as a second predictor.
+
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+Adding `nitrate` as a second predictor ...
+:::
+
+
+## Adjusting the classification threshold
 
 So far we have used the default threshold of $\alpha = 0.5$: an observation is predicted as positive if $p(X) \geq 0.5$. But this is just a convention — we can choose any threshold between 0 and 1.
 
