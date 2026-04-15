@@ -491,13 +491,13 @@ So far we have used the default threshold of $0.5$, so an observation is predict
 
 :::{.callout-tip}
 ## Check-in
-In our example, suppose we adjust the classification threshold  so that a study site $X$ gets classified as healthy if $p(X) \geq 0.9$. What type of error (false positives or false negatives) would you expect more of? What does this mean in terms of recall and precision?
-
-Now suppose we adjust the classification threshold to $0.2$. What type of error (false positives or false negatives) would you expect more of? What does this mean in terms of recall and precision?
+Suppose the threshold is raised to $\alpha = 0.9$. What type of error (FP or FN) would you expect more of, and what does this mean for precision and recall? Now repeat for $\alpha = 0.2$.
 :::
 :::{.callout-tip collapse="true"}
 ## Discussion
-*FILL OUT DISCUSSION*
+**$\alpha = 0.9$:** Only sites with very high predicted probability are classified as healthy. Many truly healthy sites fall below this bar and are classified as degraded → many false negatives. Precision increases (when we do predict healthy, we're usually right), but recall falls.
+
+**$\alpha = 0.2$:** Almost every site is classified as healthy. Most truly healthy sites are caught → very few false negatives → high recall. But many degraded sites are also classified as healthy → many false positives → precision falls.
 :::
 
 Changing the threshold shifts the classification tradeoff between recall and precision:
@@ -539,7 +539,7 @@ ax.plot(thresholds, accuracies,  label='Overall accuracy', color='seagreen',   l
 ax.axvline(0.5, color='gray', linestyle=':', linewidth=1.2, label='Default threshold (0.5)')
 ax.set_xlabel('Classification threshold')
 ax.set_ylabel('Accuracy metric value')
-ax.set_title('Precision, recall, and accuracy vs. threshold')
+ax.set_title('Kelp forest status multiple logistic regression classifier\nPrecision, recall, and accuracy vs. threshold')
 ax.legend(fontsize=9)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -547,15 +547,18 @@ plt.show()
 plt.close()
 ```
 
-Looking at grpah:
-
-1. What would we be missing if we were to only evaluate the model performance at different thersholds only using overall accuracy?
-2. You are managing kelp restoration resources and can only intervene at sites you predict as degraded. Would you want a high or low threshold? Which metric does this prioritize?
+1. What would we miss by evaluating model performance using only overall accuracy across thresholds?
+2. You manage kelp restoration and can only intervene at sites predicted as degraded. Should the threshold be high or low? Which metric does this prioritize?
+3. Around what threshold do precision and recall intersect? What does that point represent?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
-*FILL OUT DISCUSSION*
+1. Overall accuracy hides the precision–recall tradeoff. A threshold that maximizes accuracy may still have poor recall (missing many degraded sites) or poor precision (flagging many healthy sites). The green dashed line barely changes across a wide range of thresholds, yet precision and recall shift dramatically — accuracy alone would give a misleading picture of model behavior.
+
+2. A **lower threshold** flags more sites as degraded, so fewer truly degraded sites are missed. This prioritizes **recall** — consistent with the reasoning in the previous lesson: the ecological cost of missing a degraded site (false negative) is higher than unnecessarily intervening at a healthy one.
+
+3. The intersection is the threshold at which precision and recall are equal. It represents the point of maximum balance between the two metrics, equivalent to the threshold that maximizes the $F_1$ score.
 :::
 
 ## ROC curves
@@ -574,16 +577,63 @@ We obtain the ROC curve by calculating the TPR and the FPR at every value classi
 
 :::{.callout-tip}
 ## Check-in
-For each of the following values of the classification threshold for the multiple logistic regression classifier on our kelp data, we have the following confusion matrices. Use this information to fill out the table below
 
-columns: threshold, TPR, FPR
-rows: 1, 0.7, 0.5, 0.3, 0
+The code below shows the confusion matrix for our multiple logistic regression classifier at five different thresholds. Use the counts to compute TPR and FPR at each threshold, fill in the table, and sketch what the ROC curve would look like.
 
-Use these values to sketch a ROC curve for this classifier. 
+```{python}
+#| label: roc-checkin-cms
+
+from sklearn.metrics import ConfusionMatrixDisplay
+
+thresholds_roc = [1.0, 0.7, 0.3, 0.0]
+thresholds_cm  = [0.7, 0.3]
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.1, fig_size_y * 1.1))
+
+for ax, t in zip(axes, thresholds_cm):
+    y_hat = (y_prob_test >= t).astype(int)
+    cm_t  = confusion_matrix(y_test_num, y_hat, labels=[1, 0])
+    disp  = ConfusionMatrixDisplay(confusion_matrix=cm_t,
+                                   display_labels=['healthy', 'degraded'])
+    disp.plot(ax=ax, colorbar=False, cmap='Blues')
+    ax.set_title(f'α = {t}', fontsize=10)
+    ax.tick_params(axis='x', labelsize=8, rotation=30)
+    ax.tick_params(axis='y', labelsize=8)
+    if t != 1.0:
+        ax.set_ylabel('')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+For $\alpha = 0$, every site is predicted positive (healthy), so TPR = 1 and FPR = 1 — you can fill those in directly without a confusion matrix.
+
+| Threshold | TPR | FPR |
+|:---------:|:---:|:---:|
+| 1.0 | | |
+| 0.7 | | |
+| 0.3 | | |
+| 0.0 | 1 | 1 |
 
 :::
 :::{.callout-tip collapse="true"}
 ## Discussion
+
+```{python}
+#| label: roc-checkin-answers
+
+rows = []
+for t in thresholds_roc:
+    y_hat = (y_prob_test >= t).astype(int)
+    tpr_t = recall_score(y_test_num, y_hat, zero_division=0)
+    fpr_t = (y_hat[y_test_num == 0].sum() /
+             (y_test_num == 0).sum()) if (y_test_num == 0).sum() > 0 else 0.0
+    rows.append({'Threshold': t, 'TPR': round(tpr_t, 3), 'FPR': round(fpr_t, 3)})
+
+print(pd.DataFrame(rows).to_string(index=False))
+```
+
+At $\alpha = 1.0$ nothing is predicted positive → TPR = 0, FPR = 0 (bottom-left corner of the ROC plot). At $\alpha = 0.0$ everything is predicted positive → TPR = 1, FPR = 1 (top-right corner). Intermediate thresholds trace the curve between these extremes: lowering the threshold raises both TPR and FPR, moving up and to the right along the ROC curve. A good classifier hugs the upper-left corner, achieving high TPR while keeping FPR low.
 :::
 
 Every ROC curve traces a path from (0, 0) to (1, 1). A **perfect classifier** would pass through the upper-left corner (0, 1): zero false positives with perfect recall. A **random classifier** produces a diagonal line from corner to corner. The annotated points show the TPR/FPR tradeoff at three specific thresholds.
