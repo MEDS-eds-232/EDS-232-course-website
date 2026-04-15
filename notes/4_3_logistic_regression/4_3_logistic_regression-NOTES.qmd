@@ -477,7 +477,6 @@ print(recap_df.to_string(index=False))
 ```
 
 Discuss how the model's performance changes as we add `nitrate` as a second predictor.
-
 :::
 
 :::{.callout-tip collapse="true"}
@@ -488,14 +487,35 @@ Adding `nitrate` as a second predictor ...
 
 ## Adjusting the classification threshold
 
-So far we have used the default threshold of $\alpha = 0.5$: an observation is predicted as positive if $p(X) \geq 0.5$. But this is just a convention — we can choose any threshold between 0 and 1.
+So far we have used the default threshold of $0.5$, so an observation is predicted as positive if $p(X) \geq 0.5$. But this is just a convention: we can choose any threshold between 0 and 1 as a cutoff for classifying an observation into the positive or negative classes.
 
-Changing the threshold shifts the tradeoff between recall and precision:
+:::{.callout-tip}
+## Check-in
+In our example, suppose we adjust the classification threshold  so that a study site $X$ gets classified as healthy if $p(X) \geq 0.9$. What type of error (false positives or false negatives) would you expect more of? What does this mean in terms of recall and precision?
 
-- **Lowering** $\alpha$: more observations get predicted as positive → **recall increases**, precision decreases (more false positives).
-- **Raising** $\alpha$: fewer observations get predicted as positive → precision increases, **recall decreases** (more false negatives).
+Now suppose we adjust the classification threshold to $0.2$. What type of error (false positives or false negatives) would you expect more of? What does this mean in terms of recall and precision?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+*FILL OUT DISCUSSION*
+:::
 
-The right threshold depends on the application and the **cost of each error type**, not just overall accuracy.
+Changing the threshold shifts the classification tradeoff between recall and precision:
+
+- Raising the classification threshold means fewer observations get predicted as positive: precision increases, recall decreases (more false negatives).
+
+- Lowering the classification threshold means more observations get predicted as positive: recall increases, precision decreases (more false positives).
+
+The right threshold depends on the application and the cost of each error type, not just overall accuracy. There is no single correct answer and the selection must be guided by:
+
+- **Domain knowledge**: what is the consequence of each error type?
+- **The precision–recall tradeoff**: understanding what you gain and lose at each threshold.
+- **Cross-validation**: evaluating threshold performance on held-out data rather than the test set (more on this on next lesson). 
+
+:::{.callout-tip}
+## Check-in
+
+The graph above shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels. 
 
 ```{python}
 #| label: threshold-effect
@@ -517,8 +537,8 @@ ax.plot(thresholds, precisions,  label='Precision',        color='steelblue',  l
 ax.plot(thresholds, recalls,     label='Recall',           color='tomato',     linewidth=2)
 ax.plot(thresholds, accuracies,  label='Overall accuracy', color='seagreen',   linewidth=2, linestyle='--')
 ax.axvline(0.5, color='gray', linestyle=':', linewidth=1.2, label='Default threshold (0.5)')
-ax.set_xlabel('Classification threshold (α)')
-ax.set_ylabel('Metric value')
+ax.set_xlabel('Classification threshold')
+ax.set_ylabel('Accuracy metric value')
 ax.set_title('Precision, recall, and accuracy vs. threshold')
 ax.legend(fontsize=9)
 ax.grid(True, alpha=0.3)
@@ -527,50 +547,46 @@ plt.show()
 plt.close()
 ```
 
-:::{.callout-tip}
-## Check-in
+Looking at grpah:
 
-Looking at the plot above:
-
-1. What happens to recall as the threshold increases toward 1? Why?
-2. At a threshold close to 0, almost everything is predicted as positive. What does that do to precision?
-3. You are managing kelp restoration resources and can only intervene at sites you predict as degraded. Would you want a high or low threshold? Which metric does this prioritize?
+1. What would we be missing if we were to only evaluate the model performance at different thersholds only using overall accuracy?
+2. You are managing kelp restoration resources and can only intervene at sites you predict as degraded. Would you want a high or low threshold? Which metric does this prioritize?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
-
-1. As the threshold rises, fewer sites are classified as healthy (positive). This means more truly healthy sites get classified as degraded → more false negatives → recall falls toward 0.
-
-2. At a near-zero threshold everything is classified as positive. Recall approaches 1 (every true positive is caught), but precision falls because many negative observations are also classified as positive.
-
-3. A lower threshold means you flag more sites as degraded, so you are less likely to miss a truly degraded site. This prioritizes **recall** — the same reasoning we discussed for conservation applications in the KNN lesson. The cost of a missed degraded site (false negative) is higher than the cost of deploying resources to a healthy site by mistake.
+*FILL OUT DISCUSSION*
 :::
-
-### How to select the best threshold?
-
-There is no single correct answer — the threshold selection must be guided by:
-
-- **Domain knowledge**: what is the ecological or operational consequence of each error type?
-- **The precision–recall tradeoff**: understanding what you gain and lose at each threshold.
-- **Cross-validation**: evaluating threshold performance on held-out data rather than the test set.
 
 ## ROC curves
 
-The **Receiver Operating Characteristic (ROC) curve** is a tool that visualizes classifier performance **across all possible thresholds** simultaneously. Rather than committing to a single threshold, it sweeps the threshold from 1 down to 0 and traces out the resulting:
+The **Receiver Operating Characteristic (ROC) curve** is a tool that visualizes a binary classifier's performance across all possible thresholds simultaneously. 
 
-- **True Positive Rate (TPR)** = $\frac{TP}{TP + FN}$ = recall
-- **False Positive Rate (FPR)** = $\frac{FP}{FP + TN}$ = fraction of true negatives incorrectly classified as positive
+We use the following two metrics to create the ROC curve:
 
-At the extremes:
+- **True Positive Rate (TPR)**, this is another name for recall. Recall (😉) its definition:
+$$TPR = \text{recall} = \frac{TP}{TP + FN}$$ 
 
-| Threshold | Behavior | TPR | FPR |
-|---|---|:---:|:---:|
-| 1.0 | Everything predicted negative | 0 | 0 |
-| 0.5 | Default classifier | intermediate | intermediate |
-| 0.0 | Everything predicted positive | 1 | 1 |
+- **False Positive Rate (FPR)**, which gives us the fraction of true negatives incorrectly classified as positive. It is defined as: 
+$$\frac{FP}{FP + TN}$$
 
-The ROC curve traces a path from (0, 0) to (1, 1). A **perfect classifier** would pass through the upper-left corner (0, 1): zero false positives with perfect recall. A **random classifier** produces a diagonal line from corner to corner.
+We obtain the ROC curve by calculating the TPR and the FPR at every value classification threshold and then plotting TPR with respect to FPR. 
+
+:::{.callout-tip}
+## Check-in
+For each of the following values of the classification threshold for the multiple logistic regression classifier on our kelp data, we have the following confusion matrices. Use this information to fill out the table below
+
+columns: threshold, TPR, FPR
+rows: 1, 0.7, 0.5, 0.3, 0
+
+Use these values to sketch a ROC curve for this classifier. 
+
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+:::
+
+Every ROC curve traces a path from (0, 0) to (1, 1). A **perfect classifier** would pass through the upper-left corner (0, 1): zero false positives with perfect recall. A **random classifier** produces a diagonal line from corner to corner. The annotated points show the TPR/FPR tradeoff at three specific thresholds.
 
 ```{python}
 #| label: roc-curve
@@ -608,9 +624,11 @@ plt.show()
 plt.close()
 ```
 
-Each point on the ROC curve corresponds to one threshold value. Moving along the curve from lower-left to upper-right corresponds to lowering the threshold. The annotated points show the TPR/FPR tradeoff at three specific thresholds.
+Each point on the ROC curve corresponds to one threshold value. Moving along the curve from lower-left to upper-right corresponds to lowering the threshold. 
 
 A curve **closer to the upper-left corner** represents a better classifier: it achieves high TPR while keeping FPR low.
+
+![By cmglee, MartinThoma – Roc-draft-xkcd-style.svg, CC BY-SA 4.0, [https://commons.wikimedia.org/w/index.php?curid=109730045](https://commons.wikimedia.org/w/index.php?curid=109730045)](Roc_curve.svg.png)
 
 ### Area under the curve (AUC)
 
