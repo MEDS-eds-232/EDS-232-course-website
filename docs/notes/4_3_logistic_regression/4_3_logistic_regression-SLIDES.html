@@ -1,261 +1,142 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
-
-<meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-
-
-<title>logistic_regression-slides – EDS 232 - Machine Learning for Environmental Science</title>
-<style>
-code{white-space: pre-wrap;}
-span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
-div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-ul.task-list{list-style: none;}
-ul.task-list li input[type="checkbox"] {
-  width: 0.8em;
-  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
-  vertical-align: middle;
-}
-</style>
-
-
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<html lang="en"><head>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../../">
-<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabby.min.js"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script id="quarto-search-options" type="application/json">{
-  "location": "navbar",
-  "copy-button": false,
-  "collapse-after": 3,
-  "panel-placement": "end",
-  "type": "overlay",
-  "limit": 50,
-  "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
-  ],
-  "show-item-context": false,
-  "language": {
-    "search-no-results-text": "No results",
-    "search-matching-documents-text": "matching documents",
-    "search-copy-link-title": "Copy link to search",
-    "search-hide-matches-text": "Hide additional matches",
-    "search-more-match-text": "more match in this document",
-    "search-more-matches-text": "more matches in this document",
-    "search-clear-button-title": "Clear",
-    "search-text-placeholder": "",
-    "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit",
-    "search-label": "Search"
-  }
-}</script>
+<link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.33">
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
+  <title>EDS 232 - Machine Learning for Environmental Science – logistic_regression-slides</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
     }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
+  </style>
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-aa079427e74470e351a8ef456b814408.css">
+  <link href="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
 </head>
-
-<body class="nav-fixed quarto-light">
-
-<div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
-      <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
-    <a class="navbar-brand" href="../../index.html">
-    <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
-    </a>
-  </div>
-            <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-  <span class="navbar-toggler-icon"></span>
-</button>
-          <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav navbar-nav-scroll ms-auto">
-  <li class="nav-item">
-    <a class="nav-link" href="../../index.html"> 
-<span class="menu-text">home</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../notes/week-by-week/week-by-week.html"> 
-<span class="menu-text">notes</span></a>
-  </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">assignments</span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
-        <li>
-    <a class="dropdown-item" href="../../assignments/assignment-1.html">
- <span class="dropdown-text">Assignment 1</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">weekly labs</span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
-        <li>
-    <a class="dropdown-item" href="../../lab/lab1.html">
- <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../../lab/lab2.html">
- <span class="dropdown-text">Lab 2: No lab this week!</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../../lab/lab3.html">
- <span class="dropdown-text">Lab 3: Classification</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
-      <i class="bi bi-github" role="img">
-</i> 
- <span class="menu-text"></span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
-        <li>
-    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website">
- <span class="dropdown-text">Source code</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website/issues">
- <span class="dropdown-text">Report a bug</span></a>
-  </li>  
-    </ul>
-  </li>
-</ul>
-          </div> <!-- /navcollapse -->
-            <div class="quarto-navbar-tools">
-</div>
-      </div> <!-- /container-fluid -->
-    </nav>
-  <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
-<p>This wesbite is under construction.</p>
-</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
-</header>
-<!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
-<!-- sidebar -->
-<!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#title-slide" id="toc-title-slide" class="nav-link active" data-scroll-target="#title-slide"></a></li>
-  <li><a href="#in-this-lesson" id="toc-in-this-lesson" class="nav-link" data-scroll-target="#in-this-lesson"></a></li>
-  <li><a href="#section-example" id="toc-section-example" class="nav-link" data-scroll-target="#section-example"></a></li>
-  <li><a href="#kelpwatch" id="toc-kelpwatch" class="nav-link" data-scroll-target="#kelpwatch"></a></li>
-  <li><a href="#kelpwatch-plot" id="toc-kelpwatch-plot" class="nav-link" data-scroll-target="#kelpwatch-plot"></a></li>
-  <li><a href="#section-logistic" id="toc-section-logistic" class="nav-link" data-scroll-target="#section-logistic"></a></li>
-  <li><a href="#logistic-intro" id="toc-logistic-intro" class="nav-link" data-scroll-target="#logistic-intro"></a></li>
-  <li><a href="#logistic-example" id="toc-logistic-example" class="nav-link" data-scroll-target="#logistic-example"></a></li>
-  <li><a href="#logistic-intro-checkin-1" id="toc-logistic-intro-checkin-1" class="nav-link" data-scroll-target="#logistic-intro-checkin-1"></a></li>
-  <li><a href="#logistic-function" id="toc-logistic-function" class="nav-link" data-scroll-target="#logistic-function"></a></li>
-  <li><a href="#mle" id="toc-mle" class="nav-link" data-scroll-target="#mle"></a></li>
-  <li><a href="#logistic-curve-slide" id="toc-logistic-curve-slide" class="nav-link" data-scroll-target="#logistic-curve-slide"></a></li>
-  <li><a href="#checkin-logistic-q" id="toc-checkin-logistic-q" class="nav-link" data-scroll-target="#checkin-logistic-q"></a></li>
-  <li><a href="#checkin-logistic-a" id="toc-checkin-logistic-a" class="nav-link" data-scroll-target="#checkin-logistic-a"></a></li>
-  <li><a href="#section-coefficients" id="toc-section-coefficients" class="nav-link" data-scroll-target="#section-coefficients"></a></li>
-  <li><a href="#log-odds-slide-1" id="toc-log-odds-slide-1" class="nav-link" data-scroll-target="#log-odds-slide-1"></a></li>
-  <li><a href="#log-odds-slide-2" id="toc-log-odds-slide-2" class="nav-link" data-scroll-target="#log-odds-slide-2"></a></li>
-  <li><a href="#log-odds-plot-slide" id="toc-log-odds-plot-slide" class="nav-link" data-scroll-target="#log-odds-plot-slide"></a></li>
-  <li><a href="#checkin-beta-q" id="toc-checkin-beta-q" class="nav-link" data-scroll-target="#checkin-beta-q"></a></li>
-  <li><a href="#section-hypothesis" id="toc-section-hypothesis" class="nav-link" data-scroll-target="#section-hypothesis"></a></li>
-  <li><a href="#hypothesis-testing-slide" id="toc-hypothesis-testing-slide" class="nav-link" data-scroll-target="#hypothesis-testing-slide"></a></li>
-  <li><a href="#checkin-hypothesis-q" id="toc-checkin-hypothesis-q" class="nav-link" data-scroll-target="#checkin-hypothesis-q"></a></li>
-  <li><a href="#section-multiple" id="toc-section-multiple" class="nav-link" data-scroll-target="#section-multiple"></a></li>
-  <li><a href="#multiple-logistic-slide" id="toc-multiple-logistic-slide" class="nav-link" data-scroll-target="#multiple-logistic-slide"></a></li>
-  <li><a href="#multi-logistic-prob-1" id="toc-multi-logistic-prob-1" class="nav-link" data-scroll-target="#multi-logistic-prob-1"></a></li>
-  <li><a href="#multi-logistic-prob-2" id="toc-multi-logistic-prob-2" class="nav-link" data-scroll-target="#multi-logistic-prob-2"></a></li>
-  <li><a href="#multi-logistic-prob-3" id="toc-multi-logistic-prob-3" class="nav-link" data-scroll-target="#multi-logistic-prob-3"></a></li>
-  <li><a href="#ulti-logistic-prob-4" id="toc-ulti-logistic-prob-4" class="nav-link" data-scroll-target="#ulti-logistic-prob-4"></a></li>
-  <li><a href="#ulti-logistic-prob-5" id="toc-ulti-logistic-prob-5" class="nav-link" data-scroll-target="#ulti-logistic-prob-5"></a></li>
-  <li><a href="#ulti-logistic-prob-6" id="toc-ulti-logistic-prob-6" class="nav-link" data-scroll-target="#ulti-logistic-prob-6"></a></li>
-  <li><a href="#section-threshold" id="toc-section-threshold" class="nav-link" data-scroll-target="#section-threshold"></a></li>
-  <li><a href="#threshold-concept-1" id="toc-threshold-concept-1" class="nav-link" data-scroll-target="#threshold-concept-1"></a></li>
-  <li><a href="#threshold-concept-2" id="toc-threshold-concept-2" class="nav-link" data-scroll-target="#threshold-concept-2"></a></li>
-  <li><a href="#checkin-threshold-" id="toc-checkin-threshold-" class="nav-link" data-scroll-target="#checkin-threshold-"></a></li>
-  <li><a href="#checkin-threshold-a" id="toc-checkin-threshold-a" class="nav-link" data-scroll-target="#checkin-threshold-a"></a></li>
-  <li><a href="#section-roc" id="toc-section-roc" class="nav-link" data-scroll-target="#section-roc"></a></li>
-  <li><a href="#roc-intro" id="toc-roc-intro" class="nav-link" data-scroll-target="#roc-intro"></a></li>
-  <li><a href="#checkin-roc-q" id="toc-checkin-roc-q" class="nav-link" data-scroll-target="#checkin-roc-q"></a></li>
-  <li><a href="#checkin-roc-a" id="toc-checkin-roc-a" class="nav-link" data-scroll-target="#checkin-roc-a"></a></li>
-  <li><a href="#roc-properties" id="toc-roc-properties" class="nav-link" data-scroll-target="#roc-properties"></a></li>
-  <li><a href="#auc-slide" id="toc-auc-slide" class="nav-link" data-scroll-target="#auc-slide"></a></li>
-  <li><a href="#checkin-auc-q" id="toc-checkin-auc-q" class="nav-link" data-scroll-target="#checkin-auc-q"></a></li>
-  <li><a href="#checkin-auc-a" id="toc-checkin-auc-a" class="nav-link" data-scroll-target="#checkin-auc-a"></a></li>
-  </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="4_3_logistic_regression-SLIDES.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
-    </div>
-<!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
 
 
-
-
-<section id="title-slide" class="level2" data-menu-title="Title Slide" data-background="#053660">
-<h2 data-menu-title="Title Slide" data-background="#053660" class="anchored" data-anchor-id="title-slide"></h2>
+<section id="title-slide" class="slide level2 center" data-menu-title="Title Slide" data-background="#053660">
+<h2></h2>
 <p><span class="custom-title">EDS 232</span></p>
 <hr class="hr-teal">
 <p><span class="custom-subtitle">Lesson 6</span></p>
 <p><span class="custom-subtitle"><em>Logistic regression and ROC curves</em></span></p>
-<hr>
 </section>
-<section id="in-this-lesson" class="level2" data-menu-title="In this lesson">
-<h2 data-menu-title="In this lesson" class="anchored" data-anchor-id="in-this-lesson"></h2>
+<section id="in-this-lesson" class="slide level2" data-menu-title="In this lesson">
+<h2></h2>
 <p><span class="slide-title">In this lesson</span></p>
 <hr>
 <p><br></p>
@@ -265,19 +146,17 @@ window.Quarto = {
 <li>Adjusting the classification threshold and its effect on precision and recall</li>
 <li>ROC curves and the AUC as tools for evaluating classifier performance across thresholds</li>
 </ul>
-<hr>
 </section>
-<section id="section-example" class="level2" data-menu-title="# A guiding example #" data-background="#047C90">
-<h2 data-menu-title="# A guiding example #" data-background="#047C90" class="anchored" data-anchor-id="section-example"></h2>
+<section id="section-example" class="slide level2" data-menu-title="# A guiding example #" data-background="#047C90">
+<h2></h2>
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">
 A guiding example
 </p>
 </div>
-<hr>
 </section>
-<section id="kelpwatch" class="level2" data-menu-title="The KelpWatch dataset">
-<h2 data-menu-title="The KelpWatch dataset" class="anchored" data-anchor-id="kelpwatch"></h2>
+<section id="kelpwatch" class="slide level2" data-menu-title="The KelpWatch dataset">
+<h2></h2>
 <p><span class="slide-title">Our example dataset</span></p>
 <hr>
 <p>The same synthetic dataset from the previous lesson — 300 coastal monitoring stations:</p>
@@ -294,17 +173,16 @@ A guiding example
 <p><em>Can we predict whether a site is healthy or degraded</em></p>
 <p><em>based on its oceanographic conditions?</em></p>
 </div>
-<hr>
 </section>
-<section id="kelpwatch-plot" class="level2" data-menu-title="KelpWatch: data overview">
-<h2 data-menu-title="KelpWatch: data overview" class="anchored" data-anchor-id="kelpwatch-plot"></h2>
+<section id="kelpwatch-plot" class="slide level2" data-menu-title="KelpWatch: data overview">
+<h2></h2>
 <p><span class="slide-title">Data overview</span></p>
 <hr>
 <div id="cell-example-data-plot" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/example-data-plot-output-1.png" id="example-data-plot" class="quarto-figure quarto-figure-center anchored figure-img" width="1186" height="535"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/example-data-plot-output-1.png" id="example-data-plot" class="quarto-figure quarto-figure-center" width="1186" height="535"></p>
 </figure>
 </div>
 </div>
@@ -312,19 +190,17 @@ A guiding example
 <div class="center-text body-text-s">
 <p><em>Synthetic data generated for educational purposes only</em></p>
 </div>
-<hr>
 </section>
-<section id="section-logistic" class="level2" data-menu-title="# Logistic regression #" data-background="#047C90">
-<h2 data-menu-title="# Logistic regression #" data-background="#047C90" class="anchored" data-anchor-id="section-logistic"></h2>
+<section id="section-logistic" class="slide level2" data-menu-title="# Logistic regression #" data-background="#047C90">
+<h2></h2>
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">
 Logistic regression
 </p>
 </div>
-<hr>
 </section>
-<section id="logistic-intro" class="level2" data-menu-title="Logistic regression">
-<h2 data-menu-title="Logistic regression" class="anchored" data-anchor-id="logistic-intro"></h2>
+<section id="logistic-intro" class="slide level2" data-menu-title="Logistic regression">
+<h2></h2>
 <p><span class="slide-title">Logistic regression</span></p>
 <hr>
 <p>Rather than predicting the class directly, logistic regression models the <strong>probability</strong> that an observation belongs to the positive class:</p>
@@ -336,10 +212,9 @@ Logistic regression
 \]</span></p>
 <p><br></p>
 <p>The choice of threshold is something we control.</p>
-<hr>
 </section>
-<section id="logistic-example" class="level2" data-menu-title="Logistic regression">
-<h2 data-menu-title="Logistic regression" class="anchored" data-anchor-id="logistic-example"></h2>
+<section id="logistic-example" class="slide level2" data-menu-title="Logistic regression">
+<h2></h2>
 <p><span class="slide-title">Logistic regression: example data</span></p>
 <hr>
 <p>In our example:</p>
@@ -347,20 +222,21 @@ Logistic regression
 <li><strong>Predictor</strong>: <code>temp_anomaly</code></li>
 <li><strong>Response</strong>: <code>status</code>: <em>healthy</em> (class 1/positive) or <em>degraded</em> (class 0/negative)</li>
 </ul>
-<p>. . .</p>
+<div class="fragment">
 <p>Using logistic regression we can model</p>
 <p><span class="math display">\[P(\text{status} = \text{healthy} \mid \text{temp_anomaly}) = p(\text{temp_anomaly}),\]</span></p>
 <p>the probability of a site having a healthy status given a certain temperature anomaly.</p>
-<p>. . .</p>
+</div>
+<div class="fragment">
 <p>Then, we select a threshold to classify a site as healthy or degraded. E.g., using <span class="math inline">\(\alpha=0.5\)</span>:</p>
 <ul>
 <li>If <span class="math inline">\(p(\text{temp}) \geq 0.5\)</span>, then predict the site is <em>healthy</em>.</li>
 <li>If <span class="math inline">\(p(\text{temp}) &lt; 0.5\)</span>, then predict the site is <em>degraded</em>.</li>
 </ul>
-<hr>
+</div>
 </section>
-<section id="logistic-intro-checkin-1" class="level2" data-menu-title="The logistic function">
-<h2 data-menu-title="The logistic function" class="anchored" data-anchor-id="logistic-intro-checkin-1"></h2>
+<section id="logistic-intro-checkin-1" class="slide level2" data-menu-title="The logistic function">
+<h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <div class="teal-text">
@@ -369,7 +245,7 @@ Logistic regression
 <li><p>If we used <code>nitrate</code> as the predictor instead, what would <span class="math inline">\(p(X)\)</span> be modeling?</p></li>
 </ol>
 </div>
-<p>. . .</p>
+<div class="fragment">
 <p><br></p>
 <ol type="1">
 <li>After having the model <span class="math inline">\(p(X)\)</span>, we would plug in <span class="math inline">\(X = 3\)</span> to calculate <span class="math inline">\(p(3)\)</span>. If <span class="math inline">\(p(3)&lt;0.7\)</span> then we would predict the site is degraded and if <span class="math inline">\(p(3)\geq0.7\)</span> we would predict the site is healthy.</li>
@@ -378,10 +254,10 @@ Logistic regression
 <ol start="2" type="1">
 <li><span class="math inline">\(p(X)\)</span> would model <span class="math inline">\(P(\text{status} = \text{healthy} \mid \text{nitrate})\)</span>. This is the probability that a site is healthy given its nitrate concentration.</li>
 </ol>
-<hr>
+</div>
 </section>
-<section id="logistic-function" class="level2" data-menu-title="The logistic function">
-<h2 data-menu-title="The logistic function" class="anchored" data-anchor-id="logistic-function"></h2>
+<section id="logistic-function" class="slide level2" data-menu-title="The logistic function">
+<h2></h2>
 <p><span class="slide-title">The logistic function</span></p>
 <hr>
 <div style="text-align: center;">
@@ -392,16 +268,16 @@ Logistic regression
 <li><span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> are coefficients to be estimated to fit the model</li>
 </ul>
 </div>
-<hr>
 </section>
-<section id="mle" class="level2" data-menu-title="MLE">
-<h2 data-menu-title="MLE" class="anchored" data-anchor-id="mle"></h2>
+<section id="mle" class="slide level2" data-menu-title="MLE">
+<h2></h2>
 <p><span class="slide-title">Maximum likelihood estimation</span></p>
 <hr>
 <p>Logistic function: <span class="math inline">\(p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}}\)</span></p>
-<p>. . .</p>
+<div class="fragment">
 <p>Training data: <span class="math inline">\((x_1, y_1), \ldots, (x_n, y_n)\)</span>, where each <span class="math inline">\(y_i \in \{0, 1\}\)</span></p>
-<p>. . .</p>
+</div>
+<div class="fragment">
 <p>Idea: estimate coefficients <span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span> that make the observed data as probable as possible:</p>
 <ul>
 <li>For a training point <span class="math inline">\(x_i\)</span> where <span class="math inline">\(y_i = 1\)</span> (positive class), we want <span class="math inline">\(p(x_i)\)</span> to be <strong>close to 1</strong>.</li>
@@ -409,17 +285,17 @@ Logistic regression
 </ul>
 <p>To find such <span class="math inline">\(\hat\beta_0\)</span>, <span class="math inline">\(\hat\beta_1\)</span> we maximize the <strong>likelihood function</strong>:</p>
 <p><span class="math display">\[\mathcal{L}(\beta_0, \beta_1) = \prod_{i:\, y_i = 1} p(x_i) \cdot \prod_{i:\, y_i = 0} \bigl(1 - p(x_i)\bigr).\]</span></p>
-<hr>
+</div>
 </section>
-<section id="logistic-curve-slide" class="level2" data-menu-title="Fitted logistic curve">
-<h2 data-menu-title="Fitted logistic curve" class="anchored" data-anchor-id="logistic-curve-slide"></h2>
+<section id="logistic-curve-slide" class="slide level2" data-menu-title="Fitted logistic curve">
+<h2></h2>
 <p><span class="slide-title">Fitted probability curve</span></p>
 <hr>
 <div id="cell-logistic-curve" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/logistic-curve-output-1.png" id="logistic-curve" class="quarto-figure quarto-figure-center anchored figure-img" width="1025" height="385"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/logistic-curve-output-1.png" id="logistic-curve" class="quarto-figure quarto-figure-center" width="1025" height="385"></p>
 </figure>
 </div>
 </div>
@@ -432,10 +308,9 @@ Logistic regression
 <li>Notice the characteristic S-shape of the logistic function!</li>
 </ul>
 </div>
-<hr>
 </section>
-<section id="checkin-logistic-q" class="level2" data-menu-title="Check-in: predict class">
-<h2 data-menu-title="Check-in: predict class" class="anchored" data-anchor-id="checkin-logistic-q"></h2>
+<section id="checkin-logistic-q" class="slide level2" data-menu-title="Check-in: predict class">
+<h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <div class="columns">
@@ -443,8 +318,8 @@ Logistic regression
 <div id="26f95e2c" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/cell-5-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="706" height="385"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/cell-5-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="385"></p>
 </figure>
 </div>
 </div>
@@ -454,12 +329,10 @@ Logistic regression
 <p>Using the fitted logistic model,</p>
 <p>what is the predicted status of a site with <code>temp_anomaly</code> = 0.5°C? Use the threshold <span class="math inline">\(\alpha = 0.5\)</span>.</p>
 </div>
-</div>
-</div>
-<hr>
+</div></div>
 </section>
-<section id="checkin-logistic-a" class="level2" data-menu-title="Check-in: predict class (answers)">
-<h2 data-menu-title="Check-in: predict class (answers)" class="anchored" data-anchor-id="checkin-logistic-a"></h2>
+<section id="checkin-logistic-a" class="slide level2" data-menu-title="Check-in: predict class (answers)">
+<h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <div class="columns">
@@ -467,8 +340,8 @@ Logistic regression
 <div id="08fc2ae4" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/cell-6-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="706" height="385"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/cell-6-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="385"></p>
 </figure>
 </div>
 </div>
@@ -479,21 +352,18 @@ Logistic regression
 <p>what is the predicted status of a site with <code>temp_anomaly</code> = 0.5°C? Use the threshold <span class="math inline">\(\alpha = 0.5\)</span>.</p>
 </div>
 <p>Using the probability function we obtain <span class="math inline">\(p(0.5) = 0.6722\)</span>. Since this is above the classification threshold of 0.5, the site is predicted as ‘healthy’.</p>
-</div>
-</div>
-<hr>
+</div></div>
 </section>
-<section id="section-coefficients" class="level2" data-menu-title="# Interpreting coefficients #" data-background="#047C90">
-<h2 data-menu-title="# Interpreting coefficients #" data-background="#047C90" class="anchored" data-anchor-id="section-coefficients"></h2>
+<section id="section-coefficients" class="slide level2" data-menu-title="# Interpreting coefficients #" data-background="#047C90">
+<h2></h2>
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">
 Interpreting the coefficients
 </p>
 </div>
-<hr>
 </section>
-<section id="log-odds-slide-1" class="level2" data-menu-title="Log-odds and the logit">
-<h2 data-menu-title="Log-odds and the logit" class="anchored" data-anchor-id="log-odds-slide-1"></h2>
+<section id="log-odds-slide-1" class="slide level2" data-menu-title="Log-odds and the logit">
+<h2></h2>
 <p><span class="slide-title">Log-odds</span></p>
 <hr>
 <ul>
@@ -506,33 +376,32 @@ Interpreting the coefficients
 <p><span class="math display">\[\frac{p(X)}{1 - p(X)} = e^{\beta_0 + \beta_1 X}.\]</span></p>
 <p>Take the natural logarithm to get the <strong>log-odds</strong>:</p>
 <p><span class="math display">\[\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X.\]</span></p>
-<hr>
 </section>
-<section id="log-odds-slide-2" class="level2" data-menu-title="Log-odds and the logit">
-<h2 data-menu-title="Log-odds and the logit" class="anchored" data-anchor-id="log-odds-slide-2"></h2>
+<section id="log-odds-slide-2" class="slide level2" data-menu-title="Log-odds and the logit">
+<h2></h2>
 <p><span class="slide-title">Log-odds</span></p>
 <hr>
 <p>The <strong>log-odds</strong> are defined by</p>
 <p><span class="math display">\[\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X.\]</span></p>
 <p>Notice the <strong>log-odds is linear in</strong> <span class="math inline">\(X\)</span>.</p>
-<p>. . .</p>
+<div class="fragment">
 <p>In addition, <span class="math inline">\(p(X)\)</span> changes in the same direction as the log-odds.</p>
 <p>This helps us understand the relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(p(X)\)</span>:</p>
 <ul>
 <li><span class="math inline">\(\hat\beta_1 &gt; 0\)</span>: increasing <span class="math inline">\(X\)</span> <span class="math inline">\(\Rightarrow\)</span> higher log-odds <span class="math inline">\(\Rightarrow\)</span> higher <span class="math inline">\(p(X)\)</span></li>
 <li><span class="math inline">\(\hat\beta_1 &lt; 0\)</span>: increasing <span class="math inline">\(X\)</span> <span class="math inline">\(\Rightarrow\)</span> lower log-odds <span class="math inline">\(\Rightarrow\)</span> lower <span class="math inline">\(p(X)\)</span></li>
 </ul>
-<hr>
+</div>
 </section>
-<section id="log-odds-plot-slide" class="level2" data-menu-title="Log-odds vs. probability">
-<h2 data-menu-title="Log-odds vs. probability" class="anchored" data-anchor-id="log-odds-plot-slide"></h2>
+<section id="log-odds-plot-slide" class="slide level2" data-menu-title="Log-odds vs. probability">
+<h2></h2>
 <p><span class="slide-title">Log-odds and probability</span></p>
 <hr>
 <div id="cell-log-odds-plot" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/log-odds-plot-output-1.png" id="log-odds-plot" class="quarto-figure quarto-figure-center anchored figure-img" width="1186" height="385"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/log-odds-plot-output-1.png" id="log-odds-plot" class="quarto-figure quarto-figure-center" width="1186" height="385"></p>
 </figure>
 </div>
 </div>
@@ -541,10 +410,9 @@ Interpreting the coefficients
 <p>The log-odds scale is linear; the probability scale is the familiar S-curve.</p>
 <p>Both representations contain the same information.</p>
 </div>
-<hr>
 </section>
-<section id="checkin-beta-q" class="level2" data-menu-title="Check-in: sign of β₁">
-<h2 data-menu-title="Check-in: sign of β₁" class="anchored" data-anchor-id="checkin-beta-q"></h2>
+<section id="checkin-beta-q" class="slide level2" data-menu-title="Check-in: sign of β₁">
+<h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <div class="teal-text body-text-m">
@@ -552,23 +420,22 @@ Interpreting the coefficients
 <p><br></p>
 <p>What does the sign of <span class="math inline">\(\hat{\beta}_1\)</span> tell us about the relationship between temperature anomaly and kelp forest health?</p>
 </div>
-<p>. . .</p>
+<div class="fragment">
 <p><br></p>
 <p>A <strong>negative</strong> <span class="math inline">\(\hat\beta_1\)</span> means that as temperature anomaly increases (warmer ocean conditions), the log-odds of a healthy site decrease, which implies the probability of healthy status decreases.</p>
 <p>So warmer-than-average temperatures are associated with degraded kelp forests.</p>
-<hr>
+</div>
 </section>
-<section id="section-hypothesis" class="level2" data-menu-title="# Hypothesis testing #" data-background="#047C90">
-<h2 data-menu-title="# Hypothesis testing #" data-background="#047C90" class="anchored" data-anchor-id="section-hypothesis"></h2>
+<section id="section-hypothesis" class="slide level2" data-menu-title="# Hypothesis testing #" data-background="#047C90">
+<h2></h2>
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">
 Hypothesis testing
 </p>
 </div>
-<hr>
 </section>
-<section id="hypothesis-testing-slide" class="level2" data-menu-title="Hypothesis testing">
-<h2 data-menu-title="Hypothesis testing" class="anchored" data-anchor-id="hypothesis-testing-slide"></h2>
+<section id="hypothesis-testing-slide" class="slide level2" data-menu-title="Hypothesis testing">
+<h2></h2>
 <p><span class="slide-title">Is there evidence for a relationship between X and Y?</span></p>
 <hr>
 <p>If <span class="math inline">\(\beta_1 = 0\)</span>, then:</p>
@@ -583,14 +450,14 @@ Hypothesis testing
 <li><strong>Alternative hypothesis</strong> <span class="math inline">\(H_a\)</span>: there is some relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, i.e., <span class="math inline">\(\beta_1 \neq 0\)</span>.</li>
 </ul>
 </div>
-<p>. . .</p>
+<div class="fragment">
 <p>We test this using the <strong>Z-statistic</strong> (analogue of the t-statistic in linear regression):</p>
 <p><span class="math display">\[Z = \frac{\hat{\beta}_1}{\text{SE}(\hat{\beta}_1)}\]</span></p>
 <p>A large <span class="math inline">\(|Z|\)</span> provides evidence against <span class="math inline">\(H_0\)</span>. The <strong>p-value</strong> quantifies how likely we would observe a Z-statistic this extreme if <span class="math inline">\(H_0\)</span> were true.</p>
-<hr>
+</div>
 </section>
-<section id="checkin-hypothesis-q" class="level2" data-menu-title="Check-in: hypothesis test">
-<h2 data-menu-title="Check-in: hypothesis test" class="anchored" data-anchor-id="checkin-hypothesis-q"></h2>
+<section id="checkin-hypothesis-q" class="slide level2" data-menu-title="Check-in: hypothesis test">
+<h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <div class="teal-text body-text-m">
@@ -603,30 +470,29 @@ Hypothesis testing
 temp_anomaly   -1.1639      0.1739       -6.693  0.0000</code></pre>
 </div>
 </div>
-<p>. . .</p>
+<div class="fragment">
 <p><br></p>
 <p>Very small <span class="math inline">\(p\)</span>-value for <code>temp_anomaly</code>: strong evidence against <span class="math inline">\(H_0\)</span>: temperature anomaly is significantly associated with kelp forest status.</p>
 <p>We reject <span class="math inline">\(H_0: \beta_1 = 0\)</span>: there is a real relationship between temperature anomaly and the probability of a site being healthy.</p>
-<hr>
+</div>
 </section>
-<section id="section-multiple" class="level2" data-menu-title="# Multiple logistic regression #" data-background="#047C90">
-<h2 data-menu-title="# Multiple logistic regression #" data-background="#047C90" class="anchored" data-anchor-id="section-multiple"></h2>
+<section id="section-multiple" class="slide level2" data-menu-title="# Multiple logistic regression #" data-background="#047C90">
+<h2></h2>
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">
 Multiple logistic regression
 </p>
 </div>
-<hr>
 </section>
-<section id="multiple-logistic-slide" class="level2" data-menu-title="Multiple logistic regression">
-<h2 data-menu-title="Multiple logistic regression" class="anchored" data-anchor-id="multiple-logistic-slide"></h2>
+<section id="multiple-logistic-slide" class="slide level2" data-menu-title="Multiple logistic regression">
+<h2></h2>
 <p><span class="slide-title">Multiple logistic regression</span></p>
 <hr>
 <p>The logistic model extends naturally to multiple predictors <span class="math inline">\(X_1, X_2, \ldots, X_p\)</span>:</p>
 <p><span class="math display">\[p(X) = \frac{e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}{1 + e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}.\]</span></p>
 <p>The log-odds remain <strong>linear in all predictors</strong>:</p>
 <p><span class="math display">\[\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p.\]</span></p>
-<p>. . .</p>
+<div class="fragment">
 <p>Each coefficient <span class="math inline">\(\hat\beta_j\)</span> represents the change in log-odds for a one-unit increase in <span class="math inline">\(X_j\)</span>, <strong>holding all other predictors constant</strong>:</p>
 <div class="body-text-s">
 <ul>
@@ -635,32 +501,31 @@ Multiple logistic regression
 </ul>
 <!-- **Note:** raw coefficients are in different units (°C vs. μmol/L here), so their magnitudes are not directly comparable for assessing "which predictor matters more." -->
 </div>
-<hr>
+</div>
 </section>
-<section id="multi-logistic-prob-1" class="level2" data-menu-title="Multiple logistic regression: probability gradient">
-<h2 data-menu-title="Multiple logistic regression: probability gradient" class="anchored" data-anchor-id="multi-logistic-prob-1"></h2>
+<section id="multi-logistic-prob-1" class="slide level2" data-menu-title="Multiple logistic regression: probability gradient">
+<h2></h2>
 <p><span class="slide-title">Logistic regression with two predictors</span></p>
 <hr>
 <div id="cell-multi-logistic-explanation-1" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-1-output-1.png" id="multi-logistic-explanation-1" class="quarto-figure quarto-figure-center anchored figure-img" width="974" height="428"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-1-output-1.png" id="multi-logistic-explanation-1" class="quarto-figure quarto-figure-center" width="974" height="428"></p>
 </figure>
 </div>
 </div>
 </div>
-<hr>
 </section>
-<section id="multi-logistic-prob-2" class="level2" data-menu-title="Multiple logistic regression: probability gradient">
-<h2 data-menu-title="Multiple logistic regression: probability gradient" class="anchored" data-anchor-id="multi-logistic-prob-2"></h2>
+<section id="multi-logistic-prob-2" class="slide level2" data-menu-title="Multiple logistic regression: probability gradient">
+<h2></h2>
 <p><span class="slide-title">Logistic regression with two predictors</span></p>
 <hr>
 <div id="cell-multi-logistic-explanation-2" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-2-output-1.png" id="multi-logistic-explanation-2" class="quarto-figure quarto-figure-center anchored figure-img" width="1081" height="428"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-2-output-1.png" id="multi-logistic-explanation-2" class="quarto-figure quarto-figure-center" width="1081" height="428"></p>
 </figure>
 </div>
 </div>
@@ -668,17 +533,16 @@ Multiple logistic regression
 <div class="body-text-s center-text">
 <p>Darker green = higher predicted probability of healthy status.</p>
 </div>
-<hr>
 </section>
-<section id="multi-logistic-prob-3" class="level2" data-menu-title="Multiple logistic regression: probability gradient">
-<h2 data-menu-title="Multiple logistic regression: probability gradient" class="anchored" data-anchor-id="multi-logistic-prob-3"></h2>
+<section id="multi-logistic-prob-3" class="slide level2" data-menu-title="Multiple logistic regression: probability gradient">
+<h2></h2>
 <p><span class="slide-title">Logistic regression with two predictors</span></p>
 <hr>
 <div id="cell-multi-logistic-explanation-3" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-3-output-1.png" id="multi-logistic-explanation-3" class="quarto-figure quarto-figure-center anchored figure-img" width="1081" height="428"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-3-output-1.png" id="multi-logistic-explanation-3" class="quarto-figure quarto-figure-center" width="1081" height="428"></p>
 </figure>
 </div>
 </div>
@@ -686,17 +550,16 @@ Multiple logistic regression
 <div class="body-text-s center-text">
 <p>Darker green = higher predicted probability of healthy status.</p>
 </div>
-<hr>
 </section>
-<section id="ulti-logistic-prob-4" class="level2" data-menu-title="Multiple logistic regression: decision boundary">
-<h2 data-menu-title="Multiple logistic regression: decision boundary" class="anchored" data-anchor-id="ulti-logistic-prob-4"></h2>
+<section id="ulti-logistic-prob-4" class="slide level2" data-menu-title="Multiple logistic regression: decision boundary">
+<h2></h2>
 <p><span class="slide-title">Logistic regression with two predictors</span></p>
 <hr>
 <div id="cell-multi-logistic-explanation-4" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-4-output-1.png" id="multi-logistic-explanation-4" class="quarto-figure quarto-figure-center anchored figure-img" width="1081" height="428"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-4-output-1.png" id="multi-logistic-explanation-4" class="quarto-figure quarto-figure-center" width="1081" height="428"></p>
 </figure>
 </div>
 </div>
@@ -705,17 +568,16 @@ Multiple logistic regression
 <p>Darker green = higher predicted probability of healthy status.</p>
 <p>Gray line = decision boundary (<span class="math inline">\(\alpha = 0.5\)</span>).</p>
 </div>
-<hr>
 </section>
-<section id="ulti-logistic-prob-5" class="level2" data-menu-title="Multiple logistic regression: decision boundary">
-<h2 data-menu-title="Multiple logistic regression: decision boundary" class="anchored" data-anchor-id="ulti-logistic-prob-5"></h2>
+<section id="ulti-logistic-prob-5" class="slide level2" data-menu-title="Multiple logistic regression: decision boundary">
+<h2></h2>
 <p><span class="slide-title">Logistic regression with two predictors</span></p>
 <hr>
 <div id="cell-multi-logistic-explanation-5" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-5-output-1.png" id="multi-logistic-explanation-5" class="quarto-figure quarto-figure-center anchored figure-img" width="974" height="428"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-5-output-1.png" id="multi-logistic-explanation-5" class="quarto-figure quarto-figure-center" width="974" height="428"></p>
 </figure>
 </div>
 </div>
@@ -724,17 +586,16 @@ Multiple logistic regression
 <p>Blue region = predicted healthy, red region = predicted degraded.</p>
 <p>Gray line = decision boundary (<span class="math inline">\(\alpha = 0.5\)</span>).</p>
 </div>
-<hr>
 </section>
-<section id="ulti-logistic-prob-6" class="level2" data-menu-title="Multiple logistic regression: decision boundary">
-<h2 data-menu-title="Multiple logistic regression: decision boundary" class="anchored" data-anchor-id="ulti-logistic-prob-6"></h2>
+<section id="ulti-logistic-prob-6" class="slide level2" data-menu-title="Multiple logistic regression: decision boundary">
+<h2></h2>
 <p><span class="slide-title">Logistic regression with two predictors</span></p>
 <hr>
 <div id="cell-multi-logistic-explanation-6" class="cell" data-execution_count="13">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-6-output-1.png" id="multi-logistic-explanation-6" class="quarto-figure quarto-figure-center anchored figure-img" width="974" height="428"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/multi-logistic-explanation-6-output-1.png" id="multi-logistic-explanation-6" class="quarto-figure quarto-figure-center" width="974" height="428"></p>
 </figure>
 </div>
 </div>
@@ -778,33 +639,32 @@ Logistic (temp_anomaly + nitrate) 0.711     0.289     0.730  0.900 0.806
 Adding `nitrate` as a second predictor moderately improves the recall, which means we are correctly classifying more healthy sites. The rest of the metrics remain very close. 
 
 -->
-<hr>
 </section>
-<section id="section-threshold" class="level2" data-menu-title="# Adjusting the threshold #" data-background="#047C90">
-<h2 data-menu-title="# Adjusting the threshold #" data-background="#047C90" class="anchored" data-anchor-id="section-threshold"></h2>
+<section id="section-threshold" class="slide level2" data-menu-title="# Adjusting the threshold #" data-background="#047C90">
+<h2></h2>
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">
 Adjusting the classification threshold
 </p>
 </div>
-<hr>
 </section>
-<section id="threshold-concept-1" class="level2" data-menu-title="Classification threshold">
-<h2 data-menu-title="Classification threshold" class="anchored" data-anchor-id="threshold-concept-1"></h2>
+<section id="threshold-concept-1" class="slide level2" data-menu-title="Classification threshold">
+<h2></h2>
 <p><span class="slide-title">Adjusting the classification threshold</span></p>
 <hr>
 <p>The default threshold <span class="math inline">\(\alpha = 0.5\)</span> is just a convention. We can choose <strong>any</strong> value between 0 and 1.</p>
-<p>. . .</p>
+<div class="fragment">
 <div class="teal-text body-text-m">
 <p>Suppose the threshold is raised to <span class="math inline">\(\alpha = 0.9\)</span>. What type of error (FP or FN) would you expect more of, and what does this mean for precision and recall? Now repeat for <span class="math inline">\(\alpha = 0.2\)</span>.</p>
 </div>
-<p>. . .</p>
+</div>
+<div class="fragment">
 <p><strong><span class="math inline">\(\alpha = 0.9\)</span>:</strong> Only sites with very high predicted probability are classified as healthy. Many truly healthy sites fall below this bar and are classified as degraded → many false negatives. Precision increases (when we do predict healthy, we’re usually right), but recall falls.</p>
 <p><strong><span class="math inline">\(\alpha = 0.2\)</span>:</strong> Almost every site is classified as healthy. Most truly healthy sites are caught → very few false negatives → high recall. But many degraded sites are also classified as healthy → many false positives → precision</p>
-<hr>
+</div>
 </section>
-<section id="threshold-concept-2" class="level2" data-menu-title="Classification threshold">
-<h2 data-menu-title="Classification threshold" class="anchored" data-anchor-id="threshold-concept-2"></h2>
+<section id="threshold-concept-2" class="slide level2" data-menu-title="Classification threshold">
+<h2></h2>
 <p><span class="slide-title">Adjusting the classification threshold</span></p>
 <hr>
 <p>Changing the threshold has a tradeoff between recall and precision:</p>
@@ -812,17 +672,17 @@ Adjusting the classification threshold
 <li><p><strong>Raising the classification threshold</strong> means fewer observations get predicted as positive: precision increases, recall decreases (more false negatives).</p></li>
 <li><p><strong>Lowering the classification threshold</strong> means more observations get predicted as positive: recall increases, precision decreases (more false positives).</p></li>
 </ul>
-<p>. . .</p>
+<div class="fragment">
 <p>There is no single correct answer and the selection must be guided by:</p>
 <ul>
 <li><strong>Domain knowledge</strong>: what is the consequence of each error type?</li>
 <li><strong>The precision–recall tradeoff</strong>: understanding what you gain and lose at each threshold.</li>
 <li><strong>Cross-validation</strong>: evaluating threshold performance on held-out data rather than the test set (more on this on next lesson).</li>
 </ul>
-<hr>
+</div>
 </section>
-<section id="checkin-threshold-" class="level2" data-menu-title="Check-in: threshold effect (answers)">
-<h2 data-menu-title="Check-in: threshold effect (answers)" class="anchored" data-anchor-id="checkin-threshold-"></h2>
+<section id="checkin-threshold-" class="slide level2" data-menu-title="Check-in: threshold effect (answers)">
+<h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <div class="columns">
@@ -831,8 +691,8 @@ Adjusting the classification threshold
 <div id="cell-threshold-precision-recall" class="cell" data-execution_count="15">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/threshold-precision-recall-output-1.png" id="threshold-precision-recall" class="quarto-figure quarto-figure-center anchored figure-img" width="706" height="345"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/threshold-precision-recall-output-1.png" id="threshold-precision-recall" class="quarto-figure quarto-figure-center" width="706" height="345"></p>
 </figure>
 </div>
 </div>
@@ -841,12 +701,10 @@ Adjusting the classification threshold
 <div class="teal-text body-text-m">
 <p>What would we miss by evaluating performance using only overall accuracy?</p>
 </div>
-</div>
-</div>
-<hr>
+</div></div>
 </section>
-<section id="checkin-threshold-a" class="level2" data-menu-title="Check-in: threshold effect (answers)">
-<h2 data-menu-title="Check-in: threshold effect (answers)" class="anchored" data-anchor-id="checkin-threshold-a"></h2>
+<section id="checkin-threshold-a" class="slide level2" data-menu-title="Check-in: threshold effect (answers)">
+<h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <div class="columns">
@@ -855,8 +713,8 @@ Adjusting the classification threshold
 <div id="7283c992" class="cell" data-execution_count="16">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/cell-17-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="706" height="345"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/cell-17-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="345"></p>
 </figure>
 </div>
 </div>
@@ -870,21 +728,18 @@ Adjusting the classification threshold
 <p>A threshold that maximizes accuracy may still have poor recall (missing many healthy sites) or poor precision (flagging many degraded sites).</p>
 <p>The green dashed line barely changes across a wide range of thresholds, but precision and recall shift a lot!</p>
 </div>
-</div>
-</div>
-<hr>
+</div></div>
 </section>
-<section id="section-roc" class="level2" data-menu-title="# ROC curves #" data-background="#047C90">
-<h2 data-menu-title="# ROC curves #" data-background="#047C90" class="anchored" data-anchor-id="section-roc"></h2>
+<section id="section-roc" class="slide level2" data-menu-title="# ROC curves #" data-background="#047C90">
+<h2></h2>
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">
 ROC curves and AUC
 </p>
 </div>
-<hr>
 </section>
-<section id="roc-intro" class="level2" data-menu-title="TPR and FPR">
-<h2 data-menu-title="TPR and FPR" class="anchored" data-anchor-id="roc-intro"></h2>
+<section id="roc-intro" class="slide level2" data-menu-title="TPR and FPR">
+<h2></h2>
 <p><span class="slide-title">ROC curves</span></p>
 <hr>
 <p>The <strong>ROC curve</strong> plots two metrics against each other across all possible thresholds.</p>
@@ -899,14 +754,13 @@ ROC curves and AUC
 <p><strong>False Positive Rate (FPR)</strong></p>
 <p><span class="math display">\[FPR = \frac{FP}{FP + TN}\]</span></p>
 <p><em>Of all truly degraded sites, what fraction did we incorrectly flag as healthy?</em></p>
-</div>
-</div>
-<p>. . .</p>
+</div></div>
+<div class="fragment">
 <p>We obtain the ROC curve by calculating the TPR and the FPR at every value classification threshold and then plotting TPR with respect to FPR.</p>
-<hr>
+</div>
 </section>
-<section id="checkin-roc-q" class="level2" data-menu-title="Check-in: ROC by hand">
-<h2 data-menu-title="Check-in: ROC by hand" class="anchored" data-anchor-id="checkin-roc-q"></h2>
+<section id="checkin-roc-q" class="slide level2" data-menu-title="Check-in: ROC by hand">
+<h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <div class="columns">
@@ -914,7 +768,7 @@ ROC curves and AUC
 <p>We obtain the ROC curve by calculating the TPR and the FPR at every value classification threshold and then plotting TPR with respect to FPR.</p>
 <div class="teal-text">
 <p>Use the confusion matrices to fill in the table. Then sketch the ROC curve through those points.</p>
-<table class="caption-top table">
+<table class="caption-top">
 <thead>
 <tr class="header">
 <th style="text-align: center;">Threshold (α)</th>
@@ -950,18 +804,16 @@ ROC curves and AUC
 <div id="cell-roc-checkin-cms" class="cell" data-execution_count="17">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/roc-checkin-cms-output-1.png" id="roc-checkin-cms" class="quarto-figure quarto-figure-center anchored figure-img" width="564" height="293"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/roc-checkin-cms-output-1.png" id="roc-checkin-cms" class="quarto-figure quarto-figure-center" width="564" height="293"></p>
 </figure>
 </div>
 </div>
 </div>
-</div>
-</div>
-<hr>
+</div></div>
 </section>
-<section id="checkin-roc-a" class="level2" data-menu-title="Check-in: ROC by hand (answers)">
-<h2 data-menu-title="Check-in: ROC by hand (answers)" class="anchored" data-anchor-id="checkin-roc-a"></h2>
+<section id="checkin-roc-a" class="slide level2" data-menu-title="Check-in: ROC by hand (answers)">
+<h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <div class="columns">
@@ -969,8 +821,8 @@ ROC curves and AUC
 <div id="cell-roc-curve" class="cell" data-execution_count="18">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/roc-curve-output-1.png" id="roc-curve" class="quarto-figure quarto-figure-center anchored figure-img" width="623" height="435"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/roc-curve-output-1.png" id="roc-curve" class="quarto-figure quarto-figure-center" width="623" height="435"></p>
 </figure>
 </div>
 </div>
@@ -990,12 +842,10 @@ ROC curves and AUC
 <li><span class="math inline">\(\alpha = 0.0\)</span>: all predicted positive → TPR = FPR = 1 → point (1, 1)</li>
 </ul>
 <p>The curve always goes from (0, 0) to (1, 1).</p>
-</div>
-</div>
-<hr>
+</div></div>
 </section>
-<section id="roc-properties" class="level2" data-menu-title="Reading the ROC curve">
-<h2 data-menu-title="Reading the ROC curve" class="anchored" data-anchor-id="roc-properties"></h2>
+<section id="roc-properties" class="slide level2" data-menu-title="Reading the ROC curve">
+<h2></h2>
 <p><span class="slide-title">Reading the ROC curve</span></p>
 <hr>
 <div class="columns">
@@ -1012,22 +862,20 @@ ROC curves and AUC
 </div>
 </div><div class="column" style="width:55%;">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="Roc_curve.svg.png" class="img-fluid figure-img" style="width:95.0%"></p>
+<figure>
+<p><img data-src="Roc_curve.svg.png" style="width:95.0%"></p>
 <figcaption>By cmglee, MartinThoma – Roc-draft-xkcd-style.svg, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/w/index.php?curid=109730045">https://commons.wikimedia.org/w/index.php?curid=109730045</a></figcaption>
 </figure>
 </div>
-</div>
-</div>
-<hr>
+</div></div>
 </section>
-<section id="auc-slide" class="level2" data-menu-title="AUC">
-<h2 data-menu-title="AUC" class="anchored" data-anchor-id="auc-slide"></h2>
+<section id="auc-slide" class="slide level2" data-menu-title="AUC">
+<h2></h2>
 <p><span class="slide-title">Area under the curve (AUC)</span></p>
 <hr>
 <p>The <strong>AUC</strong> summarizes the entire ROC curve in a single number. Mostly used to compare models.</p>
 <p><br></p>
-<table class="caption-top table">
+<table class="caption-top">
 <thead>
 <tr class="header">
 <th style="text-align: center;">AUC</th>
@@ -1053,10 +901,9 @@ ROC curves and AUC
 </tr>
 </tbody>
 </table>
-<hr>
 </section>
-<section id="checkin-auc-q" class="level2" data-menu-title="Check-in: AUC">
-<h2 data-menu-title="Check-in: AUC" class="anchored" data-anchor-id="checkin-auc-q"></h2>
+<section id="checkin-auc-q" class="slide level2" data-menu-title="Check-in: AUC">
+<h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <div class="columns">
@@ -1064,8 +911,8 @@ ROC curves and AUC
 <div id="cell-auc-comparison" class="cell" data-execution_count="20">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/auc-comparison-output-1.png" id="auc-comparison" class="quarto-figure quarto-figure-center anchored figure-img" width="706" height="435"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/auc-comparison-output-1.png" id="auc-comparison" class="quarto-figure quarto-figure-center" width="706" height="435"></p>
 </figure>
 </div>
 </div>
@@ -1074,12 +921,10 @@ ROC curves and AUC
 <div class="teal-text body-text-m">
 <p>A colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?</p>
 </div>
-</div>
-</div>
-<hr>
+</div></div>
 </section>
-<section id="checkin-auc-a" class="level2" data-menu-title="Check-in: AUC">
-<h2 data-menu-title="Check-in: AUC" class="anchored" data-anchor-id="checkin-auc-a"></h2>
+<section id="checkin-auc-a" class="slide level2" data-menu-title="Check-in: AUC">
+<h2></h2>
 <p><span class="slide-title">Check-in</span></p>
 <hr>
 <div class="columns">
@@ -1087,8 +932,8 @@ ROC curves and AUC
 <div id="cell-auc-comparison-2" class="cell" data-execution_count="21">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="4_3_logistic_regression-SLIDES_files/figure-revealjs/auc-comparison-2-output-1.png" id="auc-comparison-2" class="quarto-figure quarto-figure-center anchored figure-img" width="706" height="435"></p>
+<figure>
+<p><img data-src="4_3_logistic_regression-SLIDES_files/figure-revealjs/auc-comparison-2-output-1.png" id="auc-comparison-2" class="quarto-figure quarto-figure-center" width="706" height="435"></p>
 </figure>
 </div>
 </div>
@@ -1098,434 +943,399 @@ ROC curves and AUC
 <p>A colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?</p>
 </div>
 <p>A model with AUC = 0.52 is barely better than random and almost certainly not useful in practice. The logistic regression would be preferred.</p>
-</div>
-</div>
+</div></div>
 
 
 </section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
 
-</main> <!-- /main -->
-<script id="quarto-html-after-body" type="application/javascript">
-  window.document.addEventListener("DOMContentLoaded", function (event) {
-    const icon = "";
-    const anchorJS = new window.AnchorJS();
-    anchorJS.options = {
-      placement: 'right',
-      icon: icon
-    };
-    anchorJS.add('.anchored');
-    const isCodeAnnotation = (el) => {
-      for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {                     
-          return true;
-        }
-      }
-      return false;
-    }
-    const onCopySuccess = function(e) {
-      // button target
-      const button = e.trigger;
-      // don't keep focus
-      button.blur();
-      // flash "checked"
-      button.classList.add('code-copy-button-checked');
-      var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copied!");
-      let tooltip;
-      if (window.bootstrap) {
-        button.setAttribute("data-bs-toggle", "tooltip");
-        button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button, 
-          { trigger: "manual", 
-            customClass: "code-copy-button-tooltip",
-            offset: [0, -8]});
-        tooltip.show();    
-      }
-      setTimeout(function() {
-        if (tooltip) {
-          tooltip.hide();
-          button.removeAttribute("data-bs-title");
-          button.removeAttribute("data-bs-toggle");
-          button.removeAttribute("data-bs-placement");
-        }
-        button.setAttribute("title", currentTitle);
-        button.classList.remove('code-copy-button-checked');
-      }, 1000);
-      // clear code selection
-      e.clearSelection();
-    }
-    const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-      text: getTextToCopy
-    });
-    clipboard.on('success', onCopySuccess);
-    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-        text: getTextToCopy,
-        container: window.document.getElementById('quarto-embedded-source-code-modal')
-      });
-      clipboardModal.on('success', onCopySuccess);
-    }
-      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-      var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
-      var isInternal = (href) => {
-          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-      }
-      // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-      for (var i=0; i<links.length; i++) {
-        const link = links[i];
-        if (!isInternal(link.href)) {
-          // undo the damage that might have been done by quarto-nav.js in the case of
-          // links that we want to consider external
-          if (link.dataset.originalHref !== undefined) {
-            link.href = link.dataset.originalHref;
-          }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
-        }
-      }
-    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-      const config = {
-        allowHTML: true,
-        maxWidth: 500,
-        delay: 100,
-        arrow: false,
-        appendTo: function(el) {
-            return el.parentElement;
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../../site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="../../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="../../site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
         },
-        interactive: true,
-        interactiveBorder: 10,
-        theme: 'quarto',
-        placement: 'bottom-start',
-      };
-      if (contentFn) {
-        config.content = contentFn;
-      }
-      if (onTriggerFn) {
-        config.onTrigger = onTriggerFn;
-      }
-      if (onUntriggerFn) {
-        config.onUntrigger = onUntriggerFn;
-      }
-      window.tippy(el, config); 
-    }
-    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-    for (var i=0; i<noterefs.length; i++) {
-      const ref = noterefs[i];
-      tippyHover(ref, function() {
-        // use id or data attribute instead here
-        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-        try { href = new URL(href).hash; } catch {}
-        const id = href.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note) {
-          return note.innerHTML;
-        } else {
-          return "";
-        }
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
       });
-    }
-    const xrefs = window.document.querySelectorAll('a.quarto-xref');
-    const processXRef = (id, note) => {
-      // Strip column container classes
-      const stripColumnClz = (el) => {
-        el.classList.remove("page-full", "page-columns");
-        if (el.children) {
-          for (const child of el.children) {
-            stripColumnClz(child);
-          }
-        }
-      }
-      stripColumnClz(note)
-      if (id === null || id.startsWith('sec-')) {
-        // Special case sections, only their first couple elements
-        const container = document.createElement("div");
-        if (note.children && note.children.length > 2) {
-          container.appendChild(note.children[0].cloneNode(true));
-          for (let i = 1; i < note.children.length; i++) {
-            const child = note.children[i];
-            if (child.tagName === "P" && child.innerText === "") {
-              continue;
-            } else {
-              container.appendChild(child.cloneNode(true));
-              break;
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
             }
           }
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(container);
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
           }
-          return container.innerHTML
-        } else {
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(note);
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+            const codeEl = trigger.previousElementSibling.cloneNode(true);
+            for (const childEl of codeEl.children) {
+              if (isCodeAnnotation(childEl)) {
+                childEl.remove();
+              }
+            }
+            return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
           }
-          return note.innerHTML;
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+                // target, if specified
+                link.setAttribute("target", "_blank");
+                if (link.getAttribute("rel") === null) {
+                  link.setAttribute("rel", "noopener");
+                }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
         }
-      } else {
-        // Remove any anchor links if they are present
-        const anchorLink = note.querySelector('a.anchorjs-link');
-        if (anchorLink) {
-          anchorLink.remove();
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
         }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(note);
-        }
-        if (note.classList.contains("callout")) {
-          return note.outerHTML;
-        } else {
-          return note.innerHTML;
-        }
-      }
-    }
-    for (var i=0; i<xrefs.length; i++) {
-      const xref = xrefs[i];
-      tippyHover(xref, undefined, function(instance) {
-        instance.disable();
-        let url = xref.getAttribute('href');
-        let hash = undefined; 
-        if (url.startsWith('#')) {
-          hash = url;
-        } else {
-          try { hash = new URL(url).hash; } catch {}
-        }
-        if (hash) {
-          const id = hash.replace(/^#\/?/, "");
-          const note = window.document.getElementById(id);
-          if (note !== null) {
-            try {
-              const html = processXRef(id, note.cloneNode(true));
-              instance.setContent(html);
-            } finally {
-              instance.enable();
-              instance.show();
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
             }
           } else {
-            // See if we can fetch this
-            fetch(url.split('#')[0])
-            .then(res => res.text())
-            .then(html => {
-              const parser = new DOMParser();
-              const htmlDoc = parser.parseFromString(html, "text/html");
-              const note = htmlDoc.getElementById(id);
-              if (note !== null) {
-                const html = processXRef(id, note);
-                instance.setContent(html);
-              } 
-            }).finally(() => {
-              instance.enable();
-              instance.show();
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
             });
           }
-        } else {
-          // See if we can fetch a full url (with no hash to target)
-          // This is a special case and we should probably do some content thinning / targeting
-          fetch(url)
-          .then(res => res.text())
-          .then(html => {
-            const parser = new DOMParser();
-            const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.querySelector('main.content');
-            if (note !== null) {
-              // This should only happen for chapter cross references
-              // (since there is no id in the URL)
-              // remove the first header
-              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-                note.children[0].remove();
-              }
-              const html = processXRef(null, note);
-              instance.setContent(html);
-            } 
-          }).finally(() => {
-            instance.enable();
-            instance.show();
-          });
         }
-      }, function(instance) {
       });
-    }
-        let selectedAnnoteEl;
-        const selectorForAnnotation = ( cell, annotation) => {
-          let cellAttr = 'data-code-cell="' + cell + '"';
-          let lineAttr = 'data-code-annotation="' +  annotation + '"';
-          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-          return selector;
-        }
-        const selectCodeLines = (annoteEl) => {
-          const doc = window.document;
-          const targetCell = annoteEl.getAttribute("data-target-cell");
-          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-          const lineIds = lines.map((line) => {
-            return targetCell + "-" + line;
-          })
-          let top = null;
-          let height = null;
-          let parent = null;
-          if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
-            }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
-            }
-            selectedAnnoteEl = annoteEl;
-          }
-        };
-        const unselectCodeLines = () => {
-          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-          elementsIds.forEach((elId) => {
-            const div = window.document.getElementById(elId);
-            if (div) {
-              div.remove();
-            }
-          });
-          selectedAnnoteEl = undefined;
-        };
-          // Handle positioning of the toggle
-      window.addEventListener(
-        "resize",
-        throttle(() => {
-          elRect = undefined;
-          if (selectedAnnoteEl) {
-            selectCodeLines(selectedAnnoteEl);
-          }
-        }, 10)
-      );
-      function throttle(fn, ms) {
-      let throttle = false;
-      let timer;
-        return (...args) => {
-          if(!throttle) { // first call gets through
-              fn.apply(this, args);
-              throttle = true;
-          } else { // all the others get throttled
-              if(timer) clearTimeout(timer); // cancel #2
-              timer = setTimeout(() => {
-                fn.apply(this, args);
-                timer = throttle = false;
-              }, ms);
-          }
-        };
-      }
-        // Attach click handler to the DT
-        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-        for (const annoteDlNode of annoteDls) {
-          annoteDlNode.addEventListener('click', (event) => {
-            const clickedEl = event.target;
-            if (clickedEl !== selectedAnnoteEl) {
-              unselectCodeLines();
-              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-              if (activeEl) {
-                activeEl.classList.remove('code-annotation-active');
-              }
-              selectCodeLines(clickedEl);
-              clickedEl.classList.add('code-annotation-active');
-            } else {
-              // Unselect the line
-              unselectCodeLines();
-              clickedEl.classList.remove('code-annotation-active');
-            }
-          });
-        }
-    const findCites = (el) => {
-      const parentEl = el.parentElement;
-      if (parentEl) {
-        const cites = parentEl.dataset.cites;
-        if (cites) {
-          return {
-            el,
-            cites: cites.split(' ')
-          };
-        } else {
-          return findCites(el.parentElement)
-        }
-      } else {
-        return undefined;
-      }
-    };
-    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-    for (var i=0; i<bibliorefs.length; i++) {
-      const ref = bibliorefs[i];
-      const citeInfo = findCites(ref);
-      if (citeInfo) {
-        tippyHover(citeInfo.el, function() {
-          var popup = window.document.createElement('div');
-          citeInfo.cites.forEach(function(cite) {
-            var citeDiv = window.document.createElement('div');
-            citeDiv.classList.add('hanging-indent');
-            citeDiv.classList.add('csl-entry');
-            var biblioDiv = window.document.getElementById('ref-' + cite);
-            if (biblioDiv) {
-              citeDiv.innerHTML = biblioDiv.innerHTML;
-            }
-            popup.appendChild(citeDiv);
-          });
-          return popup.innerHTML;
-        });
-      }
-    }
-  });
-  </script>
-</div> <!-- /content -->
-<footer class="footer">
-  <div class="nav-footer">
-    <div class="nav-footer-left">
-<p>This work is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License</a></p>
-</div>   
-    <div class="nav-footer-center">
-      &nbsp;
-    </div>
-    <div class="nav-footer-right">
-<p>This website is built with <a href="https://quarto.org/">Quarto</a> and <a href="https://github.com/MEDS-eds-220/MEDS-eds-220-course">GitHub pages</a>.</p>
-</div>
-  </div>
-</footer>
-
-
-
+      </script>
+    
 
 </body></html>
