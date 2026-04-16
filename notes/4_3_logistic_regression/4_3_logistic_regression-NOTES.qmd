@@ -166,12 +166,12 @@ Then, we select a threshold to classify a site as healthy or degraded given the 
 
 :::{.callout-tip}
 ## Check-in
-1. A new site has `temp_anomaly` = 3°C. Walk through the steps to predict its class using $p(X)$ with threshold $\alpha = 0.5$.
+1. A new site has `temp_anomaly` = 3°C. Walk through the steps to predict its class using $p(X)$ with threshold $\alpha = 0.7$.
 2. If we used `nitrate` as the predictor instead, what would $p(X)$ be modeling?
 :::
 :::{.callout-tip collapse="true"}
 ## Discussion
-1. After having the model $p(X)$, we would plug in $X = 3$ to calculate $p(3)$. If $p(3)<0.5$ then we would predict the site is degraded and if $p(3)\geq0.5$ we would predict the site is healthy. 
+1. After having the model $p(X)$, we would plug in $X = 3$ to calculate $p(3)$. If $p(3)<0.7$ then we would predict the site is degraded and if $p(3)\geq0.7$ we would predict the site is healthy. 
 
 2. $p(X)$ would model $P(\text{status} = \text{healthy} \mid \text{nitrate})$. This is the probability that a site is healthy given its nitrate concentration.
 :::
@@ -239,7 +239,7 @@ plt.close()
 
 :::{.callout-tip}
 ## Check-in
-Using the fitted model above ($\hat{\beta}_0 =$ `{python} f"{beta0_s:.4f}"`, $\hat{\beta}_1 =$ `{python} f"{beta1_s:.4f}"`), what is the predicted status of a site with `temp_anomaly` = 0.5°C? Use the default threshold $\alpha = 0.5$.
+Using the fitted model above, what is the predicted status of a site with `temp_anomaly` = 0.5°C? Use the default threshold $\alpha = 0.5$.
 :::
 :::{.callout-tip collapse="true"}
 ## Discussion

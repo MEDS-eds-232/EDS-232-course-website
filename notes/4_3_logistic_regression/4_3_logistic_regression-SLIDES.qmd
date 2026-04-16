@@ -170,11 +170,10 @@ roc_auc = auc(fpr, tpr)
 
 <br>
 
-- The **logistic function** and why we prefer it over linear regression for classification
-- **Maximum likelihood estimation** as the fitting method for logistic regression
-- Interpreting logistic regression coefficients through **log-odds**
-- Adjusting the **classification threshold** and its effect on precision and recall
-- **ROC curves** and AUC as tools for evaluating classifier performance across all thresholds
+- Logistic regression and how it is used for classification
+- Interpreting logistic regression coefficients through log-odds
+- Adjusting the classification threshold and its effect on precision and recall
+- ROC curves and the AUC as tools for evaluating classifier performance across thresholds
 
 ---
 
@@ -266,43 +265,115 @@ plt.close()
 
 Rather than predicting the class directly, logistic regression models the **probability** that an observation belongs to the positive class:
 
-$$P(Y = 1 \mid X) = p(X)$$
+$$P(Y = 1 \mid X) = p(X).$$
 
-Once we have $p(X)$, we classify using a **threshold** $\alpha$:
+<br>
 
-$$\hat{y} = \begin{cases} 1 & \text{if } p(X) \geq \alpha \\ 0 & \text{if } p(X) < \alpha \end{cases}$$
+Once we have $p(X)$, we classify $X$ using a **classification threshold** $\alpha$:
+
+$$
+\text{the class of $X$ is} = \begin{cases} \text{class } 1, & \text{if } p(X) \geq \alpha \\ \text{class } 0, & \text{if } p(X) < \alpha \end{cases}.
+$$
+
+<br>
+
+The choice of threshold is something we control.
+
+---
+
+## {#logistic-example data-menu-title="Logistic regression"}
+
+[Logistic regression: example data]{.slide-title}
+
+<hr>
+
+In our example:
+
+- **Predictor**: `temp_anomaly`
+- **Response**: `status`:  *healthy* (class 1/positive) or *degraded* (class 0/negative)
+
+Using logistic regression we can model
+
+$$P(\text{status} = \text{healthy} \mid \text{temp_anomaly}) = p(\text{temp_anomaly}),$$
+
+the probability of a site having a healthy status given a certain temperature anomaly.
+
+Then, we select a threshold to classify a site as healthy or degraded. E.g., using $\alpha=0.5$:
+
+- If $p(\text{temp}) \geq 0.5$, then predict the site is *healthy*.
+- If $p(\text{temp}) < 0.5$, then predict the site is *degraded*.
+
+---
+
+## {#logistic-intro-checkin-1 data-menu-title="The logistic function"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+
+::: {.teal-text}
+1. A new site has `temp_anomaly` = 3°C. Walk through the steps to predict its class using $p(X)$ with threshold $\alpha = 0.7$.
+
+2. If we used `nitrate` as the predictor instead, what would $p(X)$ be modeling?
+:::
 
 . . .
 
-In our example ($\alpha = 0.5$ by default):
+<br>
 
-- **Positive class**: healthy kelp forest ($Y = 1$)
-- **Negative class**: degraded kelp forest ($Y = 0$)
+1. After having the model $p(X)$, we would plug in $X = 3$ to calculate $p(3)$. If $p(3)<0.7$ then we would predict the site is degraded and if $p(3)\geq0.7$ we would predict the site is healthy. 
+
+<br>
+
+2. $p(X)$ would model $P(\text{status} = \text{healthy} \mid \text{nitrate})$. This is the probability that a site is healthy given its nitrate concentration.
+
+
 
 ---
 
 ## {#logistic-function data-menu-title="The logistic function"}
 
-[The logistic function and MLE]{.slide-title}
+[The logistic function]{.slide-title}
 
 <hr>
 
+<div style="text-align: center;">
+
 Logistic regression models $p(X)$ using the **logistic (sigmoid) function**:
 
-$$p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}}$$
+$$p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}}.$$
 
-::: {.body-text-m}
-- Always returns values **between 0 and 1** — a valid probability
-- Produces the characteristic **S-shaped curve**
-:::
+- Always returns values **between 0 and 1**: a valid probability model
+- $\beta_0$ and $\beta_1$ are coefficients to be estimated to fit the model
+
+</div>
+
+---
+
+## {#mle data-menu-title="MLE"}
+
+[Maximum likelihood estimation]{.slide-title}
+
+<hr>
+
+Logistic function: $p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}}$
 
 . . .
 
-**Maximum likelihood estimation (MLE):** find $\hat\beta_0$, $\hat\beta_1$ that make the observed training labels as probable as possible:
+Training data: $(x_1, y_1), \ldots, (x_n, y_n)$, where each $y_i \in \{0, 1\}$
 
-$$\mathcal{L}(\beta_0, \beta_1) = \prod_{i:\, y_i = 1} p(x_i) \cdot \prod_{i:\, y_i = 0} \bigl(1 - p(x_i)\bigr)$$
+. . .
 
-For each positive observation we want $p(x_i)$ close to 1; for each negative we want it close to 0.
+Idea: estimate coefficients $\hat{\beta}_0$ and $\hat{\beta}_1$ that make the observed data as probable as possible:
+
+- For a training point $x_i$ where $y_i = 1$ (positive class), we want $p(x_i)$ to be **close to 1**.
+- For a training point $x_i$ where $y_i = 0$ (negative class), we want $p(x_i)$ to be **close to 0**.
+
+To find such $\hat\beta_0$, $\hat\beta_1$ we maximize the **likelihood function**:
+
+$$\mathcal{L}(\beta_0, \beta_1) = \prod_{i:\, y_i = 1} p(x_i) \cdot \prod_{i:\, y_i = 0} \bigl(1 - p(x_i)\bigr).$$
+
 
 ---
 
@@ -339,7 +410,10 @@ plt.close()
 ```
 
 ::: {.body-text-s .center-text}
-Blue = healthy sites, red = degraded sites plotted at 0/1. Overlap near the boundary reflects genuine uncertainty in the data.
+- Points overlappin near the boundary reflects uncertainty in the data.
+- Probability is higher in regions where healthy sites are dense 
+- As temperature anomaly increases, the probability of a healthy site decreases. 
+- Notice the characteristic S-shape of the logistic function!
 :::
 
 ---
@@ -366,7 +440,8 @@ ax.plot(temp_range, prob_curve, color='black', linewidth=2)
 ax.axhline(0.5, color='gray', linestyle='--', linewidth=1, label='α = 0.5')
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('P(status = healthy)')
-ax.legend(fontsize=9)
+ax.legend(fontsize=13)
+ax.set_title('Logistic regression: fitted probability curve')
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
@@ -378,11 +453,9 @@ plt.close()
 ::: {.column width="45%"}
 
 ::: {.teal-text .body-text-m}
-The fitted model has $\hat{\beta}_0 =$ `{python} f"{beta0_s:.3f}"`, $\hat{\beta}_1 =$ `{python} f"{beta1_s:.3f}"`.
+Using the fitted logistic model, 
 
-1. What is the predicted status of a site with `temp_anomaly` = 0.5°C? Use $\alpha = 0.5$.
-
-2. A new site has `temp_anomaly` = 3°C. What would you expect its predicted class to be, and why?
+what is the predicted status of a site with `temp_anomaly` = 0.5°C? Use the threshold $\alpha = 0.5$.
 :::
 
 :::
@@ -413,7 +486,8 @@ ax.plot(temp_range, prob_curve, color='black', linewidth=2)
 ax.axhline(0.5, color='gray', linestyle='--', linewidth=1, label='α = 0.5')
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('P(status = healthy)')
-ax.legend(fontsize=9)
+ax.legend(fontsize=13)
+ax.set_title('Logistic regression: fitted probability curve')
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
@@ -424,12 +498,12 @@ plt.close()
 
 ::: {.column width="45%"}
 
-::: {.body-text-s}
-1. Log-odds at $X = 0.5$: `{python} f"{beta0_s + beta1_s * 0.5:.3f}"` → $p(0.5) =$ `{python} f"{1/(1+np.exp(-(beta0_s + beta1_s*0.5))):.3f}"`. This is `{python} "'above'" if 1/(1+np.exp(-(beta0_s+beta1_s*0.5)))>=0.5 else "'below'"` the threshold of 0.5 → predicted `{python} "'**healthy**'" if 1/(1+np.exp(-(beta0_s+beta1_s*0.5)))>=0.5 else "'**degraded**'"`.
+::: {.teal-text .body-text-m}
+Using the fitted logistic model, 
 
-2. With $\hat\beta_1 < 0$, a high temperature anomaly of 3°C gives a strongly negative log-odds → very small probability → predicted **degraded**.
+what is the predicted status of a site with `temp_anomaly` = 0.5°C? Use the threshold $\alpha = 0.5$.
 :::
-
+Using the probability function we obtain $p(0.5) = 0.6722$. Since this is above the classification threshold of 0.5, the site is predicted as 'healthy'.
 :::
 
 ::::
