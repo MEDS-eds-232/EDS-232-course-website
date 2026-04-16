@@ -247,7 +247,6 @@ window.Quarto = {
   <li><a href="#step-5-manually-calculate-accuracy-precision-recall-and-f₁" id="toc-step-5-manually-calculate-accuracy-precision-recall-and-f₁" class="nav-link" data-scroll-target="#step-5-manually-calculate-accuracy-precision-recall-and-f₁">Step 5: Manually Calculate Accuracy, Precision, Recall, and F₁</a>
   <ul class="collapse">
   <li><a href="#macro-average" id="toc-macro-average" class="nav-link" data-scroll-target="#macro-average">Macro Average</a></li>
-  <li><a href="#micro-average" id="toc-micro-average" class="nav-link" data-scroll-target="#micro-average">Micro Average</a></li>
   </ul></li>
   <li><a href="#step-6-verify-with-scikit-learns-built-in-metrics" id="toc-step-6-verify-with-scikit-learns-built-in-metrics" class="nav-link" data-scroll-target="#step-6-verify-with-scikit-learns-built-in-metrics">Step 6: Verify with Scikit-learn’s Built-in Metrics</a></li>
   </ul>
@@ -380,7 +379,7 @@ window.Quarto = {
 <section id="setup-load-libraries-and-read-in-data" class="level2">
 <h2 class="anchored" data-anchor-id="setup-load-libraries-and-read-in-data">Setup: Load Libraries and Read in Data</h2>
 <p>Run the cell below to load the EJI data, replace the EPA missing-value (<code>-999</code>) with <code>NaN</code>, and take a reproducible random sample of <strong>10,000 tracts</strong> so that cross-validated KNN runs in a reasonable time.</p>
-<div id="5e4506d8" class="cell" data-execution_count="1">
+<div id="819e97bc" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -548,7 +547,7 @@ window.Quarto = {
 <li>Create a column called <code>risk_class</code> that assigns each row the appropriate class label.</li>
 <li>Plot a bar chart showing the count of tracts in each class to visualize any potential class imbalance.</li>
 </ol>
-<div id="fda81cf4" class="cell" data-execution_count="2">
+<div id="d08ef3c7" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_risk_class(epl):</span>
@@ -598,7 +597,7 @@ Name: count, dtype: int64</code></pre>
 <p>KNN classifies a new point by finding its <em>k</em> nearest training neighbors in feature space, often using Euclidean distance.</p>
 <p>If one feature spans 0–100 while another spans 0–1, the large-range feature will dominate the distance calculation — even if the small-range feature is highly predictive. Standardizing each feature levels the playing field.</p>
 <p>Let’s take a look at the range of our observations for our 8 different features.</p>
-<div id="6912077b" class="cell" data-execution_count="3">
+<div id="0dbaf421" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>FEATURES <span class="op">=</span> [<span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>]</span>
@@ -631,7 +630,7 @@ E_MINRTY            0.0000    100.0000    100.0000</code></pre>
 <li>Split into 70% train / 30% test using <code>train_test_split</code> with <code>stratify=y</code> and <code>random_state=42</code>. Store as <code>X_train</code>, <code>X_test</code>, <code>y_train</code>, <code>y_test</code>.</li>
 <li>Fit a <code>StandardScaler</code> on the <strong>training set only</strong> and transform both sets → <code>X_train_s</code>, <code>X_test_s</code>.</li>
 </ol>
-<div id="093b9f25" class="cell" data-execution_count="4">
+<div id="41110e2c" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>var_of_interest <span class="op">=</span> [<span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>, <span class="st">'risk_class'</span>]</span>
@@ -660,7 +659,7 @@ Test set     : 2,921 tracts</code></pre>
 <section id="scaled-vs.-unscaled-knn" class="level2">
 <h2 class="anchored" data-anchor-id="scaled-vs.-unscaled-knn">Scaled vs.&nbsp;Unscaled KNN</h2>
 <p>The cell below fits the <em>same</em> KNN model (k = 5) twice — once on raw features, once on scaled features — and prints both test accuracies. Do you see an accuracy boost from scaling?</p>
-<div id="6ba3092b" class="cell" data-execution_count="5">
+<div id="a2894944" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># KNN on UNSCALED features</span></span>
@@ -698,7 +697,7 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 <li>Predict on <code>X_test_s</code>. Store your results in <code>y_pred_knn3</code>.</li>
 <li>Compute test accuracy. Store your results in <code>knn3_accuracy</code> using <code>accuracy_score</code>.</li>
 </ol>
-<div id="9f513729" class="cell" data-execution_count="6">
+<div id="debfb416" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>knn3 <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span><span class="dv">3</span>)</span>
@@ -752,7 +751,7 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 <li>Compute the confusion matrix for <code>knn3</code> using <code>y_test</code> and <code>y_pred_knn3</code>.</li>
 <li>Display it with <code>ConfusionMatrixDisplay</code>, using <code>display_labels=['Low','Medium','High']</code>.</li>
 </ol>
-<div id="6865ddac" class="cell" data-execution_count="7">
+<div id="47cd484d" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred_knn3)</span>
@@ -809,11 +808,10 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 </tbody>
 </table>
 <p><span class="math display">\[\text{Precision}_i = \frac{TP_i}{TP_i + FP_i} \qquad \text{Recall}_i = \frac{TP_i}{TP_i + FN_i} \qquad F1_i = \frac{2 \cdot P_i \cdot R_i}{P_i + R_i}\]</span></p>
-<p>There are two different methods to calculate precision, recall, and F1 when you have multiple classes: the macro average and the micro average. Let’s take a look at both.</p>
 <section id="macro-average" class="level3">
 <h3 class="anchored" data-anchor-id="macro-average">Macro Average</h3>
 <p>For each class: extract TP, FP, FN from <code>cm</code>, compute the three metrics, then take the simple mean across classes.</p>
-<div id="b1fbfe58" class="cell" data-execution_count="8">
+<div id="0f5681d9" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Accuracy ──────────────────────────────────────────────────────────────────</span></span>
@@ -879,110 +877,28 @@ Macro avg — Precision: 0.5202  Recall: 0.4665  F1: 0.4765</code></pre>
 </div>
 <hr>
 </section>
-<section id="micro-average" class="level3">
-<h3 class="anchored" data-anchor-id="micro-average">Micro Average</h3>
-<p>Macro average treats every class equally. <strong>Micro average</strong> pools all TP, FP, and FN counts across every class first, then computes one global metric.</p>
-<p><span class="math display">\[\text{Micro Precision} = \frac{\sum_i TP_i}{\sum_i (TP_i + FP_i)} \qquad \text{Micro Recall} = \frac{\sum_i TP_i}{\sum_i (TP_i + FN_i)}\]</span></p>
-<p>Using the per-class TP, FP, and FN values you already computed above:</p>
-<ol type="1">
-<li>Sum all TP values → <code>total_TP</code>, all FP → <code>total_FP</code>, all FN → <code>total_FN</code></li>
-<li>Compute <code>micro_precision</code>, <code>micro_recall</code>, and <code>micro_f1</code></li>
-<li>Compare all three to <code>accuracy_manual</code> . Do you notice anything interesting abuot these three results?</li>
-</ol>
-<div id="b6202515" class="cell" data-execution_count="9">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pool TP, FP, FN counts across all three classes</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>total_TP <span class="op">=</span> TP_low <span class="op">+</span> TP_med <span class="op">+</span> TP_high</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>total_FP <span class="op">=</span> FP_low <span class="op">+</span> FP_med <span class="op">+</span> FP_high</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>total_FN <span class="op">=</span> FN_low <span class="op">+</span> FN_med <span class="op">+</span> FN_high</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute micro-averaged metrics from the pooled counts</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>micro_precision <span class="op">=</span> total_TP <span class="op">/</span> (total_TP <span class="op">+</span> total_FP)</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>micro_recall    <span class="op">=</span> total_TP <span class="op">/</span> (total_TP <span class="op">+</span> total_FN)</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>micro_f1        <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> micro_precision <span class="op">*</span> micro_recall <span class="op">/</span> (micro_precision <span class="op">+</span> micro_recall)</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro Precision : </span><span class="sc">{</span>micro_precision<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro Recall    : </span><span class="sc">{</span>micro_recall<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro F1        : </span><span class="sc">{</span>micro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Overall Accuracy: </span><span class="sc">{</span>accuracy_manual<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Micro Precision : 0.6039
-Micro Recall    : 0.6039
-Micro F1        : 0.6039
-Overall Accuracy: 0.6039</code></pre>
-</div>
-</div>
-<hr>
-</section>
 </section>
 <section id="step-6-verify-with-scikit-learns-built-in-metrics" class="level2">
 <h2 class="anchored" data-anchor-id="step-6-verify-with-scikit-learns-built-in-metrics">Step 6: Verify with Scikit-learn’s Built-in Metrics</h2>
 <p>Now that you’ve computed everything by hand, use scikit-learn’s built-in functions to verify your results. The functions below accept <code>y_test</code> and <code>y_pred_knn3</code> directly.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Function</th>
-<th>Key argument</th>
-<th>What it returns</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>accuracy_score(y_test, y_pred)</code></td>
-<td>—</td>
-<td>Overall fraction correct</td>
-</tr>
-<tr class="even">
-<td><code>precision_score(y_test, y_pred, average=...)</code></td>
-<td><code>'macro'</code> / <code>'micro'</code></td>
-<td>Precision averaged across classes</td>
-</tr>
-<tr class="odd">
-<td><code>recall_score(y_test, y_pred, average=...)</code></td>
-<td><code>'macro'</code> / <code>'micro'</code></td>
-<td>Recall averaged across classes</td>
-</tr>
-<tr class="even">
-<td><code>f1_score(y_test, y_pred, average=...)</code></td>
-<td><code>'macro'</code> / <code>'micro'</code></td>
-<td>F₁ averaged across classes</td>
-</tr>
-</tbody>
-</table>
-<p>Compute all four metrics for both macro and micro averaging and confirm they match your manual calculations above.</p>
-<div id="aa19475a" class="cell" data-execution_count="10">
+<div id="1938acaa" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Accuracy ──────────────────────────────────────────────────────────────────</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>sk_accuracy <span class="op">=</span> accuracy_score(y_test, y_pred_knn3)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Macro-averaged metrics ────────────────────────────────────────────────────</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>sk_macro_precision <span class="op">=</span> precision_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'macro'</span>)</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>sk_macro_recall    <span class="op">=</span> recall_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'macro'</span>)</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>sk_macro_f1        <span class="op">=</span> f1_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'macro'</span>)</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Micro-averaged metrics ────────────────────────────────────────────────────</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>sk_micro_precision <span class="op">=</span> precision_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'micro'</span>)</span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>sk_micro_recall    <span class="op">=</span> recall_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'micro'</span>)</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>sk_micro_f1        <span class="op">=</span> f1_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'micro'</span>)</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== Sklearn Built-in Metrics ==="</span>)</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Accuracy          : </span><span class="sc">{</span>sk_accuracy<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro Precision   : </span><span class="sc">{</span>sk_macro_precision<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro Recall      : </span><span class="sc">{</span>sk_macro_recall<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro F1          : </span><span class="sc">{</span>sk_macro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro Precision   : </span><span class="sc">{</span>sk_micro_precision<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro Recall      : </span><span class="sc">{</span>sk_micro_recall<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro F1          : </span><span class="sc">{</span>sk_micro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Accuracy ──────────────────────────────────────────────────────────────────</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>sk_accuracy <span class="op">=</span> accuracy_score(y_test, y_pred_knn3)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Macro-averaged metrics ────────────────────────────────────────────────────</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>sk_macro_precision <span class="op">=</span> precision_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'macro'</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>sk_macro_recall    <span class="op">=</span> recall_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'macro'</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>sk_macro_f1        <span class="op">=</span> f1_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'macro'</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== Sklearn Built-in Metrics ==="</span>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Accuracy          : </span><span class="sc">{</span>sk_accuracy<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro Precision   : </span><span class="sc">{</span>sk_macro_precision<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro Recall      : </span><span class="sc">{</span>sk_macro_recall<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro F1          : </span><span class="sc">{</span>sk_macro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>=== Sklearn Built-in Metrics ===
@@ -990,11 +906,7 @@ Accuracy          : 0.6039
 
 Macro Precision   : 0.5202
 Macro Recall      : 0.4665
-Macro F1          : 0.4765
-
-Micro Precision   : 0.6039
-Micro Recall      : 0.6039
-Micro F1          : 0.6039</code></pre>
+Macro F1          : 0.4765</code></pre>
 </div>
 </div>
 

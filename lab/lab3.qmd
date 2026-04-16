@@ -265,7 +265,7 @@ For precision, recall, and F₁, each class gets its own TP, FP, and FN read dir
 
 $$\text{Precision}_i = \frac{TP_i}{TP_i + FP_i} \qquad \text{Recall}_i = \frac{TP_i}{TP_i + FN_i} \qquad F1_i = \frac{2 \cdot P_i \cdot R_i}{P_i + R_i}$$
 
-There are two different methods to calculate precision, recall, and F1 when you have multiple classes: the macro average and the micro average. Let's take a look at both.
+
 
 ### Macro Average
 
@@ -325,49 +325,13 @@ print(f"Macro avg — Precision: {macro_precision:.4f}  Recall: {macro_recall:.4
 
 ---
 
-### Micro Average
 
-Macro average treats every class equally. **Micro average** pools all TP, FP, and FN counts across every class first, then computes one global metric.
-
-$$\text{Micro Precision} = \frac{\sum_i TP_i}{\sum_i (TP_i + FP_i)} \qquad \text{Micro Recall} = \frac{\sum_i TP_i}{\sum_i (TP_i + FN_i)}$$
-
-Using the per-class TP, FP, and FN values you already computed above:
-
-1. Sum all TP values → `total_TP`, all FP → `total_FP`, all FN → `total_FN`
-2. Compute `micro_precision`, `micro_recall`, and `micro_f1`
-3. Compare all three to `accuracy_manual` . Do you notice anything interesting abuot these three results? 
-
-```{python}
-# Pool TP, FP, FN counts across all three classes
-total_TP = TP_low + TP_med + TP_high
-total_FP = FP_low + FP_med + FP_high
-total_FN = FN_low + FN_med + FN_high
-
-# Compute micro-averaged metrics from the pooled counts
-micro_precision = total_TP / (total_TP + total_FP)
-micro_recall    = total_TP / (total_TP + total_FN)
-micro_f1        = 2 * micro_precision * micro_recall / (micro_precision + micro_recall)
-
-print(f"Micro Precision : {micro_precision:.4f}")
-print(f"Micro Recall    : {micro_recall:.4f}")
-print(f"Micro F1        : {micro_f1:.4f}")
-print(f"Overall Accuracy: {accuracy_manual:.4f}")
-```
-
----
 
 ## Step 6: Verify with Scikit-learn's Built-in Metrics
 
 Now that you've computed everything by hand, use scikit-learn's built-in functions to verify your results. The functions below accept `y_test` and `y_pred_knn3` directly.
 
-| Function | Key argument | What it returns |
-|---|---|---|
-| `accuracy_score(y_test, y_pred)` | — | Overall fraction correct |
-| `precision_score(y_test, y_pred, average=...)` | `'macro'` / `'micro'` | Precision averaged across classes |
-| `recall_score(y_test, y_pred, average=...)` | `'macro'` / `'micro'` | Recall averaged across classes |
-| `f1_score(y_test, y_pred, average=...)` | `'macro'` / `'micro'` | F₁ averaged across classes |
 
-Compute all four metrics for both macro and micro averaging and confirm they match your manual calculations above.
 
 ```{python}
 # ── Accuracy ──────────────────────────────────────────────────────────────────
@@ -378,10 +342,6 @@ sk_macro_precision = precision_score(y_test, y_pred_knn3, average='macro')
 sk_macro_recall    = recall_score(y_test, y_pred_knn3, average='macro')
 sk_macro_f1        = f1_score(y_test, y_pred_knn3, average='macro')
 
-# ── Micro-averaged metrics ────────────────────────────────────────────────────
-sk_micro_precision = precision_score(y_test, y_pred_knn3, average='micro')
-sk_micro_recall    = recall_score(y_test, y_pred_knn3, average='micro')
-sk_micro_f1        = f1_score(y_test, y_pred_knn3, average='micro')
 
 print("=== Sklearn Built-in Metrics ===")
 print(f"Accuracy          : {sk_accuracy:.4f}")
@@ -389,8 +349,5 @@ print()
 print(f"Macro Precision   : {sk_macro_precision:.4f}")
 print(f"Macro Recall      : {sk_macro_recall:.4f}")
 print(f"Macro F1          : {sk_macro_f1:.4f}")
-print()
-print(f"Micro Precision   : {sk_micro_precision:.4f}")
-print(f"Micro Recall      : {sk_micro_recall:.4f}")
-print(f"Micro F1          : {sk_micro_f1:.4f}")
+
 ```
