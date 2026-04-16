@@ -379,7 +379,7 @@ window.Quarto = {
 <section id="setup-load-libraries-and-read-in-data" class="level2">
 <h2 class="anchored" data-anchor-id="setup-load-libraries-and-read-in-data">Setup: Load Libraries and Read in Data</h2>
 <p>Run the cell below to load the EJI data, replace the EPA missing-value (<code>-999</code>) with <code>NaN</code>, and take a reproducible random sample of <strong>10,000 tracts</strong> so that cross-validated KNN runs in a reasonable time.</p>
-<div id="819e97bc" class="cell" data-execution_count="1">
+<div id="46fbbdde" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -547,7 +547,7 @@ window.Quarto = {
 <li>Create a column called <code>risk_class</code> that assigns each row the appropriate class label.</li>
 <li>Plot a bar chart showing the count of tracts in each class to visualize any potential class imbalance.</li>
 </ol>
-<div id="d08ef3c7" class="cell" data-execution_count="2">
+<div id="41a0e6cd" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_risk_class(epl):</span>
@@ -597,7 +597,7 @@ Name: count, dtype: int64</code></pre>
 <p>KNN classifies a new point by finding its <em>k</em> nearest training neighbors in feature space, often using Euclidean distance.</p>
 <p>If one feature spans 0–100 while another spans 0–1, the large-range feature will dominate the distance calculation — even if the small-range feature is highly predictive. Standardizing each feature levels the playing field.</p>
 <p>Let’s take a look at the range of our observations for our 8 different features.</p>
-<div id="0dbaf421" class="cell" data-execution_count="3">
+<div id="34ffb02d" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>FEATURES <span class="op">=</span> [<span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>]</span>
@@ -630,7 +630,7 @@ E_MINRTY            0.0000    100.0000    100.0000</code></pre>
 <li>Split into 70% train / 30% test using <code>train_test_split</code> with <code>stratify=y</code> and <code>random_state=42</code>. Store as <code>X_train</code>, <code>X_test</code>, <code>y_train</code>, <code>y_test</code>.</li>
 <li>Fit a <code>StandardScaler</code> on the <strong>training set only</strong> and transform both sets → <code>X_train_s</code>, <code>X_test_s</code>.</li>
 </ol>
-<div id="41110e2c" class="cell" data-execution_count="4">
+<div id="929ed308" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>var_of_interest <span class="op">=</span> [<span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>, <span class="st">'risk_class'</span>]</span>
@@ -659,7 +659,7 @@ Test set     : 2,921 tracts</code></pre>
 <section id="scaled-vs.-unscaled-knn" class="level2">
 <h2 class="anchored" data-anchor-id="scaled-vs.-unscaled-knn">Scaled vs.&nbsp;Unscaled KNN</h2>
 <p>The cell below fits the <em>same</em> KNN model (k = 5) twice — once on raw features, once on scaled features — and prints both test accuracies. Do you see an accuracy boost from scaling?</p>
-<div id="a2894944" class="cell" data-execution_count="5">
+<div id="4e085ca2" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># KNN on UNSCALED features</span></span>
@@ -697,7 +697,7 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 <li>Predict on <code>X_test_s</code>. Store your results in <code>y_pred_knn3</code>.</li>
 <li>Compute test accuracy. Store your results in <code>knn3_accuracy</code> using <code>accuracy_score</code>.</li>
 </ol>
-<div id="debfb416" class="cell" data-execution_count="6">
+<div id="3ca94ca8" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>knn3 <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span><span class="dv">3</span>)</span>
@@ -751,7 +751,7 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 <li>Compute the confusion matrix for <code>knn3</code> using <code>y_test</code> and <code>y_pred_knn3</code>.</li>
 <li>Display it with <code>ConfusionMatrixDisplay</code>, using <code>display_labels=['Low','Medium','High']</code>.</li>
 </ol>
-<div id="47cd484d" class="cell" data-execution_count="7">
+<div id="d52d4888" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred_knn3)</span>
@@ -811,7 +811,7 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 <section id="macro-average" class="level3">
 <h3 class="anchored" data-anchor-id="macro-average">Macro Average</h3>
 <p>For each class: extract TP, FP, FN from <code>cm</code>, compute the three metrics, then take the simple mean across classes.</p>
-<div id="0f5681d9" class="cell" data-execution_count="8">
+<div id="43902ebc" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Accuracy ──────────────────────────────────────────────────────────────────</span></span>
@@ -881,7 +881,7 @@ Macro avg — Precision: 0.5202  Recall: 0.4665  F1: 0.4765</code></pre>
 <section id="step-6-verify-with-scikit-learns-built-in-metrics" class="level2">
 <h2 class="anchored" data-anchor-id="step-6-verify-with-scikit-learns-built-in-metrics">Step 6: Verify with Scikit-learn’s Built-in Metrics</h2>
 <p>Now that you’ve computed everything by hand, use scikit-learn’s built-in functions to verify your results. The functions below accept <code>y_test</code> and <code>y_pred_knn3</code> directly.</p>
-<div id="1938acaa" class="cell" data-execution_count="9">
+<div id="e24791e8" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Accuracy ──────────────────────────────────────────────────────────────────</span></span>
