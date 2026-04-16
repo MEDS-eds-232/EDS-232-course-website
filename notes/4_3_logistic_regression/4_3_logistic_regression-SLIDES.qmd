@@ -141,7 +141,7 @@ thresholds = np.linspace(0.01, 0.99, 200)
 precisions_t, recalls_t, accuracies_t = [], [], []
 for t in thresholds:
     y_hat = (y_prob_test >= t).astype(int)
-    precisions_t.append(precision_score(y_test_num, y_hat, zero_division=0))
+    precisions_t.append(precision_score(y_test_num, y_hat, zero_division=1))
     recalls_t.append(recall_score(y_test_num, y_hat, zero_division=0))
     accuracies_t.append(accuracy_score(y_test_num, y_hat))
 
@@ -1058,6 +1058,7 @@ There is no single correct answer and the selection must be guided by:
 The graph below shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels. 
 
 ```{python}
+#| label: threshold-precision-recall
 #| echo: false
 #| fig-align: center
 #| out-width: "100%"

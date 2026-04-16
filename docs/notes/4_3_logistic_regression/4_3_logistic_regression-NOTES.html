@@ -349,11 +349,10 @@ window.Quarto = {
 </header>
 
 
-<p><a href="4_3_logistic_regression-SLIDES.qmd">📊 Slides</a> / <a href="4_3_logistic_regression-SLIDES-BLANK.qmd">📊 Blank slides</a></p>
+<p><a href="../../notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html">📊 Slides</a> / <a href="4_3_logistic_regression-SLIDES-BLANK.qmd">📊 Blank slides</a></p>
 <p>In this lesson we introduce:</p>
 <ul>
-<li>The logistic function and why we prefer it over linear regression for classification</li>
-<li>Maximum likelihood estimation as the fitting method for logistic regression</li>
+<li>Logistic regression and how it is used for classification</li>
 <li>Interpreting logistic regression coefficients through log-odds</li>
 <li>Adjusting the classification threshold and its effect on precision and recall</li>
 <li>ROC curves and the AUC as tools for evaluating classifier performance across thresholds</li>
@@ -417,7 +416,7 @@ Check-in
 </div>
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li>A new site has <code>temp_anomaly</code> = 3°C. Walk through the steps to predict its class using <span class="math inline">\(p(X)\)</span> with threshold <span class="math inline">\(\alpha = 0.5\)</span>.</li>
+<li>A new site has <code>temp_anomaly</code> = 3°C. Walk through the steps to predict its class using <span class="math inline">\(p(X)\)</span> with threshold <span class="math inline">\(\alpha = 0.7\)</span>.</li>
 <li>If we used <code>nitrate</code> as the predictor instead, what would <span class="math inline">\(p(X)\)</span> be modeling?</li>
 </ol>
 </div>
@@ -435,7 +434,7 @@ Discussion
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p>After having the model <span class="math inline">\(p(X)\)</span>, we would plug in <span class="math inline">\(X = 3\)</span> to calculate <span class="math inline">\(p(3)\)</span>. If <span class="math inline">\(p(3)&lt;0.5\)</span> then we would predict the site is degraded and if <span class="math inline">\(p(3)\geq0.5\)</span> we would predict the site is healthy.</p></li>
+<li><p>After having the model <span class="math inline">\(p(X)\)</span>, we would plug in <span class="math inline">\(X = 3\)</span> to calculate <span class="math inline">\(p(3)\)</span>. If <span class="math inline">\(p(3)&lt;0.7\)</span> then we would predict the site is degraded and if <span class="math inline">\(p(3)\geq0.7\)</span> we would predict the site is healthy.</p></li>
 <li><p><span class="math inline">\(p(X)\)</span> would model <span class="math inline">\(P(\text{status} = \text{healthy} \mid \text{nitrate})\)</span>. This is the probability that a site is healthy given its nitrate concentration.</p></li>
 </ol>
 </div>
@@ -473,7 +472,7 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Using the fitted model above (<span class="math inline">\(\hat{\beta}_0 =\)</span> 1.3000, <span class="math inline">\(\hat{\beta}_1 =\)</span> -1.1639), what is the predicted status of a site with <code>temp_anomaly</code> = 0.5°C? Use the default threshold <span class="math inline">\(\alpha = 0.5\)</span>.</p>
+<p>Using the fitted model above, what is the predicted status of a site with <code>temp_anomaly</code> = 0.5°C? Use the default threshold <span class="math inline">\(\alpha = 0.5\)</span>.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -496,7 +495,7 @@ Discussion
 </section>
 <section id="interpreting-the-coefficients" class="level3">
 <h3 class="anchored" data-anchor-id="interpreting-the-coefficients">Interpreting the coefficients</h3>
-<p>Logistic regression allows us to do both classification and inference. Once we have fitted our model and estimated the coefficients <span class="math inline">\(\hat{\beta}_i\)</span>, we can interpret them to understand relations between the predictor and response variables.</p>
+<p>Logistic regression allows us to do both prediction and inference. Once we have fitted our model and estimated the coefficients <span class="math inline">\(\hat{\beta}_i\)</span>, we can interpret them to understand relations between the predictor variables and response.</p>
 <p>To understand these relationships we can rewrite the logistic function in terms of the odds and then the log-odds.</p>
 <p>Starting from the logistic function</p>
 <p><span class="math display">\[p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}},\]</span></p>
@@ -663,7 +662,7 @@ Discussion
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>FILL IN DISCUSSION</p>
+<p>Adding <code>nitrate</code> as a second predictor moderately improves the recall, which means we are correctly classifying more healthy sites. The rest of the metrics remain very close.</p>
 </div>
 </div>
 </div>
@@ -701,7 +700,7 @@ Discussion
 </div>
 </div>
 </div>
-<p>Changing the threshold shifts the classification tradeoff between recall and precision:</p>
+<p>Changing the threshold shifts has a tradeoff between recall and precision:</p>
 <ul>
 <li><p>Raising the classification threshold means fewer observations get predicted as positive: precision increases, recall decreases (more false negatives).</p></li>
 <li><p>Lowering the classification threshold means more observations get predicted as positive: recall increases, precision decreases (more false positives).</p></li>
@@ -722,7 +721,7 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The graph above shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels.</p>
+<p>The graph below shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels.</p>
 <div id="cell-threshold-effect" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div>
@@ -732,11 +731,7 @@ Check-in
 </div>
 </div>
 </div>
-<ol type="1">
-<li>What would we miss by evaluating model performance using only overall accuracy across thresholds?</li>
-<li>You manage kelp restoration and can only intervene at sites predicted as degraded. Should the threshold be high or low? Which metric does this prioritize?</li>
-<li>Around what threshold do precision and recall intersect? What does that point represent?</li>
-</ol>
+<p>What would we miss by evaluating model performance using only overall accuracy across thresholds?</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -751,11 +746,7 @@ Discussion
 </div>
 <div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ol type="1">
-<li><p>Overall accuracy hides the precision–recall tradeoff. A threshold that maximizes accuracy may still have poor recall (missing many degraded sites) or poor precision (flagging many healthy sites). The green dashed line barely changes across a wide range of thresholds, yet precision and recall shift dramatically — accuracy alone would give a misleading picture of model behavior.</p></li>
-<li><p>A <strong>lower threshold</strong> flags more sites as degraded, so fewer truly degraded sites are missed. This prioritizes <strong>recall</strong> — consistent with the reasoning in the previous lesson: the ecological cost of missing a degraded site (false negative) is higher than unnecessarily intervening at a healthy one.</p></li>
-<li><p>The intersection is the threshold at which precision and recall are equal. It represents the point of maximum balance between the two metrics, equivalent to the threshold that maximizes the <span class="math inline">\(F_1\)</span> score.</p></li>
-</ol>
+<p>Overall accuracy hides the precision–recall tradeoff. A threshold that maximizes accuracy may still have poor recall (missing many healthy sites) or poor precision (flagging many degraded sites). The green dashed line barely changes across a wide range of thresholds, but precision and recall shift a lot, so accuracy alone would give a misleading picture of model behavior.</p>
 </div>
 </div>
 </div>
@@ -902,10 +893,7 @@ Check-in
 </div>
 </div>
 </div>
-<ol type="1">
-<li>What does this AUC tell us about the model’s ability to discriminate between healthy and degraded sites?</li>
-<li>Suppose a colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?</li>
-</ol>
+<p>Suppose a colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -920,10 +908,9 @@ Discussion
 </div>
 <div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ol type="1">
-<li><p>An AUC of 0.747 means that if we randomly pick one healthy and one degraded site, the model assigns a higher probability of being healthy to the healthy site roughly 75 % of the time. This is substantially better than random.</p></li>
-<li><p>A model with AUC = 0.52 is barely better than random and almost certainly not useful in practice. The logistic regression would be preferred.</p></li>
-</ol>
+<!-- 1. An AUC of 0\.747 means that if we randomly pick one healthy and one degraded site, the model assigns a higher probability of being healthy to the healthy site roughly 75 % of the time. This is substantially better than random.
+ -->
+<p>A model with AUC = 0.52 is barely better than random and almost certainly not useful in practice. The logistic regression would be preferred.</p>
 </div>
 </div>
 </div>

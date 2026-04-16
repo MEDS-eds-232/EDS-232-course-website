@@ -530,7 +530,7 @@ precisions, recalls, accuracies = [], [], []
 
 for t in thresholds:
     y_hat = (y_prob_test >= t).astype(int)
-    precisions.append(precision_score(y_test_num, y_hat, zero_division=0))
+    precisions.append(precision_score(y_test_num, y_hat, zero_division=1))
     recalls.append(recall_score(y_test_num, y_hat, zero_division=0))
     accuracies.append(accuracy_score(y_test_num, y_hat))
 
