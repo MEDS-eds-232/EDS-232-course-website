@@ -68,11 +68,11 @@ from sklearn.metrics import (
     classification_report, precision_score, recall_score, f1_score
 )
 
-# Load and clean
+# Load and Replace -999 values with NA
 df_raw = pd.read_csv('data/EJI_2024_United_States.csv')
 df_raw = df_raw.replace(-999, np.nan)
 
-# Reproducible 10,000-tract sample
+# 10,000-tract sample
 df = df_raw.sample(n=10_000, random_state=42).reset_index(drop=True)
 df.head(3)
 ```
@@ -152,8 +152,8 @@ Complete the following steps:
 var_of_interest = ['E_NPL', 'E_TRI', 'E_TSD', 'E_RMP', 'E_DSLPM', 'E_PM', 'E_POV200', 'E_MINRTY', 'risk_class']
 
 df_model = df[var_of_interest].dropna()
-X = df_model[['E_NPL', 'E_TRI', 'E_TSD', 'E_RMP', 'E_DSLPM', 'E_PM', 'E_POV200', 'E_MINRTY']].values
-y = df_model['risk_class'].values.astype(int)
+X = df_model[['E_NPL', 'E_TRI', 'E_TSD', 'E_RMP', 'E_DSLPM', 'E_PM', 'E_POV200', 'E_MINRTY']]
+y = df_model['risk_class'].astype(int)
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.30, stratify=y, random_state=42)
@@ -173,7 +173,7 @@ print(f'Test set     : {X_test_s.shape[0]:,} tracts')
 The cell below fits the *same* KNN model (k = 5) twice — once on raw features, once on scaled features — and prints both test accuracies. Do you see an accuracy boost from scaling?
 
 ```{python}
-# KNN on RAW (unscaled) features
+# KNN on UNSCALED features
 knn_raw = KNeighborsClassifier(n_neighbors=5)
 knn_raw.fit(X_train, y_train)
 acc_raw = accuracy_score(y_test, knn_raw.predict(X_test))
@@ -237,9 +237,9 @@ cm = confusion_matrix(y_test, y_pred_knn3)
 
 disp = ConfusionMatrixDisplay(confusion_matrix=cm,
                                display_labels=['Low', 'Medium', 'High'])
+
 fig, ax = plt.subplots(figsize=(6, 5))
 disp.plot(ax=ax, colorbar=False, cmap='Blues')
-ax.set_ylim(len(['Low', 'Medium', 'High']) - 0.5, -0.5)
 ax.set_title('KNN (k=3) — Confusion Matrix', fontsize=13)
 plt.tight_layout()
 plt.show()
