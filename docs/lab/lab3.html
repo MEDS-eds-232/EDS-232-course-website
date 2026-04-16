@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Lab 3: Classification – EDS 232 - Machine Learning for Environmental Science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notes/week-by-week/week-by-week.html"> 
+<span class="menu-text">notes</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">assignments</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
+        <li>
+    <a class="dropdown-item" href="../assignments/assignment-1.html">
+ <span class="dropdown-text">Assignment 1</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">weekly labs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
+        <li>
+    <a class="dropdown-item" href="../lab/lab1.html">
+ <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lab/lab2.html">
+ <span class="dropdown-text">Lab 2: No lab this week!</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lab/lab3.html">
+ <span class="dropdown-text">Lab 3: Classification</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website">
+ <span class="dropdown-text">Source code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website/issues">
+ <span class="dropdown-text">Report a bug</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p>This wesbite is under construction.</p>
+</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a>
+  <ul class="collapse">
+  <li><a href="#download-the-data" id="toc-download-the-data" class="nav-link" data-scroll-target="#download-the-data">Download the Data</a></li>
+  <li><a href="#the-dataset" id="toc-the-dataset" class="nav-link" data-scroll-target="#the-dataset">The Dataset</a></li>
+  </ul></li>
+  <li><a href="#setup-load-libraries-and-read-in-data" id="toc-setup-load-libraries-and-read-in-data" class="nav-link" data-scroll-target="#setup-load-libraries-and-read-in-data">Setup: Load Libraries and Read in Data</a></li>
+  <li><a href="#step-1-create-the-target-variable-and-explore-the-data" id="toc-step-1-create-the-target-variable-and-explore-the-data" class="nav-link" data-scroll-target="#step-1-create-the-target-variable-and-explore-the-data">Step 1: Create the Target Variable and Explore the Data</a></li>
+  <li><a href="#why-scaling-matters-for-knn" id="toc-why-scaling-matters-for-knn" class="nav-link" data-scroll-target="#why-scaling-matters-for-knn">Why Scaling Matters for KNN</a></li>
+  <li><a href="#step-2-prepare-features-and-apply-scaling" id="toc-step-2-prepare-features-and-apply-scaling" class="nav-link" data-scroll-target="#step-2-prepare-features-and-apply-scaling">Step 2: Prepare Features and Apply Scaling</a></li>
+  <li><a href="#scaled-vs.-unscaled-knn" id="toc-scaled-vs.-unscaled-knn" class="nav-link" data-scroll-target="#scaled-vs.-unscaled-knn">Scaled vs.&nbsp;Unscaled KNN</a></li>
+  <li><a href="#step-3-fit-a-k-nearest-neighbors-classifier-k-3" id="toc-step-3-fit-a-k-nearest-neighbors-classifier-k-3" class="nav-link" data-scroll-target="#step-3-fit-a-k-nearest-neighbors-classifier-k-3">Step 3: Fit a K-Nearest Neighbors Classifier (k = 3)</a></li>
+  <li><a href="#step-4-visualize-the-confusion-matrix" id="toc-step-4-visualize-the-confusion-matrix" class="nav-link" data-scroll-target="#step-4-visualize-the-confusion-matrix">Step 4: Visualize the Confusion Matrix</a></li>
+  <li><a href="#step-6-manually-calculate-accuracy-precision-recall-and-f₁" id="toc-step-6-manually-calculate-accuracy-precision-recall-and-f₁" class="nav-link" data-scroll-target="#step-6-manually-calculate-accuracy-precision-recall-and-f₁">Step 6: Manually Calculate Accuracy, Precision, Recall, and F₁</a>
+  <ul class="collapse">
+  <li><a href="#macro-average" id="toc-macro-average" class="nav-link" data-scroll-target="#macro-average">Macro Average</a></li>
+  <li><a href="#micro-average" id="toc-micro-average" class="nav-link" data-scroll-target="#micro-average">Micro Average</a></li>
+  </ul></li>
+  <li><a href="#step-6-verify-with-scikit-learns-built-in-metrics" id="toc-step-6-verify-with-scikit-learns-built-in-metrics" class="nav-link" data-scroll-target="#step-6-verify-with-scikit-learns-built-in-metrics">Step 6: Verify with Scikit-learn’s Built-in Metrics</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Lab 3: Classification</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<hr>
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>The <strong>CDC/ATSDR Environmental Justice Index (EJI)</strong> measures the cumulative environmental and social burdens faced by communities across the United States at the census-tract level. It combines three modules:</p>
+<ul>
+<li><strong>Environmental Burden Module (EBM)</strong>: air quality, proximity to hazardous waste sites, impaired water bodies</li>
+<li><strong>Social Vulnerability Module (SVM)</strong>: poverty, race/ethnicity, housing conditions, health insurance</li>
+<li><strong>Health Vulnerability Module (HVM)</strong>: prevalence of asthma, cancer, diabetes, mental illness</li>
+</ul>
+<p>Our response variable of interest, <strong><code>E_TOTCR</code></strong>, is the EPA-modeled <strong>lifetime cancer risk from inhalation of air toxics</strong> — the estimated probability that a resident exposed continuously over a lifetime will develop cancer from airborne chemicals alone.</p>
+<hr>
+<section id="download-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="download-the-data">Download the Data</h3>
+<p>Follow these instructions to obtain the data for this lab:</p>
+<ol type="1">
+<li>Navigate to <a href="https://www.atsdr.cdc.gov/place-health/php/eji/eji-data-download.html">this link</a></li>
+<li>Select the 2024 dropdown for the United States.</li>
+<li><strong>Choose the CSV File Type, and then click “Go”</strong>.</li>
+<li>Add your data to the <code>gitignore</code>.</li>
+</ol>
+<hr>
+</section>
+<section id="the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="the-dataset">The Dataset</h3>
+<p>Each row is a <strong>U.S. census tract</strong>. The key columns used in this lab are:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Description</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>E_TOTCR</code></td>
+<td>Lifetime cancer risk from air toxics (EPA modeled)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>EPL_TOTCR</code></td>
+<td>National percentile rank of <code>E_TOTCR</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>E_DSLPM</code></td>
+<td>Ambient diesel particulate matter (μg/m³)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>E_PM</code></td>
+<td>Annual mean days above PM2.5 standard</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>E_NPL</code></td>
+<td>% of tract within 1-mile of an EPA Superfund site</td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>E_TRI</code></td>
+<td>% within 1-mile of a Toxic Release Inventory facility</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>E_TSD</code></td>
+<td>% within 1-mile of a hazardous waste TSD facility</td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>E_RMP</code></td>
+<td>% within 1-mile of an RMP chemical accident site</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>E_POV200</code></td>
+<td>% of persons below 200% of the federal poverty level</td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>E_MINRTY</code></td>
+<td>% identifying as a racial/ethnic minority</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="setup-load-libraries-and-read-in-data" class="level2">
+<h2 class="anchored" data-anchor-id="setup-load-libraries-and-read-in-data">Setup: Load Libraries and Read in Data</h2>
+<p>Run the cell below to load the EJI data, replace the EPA missing-value (<code>-999</code>) with <code>NaN</code>, and take a reproducible random sample of <strong>10,000 tracts</strong> so that cross-validated KNN runs in a reasonable time.</p>
+<div id="2fba8b5f" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> KNeighborsClassifier</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> (</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    accuracy_score, confusion_matrix, ConfusionMatrixDisplay,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    classification_report, precision_score, recall_score, f1_score</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Load and clean</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>df_raw <span class="op">=</span> pd.read_csv(<span class="st">'data/EJI_2024_United_States.csv'</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>df_raw <span class="op">=</span> df_raw.replace(<span class="op">-</span><span class="dv">999</span>, np.nan)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Reproducible 10,000-tract sample</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df_raw.sample(n<span class="op">=</span><span class="dv">10_000</span>, random_state<span class="op">=</span><span class="dv">42</span>).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>df.head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">STATEFP</th>
+<th data-quarto-table-cell-role="th">COUNTYFP</th>
+<th data-quarto-table-cell-role="th">TRACTCE</th>
+<th data-quarto-table-cell-role="th">AFFGEOID</th>
+<th data-quarto-table-cell-role="th">GEOID</th>
+<th data-quarto-table-cell-role="th">GEOID_2020</th>
+<th data-quarto-table-cell-role="th">COUNTY</th>
+<th data-quarto-table-cell-role="th">StateDesc</th>
+<th data-quarto-table-cell-role="th">STATEABBR</th>
+<th data-quarto-table-cell-role="th">LOCATION</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">E_AIAN</th>
+<th data-quarto-table-cell-role="th">NHPI</th>
+<th data-quarto-table-cell-role="th">E_NHPI</th>
+<th data-quarto-table-cell-role="th">TWOMORE</th>
+<th data-quarto-table-cell-role="th">E_TWOMORE</th>
+<th data-quarto-table-cell-role="th">OTHERRACE</th>
+<th data-quarto-table-cell-role="th">E_OTHERRACE</th>
+<th data-quarto-table-cell-role="th">Tribe_PCT_Tract</th>
+<th data-quarto-table-cell-role="th">Tribe_Names</th>
+<th data-quarto-table-cell-role="th">Tribe_Flag</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>72</td>
+<td>21</td>
+<td>31023</td>
+<td>140000US72021031023</td>
+<td>72021031023</td>
+<td>72021031023</td>
+<td>Bayamón Municipio</td>
+<td>Puerto Rico</td>
+<td>PR</td>
+<td>Census Tract 310.23; Bayamón Municipio; Puerto...</td>
+<td>...</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0.000000</td>
+<td>-999</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>51</td>
+<td>810</td>
+<td>46400</td>
+<td>140000US51810046400</td>
+<td>51810046400</td>
+<td>51810046400</td>
+<td>Virginia Beach city</td>
+<td>Virginia</td>
+<td>VA</td>
+<td>Census Tract 464; Virginia Beach city; Virginia</td>
+<td>...</td>
+<td>0.2</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>125.0</td>
+<td>2.2</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.000000</td>
+<td>-999</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>30</td>
+<td>47</td>
+<td>940600</td>
+<td>140000US30047940600</td>
+<td>30047940600</td>
+<td>30047940600</td>
+<td>Lake County</td>
+<td>Montana</td>
+<td>MT</td>
+<td>Census Tract 9406; Lake County; Montana</td>
+<td>...</td>
+<td>26.6</td>
+<td>6.0</td>
+<td>0.1</td>
+<td>420.0</td>
+<td>8.6</td>
+<td>3.0</td>
+<td>0.1</td>
+<td>99.994102</td>
+<td>Flathead Reservation</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+
+<p>3 rows × 170 columns</p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="step-1-create-the-target-variable-and-explore-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-create-the-target-variable-and-explore-the-data">Step 1: Create the Target Variable and Explore the Data</h2>
+<p>We classify each census tract into one of three cancer risk categories based on its <strong>national percentile rank</strong> for air toxics cancer risk (<code>EPL_TOTCR</code>):</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Label</th>
+<th><code>EPL_TOTCR</code> range</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>Low</td>
+<td>&lt; 0.33</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>Medium</td>
+<td>0.33 – 0.67</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>High</td>
+<td>≥ 0.67</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Create a column called <code>risk_class</code> that assigns each row the appropriate class label.</li>
+<li>Plot a bar chart showing the count of tracts in each class to visualize any potential class imbalance.</li>
+</ol>
+<div id="2dcb43e4" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_risk_class(epl):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> pd.isna(epl):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.nan</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> epl <span class="op">&lt;</span> <span class="fl">0.33</span>:</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> epl <span class="op">&lt;</span> <span class="fl">0.67</span>:</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">2</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'risk_class'</span>] <span class="op">=</span> df[<span class="st">'EPL_TOTCR'</span>].<span class="bu">apply</span>(make_risk_class)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> df[<span class="st">'risk_class'</span>].value_counts().sort_index()</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">'Low (0)'</span>, <span class="st">'Medium (1)'</span>, <span class="st">'High (2)'</span>]</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>ax.bar(labels, counts.values, color<span class="op">=</span><span class="st">"purple"</span>, edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Class Distribution of Air Toxics Cancer Risk'</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Number of Census Tracts'</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">Class counts:</span><span class="ch">\n</span><span class="st">'</span>, counts.rename({<span class="dv">0</span>: <span class="st">'Low'</span>, <span class="dv">1</span>: <span class="st">'Medium'</span>, <span class="dv">2</span>: <span class="st">'High'</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab3_files/figure-html/cell-3-output-1.png" width="565" height="373" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Class counts:
+ risk_class
+Low       4942
+Medium    4148
+High       702
+Name: count, dtype: int64</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="why-scaling-matters-for-knn" class="level2">
+<h2 class="anchored" data-anchor-id="why-scaling-matters-for-knn">Why Scaling Matters for KNN</h2>
+<p>KNN classifies a new point by finding its <em>k</em> nearest training neighbors in feature space, often using Euclidean distance.</p>
+<p>If one feature spans 0–100 while another spans 0–1, the large-range feature will dominate the distance calculation — even if the small-range feature is highly predictive. Standardizing each feature levels the playing field.</p>
+<p>Let’s take a look at the range of our observations for our 8 different features.</p>
+<div id="cdf4d9ba" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>FEATURES <span class="op">=</span> [<span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> FEATURES:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    lo  <span class="op">=</span> df[f].<span class="bu">min</span>()</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    hi  <span class="op">=</span> df[f].<span class="bu">max</span>()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> hi <span class="op">-</span> lo</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>f<span class="sc">:&lt;14}</span><span class="ss">  </span><span class="sc">{</span>lo<span class="sc">:&gt;10.4f}</span><span class="ss">  </span><span class="sc">{</span>hi<span class="sc">:&gt;10.4f}</span><span class="ss">  </span><span class="sc">{</span>rng<span class="sc">:&gt;10.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>E_DSLPM             0.0069      1.7343      1.7274
+E_PM                0.0000      9.5750      9.5750
+E_NPL               0.0000    100.0000    100.0000
+E_TRI               0.0000    100.0000    100.0000
+E_TSD               0.0000    100.0000    100.0000
+E_RMP               0.0000    100.0000    100.0000
+E_POV200            0.0000    100.0000    100.0000
+E_MINRTY            0.0000    100.0000    100.0000</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="step-2-prepare-features-and-apply-scaling" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-prepare-features-and-apply-scaling">Step 2: Prepare Features and Apply Scaling</h2>
+<p>Complete the following steps:</p>
+<ol type="1">
+<li>Build <code>df_model</code> from the columns <code>'E_NPL', 'E_TRI', 'E_TSD', 'E_RMP', 'E_DSLPM', 'E_PM', 'E_POV200', 'E_MINRTY'</code> plus <code>risk_class</code>. Drop any rows with NAs.</li>
+<li>Separate predictors (<code>X</code>) from the response (<code>y</code>).</li>
+<li>Split into 70% train / 30% test using <code>train_test_split</code> with <code>stratify=y</code> and <code>random_state=42</code>. Store as <code>X_train</code>, <code>X_test</code>, <code>y_train</code>, <code>y_test</code>.</li>
+<li>Fit a <code>StandardScaler</code> on the <strong>training set only</strong> and transform both sets → <code>X_train_s</code>, <code>X_test_s</code>.</li>
+</ol>
+<div id="bd1a1b39" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>var_of_interest <span class="op">=</span> [<span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>, <span class="st">'risk_class'</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>df_model <span class="op">=</span> df[var_of_interest].dropna()</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df_model[[<span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>]].values</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df_model[<span class="st">'risk_class'</span>].values.astype(<span class="bu">int</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.30</span>, stratify<span class="op">=</span>y, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>scaler    <span class="op">=</span> StandardScaler().fit(X_train)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>X_train_s <span class="op">=</span> scaler.transform(X_train)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>X_test_s  <span class="op">=</span> scaler.transform(X_test)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Training set : </span><span class="sc">{</span>X_train_s<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> tracts'</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test set     : </span><span class="sc">{</span>X_test_s<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> tracts'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Training set : 6,815 tracts
+Test set     : 2,921 tracts</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="scaled-vs.-unscaled-knn" class="level2">
+<h2 class="anchored" data-anchor-id="scaled-vs.-unscaled-knn">Scaled vs.&nbsp;Unscaled KNN</h2>
+<p>The cell below fits the <em>same</em> KNN model (k = 5) twice — once on raw features, once on scaled features — and prints both test accuracies. Do you see an accuracy boost from scaling?</p>
+<div id="b8e62600" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># KNN on RAW (unscaled) features</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>knn_raw <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>knn_raw.fit(X_train, y_train)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>acc_raw <span class="op">=</span> accuracy_score(y_test, knn_raw.predict(X_test))</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># KNN on SCALED features</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>knn_scaled <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>knn_scaled.fit(X_train_s, y_train)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>acc_scaled <span class="op">=</span> accuracy_score(y_test, knn_scaled.predict(X_test_s))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test accuracy — unscaled features : </span><span class="sc">{</span>acc_raw<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test accuracy — scaled features   : </span><span class="sc">{</span>acc_scaled<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Accuracy gain from scaling        : +</span><span class="sc">{</span>acc_scaled <span class="op">-</span> acc_raw<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Test accuracy — unscaled features : 0.5430
+Test accuracy — scaled features   : 0.6340
+Accuracy gain from scaling        : +0.0911</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="step-3-fit-a-k-nearest-neighbors-classifier-k-3" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-fit-a-k-nearest-neighbors-classifier-k-3">Step 3: Fit a K-Nearest Neighbors Classifier (k = 3)</h2>
+<p>A reminder on the <code>sklearn</code> workflow:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SomeClassifier(hyperparameters)   <span class="co"># 1. Initialize</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train)               <span class="co"># 2. Train</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> model.predict(X_test)            <span class="co"># 3. Predict</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Using <strong>scaled</strong> training and test data:</p>
+<ol type="1">
+<li>Initialize a <code>KNeighborsClassifier</code> with <code>n_neighbors=3</code> and store it in <code>knn3</code>.</li>
+<li>Fit on <code>X_train_s</code> / <code>y_train</code>.</li>
+<li>Predict on <code>X_test_s</code>. Store your results in <code>y_pred_knn3</code>.</li>
+<li>Compute test accuracy. Store your results in <code>knn3_accuracy</code> using <code>accuracy_score</code>.</li>
+</ol>
+<div id="0b4d75b2" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>knn3 <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>knn3.fit(X_train_s, y_train)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>y_pred_knn3   <span class="op">=</span> knn3.predict(X_test_s)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>knn3_accuracy <span class="op">=</span> accuracy_score(y_test, y_pred_knn3)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'KNN (k=3) test accuracy: </span><span class="sc">{</span>knn3_accuracy<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>KNN (k=3) test accuracy: 0.6039</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="step-4-visualize-the-confusion-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-visualize-the-confusion-matrix">Step 4: Visualize the Confusion Matrix</h2>
+<p>A <strong>confusion matrix</strong> shows how predictions map to true labels. Each row is the <em>true</em> class; each column is the <em>predicted</em> class. The diagonal entries are correct predictions; off-diagonal entries are mistakes.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Pred Low</th>
+<th>Pred Med</th>
+<th>Pred High</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>True Low</strong></td>
+<td>TP (Low)</td>
+<td>FP → Med</td>
+<td>FP → High</td>
+</tr>
+<tr class="even">
+<td><strong>True Med</strong></td>
+<td>FN → Low</td>
+<td>TP (Med)</td>
+<td>FP → High</td>
+</tr>
+<tr class="odd">
+<td><strong>True High</strong></td>
+<td>FN → Low</td>
+<td>FN → Med</td>
+<td>TP (High)</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Compute the confusion matrix for <code>knn3</code> using <code>y_test</code> and <code>y_pred_knn3</code>.</li>
+<li>Display it with <code>ConfusionMatrixDisplay</code>, using <code>display_labels=['Low','Medium','High']</code>.</li>
+</ol>
+<div id="55abf4c3" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred_knn3)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>disp <span class="op">=</span> ConfusionMatrixDisplay(confusion_matrix<span class="op">=</span>cm,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                               display_labels<span class="op">=</span>[<span class="st">'Low'</span>, <span class="st">'Medium'</span>, <span class="st">'High'</span>])</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">5</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>disp.plot(ax<span class="op">=</span>ax, colorbar<span class="op">=</span><span class="va">False</span>, cmap<span class="op">=</span><span class="st">'Blues'</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="bu">len</span>([<span class="st">'Low'</span>, <span class="st">'Medium'</span>, <span class="st">'High'</span>]) <span class="op">-</span> <span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'KNN (k=3) — Confusion Matrix'</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab3_files/figure-html/cell-8-output-1.png" width="487" height="468" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="step-6-manually-calculate-accuracy-precision-recall-and-f₁" class="level2">
+<h2 class="anchored" data-anchor-id="step-6-manually-calculate-accuracy-precision-recall-and-f₁">Step 6: Manually Calculate Accuracy, Precision, Recall, and F₁</h2>
+<p>Accuracy alone can be misleading when classes are imbalanced or when certain errors matter more than others. We’ll calculate all four metrics by hand from the confusion matrix so you can see exactly what each one is measuring.</p>
+<p><strong>Accuracy</strong> is the simplest: the fraction of all predictions that landed on the diagonal:</p>
+<p><span class="math display">\[\text{Accuracy} = \frac{\text{sum of diagonal}}{\text{sum of all cells}} = \frac{TP_{Low} + TP_{Med} + TP_{High}}{N}\]</span></p>
+<p>For precision, recall, and F₁, each class gets its own TP, FP, and FN read directly from <code>cm</code>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>How to read it from <code>cm</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>TP</strong> for class <em>i</em></td>
+<td><code>cm[i, i]</code> — correctly predicted as class <em>i</em></td>
+</tr>
+<tr class="even">
+<td><strong>FP</strong> for class <em>i</em></td>
+<td>column <em>i</em> sum minus <code>cm[i, i]</code> — other classes predicted as <em>i</em></td>
+</tr>
+<tr class="odd">
+<td><strong>FN</strong> for class <em>i</em></td>
+<td>row <em>i</em> sum minus <code>cm[i, i]</code> — class <em>i</em> predicted as something else</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math display">\[\text{Precision}_i = \frac{TP_i}{TP_i + FP_i} \qquad \text{Recall}_i = \frac{TP_i}{TP_i + FN_i} \qquad F1_i = \frac{2 \cdot P_i \cdot R_i}{P_i + R_i}\]</span></p>
+<p>There are two different methods to calculate precision, recall, and F1 when you have multiple classes: the macro average and the micro average. Let’s take a look at both.</p>
+<section id="macro-average" class="level3">
+<h3 class="anchored" data-anchor-id="macro-average">Macro Average</h3>
+<p>For each class: extract TP, FP, FN from <code>cm</code>, compute the three metrics, then take the simple mean across classes.</p>
+<div id="a51a631b" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Accuracy ──────────────────────────────────────────────────────────────────</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>correct <span class="op">=</span> np.trace(cm)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>total   <span class="op">=</span> cm.<span class="bu">sum</span>()</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>accuracy_manual <span class="op">=</span> correct <span class="op">/</span> total</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Accuracy = </span><span class="sc">{</span>correct<span class="sc">}</span><span class="ss"> / </span><span class="sc">{</span>total<span class="sc">}</span><span class="ss"> = </span><span class="sc">{</span>accuracy_manual<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Low (class 0) ─────────────────────────────────────────────────────────────</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>TP_low <span class="op">=</span> cm[<span class="dv">0</span>, <span class="dv">0</span>]</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>FP_low <span class="op">=</span> cm[<span class="dv">1</span>, <span class="dv">0</span>] <span class="op">+</span> cm[<span class="dv">2</span>, <span class="dv">0</span>]   <span class="co"># Medium and High predicted as Low</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>FN_low <span class="op">=</span> cm[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">+</span> cm[<span class="dv">0</span>, <span class="dv">2</span>]   <span class="co"># Low predicted as Medium or High</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>precision_low <span class="op">=</span> TP_low <span class="op">/</span> (TP_low <span class="op">+</span> FP_low)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>recall_low    <span class="op">=</span> TP_low <span class="op">/</span> (TP_low <span class="op">+</span> FN_low)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>f1_low        <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> precision_low <span class="op">*</span> recall_low <span class="op">/</span> (precision_low <span class="op">+</span> recall_low)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Low    — TP: </span><span class="sc">{</span>TP_low<span class="sc">}</span><span class="ss">  FP: </span><span class="sc">{</span>FP_low<span class="sc">}</span><span class="ss">  FN: </span><span class="sc">{</span>FN_low<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"         Precision: </span><span class="sc">{</span>precision_low<span class="sc">:.4f}</span><span class="ss">  Recall: </span><span class="sc">{</span>recall_low<span class="sc">:.4f}</span><span class="ss">  F1: </span><span class="sc">{</span>f1_low<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Medium (class 1) ──────────────────────────────────────────────────────────</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>TP_med <span class="op">=</span> cm[<span class="dv">1</span>, <span class="dv">1</span>]</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>FP_med <span class="op">=</span> cm[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">+</span> cm[<span class="dv">2</span>, <span class="dv">1</span>]   <span class="co"># Low and High predicted as Medium</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>FN_med <span class="op">=</span> cm[<span class="dv">1</span>, <span class="dv">0</span>] <span class="op">+</span> cm[<span class="dv">1</span>, <span class="dv">2</span>]   <span class="co"># Medium predicted as Low or High</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>precision_med <span class="op">=</span> TP_med <span class="op">/</span> (TP_med <span class="op">+</span> FP_med)</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>recall_med    <span class="op">=</span> TP_med <span class="op">/</span> (TP_med <span class="op">+</span> FN_med)</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>f1_med        <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> precision_med <span class="op">*</span> recall_med <span class="op">/</span> (precision_med <span class="op">+</span> recall_med)</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Medium — TP: </span><span class="sc">{</span>TP_med<span class="sc">}</span><span class="ss">  FP: </span><span class="sc">{</span>FP_med<span class="sc">}</span><span class="ss">  FN: </span><span class="sc">{</span>FN_med<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"         Precision: </span><span class="sc">{</span>precision_med<span class="sc">:.4f}</span><span class="ss">  Recall: </span><span class="sc">{</span>recall_med<span class="sc">:.4f}</span><span class="ss">  F1: </span><span class="sc">{</span>f1_med<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="co"># ── High (class 2) ────────────────────────────────────────────────────────────</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>TP_high <span class="op">=</span> cm[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>FP_high <span class="op">=</span> cm[<span class="dv">0</span>, <span class="dv">2</span>] <span class="op">+</span> cm[<span class="dv">1</span>, <span class="dv">2</span>]  <span class="co"># Low and Medium predicted as High</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>FN_high <span class="op">=</span> cm[<span class="dv">2</span>, <span class="dv">0</span>] <span class="op">+</span> cm[<span class="dv">2</span>, <span class="dv">1</span>]  <span class="co"># High predicted as Low or Medium</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>precision_high <span class="op">=</span> TP_high <span class="op">/</span> (TP_high <span class="op">+</span> FP_high)</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>recall_high    <span class="op">=</span> TP_high <span class="op">/</span> (TP_high <span class="op">+</span> FN_high)</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>f1_high        <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> precision_high <span class="op">*</span> recall_high <span class="op">/</span> (precision_high <span class="op">+</span> recall_high)</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"High   — TP: </span><span class="sc">{</span>TP_high<span class="sc">}</span><span class="ss">  FP: </span><span class="sc">{</span>FP_high<span class="sc">}</span><span class="ss">  FN: </span><span class="sc">{</span>FN_high<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"         Precision: </span><span class="sc">{</span>precision_high<span class="sc">:.4f}</span><span class="ss">  Recall: </span><span class="sc">{</span>recall_high<span class="sc">:.4f}</span><span class="ss">  F1: </span><span class="sc">{</span>f1_high<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Macro average ─────────────────────────────────────────────────────────────</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>macro_precision <span class="op">=</span> (precision_low <span class="op">+</span> precision_med <span class="op">+</span> precision_high) <span class="op">/</span> <span class="dv">3</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>macro_recall    <span class="op">=</span> (recall_low    <span class="op">+</span> recall_med    <span class="op">+</span> recall_high)    <span class="op">/</span> <span class="dv">3</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>macro_f1        <span class="op">=</span> (f1_low        <span class="op">+</span> f1_med        <span class="op">+</span> f1_high)        <span class="op">/</span> <span class="dv">3</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro avg — Precision: </span><span class="sc">{</span>macro_precision<span class="sc">:.4f}</span><span class="ss">  Recall: </span><span class="sc">{</span>macro_recall<span class="sc">:.4f}</span><span class="ss">  F1: </span><span class="sc">{</span>macro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy = 1764 / 2921 = 0.6039
+Low    — TP: 1058  FP: 594  FN: 417
+         Precision: 0.6404  Recall: 0.7173  F1: 0.6767
+Medium — TP: 678  FP: 511  FN: 559
+         Precision: 0.5702  Recall: 0.5481  F1: 0.5589
+High   — TP: 28  FP: 52  FN: 181
+         Precision: 0.3500  Recall: 0.1340  F1: 0.1938
+Macro avg — Precision: 0.5202  Recall: 0.4665  F1: 0.4765</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="micro-average" class="level3">
+<h3 class="anchored" data-anchor-id="micro-average">Micro Average</h3>
+<p>Macro average treats every class equally. <strong>Micro average</strong> pools all TP, FP, and FN counts across every class first, then computes one global metric.</p>
+<p><span class="math display">\[\text{Micro Precision} = \frac{\sum_i TP_i}{\sum_i (TP_i + FP_i)} \qquad \text{Micro Recall} = \frac{\sum_i TP_i}{\sum_i (TP_i + FN_i)}\]</span></p>
+<p>Using the per-class TP, FP, and FN values you already computed above:</p>
+<ol type="1">
+<li>Sum all TP values → <code>total_TP</code>, all FP → <code>total_FP</code>, all FN → <code>total_FN</code></li>
+<li>Compute <code>micro_precision</code>, <code>micro_recall</code>, and <code>micro_f1</code></li>
+<li>Compare all three to <code>accuracy_manual</code> . Do you notice anything interesting abuot these three results?</li>
+</ol>
+<div id="e74f7c5f" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pool TP, FP, FN counts across all three classes</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>total_TP <span class="op">=</span> TP_low <span class="op">+</span> TP_med <span class="op">+</span> TP_high</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>total_FP <span class="op">=</span> FP_low <span class="op">+</span> FP_med <span class="op">+</span> FP_high</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>total_FN <span class="op">=</span> FN_low <span class="op">+</span> FN_med <span class="op">+</span> FN_high</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute micro-averaged metrics from the pooled counts</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>micro_precision <span class="op">=</span> total_TP <span class="op">/</span> (total_TP <span class="op">+</span> total_FP)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>micro_recall    <span class="op">=</span> total_TP <span class="op">/</span> (total_TP <span class="op">+</span> total_FN)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>micro_f1        <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> micro_precision <span class="op">*</span> micro_recall <span class="op">/</span> (micro_precision <span class="op">+</span> micro_recall)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro Precision : </span><span class="sc">{</span>micro_precision<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro Recall    : </span><span class="sc">{</span>micro_recall<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro F1        : </span><span class="sc">{</span>micro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Overall Accuracy: </span><span class="sc">{</span>accuracy_manual<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Micro Precision : 0.6039
+Micro Recall    : 0.6039
+Micro F1        : 0.6039
+Overall Accuracy: 0.6039</code></pre>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="step-6-verify-with-scikit-learns-built-in-metrics" class="level2">
+<h2 class="anchored" data-anchor-id="step-6-verify-with-scikit-learns-built-in-metrics">Step 6: Verify with Scikit-learn’s Built-in Metrics</h2>
+<p>Now that you’ve computed everything by hand, use scikit-learn’s built-in functions to verify your results. The functions below accept <code>y_test</code> and <code>y_pred_knn3</code> directly.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Key argument</th>
+<th>What it returns</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>accuracy_score(y_test, y_pred)</code></td>
+<td>—</td>
+<td>Overall fraction correct</td>
+</tr>
+<tr class="even">
+<td><code>precision_score(y_test, y_pred, average=...)</code></td>
+<td><code>'macro'</code> / <code>'micro'</code></td>
+<td>Precision averaged across classes</td>
+</tr>
+<tr class="odd">
+<td><code>recall_score(y_test, y_pred, average=...)</code></td>
+<td><code>'macro'</code> / <code>'micro'</code></td>
+<td>Recall averaged across classes</td>
+</tr>
+<tr class="even">
+<td><code>f1_score(y_test, y_pred, average=...)</code></td>
+<td><code>'macro'</code> / <code>'micro'</code></td>
+<td>F₁ averaged across classes</td>
+</tr>
+</tbody>
+</table>
+<p>Compute all four metrics for both macro and micro averaging and confirm they match your manual calculations above.</p>
+<div id="dbbe3075" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Accuracy ──────────────────────────────────────────────────────────────────</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>sk_accuracy <span class="op">=</span> accuracy_score(y_test, y_pred_knn3)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Macro-averaged metrics ────────────────────────────────────────────────────</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>sk_macro_precision <span class="op">=</span> precision_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'macro'</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>sk_macro_recall    <span class="op">=</span> recall_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'macro'</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>sk_macro_f1        <span class="op">=</span> f1_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'macro'</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Micro-averaged metrics ────────────────────────────────────────────────────</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>sk_micro_precision <span class="op">=</span> precision_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'micro'</span>)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>sk_micro_recall    <span class="op">=</span> recall_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'micro'</span>)</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>sk_micro_f1        <span class="op">=</span> f1_score(y_test, y_pred_knn3, average<span class="op">=</span><span class="st">'micro'</span>)</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== Sklearn Built-in Metrics ==="</span>)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Accuracy          : </span><span class="sc">{</span>sk_accuracy<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro Precision   : </span><span class="sc">{</span>sk_macro_precision<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro Recall      : </span><span class="sc">{</span>sk_macro_recall<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro F1          : </span><span class="sc">{</span>sk_macro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro Precision   : </span><span class="sc">{</span>sk_micro_precision<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro Recall      : </span><span class="sc">{</span>sk_micro_recall<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Micro F1          : </span><span class="sc">{</span>sk_micro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>=== Sklearn Built-in Metrics ===
+Accuracy          : 0.6039
+
+Macro Precision   : 0.5202
+Macro Recall      : 0.4665
+Macro F1          : 0.4765
+
+Micro Precision   : 0.6039
+Micro Recall      : 0.6039
+Micro F1          : 0.6039</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>This work is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License</a></p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This website is built with <a href="https://quarto.org/">Quarto</a> and <a href="https://github.com/MEDS-eds-220/MEDS-eds-220-course">GitHub pages</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
