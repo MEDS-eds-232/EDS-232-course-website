@@ -518,36 +518,57 @@ Using the probability function we obtain $p(0.5) = 0.6722$. Since this is above 
 
 ---
 
-## {#log-odds-slide data-menu-title="Log-odds and the logit"}
+## {#log-odds-slide-1 data-menu-title="Log-odds and the logit"}
 
-[Log-odds (logit)]{.slide-title}
+[Log-odds]{.slide-title}
 
 <hr>
 
-Rearranging the logistic function gives the **log-odds**:
+- Logistic regression allows us to do both prediction and inference. 
+- Once we have fitted our model and estimated the coefficients $\hat{\beta}_i$, we can interpret them to understand relations between predictor variables and response.
 
-$$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X$$
+Starting from the logistic function
 
-The log-odds is **linear in** $X$. This gives clean coefficient interpretations:
+$$p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}},$$
 
-:::: {.columns}
+rearrange it to get the **odds**:
 
-::: {.column width="50%"}
-- $\hat\beta_1 > 0$: increasing $X$ → higher log-odds → higher $p(X)$
-- $\hat\beta_1 < 0$: increasing $X$ → lower log-odds → lower $p(X)$
-:::
+$$\frac{p(X)}{1 - p(X)} = e^{\beta_0 + \beta_1 X}.$$
 
-::: {.column width="50%"}
-More precisely: holding all other predictors constant, a one-unit increase in $X$ **multiplies the odds** by $e^{\hat\beta_1}$ (the **odds ratio**).
-:::
+Take the natural logarithm to get the **log-odds**:
 
-::::
+$$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X.$$
+
+
+---
+
+## {#log-odds-slide-2 data-menu-title="Log-odds and the logit"}
+
+[Log-odds]{.slide-title}
+
+<hr>
+
+The **log-odds** are defined by
+
+$$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X.$$
+
+Notice the **log-odds is linear in** $X$. 
+
+. . .
+
+In addition, $p(X)$ changes in teh same direction as the log-odds. 
+
+This helps us understand the relationship between $X$ and $p(X)$:
+
+- $\hat\beta_1 > 0$: increasing $X$ $\Rightarrow$ higher log-odds  $\Rightarrow$ higher $p(X)$
+- $\hat\beta_1 < 0$: increasing $X$  $\Rightarrow$ lower log-odds  $\Rightarrow$ lower $p(X)$
+
 
 ---
 
 ## {#log-odds-plot-slide data-menu-title="Log-odds vs. probability"}
 
-[Log-odds vs. probability: two scales, same information]{.slide-title}
+[Log-odds and probability]{.slide-title}
 
 <hr>
 
@@ -580,7 +601,9 @@ plt.close()
 ```
 
 ::: {.body-text-s .center-text}
-The log-odds scale is linear; the probability scale is the familiar S-curve. Both representations contain identical information.
+The log-odds scale is linear; the probability scale is the familiar S-curve. 
+
+Both representations contain the same information.
 :::
 
 ---
@@ -591,119 +614,25 @@ The log-odds scale is linear; the probability scale is the familiar S-curve. Bot
 
 <hr>
 
-:::: {.columns}
-
-::: {.column width="55%"}
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| out-width: "100%"
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y))
-ax.plot(temp_range, log_odds_vals, color='steelblue', linewidth=2)
-ax.axhline(0, color='gray', linestyle='--', linewidth=1)
-ax.set_xlabel('Temp. anomaly (°C)')
-ax.set_ylabel('Log-odds')
-ax.set_title('Log-odds vs. temp. anomaly')
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-:::
-
-::: {.column width="45%"}
-
 ::: {.teal-text .body-text-m}
+
+
 The fitted model has $\hat{\beta}_0 =$ `{python} f"{beta0_s:.3f}"` and $\hat{\beta}_1 =$ `{python} f"{beta1_s:.3f}"`.
 
+<br>
+
 What does the sign of $\hat{\beta}_1$ tell us about the relationship between temperature anomaly and kelp forest health?
-:::
 
 :::
 
-::::
+. . .
 
----
+<br>
 
-## {#checkin-beta-a data-menu-title="Check-in: sign of β₁ (answer)"}
+A **negative** $\hat\beta_1$ means that as temperature anomaly increases (warmer ocean conditions), the log-odds of a healthy site decrease, which implies the probability of healthy status decreases.
 
-[Check-in]{.slide-title}
+So warmer-than-average temperatures are associated with degraded kelp forests.
 
-<hr>
-
-:::: {.columns}
-
-::: {.column width="55%"}
-
-```{python}
-#| echo: false
-#| fig-align: center
-#| out-width: "100%"
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y))
-ax.plot(temp_range, log_odds_vals, color='steelblue', linewidth=2)
-ax.axhline(0, color='gray', linestyle='--', linewidth=1)
-ax.set_xlabel('Temp. anomaly (°C)')
-ax.set_ylabel('Log-odds')
-ax.set_title('Log-odds vs. temp. anomaly')
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-:::
-
-::: {.column width="45%"}
-
-A **negative** $\hat\beta_1$ means that, holding all other predictors constant, as temperature anomaly increases (warmer ocean conditions), the log-odds of a healthy site decrease — and the probability of healthy status decreases.
-
-Warmer-than-average temperatures are associated with kelp stress.
-
-:::
-
-::::
-
----
-
-## {#decision-boundary-value data-menu-title="Decision boundary value"}
-
-[Decision boundary: the threshold on X]{.slide-title}
-
-<hr>
-
-With threshold $\alpha = 0.5$, we predict *healthy* when $p(X) \geq 0.5$, which is equivalent to log-odds $\geq 0$:
-
-$$\hat\beta_0 + \hat\beta_1 X^* = 0 \quad \Rightarrow \quad X^* = -\frac{\hat\beta_0}{\hat\beta_1} = `{python} f"{x_star:.2f}"` \text{ °C}$$
-
-```{python}
-#| label: decision-boundary-value
-#| echo: false
-#| fig-align: center
-#| out-width: "80%"
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 1.1, fig_size_y))
-ax.scatter(df['temp_anomaly'], df['status_num'],
-           c=[col_map[s] for s in df['status']], alpha=0.25, s=15, edgecolors='none')
-ax.plot(temp_range, prob_curve, color='black', linewidth=2, label='p(healthy | temp_anomaly)')
-ax.axhline(0.5, color='gray', linestyle='--', linewidth=1, label='threshold = 0.5')
-ax.axvline(x_star, color='darkorange', linestyle='--', linewidth=1.8,
-           label=f'$X^* = {x_star:.2f}$ °C')
-ax.set_xlabel('Temp. anomaly (°C)')
-ax.set_ylabel('P(status = healthy)')
-ax.legend(fontsize=9)
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-::: {.body-text-s .center-text}
-Sites with `temp_anomaly` < `{python} f"{x_star:.2f}"` °C → predicted *healthy*; sites above → predicted *degraded*.
-:::
 
 ---
 
@@ -721,14 +650,24 @@ Sites with `temp_anomaly` < `{python} f"{x_star:.2f}"` °C → predicted *health
 
 <hr>
 
-If $\beta_1 = 0$, then $p(X)$ is constant — the predictor has **no effect** on the response.
+If $\beta_1 = 0$, then:
 
-::: {.body-text-m}
-- $H_0$: $\beta_1 = 0$ — no relationship between $X$ and $Y$
-- $H_a$: $\beta_1 \neq 0$ — some relationship exists
+::: {.body-text-s}
+$$p(X) = \frac{e^{\beta_0}}{1 + e^{\beta_0}} = \text{constant}$$
 :::
 
-<br>
+meaning the probability of the positive class does not depend on $X$ at all. 
+
+::: {.body-text-s}
+
+Our hypotheses thus are:
+
+- **Null hypothesis** $H_0$: there is no relationship between $X$ and $Y$, i.e., $\beta_1 = 0$.
+- **Alternative hypothesis** $H_a$: there is some relationship between $X$ and $Y$, i.e., $\beta_1 \neq 0$.
+
+:::
+
+. . .
 
 We test this using the **Z-statistic** (analogue of the t-statistic in linear regression):
 
@@ -748,8 +687,6 @@ A large $|Z|$ provides evidence against $H_0$. The **p-value** quantifies how li
 The table below shows the results for the logistic regression of `status` on `temp_anomaly`. What does the $p$-value for `temp_anomaly` tell us?
 :::
 
-<br>
-
 ```{python}
 #| label: hypothesis-test
 #| echo: false
@@ -757,34 +694,13 @@ The table below shows the results for the logistic regression of `status` on `te
 print(ht_results.to_string(index=False))
 ```
 
----
+. . .
 
-## {#checkin-hypothesis-a data-menu-title="Check-in: hypothesis test (answer)"}
+<br>
 
-[Check-in]{.slide-title}
+Very small $p$-value for `temp_anomaly`: strong evidence against $H_0$: temperature anomaly is significantly associated with kelp forest status.
 
-<hr>
-
-:::: {.columns}
-
-::: {.column width="55%"}
-
-```{python}
-#| echo: false
-print(ht_results.to_string(index=False))
-```
-
-:::
-
-::: {.column width="45%"}
-
-The very small $p$-value for `temp_anomaly` provides strong evidence against $H_0$: temperature anomaly is significantly associated with kelp forest status.
-
-We reject $H_0: \beta_1 = 0$ — there is a real relationship between temperature anomaly and the probability of a site being healthy.
-
-:::
-
-::::
+We reject $H_0: \beta_1 = 0$: there is a real relationship between temperature anomaly and the probability of a site being healthy.
 
 ---
 
@@ -804,27 +720,23 @@ We reject $H_0: \beta_1 = 0$ — there is a real relationship between temperatur
 
 The logistic model extends naturally to multiple predictors $X_1, X_2, \ldots, X_p$:
 
-$$p(X) = \frac{e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}{1 + e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}$$
+$$p(X) = \frac{e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}{1 + e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}.$$
 
 The log-odds remain **linear in all predictors**:
 
-$$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p$$
+$$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p.$$
 
 . . .
 
 <br>
 
-::: {.center-text .teal-text .body-text-m}
-The decision boundary is a **hyperplane** in predictor space —
-
-always a straight line in 2D, unlike the flexible boundary of KNN.
-:::
+INSERT NOTE ABOUT INTERPRETING COEFFICIENTS HERE
 
 ---
 
 ## {#multi-logistic-fit-slide data-menu-title="Multiple logistic regression: decision boundary"}
 
-[Fitting logistic regression with two predictors]{.slide-title}
+[Log regression with two predictors]{.slide-title}
 
 <hr>
 
@@ -854,7 +766,9 @@ plt.close()
 ```
 
 ::: {.body-text-s .center-text}
-Shading = predicted probability of healthy. Gray line = decision boundary ($p = 0.5$). The boundary is always a straight line.
+Shading = predicted probability of healthy. 
+
+Gray line = decision boundary ($p = 0.5$). The boundary is always a straight line.
 :::
 
 ---
