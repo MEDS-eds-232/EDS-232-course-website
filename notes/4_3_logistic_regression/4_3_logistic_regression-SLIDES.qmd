@@ -292,11 +292,15 @@ In our example:
 - **Predictor**: `temp_anomaly`
 - **Response**: `status`:  *healthy* (class 1/positive) or *degraded* (class 0/negative)
 
+. . .
+
 Using logistic regression we can model
 
 $$P(\text{status} = \text{healthy} \mid \text{temp_anomaly}) = p(\text{temp_anomaly}),$$
 
 the probability of a site having a healthy status given a certain temperature anomaly.
+
+. . .
 
 Then, we select a threshold to classify a site as healthy or degraded. E.g., using $\alpha=0.5$:
 
@@ -1142,18 +1146,20 @@ The green dashed line barely changes across a wide range of thresholds, but prec
 ## {#section-roc data-menu-title="# ROC curves #" background="#047C90"}
 
 <div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">ROC curves</p>
+<p class="custom-subtitle bottombr">ROC curves and AUC</p>
 </div>
 
 ---
 
 ## {#roc-intro data-menu-title="TPR and FPR"}
 
-[ROC curves: performance across all thresholds]{.slide-title}
+[ROC curves]{.slide-title}
 
 <hr>
 
-The **ROC curve** plots two metrics against each other across all possible thresholds:
+The **ROC curve** plots two metrics against each other across all possible thresholds.
+
+It uses the following metrics:
 
 <br>
 
@@ -1179,13 +1185,8 @@ $$FPR = \frac{FP}{FP + TN}$$
 
 . . .
 
-<br>
+We obtain the ROC curve by calculating the TPR and the FPR at every value classification threshold and then plotting TPR with respect to FPR. 
 
-::: {.center-text .teal-text}
-Each point on the ROC curve = one threshold value.
-
-Lowering the threshold moves **up and to the right** along the curve.
-:::
 
 ---
 
@@ -1196,6 +1197,24 @@ Lowering the threshold moves **up and to the right** along the curve.
 <hr>
 
 :::: {.columns}
+
+::: {.column width="42%"}
+
+We obtain the ROC curve by calculating the TPR and the FPR at every value classification threshold and then plotting TPR with respect to FPR. 
+
+::: {.teal-text}
+Use the confusion matrices to fill in the table. Then sketch the ROC curve through those points.
+
+| Threshold (α) | TPR | FPR |
+|:---:|:---:|:---:|
+| 1.0 | | |
+| 0.7 | | |
+| 0.3 | | |
+| 0.0 | | |
+
+:::
+
+:::
 
 ::: {.column width="58%"}
 
@@ -1222,22 +1241,6 @@ plt.show()
 plt.close()
 ```
 
-:::
-
-::: {.column width="42%"}
-
-::: {.teal-text .body-text-s}
-Use the confusion matrices to fill in the table. Then sketch the ROC curve through those points.
-
-| α | TPR | FPR |
-|:---:|:---:|:---:|
-| 1.0 | | |
-| 0.7 | | |
-| 0.3 | | |
-| 0.0 | | |
-
-*Hint: α = 1.0 classifies everything as negative; α = 0.0 classifies everything as positive.*
-:::
 
 :::
 
@@ -1304,12 +1307,11 @@ for t in thresholds_roc:
 print(pd.DataFrame(rows).to_string(index=False))
 ```
 
-::: {.body-text-s}
+
 - $\alpha = 1.0$: all predicted negative → TPR = FPR = 0 → point (0, 0)
 - $\alpha = 0.0$: all predicted positive → TPR = FPR = 1 → point (1, 1)
 
 The curve always goes from (0, 0) to (1, 1).
-:::
 
 :::
 
@@ -1325,37 +1327,30 @@ The curve always goes from (0, 0) to (1, 1).
 
 :::: {.columns}
 
-::: {.column width="55%"}
-
-![](Roc_curve.svg.png){width=95%}
-
-:::
-
 ::: {.column width="45%"}
 
-::: {.body-text-m}
-- **Perfect classifier**: passes through (0, 1) — zero false positives with perfect recall
-- **Random classifier**: the diagonal — no better than a coin flip
-- **Closer to upper-left**: better discriminating ability
-:::
+- **Perfect classifier**: passes through (0, 1).  Zero false positives with perfect recall
+- **Random classifier**: the diagonal. No better than a coin flip
+- **Closer to upper-left**: better discriminating ability. This is what we aim for
 
 <br>
 
+Lowering the threshold raises both TPR and FPR. 
+
 ::: {.teal-text}
-Lowering the threshold raises both TPR and FPR — gaining recall at the cost of more false positives.
+
+We gain recall at the cost of more false positives.
+
 :::
+
+:::
+
+::: {.column width="55%"}
+![By cmglee, MartinThoma – Roc-draft-xkcd-style.svg, CC BY-SA 4.0, [https://commons.wikimedia.org/w/index.php?curid=109730045](https://commons.wikimedia.org/w/index.php?curid=109730045)](Roc_curve.svg.png){width=95%}
 
 :::
 
 ::::
-
----
-
-## {#section-auc data-menu-title="# AUC #" background="#047C90"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Area under the curve (AUC)</p>
-</div>
 
 ---
 
@@ -1365,7 +1360,7 @@ Lowering the threshold raises both TPR and FPR — gaining recall at the cost of
 
 <hr>
 
-The **AUC** summarizes the entire ROC curve in a single number — easy to compare models.
+The **AUC** summarizes the entire ROC curve in a single number. Mostly used to compare models.
 
 <br>
 
@@ -1373,14 +1368,9 @@ The **AUC** summarizes the entire ROC curve in a single number — easy to compa
 |:---:|---|
 | 1.0 | Perfect classifier |
 | > 0.8 | Good discriminating ability (in most applications) |
-| 0.5 – 1.0 | Some discriminating ability |
+| > 0.5  | Some discriminating ability |
 | 0.5 | Random classifier (no better than a coin flip) |
 
-<br>
-
-::: {.body-text-m}
-**Probabilistic interpretation**: AUC = probability that the model ranks a randomly chosen positive example higher than a randomly chosen negative example.
-:::
 
 ---
 
@@ -1423,9 +1413,7 @@ plt.close()
 ::: {.column width="42%"}
 
 ::: {.teal-text .body-text-m}
-1. What does an AUC of `{python} f"{roc_auc:.3f}"` tell us about the model's ability to discriminate between healthy and degraded sites?
-
-2. A colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?
+A colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?
 :::
 
 :::
@@ -1434,7 +1422,7 @@ plt.close()
 
 ---
 
-## {#checkin-auc-a data-menu-title="Check-in: AUC (answers)"}
+## {#checkin-auc-a data-menu-title="Check-in: AUC"}
 
 [Check-in]{.slide-title}
 
@@ -1445,9 +1433,13 @@ plt.close()
 ::: {.column width="58%"}
 
 ```{python}
+#| label: auc-comparison-2
 #| echo: false
 #| fig-align: center
 #| out-width: "100%"
+
+null_probs = np.full(len(y_test_num), y_test_num.mean())
+fpr_null, tpr_null, _ = roc_curve(y_test_num, null_probs)
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y + 0.5))
 ax.fill_between(fpr, tpr, alpha=0.15, color='steelblue')
@@ -1468,56 +1460,13 @@ plt.close()
 
 ::: {.column width="42%"}
 
-::: {.body-text-s}
-1. An AUC of `{python} f"{roc_auc:.3f}"` means that if we randomly pick one healthy and one degraded site, the model assigns a higher predicted probability to the healthy site about `{python} f"{roc_auc*100:.0f}"` % of the time — substantially better than random.
-
-2. AUC = 0.52 is barely better than random and not useful in practice. The logistic regression would be strongly preferred.
+::: {.teal-text .body-text-m}
+A colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?
 :::
+
+A model with AUC = 0.52 is barely better than random and almost certainly not useful in practice. The logistic regression would be preferred.
 
 :::
 
 ::::
 
----
-
-## {#roc-comparison data-menu-title="Comparing models: ROC curves"}
-
-[Comparing models with ROC curves]{.slide-title}
-
-<hr>
-
-```{python}
-#| label: roc-both-models
-#| echo: false
-#| fig-align: center
-#| out-width: "75%"
-
-lr_single_roc = LogisticRegression(max_iter=1000)
-lr_single_roc.fit(X_train[:, [0]], (y_train == 'healthy').astype(int))
-y_prob_single    = lr_single_roc.predict_proba(X_test[:, [0]])[:, 1]
-y_prob_multi_roc = lr_multi.predict_proba(X_test)[:, 1]
-
-fpr_s, tpr_s, _ = roc_curve(y_test_num, y_prob_single)
-fpr_m, tpr_m, _ = roc_curve(y_test_num, y_prob_multi_roc)
-auc_s = auc(fpr_s, tpr_s)
-auc_m = auc(fpr_m, tpr_m)
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 1.0, fig_size_y + 0.5))
-ax.plot(fpr_s, tpr_s, color='steelblue', linewidth=2,
-        label=f'Logistic (temp_anomaly only)  AUC = {auc_s:.3f}')
-ax.plot(fpr_m, tpr_m, color='tomato', linewidth=2,
-        label=f'Logistic (temp + nitrate)       AUC = {auc_m:.3f}')
-ax.plot([0, 1], [0, 1], 'k--', linewidth=1, label='Random classifier')
-ax.set_xlabel('False Positive Rate (FPR)')
-ax.set_ylabel('True Positive Rate (TPR)')
-ax.set_title('ROC curves — KelpWatch logistic regression models')
-ax.legend(fontsize=9, loc='lower right')
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-::: {.body-text-s .center-text}
-Adding `nitrate` improves the AUC from `{python} f"{auc_s:.3f}"` to `{python} f"{auc_m:.3f}"`, confirming better discrimination across **all** thresholds.
-:::

@@ -730,16 +730,15 @@ plt.show()
 plt.close()
 ```
 
-1. What does this AUC tell us about the model's ability to discriminate between healthy and degraded sites?
-2. Suppose a colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?
+Suppose a colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. An AUC of `{python} f"{roc_auc:.3f}"` means that if we randomly pick one healthy and one degraded site, the model assigns a higher probability of being healthy to the healthy site roughly `{python} f"{roc_auc*100:.0f}"` % of the time. This is substantially better than random.
-
-2. A model with AUC = 0.52 is barely better than random and almost certainly not useful in practice. The logistic regression would be preferred.
+<!-- 1. An AUC of `{python} f"{roc_auc:.3f}"` means that if we randomly pick one healthy and one degraded site, the model assigns a higher probability of being healthy to the healthy site roughly `{python} f"{roc_auc*100:.0f}"` % of the time. This is substantially better than random.
+ -->
+A model with AUC = 0.52 is barely better than random and almost certainly not useful in practice. The logistic regression would be preferred.
 :::
 
 Remember the  AUC is a *performance* metric tha summarizes performance across all thresholds equally. In practice, not all thresholds are equally relevant: we may only care about behavior at low FPR (e.g., if false alarms are very costly), at high TPR (if missing a positive is very costly).
