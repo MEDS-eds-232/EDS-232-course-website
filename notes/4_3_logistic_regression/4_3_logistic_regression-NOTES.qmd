@@ -483,7 +483,7 @@ Discuss how the model's performance changes as we add `nitrate` as a second pred
 
 :::{.callout-tip collapse="true"}
 ## Discussion
-FILL IN DISCUSSION
+Adding `nitrate` as a second predictor moderately improves the recall, which means we are correctly classifying more healthy sites. The rest of the metrics remain very close.
 :::
 
 
@@ -502,7 +502,7 @@ Suppose the threshold is raised to $\alpha = 0.9$. What type of error (FP or FN)
 **$\alpha = 0.2$:** Almost every site is classified as healthy. Most truly healthy sites are caught → very few false negatives → high recall. But many degraded sites are also classified as healthy → many false positives → precision falls.
 :::
 
-Changing the threshold shifts the classification tradeoff between recall and precision:
+Changing the threshold shifts has a tradeoff between recall and precision:
 
 - Raising the classification threshold means fewer observations get predicted as positive: precision increases, recall decreases (more false negatives).
 
@@ -517,7 +517,7 @@ The right threshold depends on the application and the cost of each error type, 
 :::{.callout-tip}
 ## Check-in
 
-The graph above shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels. 
+The graph below shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels. 
 
 ```{python}
 #| label: threshold-effect
@@ -549,18 +549,12 @@ plt.show()
 plt.close()
 ```
 
-1. What would we miss by evaluating model performance using only overall accuracy across thresholds?
-2. You manage kelp restoration and can only intervene at sites predicted as degraded. Should the threshold be high or low? Which metric does this prioritize?
-3. Around what threshold do precision and recall intersect? What does that point represent?
+What would we miss by evaluating model performance using only overall accuracy across thresholds?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
-1. Overall accuracy hides the precision–recall tradeoff. A threshold that maximizes accuracy may still have poor recall (missing many degraded sites) or poor precision (flagging many healthy sites). The green dashed line barely changes across a wide range of thresholds, yet precision and recall shift dramatically — accuracy alone would give a misleading picture of model behavior.
-
-2. A **lower threshold** flags more sites as degraded, so fewer truly degraded sites are missed. This prioritizes **recall** — consistent with the reasoning in the previous lesson: the ecological cost of missing a degraded site (false negative) is higher than unnecessarily intervening at a healthy one.
-
-3. The intersection is the threshold at which precision and recall are equal. It represents the point of maximum balance between the two metrics, equivalent to the threshold that maximizes the $F_1$ score.
+Overall accuracy hides the precision–recall tradeoff. A threshold that maximizes accuracy may still have poor recall (missing many healthy sites) or poor precision (flagging many degraded sites). The green dashed line barely changes across a wide range of thresholds, but precision and recall shift a lot, so accuracy alone would give a misleading picture of model behavior.
 :::
 
 ## ROC curves

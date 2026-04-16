@@ -752,16 +752,18 @@ Each coefficient $\hat\beta_j$ represents the change in log-odds for a one-unit 
 #| out-width: "95%"
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
+ax.set_position([0.07, 0.14, 0.75, 0.76])
 for label, col in col_map.items():
     mask = y_train == label
     ax.scatter(X_train[mask, 0], X_train[mask, 1],
                c=col, s=20, alpha=0.8, label=label, edgecolors='black')
-
 ax.set_xlim(-2, 4)
+ax.set_ylim(x2_range[0], x2_range[-1])
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
 ax.set_title('Training data (210 pts) with two predictors')
-plt.tight_layout()
+ax.legend(title='True status', fontsize=9)
+ax.grid(True, alpha=0.3)
 plt.show()
 plt.close()
 ```
@@ -781,19 +783,21 @@ plt.close()
 #| out-width: "95%"
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
+ax.set_position([0.07, 0.14, 0.75, 0.76])
 cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='Greens', alpha=0.7, vmin=0, vmax=1)
 for label, col in col_map.items():
     mask = y_train == label
     ax.scatter(X_train[mask, 0], X_train[mask, 1],
                c=col, s=20, alpha=0.8, label=label, edgecolors='black')
-
 ax.set_xlim(-2, 4)
+ax.set_ylim(x2_range[0], x2_range[-1])
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
 ax.set_title('P(healthy) — fitted logistic regression with two predictors')
+ax.legend(title='True status', fontsize=9)
 ax.grid(True, alpha=0.2)
-fig.colorbar(cf, ax=ax, label='P(healthy)', shrink=0.8)
-plt.tight_layout()
+cbar_ax = fig.add_axes([0.84, 0.14, 0.02, 0.76])
+fig.colorbar(cf, cax=cbar_ax, label='P(healthy)')
 plt.show()
 plt.close()
 ```
@@ -818,15 +822,16 @@ Darker green = higher predicted probability of healthy status.
 #| out-width: "95%"
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
+ax.set_position([0.07, 0.14, 0.75, 0.76])
 cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='Greens', alpha=0.7, vmin=0, vmax=1)
-
 ax.set_xlim(-2, 4)
+ax.set_ylim(x2_range[0], x2_range[-1])
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
-ax.set_title('P(healthy) — fitted logistic regression with two predictors')
+ax.set_title('We obtain a model for the probability of healthy class: P(healthy)')
 ax.grid(True, alpha=0.2)
-fig.colorbar(cf, ax=ax, label='P(healthy)', shrink=0.8)
-plt.tight_layout()
+cbar_ax = fig.add_axes([0.84, 0.14, 0.02, 0.76])
+fig.colorbar(cf, cax=cbar_ax, label='P(healthy)')
 plt.show()
 plt.close()
 ```
@@ -850,16 +855,17 @@ Darker green = higher predicted probability of healthy status.
 #| out-width: "95%"
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
+ax.set_position([0.07, 0.14, 0.75, 0.76])
 cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='Greens', alpha=0.7, vmin=0, vmax=1)
 ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
-
 ax.set_xlim(-2, 4)
+ax.set_ylim(x2_range[0], x2_range[-1])
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
-ax.set_title('Selecting a threshold creates a decision boundary for the fitted logistic model')
+ax.set_title('Selecting a threshold creates a decision boundary for classification')
 ax.grid(True, alpha=0.3)
-fig.colorbar(cf, ax=ax, label='P(healthy)', shrink=0.8)
-plt.tight_layout()
+cbar_ax = fig.add_axes([0.84, 0.14, 0.02, 0.76])
+fig.colorbar(cf, cax=cbar_ax, label='P(healthy)')
 plt.show()
 plt.close()
 ```
@@ -884,23 +890,25 @@ Gray line = decision boundary ($\alpha = 0.5$).
 #| fig-align: center
 #| out-width: "95%"
 
-fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
-cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='Greens', alpha=0.7, vmin=0, vmax=1)
-ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
+grid_binary = (grid_prob >= 0.5).astype(int)
 
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
+ax.set_position([0.07, 0.14, 0.75, 0.76])
+ax.contourf(xx1, xx2, grid_binary, levels=[-0.5, 0.5, 1.5],
+            colors=['tomato', 'steelblue'], alpha=0.3)
+ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
 ax.set_xlim(-2, 4)
+ax.set_ylim(x2_range[0], x2_range[-1])
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
-ax.set_title('Selecting a threshold creates a decision boundary for the fitted logistic model')
+ax.set_title('This decision boundary creates two regions to classify observations into healthy/degraded')
 ax.grid(True, alpha=0.3)
-fig.colorbar(cf, ax=ax, label='P(healthy)', shrink=0.8)
-plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
 ::: {.body-text-s .center-text}
-Darker green = higher predicted probability of healthy status. 
+Blue region = predicted healthy, red region = predicted degraded.
 
 Gray line = decision boundary ($\alpha = 0.5$).
 :::
@@ -920,41 +928,32 @@ Gray line = decision boundary ($\alpha = 0.5$).
 #| out-width: "95%"
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
-cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='Greens', alpha=0.7, vmin=0, vmax=1)
+ax.set_position([0.07, 0.14, 0.75, 0.76])
+ax.contourf(xx1, xx2, grid_binary, levels=[-0.5, 0.5, 1.5],
+            colors=['tomato', 'steelblue'], alpha=0.3)
 ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
 for label, col in col_map.items():
     mask = y_test == label
     ax.scatter(X_test[mask, 0], X_test[mask, 1],
                c=col, s=20, alpha=0.8, label=label, edgecolors='black')
 ax.set_xlim(-2, 4)
+ax.set_ylim(x2_range[0], x2_range[-1])
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
-ax.set_title('Apply classifier to test data (90 pts)')
+ax.set_title('We can now apply the classifier to make predictions (test data shown)')
 ax.legend(title='True status', fontsize=9)
 ax.grid(True, alpha=0.3)
-fig.colorbar(cf, ax=ax, label='P(healthy)', shrink=0.8)
-plt.tight_layout()
 plt.show()
 plt.close()
-
 ```
 
-
 ::: {.body-text-s .center-text}
-Shading = predicted probability of healthy.
+Blue region = predicted healthy, red region = predicted degraded.
 
-Gray line = decision boundary ($\alpha = 0.5$).
-
-Points in the "wrong" region are misclassified test observations.
+Gray line = decision boundary ($\alpha = 0.5$). Points in the "wrong" region are misclassified.
 :::
 
----
-
-## {#section-accuracy data-menu-title="# Accuracy assessment #" background="#047C90"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Accuracy assessment</p>
-</div>
+<!-- 
 
 ---
 
@@ -965,10 +964,12 @@ Points in the "wrong" region are misclassified test observations.
 <hr>
 
 ::: {.teal-text .body-text-m}
-Both models use `healthy` as the positive class and the default threshold $\alpha = 0.5$. How does performance change when we add `nitrate` as a second predictor?
-:::
+We fitted two logistic models: one with one predictor `temp_anomaly` and one using `temp_anomaly` and `nitrate` as predictors. 
 
-<br>
+Both models use `healthy` as the positive class and the default threshold $\alpha = 0.5$. 
+
+How does performance change when we add `nitrate` as a second predictor?
+:::
 
 ```{python}
 #| label: accuracy-recap
@@ -977,32 +978,11 @@ Both models use `healthy` as the positive class and the default threshold $\alph
 print(recap_df.to_string(index=False))
 ```
 
----
+. . .
 
-## {#checkin-accuracy-a data-menu-title="Check-in: accuracy metrics (answer)"}
+Adding `nitrate` as a second predictor moderately improves the recall, which means we are correctly classifying more healthy sites. The rest of the metrics remain very close. 
 
-[Check-in]{.slide-title}
-
-<hr>
-
-:::: {.columns}
-
-::: {.column width="55%"}
-
-```{python}
-#| echo: false
-print(recap_df.to_string(index=False))
-```
-
-:::
-
-::: {.column width="45%"}
-
-Adding `nitrate` as a second predictor improves performance across all metrics. Both overall accuracy and $F_1$ score increase, and the gains in precision and recall suggest the model is better at separating healthy from degraded sites when both temperature and nutrient conditions are considered.
-
-:::
-
-::::
+-->
 
 ---
 
@@ -1014,7 +994,7 @@ Adding `nitrate` as a second predictor improves performance across all metrics. 
 
 ---
 
-## {#threshold-concept data-menu-title="Classification threshold"}
+## {#threshold-concept-1 data-menu-title="Classification threshold"}
 
 [Adjusting the classification threshold]{.slide-title}
 
@@ -1022,70 +1002,46 @@ Adding `nitrate` as a second predictor improves performance across all metrics. 
 
 The default threshold $\alpha = 0.5$ is just a convention. We can choose **any** value between 0 and 1.
 
-<br>
+. . .
 
-:::: {.columns}
-
-::: {.column width="50%"}
-**Raising** $\alpha$ (e.g., $\alpha = 0.9$):
-
-- Fewer sites predicted healthy
-- **Precision ↑**, **Recall ↓**
-- More false negatives
+::: {.teal-text .body-text-m}
+Suppose the threshold is raised to $\alpha = 0.9$. What type of error (FP or FN) would you expect more of, and what does this mean for precision and recall? Now repeat for $\alpha = 0.2$.
 :::
-
-::: {.column width="50%"}
-**Lowering** $\alpha$ (e.g., $\alpha = 0.2$):
-
-- More sites predicted healthy
-- **Recall ↑**, **Precision ↓**
-- More false positives
-:::
-
-::::
 
 . . .
 
-<br>
 
-The right threshold depends on the **domain** and the **cost of each error type** — not just overall accuracy.
+**$\alpha = 0.9$:** Only sites with very high predicted probability are classified as healthy. Many truly healthy sites fall below this bar and are classified as degraded → many false negatives. Precision increases (when we do predict healthy, we're usually right), but recall falls.
+
+**$\alpha = 0.2$:** Almost every site is classified as healthy. Most truly healthy sites are caught → very few false negatives → high recall. But many degraded sites are also classified as healthy → many false positives → precision 
 
 ---
 
-## {#checkin-threshold-q data-menu-title="Check-in: threshold effect"}
+## {#threshold-concept-2 data-menu-title="Classification threshold"}
 
-[Check-in]{.slide-title}
+[Adjusting the classification threshold]{.slide-title}
 
 <hr>
 
-```{python}
-#| label: threshold-effect
-#| echo: false
-#| fig-align: center
-#| out-width: "85%"
 
-fig, ax = plt.subplots(figsize=(fig_size_x * 1.3, fig_size_y * 0.9))
-ax.plot(thresholds, precisions_t,  label='Precision',        color='steelblue', linewidth=2)
-ax.plot(thresholds, recalls_t,     label='Recall',           color='tomato',    linewidth=2)
-ax.plot(thresholds, accuracies_t,  label='Overall accuracy', color='seagreen',  linewidth=2, linestyle='--')
-ax.axvline(0.5, color='gray', linestyle=':', linewidth=1.2, label='Default threshold (0.5)')
-ax.set_xlabel('Classification threshold')
-ax.set_ylabel('Metric value')
-ax.set_title('Kelp forest status multiple logistic regression classifier\nPrecision, recall, and accuracy vs. threshold')
-ax.legend(fontsize=9)
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
+Changing the threshold has a tradeoff between recall and precision:
 
-::: {.teal-text .body-text-s}
-1. What would we miss by evaluating performance using only overall accuracy?   2. You can only intervene at sites predicted as degraded — should the threshold be high or low?   3. Around what threshold do precision and recall intersect?
-:::
+- **Raising the classification threshold** means fewer observations get predicted as positive: precision increases, recall decreases (more false negatives).
+
+- **Lowering the classification threshold** means more observations get predicted as positive: recall increases, precision decreases (more false positives).
+
+. . .
+
+There is no single correct answer and the selection must be guided by:
+
+- **Domain knowledge**: what is the consequence of each error type?
+- **The precision–recall tradeoff**: understanding what you gain and lose at each threshold.
+- **Cross-validation**: evaluating threshold performance on held-out data rather than the test set (more on this on next lesson). 
+
 
 ---
 
-## {#checkin-threshold-a data-menu-title="Check-in: threshold effect (answers)"}
+## {#checkin-threshold- data-menu-title="Check-in: threshold effect (answers)"}
 
 [Check-in]{.slide-title}
 
@@ -1094,6 +1050,8 @@ plt.close()
 :::: {.columns}
 
 ::: {.column width="55%"}
+
+The graph below shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels. 
 
 ```{python}
 #| echo: false
@@ -1118,12 +1076,61 @@ plt.close()
 
 ::: {.column width="45%"}
 
+::: {.teal-text .body-text-m}
+What would we miss by evaluating performance using only overall accuracy?   
+:::
+
+:::
+
+::::
+
+---
+
+## {#checkin-threshold-a data-menu-title="Check-in: threshold effect (answers)"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="55%"}
+
+The graph below shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels. 
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y * 0.9))
+ax.plot(thresholds, precisions_t,  label='Precision',        color='steelblue', linewidth=2)
+ax.plot(thresholds, recalls_t,     label='Recall',           color='tomato',    linewidth=2)
+ax.plot(thresholds, accuracies_t,  label='Overall accuracy', color='seagreen',  linewidth=2, linestyle='--')
+ax.axvline(0.5, color='gray', linestyle=':', linewidth=1.2, label='Default (0.5)')
+ax.set_xlabel('Classification threshold')
+ax.set_ylabel('Metric value')
+ax.legend(fontsize=8)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="45%"}
+
+::: {.teal-text .body-text-m}
+What would we miss by evaluating performance using only overall accuracy?   
+:::
+
 ::: {.body-text-s}
-1. Overall accuracy barely changes across thresholds, yet precision and recall shift dramatically — accuracy alone gives a misleading picture.
+Overall accuracy hides the precision–recall tradeoff. 
 
-2. A **lower** threshold flags more sites as degraded → fewer missed degraded sites → higher **recall**. The ecological cost of a false negative is high.
+A threshold that maximizes accuracy may still have poor recall (missing many healthy sites) or poor precision (flagging many degraded sites). 
 
-3. The intersection is where precision = recall, the threshold that maximizes the $F_1$ score.
+The green dashed line barely changes across a wide range of thresholds, but precision and recall shift a lot!
 :::
 
 :::
