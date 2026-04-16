@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.7.33">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -52,15 +52,14 @@ div.csl-indent {
 <meta name="quarto:offset" content="../../">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -103,7 +102,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+      if (mathElements[i].tagName == "SPAN") {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -128,8 +127,6 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
     </a>
@@ -141,11 +138,11 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../notes/week-by-week/week-by-week.html"> 
+    <a class="nav-link active" href="../../notes/week-by-week/week-by-week.html" aria-current="page"> 
 <span class="menu-text">notes</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -219,10 +216,6 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header">
-      <a href="../../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -360,11 +353,10 @@ window.Quarto = {
 </header>
 
 
-<p><a href="4_3_logistic_regression-SLIDES.qmd">📊 Slides</a> / <a href="4_3_logistic_regression-SLIDES-BLANK.qmd">📊 Blank slides</a></p>
+<p><a href="../../notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html">📊 Slides</a> / <a href="../../notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html">📊 Blank slides</a></p>
 <p>In this lesson we introduce:</p>
 <ul>
-<li>The logistic function and why we prefer it over linear regression for classification</li>
-<li>Maximum likelihood estimation as the fitting method for logistic regression</li>
+<li>Logistic regression and how it is used for classification</li>
 <li>Interpreting logistic regression coefficients through log-odds</li>
 <li>Adjusting the classification threshold and its effect on precision and recall</li>
 <li>ROC curves and the AUC as tools for evaluating classifier performance across thresholds</li>
@@ -412,7 +404,7 @@ window.Quarto = {
 </ul>
 <p>Using logistic regression we can model the probability of a site having a healthy status given a certain temperature anomaly:</p>
 <p><span class="math display">\[P(\text{status} = \text{healthy} \mid \text{temp\_anomaly}) = p(\text{temp\_anomaly}).\]</span></p>
-<p>Then, we select a threshold to classify a site as healthy or degraded given the probability that it is degraded based on the observed temperature anomaly. For example, if we use <span class="math inline">\(\alpha = 0.5\)</span> we can make the predictions:</p>
+<p>Then, we select a threshold to classify a site as healthy or degraded given the probability that it is healthy based on the observed temperature anomaly. For example, if we use <span class="math inline">\(\alpha = 0.5\)</span> we can make the predictions:</p>
 <ul>
 <li>If <span class="math inline">\(p(\text{temp}) \geq 0.5\)</span>, then predict the site is <em>healthy</em>.</li>
 <li>If <span class="math inline">\(p(\text{temp}) &lt; 0.5\)</span>, then predict the site is <em>degraded</em>.</li>
@@ -423,30 +415,30 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li>A new site has <code>temp_anomaly</code> = 3°C. Walk through the steps to predict its class using <span class="math inline">\(p(X)\)</span> with threshold <span class="math inline">\(\alpha = 0.5\)</span>.</li>
+<li>A new site has <code>temp_anomaly</code> = 3°C. Walk through the steps to predict its class using <span class="math inline">\(p(X)\)</span> with threshold <span class="math inline">\(\alpha = 0.7\)</span>.</li>
 <li>If we used <code>nitrate</code> as the predictor instead, what would <span class="math inline">\(p(X)\)</span> be modeling?</li>
 </ol>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p>After having the model <span class="math inline">\(p(X)\)</span>, we would plug in <span class="math inline">\(X = 3\)</span> to calculate <span class="math inline">\(p(3)\)</span>. If <span class="math inline">\(p(3)&lt;0.5\)</span> then we would predict the site is degraded and if <span class="math inline">\(p(3)\geq0.5\)</span> we would predict the site is healthy.</p></li>
+<li><p>After having the model <span class="math inline">\(p(X)\)</span>, we would plug in <span class="math inline">\(X = 3\)</span> to calculate <span class="math inline">\(p(3)\)</span>. If <span class="math inline">\(p(3)&lt;0.7\)</span> then we would predict the site is degraded and if <span class="math inline">\(p(3)\geq0.7\)</span> we would predict the site is healthy.</p></li>
 <li><p><span class="math inline">\(p(X)\)</span> would model <span class="math inline">\(P(\text{status} = \text{healthy} \mid \text{nitrate})\)</span>. This is the probability that a site is healthy given its nitrate concentration.</p></li>
 </ol>
 </div>
@@ -480,20 +472,20 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Using the fitted model above (<span class="math inline">\(\hat{\beta}_0 =\)</span> 1.3000, <span class="math inline">\(\hat{\beta}_1 =\)</span> -1.1639), what is the predicted status of a site with <code>temp_anomaly</code> = 0.5°C? Use the default threshold <span class="math inline">\(\alpha = 0.5\)</span>.</p>
+<p>Using the fitted model above, what is the predicted status of a site with <code>temp_anomaly</code> = 0.5°C? Use the default threshold <span class="math inline">\(\alpha = 0.5\)</span>.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -507,7 +499,7 @@ window.Quarto = {
 </section>
 <section id="interpreting-the-coefficients" class="level3">
 <h3 class="anchored" data-anchor-id="interpreting-the-coefficients">Interpreting the coefficients</h3>
-<p>Logistic regression allows us to do both classification and inference. Once we have fitted our model and estimated the coefficients <span class="math inline">\(\hat{\beta}_i\)</span>, we can interpret them to understand relations between the predictor and response variables.</p>
+<p>Logistic regression allows us to do both prediction and inference. Once we have fitted our model and estimated the coefficients <span class="math inline">\(\hat{\beta}_i\)</span>, we can interpret them to understand relations between the predictor variables and response.</p>
 <p>To understand these relationships we can rewrite the logistic function in terms of the odds and then the log-odds.</p>
 <p>Starting from the logistic function</p>
 <p><span class="math display">\[p(X) = \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}},\]</span></p>
@@ -536,7 +528,7 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -546,12 +538,12 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -584,7 +576,7 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -604,12 +596,12 @@ temp_anomaly   -1.1639      0.1739       -6.693  0.0000</code></pre>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -647,7 +639,7 @@ temp_anomaly   -1.1639      0.1739       -6.693  0.0000</code></pre>
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -663,18 +655,18 @@ Logistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900  
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>FILL IN DISCUSSION</p>
+<p>Adding <code>nitrate</code> as a second predictor moderately improves the recall, which means we are correctly classifying more healthy sites. The rest of the metrics remain very close.</p>
 </div>
 </div>
 </div>
@@ -688,7 +680,7 @@ Logistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900  
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -696,12 +688,12 @@ Logistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900  
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -712,7 +704,7 @@ Logistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900  
 </div>
 </div>
 </div>
-<p>Changing the threshold shifts the classification tradeoff between recall and precision:</p>
+<p>Changing the threshold shifts has a tradeoff between recall and precision:</p>
 <ul>
 <li><p>Raising the classification threshold means fewer observations get predicted as positive: precision increases, recall decreases (more false negatives).</p></li>
 <li><p>Lowering the classification threshold means more observations get predicted as positive: recall increases, precision decreases (more false positives).</p></li>
@@ -729,11 +721,11 @@ Logistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900  
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The graph above shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels.</p>
+<p>The graph below shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels.</p>
 <div id="cell-threshold-effect" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div>
@@ -743,30 +735,22 @@ Logistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900  
 </div>
 </div>
 </div>
-<ol type="1">
-<li>What would we miss by evaluating model performance using only overall accuracy across thresholds?</li>
-<li>You manage kelp restoration and can only intervene at sites predicted as degraded. Should the threshold be high or low? Which metric does this prioritize?</li>
-<li>Around what threshold do precision and recall intersect? What does that point represent?</li>
-</ol>
+<p>What would we miss by evaluating model performance using only overall accuracy across thresholds?</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ol type="1">
-<li><p>Overall accuracy hides the precision–recall tradeoff. A threshold that maximizes accuracy may still have poor recall (missing many degraded sites) or poor precision (flagging many healthy sites). The green dashed line barely changes across a wide range of thresholds, yet precision and recall shift dramatically — accuracy alone would give a misleading picture of model behavior.</p></li>
-<li><p>A <strong>lower threshold</strong> flags more sites as degraded, so fewer truly degraded sites are missed. This prioritizes <strong>recall</strong> — consistent with the reasoning in the previous lesson: the ecological cost of missing a degraded site (false negative) is higher than unnecessarily intervening at a healthy one.</p></li>
-<li><p>The intersection is the threshold at which precision and recall are equal. It represents the point of maximum balance between the two metrics, equivalent to the threshold that maximizes the <span class="math inline">\(F_1\)</span> score.</p></li>
-</ol>
+<p>Overall accuracy hides the precision–recall tradeoff. A threshold that maximizes accuracy may still have poor recall (missing many healthy sites) or poor precision (flagging many degraded sites). The green dashed line barely changes across a wide range of thresholds, but precision and recall shift a lot, so accuracy alone would give a misleading picture of model behavior.</p>
 </div>
 </div>
 </div>
@@ -786,7 +770,7 @@ Logistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900  
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -836,12 +820,12 @@ Logistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900  
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -899,7 +883,7 @@ Logistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900  
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -913,28 +897,24 @@ Logistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900  
 </div>
 </div>
 </div>
-<ol type="1">
-<li>What does this AUC tell us about the model’s ability to discriminate between healthy and degraded sites?</li>
-<li>Suppose a colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?</li>
-</ol>
+<p>Suppose a colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ol type="1">
-<li><p>An AUC of 0.747 means that if we randomly pick one healthy and one degraded site, the model assigns a higher probability of being healthy to the healthy site roughly 75 % of the time. This is substantially better than random.</p></li>
-<li><p>A model with AUC = 0.52 is barely better than random and almost certainly not useful in practice. The logistic regression would be preferred.</p></li>
-</ol>
+<!-- 1. An AUC of 0\.747 means that if we randomly pick one healthy and one degraded site, the model assigns a higher probability of being healthy to the healthy site roughly 75 % of the time. This is substantially better than random.
+ -->
+<p>A model with AUC = 0.52 is barely better than random and almost certainly not useful in practice. The logistic regression would be preferred.</p>
 </div>
 </div>
 </div>
@@ -1001,14 +981,13 @@ James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
         }
-      }
-      return codeEl.innerText;
+        return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

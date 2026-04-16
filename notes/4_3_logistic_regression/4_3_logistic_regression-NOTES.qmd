@@ -73,8 +73,7 @@ xx1, xx2 = np.meshgrid(x1_range, x2_range)
 
 In this lesson we introduce:
 
-- The logistic function and why we prefer it over linear regression for classification
-- Maximum likelihood estimation as the fitting method for logistic regression
+- Logistic regression and how it is used for classification
 - Interpreting logistic regression coefficients through log-odds
 - Adjusting the classification threshold and its effect on precision and recall
 - ROC curves and the AUC as tools for evaluating classifier performance across thresholds
@@ -160,19 +159,19 @@ Using logistic regression we can model the probability of a site having a health
 
 $$P(\text{status} = \text{healthy} \mid \text{temp\_anomaly}) = p(\text{temp\_anomaly}).$$
 
-Then, we select a threshold to classify a site as healthy or degraded given the probability that it is degraded based on the observed temperature anomaly. For example, if we use $\alpha = 0.5$ we can make the predictions:
+Then, we select a threshold to classify a site as healthy or degraded given the probability that it is healthy based on the observed temperature anomaly. For example, if we use $\alpha = 0.5$ we can make the predictions:
 
 - If $p(\text{temp}) \geq 0.5$, then predict the site is *healthy*.
 - If $p(\text{temp}) < 0.5$, then predict the site is *degraded*.
 
 :::{.callout-tip}
 ## Check-in
-1. A new site has `temp_anomaly` = 3°C. Walk through the steps to predict its class using $p(X)$ with threshold $\alpha = 0.5$.
+1. A new site has `temp_anomaly` = 3°C. Walk through the steps to predict its class using $p(X)$ with threshold $\alpha = 0.7$.
 2. If we used `nitrate` as the predictor instead, what would $p(X)$ be modeling?
 :::
 :::{.callout-tip collapse="true"}
 ## Discussion
-1. After having the model $p(X)$, we would plug in $X = 3$ to calculate $p(3)$. If $p(3)<0.5$ then we would predict the site is degraded and if $p(3)\geq0.5$ we would predict the site is healthy. 
+1. After having the model $p(X)$, we would plug in $X = 3$ to calculate $p(3)$. If $p(3)<0.7$ then we would predict the site is degraded and if $p(3)\geq0.7$ we would predict the site is healthy. 
 
 2. $p(X)$ would model $P(\text{status} = \text{healthy} \mid \text{nitrate})$. This is the probability that a site is healthy given its nitrate concentration.
 :::
@@ -240,7 +239,7 @@ plt.close()
 
 :::{.callout-tip}
 ## Check-in
-Using the fitted model above ($\hat{\beta}_0 =$ `{python} f"{beta0_s:.4f}"`, $\hat{\beta}_1 =$ `{python} f"{beta1_s:.4f}"`), what is the predicted status of a site with `temp_anomaly` = 0.5°C? Use the default threshold $\alpha = 0.5$.
+Using the fitted model above, what is the predicted status of a site with `temp_anomaly` = 0.5°C? Use the default threshold $\alpha = 0.5$.
 :::
 :::{.callout-tip collapse="true"}
 ## Discussion
@@ -251,7 +250,7 @@ Using the probability function we obtain $p(0.5) =$ `{python} f"{1 / (1 + np.exp
 
 ### Interpreting the coefficients
 
-Logistic regression allows us to do both classification and inference. Once we have fitted our model and estimated the coefficients $\hat{\beta}_i$, we can interpret them to understand relations between the predictor and response variables. 
+Logistic regression allows us to do both prediction and inference. Once we have fitted our model and estimated the coefficients $\hat{\beta}_i$, we can interpret them to understand relations between the predictor variables and response. 
 
 To understand these relationships we can rewrite the logistic function in terms of the odds and then the log-odds.
 
@@ -484,7 +483,7 @@ Discuss how the model's performance changes as we add `nitrate` as a second pred
 
 :::{.callout-tip collapse="true"}
 ## Discussion
-FILL IN DISCUSSION
+Adding `nitrate` as a second predictor moderately improves the recall, which means we are correctly classifying more healthy sites. The rest of the metrics remain very close.
 :::
 
 
@@ -503,7 +502,7 @@ Suppose the threshold is raised to $\alpha = 0.9$. What type of error (FP or FN)
 **$\alpha = 0.2$:** Almost every site is classified as healthy. Most truly healthy sites are caught → very few false negatives → high recall. But many degraded sites are also classified as healthy → many false positives → precision falls.
 :::
 
-Changing the threshold shifts the classification tradeoff between recall and precision:
+Changing the threshold shifts has a tradeoff between recall and precision:
 
 - Raising the classification threshold means fewer observations get predicted as positive: precision increases, recall decreases (more false negatives).
 
@@ -518,7 +517,7 @@ The right threshold depends on the application and the cost of each error type, 
 :::{.callout-tip}
 ## Check-in
 
-The graph above shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels. 
+The graph below shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels. 
 
 ```{python}
 #| label: threshold-effect
@@ -531,7 +530,7 @@ precisions, recalls, accuracies = [], [], []
 
 for t in thresholds:
     y_hat = (y_prob_test >= t).astype(int)
-    precisions.append(precision_score(y_test_num, y_hat, zero_division=0))
+    precisions.append(precision_score(y_test_num, y_hat, zero_division=1))
     recalls.append(recall_score(y_test_num, y_hat, zero_division=0))
     accuracies.append(accuracy_score(y_test_num, y_hat))
 
@@ -550,18 +549,12 @@ plt.show()
 plt.close()
 ```
 
-1. What would we miss by evaluating model performance using only overall accuracy across thresholds?
-2. You manage kelp restoration and can only intervene at sites predicted as degraded. Should the threshold be high or low? Which metric does this prioritize?
-3. Around what threshold do precision and recall intersect? What does that point represent?
+What would we miss by evaluating model performance using only overall accuracy across thresholds?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
-1. Overall accuracy hides the precision–recall tradeoff. A threshold that maximizes accuracy may still have poor recall (missing many degraded sites) or poor precision (flagging many healthy sites). The green dashed line barely changes across a wide range of thresholds, yet precision and recall shift dramatically — accuracy alone would give a misleading picture of model behavior.
-
-2. A **lower threshold** flags more sites as degraded, so fewer truly degraded sites are missed. This prioritizes **recall** — consistent with the reasoning in the previous lesson: the ecological cost of missing a degraded site (false negative) is higher than unnecessarily intervening at a healthy one.
-
-3. The intersection is the threshold at which precision and recall are equal. It represents the point of maximum balance between the two metrics, equivalent to the threshold that maximizes the $F_1$ score.
+Overall accuracy hides the precision–recall tradeoff. A threshold that maximizes accuracy may still have poor recall (missing many healthy sites) or poor precision (flagging many degraded sites). The green dashed line barely changes across a wide range of thresholds, but precision and recall shift a lot, so accuracy alone would give a misleading picture of model behavior.
 :::
 
 ## ROC curves
@@ -737,16 +730,15 @@ plt.show()
 plt.close()
 ```
 
-1. What does this AUC tell us about the model's ability to discriminate between healthy and degraded sites?
-2. Suppose a colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?
+Suppose a colleague proposes a model with AUC = 0.52. Would you use it over the logistic regression? Why or why not?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. An AUC of `{python} f"{roc_auc:.3f}"` means that if we randomly pick one healthy and one degraded site, the model assigns a higher probability of being healthy to the healthy site roughly `{python} f"{roc_auc*100:.0f}"` % of the time. This is substantially better than random.
-
-2. A model with AUC = 0.52 is barely better than random and almost certainly not useful in practice. The logistic regression would be preferred.
+<!-- 1. An AUC of `{python} f"{roc_auc:.3f}"` means that if we randomly pick one healthy and one degraded site, the model assigns a higher probability of being healthy to the healthy site roughly `{python} f"{roc_auc*100:.0f}"` % of the time. This is substantially better than random.
+ -->
+A model with AUC = 0.52 is barely better than random and almost certainly not useful in practice. The logistic regression would be preferred.
 :::
 
 Remember the  AUC is a *performance* metric tha summarizes performance across all thresholds equally. In practice, not all thresholds are equally relevant: we may only care about behavior at low FPR (e.g., if false alarms are very costly), at high TPR (if missing a positive is very costly).
