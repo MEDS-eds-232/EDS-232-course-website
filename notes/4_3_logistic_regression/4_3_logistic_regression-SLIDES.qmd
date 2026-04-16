@@ -556,7 +556,7 @@ Notice the **log-odds is linear in** $X$.
 
 . . .
 
-In addition, $p(X)$ changes in teh same direction as the log-odds. 
+In addition, $p(X)$ changes in the same direction as the log-odds. 
 
 This helps us understand the relationship between $X$ and $p(X)$:
 
@@ -728,36 +728,135 @@ $$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X_1 + \cdots + \bet
 
 . . .
 
-<br>
+Each coefficient $\hat\beta_j$ represents the change in log-odds for a one-unit increase in $X_j$, **holding all other predictors constant**:
 
-INSERT NOTE ABOUT INTERPRETING COEFFICIENTS HERE
+::: {.body-text-s}
+- $\hat\beta_j > 0$: increasing $X_j$ $\Rightarrow$ higher log-odds $\Rightarrow$ higher $p(X)$ (holding other predictors fixed)
+- $\hat\beta_j < 0$: increasing $X_j$ $\Rightarrow$ lower log-odds $\Rightarrow$ lower $p(X)$ (holding other predictors fixed)
+
+<!-- **Note:** raw coefficients are in different units (°C vs. μmol/L here), so their magnitudes are not directly comparable for assessing "which predictor matters more." -->
+:::
 
 ---
 
-## {#multi-logistic-fit-slide data-menu-title="Multiple logistic regression: decision boundary"}
+## {#multi-logistic-prob-1 data-menu-title="Multiple logistic regression: probability gradient"}
 
-[Log regression with two predictors]{.slide-title}
+[Logistic regression with two predictors]{.slide-title}
 
 <hr>
 
 ```{python}
-#| label: multi-logistic-fit
+#| label: multi-logistic-explanation-1
 #| echo: false
 #| fig-align: center
 #| out-width: "95%"
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
-cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='coolwarm_r', alpha=0.25, vmin=0, vmax=1)
-ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
 for label, col in col_map.items():
     mask = y_train == label
     ax.scatter(X_train[mask, 0], X_train[mask, 1],
-               c=col, s=15, alpha=0.7, label=label, edgecolors='none')
+               c=col, s=20, alpha=0.8, label=label, edgecolors='black')
+
 ax.set_xlim(-2, 4)
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
-ax.set_title('Training data (210 pts)')
-ax.legend(title='True status', fontsize=9)
+ax.set_title('Training data (210 pts) with two predictors')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#multi-logistic-prob-2 data-menu-title="Multiple logistic regression: probability gradient"}
+
+[Logistic regression with two predictors]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: multi-logistic-explanation-2
+#| echo: false
+#| fig-align: center
+#| out-width: "95%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
+cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='Greens', alpha=0.7, vmin=0, vmax=1)
+for label, col in col_map.items():
+    mask = y_train == label
+    ax.scatter(X_train[mask, 0], X_train[mask, 1],
+               c=col, s=20, alpha=0.8, label=label, edgecolors='black')
+
+ax.set_xlim(-2, 4)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('P(healthy) — fitted logistic regression with two predictors')
+ax.grid(True, alpha=0.2)
+fig.colorbar(cf, ax=ax, label='P(healthy)', shrink=0.8)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s .center-text}
+Darker green = higher predicted probability of healthy status. 
+:::
+
+---
+
+
+## {#multi-logistic-prob-3 data-menu-title="Multiple logistic regression: probability gradient"}
+
+[Logistic regression with two predictors]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: multi-logistic-explanation-3
+#| echo: false
+#| fig-align: center
+#| out-width: "95%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
+cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='Greens', alpha=0.7, vmin=0, vmax=1)
+
+ax.set_xlim(-2, 4)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('P(healthy) — fitted logistic regression with two predictors')
+ax.grid(True, alpha=0.2)
+fig.colorbar(cf, ax=ax, label='P(healthy)', shrink=0.8)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s .center-text}
+Darker green = higher predicted probability of healthy status. 
+:::
+
+---
+
+## {#ulti-logistic-prob-4 data-menu-title="Multiple logistic regression: decision boundary"}
+
+[Logistic regression with two predictors]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: multi-logistic-explanation-4
+#| echo: false
+#| fig-align: center
+#| out-width: "95%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
+cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='Greens', alpha=0.7, vmin=0, vmax=1)
+ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
+
+ax.set_xlim(-2, 4)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('Selecting a threshold creates a decision boundary for the fitted logistic model')
 ax.grid(True, alpha=0.3)
 fig.colorbar(cf, ax=ax, label='P(healthy)', shrink=0.8)
 plt.tight_layout()
@@ -766,9 +865,87 @@ plt.close()
 ```
 
 ::: {.body-text-s .center-text}
-Shading = predicted probability of healthy. 
+Darker green = higher predicted probability of healthy status. 
 
-Gray line = decision boundary ($p = 0.5$). The boundary is always a straight line.
+Gray line = decision boundary ($\alpha = 0.5$).
+:::
+
+---
+
+## {#ulti-logistic-prob-5 data-menu-title="Multiple logistic regression: decision boundary"}
+
+[Logistic regression with two predictors]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: multi-logistic-explanation-5
+#| echo: false
+#| fig-align: center
+#| out-width: "95%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
+cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='Greens', alpha=0.7, vmin=0, vmax=1)
+ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
+
+ax.set_xlim(-2, 4)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('Selecting a threshold creates a decision boundary for the fitted logistic model')
+ax.grid(True, alpha=0.3)
+fig.colorbar(cf, ax=ax, label='P(healthy)', shrink=0.8)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s .center-text}
+Darker green = higher predicted probability of healthy status. 
+
+Gray line = decision boundary ($\alpha = 0.5$).
+:::
+
+---
+
+## {#ulti-logistic-prob-6 data-menu-title="Multiple logistic regression: decision boundary"}
+
+[Logistic regression with two predictors]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: multi-logistic-explanation-6
+#| echo: false
+#| fig-align: center
+#| out-width: "95%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 0.5))
+cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='Greens', alpha=0.7, vmin=0, vmax=1)
+ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
+for label, col in col_map.items():
+    mask = y_test == label
+    ax.scatter(X_test[mask, 0], X_test[mask, 1],
+               c=col, s=20, alpha=0.8, label=label, edgecolors='black')
+ax.set_xlim(-2, 4)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('Apply classifier to test data (90 pts)')
+ax.legend(title='True status', fontsize=9)
+ax.grid(True, alpha=0.3)
+fig.colorbar(cf, ax=ax, label='P(healthy)', shrink=0.8)
+plt.tight_layout()
+plt.show()
+plt.close()
+
+```
+
+
+::: {.body-text-s .center-text}
+Shading = predicted probability of healthy.
+
+Gray line = decision boundary ($\alpha = 0.5$).
+
+Points in the "wrong" region are misclassified test observations.
 :::
 
 ---
