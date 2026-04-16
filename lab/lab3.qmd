@@ -68,11 +68,11 @@ from sklearn.metrics import (
     classification_report, precision_score, recall_score, f1_score
 )
 
-# Load and clean
+# Load and Replace -999 values with NA
 df_raw = pd.read_csv('data/EJI_2024_United_States.csv')
 df_raw = df_raw.replace(-999, np.nan)
 
-# Reproducible 10,000-tract sample
+# 10,000-tract sample
 df = df_raw.sample(n=10_000, random_state=42).reset_index(drop=True)
 df.head(3)
 ```
@@ -152,8 +152,8 @@ Complete the following steps:
 var_of_interest = ['E_NPL', 'E_TRI', 'E_TSD', 'E_RMP', 'E_DSLPM', 'E_PM', 'E_POV200', 'E_MINRTY', 'risk_class']
 
 df_model = df[var_of_interest].dropna()
-X = df_model[['E_NPL', 'E_TRI', 'E_TSD', 'E_RMP', 'E_DSLPM', 'E_PM', 'E_POV200', 'E_MINRTY']].values
-y = df_model['risk_class'].values.astype(int)
+X = df_model[['E_NPL', 'E_TRI', 'E_TSD', 'E_RMP', 'E_DSLPM', 'E_PM', 'E_POV200', 'E_MINRTY']]
+y = df_model['risk_class'].astype(int)
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.30, stratify=y, random_state=42)
@@ -173,7 +173,7 @@ print(f'Test set     : {X_test_s.shape[0]:,} tracts')
 The cell below fits the *same* KNN model (k = 5) twice — once on raw features, once on scaled features — and prints both test accuracies. Do you see an accuracy boost from scaling?
 
 ```{python}
-# KNN on RAW (unscaled) features
+# KNN on UNSCALED features
 knn_raw = KNeighborsClassifier(n_neighbors=5)
 knn_raw.fit(X_train, y_train)
 acc_raw = accuracy_score(y_test, knn_raw.predict(X_test))
@@ -237,9 +237,9 @@ cm = confusion_matrix(y_test, y_pred_knn3)
 
 disp = ConfusionMatrixDisplay(confusion_matrix=cm,
                                display_labels=['Low', 'Medium', 'High'])
+
 fig, ax = plt.subplots(figsize=(6, 5))
 disp.plot(ax=ax, colorbar=False, cmap='Blues')
-ax.set_ylim(len(['Low', 'Medium', 'High']) - 0.5, -0.5)
 ax.set_title('KNN (k=3) — Confusion Matrix', fontsize=13)
 plt.tight_layout()
 plt.show()
@@ -265,7 +265,7 @@ For precision, recall, and F₁, each class gets its own TP, FP, and FN read dir
 
 $$\text{Precision}_i = \frac{TP_i}{TP_i + FP_i} \qquad \text{Recall}_i = \frac{TP_i}{TP_i + FN_i} \qquad F1_i = \frac{2 \cdot P_i \cdot R_i}{P_i + R_i}$$
 
-There are two different methods to calculate precision, recall, and F1 when you have multiple classes: the macro average and the micro average. Let's take a look at both.
+
 
 ### Macro Average
 
@@ -325,49 +325,13 @@ print(f"Macro avg — Precision: {macro_precision:.4f}  Recall: {macro_recall:.4
 
 ---
 
-### Micro Average
 
-Macro average treats every class equally. **Micro average** pools all TP, FP, and FN counts across every class first, then computes one global metric.
-
-$$\text{Micro Precision} = \frac{\sum_i TP_i}{\sum_i (TP_i + FP_i)} \qquad \text{Micro Recall} = \frac{\sum_i TP_i}{\sum_i (TP_i + FN_i)}$$
-
-Using the per-class TP, FP, and FN values you already computed above:
-
-1. Sum all TP values → `total_TP`, all FP → `total_FP`, all FN → `total_FN`
-2. Compute `micro_precision`, `micro_recall`, and `micro_f1`
-3. Compare all three to `accuracy_manual` . Do you notice anything interesting abuot these three results? 
-
-```{python}
-# Pool TP, FP, FN counts across all three classes
-total_TP = TP_low + TP_med + TP_high
-total_FP = FP_low + FP_med + FP_high
-total_FN = FN_low + FN_med + FN_high
-
-# Compute micro-averaged metrics from the pooled counts
-micro_precision = total_TP / (total_TP + total_FP)
-micro_recall    = total_TP / (total_TP + total_FN)
-micro_f1        = 2 * micro_precision * micro_recall / (micro_precision + micro_recall)
-
-print(f"Micro Precision : {micro_precision:.4f}")
-print(f"Micro Recall    : {micro_recall:.4f}")
-print(f"Micro F1        : {micro_f1:.4f}")
-print(f"Overall Accuracy: {accuracy_manual:.4f}")
-```
-
----
 
 ## Step 6: Verify with Scikit-learn's Built-in Metrics
 
 Now that you've computed everything by hand, use scikit-learn's built-in functions to verify your results. The functions below accept `y_test` and `y_pred_knn3` directly.
 
-| Function | Key argument | What it returns |
-|---|---|---|
-| `accuracy_score(y_test, y_pred)` | — | Overall fraction correct |
-| `precision_score(y_test, y_pred, average=...)` | `'macro'` / `'micro'` | Precision averaged across classes |
-| `recall_score(y_test, y_pred, average=...)` | `'macro'` / `'micro'` | Recall averaged across classes |
-| `f1_score(y_test, y_pred, average=...)` | `'macro'` / `'micro'` | F₁ averaged across classes |
 
-Compute all four metrics for both macro and micro averaging and confirm they match your manual calculations above.
 
 ```{python}
 # ── Accuracy ──────────────────────────────────────────────────────────────────
@@ -378,10 +342,6 @@ sk_macro_precision = precision_score(y_test, y_pred_knn3, average='macro')
 sk_macro_recall    = recall_score(y_test, y_pred_knn3, average='macro')
 sk_macro_f1        = f1_score(y_test, y_pred_knn3, average='macro')
 
-# ── Micro-averaged metrics ────────────────────────────────────────────────────
-sk_micro_precision = precision_score(y_test, y_pred_knn3, average='micro')
-sk_micro_recall    = recall_score(y_test, y_pred_knn3, average='micro')
-sk_micro_f1        = f1_score(y_test, y_pred_knn3, average='micro')
 
 print("=== Sklearn Built-in Metrics ===")
 print(f"Accuracy          : {sk_accuracy:.4f}")
@@ -389,8 +349,5 @@ print()
 print(f"Macro Precision   : {sk_macro_precision:.4f}")
 print(f"Macro Recall      : {sk_macro_recall:.4f}")
 print(f"Macro F1          : {sk_macro_f1:.4f}")
-print()
-print(f"Micro Precision   : {sk_micro_precision:.4f}")
-print(f"Micro Recall      : {sk_micro_recall:.4f}")
-print(f"Micro F1          : {sk_micro_f1:.4f}")
+
 ```
