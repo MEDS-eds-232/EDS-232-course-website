@@ -315,7 +315,7 @@ Logistic regression
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="26f95e2c" class="cell" data-execution_count="4">
+<div id="891c361a" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -337,7 +337,7 @@ Logistic regression
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="08fc2ae4" class="cell" data-execution_count="5">
+<div id="2f87fa92" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -388,9 +388,13 @@ Interpreting the coefficients
 <p>In addition, <span class="math inline">\(p(X)\)</span> changes in the same direction as the log-odds.</p>
 <p>This helps us understand the relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(p(X)\)</span>:</p>
 <ul>
-<li><span class="math inline">\(\hat\beta_1 &gt; 0\)</span>: increasing <span class="math inline">\(X\)</span> <span class="math inline">\(\Rightarrow\)</span> higher log-odds <span class="math inline">\(\Rightarrow\)</span> higher <span class="math inline">\(p(X)\)</span></li>
-<li><span class="math inline">\(\hat\beta_1 &lt; 0\)</span>: increasing <span class="math inline">\(X\)</span> <span class="math inline">\(\Rightarrow\)</span> lower log-odds <span class="math inline">\(\Rightarrow\)</span> lower <span class="math inline">\(p(X)\)</span></li>
+<li>If <span class="math inline">\(\hat\beta_1 &gt; 0\)</span>, then</li>
 </ul>
+<p>increasing <span class="math inline">\(X\)</span> <span class="math inline">\(\Rightarrow\)</span> log-odds increase <span class="math inline">\(\Rightarrow\)</span> probability of belonging to positive class <span class="math inline">\(p(X)\)</span> increases</p>
+<ul>
+<li>If <span class="math inline">\(\hat\beta_1 &lt; 0\)</span>, then</li>
+</ul>
+<p>increasing <span class="math inline">\(X\)</span> <span class="math inline">\(\Rightarrow\)</span> log-odds decrease <span class="math inline">\(\Rightarrow\)</span> probability of belonging to positive class <span class="math inline">\(p(X)\)</span> decreases</p>
 </div>
 </section>
 <section id="log-odds-plot-slide" class="slide level2" data-menu-title="Log-odds vs. probability">
@@ -446,13 +450,13 @@ Hypothesis testing
 <div class="body-text-s">
 <p>Our hypotheses thus are:</p>
 <ul>
-<li><strong>Null hypothesis</strong> <span class="math inline">\(H_0\)</span>: there is no relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, i.e., <span class="math inline">\(\beta_1 = 0\)</span>.</li>
-<li><strong>Alternative hypothesis</strong> <span class="math inline">\(H_a\)</span>: there is some relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, i.e., <span class="math inline">\(\beta_1 \neq 0\)</span>.</li>
+<li><strong>Null hypothesis</strong> <span class="math inline">\(H_0\)</span>: there is no relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(p(X)\)</span>, i.e., <span class="math inline">\(\beta_1 = 0\)</span>.</li>
+<li><strong>Alternative hypothesis</strong> <span class="math inline">\(H_a\)</span>: there is some relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(p(X)\)</span>, i.e., <span class="math inline">\(\beta_1 \neq 0\)</span>.</li>
 </ul>
 </div>
 <div class="fragment">
 <p>We test this using the <strong>Z-statistic</strong> (analogue of the t-statistic in linear regression):</p>
-<p><span class="math display">\[Z = \frac{\hat{\beta}_1}{\text{SE}(\hat{\beta}_1)}\]</span></p>
+<p><span class="math display">\[Z = \frac{\hat{\beta}_1}{\text{SE}(\hat{\beta}_1)}.\]</span></p>
 <p>A large <span class="math inline">\(|Z|\)</span> provides evidence against <span class="math inline">\(H_0\)</span>. The <strong>p-value</strong> quantifies how likely we would observe a Z-statistic this extreme if <span class="math inline">\(H_0\)</span> were true.</p>
 </div>
 </section>
@@ -502,6 +506,24 @@ Multiple logistic regression
 <!-- **Note:** raw coefficients are in different units (°C vs. μmol/L here), so their magnitudes are not directly comparable for assessing "which predictor matters more." -->
 </div>
 </div>
+</section>
+<section id="multiple-logistic-example" class="slide level2" data-menu-title="Logistic regression">
+<h2></h2>
+<p><span class="slide-title">Multiple logistic regression: example data</span></p>
+<hr>
+<p>In our example:</p>
+<ul>
+<li><strong>Predictors</strong>: <code>temp_anomaly</code>, <code>nitrate</code></li>
+<li><strong>Response</strong>: <code>status</code>: <em>healthy</em> (class 1/positive) or <em>degraded</em> (class 0/negative)</li>
+</ul>
+<p>Using logistic regression we can model</p>
+<p><span class="math display">\[P(\text{status} = \text{healthy} \mid \text{temp_anomaly}, \text{nitrate}) = p(\text{temp_anomaly}, \text{nitrate}),\]</span></p>
+<p>the probability of a site having a healthy status given a certain temperature anomaly and nitrate concentration.</p>
+<p>Then, we select a threshold to classify a site as healthy or degraded. E.g., using <span class="math inline">\(\alpha=0.5\)</span>:</p>
+<ul>
+<li>If <span class="math inline">\(p(\text{temp_anomaly}, \text{nitrate}) \geq 0.5\)</span>, then predict the site is <em>healthy</em>.</li>
+<li>If <span class="math inline">\(p(\text{temp_anomaly}, \text{nitrate}) &lt; 0.5\)</span>, then predict the site is <em>degraded</em>.</li>
+</ul>
 </section>
 <section id="multi-logistic-prob-1" class="slide level2" data-menu-title="Multiple logistic regression: probability gradient">
 <h2></h2>
@@ -566,7 +588,7 @@ Multiple logistic regression
 </div>
 <div class="body-text-s center-text">
 <p>Darker green = higher predicted probability of healthy status.</p>
-<p>Gray line = decision boundary (<span class="math inline">\(\alpha = 0.5\)</span>).</p>
+<p>Gray line = decision boundary using the threshold <span class="math inline">\(\alpha = 0.5\)</span>.</p>
 </div>
 </section>
 <section id="ulti-logistic-prob-5" class="slide level2" data-menu-title="Multiple logistic regression: decision boundary">
@@ -584,7 +606,7 @@ Multiple logistic regression
 </div>
 <div class="body-text-s center-text">
 <p>Blue region = predicted healthy, red region = predicted degraded.</p>
-<p>Gray line = decision boundary (<span class="math inline">\(\alpha = 0.5\)</span>).</p>
+<p>Gray line = decision boundary using the threshold <span class="math inline">\(\alpha = 0.5\)</span>.</p>
 </div>
 </section>
 <section id="ulti-logistic-prob-6" class="slide level2" data-menu-title="Multiple logistic regression: decision boundary">
@@ -602,7 +624,8 @@ Multiple logistic regression
 </div>
 <div class="body-text-s center-text">
 <p>Blue region = predicted healthy, red region = predicted degraded.</p>
-<p>Gray line = decision boundary (<span class="math inline">\(\alpha = 0.5\)</span>). Points in the “wrong” region are misclassified.</p>
+<p>Gray line = decision boundary using the threshold <span class="math inline">\(\alpha = 0.5\)</span>.</p>
+<p>Points in the “wrong” region are misclassified.</p>
 </div>
 <!-- 
 
@@ -710,7 +733,7 @@ Adjusting the classification threshold
 <div class="columns">
 <div class="column" style="width:55%;">
 <p>The graph below shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels.</p>
-<div id="7283c992" class="cell" data-execution_count="16">
+<div id="15e432e3" class="cell" data-execution_count="16">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>

@@ -287,9 +287,8 @@ $$
 \text{the class of $X$ is} = \begin{cases} \text{class } 1, & \text{if } p(X) \geq \alpha \\ \text{class } 0, & \text{if } p(X) < \alpha \end{cases}.
 $$
 
-<br>
-
 The choice of threshold is something we control.
+
 ---
 
 ## {#logistic-example-blank data-menu-title="Logistic regression"}
@@ -315,15 +314,11 @@ In our example:
 - **Predictor**: `temp_anomaly`
 - **Response**: `status`:  *healthy* (class 1/positive) or *degraded* (class 0/negative)
 
-. . .
-
 Using logistic regression we can model
 
 $$P(\text{status} = \text{healthy} \mid \text{temp_anomaly}) = p(\text{temp_anomaly}),$$
 
 the probability of a site having a healthy status given a certain temperature anomaly.
-
-. . .
 
 Then, we select a threshold to classify a site as healthy or degraded. E.g., using $\alpha=0.5$:
 
@@ -355,7 +350,7 @@ Then, we select a threshold to classify a site as healthy or degraded. E.g., usi
 
 2. $p(X)$ would model $P(\text{status} = \text{healthy} \mid \text{nitrate})$. This is the probability that a site is healthy given its nitrate concentration.
 
---
+---
 
 ## {#logistic-function-blank data-menu-title="The logistic function"}
 
@@ -447,7 +442,7 @@ plt.close()
 ```
 
 ::: {.body-text-s .center-text}
-- Points overlappin near the boundary reflects uncertainty in the data.
+- Points overlapping near the boundary reflects uncertainty in the data.
 - Probability is higher in regions where healthy sites are dense 
 - As temperature anomaly increases, the probability of a healthy site decreases. 
 - Notice the characteristic S-shape of the logistic function!
@@ -591,14 +586,20 @@ $$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X.$$
 
 Notice the **log-odds is linear in** $X$. 
 
-. . .
-
 In addition, $p(X)$ changes in the same direction as the log-odds. 
+
+. . .
 
 This helps us understand the relationship between $X$ and $p(X)$:
 
-- $\hat\beta_1 > 0$: increasing $X$ $\Rightarrow$ higher log-odds  $\Rightarrow$ higher $p(X)$
-- $\hat\beta_1 < 0$: increasing $X$  $\Rightarrow$ lower log-odds  $\Rightarrow$ lower $p(X)$
+- If $\hat\beta_1 > 0$, then
+
+increasing $X$ $\Rightarrow$  log-odds increase $\Rightarrow$ probability of belonging to positive class $p(X)$ increases
+
+
+- If $\hat\beta_1 < 0$, then
+
+increasing $X$  $\Rightarrow$ log-odds decrease $\Rightarrow$ probability of belonging to positive class $p(X)$ decreases
 
 
 ---
@@ -701,8 +702,8 @@ meaning the probability of the positive class does not depend on $X$ at all.
 
 Our hypotheses thus are:
 
-- **Null hypothesis** $H_0$: there is no relationship between $X$ and $Y$, i.e., $\beta_1 = 0$.
-- **Alternative hypothesis** $H_a$: there is some relationship between $X$ and $Y$, i.e., $\beta_1 \neq 0$.
+- **Null hypothesis** $H_0$: there is no relationship between $X$ and $p(X)$, i.e., $\beta_1 = 0$.
+- **Alternative hypothesis** $H_a$: there is some relationship between $X$ and $p(X)$, i.e., $\beta_1 \neq 0$.
 
 :::
 
@@ -710,7 +711,7 @@ Our hypotheses thus are:
 
 We test this using the **Z-statistic** (analogue of the t-statistic in linear regression):
 
-$$Z = \frac{\hat{\beta}_1}{\text{SE}(\hat{\beta}_1)}$$
+$$Z = \frac{\hat{\beta}_1}{\text{SE}(\hat{\beta}_1)}.$$
 
 A large $|Z|$ provides evidence against $H_0$. The **p-value** quantifies how likely we would observe a Z-statistic this extreme if $H_0$ were true.
 
@@ -778,6 +779,31 @@ Each coefficient $\hat\beta_j$ represents the change in log-odds for a one-unit 
 
 ---
 
+## {#multiple-logistic-example data-menu-title="Logistic regression"}
+
+[Multiple logistic regression: example data]{.slide-title}
+
+<hr>
+
+In our example:
+
+- **Predictors**: `temp_anomaly`, `nitrate`
+- **Response**: `status`:  *healthy* (class 1/positive) or *degraded* (class 0/negative)
+
+Using logistic regression we can model
+
+$$P(\text{status} = \text{healthy} \mid \text{temp_anomaly}, \text{nitrate}) = p(\text{temp_anomaly}, \text{nitrate}),$$
+
+the probability of a site having a healthy status given a certain temperature anomaly and nitrate concentration.
+
+Then, we select a threshold to classify a site as healthy or degraded. E.g., using $\alpha=0.5$:
+
+- If $p(\text{temp_anomaly}, \text{nitrate}) \geq 0.5$, then predict the site is *healthy*.
+- If $p(\text{temp_anomaly}, \text{nitrate}) < 0.5$, then predict the site is *degraded*.
+
+
+---
+
 ## {#multi-logistic-prob-1 data-menu-title="Multiple logistic regression: probability gradient"}
 
 [Logistic regression with two predictors]{.slide-title}
@@ -832,11 +858,11 @@ ax.set_xlim(-2, 4)
 ax.set_ylim(x2_range[0], x2_range[-1])
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
-ax.set_title('P(healthy) — fitted logistic regression with two predictors')
+ax.set_title('P(healthy | temp, nitrate) — fitted logistic regression with two predictors')
 ax.legend(title='True status', fontsize=9)
 ax.grid(True, alpha=0.2)
 cbar_ax = fig.add_axes([0.84, 0.14, 0.02, 0.76])
-fig.colorbar(cf, cax=cbar_ax, label='P(healthy)')
+fig.colorbar(cf, cax=cbar_ax, label='P(healthy | temp, nitrate)')
 plt.show()
 plt.close()
 ```
@@ -867,10 +893,10 @@ ax.set_xlim(-2, 4)
 ax.set_ylim(x2_range[0], x2_range[-1])
 ax.set_xlabel('Temp. anomaly (°C)')
 ax.set_ylabel('Nitrate (μmol/L)')
-ax.set_title('We obtain a model for the probability of healthy class: P(healthy)')
+ax.set_title('We obtain a model for the probability of healthy class: P(healthy | temp, nitrate)')
 ax.grid(True, alpha=0.2)
 cbar_ax = fig.add_axes([0.84, 0.14, 0.02, 0.76])
-fig.colorbar(cf, cax=cbar_ax, label='P(healthy)')
+fig.colorbar(cf, cax=cbar_ax, label='P(healthy | temp, nitrate)')
 plt.show()
 plt.close()
 ```
@@ -904,7 +930,7 @@ ax.set_ylabel('Nitrate (μmol/L)')
 ax.set_title('Selecting a threshold creates a decision boundary for classification')
 ax.grid(True, alpha=0.3)
 cbar_ax = fig.add_axes([0.84, 0.14, 0.02, 0.76])
-fig.colorbar(cf, cax=cbar_ax, label='P(healthy)')
+fig.colorbar(cf, cax=cbar_ax, label='P(healthy | temp, nitrate)')
 plt.show()
 plt.close()
 ```
@@ -912,7 +938,7 @@ plt.close()
 ::: {.body-text-s .center-text}
 Darker green = higher predicted probability of healthy status. 
 
-Gray line = decision boundary ($\alpha = 0.5$).
+Gray line = decision boundary using the threshold $\alpha = 0.5$.
 :::
 
 ---
@@ -949,7 +975,7 @@ plt.close()
 ::: {.body-text-s .center-text}
 Blue region = predicted healthy, red region = predicted degraded.
 
-Gray line = decision boundary ($\alpha = 0.5$).
+Gray line = decision boundary using the threshold $\alpha = 0.5$.
 :::
 
 ---
@@ -989,7 +1015,9 @@ plt.close()
 ::: {.body-text-s .center-text}
 Blue region = predicted healthy, red region = predicted degraded.
 
-Gray line = decision boundary ($\alpha = 0.5$). Points in the "wrong" region are misclassified.
+Gray line = decision boundary using the threshold $\alpha = 0.5$. 
+
+Points in the "wrong" region are misclassified.
 :::
 
 <!-- 

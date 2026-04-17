@@ -160,7 +160,7 @@
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#log-odds-slide-2",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Log-odds\n\nThe log-odds are defined by\n\\[\\log\\left(\\frac{p(X)}{1 - p(X)}\\right) = \\beta_0 + \\beta_1 X.\\]\nNotice the log-odds is linear in \\(X\\).\n\nIn addition, \\(p(X)\\) changes in the same direction as the log-odds.\nThis helps us understand the relationship between \\(X\\) and \\(p(X)\\):\n\n\\(\\hat\\beta_1 &gt; 0\\): increasing \\(X\\) \\(\\Rightarrow\\) higher log-odds \\(\\Rightarrow\\) higher \\(p(X)\\)\n\\(\\hat\\beta_1 &lt; 0\\): increasing \\(X\\) \\(\\Rightarrow\\) lower log-odds \\(\\Rightarrow\\) lower \\(p(X)\\)"
+    "text": "Log-odds\n\nThe log-odds are defined by\n\\[\\log\\left(\\frac{p(X)}{1 - p(X)}\\right) = \\beta_0 + \\beta_1 X.\\]\nNotice the log-odds is linear in \\(X\\).\n\nIn addition, \\(p(X)\\) changes in the same direction as the log-odds.\nThis helps us understand the relationship between \\(X\\) and \\(p(X)\\):\n\nIf \\(\\hat\\beta_1 &gt; 0\\), then\n\nincreasing \\(X\\) \\(\\Rightarrow\\) log-odds increase \\(\\Rightarrow\\) probability of belonging to positive class \\(p(X)\\) increases\n\nIf \\(\\hat\\beta_1 &lt; 0\\), then\n\nincreasing \\(X\\) \\(\\Rightarrow\\) log-odds decrease \\(\\Rightarrow\\) probability of belonging to positive class \\(p(X)\\) decreases"
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#log-odds-plot-slide",
@@ -188,7 +188,7 @@
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#hypothesis-testing-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Is there evidence for a relationship between X and Y?\n\nIf \\(\\beta_1 = 0\\), then:\n\n\\[p(X) = \\frac{e^{\\beta_0}}{1 + e^{\\beta_0}} = \\text{constant}\\]\n\nmeaning the probability of the positive class does not depend on \\(X\\) at all.\n\nOur hypotheses thus are:\n\nNull hypothesis \\(H_0\\): there is no relationship between \\(X\\) and \\(Y\\), i.e., \\(\\beta_1 = 0\\).\nAlternative hypothesis \\(H_a\\): there is some relationship between \\(X\\) and \\(Y\\), i.e., \\(\\beta_1 \\neq 0\\).\n\n\n\nWe test this using the Z-statistic (analogue of the t-statistic in linear regression):\n\\[Z = \\frac{\\hat{\\beta}_1}{\\text{SE}(\\hat{\\beta}_1)}\\]\nA large \\(|Z|\\) provides evidence against \\(H_0\\). The p-value quantifies how likely we would observe a Z-statistic this extreme if \\(H_0\\) were true."
+    "text": "Is there evidence for a relationship between X and Y?\n\nIf \\(\\beta_1 = 0\\), then:\n\n\\[p(X) = \\frac{e^{\\beta_0}}{1 + e^{\\beta_0}} = \\text{constant}\\]\n\nmeaning the probability of the positive class does not depend on \\(X\\) at all.\n\nOur hypotheses thus are:\n\nNull hypothesis \\(H_0\\): there is no relationship between \\(X\\) and \\(p(X)\\), i.e., \\(\\beta_1 = 0\\).\nAlternative hypothesis \\(H_a\\): there is some relationship between \\(X\\) and \\(p(X)\\), i.e., \\(\\beta_1 \\neq 0\\).\n\n\n\nWe test this using the Z-statistic (analogue of the t-statistic in linear regression):\n\\[Z = \\frac{\\hat{\\beta}_1}{\\text{SE}(\\hat{\\beta}_1)}.\\]\nA large \\(|Z|\\) provides evidence against \\(H_0\\). The p-value quantifies how likely we would observe a Z-statistic this extreme if \\(H_0\\) were true."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#checkin-hypothesis-q",
@@ -210,6 +210,13 @@
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
     "text": "Multiple logistic regression\n\nThe logistic model extends naturally to multiple predictors \\(X_1, X_2, \\ldots, X_p\\):\n\\[p(X) = \\frac{e^{\\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p}}{1 + e^{\\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p}}.\\]\nThe log-odds remain linear in all predictors:\n\\[\\log\\left(\\frac{p(X)}{1 - p(X)}\\right) = \\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p.\\]\n\nEach coefficient \\(\\hat\\beta_j\\) represents the change in log-odds for a one-unit increase in \\(X_j\\), holding all other predictors constant:\n\n\n\\(\\hat\\beta_j &gt; 0\\): increasing \\(X_j\\) \\(\\Rightarrow\\) higher log-odds \\(\\Rightarrow\\) higher \\(p(X)\\) (holding other predictors fixed)\n\\(\\hat\\beta_j &lt; 0\\): increasing \\(X_j\\) \\(\\Rightarrow\\) lower log-odds \\(\\Rightarrow\\) lower \\(p(X)\\) (holding other predictors fixed)"
+  },
+  {
+    "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#multiple-logistic-example",
+    "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#multiple-logistic-example",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Multiple logistic regression: example data\n\nIn our example:\n\nPredictors: temp_anomaly, nitrate\nResponse: status: healthy (class 1/positive) or degraded (class 0/negative)\n\nUsing logistic regression we can model\n\\[P(\\text{status} = \\text{healthy} \\mid \\text{temp_anomaly}, \\text{nitrate}) = p(\\text{temp_anomaly}, \\text{nitrate}),\\]\nthe probability of a site having a healthy status given a certain temperature anomaly and nitrate concentration.\nThen, we select a threshold to classify a site as healthy or degraded. E.g., using \\(\\alpha=0.5\\):\n\nIf \\(p(\\text{temp_anomaly}, \\text{nitrate}) \\geq 0.5\\), then predict the site is healthy.\nIf \\(p(\\text{temp_anomaly}, \\text{nitrate}) &lt; 0.5\\), then predict the site is degraded."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#multi-logistic-prob-1",
@@ -237,21 +244,21 @@
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#ulti-logistic-prob-4",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nDarker green = higher predicted probability of healthy status.\nGray line = decision boundary (\\(\\alpha = 0.5\\))."
+    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nDarker green = higher predicted probability of healthy status.\nGray line = decision boundary using the threshold \\(\\alpha = 0.5\\)."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#ulti-logistic-prob-5",
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#ulti-logistic-prob-5",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nBlue region = predicted healthy, red region = predicted degraded.\nGray line = decision boundary (\\(\\alpha = 0.5\\))."
+    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nBlue region = predicted healthy, red region = predicted degraded.\nGray line = decision boundary using the threshold \\(\\alpha = 0.5\\)."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#ulti-logistic-prob-6",
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#ulti-logistic-prob-6",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nBlue region = predicted healthy, red region = predicted degraded.\nGray line = decision boundary (\\(\\alpha = 0.5\\)). Points in the “wrong” region are misclassified."
+    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nBlue region = predicted healthy, red region = predicted degraded.\nGray line = decision boundary using the threshold \\(\\alpha = 0.5\\).\nPoints in the “wrong” region are misclassified."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES.html#section-threshold",
@@ -385,7 +392,7 @@
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-NOTES.html#multiple-logistic-regression",
     "title": "Logistic regression and ROC curves",
     "section": "Multiple logistic regression",
-    "text": "Multiple logistic regression\nThe logistic model extends naturally to predicting a binary response variable \\(Y\\) using multiple predictors \\(X_1, X_2, \\ldots, X_p\\). In this case, the logistic function is generalized to\n\\[p(X) = \\frac{e^{\\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p}}{1 + e^{\\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p}}\\]\nand the coefficients \\(\\hat{\\beta}_i\\) are estimated using the maximum likelihood estimation.\nNotice the log-odds remain linear in all predictors:\n\\[\\log\\left(\\frac{p(X)}{1 - p(X)}\\right) = \\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p\\]\nFor our example data, we can now fit a logistic regression using both temp_anomaly and nitrate as predictors:\n\n\n\n\n\n\n\n\n\nThe shading now represents the predicted probability of healthy status: darker blue regions indicate higher probability of healthy, darker red indicate higher probability of degraded. The gray line is the decision boundary at \\(p = 0.5\\).\nUnlike KNN, the logistic regression boundary is always a straight line (or a hyperplane in higher dimensions), reflecting the linear structure of the log-odds model.\n\n\n\n\n\n\n\nCheck-in\n\n\n\nBefore exploring how the threshold affects performance, let’s evaluate both models using the accuracy metrics introduced in the previous lesson: overall accuracy, error rate, precision, recall, and \\(F_1\\) score. All metrics below use healthy as the positive class and the default threshold \\(\\alpha = 0.5\\).\n\n\n                            Model Overall accuracy Error rate Precision Recall F₁ score\n     Logistic (temp_anomaly only)            0.711      0.289     0.736  0.883    0.803\nLogistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900    0.806\n\n\nDiscuss how the model’s performance changes as we add nitrate as a second predictor.\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\nAdding nitrate as a second predictor moderately improves the recall, which means we are correctly classifying more healthy sites. The rest of the metrics remain very close.",
+    "text": "Multiple logistic regression\nThe logistic model extends naturally to predicting a binary response variable \\(Y\\) using multiple predictors \\(X_1, X_2, \\ldots, X_p\\). In this case, the logistic function is generalized to\n\\[p(X) = \\frac{e^{\\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p}}{1 + e^{\\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p}}\\]\nand the coefficients \\(\\hat{\\beta}_i\\) are estimated using the maximum likelihood estimation.\nNotice the log-odds remain linear in all predictors:\n\\[\\log\\left(\\frac{p(X)}{1 - p(X)}\\right) = \\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p\\]\nFor our example data, we can now fit a logistic regression using both temp_anomaly and nitrate as predictors. The plot below shows the predicted probability surface across the feature space. Darker green indicates higher probability of healthy status. The gray line is the decision boundary at \\(\\alpha = 0.5\\).\n\n\n\n\n\n\n\n\n\nUnlike KNN, the logistic regression boundary is always a straight line (or a hyperplane in higher dimensions), reflecting the linear structure of the log-odds model.\nApplying the classifier to the test data, observations falling in the “wrong” colored region are misclassified:\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nBefore exploring how the threshold affects performance, let’s evaluate both models using the accuracy metrics introduced in the previous lesson: overall accuracy, error rate, precision, recall, and \\(F_1\\) score. All metrics below use healthy as the positive class and the default threshold \\(\\alpha = 0.5\\).\n\n\n                            Model Overall accuracy Error rate Precision Recall F₁ score\n     Logistic (temp_anomaly only)            0.711      0.289     0.736  0.883    0.803\nLogistic (temp_anomaly + nitrate)            0.711      0.289     0.730  0.900    0.806\n\n\nDiscuss how the model’s performance changes as we add nitrate as a second predictor.\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\nAdding nitrate as a second predictor moderately improves the recall, which means we are correctly classifying more healthy sites. The rest of the metrics remain very close.",
     "crumbs": [
       "notes",
       "Classification",
@@ -3846,14 +3853,7 @@
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#logistic-intro",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Logistic regression\n\nRather than predicting the class directly, logistic regression models the probability that an observation belongs to the positive class:\n\\[P(Y = 1 \\mid X) = p(X).\\]\n\nOnce we have \\(p(X)\\), we classify \\(X\\) using a classification threshold \\(\\alpha\\):\n\\[\n\\text{the class of $X$ is} = \\begin{cases} \\text{class } 1, & \\text{if } p(X) \\geq \\alpha \\\\ \\text{class } 0, & \\text{if } p(X) &lt; \\alpha \\end{cases}.\n\\]"
-  },
-  {
-    "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#the-choice-of-threshold-is-something-we-control.",
-    "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#the-choice-of-threshold-is-something-we-control.",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "The choice of threshold is something we control.",
-    "text": "The choice of threshold is something we control."
+    "text": "Logistic regression\n\nRather than predicting the class directly, logistic regression models the probability that an observation belongs to the positive class:\n\\[P(Y = 1 \\mid X) = p(X).\\]\n\nOnce we have \\(p(X)\\), we classify \\(X\\) using a classification threshold \\(\\alpha\\):\n\\[\n\\text{the class of $X$ is} = \\begin{cases} \\text{class } 1, & \\text{if } p(X) \\geq \\alpha \\\\ \\text{class } 0, & \\text{if } p(X) &lt; \\alpha \\end{cases}.\n\\]\nThe choice of threshold is something we control."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#logistic-example-blank",
@@ -3867,14 +3867,14 @@
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#logistic-example",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Logistic regression: example data\n\nIn our example:\n\nPredictor: temp_anomaly\nResponse: status: healthy (class 1/positive) or degraded (class 0/negative)\n\n\nUsing logistic regression we can model\n\\[P(\\text{status} = \\text{healthy} \\mid \\text{temp_anomaly}) = p(\\text{temp_anomaly}),\\]\nthe probability of a site having a healthy status given a certain temperature anomaly.\n\n\nThen, we select a threshold to classify a site as healthy or degraded. E.g., using \\(\\alpha=0.5\\):\n\nIf \\(p(\\text{temp}) \\geq 0.5\\), then predict the site is healthy.\nIf \\(p(\\text{temp}) &lt; 0.5\\), then predict the site is degraded."
+    "text": "Logistic regression: example data\n\nIn our example:\n\nPredictor: temp_anomaly\nResponse: status: healthy (class 1/positive) or degraded (class 0/negative)\n\nUsing logistic regression we can model\n\\[P(\\text{status} = \\text{healthy} \\mid \\text{temp_anomaly}) = p(\\text{temp_anomaly}),\\]\nthe probability of a site having a healthy status given a certain temperature anomaly.\nThen, we select a threshold to classify a site as healthy or degraded. E.g., using \\(\\alpha=0.5\\):\n\nIf \\(p(\\text{temp}) \\geq 0.5\\), then predict the site is healthy.\nIf \\(p(\\text{temp}) &lt; 0.5\\), then predict the site is degraded."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#logistic-intro-checkin-1",
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#logistic-intro-checkin-1",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\nA new site has temp_anomaly = 3°C. Walk through the steps to predict its class using \\(p(X)\\) with threshold \\(\\alpha = 0.7\\).\nIf we used nitrate as the predictor instead, what would \\(p(X)\\) be modeling?\n\n\n\n\n\nAfter having the model \\(p(X)\\), we would plug in \\(X = 3\\) to calculate \\(p(3)\\). If \\(p(3)&lt;0.7\\) then we would predict the site is degraded and if \\(p(3)\\geq0.7\\) we would predict the site is healthy.\n\n\n\n\\(p(X)\\) would model \\(P(\\text{status} = \\text{healthy} \\mid \\text{nitrate})\\). This is the probability that a site is healthy given its nitrate concentration.\n\n–"
+    "text": "Check-in\n\n\n\nA new site has temp_anomaly = 3°C. Walk through the steps to predict its class using \\(p(X)\\) with threshold \\(\\alpha = 0.7\\).\nIf we used nitrate as the predictor instead, what would \\(p(X)\\) be modeling?\n\n\n\n\n\nAfter having the model \\(p(X)\\), we would plug in \\(X = 3\\) to calculate \\(p(3)\\). If \\(p(3)&lt;0.7\\) then we would predict the site is degraded and if \\(p(3)\\geq0.7\\) we would predict the site is healthy.\n\n\n\n\\(p(X)\\) would model \\(P(\\text{status} = \\text{healthy} \\mid \\text{nitrate})\\). This is the probability that a site is healthy given its nitrate concentration."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#logistic-function-blank",
@@ -3902,7 +3902,7 @@
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#logistic-curve-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Fitted probability curve\n\n\n\n\n\n\n\n\n\n\n\n\nPoints overlappin near the boundary reflects uncertainty in the data.\nProbability is higher in regions where healthy sites are dense\nAs temperature anomaly increases, the probability of a healthy site decreases.\nNotice the characteristic S-shape of the logistic function!"
+    "text": "Fitted probability curve\n\n\n\n\n\n\n\n\n\n\n\n\nPoints overlapping near the boundary reflects uncertainty in the data.\nProbability is higher in regions where healthy sites are dense\nAs temperature anomaly increases, the probability of a healthy site decreases.\nNotice the characteristic S-shape of the logistic function!"
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#checkin-logistic-q",
@@ -3937,7 +3937,7 @@
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#log-odds-slide-2",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Log-odds\n\nThe log-odds are defined by\n\\[\\log\\left(\\frac{p(X)}{1 - p(X)}\\right) = \\beta_0 + \\beta_1 X.\\]\nNotice the log-odds is linear in \\(X\\).\n\nIn addition, \\(p(X)\\) changes in the same direction as the log-odds.\nThis helps us understand the relationship between \\(X\\) and \\(p(X)\\):\n\n\\(\\hat\\beta_1 &gt; 0\\): increasing \\(X\\) \\(\\Rightarrow\\) higher log-odds \\(\\Rightarrow\\) higher \\(p(X)\\)\n\\(\\hat\\beta_1 &lt; 0\\): increasing \\(X\\) \\(\\Rightarrow\\) lower log-odds \\(\\Rightarrow\\) lower \\(p(X)\\)"
+    "text": "Log-odds\n\nThe log-odds are defined by\n\\[\\log\\left(\\frac{p(X)}{1 - p(X)}\\right) = \\beta_0 + \\beta_1 X.\\]\nNotice the log-odds is linear in \\(X\\).\nIn addition, \\(p(X)\\) changes in the same direction as the log-odds.\n\nThis helps us understand the relationship between \\(X\\) and \\(p(X)\\):\n\nIf \\(\\hat\\beta_1 &gt; 0\\), then\n\nincreasing \\(X\\) \\(\\Rightarrow\\) log-odds increase \\(\\Rightarrow\\) probability of belonging to positive class \\(p(X)\\) increases\n\nIf \\(\\hat\\beta_1 &lt; 0\\), then\n\nincreasing \\(X\\) \\(\\Rightarrow\\) log-odds decrease \\(\\Rightarrow\\) probability of belonging to positive class \\(p(X)\\) decreases"
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#log-odds-plot-slide",
@@ -3965,7 +3965,7 @@
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#hypothesis-testing-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Is there evidence for a relationship between X and Y?\n\nIf \\(\\beta_1 = 0\\), then:\n\n\\[p(X) = \\frac{e^{\\beta_0}}{1 + e^{\\beta_0}} = \\text{constant}\\]\n\nmeaning the probability of the positive class does not depend on \\(X\\) at all.\n\n\nOur hypotheses thus are:\n\nNull hypothesis \\(H_0\\): there is no relationship between \\(X\\) and \\(Y\\), i.e., \\(\\beta_1 = 0\\).\nAlternative hypothesis \\(H_a\\): there is some relationship between \\(X\\) and \\(Y\\), i.e., \\(\\beta_1 \\neq 0\\).\n\n\n\n\nWe test this using the Z-statistic (analogue of the t-statistic in linear regression):\n\\[Z = \\frac{\\hat{\\beta}_1}{\\text{SE}(\\hat{\\beta}_1)}\\]\nA large \\(|Z|\\) provides evidence against \\(H_0\\). The p-value quantifies how likely we would observe a Z-statistic this extreme if \\(H_0\\) were true."
+    "text": "Is there evidence for a relationship between X and Y?\n\nIf \\(\\beta_1 = 0\\), then:\n\n\\[p(X) = \\frac{e^{\\beta_0}}{1 + e^{\\beta_0}} = \\text{constant}\\]\n\nmeaning the probability of the positive class does not depend on \\(X\\) at all.\n\n\nOur hypotheses thus are:\n\nNull hypothesis \\(H_0\\): there is no relationship between \\(X\\) and \\(p(X)\\), i.e., \\(\\beta_1 = 0\\).\nAlternative hypothesis \\(H_a\\): there is some relationship between \\(X\\) and \\(p(X)\\), i.e., \\(\\beta_1 \\neq 0\\).\n\n\n\n\nWe test this using the Z-statistic (analogue of the t-statistic in linear regression):\n\\[Z = \\frac{\\hat{\\beta}_1}{\\text{SE}(\\hat{\\beta}_1)}.\\]\nA large \\(|Z|\\) provides evidence against \\(H_0\\). The p-value quantifies how likely we would observe a Z-statistic this extreme if \\(H_0\\) were true."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#checkin-hypothesis-q",
@@ -3987,6 +3987,13 @@
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
     "text": "Multiple logistic regression\n\nThe logistic model extends naturally to multiple predictors \\(X_1, X_2, \\ldots, X_p\\):\n\\[p(X) = \\frac{e^{\\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p}}{1 + e^{\\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p}}.\\]\nThe log-odds remain linear in all predictors:\n\\[\\log\\left(\\frac{p(X)}{1 - p(X)}\\right) = \\beta_0 + \\beta_1 X_1 + \\cdots + \\beta_p X_p.\\]\n\nEach coefficient \\(\\hat\\beta_j\\) represents the change in log-odds for a one-unit increase in \\(X_j\\), holding all other predictors constant:\n\n\n\\(\\hat\\beta_j &gt; 0\\): increasing \\(X_j\\) \\(\\Rightarrow\\) higher log-odds \\(\\Rightarrow\\) higher \\(p(X)\\) (holding other predictors fixed)\n\\(\\hat\\beta_j &lt; 0\\): increasing \\(X_j\\) \\(\\Rightarrow\\) lower log-odds \\(\\Rightarrow\\) lower \\(p(X)\\) (holding other predictors fixed)"
+  },
+  {
+    "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#multiple-logistic-example",
+    "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#multiple-logistic-example",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Multiple logistic regression: example data\n\nIn our example:\n\nPredictors: temp_anomaly, nitrate\nResponse: status: healthy (class 1/positive) or degraded (class 0/negative)\n\nUsing logistic regression we can model\n\\[P(\\text{status} = \\text{healthy} \\mid \\text{temp_anomaly}, \\text{nitrate}) = p(\\text{temp_anomaly}, \\text{nitrate}),\\]\nthe probability of a site having a healthy status given a certain temperature anomaly and nitrate concentration.\nThen, we select a threshold to classify a site as healthy or degraded. E.g., using \\(\\alpha=0.5\\):\n\nIf \\(p(\\text{temp_anomaly}, \\text{nitrate}) \\geq 0.5\\), then predict the site is healthy.\nIf \\(p(\\text{temp_anomaly}, \\text{nitrate}) &lt; 0.5\\), then predict the site is degraded."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#multi-logistic-prob-1",
@@ -4014,21 +4021,21 @@
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#ulti-logistic-prob-4",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nDarker green = higher predicted probability of healthy status.\nGray line = decision boundary (\\(\\alpha = 0.5\\))."
+    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nDarker green = higher predicted probability of healthy status.\nGray line = decision boundary using the threshold \\(\\alpha = 0.5\\)."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#ulti-logistic-prob-5",
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#ulti-logistic-prob-5",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nBlue region = predicted healthy, red region = predicted degraded.\nGray line = decision boundary (\\(\\alpha = 0.5\\))."
+    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nBlue region = predicted healthy, red region = predicted degraded.\nGray line = decision boundary using the threshold \\(\\alpha = 0.5\\)."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#ulti-logistic-prob-6",
     "href": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#ulti-logistic-prob-6",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nBlue region = predicted healthy, red region = predicted degraded.\nGray line = decision boundary (\\(\\alpha = 0.5\\)). Points in the “wrong” region are misclassified."
+    "text": "Logistic regression with two predictors\n\n\n\n\n\n\n\n\n\n\n\nBlue region = predicted healthy, red region = predicted degraded.\nGray line = decision boundary using the threshold \\(\\alpha = 0.5\\).\nPoints in the “wrong” region are misclassified."
   },
   {
     "objectID": "notes/4_3_logistic_regression/4_3_logistic_regression-SLIDES-BLANK.html#section-threshold",

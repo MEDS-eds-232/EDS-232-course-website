@@ -398,45 +398,63 @@ Notice the log-odds remain linear in all predictors:
 
 $$\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p$$
 
-For our example data, we can now fit a logistic regression using both `temp_anomaly` and `nitrate` as predictors:
+For our example data, we can now fit a logistic regression using both `temp_anomaly` and `nitrate` as predictors. The plot below shows the **predicted probability** surface across the feature space. Darker green indicates higher probability of healthy status. The gray line is the **decision boundary** at $\alpha = 0.5$.
 
 ```{python}
 #| label: multi-logistic-fit
 
-lr_multi = LogisticRegression(max_iter=1000)
+lr_multi    = LogisticRegression(max_iter=1000)
 lr_multi.fit(X_train, (y_train == 'healthy').astype(int))
+grid_prob   = lr_multi.predict_proba(np.c_[xx1.ravel(), xx2.ravel()])[:, 1].reshape(xx1.shape)
+grid_binary = (grid_prob >= 0.5).astype(int)
+```
 
-grid_prob = lr_multi.predict_proba(np.c_[xx1.ravel(), xx2.ravel()])[:, 1].reshape(xx1.shape)
+```{python}
+#| label: multi-logistic-prob-plot
+#| echo: false
+#| fig-align: center
 
-fig, axes = plt.subplots(2, 1, figsize=(fig_size_x * 0.8, fig_size_y * 2),
-                         sharex=True, constrained_layout=True)
-
-datasets = [('Training data (210 pts)', X_train, y_train),
-            ('Test data (90 pts)',      X_test,  y_test)]
-
-for ax, (title, X_data, y_data) in zip(axes, datasets):
-    cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='coolwarm_r', alpha=0.25,
-                     vmin=0, vmax=1)
-    ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
-    for label, col in col_map.items():
-        mask = y_data == label
-        ax.scatter(X_data[mask, 0], X_data[mask, 1],
-                   c=col, s=15, alpha=0.7, label=label, edgecolors='none')
-    ax.set_xlim(-2, 4)
-    ax.set_ylabel('Nitrate (μmol/L)')
-    ax.set_title(title)
-    ax.legend(title='True status', fontsize=9)
-    ax.grid(True, alpha=0.3)
-
-axes[1].set_xlabel('Temp. anomaly (°C)')
-fig.colorbar(cf, ax=axes, label='P(healthy)', location='bottom', shrink=0.6, pad=0.05)
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y + 0.5))
+cf = ax.contourf(xx1, xx2, grid_prob, levels=50, cmap='Greens', alpha=0.7, vmin=0, vmax=1)
+ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
+ax.set_xlim(-2, 4)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('P(healthy) — logistic regression with two predictors')
+ax.grid(True, alpha=0.3)
+fig.colorbar(cf, ax=ax, label='P(healthy)', shrink=0.8)
+plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
-The shading now represents the **predicted probability** of healthy status: darker blue regions indicate higher probability of healthy, darker red indicate higher probability of degraded. The gray line is the **decision boundary** at $p = 0.5$.
-
 Unlike KNN, the logistic regression boundary is always a straight line (or a hyperplane in higher dimensions), reflecting the linear structure of the log-odds model.
+
+Applying the classifier to the test data, observations falling in the "wrong" colored region are misclassified:
+
+```{python}
+#| label: multi-logistic-test-data
+#| echo: false
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y + 0.5))
+ax.contourf(xx1, xx2, grid_binary, levels=[-0.5, 0.5, 1.5],
+            colors=['tomato', 'steelblue'], alpha=0.3)
+ax.contour(xx1, xx2, grid_prob, levels=[0.5], colors='gray', linewidths=1.5)
+for label, col in col_map.items():
+    mask = y_test == label
+    ax.scatter(X_test[mask, 0], X_test[mask, 1],
+               c=col, s=15, alpha=0.7, label=label, edgecolors='none')
+ax.set_xlim(-2, 4)
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title('Test data (90 pts) — classification regions at α = 0.5')
+ax.legend(title='True status', fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
 <!--TODO in a future iteration, include interpretations for the coefficients in the multiple logistic regression-->
 

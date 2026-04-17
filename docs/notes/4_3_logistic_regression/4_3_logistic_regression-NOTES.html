@@ -620,18 +620,27 @@ Discussion
 <p>and the coefficients <span class="math inline">\(\hat{\beta}_i\)</span> are estimated using the maximum likelihood estimation.</p>
 <p>Notice the log-odds remain linear in all predictors:</p>
 <p><span class="math display">\[\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p\]</span></p>
-<p>For our example data, we can now fit a logistic regression using both <code>temp_anomaly</code> and <code>nitrate</code> as predictors:</p>
-<div id="cell-multi-logistic-fit" class="cell" data-execution_count="6">
+<p>For our example data, we can now fit a logistic regression using both <code>temp_anomaly</code> and <code>nitrate</code> as predictors. The plot below shows the <strong>predicted probability</strong> surface across the feature space. Darker green indicates higher probability of healthy status. The gray line is the <strong>decision boundary</strong> at <span class="math inline">\(\alpha = 0.5\)</span>.</p>
+<div id="cell-multi-logistic-prob-plot" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="4_3_logistic_regression-NOTES_files/figure-html/multi-logistic-fit-output-1.png" id="multi-logistic-fit" width="651" height="815" class="figure-img"></p>
+<p><img src="4_3_logistic_regression-NOTES_files/figure-html/multi-logistic-prob-plot-output-1.png" id="multi-logistic-prob-plot" class="quarto-figure quarto-figure-center anchored figure-img" width="687" height="441"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>The shading now represents the <strong>predicted probability</strong> of healthy status: darker blue regions indicate higher probability of healthy, darker red indicate higher probability of degraded. The gray line is the <strong>decision boundary</strong> at <span class="math inline">\(p = 0.5\)</span>.</p>
 <p>Unlike KNN, the logistic regression boundary is always a straight line (or a hyperplane in higher dimensions), reflecting the linear structure of the log-odds model.</p>
+<p>Applying the classifier to the test data, observations falling in the “wrong” colored region are misclassified:</p>
+<div id="cell-multi-logistic-test-data" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="4_3_logistic_regression-NOTES_files/figure-html/multi-logistic-test-data-output-1.png" id="multi-logistic-test-data" class="quarto-figure quarto-figure-center anchored figure-img" width="709" height="441"></p>
+</figure>
+</div>
+</div>
+</div>
 <!--TODO in a future iteration, include interpretations for the coefficients in the multiple logistic regression-->
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -644,7 +653,7 @@ Check-in
 </div>
 <div class="callout-body-container callout-body">
 <p>Before exploring how the threshold affects performance, let’s evaluate both models using the accuracy metrics introduced in the <a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics-NOTES.html">previous lesson</a>: overall accuracy, error rate, precision, recall, and <span class="math inline">\(F_1\)</span> score. All metrics below use <code>healthy</code> as the positive class and the default threshold <span class="math inline">\(\alpha = 0.5\)</span>.</p>
-<div id="accuracy-recap" class="cell" data-execution_count="7">
+<div id="accuracy-recap" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-stdout">
 <pre><code>                            Model Overall accuracy Error rate Precision Recall F₁ score
      Logistic (temp_anomaly only)            0.711      0.289     0.736  0.883    0.803
@@ -726,7 +735,7 @@ Check-in
 </div>
 <div class="callout-body-container callout-body">
 <p>The graph below shows the precision, recall, and overall accuracy for our multiple logistic regression kelp forest status classifier at different classification threshold levels.</p>
-<div id="cell-threshold-effect" class="cell" data-execution_count="8">
+<div id="cell-threshold-effect" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -807,7 +816,7 @@ Check-in
 </tbody>
 </table>
 <p>To fill in the values for 0.3 and 0.7 you will need to use the confusion matrices from the multiple logistic regression classifier at these thresholds.</p>
-<div id="cell-roc-checkin-cms" class="cell" data-execution_count="9">
+<div id="cell-roc-checkin-cms" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -832,7 +841,7 @@ Discussion
 <div id="callout-16" class="callout-16-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>The values for the table are:</p>
-<div id="roc-checkin-answers" class="cell" data-execution_count="10">
+<div id="roc-checkin-answers" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-stdout">
 <pre><code> Threshold (α)   TPR   FPR
            1.0 0.000 0.000
@@ -847,7 +856,7 @@ Discussion
 <li><p><span class="math inline">\(\alpha=0\)</span> means we classify a site <span class="math inline">\(X\)</span> as healthy if <span class="math inline">\(p(X)\geq0\)</span> which always happens. Thus, every site is classified as healthy, which means <span class="math inline">\(FN=TN=0\)</span>. Substituting these in the FPR and TPR formulas we get <span class="math inline">\(TPR= FPR=1\)</span></p></li>
 </ul>
 <p>So the ROC curve always go from (0,0) to (1,1). Our draft would look something similar to this</p>
-<div id="cell-roc-curve" class="cell" data-execution_count="11">
+<div id="cell-roc-curve" class="cell" data-execution_count="13">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -888,7 +897,7 @@ Check-in
 </div>
 <div class="callout-body-container callout-body">
 <p>Back in our kelp forest example, the logistic regression model gives an AUC of 0.747.</p>
-<div id="cell-auc-comparison" class="cell" data-execution_count="12">
+<div id="cell-auc-comparison" class="cell" data-execution_count="14">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
