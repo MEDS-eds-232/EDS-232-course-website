@@ -1,0 +1,180 @@
+---
+title: Assignment 2
+subtitle: Classification and Potential Problems in Linear Regression
+date: today
+format:
+  html:
+    toc: true
+---
+
+This assignment covers topics from the course on classification, specifically KNN and Logistic Regression. Task 1 will contribute 35% to the total grade and Task 2 will contribute 65%. Review the rubric for this assignment [here](https://docs.google.com/document/d/1a5_Eu_RZ24BMorTcvYepYpxLLjZdb79rRsCvU7LMaFQ/edit?tab=t.0#heading=h.kx0dpavp3fk4). 
+
+---
+
+## Submission Instructions
+
+::: {.callout-warning appearance="minimal"}
+This assignment is submitted as a **GitHub repository** to Gradescope. Before submitting, make sure you satisfy every item in this checklist:
+
+- [ ] Your repository is properly forked and all work is committed and pushed to **your own GitHub repository**.
+- [ ] Your notebooks must include your code **and** all required rendered outputs (printed results, plots, tables). **Run all cells before committing** and verify all outputs are visible.
+- [ ] Each notebook must include the output from the final `grader.check_all()` cell.
+- [ ] The notebooks you submit must contain **your solutions**: do not submit the blank template notebooks.
+- [ ] Double-check that each file is in the correct folder in your repository and that all code and outputs are visible.
+
+**Resubmissions after the due date that fail to satisfy one of the checks above will be strictly held to the course's 50%-regrade resubmission policy (see syllabus).**
+
+If you have any questions about assignment logistics, please reach out to the instructional team.
+:::
+
+---
+
+## How to Submit via GitHub to Gradescope
+
+::: {.callout-tip appearance="minimal"}
+1. **Fork** [this repository](https://github.com/MEDS-eds-232/assignment-2) from the course GitHub organization.
+2. **Clone** your forked repository to your local machine or the workbench server.
+3. Complete the tasks inside your cloned repository. Do not move files out of the repo.
+4. As you work, **commit and push** your changes regularly.
+5. When you are finished, **make a final push** to ensure your most recent work is on GitHub.
+6. On Gradescope, select "GitHub" as your submission method and choose your forked repository and the correct branch (usually `main`).
+
+**Your Gradescope submission will pull directly from whatever is in your GitHub repo at the time of submission, so be sure to submit only once you are completely finished.**
+:::
+
+---
+
+## How the Otter Grader Works
+
+::: {.callout-note appearance="minimal" collapse="true"}
+## Expand to learn how to use the autograder
+
+These notebooks use the `otter-grader` library to provide instant feedback on your answers as you work. Here is how it works:
+
+### Step 1 — Initialize Otter
+
+The very first cell of each notebook initializes the grader. **Always run this cell first before anything else**:
+
+```python
+# Initialize Otter
+import otter
+grader = otter.Notebook("hw2-task2.ipynb")
+```
+
+### Step 2 — Complete the exercises
+
+Fill in code in the cells marked with `...` or `# Your answer here`. Read each question carefully and make sure your variable names match exactly what is asked since the autograder checks specific variable names.
+
+### Step 3 — Run individual checks
+
+After completing an exercise, run the `grader.check("qN")` cell immediately following it. This will tell you right away whether your answer is correct:
+
+- ✅ **Passed:** You'll see something like `q3 passed!`. If so, you're good to move on.
+- ❌ **Failed:** You'll see a description of what went wrong. Re-read the question, inspect your output, and try again.
+
+::: {.callout-tip appearance="minimal"}
+**Stuck?** Check that your variable names, data types, and shapes all match what the question asks for. Most failures come from a small mismatch. For example, returning a list instead of a DataFrame.
+:::
+
+### Step 4 — Run `grader.check_all()` before submitting
+
+The **very last cell** of each notebook runs all checks at once and gives you a summary:
+
+```
+q3  ✅ passed
+q5  ✅ passed
+q6  ❌ failed
+...
+```
+
+**You must run this cell and leave its output visible before committing and pushing your notebook.** This summary will be used to grade your autograded answers. You will not receive credit for questions that failed in this section. If this cell has not been run, or its output is missing, you may lose points.
+
+::: {.callout-warning appearance="minimal"}
+- **Do not modify or delete** any `grader.check()` or `grader.check_all()` cells.
+- Passing all autograder checks does **not** guarantee full credit on the assignemnt. Some questions are graded manually as well.
+- Always re-run all cells from top to bottom before your final commit to make sure everything still passes in sequence.
+:::
+:::
+
+---
+
+## AI Policy
+
+::: {.callout-note appearance="minimal" collapse="true"}
+## Expand to read the course AI policy
+
+If you use generative AI on this assignment, you are expected to adhere to the following course policies:
+
+- ✅ **Cultivate understanding:** You should be able to fully understand, justify, and explain all the work you submit.
+- 🤔 **Question AI outputs:** Assume AI-generated answers may be incorrect and verify all information independently.
+- 🚫 **Academic integrity:** Submitting work you don't understand or cannot explain will be considered plagiarism, regardless of whether AI use was disclosed.
+
+
+If there are concerns about AI use in your work, your instructor will ask you to meet and discuss it. If understanding is clearly lacking and this is the first occurrence, you will have the chance to revise and resubmit for 50% of the original maximum grade within two days.
+:::
+
+---
+
+
+# Task 1: Potential problems in linear regression
+
+In this task you will explore common problems that may arise when fitting a linear regression model and use generative AI to create examples that illustrate these issues.
+
+1. Read section 3.3.3 *Potential problems* in the course textbook: [An Introduction to Statistical Learning with applications in Python](https://www.statlearning.com). The section covers six common issues when fitting a linear model:
+    A. Non-linearity of the response-predictor relationships
+    B. Correlation of error terms
+    C. Non-constant variance of error terms
+    D. Outliers
+    E. High-leverage points
+    F. Collinearity
+
+2. Select 3 of the issues above and, for each one, write:
+    - a short paragraph explaining what the problem is, why it matters, and how to detect it (and how to address it, if applicable)
+    - a question that came up while reading that you couldn't answer from the text alone, and the answer you investigated
+
+3. For each of the three issues, use a generative AI tool (such as ChatGPT, Claude, or Claude code) to write Python code that:
+    - generates synthetic data that clearly illustrates the issue
+    - produces plots making the issue visually clear
+    - where applicable, produces additional plots showing how the issue can be addressed
+
+Add a brief caption (2-3 sentences) describiing what the plots show, or integrate this explanation into your paragraph from step 2. 
+
+4. In a short paragraph (4–6 sentences), reflect on your use of generative AI in this task: which tool did you use, what prompts did you give it, and how many iterations did it take to get working code? Note any mistakes the AI made and how you identified and fixed them.
+
+Your submission should be a Jupyter notebook (inside your forked repo) with the following structure:
+
+| Section | Content |
+|---|---|
+| **Title + intro** | Title + one sentence explaining the content of the document |
+| **Issue 1** | Explanation + plots + question |
+| **Issue 2** | Explanation + plots + question |
+| **Issue 3** | Explanation + plots + question |
+| **Generative AI reflection** | Answer to step 4 |
+
+Before submitting, restart your kernel and run all cells from top to bottom. Make sure all code has been executed and all plots are visible in the notebook.
+
+## Rubric
+
+- For each issue you explore, you will be graded on the plots and graphs and conceptual accuracy of your explanations using the [course rubric](https://docs.google.com/document/d/1a5_Eu_RZ24BMorTcvYepYpxLLjZdb79rRsCvU7LMaFQ/edit?usp=sharing). 
+
+- The answer to step 4 will be graded as 1: complete, 0: incomplete.
+
+---
+
+# Task 2: Classification
+## Do Social and Economic Conditions Predict Whether a Community Has Elevated Asthma Risk?
+
+**Follow the instructions in `hw2-task2.ipynb` to complete this task.** You will practice:
+
+- Visualizing class imbalance
+- Preparing features for classification: selecting predictors, dropping missing values, and performing a stratified train/test split 
+- Fitting a K-Nearest Neighbors (KNN) classifier and evaluating test-set accuracy
+- Selecting the optimal value of k using 5-fold cross-validation with`cross_val_score`    
+- Fitting a Logistic Regression model with built-in cross-validation using `LogisticRegressionCV`   
+- Computing and interpretting a confusion matrix 
+- Calculating accuracy, precision, recall and F1 score using `sklearn.metrics`     
+- Comparring KNN and Logistic Regression model performance
+- Evaluating a classifier with an ROC Curve and AUC score
+
+
+---
