@@ -1,0 +1,337 @@
+---
+title: Cross-validation
+jupyter: eds232-env
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import (train_test_split, cross_val_score,
+                                      KFold, LeaveOneOut)
+from sklearn.metrics import accuracy_score
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+# ── KelpWatch synthetic dataset ────────────────────────────────────────────────
+np.random.seed(42)
+n = 300
+
+temp_anomaly = np.random.normal(0.4, 1.0, n)
+nitrate      = np.random.normal(14, 4, n)
+upwelling    = np.random.binomial(1, 0.5, n)
+
+log_odds     = -0.8 + (-1.5 * temp_anomaly) + (0.10 * nitrate) + (1.8 * upwelling)
+prob_healthy = 1 / (1 + np.exp(-log_odds))
+status_num   = np.random.binomial(1, prob_healthy, n)
+status       = np.where(status_num == 1, 'healthy', 'degraded')
+
+df = pd.DataFrame({
+    'temp_anomaly': temp_anomaly,
+    'nitrate':      nitrate,
+    'upwelling':    upwelling,
+    'status':       status,
+    'status_num':   status_num,
+})
+
+X = df[['temp_anomaly', 'nitrate']].values
+y = df['status'].values
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42, stratify=y
+)
+
+col_map = {'healthy': 'steelblue', 'degraded': 'tomato'}
+```
+
+In this lesson we introduce:
+
+- The **validation set approach** and why it produces variable error estimates
+- **Leave-one-out cross-validation (LOOCV)** as a more stable alternative
+- **K-fold cross-validation** as the practical standard
+- Using cross-validation to **select hyperparameters** (e.g., $K$ in KNN)
+- Using cross-validation to **compare models**
+
+These notes are based on chapter 5 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
+
+## Why cross-validation?
+
+In previous lessons we split our data into a training set and a test set, fit models on the training set, and evaluated performance on the test set. This raises a practical problem: **what if we want to compare models or tune a hyperparameter before committing to a final model?**
+
+If we use the test set to make that decision, we are implicitly optimizing for it, and the reported test accuracy will be overoptimistic — it no longer reflects performance on truly unseen data. We need a way to estimate test error using only the training data, so the test set stays sealed until the very end.
+
+**Cross-validation** is the standard solution. It is a **resampling method**: it repeatedly draws different subsets from the training data, fits the model on each subset, and evaluates on the remainder. The average error across those evaluations is an estimate of the true test error.
+
+## The validation set approach
+
+The simplest resampling method is the **validation set approach**:
+
+1. Randomly divide the training observations into a **training set** and a **validation set**.
+2. Fit the model on the training set.
+3. Evaluate the fitted model on the validation set.
+4. The validation error is the estimate of the test error.
+
+```{python}
+#| label: validation-set-example
+#| echo: false
+#| fig-align: center
+
+np.random.seed(0)
+n_splits = 30
+val_errors = []
+
+for _ in range(n_splits):
+    seed = np.random.randint(0, 10000)
+    X_tr, X_val, y_tr, y_val = train_test_split(
+        X_train, y_train, test_size=0.3, random_state=seed
+    )
+    lr = LogisticRegression(max_iter=1000)
+    lr.fit(X_tr, (y_tr == 'healthy').astype(int))
+    y_hat       = lr.predict(X_val)
+    y_hat_label = np.where(y_hat == 1, 'healthy', 'degraded')
+    val_errors.append(1 - accuracy_score(y_val, y_hat_label))
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y))
+ax.plot(range(1, n_splits + 1), val_errors, 'o-', color='steelblue',
+        linewidth=1.5, markersize=5)
+ax.axhline(np.mean(val_errors), color='tomato', linestyle='--', linewidth=1.5,
+           label=f'Mean error = {np.mean(val_errors):.3f}')
+ax.set_xlabel('Validation split (different random seed each time)')
+ax.set_ylabel('Validation error rate')
+ax.set_title('Validation error varies across different random splits\n(logistic regression, two predictors)')
+ax.set_ylim(0, 0.5)
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+Each point is the validation error from a different random split of the same training data — the model and the data are identical, only the split changes. The variability is substantial: the estimate of test error depends heavily on which observations happen to end up in the validation set.
+
+A second drawback: setting aside part of the training data for validation means the model is **fit on fewer observations than we will ultimately use**. Models fit on less data tend to perform worse, so the validation error will tend to *overestimate* the true test error of the final model (which will be trained on more data).
+
+:::{.callout-tip}
+## Check-in
+1. In the plot above, some splits give a much lower validation error than others. Does this mean those splits produced better models? What is actually varying?
+2. If you had a dataset of only 60 observations and used a 50/50 validation split, what concern would you have about the reliability of the error estimate?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+1. No — the model and the training data are the same every time. What varies is *which observations* are in the validation set. Some splits put "easier" observations in the validation set and some put "harder" ones, producing a wide range of error estimates. The variation tells us about the sensitivity of the estimate, not the quality of the model.
+2. With only 30 training observations, the fitted model sees very little data and will likely perform worse than a model trained on 60 observations. The validation error will overestimate the true test error of the final model, and with so few observations in the validation set the estimate will also be very noisy.
+:::
+
+## Leave-one-out cross-validation (LOOCV)
+
+**Leave-one-out cross-validation (LOOCV)** addresses both drawbacks of the validation set approach by repeating the evaluation $n$ times, each time holding out only a single observation.
+
+Given training observations $\{(x_1, y_1), \ldots, (x_n, y_n)\}$:
+
+1. Hold out the first observation $(x_1, y_1)$.
+2. Fit the model on the remaining $n - 1$ observations.
+3. Predict $\hat{y}_1$ using $x_1$ and compute the error for that observation.
+4. Repeat steps 1–3, each time holding out observation $i$, for $i = 1, \ldots, n$.
+5. Average the $n$ individual errors:
+
+$$\text{CV}_{(n)} = \frac{1}{n} \sum_{i=1}^{n} \text{Err}_i$$
+
+For a **classification** problem, $\text{Err}_i = \mathbf{1}(\hat{y}_i \neq y_i)$: it equals 1 if observation $i$ was misclassified and 0 otherwise. The LOOCV estimate is therefore the average misclassification rate across all $n$ held-out observations.
+
+**Advantages over the validation set approach:**
+
+- Each model is trained on $n - 1$ observations — almost the full training set — so there is far less bias in the error estimate.
+- There is **no randomness**: LOOCV always produces the same result regardless of how many times you run it.
+
+**Drawback:**
+
+- The model must be fit $n$ times. For large $n$ or complex models, this is computationally expensive.
+
+```{python}
+#| label: loocv-example
+
+loocv    = LeaveOneOut()
+lr_loocv = LogisticRegression(max_iter=1000)
+scores   = cross_val_score(lr_loocv, X_train, y_train, cv=loocv, scoring='accuracy')
+
+print(f"Number of models fitted:        {len(scores)}")
+print(f"LOOCV error rate (2 predictors): {1 - scores.mean():.4f}")
+```
+
+:::{.callout-tip}
+## Check-in
+1. LOOCV on our 210-observation training set fits the model 210 times. How many observations are used to train the model in each of those fits?
+2. True or false: running LOOCV twice on the same data will give two different error estimates. Explain your answer.
+3. Why is LOOCV rarely used in practice despite having good statistical properties?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+1. Each fit uses $210 - 1 = 209$ observations for training.
+2. **False.** LOOCV has no random component — there is exactly one way to hold out each single observation, so the result is always identical.
+3. For a training set of size $n$, LOOCV requires fitting the model $n$ times. For large datasets or computationally heavy models this is prohibitively slow. K-fold CV (with $K = 5$ or $10$) achieves comparable accuracy estimates while fitting the model only 5 or 10 times.
+:::
+
+## K-fold cross-validation
+
+**K-fold cross-validation** offers a computationally efficient alternative to LOOCV that is the standard approach in practice.
+
+**Approach:**
+
+1. Randomly divide the training set into $K$ roughly equal-sized **folds**.
+2. Hold out fold 1 as the validation set; fit the model on the remaining $K - 1$ folds.
+3. Compute the error on the held-out fold: $\text{Err}_1$ (misclassification rate for classification).
+4. Repeat steps 2–3 for each of the $K$ folds, each time holding out a different fold.
+5. Average the $K$ fold errors:
+
+$$\text{CV}_{(K)} = \frac{1}{K} \sum_{i=1}^{K} \text{Err}_i$$
+
+LOOCV is a special case of K-fold CV where $K = n$.
+
+**Why $K = 5$ or $K = 10$?** These values strike a good balance: each fold uses 80–90% of the training data per fit (nearly as much as LOOCV), fitting only 5 or 10 models. The fold errors are also less correlated with each other than in LOOCV, which can actually produce lower-variance estimates of the test error.
+
+```{python}
+#| label: kfold-example
+
+kf       = KFold(n_splits=5, shuffle=True, random_state=42)
+lr_kf    = LogisticRegression(max_iter=1000)
+kf_scores = cross_val_score(lr_kf, X_train, y_train, cv=kf, scoring='accuracy')
+
+print("5-fold CV accuracy per fold: ", np.round(kf_scores, 4))
+print(f"Mean CV accuracy:             {kf_scores.mean():.4f}")
+print(f"Mean CV error rate:           {1 - kf_scores.mean():.4f}")
+```
+
+:::{.callout-tip}
+## Check-in
+In 5-fold CV on our 210-observation training set:
+
+1. Approximately how many observations are in each fold?
+2. How many observations are used to train the model in each iteration?
+3. Why might $K = 10$ give a more stable error estimate than $K = 2$, even though both split the data?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+1. $210 / 5 = 42$ observations per fold.
+2. $210 - 42 = 168$ observations for training in each fold.
+3. With $K = 2$, each model is trained on only half the data — the error estimates are based on smaller training sets and will be noisier. With $K = 10$, each model trains on 90% of the data, producing lower-bias estimates. The 10 fold errors are also more independent of each other, so their average is more stable.
+:::
+
+## Using CV to select a hyperparameter
+
+One of the most important uses of cross-validation is **hyperparameter selection**: choosing a model parameter that cannot be learned from the training data directly.
+
+In our KelpWatch classification task, KNN requires choosing $K$ — the number of neighbors. A small $K$ produces a flexible model that may overfit; a large $K$ produces a smooth model that may underfit. Cross-validation gives us a principled way to select $K$ without touching the test set.
+
+**Procedure:**
+
+1. For each candidate value of $K$, compute the K-fold CV error on the training set.
+2. Select the $K$ with the lowest CV error.
+3. Refit the final KNN model using that $K$ on the **full training set**.
+4. Evaluate once on the test set.
+
+```{python}
+#| label: cv-knn-selection
+#| echo: false
+#| fig-align: center
+
+k_values  = range(1, 51)
+cv_errors = []
+
+kf = KFold(n_splits=10, shuffle=True, random_state=42)
+for k in k_values:
+    knn    = KNeighborsClassifier(n_neighbors=k)
+    scores = cross_val_score(knn, X_train, y_train, cv=kf, scoring='accuracy')
+    cv_errors.append(1 - scores.mean())
+
+best_k   = list(k_values)[np.argmin(cv_errors)]
+best_err = min(cv_errors)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y))
+ax.plot(k_values, cv_errors, color='steelblue', linewidth=2)
+ax.scatter(best_k, best_err, color='tomato', s=80, zorder=5,
+           label=f'Best K = {best_k}  (CV error = {best_err:.3f})')
+ax.set_xlabel('K (number of neighbors)')
+ax.set_ylabel('10-fold CV error rate')
+ax.set_title('KNN: 10-fold CV error vs. K\n(KelpWatch training data, 210 observations)')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The curve traces the **bias-variance tradeoff**: at very small $K$ the model overfits (high variance, low bias); at very large $K$ the model underfits (low variance, high bias). The CV minimum identifies the value of $K$ that balances the two.
+
+:::{.callout-tip}
+## Check-in
+1. Describe what happens to the decision boundary as $K$ increases from 1 to 50. How does this relate to bias and variance?
+2. Once $K$ is selected using CV, on what data should the final KNN model be fit before evaluating on the test set?
+3. Why would it be incorrect to use the test set to select $K$ and then report performance on that same test set?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+1. As $K$ increases, the decision boundary becomes smoother and less sensitive to individual training points. Bias increases (the model cannot capture fine-grained patterns) but variance decreases (predictions are more stable across datasets). At $K = 1$ the boundary traces every training point perfectly — very low bias, very high variance. At $K = n$ the model always predicts the majority class — maximum bias, near-zero variance.
+2. The final model should be refit on the **full training set** (all 210 observations) using the selected $K$. Cross-validation only informs the choice of $K$; the final fit uses all available training data.
+3. Selecting $K$ based on test set performance means the test set has influenced our modeling decisions. The reported accuracy would reflect how well we optimized for that particular test set, not how well the model generalizes to new data. The test set must remain unseen until the very final evaluation.
+:::
+
+## Comparing models with CV
+
+Cross-validation is also used to compare different model types on the same training data before ever touching the test set.
+
+```{python}
+#| label: cv-model-comparison
+
+kf = KFold(n_splits=10, shuffle=True, random_state=42)
+
+# KNN with the best K selected above
+knn_best     = KNeighborsClassifier(n_neighbors=best_k)
+knn_cv       = cross_val_score(knn_best,  X_train,       y_train, cv=kf, scoring='accuracy')
+
+# Logistic regression: single predictor
+lr_single    = LogisticRegression(max_iter=1000)
+lr_single_cv = cross_val_score(lr_single, X_train[:, [0]], y_train, cv=kf, scoring='accuracy')
+
+# Logistic regression: two predictors
+lr_multi     = LogisticRegression(max_iter=1000)
+lr_multi_cv  = cross_val_score(lr_multi,  X_train,       y_train, cv=kf, scoring='accuracy')
+
+comparison = pd.DataFrame({
+    'Model': [f'KNN (K={best_k})', 'Logistic (temp only)', 'Logistic (temp + nitrate)'],
+    'CV error (mean)': [f'{1 - knn_cv.mean():.3f}',
+                        f'{1 - lr_single_cv.mean():.3f}',
+                        f'{1 - lr_multi_cv.mean():.3f}'],
+    'CV error (std)':  [f'{knn_cv.std():.3f}',
+                        f'{lr_single_cv.std():.3f}',
+                        f'{lr_multi_cv.std():.3f}'],
+})
+print(comparison.to_string(index=False))
+```
+
+The standard deviation across folds is a useful indicator of **stability**: a model with high variance across folds is sensitive to which observations happen to land in each fold, which may indicate overfitting.
+
+Once you have selected a model using CV, refit it on the full training set and report its performance on the test set — **once**, as the final evaluation.
+
+:::{.callout-tip}
+## Check-in
+1. Which model would you select based on this CV comparison?
+2. Suppose two models have nearly identical CV error but one has a much lower standard deviation across folds. Which would you prefer and why?
+3. After selecting a model with CV, a student fits it on the training data, evaluates on the test set, is unhappy with the result, and goes back to try another model. What is wrong with this workflow?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+1. Select the model with the lowest mean CV error.
+2. Prefer the model with lower standard deviation — its performance is more consistent across different data subsets, meaning it is more likely to generalize reliably to new data rather than performing well on some splits and poorly on others.
+3. The student has now used the test set as a feedback signal to guide model selection. Every time the test set is consulted to make a decision, it becomes part of the model selection process. Future accuracy estimates on that same test set will be optimistic and cannot be trusted as an honest measure of generalization performance.
+:::
