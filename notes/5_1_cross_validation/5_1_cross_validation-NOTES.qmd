@@ -52,21 +52,191 @@ col_map = {'healthy': 'steelblue', 'degraded': 'tomato'}
 
 In this lesson we introduce:
 
+- Using a validation set to estimate the test set error
 - The **validation set approach** and why it produces variable error estimates
-- **Leave-one-out cross-validation (LOOCV)** as a more stable alternative
-- **K-fold cross-validation** as the practical standard
+- **K-fold cross-validation**
 - Using cross-validation to **select hyperparameters** (e.g., $K$ in KNN)
 - Using cross-validation to **compare models**
 
 These notes are based on chapter 5 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
 
+## A guiding example: kelp forest monitoring
+
+In this lesson we use the same example dataset as in our KNN lesson: a synthetic dataset that "tracks" 300 coastal monitoring stations. For each station we record:
+
+- **`temp_anomaly`** — sea surface temperature anomaly (°C); positive values indicate warmer-than-average conditions
+- **`nitrate`** — nitrate concentration (μmol/L); higher values generally support kelp growth
+- **`status`** — observed kelp forest condition: *healthy* or *degraded*
+
+The central question is: *can we predict whether a kelp forest site is healthy or degraded from its oceanographic conditions?*
+
+
+```{python}
+#| label: initial-data-plotting
+
+colors  = {'healthy': 'steelblue', 'degraded': 'tomato'}
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.75, fig_size_y + 0.5))
+
+for up_val in [1, 0]:
+    for status_val, col in colors.items():
+        mask = (df['upwelling'] == up_val) & (df['status'] == status_val)
+        ax.scatter(
+            df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
+            c=col, s=20, alpha=0.5, edgecolors='none'
+        )
+
+# Legend 1: kelp status (colors)
+status_handles = [
+    plt.scatter([], [], c=col, s=50, label=lab)
+    for lab, col in colors.items()
+]
+leg1 = ax.legend(handles=status_handles, title='Status', fontsize=9, loc='upper left')
+ax.add_artist(leg1)
+
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.set_title(
+    'KelpWatch: kelp status vs. oceanographic conditions\n'
+    '*Synthetic data generated for educational purposes only*'
+)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+In the [previous lesson](../4_3_logistic_regression/4_3_logistic_regression-NOTES.qmd) we introduced logistic regression to predict kelp forest status in this dataset. In this lesson we study how we can use cross-validation to choose amongst different models and select hyperparameters.
+
 ## Why cross-validation?
 
-In previous lessons we split our data into a training set and a test set, fit models on the training set, and evaluated performance on the test set. This raises a practical problem: **what if we want to compare models or tune a hyperparameter before committing to a final model?**
+### A motivating example: selecting the classification threshold
 
-If we use the test set to make that decision, we are implicitly optimizing for it, and the reported test accuracy will be overoptimistic — it no longer reflects performance on truly unseen data. We need a way to estimate test error using only the training data, so the test set stays sealed until the very end.
+Recall from the logistic regression lesson that once we fit a model, we classify observations by comparing the predicted probability $p(X)$ to a **classification threshold** $\alpha$. In our example data this means we predict healthy if $p(X) \geq \alpha$, degraded otherwise. The default is $\alpha = 0.5$, but different thresholds shift the tradeoff between precision and recall. How should we choose $\alpha$?
 
-**Cross-validation** is the standard solution. It is a **resampling method**: it repeatedly draws different subsets from the training data, fits the model on each subset, and evaluates on the remainder. The average error across those evaluations is an estimate of the true test error.
+A natural approach: try many threshold values, measure accuracy on the test set for each, and pick the best.
+
+```{python}
+#| label: threshold-naive-selection
+#| fig-align: center
+
+lr_thresh  = LogisticRegression(max_iter=1000)
+lr_thresh.fit(X_train, (y_train == 'healthy').astype(int))
+
+y_prob_test = lr_thresh.predict_proba(X_test)[:, 1]
+y_test_num  = (y_test == 'healthy').astype(int)
+
+thresholds_naive = np.linspace(0.01, 0.99, 100)
+test_accs_naive  = []
+
+for t in thresholds_naive:
+    y_hat = (y_prob_test >= t).astype(int)
+    test_accs_naive.append(accuracy_score(y_test_num, y_hat))
+
+best_naive_idx = np.argmax(test_accs_naive)
+best_naive_t   = thresholds_naive[best_naive_idx]
+best_naive_acc = test_accs_naive[best_naive_idx]
+default_acc    = test_accs_naive[np.argmin(np.abs(thresholds_naive - 0.5))]
+
+print(f"Accuracy at default threshold α = 0.50:       {default_acc:.3f}")
+print(f"Best threshold found on test set: α = {best_naive_t:.2f}")
+print(f"Accuracy at that threshold (on test set):     {best_naive_acc:.3f}")
+```
+
+We found a threshold that beats the default — but we have made a critical mistake: **we used the test set to make a modeling decision.** We examined the test set outcomes to figure out which threshold works best, and then reported the accuracy for that threshold on the very same observations we used to select it.
+
+This is called **data leakage**: information from the test set leaked into our modeling process. The reported accuracy is no longer an honest estimate of how the model performs on new, unseen data. We selected $\alpha$ *because* it happened to work well on these particular 90 test observations — not because it generalizes well.
+
+```{python}
+#| label: threshold-leakage-illustration
+#| echo: false
+#| fig-align: center
+
+from sklearn.model_selection import StratifiedKFold
+
+# Estimate accuracy at each threshold using 5-fold CV on the training set
+cv5 = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+y_train_num = (y_train == 'healthy').astype(int)
+
+cv_accs_naive = []
+for t in thresholds_naive:
+    fold_accs = []
+    for tr_idx, val_idx in cv5.split(X_train, y_train_num):
+        X_tr, X_val = X_train[tr_idx], X_train[val_idx]
+        y_tr, y_val = y_train_num[tr_idx], y_train_num[val_idx]
+        lr_cv = LogisticRegression(max_iter=1000)
+        lr_cv.fit(X_tr, y_tr)
+        y_prob_val = lr_cv.predict_proba(X_val)[:, 1]
+        fold_accs.append(accuracy_score(y_val, (y_prob_val >= t).astype(int)))
+    cv_accs_naive.append(np.mean(fold_accs))
+
+best_cv_naive_idx = np.argmax(cv_accs_naive)
+best_cv_naive_t   = thresholds_naive[best_cv_naive_idx]
+best_cv_naive_acc = cv_accs_naive[best_cv_naive_idx]
+actual_test_at_cv = test_accs_naive[best_cv_naive_idx]
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y))
+
+ax.plot(thresholds_naive, test_accs_naive, color='tomato',    linewidth=2,
+        label='Accuracy on test set ⚠ data leakage')
+ax.plot(thresholds_naive, cv_accs_naive,   color='steelblue', linewidth=2,
+        label='5-fold CV accuracy on training set ✓')
+
+ax.scatter(best_naive_t,   best_naive_acc,      color='tomato',    s=80, zorder=5,
+           label=f'Test-selected α = {best_naive_t:.2f}  →  reported acc = {best_naive_acc:.3f}')
+ax.scatter(best_cv_naive_t, actual_test_at_cv,  color='seagreen',  s=80, marker='D', zorder=5,
+           label=f'CV-selected α = {best_cv_naive_t:.2f}  →  actual test acc = {actual_test_at_cv:.3f}')
+
+ax.axvline(best_naive_t,   color='tomato',    linestyle=':', alpha=0.5)
+ax.axvline(best_cv_naive_t, color='steelblue', linestyle=':', alpha=0.5)
+
+ax.set_xlabel('Classification threshold α')
+ax.set_ylabel('Accuracy')
+ax.set_title('Selecting the classification threshold\nTest set (data leakage) vs. cross-validation (honest)')
+ax.legend(fontsize=8.5, loc='lower left')
+ax.set_ylim(0.5, 0.85)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The **red curve** sweeps thresholds against the test set. Its peak is what we would naively report, but because we *searched for* the peak using the test set, the reported accuracy is inflated.
+
+The **blue curve** estimates accuracy at each threshold using only the training data (5-fold cross-validation — we'll cover the details shortly). The green diamond marks the actual test-set accuracy when the threshold is selected honestly via CV. This lower value is the more reliable estimate of how the model will perform on truly new data.
+
+The gap between the red peak and the green diamond is the cost of data leakage: by using the test set to tune a modeling choice, we fooled ourselves into thinking our model is better than it is.
+
+### Hyperparameters
+
+The classification threshold is one instance of a broader concept: a **hyperparameter**.
+
+A **hyperparameter** is any setting of a model that is **chosen by the analyst** and **cannot be learned from the training data during model fitting**. Unlike model parameters (such as regression coefficients, which the algorithm estimates from data), hyperparameters must be set before fitting and control *how* the model learns.
+
+Some examples we have already encountered:
+
+| Model | Hyperparameter | What it controls |
+|-------|----------------|-----------------|
+| K-Nearest Neighbors | $K$ (number of neighbors) | Smoothness of the decision boundary |
+| Logistic Regression | Classification threshold $\alpha$ | Precision–recall tradeoff |
+
+Choosing a hyperparameter by optimizing against the test set is always data leakage, regardless of which hyperparameter it is.
+
+### The workflow we have been using
+
+The example above reveals a limitation of the workflow we have used so far:
+
+1. Split our available data into a **training set** and a **test set**.
+2. Fit the model on the training set.
+3. Evaluate performance on the test set.
+
+![Diagram from [Google's ML Concepts Crash Course.](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets)](training-test.png)
+
+This works well when we have already committed to a single, fully specified model. But as soon as we need to make any modeling decision — choosing a threshold, selecting $K$, comparing two model types — consulting the test set contaminates it. The test set can only serve as an honest final evaluation if it plays no role in any decision made along the way.
+
+### Looking forward: cross-validation
+
+The fix is straightforward: **make all modeling decisions — including hyperparameter selection — using only the training data**, and keep the test set sealed until the very final evaluation. Cross-validation is the standard tool for doing this. It repeatedly splits the training data into temporary training and validation subsets, fits the model on each split, and averages the resulting errors to produce a stable, honest estimate of test performance.
 
 ## The validation set approach
 
