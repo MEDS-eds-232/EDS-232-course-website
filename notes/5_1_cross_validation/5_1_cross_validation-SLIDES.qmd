@@ -16,7 +16,7 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import (train_test_split, cross_val_score,
-                                      KFold, LeaveOneOut, StratifiedKFold)
+                                      KFold, StratifiedKFold)
 from sklearn.metrics import accuracy_score
 
 plt.style.use('default')
@@ -207,6 +207,45 @@ The same synthetic dataset from the previous lessons — 300 coastal monitoring 
 
 ---
 
+## {#kelpwatch-plot data-menu-title="KelpWatch: data overview"}
+
+[Data overview]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: example-data-plot
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+colors = {'healthy': 'steelblue', 'degraded': 'tomato'}
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.5, fig_size_y + 1.5))
+
+for status_val, col in colors.items():
+    mask = df['status'] == status_val
+    ax.scatter(df.loc[mask, 'temp_anomaly'], df.loc[mask, 'nitrate'],
+               c=col, s=25, alpha=0.6, edgecolors='none')
+
+counts = df['status'].value_counts()
+legend_labels = {s: f'{s} (n={counts[s]})' for s in colors}
+handles = [plt.scatter([], [], c=col, s=50, label=legend_labels[s]) for s, col in colors.items()]
+ax.legend(handles=handles, title='Status', fontsize=10, loc='upper left')
+ax.set_xlabel('Temp. anomaly (°C)')
+ax.set_ylabel('Nitrate (μmol/L)')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.center-text .body-text-s}
+*Synthetic data generated for educational purposes only*
+:::
+
+
+---
+
 ## {#section-why-cv data-menu-title="# Why cross-validation? #" background="#047C90"}
 
 <div class="page-center vertical-center">
@@ -304,7 +343,7 @@ This works well for a **single, already-decided model**, but breaks down as soon
 We would want to:
 
 - make all modeling decisions using only the training data,
-- estimate the accuracy metrics on the test set, and
+- estimate the test set's accuracy metrics, and
 - keep the test set sealed until the very final evaluation.
 
 . . .
@@ -394,7 +433,7 @@ Same model, same data, only the split changes. The error estimate varies substan
 ::: {.teal-text .body-text-m}
 The training set for the kelp data has 210 points. 
 
-If you used a **50/50 split** (110 points for training / 110 for validation), 
+If you used a **50/50 split** (105 points for training / 105 for validation), 
 
 what would be a bigger concern: 
 
@@ -403,7 +442,7 @@ the validation error being much higher or much lower than the test error?
 
 . . .
 
-**The concern would be that the validation error is higher than the test error** the validation error estimates performance of a model trained on only 110 observations, but the final model will be trained on all 210. 
+**The concern would be that the validation error is higher than the test error** the validation error estimates performance of a model trained on only 105 observations, but the final model will be trained on all 210. 
 
 More training data almost always produces a better model, so the validation error *overestimates* the true test error. 
 
@@ -602,25 +641,36 @@ In 5-fold CV on our 210-observation training set:
 
 <hr>
 
-How we measure $\text{Err}_i$ depends on the type of problem.
+::: {.body-text-s}
 
-<br>
+We have:
 
-**Regression** — Mean Squared Error (MSE):
+- $(x_1, y_1), ... (x_n, y_n)$ = the training set which will be split into folds
+- $n_i$ = number of observations in the $i$-th fold
+- $\hat{y}_j$ = the prediction made on $y_j$ by the corresponding CV model
 
-$$\text{Err}_i = \frac{1}{n_i} \sum_{j \in \text{fold } i} (y_j - \hat{y}_j)^2$$
-
-Larger mistakes are penalized more because errors are squared.
+:::
 
 . . .
 
-<br>
+How we measure $\text{Err}_i$ on the $i$-th fold depends on the type of problem.
 
-**Classification** — misclassification rate:
+**Regression**: typically use the Mean Squared Error (MSE):
 
-$$\text{Err}_i = \frac{1}{n_i} \sum_{j \in \text{fold } i} \mathbf{1}(\hat{y}_j \neq y_j)$$
+$$\text{Err}_i = \frac{1}{n_i} \sum_{j \in \text{fold } i} (y_j - \hat{y}_j)^2$$
+
+. . .
+
+**Classification**: typically use the  error rate:
+
+$$\text{Err}_i = \frac{\text{number of misclassified observations in $i$-th fold }}{\text{number of observations in $i$-th fold}}$$ 
+
+<!-- 
+$$\text{Err}_i = \frac{1}{n_i} \sum_{j \in \text{fold } i} \mathbf{1}(\hat{y}_j \neq y_j)$$ 
 
 $\mathbf{1}(\hat{y}_j \neq y_j) = 1$ if observation $j$ was misclassified, 0 otherwise — the fraction of held-out observations assigned the wrong class.
+
+-->
 
 ---
 
@@ -630,26 +680,23 @@ $\mathbf{1}(\hat{y}_j \neq y_j) = 1$ if observation $j$ was misclassified, 0 oth
 
 <hr>
 
-The error rate (or MSE) is not the only metric that can be estimated with CV.
+The error rate or MSE is not the only metric that can be estimated with CV.
 
 <br>
 
-**Any scalar performance metric can be substituted:**
+Any performance metric that gives us a number can be substituted:
 
 ::: {.body-text-m}
 | Problem type | Examples |
 |---|---|
-| Classification | Accuracy, precision, recall, $F_1$, AUC |
-| Regression | MSE, MAE, $R^2$ |
+| Classification | Accuracy, precision, recall, $F_1$, AUC, ... |
+| Regression | MSE, $R^2$, ...  |
 :::
 
-<br>
 
 . . .
 
-The procedure is identical: compute the chosen metric on each held-out fold, then **average across folds**.
-
-In scikit-learn, the `scoring` parameter of `cross_val_score` controls which metric is used.
+The procedure is identical: compute the chosen metric on each held-out fold, then **average across folds** to get an estimate of the metric on the test set.
 
 ---
 
@@ -661,6 +708,8 @@ In scikit-learn, the `scoring` parameter of `cross_val_score` controls which met
 
 5-fold CV for the two-predictor logistic regression, estimating accuracy, precision, and recall:
 
+<br>
+
 ```{python}
 #| echo: false
 
@@ -671,35 +720,11 @@ print(f"Mean CV precision:  {prec_scores.mean():.4f}")
 print(f"Mean CV recall:     {rec_scores.mean():.4f}")
 ```
 
-::: {.body-text-s}
-Each row is a separate model fit on a different 4-fold subset and evaluated on the held-out fold. The mean across folds is our estimate of test performance.
-:::
-
----
-
-## {#loocv data-menu-title="LOOCV"}
-
-[Leave-one-out CV (LOOCV)]{.slide-title}
-
-<hr>
-
-LOOCV is a special case of $k$-fold CV where $k = n$:
-
-$$\text{CV}_{(n)} = \frac{1}{n} \sum_{i=1}^{n} \text{Err}_i$$
-
 <br>
 
-::: {.body-text-m}
-**Advantages over the validation set approach:**
+Each row is a separate model fit on a different 4-fold subset and evaluated on the held-out fold. 
 
-- Each model trains on $n - 1$ observations → very little bias
-- No randomness: there is only one way to hold out each single observation
-
-**Drawback:**
-
-- Must fit the model $n$ times → prohibitively slow for large datasets or complex models
-- $k = 5$ or $k = 10$ achieves comparable estimates at a fraction of the cost
-:::
+The mean across folds is our estimate of test performance.
 
 ---
 
@@ -719,7 +744,7 @@ $$\text{CV}_{(n)} = \frac{1}{n} \sum_{i=1}^{n} \text{Err}_i$$
 
 A **hyperparameter** is any setting chosen by the analyst that **cannot be learned from the training data** during model fitting.
 
-<br>
+Examples: 
 
 ::: {.body-text-m}
 | Model | Hyperparameter | What it controls |
@@ -733,7 +758,7 @@ A **hyperparameter** is any setting chosen by the analyst that **cannot be learn
 . . .
 
 ::: {.teal-text .body-text-m}
-Choosing a hyperparameter by optimizing against the test set is always **data leakage**, regardless of which hyperparameter it is.
+Choosing a hyperparameter by optimizing against the test set is  another example of data leakage.
 :::
 
 ---
@@ -747,17 +772,17 @@ Choosing a hyperparameter by optimizing against the test set is always **data le
 <br>
 
 0. Identify the hyperparameter to tune.
-1. For each candidate value, compute the $k$-fold CV error on the **training set**.
-2. Select the value with the lowest CV error.
-3. Refit the model using the selected value on the **full training set**.
-4. Evaluate the final model **once** on the test set.
+1. For each hyperparameter candidate value, compute the $k$-fold CV error on the training set.
+2. Select the hyperparameter value with the lowest CV error.
+3. Refit the model using the selected hyperparameter **on the full training set**.
+4. Evaluate the final model once on the test set to report the accuracy metrics.
 
 <br>
 
 . . .
 
 ::: {.center-text .teal-text .body-text-m}
-The test set never influences the selection — it is only used for the final reported number.
+The test set never influences the selection, so we are not inadvertently tuning our model to perform on the test set. 
 :::
 
 ---
@@ -767,6 +792,8 @@ The test set never influences the selection — it is only used for the final re
 [KNN hyperparameter selection: kelp data]{.slide-title}
 
 <hr>
+
+We decide to tune the hyperparameter $K$ using CV. For each value of $K$ we  estimate the test error rate using 10-fold CV. 
 
 ```{python}
 #| echo: false
@@ -786,10 +813,6 @@ plt.tight_layout()
 plt.show()
 plt.close()
 ```
-
-::: {.body-text-s .center-text}
-The curve traces the bias–variance tradeoff: small $K$ → overfit (high variance); large $K$ → underfit (high bias).
-:::
 
 ---
 
@@ -825,12 +848,10 @@ plt.close()
 
 ::: {.column width="45%"}
 
-::: {.teal-text .body-text-m}
-1. What happens to the decision boundary as $K$ increases from 1 to 50? How does this relate to bias and variance?
+::: {.teal-text}
+1. Once $K$ is selected, on what data should the final model be fit?
 
-2. Once $K$ is selected, on what data should the final model be fit?
-
-3. Why is using the test set to select $K$ incorrect?
+2. Why is using the test set to select $K$ not the best practice?
 :::
 
 :::
@@ -871,21 +892,15 @@ plt.close()
 
 ::: {.column width="45%"}
 
-::: {.teal-text .body-text-m}
-1. What happens to the decision boundary as $K$ increases from 1 to 50? How does this relate to bias and variance?
+::: {.teal-text}
+1. Once $K$ is selected, on what data should the final model be fit?
 
-2. Once $K$ is selected, on what data should the final model be fit?
-
-3. Why is using the test set to select $K$ incorrect?
+2. Why is using the test set to select $K$ not the best practice?
 :::
 
-::: {.body-text-s}
-1. Boundary gets smoother. Bias ↑, variance ↓. At $K=1$ perfect fit (overfit); at $K=n$ always predicts majority class.
+1. On the **full training set** (all 210 obs). CV only informs the choice of $K$.
 
-2. On the **full training set** (all 210 obs). CV only informs the choice of $K$.
-
-3. The test set would influence the modeling decision. The reported accuracy would reflect optimization for those observations, not true generalization.
-:::
+2. The test set would influence the modeling decision. The reported accuracy would reflect optimization for those observations, not true generalization.
 
 :::
 
@@ -899,7 +914,13 @@ plt.close()
 
 <hr>
 
-Once $K$ is selected via CV, refit on the full training set and evaluate **once** on the test set:
+Once $K$ is selected via CV, refit on the full training set and evaluate once on the test set.
+
+. . .
+
+<br>
+
+In our example data we obtain the following:
 
 ```{python}
 #| echo: false
@@ -911,9 +932,50 @@ print(f"Actual test error:     {test_error_knn:.4f}")
 
 <br>
 
+If the CV error and test error are in a similar range, cross-validation gave us a reliable estimate of generalization before we ever touched the test set.
+
+---
+
+## {#model-comparison-q data-menu-title="Check-in: model comparison (Q)"}
+
+[Comparing models with CV]{.slide-title}
+
+<hr>
+
+CV can be used to compare different model types on the same training data before touching the test set. 
+
+Once a model is selected using CV, we can refit on the full training set and report its performance on the test set once, as a final evaluation. 
+
 . . .
 
-If the CV error and test error are in a similar range, cross-validation gave us a reliable estimate of generalization **before we ever touched the test set**.
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text}
+**Check-in**
+:::
+
+10-fold CV error for three candidate models on the kelp training data:
+
+```{python}
+#| echo: false
+
+print(comparison_df.to_string(index=False))
+```
+:::
+
+::: {.column width="50%"}
+
+::: {.teal-text}
+1. Which model would you select and why? Is there other information you'd like to take into consideration before deciding?
+
+2. Earlier we saw that selecting the classification threshold using the test set leads to data leakage. How is using CV to compare these three models solving the same underlying problem?
+:::
+
+:::
+
+::::
 
 ---
 
@@ -923,98 +985,12 @@ If the CV error and test error are in a similar range, cross-validation gave us 
 
 <hr>
 
-![](parameters_workflow.png){width=80% fig-align="center"}
-
-::: {.body-text-s .center-text}
-CV governs all decisions made during model development. The test set is used exactly once, at the end.
-:::
-
----
-
-## {#section-comparing data-menu-title="# Comparing models with CV #" background="#047C90"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Comparing models with CV</p>
-</div>
-
----
-
-## {#model-comparison-q data-menu-title="Check-in: model comparison (Q)"}
-
-[Check-in]{.slide-title}
-
-<hr>
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-10-fold CV error for three candidate models on the kelp training data:
-
-```{python}
-#| echo: false
-
-print(comparison_df.to_string(index=False))
-```
-
-<br>
-
-Once you select a model with CV, refit it on the full training set and report test-set performance **once**, as the final evaluation.
-
-:::
-
-::: {.column width="50%"}
-
-::: {.teal-text .body-text-m}
-1. Which model would you select based on this comparison?
-
-2. Earlier we saw that selecting the classification threshold using the test set leads to data leakage. How is using CV to compare these three models solving the same underlying problem?
-:::
-
-:::
-
-::::
-
----
-
-## {#model-comparison-a data-menu-title="Check-in: model comparison (A)"}
-
-[Check-in]{.slide-title}
-
-<hr>
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-10-fold CV error for three candidate models on the kelp training data:
-
-```{python}
-#| echo: false
-
-print(comparison_df.to_string(index=False))
-```
-
-<br>
-
-Once you select a model with CV, refit it on the full training set and report test-set performance **once**, as the final evaluation.
-
-:::
-
-::: {.column width="50%"}
-
-::: {.teal-text .body-text-m}
-1. Which model would you select based on this comparison?
-
-2. Earlier we saw that selecting the classification threshold using the test set leads to data leakage. How is using CV to compare these three models solving the same underlying problem?
-:::
+![](parameters_workflow.png){width=70% fig-align="center"}
 
 ::: {.body-text-s}
-1. The model with the lowest CV error.
-
-2. Any time we use the test set to inform a decision — choosing a threshold, tuning $K$, or picking a model type — we are optimizing for those specific observations and the test error is no longer honest. CV solves this in all three cases: it estimates how each candidate generalizes using only the training set, so the test set stays untouched until the very final evaluation.
+Diagram from [`scikit-learn`'s documentation on cross-validation](https://scikit-learn.org/stable/modules/cross_validation.html)
 :::
 
+::: {.center-text}
+CV governs decisions made during model development. 
 :::
-
-::::
