@@ -1,6 +1,7 @@
 ---
 title: Cross-validation
 jupyter: eds232-env
+echo: false
 ---
 
 ```{python}
@@ -110,11 +111,13 @@ In the [previous lesson](../4_3_logistic_regression/4_3_logistic_regression-NOTE
 
 ## Why cross-validation?
 
-### A motivating example: selecting the classification threshold
+Recall from the logistic regression lesson that once we fit a model, we classify observations by comparing the predicted probability $p(X)$ to a **classification threshold** $\alpha$. In our example data this means we 
 
-Recall from the logistic regression lesson that once we fit a model, we classify observations by comparing the predicted probability $p(X)$ to a **classification threshold** $\alpha$. In our example data this means we predict healthy if $p(X) \geq \alpha$, degraded otherwise. The default is $\alpha = 0.5$, but different thresholds shift the tradeoff between precision and recall. How should we choose $\alpha$?
+$$\text{predict healthy if } p(X) \geq \alpha \text{, degraded otherwise.}$$
 
-A natural approach: try many threshold values, measure accuracy on the test set for each, and pick the best.
+The default is $\alpha = 0.5$, but different thresholds shift the tradeoff between precision and recall, so the default may not always be the threshold we want to use to maximize our accuracy metric. How should we choose $\alpha$?
+
+Suppose we want to maximze overall accuracy, a natural approach: try many threshold values, measure accuracy on the test set for each, and pick the best. We obtain the following information:
 
 ```{python}
 #| label: threshold-naive-selection
@@ -143,88 +146,11 @@ print(f"Best threshold found on test set: α = {best_naive_t:.2f}")
 print(f"Accuracy at that threshold (on test set):     {best_naive_acc:.3f}")
 ```
 
-We found a threshold that beats the default — but we have made a critical mistake: **we used the test set to make a modeling decision.** We examined the test set outcomes to figure out which threshold works best, and then reported the accuracy for that threshold on the very same observations we used to select it.
+We found a threshold that beats the default, but we might be making a mistake if using this value beacuse **we used the test set to make a modeling decision.** We examined the test set outcomes to figure out which threshold works best, and then reported the accuracy for that threshold on the very same observations we used to select it.
 
-This is called **data leakage**: information from the test set leaked into our modeling process. The reported accuracy is no longer an honest estimate of how the model performs on new, unseen data. We selected $\alpha$ *because* it happened to work well on these particular 90 test observations — not because it generalizes well.
+This is called **data leakage**: information from the test set leaked into our modeling process. The reported accuracy is no longer an honest estimate of how the model performs on new, truly unseen data. We selected $\alpha$ *because* it happened to work well on these test observations, not because it generalizes well.
 
-```{python}
-#| label: threshold-leakage-illustration
-#| echo: false
-#| fig-align: center
-
-from sklearn.model_selection import StratifiedKFold
-
-# Estimate accuracy at each threshold using 5-fold CV on the training set
-cv5 = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-y_train_num = (y_train == 'healthy').astype(int)
-
-cv_accs_naive = []
-for t in thresholds_naive:
-    fold_accs = []
-    for tr_idx, val_idx in cv5.split(X_train, y_train_num):
-        X_tr, X_val = X_train[tr_idx], X_train[val_idx]
-        y_tr, y_val = y_train_num[tr_idx], y_train_num[val_idx]
-        lr_cv = LogisticRegression(max_iter=1000)
-        lr_cv.fit(X_tr, y_tr)
-        y_prob_val = lr_cv.predict_proba(X_val)[:, 1]
-        fold_accs.append(accuracy_score(y_val, (y_prob_val >= t).astype(int)))
-    cv_accs_naive.append(np.mean(fold_accs))
-
-best_cv_naive_idx = np.argmax(cv_accs_naive)
-best_cv_naive_t   = thresholds_naive[best_cv_naive_idx]
-best_cv_naive_acc = cv_accs_naive[best_cv_naive_idx]
-actual_test_at_cv = test_accs_naive[best_cv_naive_idx]
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y))
-
-ax.plot(thresholds_naive, test_accs_naive, color='tomato',    linewidth=2,
-        label='Accuracy on test set ⚠ data leakage')
-ax.plot(thresholds_naive, cv_accs_naive,   color='steelblue', linewidth=2,
-        label='5-fold CV accuracy on training set ✓')
-
-ax.scatter(best_naive_t,   best_naive_acc,      color='tomato',    s=80, zorder=5,
-           label=f'Test-selected α = {best_naive_t:.2f}  →  reported acc = {best_naive_acc:.3f}')
-ax.scatter(best_cv_naive_t, actual_test_at_cv,  color='seagreen',  s=80, marker='D', zorder=5,
-           label=f'CV-selected α = {best_cv_naive_t:.2f}  →  actual test acc = {actual_test_at_cv:.3f}')
-
-ax.axvline(best_naive_t,   color='tomato',    linestyle=':', alpha=0.5)
-ax.axvline(best_cv_naive_t, color='steelblue', linestyle=':', alpha=0.5)
-
-ax.set_xlabel('Classification threshold α')
-ax.set_ylabel('Accuracy')
-ax.set_title('Selecting the classification threshold\nTest set (data leakage) vs. cross-validation (honest)')
-ax.legend(fontsize=8.5, loc='lower left')
-ax.set_ylim(0.5, 0.85)
-ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-The **red curve** sweeps thresholds against the test set. Its peak is what we would naively report, but because we *searched for* the peak using the test set, the reported accuracy is inflated.
-
-The **blue curve** estimates accuracy at each threshold using only the training data (5-fold cross-validation — we'll cover the details shortly). The green diamond marks the actual test-set accuracy when the threshold is selected honestly via CV. This lower value is the more reliable estimate of how the model will perform on truly new data.
-
-The gap between the red peak and the green diamond is the cost of data leakage: by using the test set to tune a modeling choice, we fooled ourselves into thinking our model is better than it is.
-
-### Hyperparameters
-
-The classification threshold is one instance of a broader concept: a **hyperparameter**.
-
-A **hyperparameter** is any setting of a model that is **chosen by the analyst** and **cannot be learned from the training data during model fitting**. Unlike model parameters (such as regression coefficients, which the algorithm estimates from data), hyperparameters must be set before fitting and control *how* the model learns.
-
-Some examples we have already encountered:
-
-| Model | Hyperparameter | What it controls |
-|-------|----------------|-----------------|
-| K-Nearest Neighbors | $K$ (number of neighbors) | Smoothness of the decision boundary |
-| Logistic Regression | Classification threshold $\alpha$ | Precision–recall tradeoff |
-
-Choosing a hyperparameter by optimizing against the test set is always data leakage, regardless of which hyperparameter it is.
-
-### The workflow we have been using
-
-The example above reveals a limitation of the workflow we have used so far:
+The workflow we have used so far is
 
 1. Split our available data into a **training set** and a **test set**.
 2. Fit the model on the training set.
@@ -232,20 +158,32 @@ The example above reveals a limitation of the workflow we have used so far:
 
 ![Diagram from [Google's ML Concepts Crash Course.](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets)](training-test.png)
 
-This works well when we have already committed to a single, fully specified model. But as soon as we need to make any modeling decision — choosing a threshold, selecting $K$, comparing two model types — consulting the test set contaminates it. The test set can only serve as an honest final evaluation if it plays no role in any decision made along the way.
+This works well when we have already committed to a single (or a few) fully specified models. But as soon as we need to make any modeling decision, consulting the test set to do so can interfere. The test set serves as an honest final evaluation if it plays no role in any decision made along the way. 
 
-### Looking forward: cross-validation
+The fix is straightforward: **make modeling decisions using only the training data**, and keep the test set sealed until the very final evaluation. Cross-validation (a type of resampling method) is the standard tool for doing this.
 
-The fix is straightforward: **make all modeling decisions — including hyperparameter selection — using only the training data**, and keep the test set sealed until the very final evaluation. Cross-validation is the standard tool for doing this. It repeatedly splits the training data into temporary training and validation subsets, fits the model on each split, and averages the resulting errors to produce a stable, honest estimate of test performance.
 
 ## The validation set approach
 
-The simplest resampling method is the **validation set approach**:
+Before going into cross-validation, let's talk about the **validation set approach**. This is the simplest resampling method, the building block for cross-validation, and consists of the following steps
 
-1. Randomly divide the training observations into a **training set** and a **validation set**.
+1. Randomly divide the training observations into a **training set** and a **validation set** (also called **hold-out set**).
 2. Fit the model on the training set.
 3. Evaluate the fitted model on the validation set.
-4. The validation error is the estimate of the test error.
+4. Estimate the test error by calculating the error rate on the validation set. 
+
+![Diagram from [Google's ML Concepts Crash Course.](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets)](training-validation-test.png)
+
+Steps 1-4 let us obtain an estimate of test error for a given model. We would then compare models by:
+
+5. Use the validation set approach to have an estimate of the test error for each model.
+6. Select the model with the lowest error. 
+7. Train the model with the lowest error on the full training set.
+8. Obtain final accuracy metric by applying fully-trained model to the test set. 
+
+This is a very flexible approach and can be applied to both classification and regression, the only chage would be how we measure the error on the validation set in step 4. 
+
+When we divide our data into training and validation sets in step 1, the test error estimate depends on the particular randomly selected validation set. This is a drawback of this approach since different validation sets can greatly vary this estimate. We can see this variation in our example kelp classification data when we use different random splits to create the validation set:
 
 ```{python}
 #| label: validation-set-example
@@ -272,9 +210,9 @@ ax.plot(range(1, n_splits + 1), val_errors, 'o-', color='steelblue',
         linewidth=1.5, markersize=5)
 ax.axhline(np.mean(val_errors), color='tomato', linestyle='--', linewidth=1.5,
            label=f'Mean error = {np.mean(val_errors):.3f}')
-ax.set_xlabel('Validation split (different random seed each time)')
+ax.set_xlabel('Validation split (63 points - different random seed each time)')
 ax.set_ylabel('Validation error rate')
-ax.set_title('Validation error varies across different random splits\n(logistic regression, two predictors)')
+ax.set_title('Validation error varies across different random splits\n(logistic regression, two predictors on kelp data)')
 ax.set_ylim(0, 0.5)
 ax.legend(fontsize=9)
 ax.grid(True, alpha=0.3)
@@ -283,21 +221,20 @@ plt.show()
 plt.close()
 ```
 
-Each point is the validation error from a different random split of the same training data — the model and the data are identical, only the split changes. The variability is substantial: the estimate of test error depends heavily on which observations happen to end up in the validation set.
-
-A second drawback: setting aside part of the training data for validation means the model is **fit on fewer observations than we will ultimately use**. Models fit on less data tend to perform worse, so the validation error will tend to *overestimate* the true test error of the final model (which will be trained on more data).
 
 :::{.callout-tip}
 ## Check-in
-1. In the plot above, some splits give a much lower validation error than others. Does this mean those splits produced better models? What is actually varying?
-2. If you had a dataset of only 60 observations and used a 50/50 validation split, what concern would you have about the reliability of the error estimate?
+The training set for the kelp data has 210 points and 90 test points. The plot above shows the results using  validation sets with 63 points. If you decided to use a 50/50 validation split (110 poits for training/110 points for validation), what would be a bigger concern: the validation error being much higher or much lower than the test error?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
-1. No — the model and the training data are the same every time. What varies is *which observations* are in the validation set. Some splits put "easier" observations in the validation set and some put "harder" ones, producing a wide range of error estimates. The variation tells us about the sensitivity of the estimate, not the quality of the model.
-2. With only 30 training observations, the fitted model sees very little data and will likely perform worse than a model trained on 60 observations. The validation error will overestimate the true test error of the final model, and with so few observations in the validation set the estimate will also be very noisy.
+The bigger concern is the validation error being much higher than the test error. 
+
+The validation error estimates how well a model trained on 110 observations performs. But the model you will ultimately deploy is trained on all 210 observations. More training data almost always produces a better-fitting model, so the final model will perform better than the one evaluated during validation.  
 :::
+
+A second drawback is that setting aside part of the training data for validation means the model is **fit on fewer observations than we will ultimately use**. Models fit on less data tend to perform worse, so the validation error will tend to *overestimate* the true test error of the final model (which will be trained on more data).
 
 ## Leave-one-out cross-validation (LOOCV)
 
@@ -396,6 +333,21 @@ In 5-fold CV on our 210-observation training set:
 :::
 
 ## Using CV to select a hyperparameter
+
+### Hyperparameters
+
+The classification threshold is one instance of a broader concept: a **hyperparameter**.
+
+A **hyperparameter** is any setting of a model that is **chosen by the analyst** and **cannot be learned from the training data during model fitting**. Unlike model parameters (such as regression coefficients, which the algorithm estimates from data), hyperparameters must be set before fitting and control *how* the model learns.
+
+Some examples we have already encountered:
+
+| Model | Hyperparameter | What it controls |
+|-------|----------------|-----------------|
+| K-Nearest Neighbors | $K$ (number of neighbors) | Smoothness of the decision boundary |
+| Logistic Regression | Classification threshold $\alpha$ | Precision–recall tradeoff |
+
+Choosing a hyperparameter by optimizing against the test set is always data leakage, regardless of which hyperparameter it is.
 
 One of the most important uses of cross-validation is **hyperparameter selection**: choosing a model parameter that cannot be learned from the training data directly.
 
