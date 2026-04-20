@@ -165,25 +165,18 @@ The fix is straightforward: **make modeling decisions using only the training da
 
 ## The validation set approach
 
-Before going into cross-validation, let's talk about the **validation set approach**. This is the simplest resampling method, the building block for cross-validation, and consists of the following steps
+Before going into cross-validation, let's talk about the **validation set approach**. This is the simplest resampling method, the building block for cross-validation, and consists of the following steps:
 
 1. Randomly divide the training observations into a **training set** and a **validation set** (also called **hold-out set**).
-2. Fit the model on the training set.
-3. Evaluate the fitted model on the validation set.
-4. Estimate the test error by calculating the error rate on the validation set. 
+2. Fit the model on the (smaller) training set.
+3. Compute the error using the fitted model on the validation set.
+
+
+The validation error obtained in step 3 is the estimate for the test error.
 
 ![Diagram from [Google's ML Concepts Crash Course.](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets)](training-validation-test.png)
 
-Steps 1-4 let us obtain an estimate of test error for a given model. We would then compare models by:
-
-5. Use the validation set approach to have an estimate of the test error for each model.
-6. Select the model with the lowest error. 
-7. Train the model with the lowest error on the full training set.
-8. Obtain final accuracy metric by applying fully-trained model to the test set. 
-
-This is a very flexible approach and can be applied to both classification and regression, the only chage would be how we measure the error on the validation set in step 4. 
-
-When we divide our data into training and validation sets in step 1, the test error estimate depends on the particular randomly selected validation set. This is a drawback of this approach since different validation sets can greatly vary this estimate. We can see this variation in our example kelp classification data when we use different random splits to create the validation set:
+Notice that when we divide our data into training and validation sets in step 1, the test error estimate depends on the particular randomly selected validation set. This is a drawback of this approach since different validation sets can greatly vary the test error estimate (high variance). We can see this variation in our example kelp classification data when we use different random splits to create the validation set:
 
 ```{python}
 #| label: validation-set-example
@@ -234,87 +227,40 @@ The bigger concern is the validation error being much higher than the test error
 The validation error estimates how well a model trained on 110 observations performs. But the model you will ultimately deploy is trained on all 210 observations. More training data almost always produces a better-fitting model, so the final model will perform better than the one evaluated during validation.  
 :::
 
-A second drawback is that setting aside part of the training data for validation means the model is **fit on fewer observations than we will ultimately use**. Models fit on less data tend to perform worse, so the validation error will tend to *overestimate* the true test error of the final model (which will be trained on more data).
+A second drawback is that setting aside part of the training data for validation means the model is fit on fewer observations than we will ultimately use (introducing higher bias). Models fit on less data tend to perform worse, so the validation error will tend to *overestimate* the true test error of the final model (which will be trained on more data).
 
-## Leave-one-out cross-validation (LOOCV)
 
-**Leave-one-out cross-validation (LOOCV)** addresses both drawbacks of the validation set approach by repeating the evaluation $n$ times, each time holding out only a single observation.
 
-Given training observations $\{(x_1, y_1), \ldots, (x_n, y_n)\}$:
+<!-- 
+Steps 1-4 let us obtain an estimate of test error for a given model. We would then compare models by following these steps:
 
-1. Hold out the first observation $(x_1, y_1)$.
-2. Fit the model on the remaining $n - 1$ observations.
-3. Predict $\hat{y}_1$ using $x_1$ and compute the error for that observation.
-4. Repeat steps 1–3, each time holding out observation $i$, for $i = 1, \ldots, n$.
-5. Average the $n$ individual errors:
+5. Use the validation set approach to have an estimate of the test error for each model.
+6. Select the model with the lowest error. 
+7. Train the model with the lowest error on the full training set.
+8. Obtain final accuracy metric by applying fully-trained model to the test set. 
 
-$$\text{CV}_{(n)} = \frac{1}{n} \sum_{i=1}^{n} \text{Err}_i$$
+This is a very flexible approach and can be applied to both classification and regression, the only chage would be how we measure the error on the validation set in step 4. 
+ -->
 
-For a **classification** problem, $\text{Err}_i = \mathbf{1}(\hat{y}_i \neq y_i)$: it equals 1 if observation $i$ was misclassified and 0 otherwise. The LOOCV estimate is therefore the average misclassification rate across all $n$ held-out observations.
 
-**Advantages over the validation set approach:**
+## $k$-fold cross-validation
 
-- Each model is trained on $n - 1$ observations — almost the full training set — so there is far less bias in the error estimate.
-- There is **no randomness**: LOOCV always produces the same result regardless of how many times you run it.
+**$k$-fold cross-validation** is the standard resampling method in practice. It overcomes both drawbacks of the validation set approach (high variance from a single split and upward bias from training on fewer observations) by systematically rotating through all the data. We use the following steps to do the $k$-fold cross-validation:
 
-**Drawback:**
 
-- The model must be fit $n$ times. For large $n$ or complex models, this is computationally expensive.
+1. Randomly divide the training set into $k$ roughly equal-sized **folds**.
+2. Hold out the first fold as the validation set; fit the model on the remaining $k - 1$ folds.
+3. Compute the error $\text{Err}_1$ on the held-out fold.
+4. Repeat steps 2–3 for each of the $k$ folds, each time holding out a different fold.
+5. Average the $k$ fold errors $\text{Err}_1, \ldots, \text{Err}_k$ to obtain an estimate of the test errors:
 
-```{python}
-#| label: loocv-example
+$$\text{CV}_{(k)} = \frac{1}{k} \sum_{i=1}^{k} \text{Err}_i.$$
 
-loocv    = LeaveOneOut()
-lr_loocv = LogisticRegression(max_iter=1000)
-scores   = cross_val_score(lr_loocv, X_train, y_train, cv=loocv, scoring='accuracy')
 
-print(f"Number of models fitted:        {len(scores)}")
-print(f"LOOCV error rate (2 predictors): {1 - scores.mean():.4f}")
-```
+In practice we **use $k=5$ or $k=10$ for the number of folds**. These values strike a good balance: each fold uses 80–90% of the training data per fit and fitting only 5 or 10 models is also computationally cheap. The fold errors are less correlated with each other than in approaches that use more folds, which tends to produce stable estimates of the test error.
 
-:::{.callout-tip}
-## Check-in
-1. LOOCV on our 210-observation training set fits the model 210 times. How many observations are used to train the model in each of those fits?
-2. True or false: running LOOCV twice on the same data will give two different error estimates. Explain your answer.
-3. Why is LOOCV rarely used in practice despite having good statistical properties?
-:::
+![Diagram adapted from [`scikit-learn`'s documentation on cross-validation](https://scikit-learn.org/stable/modules/cross_validation.html)](grid_search_cross_validation.png)
 
-:::{.callout-tip collapse="true"}
-## Discussion
-1. Each fit uses $210 - 1 = 209$ observations for training.
-2. **False.** LOOCV has no random component — there is exactly one way to hold out each single observation, so the result is always identical.
-3. For a training set of size $n$, LOOCV requires fitting the model $n$ times. For large datasets or computationally heavy models this is prohibitively slow. K-fold CV (with $K = 5$ or $10$) achieves comparable accuracy estimates while fitting the model only 5 or 10 times.
-:::
-
-## K-fold cross-validation
-
-**K-fold cross-validation** offers a computationally efficient alternative to LOOCV that is the standard approach in practice.
-
-**Approach:**
-
-1. Randomly divide the training set into $K$ roughly equal-sized **folds**.
-2. Hold out fold 1 as the validation set; fit the model on the remaining $K - 1$ folds.
-3. Compute the error on the held-out fold: $\text{Err}_1$ (misclassification rate for classification).
-4. Repeat steps 2–3 for each of the $K$ folds, each time holding out a different fold.
-5. Average the $K$ fold errors:
-
-$$\text{CV}_{(K)} = \frac{1}{K} \sum_{i=1}^{K} \text{Err}_i$$
-
-LOOCV is a special case of K-fold CV where $K = n$.
-
-**Why $K = 5$ or $K = 10$?** These values strike a good balance: each fold uses 80–90% of the training data per fit (nearly as much as LOOCV), fitting only 5 or 10 models. The fold errors are also less correlated with each other than in LOOCV, which can actually produce lower-variance estimates of the test error.
-
-```{python}
-#| label: kfold-example
-
-kf       = KFold(n_splits=5, shuffle=True, random_state=42)
-lr_kf    = LogisticRegression(max_iter=1000)
-kf_scores = cross_val_score(lr_kf, X_train, y_train, cv=kf, scoring='accuracy')
-
-print("5-fold CV accuracy per fold: ", np.round(kf_scores, 4))
-print(f"Mean CV accuracy:             {kf_scores.mean():.4f}")
-print(f"Mean CV error rate:           {1 - kf_scores.mean():.4f}")
-```
 
 :::{.callout-tip}
 ## Check-in
@@ -322,15 +268,90 @@ In 5-fold CV on our 210-observation training set:
 
 1. Approximately how many observations are in each fold?
 2. How many observations are used to train the model in each iteration?
-3. Why might $K = 10$ give a more stable error estimate than $K = 2$, even though both split the data?
+3. What happens if you set $k = n$ (i.e., one observation per fold)? Will running this procedure twice on the same data give the same result or a different one? Why?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 1. $210 / 5 = 42$ observations per fold.
 2. $210 - 42 = 168$ observations for training in each fold.
-3. With $K = 2$, each model is trained on only half the data — the error estimates are based on smaller training sets and will be noisier. With $K = 10$, each model trains on 90% of the data, producing lower-bias estimates. The 10 fold errors are also more independent of each other, so their average is more stable.
+3. Setting $k = n$ means each fold contains exactly one observation — this is **leave-one-out cross-validation (LOOCV)**. Because there is only one way to hold out each single observation, there is no randomness in how the folds are formed. Running LOOCV twice on the same data always produces exactly the same result. (Contrast this with $k = 5$ or $k = 10$, where the random fold assignment can vary unless a random seed is fixed.)
 :::
+
+### Computing the fold error
+
+How we measure $\text{Err}_i$ in step 3 depends on the type of problem.
+
+**Regression**: Use the Mean Squared Error (MSE) on the held-out fold:
+
+$$\text{Err}_i = \text{MSE in fold $i$} = \frac{1}{n_i} \sum_{j \in \text{fold } i} (y_j - \hat{y}_j)^2,$$
+
+where $n_i$ is the number of observations in fold $i$, $y_j$ is the true response, and $\hat{y}_j$ is the model's prediction.  
+
+**Classification**: Use the misclassification rate on the held-out fold:
+
+$$\text{Err}_i = \text{error rate in fold $i$} =  \frac{1}{n_i} \sum_{j \in \text{fold } i} \mathbf{1}(\hat{y}_j \neq y_j)$$
+
+where $\mathbf{1}(\hat{y}_i \neq y_i)$ equals 1 if observation $i$ was assigned the wrong class and 0 otherwise. This is simply the fraction of observations within the fold that were misclassified.
+
+### Other metrics
+
+The error rate or MSE are not the only metrics that can be estimated with cross-validation. Any performance metric that gives us a number can be substituted. In classification, this includes precision, recall, $F_1$, and AUC; in regression, you could use $R^2$. The procedure is identical: compute the chosen metric on each held-out fold, then average across folds. For example, in our kelp data we can estimate the test accuracy, precision, and recall in for our classifier using 5-fold CV as shown in the results below:
+
+<!-- In `scikit-learn`, the `scoring` parameter of `cross_val_score` controls which metric is used (e.g., `scoring='roc_auc'`, `scoring='f1'`). -->
+
+```{python}
+#| label: kfold-example
+
+kf    = KFold(n_splits=5, shuffle=True, random_state=42)
+lr_kf = LogisticRegression(max_iter=1000)
+
+acc_scores  = cross_val_score(lr_kf, X_train, y_train, cv=kf, scoring='accuracy')
+prec_scores = cross_val_score(lr_kf, X_train, y_train, cv=kf, scoring='precision_weighted')
+rec_scores  = cross_val_score(lr_kf, X_train, y_train, cv=kf, scoring='recall_weighted')
+
+results = pd.DataFrame({
+    'Fold':      range(1, 6),
+    'Accuracy':  np.round(acc_scores,  4),
+    'Precision': np.round(prec_scores, 4),
+    'Recall':    np.round(rec_scores,  4),
+})
+print(results.to_string(index=False))
+print()
+print(f"Mean CV accuracy:   {acc_scores.mean():.4f}")
+print(f"Mean CV precision:  {prec_scores.mean():.4f}")
+print(f"Mean CV recall:     {rec_scores.mean():.4f}")
+```
+
+<!-- 
+### Leave-one-out cross-validation (LOOCV)
+
+**Leave-one-out cross-validation (LOOCV)** is a special case of K-fold CV where $K = n$: each fold contains exactly one observation, so the model is fit $n$ times, each time on $n - 1$ observations.
+
+$$\text{CV}_{(n)} = \frac{1}{n} \sum_{i=1}^{n} \text{Err}_i$$
+
+**Advantages over the validation set approach:**
+
+- Each model is trained on $n - 1$ observations — almost the full training set — so there is very little bias in the error estimate.
+- There is **no randomness**: there is only one way to hold out each single observation, so LOOCV always produces the same result.
+
+**Drawback:**
+
+- The model must be fit $n$ times. For large datasets or computationally expensive models this is prohibitively slow. K-fold CV with $K = 5$ or $10$ achieves comparable accuracy at a fraction of the cost, and is preferred in practice.
+
+-->
+
+<!-- ```{python}
+#| label: loocv-example
+
+loocv    = LeaveOneOut()
+lr_loocv = LogisticRegression(max_iter=1000)
+scores   = cross_val_score(lr_loocv, X_train, y_train, cv=loocv, scoring='accuracy')
+
+print(f"Number of models fitted:         {len(scores)}")
+print(f"LOOCV error rate (2 predictors): {1 - scores.mean():.4f}")
+``` -->
+ 
 
 ## Using CV to select a hyperparameter
 
