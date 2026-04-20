@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Learning from data – EDS 232 - Machine Learning for Environmental Science</title>
+<title>Cross-validation – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -183,7 +203,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html">Introduction</a></li><li class="breadcrumb-item"><a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html">Learning from data</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html">Resampling Methods</a></li><li class="breadcrumb-item"><a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html">Cross-validation</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -227,7 +247,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html" class="sidebar-item-text sidebar-link active">
+  <a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Learning from data</span></a>
   </div>
 </li>
@@ -296,7 +316,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html" class="sidebar-item-text sidebar-link">
+  <a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Cross-validation</span></a>
   </div>
 </li>
@@ -312,43 +332,25 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#investigating-elephant-seal-population" id="toc-investigating-elephant-seal-population" class="nav-link active" data-scroll-target="#investigating-elephant-seal-population">Investigating elephant seal population</a>
+  <li><a href="#a-guiding-example-kelp-forest-monitoring" id="toc-a-guiding-example-kelp-forest-monitoring" class="nav-link active" data-scroll-target="#a-guiding-example-kelp-forest-monitoring">A guiding example: kelp forest monitoring</a></li>
+  <li><a href="#why-cross-validation" id="toc-why-cross-validation" class="nav-link" data-scroll-target="#why-cross-validation">Why cross-validation?</a></li>
+  <li><a href="#the-validation-set-approach" id="toc-the-validation-set-approach" class="nav-link" data-scroll-target="#the-validation-set-approach">The validation set approach</a></li>
+  <li><a href="#k-fold-cross-validation" id="toc-k-fold-cross-validation" class="nav-link" data-scroll-target="#k-fold-cross-validation"><span class="math inline">\(k\)</span>-fold cross-validation</a>
   <ul class="collapse">
-  <li><a href="#an-ideal-function-f-exists-somewhere-we-just-cant-access-it" id="toc-an-ideal-function-f-exists-somewhere-we-just-cant-access-it" class="nav-link" data-scroll-target="#an-ideal-function-f-exists-somewhere-we-just-cant-access-it">An ideal function <span class="math inline">\(f\)</span> exists somewhere, we just can’t access it</a></li>
-  <li><a href="#our-next-best-option-is-to-estimate-f-using-data" id="toc-our-next-best-option-is-to-estimate-f-using-data" class="nav-link" data-scroll-target="#our-next-best-option-is-to-estimate-f-using-data">Our next best option is to estimate <span class="math inline">\(f\)</span> using data</a></li>
+  <li><a href="#computing-the-fold-error" id="toc-computing-the-fold-error" class="nav-link" data-scroll-target="#computing-the-fold-error">Computing the fold error</a></li>
+  <li><a href="#other-metrics" id="toc-other-metrics" class="nav-link" data-scroll-target="#other-metrics">Other metrics</a></li>
   </ul></li>
-  <li><a href="#abstract-setup" id="toc-abstract-setup" class="nav-link" data-scroll-target="#abstract-setup">Abstract setup</a>
-  <ul class="collapse">
-  <li><a href="#why-bother-to-estimate-f" id="toc-why-bother-to-estimate-f" class="nav-link" data-scroll-target="#why-bother-to-estimate-f">Why bother to estimate <span class="math inline">\(f\)</span>?</a></li>
-  <li><a href="#how-do-we-estimate-f" id="toc-how-do-we-estimate-f" class="nav-link" data-scroll-target="#how-do-we-estimate-f">How do we estimate <span class="math inline">\(f\)</span>?</a></li>
-  <li><a href="#notation" id="toc-notation" class="nav-link" data-scroll-target="#notation">Notation</a></li>
-  </ul></li>
-  <li><a href="#parametric-methods" id="toc-parametric-methods" class="nav-link" data-scroll-target="#parametric-methods">Parametric methods</a>
-  <ul class="collapse">
-  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
-  </ul></li>
-  <li><a href="#non-parametric-methods" id="toc-non-parametric-methods" class="nav-link" data-scroll-target="#non-parametric-methods">Non-parametric methods</a>
-  <ul class="collapse">
-  <li><a href="#example-1" id="toc-example-1" class="nav-link" data-scroll-target="#example-1">Example</a></li>
-  </ul></li>
-  <li><a href="#regression-vs.-classification" id="toc-regression-vs.-classification" class="nav-link" data-scroll-target="#regression-vs.-classification">Regression vs.&nbsp;Classification</a>
-  <ul class="collapse">
-  <li><a href="#example-2" id="toc-example-2" class="nav-link" data-scroll-target="#example-2">Example</a></li>
-  </ul></li>
-  <li><a href="#unsupervised-vs.-supervised-learning" id="toc-unsupervised-vs.-supervised-learning" class="nav-link" data-scroll-target="#unsupervised-vs.-supervised-learning">Unsupervised vs.&nbsp;Supervised Learning</a>
-  <ul class="collapse">
-  <li><a href="#example-3" id="toc-example-3" class="nav-link" data-scroll-target="#example-3">Example</a></li>
-  </ul></li>
-  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap">Recap</a></li>
+  <li><a href="#using-cv-to-select-a-hyperparameter" id="toc-using-cv-to-select-a-hyperparameter" class="nav-link" data-scroll-target="#using-cv-to-select-a-hyperparameter">Using CV to select a hyperparameter</a></li>
+  <li><a href="#comparing-models-with-cv" id="toc-comparing-models-with-cv" class="nav-link" data-scroll-target="#comparing-models-with-cv">Comparing models with CV</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html">Introduction</a></li><li class="breadcrumb-item"><a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html">Learning from data</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html">Resampling Methods</a></li><li class="breadcrumb-item"><a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html">Cross-validation</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Learning from data</h1>
+<h1 class="title">Cross-validation</h1>
 </div>
 
 
@@ -365,47 +367,87 @@ window.Quarto = {
 </header>
 
 
-<p><a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES.html">📊 Slides</a> / <a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-SLIDES-BLANK.html">📊 Blank slides</a></p>
+<p><a href="5_1_cross_validation-SLIDES.qmd">📊 Slides</a> / <a href="5_1_cross_validation-SLIDES-BLANK.qmd">📊 Blank slides</a></p>
 <p>In this lesson we introduce:</p>
 <ul>
-<li>The idea of estimating a function <span class="math inline">\(f\)</span> using observed data</li>
-<li>Inference and prediction</li>
-<li>Training set = observations used to fit/train a model</li>
-<li>Predictors + response variable &amp; their math notation</li>
-<li>Parametric vs.&nbsp;non parametric</li>
-<li>Regression vs.&nbsp;classification</li>
-<li>Unsupervised vs.&nbsp;supervised learning</li>
+<li>Using a validation set to estimate the test set error</li>
+<li>The <strong>validation set approach</strong> and why it produces variable error estimates</li>
+<li><strong>K-fold cross-validation</strong></li>
+<li>Using cross-validation to <strong>select hyperparameters</strong> (e.g., <span class="math inline">\(K\)</span> in KNN)</li>
+<li>Using cross-validation to <strong>compare models</strong></li>
 </ul>
-<p>These notes are based on chapter 2.1 of the book <em>An Introduction to Statistical Learning with Applications in Python</em> (James et al., 2023).</p>
-<section id="investigating-elephant-seal-population" class="level2">
-<h2 class="anchored" data-anchor-id="investigating-elephant-seal-population">Investigating elephant seal population</h2>
-<p>Amanda is a marine scientist investigating how protected areas affect the population of elephant seals in California. Specifically, she wants to understand: <em>how does elephant seal population change in a protected rookery that has just been protected?</em></p>
+<p>These notes are based on chapter 5 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.</p>
+<section id="a-guiding-example-kelp-forest-monitoring" class="level2">
+<h2 class="anchored" data-anchor-id="a-guiding-example-kelp-forest-monitoring">A guiding example: kelp forest monitoring</h2>
+<p>In this lesson we use the same example dataset as in our KNN lesson: a synthetic dataset that “tracks” 300 coastal monitoring stations. For each station we record:</p>
+<ul>
+<li><strong><code>temp_anomaly</code></strong> — sea surface temperature anomaly (°C); positive values indicate warmer-than-average conditions</li>
+<li><strong><code>nitrate</code></strong> — nitrate concentration (μmol/L); higher values generally support kelp growth</li>
+<li><strong><code>status</code></strong> — observed kelp forest condition: <em>healthy</em> or <em>degraded</em></li>
+</ul>
+<p>The central question is: <em>can we predict whether a kelp forest site is healthy or degraded from its oceanographic conditions?</em></p>
+<div id="cell-initial-data-plotting" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="5_1_cross_validation-NOTES_files/figure-html/initial-data-plotting-output-1.png" id="initial-data-plotting" width="589" height="442" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In the <a href="../../notes/4_3_logistic_regression/4_3_logistic_regression-NOTES.html">previous lesson</a> we introduced logistic regression to predict kelp forest status in this dataset. In this lesson we study how we can use cross-validation to choose amongst different models and select hyperparameters.</p>
+</section>
+<section id="why-cross-validation" class="level2">
+<h2 class="anchored" data-anchor-id="why-cross-validation">Why cross-validation?</h2>
+<p>Recall from the logistic regression lesson that once we fit a model, we classify observations by comparing the predicted probability <span class="math inline">\(p(X)\)</span> to a <strong>classification threshold</strong> <span class="math inline">\(\alpha\)</span>. In our example data this means we</p>
+<p><span class="math display">\[\text{predict healthy if } p(X) \geq \alpha \text{, degraded otherwise.}\]</span></p>
+<p>The default is <span class="math inline">\(\alpha = 0.5\)</span>, but different thresholds shift the tradeoff between precision and recall, so the default may not always be the threshold we want to use to maximize our accuracy metric. How should we choose <span class="math inline">\(\alpha\)</span>?</p>
+<p>Suppose we want to maximze overall accuracy, a natural approach: try many threshold values, measure accuracy on the test set for each, and pick the best. We obtain the following information:</p>
+<div id="threshold-naive-selection" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy at default threshold α = 0.50:       0.711
+Best threshold found on test set: α = 0.59
+Accuracy at that threshold (on test set):     0.722</code></pre>
+</div>
+</div>
+<p>We found a threshold that beats the default, but we might be making a mistake if using this value beacuse <strong>we used the test set to make a modeling decision.</strong> We examined the test set outcomes to figure out which threshold works best, and then reported the accuracy for that threshold on the very same observations we used to select it.</p>
+<p>This is called <strong>data leakage</strong>: information from the test set leaked into our modeling process. The reported accuracy is no longer an honest estimate of how the model performs on new, truly unseen data. We selected <span class="math inline">\(\alpha\)</span> <em>because</em> it happened to work well on these test observations, not because it generalizes well.</p>
+<p>The workflow we have used so far is</p>
+<ol type="1">
+<li>Split our available data into a <strong>training set</strong> and a <strong>test set</strong>.</li>
+<li>Fit the model on the training set.</li>
+<li>Evaluate performance on the test set.</li>
+</ol>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/elephant_seals.jpg" class="img-fluid figure-img"></p>
-<figcaption>(Northern Elephant Seals (M. angustirostris) at sunrise early light at Piedras Blancas, San Simeon, CA 03 Feb 2012. Photo by <a href="https://commons.wikimedia.org/wiki/File:Northern_Elephant_Seals_%28M._angustirostris%29_at_sunrise_early_light_at_Piedras_Blancas,_San_Simeon,_CA.jpg">Mike Baird</a>.</figcaption>
+<p><img src="training-test.png" class="img-fluid figure-img"></p>
+<figcaption>Diagram from <a href="https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets">Google’s ML Concepts Crash Course.</a></figcaption>
 </figure>
 </div>
-<p>She identifies the <strong>predictor variable</strong> as time since the rookery was protected and the <strong>response variable</strong> as elephant seal population (since elephant seal population <em>responds</em> on time).</p>
-<div id="9ce16f66" class="cell" data-execution_count="2">
-<div class="cell-output cell-output-display">
-<div>
+<p>This works well when we have already committed to a single (or a few) fully specified models. But as soon as we need to make any modeling decision, consulting the test set to do so can interfere. The test set serves as an honest final evaluation if it plays no role in any decision made along the way.</p>
+<p>The fix is straightforward: <strong>make modeling decisions using only the training data</strong>, and keep the test set sealed until the very final evaluation. Cross-validation (a type of resampling method) is the standard tool for doing this.</p>
+</section>
+<section id="the-validation-set-approach" class="level2">
+<h2 class="anchored" data-anchor-id="the-validation-set-approach">The validation set approach</h2>
+<p>Before going into cross-validation, let’s talk about the <strong>validation set approach</strong>. This is the simplest resampling method, the building block for cross-validation, and consists of the following steps:</p>
+<ol type="1">
+<li>Randomly divide the training observations into a <strong>training set</strong> and a <strong>validation set</strong> (also called <strong>hold-out set</strong>).</li>
+<li>Fit the model on the (smaller) training set.</li>
+<li>Compute the error using the fitted model on the validation set.</li>
+</ol>
+<p>The validation error obtained in step 3 is the estimate for the test error.</p>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="2_1_what_is_statistical_learning-NOTES_files/figure-html/cell-3-output-1.png" width="711" height="376" class="figure-img"></p>
+<p><img src="training-validation-test.png" class="img-fluid figure-img"></p>
+<figcaption>Diagram from <a href="https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets">Google’s ML Concepts Crash Course.</a></figcaption>
 </figure>
 </div>
-</div>
-</div>
-<section id="an-ideal-function-f-exists-somewhere-we-just-cant-access-it" class="level3">
-<h3 class="anchored" data-anchor-id="an-ideal-function-f-exists-somewhere-we-just-cant-access-it">An ideal function <span class="math inline">\(f\)</span> exists somewhere, we just can’t access it</h3>
-<p>What if Amanda was given the true, real relationship between time and population?</p>
-<p>In mathematical terms, this would mean Amanda would have a <strong>function <span class="math inline">\(f\)</span></strong> such that</p>
-<p><span class="math display">\[f(\text{time since protection}) = \text{true population}.\]</span></p>
-<div id="f0001783" class="cell" data-execution_count="3">
+<p>Notice that when we divide our data into training and validation sets in step 1, the test error estimate depends on the particular randomly selected validation set. This is a drawback of this approach since different validation sets can greatly vary the test error estimate (high variance). We can see this variation in our example kelp classification data when we use different random splits to create the validation set:</p>
+<div id="cell-validation-set-example" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="2_1_what_is_statistical_learning-NOTES_files/figure-html/cell-4-output-1.png" width="711" height="376" class="figure-img"></p>
+<p><img src="5_1_cross_validation-NOTES_files/figure-html/validation-set-example-output-1.png" id="validation-set-example" class="quarto-figure quarto-figure-center anchored figure-img" width="709" height="392"></p>
 </figure>
 </div>
 </div>
@@ -420,10 +462,7 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<ol type="1">
-<li><p>What does <span class="math inline">\(f(0)\)</span> represent? What does <span class="math inline">\(f(5)=100\)</span> mean?</p></li>
-<li><p>What could Amanda do if she had this function <span class="math inline">\(f\)</span>?</p></li>
-</ol>
+<p>The training set for the kelp data has 210 points and 90 test points. The plot above shows the results using validation sets with 63 points. If you decided to use a 50/50 validation split (110 poits for training/110 points for validation), what would be a bigger concern: the validation error being much higher or much lower than the test error?</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -438,62 +477,40 @@ Discussion
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ul>
-<li><p>She could understand whether and how population and time are related: is there no relation, does it increase, decrease, varies, etc?</p></li>
-<li><p>She could also understand the mathematical form of this relationship: for example, is it linear? These are examples of using the function <span class="math inline">\(f\)</span> for <strong>inference</strong>.</p></li>
-<li><p>She could also use the function <span class="math inline">\(f\)</span> to know the elephant seal population in the future, i.e.&nbsp;using the function for <strong>prediction</strong>. In addtion, she could probably save resources spent in going out into the field for data collection.</p></li>
-</ul>
+<p>The bigger concern is the validation error being much higher than the test error.</p>
+<p>The validation error estimates how well a model trained on 110 observations performs. But the model you will ultimately deploy is trained on all 210 observations. More training data almost always produces a better-fitting model, so the final model will perform better than the one evaluated during validation.</p>
 </div>
 </div>
 </div>
+<p>A second drawback is that setting aside part of the training data for validation means the model is fit on fewer observations than we will ultimately use (introducing higher bias). Models fit on less data tend to perform worse, so the validation error will tend to <em>overestimate</em> the true test error of the final model (which will be trained on more data).</p>
+<!-- 
+Steps 1-4 let us obtain an estimate of test error for a given model. We would then compare models by following these steps:
+
+5. Use the validation set approach to have an estimate of the test error for each model.
+6. Select the model with the lowest error. 
+7. Train the model with the lowest error on the full training set.
+8. Obtain final accuracy metric by applying fully-trained model to the test set. 
+
+This is a very flexible approach and can be applied to both classification and regression, the only chage would be how we measure the error on the validation set in step 4. 
+ -->
 </section>
-<section id="our-next-best-option-is-to-estimate-f-using-data" class="level3">
-<h3 class="anchored" data-anchor-id="our-next-best-option-is-to-estimate-f-using-data">Our next best option is to estimate <span class="math inline">\(f\)</span> using data</h3>
-<p>Clearly Amanda has no access to this true, ideal function! So her next best option is to try to <strong>estimate <span class="math inline">\(f\)</span></strong> using data.</p>
-<p>Fortunately, she found some long-term ecological data that measures the elephant seal population since the protection for the rookery was established:</p>
-<div id="43cfa165" class="cell" data-execution_count="4">
-<div class="cell-output cell-output-display">
-<div>
+<section id="k-fold-cross-validation" class="level2">
+<h2 class="anchored" data-anchor-id="k-fold-cross-validation"><span class="math inline">\(k\)</span>-fold cross-validation</h2>
+<p><strong><span class="math inline">\(k\)</span>-fold cross-validation</strong> is the standard resampling method in practice. It overcomes both drawbacks of the validation set approach (high variance from a single split and upward bias from training on fewer observations) by systematically rotating through all the data. We use the following steps to do the <span class="math inline">\(k\)</span>-fold cross-validation:</p>
+<ol type="1">
+<li>Randomly divide the training set into <span class="math inline">\(k\)</span> roughly equal-sized <strong>folds</strong>.</li>
+<li>Hold out the first fold as the validation set; fit the model on the remaining <span class="math inline">\(k - 1\)</span> folds.</li>
+<li>Compute the error <span class="math inline">\(\text{Err}_1\)</span> on the held-out fold.</li>
+<li>Repeat steps 2–3 for each of the <span class="math inline">\(k\)</span> folds, each time holding out a different fold.</li>
+<li>Average the <span class="math inline">\(k\)</span> fold errors <span class="math inline">\(\text{Err}_1, \ldots, \text{Err}_k\)</span> to obtain an estimate of the test errors:</li>
+</ol>
+<p><span class="math display">\[\text{CV}_{(k)} = \frac{1}{k} \sum_{i=1}^{k} \text{Err}_i.\]</span></p>
+<p>In practice we <strong>use <span class="math inline">\(k=5\)</span> or <span class="math inline">\(k=10\)</span> for the number of folds</strong>. These values strike a good balance: each fold uses 80–90% of the training data per fit and fitting only 5 or 10 models is also computationally cheap. The fold errors are less correlated with each other than in approaches that use more folds, which tends to produce stable estimates of the test error.</p>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="2_1_what_is_statistical_learning-NOTES_files/figure-html/cell-5-output-1.png" width="711" height="376" class="figure-img"></p>
+<p><img src="grid_search_cross_validation.png" class="img-fluid figure-img"></p>
+<figcaption>Diagram adapted from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></figcaption>
 </figure>
-</div>
-</div>
-</div>
-<p>These are the <strong>observed values</strong> for the response variable.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Check-in
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Are the observed values the “true values” for the response variable?</p>
-</div>
-</div>
-<p>Error can be introduced during measurement. In this case we have</p>
-<p><span class="math display">\[f(\text{time}) = \text{true population} = \text{observed population} + \text{error}\]</span></p>
-<div id="39bd6e57" class="cell" data-execution_count="5">
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="2_1_what_is_statistical_learning-NOTES_files/figure-html/cell-6-output-1.png" width="711" height="376" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>With these observed population values at a given time, Amanda can try to estimate the real function <span class="math inline">\(f\)</span> with another <strong>function <span class="math inline">\(\hat{f}\)</span></strong>. Some estimates of <span class="math inline">\(f\)</span> are shown in the graph below.</p>
-<div id="52fc4647" class="cell" data-execution_count="6">
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="2_1_what_is_statistical_learning-NOTES_files/figure-html/cell-7-output-1.png" width="711" height="392" class="figure-img"></p>
-</figure>
-</div>
-</div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -505,11 +522,16 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>What considerations can Amanda take into account when choosing an estimate <span class="math inline">\(\hat{f}\)</span>?</p>
+<p>In 5-fold CV on our 210-observation training set:</p>
+<ol type="1">
+<li>Approximately how many observations are in each fold?</li>
+<li>How many observations are used to train the model in each iteration?</li>
+<li>What happens if you set <span class="math inline">\(k = n\)</span> (i.e., one observation per fold)? Will running this procedure twice on the same data give the same result or a different one? Why?</li>
+</ol>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -518,443 +540,138 @@ Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>Many! Preliminary understanding of the data, the application (prediction or inference?), volume of available data, minimizing error, even computing power. Selecting any <span class="math inline">\(\hat{f}\)</span> comes with tradeoffs!</p>
-</div>
-</div>
-</div>
-</section>
-</section>
-<section id="abstract-setup" class="level2">
-<h2 class="anchored" data-anchor-id="abstract-setup">Abstract setup</h2>
-<p>Roughly, this is the setup in which we will be working in. Let’s see it more abstractly:</p>
-<p>We have a set of <span class="math inline">\(p\)</span> <strong>predictors</strong> <span class="math inline">\(X_1, ..., X_p\)</span> and a <strong>dependent variable</strong> <span class="math inline">\(Y\)</span>.</p>
-<p>We assume there is a relationship between <span class="math inline">\(Y\)</span> and <span class="math inline">\(X = (X_1, ..., X_p)\)</span> that can be written as <span class="math display">\[Y = f(X) + \epsilon.\]</span></p>
-<p>Here <span class="math inline">\(f\)</span> is some fixed but <em>unknown</em> function of the predictors <span class="math inline">\(X_1, . . ., X_p\)</span> and <span class="math inline">\(\epsilon\)</span> represents an error term (independent of <span class="math inline">\(X\)</span> and with mean zero).</p>
-<p>Our objective is to estimate <span class="math inline">\(f(X)\)</span> well enough with another function <span class="math inline">\(\hat{f}(X)\)</span>.</p>
-<section id="why-bother-to-estimate-f" class="level3">
-<h3 class="anchored" data-anchor-id="why-bother-to-estimate-f">Why bother to estimate <span class="math inline">\(f\)</span>?</h3>
 <ol type="1">
-<li><p>Do <strong>inference</strong>: use <span class="math inline">\(\hat{f}\)</span> to understand which predictors are associated with the response and understand the form of this relationship.</p></li>
-<li><p>Do <strong>predictions</strong>: this means calculating <span class="math inline">\(\hat{f}(X) = \hat{Y}\)</span> to predict what the value of <span class="math inline">\(Y\)</span> will be with at a new input <span class="math inline">\(X\)</span>.</p></li>
+<li><span class="math inline">\(210 / 5 = 42\)</span> observations per fold.</li>
+<li><span class="math inline">\(210 - 42 = 168\)</span> observations for training in each fold.</li>
+<li>Setting <span class="math inline">\(k = n\)</span> means each fold contains exactly one observation — this is <strong>leave-one-out cross-validation (LOOCV)</strong>. Because there is only one way to hold out each single observation, there is no randomness in how the folds are formed. Running LOOCV twice on the same data always produces exactly the same result. (Contrast this with <span class="math inline">\(k = 5\)</span> or <span class="math inline">\(k = 10\)</span>, where the random fold assignment can vary unless a random seed is fixed.)</li>
 </ol>
-<p>Depending whether our goal is prediction, inference, or a combination of the two, we may select different methods for estimating <span class="math inline">\(f\)</span>.</p>
-<p>Generally:</p>
-<ul>
-<li>models for <span class="math inline">\(f\)</span> that are interpretable enough to allow inference may not be have as accurate prediction results as other approaches.</li>
-<li>models for <span class="math inline">\(f\)</span> that can give excellent predictions, may not be as interpretable and make inference more challenging.</li>
-</ul>
-<p>There’s a tradeoff.</p>
-<p>Generally, <strong>machine learning</strong> may prioritize predictions over interpretability (we want the best prediction, even if we got it out of a black box), while <strong>statistical modeling</strong> may prioritize interpretability over prediction.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Check-in
 </div>
 </div>
-<div class="callout-body-container callout-body">
-<p>What are some problems or scenarios where inference may be more important than prediction? What about an problems or scenarios where prediction is the priority?</p>
 </div>
-</div>
+<section id="computing-the-fold-error" class="level3">
+<h3 class="anchored" data-anchor-id="computing-the-fold-error">Computing the fold error</h3>
+<p>How we measure <span class="math inline">\(\text{Err}_i\)</span> in step 3 depends on the type of problem.</p>
+<p><strong>Regression</strong>: Use the Mean Squared Error (MSE) on the held-out fold:</p>
+<p><span class="math display">\[\text{Err}_i = \text{MSE in fold $i$} = \frac{1}{n_i} \sum_{j \in \text{fold } i} (y_j - \hat{y}_j)^2,\]</span></p>
+<p>where <span class="math inline">\(n_i\)</span> is the number of observations in fold <span class="math inline">\(i\)</span>, <span class="math inline">\(y_j\)</span> is the true response, and <span class="math inline">\(\hat{y}_j\)</span> is the model’s prediction.</p>
+<p><strong>Classification</strong>: Use the misclassification rate on the held-out fold:</p>
+<p><span class="math display">\[\text{Err}_i = \text{error rate in fold $i$} =  \frac{1}{n_i} \sum_{j \in \text{fold } i} \mathbf{1}(\hat{y}_j \neq y_j)\]</span></p>
+<p>where <span class="math inline">\(\mathbf{1}(\hat{y}_i \neq y_i)\)</span> equals 1 if observation <span class="math inline">\(i\)</span> was assigned the wrong class and 0 otherwise. This is simply the fraction of observations within the fold that were misclassified.</p>
 </section>
-<section id="how-do-we-estimate-f" class="level3">
-<h3 class="anchored" data-anchor-id="how-do-we-estimate-f">How do we estimate <span class="math inline">\(f\)</span>?</h3>
-<p>We start with a set of <span class="math inline">\(n\)</span> observed data points:</p>
-<p><span class="math display">\[ \{ (x_1, y_1) , ..., (x_n, y_n)\}, \]</span></p>
-<p>where</p>
-<ul>
-<li><span class="math inline">\(x_i\)</span> = a <em>vector</em> with with the <strong>predictor information</strong>, and</li>
-<li><span class="math inline">\(y_i\)</span> = the <strong>response variable</strong> for the <span class="math inline">\(i\)</span>-th observation.</li>
-</ul>
-<p>These data points are the <strong>training set</strong> or <strong>training data</strong> because we will use them to <strong>train</strong> (or <strong>fit</strong>) our method and obtain an estimate <span class="math inline">\(\hat{f}\)</span> of the “true” function <span class="math inline">\(f\)</span>.</p>
-<p>Our goal is to apply methods to the training data to estimate the unknown function <span class="math inline">\(f\)</span> that links predictors with the response.</p>
-<p>The “learning” part in <em>machine learning</em> is precisely the process of adjusting <span class="math inline">\(\hat{f}\)</span> to minimize error on the training data.</p>
-</section>
-<section id="notation" class="level3">
-<h3 class="anchored" data-anchor-id="notation">Notation</h3>
-<p>Our training set has <span class="math inline">\(n\)</span> observed data points:</p>
-<p><span class="math display">\[ \{ (x_1, y_1) , ..., (x_n, y_n)\}.\]</span></p>
-<p>If we have <span class="math inline">\(p\)</span> predictors, then each <span class="math inline">\(x_i\)</span> is a <strong>vector</strong> of the form: <span class="math display">\[x_i = (x_{i1}, ..., x_{ip}).\]</span> The response variable <span class="math inline">\(y_i\)</span> is just a single number or category.</p>
-<p>For example, for our previous data we would transfor the data table into the corresponding notation as shown below.</p>
-<!-- table with 4 values of time, population, and something else and then these values represented as vectors x_i and their corresponding value y_i-->
-<div class="columns">
-<div class="column" style="width:55%;">
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Obs.</th>
-<th>Time (Predictor)</th>
-<th>Population (Response)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>2</td>
-<td>53</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>10</td>
-<td>353</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-</tr>
-<tr class="odd">
-<td>9</td>
-<td>18</td>
-<td>473</td>
-</tr>
-</tbody>
-</table>
-</div><div class="column" style="width:10%;">
-<p><br>
-</p>
-<p><br>
-</p>
-<p><br>
-</p>
-<p><br>
-</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>→</strong></p>
-</div><div class="column" style="width:35%;">
-<p><br>
-<br>
-</p>
-<p><span class="math inline">\((x_1,y_1) = (2,53)\)</span></p>
-<p><span class="math inline">\(\vdots\)</span></p>
-<p><span class="math inline">\((x_5,y_5) = (10,353)\)</span></p>
-<p><span class="math inline">\(\vdots\)</span></p>
-<p><span class="math inline">\((x_9,y_9) = (18,473)\)</span></p>
-</div>
-</div>
-<p>If we were to add average annual sea surface temperature (SST) as a second predictor variable, then our notation would update accordingly:</p>
-<div class="columns">
-<div class="column" style="width:55%;">
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Obs.</th>
-<th>Time (Predictor 1)</th>
-<th>SST (Predictor 2)</th>
-<th>Population (Response)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>2</td>
-<td>17.05</td>
-<td>53</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>10</td>
-<td>20.86</td>
-<td>353</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-</tr>
-<tr class="odd">
-<td>9</td>
-<td>18</td>
-<td>23.27</td>
-<td>473</td>
-</tr>
-</tbody>
-</table>
-</div><div class="column" style="width:10%;">
-<p><br>
-</p>
-<p><br>
-</p>
-<p><br>
-</p>
-<p><br>
-</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>→</strong></p>
-</div><div class="column" style="width:35%;">
-<p><span class="math inline">\(x_1 = (x_{1,1}, x_{1,2}) = (2, 17.05)\)</span></p>
-<p><span class="math inline">\(y_1 = 53\)</span></p>
-<p><span class="math inline">\(\vdots\)</span></p>
-<p><span class="math inline">\(x_5 = (x_{5,1}, x_{5,2}) = (10, 20.86)\)</span></p>
-<p><span class="math inline">\(y_5 = 353\)</span></p>
-<p><span class="math inline">\(\vdots\)</span></p>
-<p><span class="math inline">\(x_9 = (x_{9,1}, x_{9,2}) = (18, 23.27)\)</span></p>
-<p><span class="math inline">\(y_9 = 473\)</span></p>
-</div>
-</div>
-</section>
-</section>
-<section id="parametric-methods" class="level2">
-<h2 class="anchored" data-anchor-id="parametric-methods">Parametric methods</h2>
-<p>Broadly, most methods for estimating <span class="math inline">\(f\)</span> can be characterized as parametric or non-parametric.</p>
-<p>Parametric methods estimate <span class="math inline">\(f\)</span> in two steps:</p>
-<ol type="1">
-<li><p>Make an assumption about the <em>functional form</em> or shape of <span class="math inline">\(f\)</span>.</p></li>
-<li><p>Use the training data to <strong>train</strong> or <strong>fit</strong> the model and get those parameters that will define the estimate <span class="math inline">\(\hat{f}\)</span>.</p></li>
-</ol>
-<p>Considerations:</p>
-<ul>
-<li>May be used with small training sets</li>
-<li>May be computationally easier to estimate a few parameters</li>
-<li>Simpler functional forms for <span class="math inline">\(\hat{f}\)</span> can make inference easier</li>
-<li>Assumed functional form for <span class="math inline">\(\hat{f}\)</span> may be far from true <span class="math inline">\(f\)</span>, making predictions inaccurate</li>
-<li>Predictions could not be as good</li>
-</ul>
-<section id="example" class="level3">
-<h3 class="anchored" data-anchor-id="example">Example</h3>
-<ol type="1">
-<li>Amanda <em>decides</em> to model the population with a linear model on the predictors <span class="math inline">\(X_1 =\)</span> <em>time</em> and <span class="math inline">\(X_2=\)</span> <em>average annual sea surface temperature (SST)</em>. This means she assumes the function</li>
-</ol>
-<p><span class="math display">\[f(\text{time}, \text{SST}) = \text{population}\]</span></p>
-<p>has the form</p>
-<p><span class="math display">\[ f(x_1, x_2) = \beta_0 + \beta_1 x_1 + \beta_2 x_2. \]</span></p>
-<ol start="2" type="1">
-<li>She trains the model to get an estimate for <span class="math inline">\(f\)</span>, by finding <em>parameters</em> <span class="math inline">\(\beta_0, \beta_1\)</span>, and <span class="math inline">\(\beta_2\)</span> such that</li>
-</ol>
-<p><span class="math display">\[ \text{observed data} \approx \beta_0 + \beta_1 \text{time} + \beta_2 \text{SST} .\]</span></p>
-<p>This is great! She only needs to find three numbers to get a model for the population.</p>
-<div id="376b5cab" class="cell" data-execution_count="7">
+<section id="other-metrics" class="level3">
+<h3 class="anchored" data-anchor-id="other-metrics">Other metrics</h3>
+<p>The error rate or MSE are not the only metrics that can be estimated with cross-validation. Any performance metric that gives us a number can be substituted. In classification, this includes precision, recall, <span class="math inline">\(F_1\)</span>, and AUC; in regression, you could use <span class="math inline">\(R^2\)</span>. The procedure is identical: compute the chosen metric on each held-out fold, then average across folds. For example, in our kelp data we can estimate the test accuracy, precision, and recall in for our classifier using 5-fold CV as shown in the results below:</p>
+<!-- In `scikit-learn`, the `scoring` parameter of `cross_val_score` controls which metric is used (e.g., `scoring='roc_auc'`, `scoring='f1'`). -->
+<div id="kfold-example" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-stdout">
-<pre><code>Linear Model: Population = -1112.46 + 10.10*Time + 64.58*SST</code></pre>
+<pre><code> Fold  Accuracy  Precision  Recall
+    1    0.6905     0.6763  0.6905
+    2    0.7857     0.7910  0.7857
+    3    0.8095     0.8056  0.8095
+    4    0.8095     0.8009  0.8095
+    5    0.7619     0.7711  0.7619
+
+Mean CV accuracy:   0.7714
+Mean CV precision:  0.7690
+Mean CV recall:     0.7714</code></pre>
 </div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="2_1_what_is_statistical_learning-NOTES_files/figure-html/cell-8-output-2.png" width="603" height="590" class="figure-img"></p>
-</figure>
 </div>
-</div>
-</div>
+<!-- 
+### Leave-one-out cross-validation (LOOCV)
+
+**Leave-one-out cross-validation (LOOCV)** is a special case of K-fold CV where $K = n$: each fold contains exactly one observation, so the model is fit $n$ times, each time on $n - 1$ observations.
+
+$$\text{CV}_{(n)} = \frac{1}{n} \sum_{i=1}^{n} \text{Err}_i$$
+
+**Advantages over the validation set approach:**
+
+- Each model is trained on $n - 1$ observations — almost the full training set — so there is very little bias in the error estimate.
+- There is **no randomness**: there is only one way to hold out each single observation, so LOOCV always produces the same result.
+
+**Drawback:**
+
+- The model must be fit $n$ times. For large datasets or computationally expensive models this is prohibitively slow. K-fold CV with $K = 5$ or $10$ achieves comparable accuracy at a fraction of the cost, and is preferred in practice.
+
+-->
+<!-- ```{python}
+#| label: loocv-example
+
+loocv    = LeaveOneOut()
+lr_loocv = LogisticRegression(max_iter=1000)
+scores   = cross_val_score(lr_loocv, X_train, y_train, cv=loocv, scoring='accuracy')
+
+print(f"Number of models fitted:         {len(scores)}")
+print(f"LOOCV error rate (2 predictors): {1 - scores.mean():.4f}")
+``` -->
 </section>
 </section>
-<section id="non-parametric-methods" class="level2">
-<h2 class="anchored" data-anchor-id="non-parametric-methods">Non-parametric methods</h2>
-<p>Non-parametric methods do not make explicit assumptions about the functional form of <span class="math inline">\(f\)</span>. Instead, they seek an estimate of <span class="math inline">\(f\)</span> that gets as close to the training set as possible without being “being too rough or wiggly”.</p>
-<p>Considerations:</p>
-<ul>
-<li>May be better at prediction</li>
-<li>May need a lot of data to fit the model</li>
-<li>May follow errors or noise in the data too closely</li>
-<li>May be less interpretable than more restrictive models</li>
-</ul>
-<section id="example-1" class="level3">
-<h3 class="anchored" data-anchor-id="example-1">Example</h3>
-<p>Instead of assuming a linear form, Amanda uses <strong>K-nearest neighbors (KNN)</strong> to estimate <span class="math inline">\(f(\text{time}, \text{SST})\)</span>. For any new combination of time and SST, the model predicts population as the average of the <span class="math inline">\(K\)</span> most similar observations in the training set. No assumptions about the shape of <span class="math inline">\(f\)</span> required.</p>
-<div id="994f478f" class="cell" data-execution_count="8">
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="2_1_what_is_statistical_learning-NOTES_files/figure-html/cell-9-output-1.png" width="601" height="590" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Notice the fitted surface is no longer a flat plane, but it bends and curves to follow the data. Amanda did not specify any functional form; the shape of <span class="math inline">\(\hat{f}\)</span> emerges entirely from the training observations.</p>
-</section>
-</section>
-<section id="regression-vs.-classification" class="level2">
-<h2 class="anchored" data-anchor-id="regression-vs.-classification">Regression vs.&nbsp;Classification</h2>
-<p>Variables can be either:</p>
-<ul>
-<li><p><strong>quantitative</strong>: continuous numerical values, or</p></li>
-<li><p><strong>qualitative</strong> or <strong>categorical</strong>: values in one of <span class="math inline">\(K\)</span> different classes or categories.</p></li>
-</ul>
-<p>Problems having a quantitative response are <strong>regression problems</strong>.</p>
-<p>Problems having a qualitative response are <strong>classification problems</strong>.</p>
-<p>We tend to select machine learning methods based on whether the response is quantitative or qualitative.</p>
-<p>What about the predictors being quantitative or categorical? Not as important, often possible to <em>code</em> qualitative predictors before the analysis.</p>
-<section id="example-2" class="level3">
-<h3 class="anchored" data-anchor-id="example-2">Example</h3>
-<p>Amanda wants to predict the <strong>health status</strong> of individual adult seals. A veterinarian has assessed a sample of seals and labeled each one as <em>healthy</em>, <em>malnourished</em>, or <em>injured</em>. Amanda wants to train a classifier using weight and length as predictors:</p>
-<p><span class="math display">\[f(\text{weight, length}) = \text{health status} \in \{\text{healthy, malnourished, injured}\}.\]</span></p>
-<p>Her <strong>labeled training data</strong> looks like this:</p>
-<div class="columns">
-<div class="column" style="width:55%;">
+<section id="using-cv-to-select-a-hyperparameter" class="level2">
+<h2 class="anchored" data-anchor-id="using-cv-to-select-a-hyperparameter">Using CV to select a hyperparameter</h2>
+<p>The classification threshold we saw in the example at the beginning of the section is one instance of a what is called a hyperparamenter. In this section we see how cross-validation can help us tune hyperparameters for our models without risking information from our test set leaking into our model development.</p>
+<p>A <strong>hyperparameter</strong> is any setting of a model that is <strong>chosen by the analyst</strong> and <strong>cannot be learned from the training data during model fitting</strong>. Unlike model parameters (such as regression coefficients, which the algorithm estimates from data), hyperparameters must be set before fitting and control <em>how</em> the model learns.</p>
+<p>Some examples we have already encountered:</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 14%">
-<col style="width: 28%">
-<col style="width: 28%">
-<col style="width: 28%">
+<col style="width: 17%">
+<col style="width: 40%">
+<col style="width: 42%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>Obs.</th>
-<th>Length (Predictor 1)</th>
-<th>Weight (Predictor 2)</th>
-<th>Health status (Response)</th>
+<th>Model</th>
+<th>Hyperparameter</th>
+<th>What it controls</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>1</td>
-<td>173.58</td>
-<td>200.14</td>
-<td>healthy</td>
+<td>K-Nearest Neighbors</td>
+<td><span class="math inline">\(K\)</span> (number of neighbors)</td>
+<td>Smoothness of the decision boundary</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-</tr>
-<tr class="odd">
-<td>44</td>
-<td>157.06</td>
-<td>122.96</td>
-<td>malnourished</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-</tr>
-<tr class="odd">
-<td>90</td>
-<td>163.48</td>
-<td>164.98</td>
-<td>injured</td>
+<td>Logistic Regression</td>
+<td>Classification threshold <span class="math inline">\(\alpha\)</span></td>
+<td>Precision–recall tradeoff</td>
 </tr>
 </tbody>
 </table>
-</div><div class="column" style="width:10%;">
-<p><br>
-</p>
-<p><br>
-</p>
-<p><br>
-</p>
-<p><br>
-</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>→</strong></p>
-</div><div class="column" style="width:35%;">
-<p><span class="math inline">\(x_1 = (x_{1,1}, x_{1,2}) = (173.58 ,200.14)\)</span></p>
-<p><span class="math inline">\(y_1 =\)</span> healthy</p>
-<p><span class="math inline">\(\vdots\)</span></p>
-<p><span class="math inline">\(x_{44} = (x_{44,1}, x_{44,2}) = (157.06, 122.96)\)</span></p>
-<p><span class="math inline">\(y_{44} =\)</span> malnourished</p>
-<p><span class="math inline">\(\vdots\)</span></p>
-<p><span class="math inline">\(x_{90} = (x_{90,1}, x_{90,2}) = (163.48, 164.98)\)</span></p>
-<p><span class="math inline">\(y_{90} =\)</span> injured</p>
-</div>
-</div>
-<p>She can use this data to train a classifier, and then use it to predict the health status of new, unlabeled seals given their weight and length.</p>
-<div id="5161b7ce" class="cell" data-execution_count="9">
+<p>One of the most important uses of cross-validation is <strong>hyperparameter selection</strong>: choosing a model parameter that cannot be learned from the training data directly. Generally, we follow these steps to do so:</p>
+<ol start="0" type="1">
+<li>Identify the hyperparameter you want to examine.</li>
+<li>For each candidate value of the hyperparameter, compute the <span class="math inline">\(k\)</span>-fold CV error on the training set.</li>
+<li>Select the hyperparameter that resulted in the lowest CV error. If there are several candidates, opt for the one that gives the simpler model.</li>
+<li>Refit the model using the selected hyperaparameter on the full training set.</li>
+<li>Evaluate the final model once on the test set.</li>
+</ol>
+<p>In our kelp classification task, KNN requires choosing <span class="math inline">\(K\)</span>, the number of neighbors. Recall a small <span class="math inline">\(K\)</span> produces a flexible model that may overfit; a large <span class="math inline">\(K\)</span> produces a smooth model that may underfit. Cross-validation gives us a way to select <span class="math inline">\(K\)</span> without touching the test set:</p>
+<ol type="1">
+<li>For each candidate value of <span class="math inline">\(K\)</span>, compute the <span class="math inline">\(k\)</span>-fold CV error on the training set.</li>
+<li>Select the <span class="math inline">\(K\)</span> with the lowest CV error.</li>
+<li>Refit the final KNN model using that <span class="math inline">\(K\)</span> on the full training set.</li>
+<li>Evaluate once on the test set.</li>
+</ol>
+<p>The graph below shows us what this procedure looks like for our kelp data looking at <span class="math inline">\(K\)</span> from 0 to 50.</p>
+<div id="cell-cv-knn-selection" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="2_1_what_is_statistical_learning-NOTES_files/figure-html/cell-10-output-1.png" width="789" height="390" class="figure-img"></p>
+<p><img src="5_1_cross_validation-NOTES_files/figure-html/cv-knn-selection-output-1.png" id="cv-knn-selection" class="quarto-figure quarto-figure-center anchored figure-img" width="709" height="392"></p>
 </figure>
 </div>
 </div>
 </div>
-</section>
-</section>
-<section id="unsupervised-vs.-supervised-learning" class="level2">
-<h2 class="anchored" data-anchor-id="unsupervised-vs.-supervised-learning">Unsupervised vs.&nbsp;Supervised Learning</h2>
-<p><strong>Supervised learning:</strong> each observation has predictors associated to a response variable: <span class="math display">\[\text{training set} = \{(x_1, y_1), ..., (x_n, y_n)\}\]</span></p>
-<p>where each <span class="math inline">\(x_i = (x_{i1}, ..., x_{ip})\)</span> is a vector with <span class="math inline">\(p\)</span> predictors and <span class="math inline">\(y_i\)</span> is the response to <span class="math inline">\(x_i\)</span>.</p>
-<p><strong>Unsupervised learning:</strong> each observation only has <strong>features</strong>, no response variable.</p>
-<p>Our training set only has observations of <span class="math inline">\(p\)</span> different features: <span class="math display">\[ \text{training set} = \{ x_1, ..., x_n\},\]</span></p>
-<p>where each <span class="math inline">\(x_i = (x_{i1}, ..., x_{ip})\)</span> is a vector with <span class="math inline">\(p\)</span> features. There’s no reponse variable <span class="math inline">\(Y\)</span>.</p>
-<p>In unsupervised learning problems, we seek to understand the relationships between the variables or between the observations.</p>
-<section id="example-3" class="level3">
-<h3 class="anchored" data-anchor-id="example-3">Example</h3>
-<p>Amanda records <strong>dive depth</strong> and <strong>dive duration</strong> for a large number of seals, but has no prior labels or categories in mind. She wants to know: <em>are there distinct foraging strategies among these seals?</em> Her data looks like this:</p>
-<div class="columns">
-<div class="column" style="width:55%;">
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Obs.</th>
-<th>Depth (Feature 1)</th>
-<th>Duration (Feature 2)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>585.29</td>
-<td>39.39</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-</tr>
-<tr class="odd">
-<td>23</td>
-<td>108.23</td>
-<td>9.52</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-<td><span class="math inline">\(\vdots\)</span></td>
-</tr>
-<tr class="odd">
-<td>41</td>
-<td>324.37</td>
-<td>23.2</td>
-</tr>
-</tbody>
-</table>
-</div><div class="column" style="width:10%;">
-<p><br>
-</p>
-<p><br>
-</p>
-<p><br>
-</p>
-<p><br>
-</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>→</strong></p>
-</div><div class="column" style="width:35%;">
-<p><br>
-</p>
-<p><span class="math inline">\(x_1 = (x_{1,1}, x_{1,2}) = (585.29, 39.39)\)</span></p>
-<p><span class="math inline">\(\vdots\)</span></p>
-<p><span class="math inline">\(x_{23} = (x_{23,1}, x_{23,2}) = (108.23, 9.52)\)</span></p>
-<p><span class="math inline">\(\vdots\)</span></p>
-<p><span class="math inline">\(x_{41} = (x_{41,1}, x_{41,2}) = (324.37, 23.2)\)</span></p>
+<p>Once we have selected <span class="math inline">\(K\)</span> using CV, we refit the model on the full training set and evaluate it <strong>once</strong> on the test set:</p>
+<div id="knn-test-evaluation" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-stdout">
+<pre><code>Selected K (via CV):      20
+CV error estimate:        0.2429
+Actual test error:        0.3333</code></pre>
 </div>
 </div>
-<p>In this case, there is no response variable <span class="math inline">\(y\)</span>, Amanda lets the algorithm find structure in the data on its own.</p>
-<div id="7a05a930" class="cell" data-execution_count="10">
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="2_1_what_is_statistical_learning-NOTES_files/figure-html/cell-11-output-1.png" width="789" height="791" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>The top plot shows what Amanda starts with: just measurements, no categories. The bottom plot shows the structure the algorithm uncovers, which Amanda interprets as distinct <strong>foraging strategies</strong>.</p>
+<p>The CV error and the test error should be in a similar range. If they are, it means cross-validation gave us a reliable estimate of how the model generalizes before we ever touched the test set.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -965,29 +682,99 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>What is the key difference between the classification and clustering examples above?</p>
+<ol type="1">
+<li>Describe what happens to the decision boundary as <span class="math inline">\(K\)</span> increases from 1 to 50. How does this relate to bias and variance?</li>
+<li>Once <span class="math inline">\(K\)</span> is selected using CV, on what data should the final KNN model be fit before evaluating on the test set?</li>
+<li>Why would it be incorrect to use the test set to select <span class="math inline">\(K\)</span> and then report performance on that same test set?</li>
+</ol>
 </div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>As <span class="math inline">\(K\)</span> increases, the decision boundary becomes more connected and less sensitive to individual training points. Bias increases (the model cannot capture fine-grained patterns) but variance decreases (predictions are more stable across datasets). At <span class="math inline">\(K = 1\)</span> the boundary traces every training point perfectly — very low bias, very high variance. At <span class="math inline">\(K = n\)</span> the model always predicts the majority class — maximum bias, near-zero variance.</li>
+<li>The final model should be refit <strong>on the full training set</strong> (all 210 observations) using the selected <span class="math inline">\(K\)</span>. Cross-validation only informs the choice of <span class="math inline">\(K\)</span>; the final fit uses all available training data.</li>
+<li>Selecting <span class="math inline">\(K\)</span> based on test set performance means the test set has influenced our modeling decisions. The reported accuracy would reflect how well we optimized for that particular test set, not how well the model generalizes to new data. The test set must remain unseen until the very final evaluation.</li>
+</ol>
+</div>
+</div>
+</div>
+<p>Overall, we follow the following workflow when using our data to find the best (hyper)parameters:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="parameters_workflow.png" class="img-fluid figure-img" style="width:80.0%"></p>
+<figcaption>Diagram from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></figcaption>
+</figure>
+</div>
 </section>
-</section>
-<section id="recap" class="level2">
-<h2 class="anchored" data-anchor-id="recap">Recap</h2>
-<p>What we covered today:</p>
-<ul>
-<li>The idea of estimating a function <span class="math inline">\(f\)</span> using observed data</li>
-<li>Inference and prediction</li>
-<li>Training set = observations used to fit/train a model</li>
-<li>Predictors + response variable &amp; their math notation</li>
-<li>Parametric vs.&nbsp;non parametric</li>
-<li>Regression vs.&nbsp;classification</li>
-<li>Supervised vs.&nbsp;unsupervised learning</li>
-</ul>
-<p>Next class: assessing model accuracy</p>
+<section id="comparing-models-with-cv" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-models-with-cv">Comparing models with CV</h2>
+<p>Cross-validation is also used to compare different model types on the same training data before ever touching the test set.</p>
+<div id="cv-model-comparison" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-stdout">
+<pre><code>                    Model CV error (mean)
+               KNN (K=20)           0.243
+     Logistic (temp only)           0.295
+Logistic (temp + nitrate)           0.243</code></pre>
+</div>
+</div>
+<p>Once you have selected a model using CV, refit it on the full training set and report its performance on the test set once, as the final evaluation.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>Which model would you select based on this CV comparison?</li>
+<li>Earlier in this lesson we saw that selecting the classification threshold using the test set leads to data leakage. How is using CV to compare these three models solving the same underlying problem?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>Select the model with the lowest mean CV error.</li>
+<li>Any time we use the test set to inform a decision — whether choosing a threshold, tuning <span class="math inline">\(K\)</span>, or picking between model types — we are optimizing for those specific observations and the test error is no longer an honest estimate of generalization. CV solves this in all three cases the same way: it estimates how each candidate will perform on new data using only the training set, so the test set stays untouched until the very final evaluation.<br>
+</li>
+</ol>
+</div>
+</div>
+</div>
 
 
+
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-islp_2023" class="csl-entry" role="listitem">
+James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E. Taylor. 2023. <em>An Introduction to Statistical Learning: With Applications in <span>Python</span></em>. Springer Texts in Statistics. Cham: Springer.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
