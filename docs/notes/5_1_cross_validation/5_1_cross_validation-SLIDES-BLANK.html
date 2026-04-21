@@ -9,7 +9,7 @@
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.7.33">
 
-  <title>EDS 232 - Machine Learning for Environmental Science – cross_validation-slides</title>
+  <title>EDS 232 - Machine Learning for Environmental Science – cross_validation-slides-blank</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -182,7 +182,7 @@ A guiding example
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="5_1_cross_validation-SLIDES_files/figure-revealjs/example-data-plot-output-1.png" id="example-data-plot" class="quarto-figure quarto-figure-center" width="1186" height="535"></p>
+<p><img data-src="5_1_cross_validation-SLIDES-BLANK_files/figure-revealjs/example-data-plot-output-1.png" id="example-data-plot" class="quarto-figure quarto-figure-center" width="1186" height="535"></p>
 </figure>
 </div>
 </div>
@@ -208,7 +208,7 @@ Why cross-validation?
 <div class="fragment">
 <p><br></p>
 <p><strong>Idea:</strong> try many values of <span class="math inline">\(\alpha\)</span>, measure accuracy on the test set, pick the best.</p>
-<div id="17551fb4" class="cell" data-execution_count="3">
+<div id="56c1cade" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-stdout">
 <pre><code>Accuracy at default  α = 0.50:        0.711
 Best threshold found on test set: α = 0.59
@@ -233,6 +233,14 @@ Accuracy at that threshold:           0.722</code></pre>
 <div class="fragment">
 <p><br></p>
 <p>This is called <strong>data leakage</strong>: information from the test set leaked into our modeling process. The reported accuracy is no longer an honest estimate of performance on truly new data.</p>
+</div>
+</section>
+<section id="previous-workflow-blank" class="slide level2" data-menu-title="The workflow so far">
+<h2></h2>
+<p><span class="slide-title">The workflow we have been using</span></p>
+<hr>
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">
+<p>✏️</p>
 </div>
 </section>
 <section id="previous-workflow" class="slide level2" data-menu-title="The workflow so far">
@@ -281,6 +289,14 @@ The validation set approach
 </p>
 </div>
 </section>
+<section id="validation-approach-blank" class="slide level2" data-menu-title="The validation set approach">
+<h2></h2>
+<p><span class="slide-title">The validation set approach</span></p>
+<hr>
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">
+<p>✏️</p>
+</div>
+</section>
 <section id="validation-approach" class="slide level2" data-menu-title="The validation set approach">
 <h2></h2>
 <p><span class="slide-title">The validation set approach</span></p>
@@ -302,11 +318,11 @@ The validation set approach
 <h2></h2>
 <p><span class="slide-title">Drawback 1: high variance</span></p>
 <hr>
-<div id="aa3e31fb" class="cell" data-execution_count="4">
+<div id="4592f570" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="5_1_cross_validation-SLIDES_files/figure-revealjs/cell-5-output-1.png" class="quarto-figure quarto-figure-center" width="1106" height="435"></p>
+<p><img data-src="5_1_cross_validation-SLIDES-BLANK_files/figure-revealjs/cell-5-output-1.png" class="quarto-figure quarto-figure-center" width="1106" height="435"></p>
 </figure>
 </div>
 </div>
@@ -327,7 +343,7 @@ The validation set approach
 </div>
 <div class="fragment">
 <p><strong>The concern would be that the validation error is higher than the test error</strong> the validation error estimates performance of a model trained on only 105 observations, but the final model will be trained on all 210.</p>
-<p>More training data almost always produces a better model, so the validation error <em>overestimates</em> the true test error.</p>
+<p>More training data almost always produces a better model, so for the validation set approach, the validation error <em>overestimates</em> the true test error.</p>
 </div>
 </section>
 <section id="validation-drawback2" class="slide level2" data-menu-title="Validation set: drawback 2">
@@ -337,7 +353,7 @@ The validation set approach
 <p><br></p>
 <p>Setting aside part of the training data for validation means the model is <strong>fit on fewer observations than we will ultimately use</strong>.</p>
 <p><br></p>
-<p>Models fit on less data tend to perform worse, so the validation error will tend to <strong>overestimate</strong> the true test error of the final model (which will be trained on all the data). This could lead to us selecting a sub-optimal model.</p>
+<p><strong>Models fit on less data tend to perform worse</strong>, so the validation error will tend to <em>overestimate</em> the true test error of the final model (which will be trained on all the data). This could lead to us selecting a sub-optimal model.</p>
 <p><br></p>
 <div class="fragment">
 <div class="center-text teal-text body-text-m">
@@ -502,6 +518,14 @@ Using CV to select a hyperparameter
 </p>
 </div>
 </section>
+<section id="hyperparameter-def-blank" class="slide level2" data-menu-title="Hyperparameters">
+<h2></h2>
+<p><span class="slide-title">Hyperparameters</span></p>
+<hr>
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">
+<p>✏️</p>
+</div>
+</section>
 <section id="hyperparameter-def" class="slide level2" data-menu-title="Hyperparameters">
 <h2></h2>
 <p><span class="slide-title">Hyperparameters</span></p>
@@ -539,11 +563,11 @@ Using CV to select a hyperparameter
 <hr>
 <p>We decide to tune the hyperparameter <span class="math inline">\(K\)</span> using CV.</p>
 <p>For each value of <span class="math inline">\(K\)</span> we estimate the test error rate using 10-fold CV.</p>
-<div id="353e03f3" class="cell" data-execution_count="5">
+<div id="7f691981" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="5_1_cross_validation-SLIDES_files/figure-revealjs/cell-6-output-1.png" class="quarto-figure quarto-figure-center" width="1106" height="435"></p>
+<p><img data-src="5_1_cross_validation-SLIDES-BLANK_files/figure-revealjs/cell-6-output-1.png" class="quarto-figure quarto-figure-center" width="1106" height="435"></p>
 </figure>
 </div>
 </div>
@@ -555,11 +579,11 @@ Using CV to select a hyperparameter
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="68cc4127" class="cell" data-execution_count="6">
+<div id="d50f5ede" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="5_1_cross_validation-SLIDES_files/figure-revealjs/cell-7-output-1.png" class="quarto-figure quarto-figure-center" width="746" height="435"></p>
+<p><img data-src="5_1_cross_validation-SLIDES-BLANK_files/figure-revealjs/cell-7-output-1.png" class="quarto-figure quarto-figure-center" width="746" height="435"></p>
 </figure>
 </div>
 </div>
@@ -579,11 +603,11 @@ Using CV to select a hyperparameter
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="cdd34ad5" class="cell" data-execution_count="7">
+<div id="4127cacf" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="5_1_cross_validation-SLIDES_files/figure-revealjs/cell-8-output-1.png" class="quarto-figure quarto-figure-center" width="746" height="435"></p>
+<p><img data-src="5_1_cross_validation-SLIDES-BLANK_files/figure-revealjs/cell-8-output-1.png" class="quarto-figure quarto-figure-center" width="746" height="435"></p>
 </figure>
 </div>
 </div>
@@ -601,25 +625,6 @@ Using CV to select a hyperparameter
 </ol>
 </div></div>
 </section>
-<section id="knn-test-eval" class="slide level2" data-menu-title="KNN: final test evaluation">
-<h2></h2>
-<p><span class="slide-title">Final evaluation on the test set</span></p>
-<hr>
-<p>Once <span class="math inline">\(K\)</span> is selected via CV, refit on the full training set and evaluate once on the test set.</p>
-<div class="fragment">
-<p><br></p>
-<p>In our example data we obtain the following:</p>
-<div id="d1499669" class="cell" data-execution_count="8">
-<div class="cell-output cell-output-stdout">
-<pre><code>Selected K (via CV):   20
-CV error estimate:     0.2429
-Actual test error:     0.3333</code></pre>
-</div>
-</div>
-<p><br></p>
-<p>If the CV error and test error are in a similar range, cross-validation gave us a reliable estimate of generalization before we ever touched the test set.</p>
-</div>
-</section>
 <section id="model-comparison-q" class="slide level2" data-menu-title="Check-in: model comparison (Q)">
 <h2></h2>
 <p><span class="slide-title">Comparing models with CV</span></p>
@@ -634,7 +639,7 @@ Actual test error:     0.3333</code></pre>
 <p><strong>Check-in</strong></p>
 </div>
 <p>10-fold CV error for three candidate models on the kelp training data:</p>
-<div id="b088cb8e" class="cell" data-execution_count="9">
+<div id="76e179ae" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-stdout">
 <pre><code>                    Model CV error
                KNN (K=20)    0.243

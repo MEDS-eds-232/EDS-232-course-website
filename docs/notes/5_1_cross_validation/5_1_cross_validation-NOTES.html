@@ -370,7 +370,7 @@ window.Quarto = {
 </header>
 
 
-<p><a href="../../notes/5_1_cross_validation/5_1_cross_validation-SLIDES.html">📊 Slides</a> / <a href="5_1_cross_validation-SLIDES-BLANK.qmd">📊 Blank slides</a></p>
+<p><a href="../../notes/5_1_cross_validation/5_1_cross_validation-SLIDES.html">📊 Slides</a> / <a href="../../notes/5_1_cross_validation/5_1_cross_validation-SLIDES-BLANK.html">📊 Blank slides</a></p>
 <p>In this lesson we introduce:</p>
 <ul>
 <li>Using a <strong>validation set</strong> to estimate the test set error</li>
@@ -398,14 +398,14 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>In the <a href="../../notes/4_3_logistic_regression/4_3_logistic_regression-NOTES.html">previous lesson</a> we introduced logistic regression to predict kelp forest status in this dataset. In this lesson we study how we can use cross-validation to choose amongst different models and select hyperparameters.</p>
+<p>In the previous lessons we introduced <a href="../../notes/4_3_logistic_regression/4_3_logistic_regression-NOTES.html">logistic regression</a> and <a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics-NOTES.html"><span class="math inline">\(K\)</span>-nearest neighbors</a> to predict kelp forest status in this dataset. In this lesson we study how we can use cross-validation to choose amongst different models and select hyperparameters.</p>
 </section>
 <section id="why-cross-validation" class="level2">
 <h2 class="anchored" data-anchor-id="why-cross-validation">Why cross-validation?</h2>
 <p>Recall from the logistic regression lesson that once we fit a model, we classify observations by comparing the predicted probability <span class="math inline">\(p(X)\)</span> to a <strong>classification threshold</strong> <span class="math inline">\(\alpha\)</span>. In our example data this means we</p>
 <p><span class="math display">\[\text{predict healthy if } p(X) \geq \alpha \text{, degraded otherwise.}\]</span></p>
-<p>The default is <span class="math inline">\(\alpha = 0.5\)</span>, but different thresholds shift the tradeoff between precision and recall, so the default may not always be the threshold we want to use to maximize our accuracy metric. How should we choose <span class="math inline">\(\alpha\)</span>?</p>
-<p>Suppose we want to maximze overall accuracy, a natural approach: try many threshold values, measure accuracy on the test set for each, and pick the best. We obtain the following information:</p>
+<p>The default is <span class="math inline">\(\alpha = 0.5\)</span>, but different thresholds shift the tradeoff between accuracy metrics, so the default may not always be the threshold we want to use to maximize our prefered accuracy metric. How should we choose <span class="math inline">\(\alpha\)</span>?</p>
+<p>Suppose we want to maximze overall accuracy. A natural approach is: try many threshold values, measure accuracy on the test set for each, and pick the best. We obtain the following information:</p>
 <div id="threshold-naive-selection" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-stdout">
 <pre><code>Accuracy at default threshold α = 0.50:       0.711
@@ -413,9 +413,9 @@ Best threshold found on test set: α = 0.59
 Accuracy at that threshold (on test set):     0.722</code></pre>
 </div>
 </div>
-<p>We found a threshold that beats the default, but we might be making a mistake if using this value beacuse <strong>we used the test set to make a modeling decision.</strong> We examined the test set outcomes to figure out which threshold works best, and then reported the accuracy for that threshold on the very same observations we used to select it.</p>
+<p>We found a threshold that beats the default, but we might be making a mistake if using this value of <span class="math inline">\(\alpha\)</span> beacuse <strong>we used the test set to make a modeling decision.</strong> We examined the test set outcomes to figure out which threshold works best, and then reported the accuracy for that threshold on the very same observations we used to select it.</p>
 <p>This is called <strong>data leakage</strong>: information from the test set leaked into our modeling process. The reported accuracy is no longer an honest estimate of how the model performs on new, truly unseen data. We selected <span class="math inline">\(\alpha\)</span> <em>because</em> it happened to work well on these test observations, not because it generalizes well.</p>
-<p>The workflow we have used so far is</p>
+<p>This workflow is summarized as follows:</p>
 <ol type="1">
 <li>Split our available data into a <strong>training set</strong> and a <strong>test set</strong>.</li>
 <li>Fit the model on the training set.</li>
@@ -427,8 +427,8 @@ Accuracy at that threshold (on test set):     0.722</code></pre>
 <figcaption>Diagram from <a href="https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets">Google’s ML Concepts Crash Course.</a></figcaption>
 </figure>
 </div>
-<p>This works well when we have already committed to a single (or a few) fully specified models. But as soon as we need to make any modeling decision, consulting the test set to do so can interfere. The test set serves as an honest final evaluation if it plays no role in any decision made along the way.</p>
-<p>The fix is straightforward: <strong>make modeling decisions using only the training data</strong>, and keep the test set sealed until the very final evaluation. Cross-validation (a type of resampling method) is a standard tool for doing this.</p>
+<p>This works well when we have already committed to a single fully specified model and want to report its accuracy. But as soon as we need to make any modeling decision, consulting the test set to do so can interfere. The test set serves as an honest final evaluation if it plays no role in any decision made along the way.</p>
+<p>The fix is: <strong>make modeling decisions using only the training data</strong>, and keep the test set sealed until the very final evaluation. Cross-validation is a standard tool for doing this.</p>
 </section>
 <section id="the-validation-set-approach" class="level2">
 <h2 class="anchored" data-anchor-id="the-validation-set-approach">The validation set approach</h2>
@@ -438,14 +438,14 @@ Accuracy at that threshold (on test set):     0.722</code></pre>
 <li>Fit the model on the (smaller) training set.</li>
 <li>Compute the error using the fitted model on the validation set.</li>
 </ol>
-<p>The validation error obtained in step 3 is the estimate for the test error.</p>
+<p>The validation error obtained in step 3 is the <strong>estimate for the test error</strong>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="training-validation-test.png" class="img-fluid figure-img"></p>
 <figcaption>Diagram from <a href="https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets">Google’s ML Concepts Crash Course.</a></figcaption>
 </figure>
 </div>
-<p>Notice that when we divide our data into training and validation sets in step 1, the test error estimate depends on the particular randomly selected validation set. This is a drawback of this approach since different validation sets can greatly vary the test error estimate (high variance). We can see this variation in our example kelp classification data when we use different random splits to create the validation set:</p>
+<p>Notice that when we divide our data into training and validation sets in step 1, the test error estimate depends on the particular randomly selected validation set. This is a drawback of the validation set approach since different validation sets can greatly vary the test error estimate (high variance). We can see this variation in our example kelp classification data when we use different random splits to create the validation set:</p>
 <div id="cell-validation-set-example" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -481,11 +481,11 @@ Discussion
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>The bigger concern is the validation error being much higher than the test error.</p>
-<p>The validation error estimates how well a model trained on 110 observations performs. But the model you will ultimately deploy is trained on all 210 observations. More training data almost always produces a better-fitting model, so the final model will perform better than the one evaluated during validation.</p>
+<p>The validation error estimates how well a model trained on 105 observations performs. But the model you will ultimately deploy is trained on all 210 observations. More training data almost always produces a better-fitting model, so the final model will perform better than the one evaluated during validation.</p>
 </div>
 </div>
 </div>
-<p>A second drawback is that setting aside part of the training data for validation means the model is fit on fewer observations than we will ultimately use (introducing higher bias). Models fit on less data tend to perform worse, so the validation error will tend to <em>overestimate</em> the true test error of the final model (which will be trained on more data).</p>
+<p>A second drawback is that setting aside part of the training data for validation means the model is fit on fewer observations than we will ultimately use. Models fit on less data tend to perform worse, so the validation error will tend to <em>overestimate</em> the true test error of the final model (which will be trained on more data).</p>
 <!-- 
 Steps 1-4 let us obtain an estimate of test error for a given model. We would then compare models by following these steps:
 
@@ -504,11 +504,11 @@ This is a very flexible approach and can be applied to both classification and r
 <li>Randomly divide the training set into <span class="math inline">\(k\)</span> roughly equal-sized <strong>folds</strong>.</li>
 <li>Hold out the first fold as the validation set; fit the model on the remaining <span class="math inline">\(k - 1\)</span> folds.</li>
 <li>Compute the error <span class="math inline">\(\text{Err}_1\)</span> on the held-out fold.</li>
-<li>Repeat steps 2–3 for each of the <span class="math inline">\(k\)</span> folds, each time holding out a different fold.</li>
-<li>Average the <span class="math inline">\(k\)</span> fold errors <span class="math inline">\(\text{Err}_1, \ldots, \text{Err}_k\)</span> to obtain an estimate of the test errors:</li>
+<li>Repeat steps 2–3 for each of the <span class="math inline">\(k\)</span> folds, each time holding out a different fold. We obtain one error rate for each fold: <span class="math inline">\(\text{Err}_1, \ldots, \text{Err}_k\)</span></li>
+<li>Average the <span class="math inline">\(k\)</span> fold errors <span class="math inline">\(\text{Err}_1, \ldots, \text{Err}_k\)</span> to obtain an estimate of the test error:</li>
 </ol>
 <p><span class="math display">\[\text{CV}_{(k)} = \frac{1}{k} \sum_{i=1}^{k} \text{Err}_i.\]</span></p>
-<p>In practice we <strong>use <span class="math inline">\(k=5\)</span> or <span class="math inline">\(k=10\)</span> for the number of folds</strong>. These values strike a good balance: each fold uses 80–90% of the training data per fit and fitting only 5 or 10 models is also computationally cheap. The fold errors are less correlated with each other than in approaches that use more folds, which tends to produce stable estimates of the test error.</p>
+<p>In practice we <strong>use <span class="math inline">\(k=5\)</span> or <span class="math inline">\(k=10\)</span> for the number of folds</strong>. These values strike a good balance since each fold uses 80–90% of the training data per fit and fitting only 5 or 10 models is also not as computationally intensive.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="grid_search_cross_validation.png" class="img-fluid figure-img"></p>
@@ -525,7 +525,7 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>In 5-fold CV on our 210-observation training set:</p>
+<p>Our dataset has 210 observations in the training set and 90 in the test set. By using 5-fold CV on our workflow:</p>
 <ol type="1">
 <li>Approximately how many observations are in each fold?</li>
 <li>How many observations are used to train the model in each iteration?</li>
@@ -562,6 +562,7 @@ Discussion
 <p><strong>Classification</strong>: Use the misclassification rate on the held-out fold:</p>
 <p><span class="math display">\[\text{Err}_i = \text{error rate in fold $i$} =  \frac{1}{n_i} \sum_{j \in \text{fold } i} \mathbf{1}(\hat{y}_j \neq y_j)\]</span></p>
 <p>where <span class="math inline">\(\mathbf{1}(\hat{y}_i \neq y_i)\)</span> equals 1 if observation <span class="math inline">\(i\)</span> was assigned the wrong class and 0 otherwise. This is simply the fraction of observations within the fold that were misclassified.</p>
+<p>The error rate or MSE are not the only metrics that can be estimated with cross-validation. Other performance metrics can be substituted.</p>
 <!-- 
 
 TO DO: in the future, work on rewriting this section to explain how to compute those other metrics usinc CV, will leave out for now. 
@@ -623,11 +624,11 @@ print(f"LOOCV error rate (2 predictors): {1 - scores.mean():.4f}")
 <ol type="1">
 <li>Feature scaling must happen inside the CV loop</li>
 </ol>
-<p>Models that rely on distances (like KNN) are sensitive to feature scale: a feature with a larger numeric range will dominate the distance calculation. In practice you would standardize features before fitting these models. The critical constraint is that <strong>the scaler must be fit on the training folds only</strong> and then applied to the validation fold.</p>
+<p>Models that rely on distances (like KNN) are sensitive to feature scale. In practice you would standardize features before fitting these models. The critical constraint is that <strong>the scaler must be fit on the training folds only</strong> and then applied to the validation fold.</p>
 <ol start="2" type="1">
 <li>Use stratified folds for classification if classes are imbalanced</li>
 </ol>
-<p>Plain <span class="math inline">\(k\)</span>-fold CV shuffles observations without regard to class labels. For classification problems — especially with class imbalance — this can produce folds where one class is barely represented, making fold error estimates noisy. <strong>Stratified K-fold</strong> preserves the class proportion of the full training set in each fold and is the standard practice for classification tasks.</p>
+<p>Plain <span class="math inline">\(k\)</span>-fold CV shuffles observations without regard to class labels. For classification problems (especially with class imbalance) this can produce folds where one class is barely represented, making fold error estimates noisy. <strong>Stratified K-fold</strong> preserves the class proportion of the full training set in each fold and is the standard practice for classification tasks.</p>
 </section>
 </section>
 <section id="using-cv-to-select-a-hyperparameter" class="level2">

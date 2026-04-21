@@ -310,6 +310,18 @@ This is called **data leakage**: information from the test set leaked into our m
 
 ---
 
+## {#previous-workflow-blank data-menu-title="The workflow so far"}
+
+[The workflow we have been using]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
+
+---
+
 ## {#previous-workflow data-menu-title="The workflow so far"}
 
 [The workflow we have been using]{.slide-title}
@@ -329,7 +341,7 @@ Diagram from [Google's ML Concepts Crash Course.](https://developers.google.com/
 
 <br>
 
-This works well for a **single, already-decided model**, but breaks down as soon as we need to make any modeling decision.
+This works well to report metrics for a **single, already-decided model**, but breaks down when we need to make any modeling decision.
 
 
 ---
@@ -352,7 +364,7 @@ We would want to:
 
 - splits the training data into temporary training and validation subsets, 
 - fits the model on each split, and 
-- averages the resulting errors to produce a stable, honest estimate of test performance.
+- averages the resulting errors to produce an estimate of test performance.
 
 
 ::: {.center-text .teal-text .body-text-m}
@@ -366,6 +378,18 @@ The test set is only used once, for the final reported result.
 <div class="page-center vertical-center">
 <p class="custom-subtitle bottombr">The validation set approach</p>
 </div>
+
+---
+
+## {#validation-approach-blank data-menu-title="The validation set approach"}
+
+[The validation set approach]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
 
 ---
 
@@ -433,7 +457,7 @@ Same model, same data, only the split changes. The error estimate varies substan
 ::: {.teal-text .body-text-m}
 The training set for the kelp data has 210 points. 
 
-If you used a **50/50 split** (105 points for training / 105 for validation), 
+If you used a 50/50 split (105 points for training / 105 for validation), 
 
 what would be a bigger concern: 
 
@@ -444,7 +468,7 @@ the validation error being much higher or much lower than the test error?
 
 **The concern would be that the validation error is higher than the test error** the validation error estimates performance of a model trained on only 105 observations, but the final model will be trained on all 210. 
 
-More training data almost always produces a better model, so the validation error *overestimates* the true test error. 
+More training data almost always produces a better model, so for the validation set approach, the validation error *overestimates* the true test error. 
 
 ---
 
@@ -461,7 +485,7 @@ Setting aside part of the training data for validation means the model is **fit 
 <br>
 
 
-Models fit on less data tend to perform worse, so the validation error will tend to **overestimate** the true test error of the final model (which will be trained on all the data). This could lead to us selecting a sub-optimal model. 
+**Models fit on less data tend to perform worse**, so the validation error will tend to *overestimate* the true test error of the final model (which will be trained on all the data). This could lead to us selecting a sub-optimal model. 
 
 <br>
 
@@ -624,7 +648,7 @@ In practice, use **$k = 5$ or $k = 10$**: each fold trains on 80–90% of the da
 ::: {.teal-text .body-text-m}
 Our dataset has 210 observations in the training set and 90 in the test set. By using 5-fold CV on our workflow:
 
-1. Approximately how many observations are in each fold?
+1. How many observations are in each fold?
 2. How many observations are used to train the model in each iteration?
 :::
 
@@ -695,6 +719,18 @@ Plain k-fold shuffles without regard to class labels. For classification — esp
 
 ---
 
+## {#hyperparameter-def-blank data-menu-title="Hyperparameters"}
+
+[Hyperparameters]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
+
+---
+
 ## {#hyperparameter-def data-menu-title="Hyperparameters"}
 
 [Hyperparameters]{.slide-title}
@@ -743,7 +779,9 @@ The test set never influences the selection, so we are not inadvertently tuning 
 
 <hr>
 
-We decide to tune the hyperparameter $K$ using CV. For each value of $K$ we  estimate the test error rate using 10-fold CV. 
+We decide to tune the hyperparameter $K$ using CV. 
+
+For each value of $K$ we  estimate the test error rate using 10-fold CV. 
 
 ```{python}
 #| echo: false
@@ -799,7 +837,7 @@ plt.close()
 ::: {.column width="45%"}
 
 ::: {.teal-text}
-1. Once $K$ is selected, on what data should the final model be fit?
+1. Once $K$ is selected, on what data would you fit the final model?
 
 2. Why is using the test set to select $K$ not the best practice?
 :::
@@ -843,46 +881,18 @@ plt.close()
 ::: {.column width="45%"}
 
 ::: {.teal-text}
-1. Once $K$ is selected, on what data should the final model be fit?
+1. Once $K$ is selected, on what data would you fit the final model?
 
 2. Why is using the test set to select $K$ not the best practice?
 :::
 
-1. On the **full training set** (all 210 obs). CV only informs the choice of $K$.
+1. On the full training set (all 210 obs). CV only informs the choice of $K$.
 
-2. The test set would influence the modeling decision. The reported accuracy would reflect optimization for those observations, not true generalization.
+2. The test set would influence the modeling decision. The reported accuracy would reflect optimization for the specific test set observations, not true generalization.
 
 :::
 
 ::::
-
----
-
-## {#knn-test-eval data-menu-title="KNN: final test evaluation"}
-
-[Final evaluation on the test set]{.slide-title}
-
-<hr>
-
-Once $K$ is selected via CV, refit on the full training set and evaluate once on the test set.
-
-. . .
-
-<br>
-
-In our example data we obtain the following:
-
-```{python}
-#| echo: false
-
-print(f"Selected K (via CV):   {best_k}")
-print(f"CV error estimate:     {best_err:.4f}")
-print(f"Actual test error:     {test_error_knn:.4f}")
-```
-
-<br>
-
-If the CV error and test error are in a similar range, cross-validation gave us a reliable estimate of generalization before we ever touched the test set.
 
 ---
 
@@ -892,11 +902,11 @@ If the CV error and test error are in a similar range, cross-validation gave us 
 
 <hr>
 
-CV can be used to compare different model types on the same training data before touching the test set. 
+CV can be used to **compare different model types on the same training data before touching the test set**. 
 
-Once a model is selected using CV, we can refit on the full training set and report its performance on the test set once, as a final evaluation. 
+Once a model is selected using CV, we can **refit on the full training set** and report its performance on the test set once, as a final evaluation. 
 
-We use the same folds for all models so that differences in CV error reflect the model, not randomness in how the data was split.
+We **use the same folds for all models** so that differences in CV error reflect the model, not randomness in how the data was split.
 
 . . .
 
@@ -920,7 +930,7 @@ print(comparison_df.to_string(index=False))
 ::: {.column width="50%"}
 
 ::: {.teal-text}
-1. Which model would you select and why? Is there other information you'd like to take into consideration before deciding?
+1. Which model would you select and why? What other considerations would you take into account to decide?
 
 2. Earlier we saw that selecting the classification threshold using the test set leads to data leakage. How is using CV to compare these three models solving the same underlying problem?
 :::
@@ -944,5 +954,5 @@ Diagram from [`scikit-learn`'s documentation on cross-validation](https://scikit
 :::
 
 ::: {.center-text}
-CV governs decisions made during model development. 
+CV guides decisions made during model development. 
 :::
