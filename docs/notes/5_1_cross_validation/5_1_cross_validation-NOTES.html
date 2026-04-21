@@ -342,7 +342,6 @@ window.Quarto = {
   <li><a href="#k-fold-cross-validation" id="toc-k-fold-cross-validation" class="nav-link" data-scroll-target="#k-fold-cross-validation"><span class="math inline">\(k\)</span>-fold cross-validation</a>
   <ul class="collapse">
   <li><a href="#computing-the-fold-error" id="toc-computing-the-fold-error" class="nav-link" data-scroll-target="#computing-the-fold-error">Computing the fold error</a></li>
-  <li><a href="#other-metrics" id="toc-other-metrics" class="nav-link" data-scroll-target="#other-metrics">Other metrics</a></li>
   </ul></li>
   <li><a href="#using-cv-to-select-a-hyperparameter" id="toc-using-cv-to-select-a-hyperparameter" class="nav-link" data-scroll-target="#using-cv-to-select-a-hyperparameter">Using CV to select a hyperparameter</a></li>
   <li><a href="#comparing-models-with-cv" id="toc-comparing-models-with-cv" class="nav-link" data-scroll-target="#comparing-models-with-cv">Comparing models with CV</a></li>
@@ -371,12 +370,12 @@ window.Quarto = {
 </header>
 
 
-<p><a href="5_1_cross_validation-SLIDES.qmd">📊 Slides</a> / <a href="5_1_cross_validation-SLIDES-BLANK.qmd">📊 Blank slides</a></p>
+<p><a href="../../notes/5_1_cross_validation/5_1_cross_validation-SLIDES.html">📊 Slides</a> / <a href="5_1_cross_validation-SLIDES-BLANK.qmd">📊 Blank slides</a></p>
 <p>In this lesson we introduce:</p>
 <ul>
-<li>Using a validation set to estimate the test set error</li>
+<li>Using a <strong>validation set</strong> to estimate the test set error</li>
 <li>The <strong>validation set approach</strong> and why it produces variable error estimates</li>
-<li><strong>K-fold cross-validation</strong></li>
+<li><strong>K-fold cross-validation</strong> as a better alternative</li>
 <li>Using cross-validation to <strong>select hyperparameters</strong> (e.g., <span class="math inline">\(K\)</span> in KNN)</li>
 <li>Using cross-validation to <strong>compare models</strong></li>
 </ul>
@@ -429,11 +428,11 @@ Accuracy at that threshold (on test set):     0.722</code></pre>
 </figure>
 </div>
 <p>This works well when we have already committed to a single (or a few) fully specified models. But as soon as we need to make any modeling decision, consulting the test set to do so can interfere. The test set serves as an honest final evaluation if it plays no role in any decision made along the way.</p>
-<p>The fix is straightforward: <strong>make modeling decisions using only the training data</strong>, and keep the test set sealed until the very final evaluation. Cross-validation (a type of resampling method) is the standard tool for doing this.</p>
+<p>The fix is straightforward: <strong>make modeling decisions using only the training data</strong>, and keep the test set sealed until the very final evaluation. Cross-validation (a type of resampling method) is a standard tool for doing this.</p>
 </section>
 <section id="the-validation-set-approach" class="level2">
 <h2 class="anchored" data-anchor-id="the-validation-set-approach">The validation set approach</h2>
-<p>Before going into cross-validation, let’s talk about the <strong>validation set approach</strong>. This is the simplest resampling method, the building block for cross-validation, and consists of the following steps:</p>
+<p>Before going into cross-validation, let’s talk about the <strong>validation set approach</strong>. This is the simplest resampling method and consists of the following steps:</p>
 <ol type="1">
 <li>Randomly divide the training observations into a <strong>training set</strong> and a <strong>validation set</strong> (also called <strong>hold-out set</strong>).</li>
 <li>Fit the model on the (smaller) training set.</li>
@@ -466,7 +465,7 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The training set for the kelp data has 210 points and 90 test points. The plot above shows the results using validation sets with 63 points. If you decided to use a 50/50 validation split (110 poits for training/110 points for validation), what would be a bigger concern: the validation error being much higher or much lower than the test error?</p>
+<p>The training set for the kelp data has 210 points and 90 test points. The plot above shows the results using validation sets with 63 points. If you decided to use a 50/50 validation split (105 poits for training/105 points for validation), what would be a bigger concern: the validation error being much higher or much lower than the test error?</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -500,7 +499,7 @@ This is a very flexible approach and can be applied to both classification and r
 </section>
 <section id="k-fold-cross-validation" class="level2">
 <h2 class="anchored" data-anchor-id="k-fold-cross-validation"><span class="math inline">\(k\)</span>-fold cross-validation</h2>
-<p><strong><span class="math inline">\(k\)</span>-fold cross-validation</strong> is the standard resampling method in practice. It overcomes both drawbacks of the validation set approach (high variance from a single split and upward bias from training on fewer observations) by systematically rotating through all the data. We use the following steps to do the <span class="math inline">\(k\)</span>-fold cross-validation:</p>
+<p><strong>Resampling methods</strong> repeatedly draw samples from the training set and refit a model of interst in each sample to obtain additional information about the model. A standard resampling method is <strong><span class="math inline">\(k\)</span>-fold cross-validation</strong>. It overcomes both drawbacks of the validation set approach (high variance from a single split and the issue of training on fewer observations) by systematically rotating through all the data. We use the following steps to do the <span class="math inline">\(k\)</span>-fold cross-validation:</p>
 <ol type="1">
 <li>Randomly divide the training set into <span class="math inline">\(k\)</span> roughly equal-sized <strong>folds</strong>.</li>
 <li>Hold out the first fold as the validation set; fit the model on the remaining <span class="math inline">\(k - 1\)</span> folds.</li>
@@ -563,14 +562,21 @@ Discussion
 <p><strong>Classification</strong>: Use the misclassification rate on the held-out fold:</p>
 <p><span class="math display">\[\text{Err}_i = \text{error rate in fold $i$} =  \frac{1}{n_i} \sum_{j \in \text{fold } i} \mathbf{1}(\hat{y}_j \neq y_j)\]</span></p>
 <p>where <span class="math inline">\(\mathbf{1}(\hat{y}_i \neq y_i)\)</span> equals 1 if observation <span class="math inline">\(i\)</span> was assigned the wrong class and 0 otherwise. This is simply the fraction of observations within the fold that were misclassified.</p>
-</section>
-<section id="other-metrics" class="level3">
-<h3 class="anchored" data-anchor-id="other-metrics">Other metrics</h3>
-<p>The error rate or MSE are not the only metrics that can be estimated with cross-validation. Any performance metric that gives us a number can be substituted. In classification, this includes precision, recall, <span class="math inline">\(F_1\)</span>, and AUC; in regression, you could use <span class="math inline">\(R^2\)</span>. The procedure is identical: compute the chosen metric on each held-out fold, then average across folds. For example, in our kelp data we can estimate the test accuracy, precision, and recall in for our classifier using 5-fold CV as shown in the results below:</p>
-<!-- In `scikit-learn`, the `scoring` parameter of `cross_val_score` controls which metric is used (e.g., `scoring='roc_auc'`, `scoring='f1'`). -->
-<div id="kfold-example" class="cell" data-execution_count="5">
-<div class="cell-output cell-output-stdout">
-<pre><code> Fold  Accuracy  Precision  Recall
+<!-- 
+
+TO DO: in the future, work on rewriting this section to explain how to compute those other metrics usinc CV, will leave out for now. 
+
+### Other metrics
+
+The error rate or MSE are not the only metrics that can be estimated with cross-validation. Any performance metric that gives us a number can be substituted. In classification, this includes precision, recall, $F_1$, and AUC; in regression, you could use $R^2$. The procedure is identical: compute the chosen metric on each held-out fold, then average across folds. For example, in our kelp data we can estimate the test accuracy, precision, and recall in for our classifier using 5-fold CV as shown in the results below:
+
+In `scikit-learn`, the `scoring` parameter of `cross_val_score` controls which metric is used (e.g., `scoring='roc_auc'`, `scoring='f1'`). 
+
+::: {#kfold-example .cell execution_count=5}
+
+::: {.cell-output .cell-output-stdout}
+```
+ Fold  Accuracy  Precision  Recall
     1    0.6905     0.6763  0.6905
     2    0.7857     0.7910  0.7857
     3    0.8095     0.8056  0.8095
@@ -579,9 +585,13 @@ Discussion
 
 Mean CV accuracy:   0.7714
 Mean CV precision:  0.7690
-Mean CV recall:     0.7714</code></pre>
-</div>
-</div>
+Mean CV recall:     0.7714
+```
+:::
+:::
+
+
+-->
 <!-- 
 ### Leave-one-out cross-validation (LOOCV)
 
@@ -609,40 +619,21 @@ scores   = cross_val_score(lr_loocv, X_train, y_train, cv=loocv, scoring='accura
 print(f"Number of models fitted:         {len(scores)}")
 print(f"LOOCV error rate (2 predictors): {1 - scores.mean():.4f}")
 ``` -->
+<p>Two caveats for implementation:</p>
+<ol type="1">
+<li>Feature scaling must happen inside the CV loop</li>
+</ol>
+<p>Models that rely on distances (like KNN) are sensitive to feature scale: a feature with a larger numeric range will dominate the distance calculation. In practice you would standardize features before fitting these models. The critical constraint is that <strong>the scaler must be fit on the training folds only</strong> and then applied to the validation fold.</p>
+<ol start="2" type="1">
+<li>Use stratified folds for classification if classes are imbalanced</li>
+</ol>
+<p>Plain <span class="math inline">\(k\)</span>-fold CV shuffles observations without regard to class labels. For classification problems — especially with class imbalance — this can produce folds where one class is barely represented, making fold error estimates noisy. <strong>Stratified K-fold</strong> preserves the class proportion of the full training set in each fold and is the standard practice for classification tasks.</p>
 </section>
 </section>
 <section id="using-cv-to-select-a-hyperparameter" class="level2">
 <h2 class="anchored" data-anchor-id="using-cv-to-select-a-hyperparameter">Using CV to select a hyperparameter</h2>
-<p>The classification threshold we saw in the example at the beginning of the section is one instance of a what is called a hyperparamenter. In this section we see how cross-validation can help us tune hyperparameters for our models without risking information from our test set leaking into our model development.</p>
-<p>A <strong>hyperparameter</strong> is any setting of a model that is <strong>chosen by the analyst</strong> and <strong>cannot be learned from the training data during model fitting</strong>. Unlike model parameters (such as regression coefficients, which the algorithm estimates from data), hyperparameters must be set before fitting and control <em>how</em> the model learns.</p>
-<p>Some examples we have already encountered:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 17%">
-<col style="width: 40%">
-<col style="width: 42%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Model</th>
-<th>Hyperparameter</th>
-<th>What it controls</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>K-Nearest Neighbors</td>
-<td><span class="math inline">\(K\)</span> (number of neighbors)</td>
-<td>Smoothness of the decision boundary</td>
-</tr>
-<tr class="even">
-<td>Logistic Regression</td>
-<td>Classification threshold <span class="math inline">\(\alpha\)</span></td>
-<td>Precision–recall tradeoff</td>
-</tr>
-</tbody>
-</table>
-<p>One of the most important uses of cross-validation is <strong>hyperparameter selection</strong>: choosing a model parameter that cannot be learned from the training data directly. Generally, we follow these steps to do so:</p>
+<p>A <strong>hyperparameter</strong> is any setting of a model that is <strong>chosen by the analyst</strong> and <strong>cannot be learned from the training data during model fitting</strong>. Unlike model parameters (such as regression coefficients, which the algorithm estimates from data), hyperparameters must be set before fitting and control <em>how</em> the model learns. The integer <span class="math inline">\(K\)</span> that controls the number of neighbors used in the the KNN algorithm is an example of a hyperparameter.</p>
+<p>One important use case of cross-validation is <strong>hyperparameter selection</strong>. This helps us select hyperparameters for our models without risking information from our test set leaking into our model development. Generally, we follow these steps to do so:</p>
 <ol start="0" type="1">
 <li>Identify the hyperparameter you want to examine.</li>
 <li>For each candidate value of the hyperparameter, compute the <span class="math inline">\(k\)</span>-fold CV error on the training set.</li>
@@ -667,7 +658,7 @@ print(f"LOOCV error rate (2 predictors): {1 - scores.mean():.4f}")
 </div>
 </div>
 </div>
-<p>Once we have selected <span class="math inline">\(K\)</span> using CV, we refit the model on the full training set and evaluate it <strong>once</strong> on the test set:</p>
+<p>Once we have selected <span class="math inline">\(K\)</span> using CV, we refit the model on the full training set and evaluate it once on the test set:</p>
 <div id="knn-test-evaluation" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-stdout">
 <pre><code>Selected K (via CV):      20
@@ -723,16 +714,7 @@ Discussion
 </section>
 <section id="comparing-models-with-cv" class="level2">
 <h2 class="anchored" data-anchor-id="comparing-models-with-cv">Comparing models with CV</h2>
-<p>Cross-validation is also used to compare different model types on the same training data before ever touching the test set.</p>
-<div id="cv-model-comparison" class="cell" data-execution_count="8">
-<div class="cell-output cell-output-stdout">
-<pre><code>                    Model CV error (mean)
-               KNN (K=20)           0.243
-     Logistic (temp only)           0.295
-Logistic (temp + nitrate)           0.243</code></pre>
-</div>
-</div>
-<p>Once you have selected a model using CV, refit it on the full training set and report its performance on the test set once, as the final evaluation.</p>
+<p>Cross-validation is also used to compare different model types on the same training data before ever touching the test set. We use the same folds for all models so that differences in CV error reflect the model, not randomness in how the data was split. Once you have selected a model using CV, refit it on the full training set and report its performance on the test set once, as the final evaluation.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -743,6 +725,15 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
+<p>Examnining the error rate coming from a 10-fold CV on three different models we obtain:</p>
+<div id="cv-model-comparison" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-stdout">
+<pre><code>                    Model CV error (mean)
+               KNN (K=20)           0.243
+     Logistic (temp only)           0.295
+Logistic (temp + nitrate)           0.243</code></pre>
+</div>
+</div>
 <ol type="1">
 <li>Which model would you select based on this CV comparison?</li>
 <li>Earlier in this lesson we saw that selecting the classification threshold using the test set leads to data leakage. How is using CV to compare these three models solving the same underlying problem?</li>

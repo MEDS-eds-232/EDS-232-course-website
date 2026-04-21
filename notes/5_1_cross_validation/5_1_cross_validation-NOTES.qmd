@@ -55,9 +55,9 @@ col_map = {'healthy': 'steelblue', 'degraded': 'tomato'}
 
 In this lesson we introduce:
 
-- Using a validation set to estimate the test set error
+- Using a **validation set** to estimate the test set error
 - The **validation set approach** and why it produces variable error estimates
-- **K-fold cross-validation**
+- **K-fold cross-validation** as a better alternative
 - Using cross-validation to **select hyperparameters** (e.g., $K$ in KNN)
 - Using cross-validation to **compare models**
 
@@ -162,12 +162,12 @@ The workflow we have used so far is
 
 This works well when we have already committed to a single (or a few) fully specified models. But as soon as we need to make any modeling decision, consulting the test set to do so can interfere. The test set serves as an honest final evaluation if it plays no role in any decision made along the way. 
 
-The fix is straightforward: **make modeling decisions using only the training data**, and keep the test set sealed until the very final evaluation. Cross-validation (a type of resampling method) is the standard tool for doing this.
+The fix is straightforward: **make modeling decisions using only the training data**, and keep the test set sealed until the very final evaluation. Cross-validation (a type of resampling method) is a standard tool for doing this.
 
 
 ## The validation set approach
 
-Before going into cross-validation, let's talk about the **validation set approach**. This is the simplest resampling method, the building block for cross-validation, and consists of the following steps:
+Before going into cross-validation, let's talk about the **validation set approach**. This is the simplest resampling method and consists of the following steps:
 
 1. Randomly divide the training observations into a **training set** and a **validation set** (also called **hold-out set**).
 2. Fit the model on the (smaller) training set.
@@ -247,7 +247,7 @@ This is a very flexible approach and can be applied to both classification and r
 
 ## $k$-fold cross-validation
 
-**$k$-fold cross-validation** is the standard resampling method in practice. It overcomes both drawbacks of the validation set approach (high variance from a single split and upward bias from training on fewer observations) by systematically rotating through all the data. We use the following steps to do the $k$-fold cross-validation:
+**Resampling methods** repeatedly draw samples from the training set and refit a model of interst in each sample to obtain additional information about the model. A standard resampling method is **$k$-fold cross-validation**. It overcomes both drawbacks of the validation set approach (high variance from a single split and the issue of training on fewer observations) by systematically rotating through all the data. We use the following steps to do the $k$-fold cross-validation:
 
 
 1. Randomly divide the training set into $k$ roughly equal-sized **folds**.
@@ -296,11 +296,15 @@ $$\text{Err}_i = \text{error rate in fold $i$} =  \frac{1}{n_i} \sum_{j \in \tex
 
 where $\mathbf{1}(\hat{y}_i \neq y_i)$ equals 1 if observation $i$ was assigned the wrong class and 0 otherwise. This is simply the fraction of observations within the fold that were misclassified.
 
+<!-- 
+
+TO DO: in the future, work on rewriting this section to explain how to compute those other metrics usinc CV, will leave out for now. 
+
 ### Other metrics
 
 The error rate or MSE are not the only metrics that can be estimated with cross-validation. Any performance metric that gives us a number can be substituted. In classification, this includes precision, recall, $F_1$, and AUC; in regression, you could use $R^2$. The procedure is identical: compute the chosen metric on each held-out fold, then average across folds. For example, in our kelp data we can estimate the test accuracy, precision, and recall in for our classifier using 5-fold CV as shown in the results below:
 
-<!-- In `scikit-learn`, the `scoring` parameter of `cross_val_score` controls which metric is used (e.g., `scoring='roc_auc'`, `scoring='f1'`). -->
+In `scikit-learn`, the `scoring` parameter of `cross_val_score` controls which metric is used (e.g., `scoring='roc_auc'`, `scoring='f1'`). 
 
 ```{python}
 #| label: kfold-example
@@ -323,7 +327,8 @@ print()
 print(f"Mean CV accuracy:   {acc_scores.mean():.4f}")
 print(f"Mean CV precision:  {prec_scores.mean():.4f}")
 print(f"Mean CV recall:     {rec_scores.mean():.4f}")
-```
+``` 
+-->
 
 <!-- 
 ### Leave-one-out cross-validation (LOOCV)
@@ -354,21 +359,21 @@ print(f"Number of models fitted:         {len(scores)}")
 print(f"LOOCV error rate (2 predictors): {1 - scores.mean():.4f}")
 ``` -->
  
+Two caveats for implementation:
+
+1. Feature scaling must happen inside the CV loop
+
+Models that rely on distances (like KNN) are sensitive to feature scale: a feature with a larger numeric range will dominate the distance calculation. In practice you would standardize features before fitting these models. The critical constraint is that **the scaler must be fit on the training folds only** and then applied to the validation fold. 
+
+2. Use stratified folds for classification if classes are imbalanced
+
+Plain $k$-fold CV shuffles observations without regard to class labels. For classification problems — especially with class imbalance — this can produce folds where one class is barely represented, making fold error estimates noisy. **Stratified K-fold** preserves the class proportion of the full training set in each fold and is the standard practice for classification tasks.
 
 ## Using CV to select a hyperparameter
 
-The classification threshold we saw in the example at the beginning of the section is one instance of a what is called a hyperparamenter. In this section we see how cross-validation can help us tune hyperparameters for our models without risking information from our test set leaking into our model development. 
+A **hyperparameter** is any setting of a model that is **chosen by the analyst** and **cannot be learned from the training data during model fitting**. Unlike model parameters (such as regression coefficients, which the algorithm estimates from data), hyperparameters must be set before fitting and control *how* the model learns. The integer $K$ that controls the number of neighbors used in the the KNN algorithm is an example of a hyperparameter.
 
-A **hyperparameter** is any setting of a model that is **chosen by the analyst** and **cannot be learned from the training data during model fitting**. Unlike model parameters (such as regression coefficients, which the algorithm estimates from data), hyperparameters must be set before fitting and control *how* the model learns.
-
-Some examples we have already encountered:
-
-| Model | Hyperparameter | What it controls |
-|-------|----------------|-----------------|
-| K-Nearest Neighbors | $K$ (number of neighbors) | Smoothness of the decision boundary |
-| Logistic Regression | Classification threshold $\alpha$ | Precision–recall tradeoff |
-
-One of the most important uses of cross-validation is **hyperparameter selection**: choosing a model parameter that cannot be learned from the training data directly. Generally, we follow these steps to do so:
+One important use case of cross-validation is **hyperparameter selection**. This helps us select hyperparameters for our models without risking information from our test set leaking into our model development. Generally, we follow these steps to do so:
 
 0. Identify the hyperparameter you want to examine.
 1. For each candidate value of the hyperparameter, compute the $k$-fold CV error on the training set.
@@ -417,7 +422,7 @@ plt.show()
 plt.close()
 ```
 
-Once we have selected $K$ using CV, we refit the model on the full training set and evaluate it **once** on the test set:
+Once we have selected $K$ using CV, we refit the model on the full training set and evaluate it once on the test set:
 
 ```{python}
 #| label: knn-test-evaluation
@@ -455,7 +460,13 @@ Overall, we follow the following workflow when using our data to find the best (
 
 ## Comparing models with CV
 
-Cross-validation is also used to compare different model types on the same training data before ever touching the test set.
+Cross-validation is also used to compare different model types on the same training data before ever touching the test set. We use the same folds for all models so that differences in CV error reflect the model, not randomness in how the data was split. Once you have selected a model using CV, refit it on the full training set and report its performance on the test set once, as the final evaluation. 
+
+
+:::{.callout-tip}
+## Check-in
+
+Examnining the error rate coming from a 10-fold CV on three different models we obtain:
 
 ```{python}
 #| label: cv-model-comparison
@@ -483,10 +494,7 @@ comparison = pd.DataFrame({
 print(comparison.to_string(index=False))
 ```
 
-Once you have selected a model using CV, refit it on the full training set and report its performance on the test set once, as the final evaluation.
 
-:::{.callout-tip}
-## Check-in
 1. Which model would you select based on this CV comparison?
 2. Earlier in this lesson we saw that selecting the classification threshold using the test set leads to data leakage. How is using CV to compare these three models solving the same underlying problem?
 :::

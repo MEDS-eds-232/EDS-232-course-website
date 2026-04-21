@@ -348,7 +348,7 @@ We would want to:
 
 . . .
 
-**Cross-validation** is the standard tool for doing this:
+**Cross-validation** is a standard tool for doing this:
 
 - splits the training data into temporary training and validation subsets, 
 - fits the model on each split, and 
@@ -375,7 +375,7 @@ The test set is only used once, for the final reported result.
 
 <hr>
 
-The simplest resampling method and building block for cross-validation:
+The simplest resampling method:
 
 1. Randomly divide the training observations into a **training set** and a **validation set**.
 2. Fit the model on the (smaller) training set.
@@ -599,7 +599,7 @@ Diagram adapted from [`scikit-learn`'s documentation on cross-validation](https:
 
 <hr>
 
-The standard **resampling method** in practice. We use the following steps:
+A standard **resampling method**. We use the following steps:
 
 1. Randomly divide the training set into $k$ roughly equal-sized **folds**.
 2. Hold out fold 1 as the validation set; fit the model on the remaining $k - 1$ folds.
@@ -622,7 +622,7 @@ In practice, use **$k = 5$ or $k = 10$**: each fold trains on 80–90% of the da
 <hr>
 
 ::: {.teal-text .body-text-m}
-In 5-fold CV on our 210-observation training set:
+Our dataset has 210 observations in the training set and 90 in the test set. By using 5-fold CV on our workflow:
 
 1. Approximately how many observations are in each fold?
 2. How many observations are used to train the model in each iteration?
@@ -663,68 +663,27 @@ $$\text{Err}_i = \frac{1}{n_i} \sum_{j \in \text{fold } i} (y_j - \hat{y}_j)^2$$
 
 **Classification**: typically use the  error rate:
 
-$$\text{Err}_i = \frac{\text{number of misclassified observations in $i$-th fold }}{\text{number of observations in $i$-th fold}}$$ 
-
-<!-- 
-$$\text{Err}_i = \frac{1}{n_i} \sum_{j \in \text{fold } i} \mathbf{1}(\hat{y}_j \neq y_j)$$ 
-
-$\mathbf{1}(\hat{y}_j \neq y_j) = 1$ if observation $j$ was misclassified, 0 otherwise — the fraction of held-out observations assigned the wrong class.
-
--->
+$$\text{Err}_i = \frac{\text{number of misclassified observations in $i$-th fold }}{\text{number of observations in $i$-th fold}}$$
 
 ---
 
-## {#other-metrics data-menu-title="Other metrics in CV"}
+## {#cv-caveats data-menu-title="Two caveats for practice"}
 
-[Other metrics]{.slide-title}
+[Two caveats for implementation]{.slide-title}
 
 <hr>
 
-The error rate or MSE is not the only metric that can be estimated with CV.
+**Caveat 1: feature scaling must happen inside the CV loop**
 
-<br>
-
-Any performance metric that gives us a number can be substituted:
-
-::: {.body-text-m}
-| Problem type | Examples |
-|---|---|
-| Classification | Accuracy, precision, recall, $F_1$, AUC, ... |
-| Regression | MSE, $R^2$, ...  |
-:::
-
+Models that rely on distances (e.g., KNN) are sensitive to feature scale. If you standardize the full training set *before* splitting into folds, the validation fold's statistics were computed using the whole dataset (data leakage). The **scaler must be fit on the training folds only** and then applied to the validation fold.
 
 . . .
 
-The procedure is identical: compute the chosen metric on each held-out fold, then **average across folds** to get an estimate of the metric on the test set.
-
----
-
-## {#kfold-example data-menu-title="K-fold CV: example"}
-
-[K-fold CV example: kelp data]{.slide-title}
-
-<hr>
-
-5-fold CV for the two-predictor logistic regression, estimating accuracy, precision, and recall:
-
 <br>
 
-```{python}
-#| echo: false
+**Caveat 2: use stratified folds for classification**
 
-print(kfold_results.to_string(index=False))
-print()
-print(f"Mean CV accuracy:   {acc_scores.mean():.4f}")
-print(f"Mean CV precision:  {prec_scores.mean():.4f}")
-print(f"Mean CV recall:     {rec_scores.mean():.4f}")
-```
-
-<br>
-
-Each row is a separate model fit on a different 4-fold subset and evaluated on the held-out fold. 
-
-The mean across folds is our estimate of test performance.
+Plain k-fold shuffles without regard to class labels. For classification — especially with class imbalance — this can produce folds where one class is barely represented, making error estimates noisy. **Stratified K-fold** preserves the class proportion of the full training set in each fold and is the standard practice.
 
 ---
 
@@ -742,16 +701,7 @@ The mean across folds is our estimate of test performance.
 
 <hr>
 
-A **hyperparameter** is any setting chosen by the analyst that **cannot be learned from the training data** during model fitting.
-
-Examples: 
-
-::: {.body-text-m}
-| Model | Hyperparameter | What it controls |
-|---|---|---|
-| K-Nearest Neighbors | $K$ (neighbors) | Decision boundary smoothness |
-| Logistic Regression | Threshold $\alpha$ | Precision–recall tradeoff |
-:::
+A **hyperparameter** is any setting chosen by the analyst that **cannot be learned from the training data** during model fitting. For example, the number of neighbors $K$ in the $K$-Nearest neihbors model
 
 <br>
 
@@ -774,7 +724,7 @@ Choosing a hyperparameter by optimizing against the test set is  another example
 0. Identify the hyperparameter to tune.
 1. For each hyperparameter candidate value, compute the $k$-fold CV error on the training set.
 2. Select the hyperparameter value with the lowest CV error.
-3. Refit the model using the selected hyperparameter **on the full training set**.
+3. Refit the model using the selected hyperparameter on the full training set.
 4. Evaluate the final model once on the test set to report the accuracy metrics.
 
 <br>
@@ -945,6 +895,8 @@ If the CV error and test error are in a similar range, cross-validation gave us 
 CV can be used to compare different model types on the same training data before touching the test set. 
 
 Once a model is selected using CV, we can refit on the full training set and report its performance on the test set once, as a final evaluation. 
+
+We use the same folds for all models so that differences in CV error reflect the model, not randomness in how the data was split.
 
 . . .
 
