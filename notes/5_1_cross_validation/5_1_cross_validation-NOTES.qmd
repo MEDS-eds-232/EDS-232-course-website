@@ -109,7 +109,7 @@ plt.show()
 plt.close()
 ```
 
-In the [previous lesson](../4_3_logistic_regression/4_3_logistic_regression-NOTES.qmd) we introduced logistic regression to predict kelp forest status in this dataset. In this lesson we study how we can use cross-validation to choose amongst different models and select hyperparameters.
+In the previous lessons we introduced [logistic regression](../4_3_logistic_regression/4_3_logistic_regression-NOTES.qmd) and [$K$-nearest neighbors](../4_1_classification/4_1_knn_accuracy_metrics-NOTES.qmd) to predict kelp forest status in this dataset. In this lesson we study how we can use cross-validation to choose amongst different models and select hyperparameters.
 
 ## Why cross-validation?
 
@@ -117,9 +117,9 @@ Recall from the logistic regression lesson that once we fit a model, we classify
 
 $$\text{predict healthy if } p(X) \geq \alpha \text{, degraded otherwise.}$$
 
-The default is $\alpha = 0.5$, but different thresholds shift the tradeoff between precision and recall, so the default may not always be the threshold we want to use to maximize our accuracy metric. How should we choose $\alpha$?
+The default is $\alpha = 0.5$, but different thresholds shift the tradeoff between accuracy metrics, so the default may not always be the threshold we want to use to maximize our prefered accuracy metric. How should we choose $\alpha$?
 
-Suppose we want to maximze overall accuracy, a natural approach: try many threshold values, measure accuracy on the test set for each, and pick the best. We obtain the following information:
+Suppose we want to maximze overall accuracy. A natural approach is: try many threshold values, measure accuracy on the test set for each, and pick the best. We obtain the following information:
 
 ```{python}
 #| label: threshold-naive-selection
@@ -148,11 +148,11 @@ print(f"Best threshold found on test set: α = {best_naive_t:.2f}")
 print(f"Accuracy at that threshold (on test set):     {best_naive_acc:.3f}")
 ```
 
-We found a threshold that beats the default, but we might be making a mistake if using this value beacuse **we used the test set to make a modeling decision.** We examined the test set outcomes to figure out which threshold works best, and then reported the accuracy for that threshold on the very same observations we used to select it.
+We found a threshold that beats the default, but we might be making a mistake if using this value of $\alpha$ beacuse **we used the test set to make a modeling decision.** We examined the test set outcomes to figure out which threshold works best, and then reported the accuracy for that threshold on the very same observations we used to select it.
 
 This is called **data leakage**: information from the test set leaked into our modeling process. The reported accuracy is no longer an honest estimate of how the model performs on new, truly unseen data. We selected $\alpha$ *because* it happened to work well on these test observations, not because it generalizes well.
 
-The workflow we have used so far is
+This workflow is summarized as follows:
 
 1. Split our available data into a **training set** and a **test set**.
 2. Fit the model on the training set.
@@ -160,9 +160,9 @@ The workflow we have used so far is
 
 ![Diagram from [Google's ML Concepts Crash Course.](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets)](training-test.png)
 
-This works well when we have already committed to a single (or a few) fully specified models. But as soon as we need to make any modeling decision, consulting the test set to do so can interfere. The test set serves as an honest final evaluation if it plays no role in any decision made along the way. 
+This works well when we have already committed to a single fully specified model and want to report its accuracy. But as soon as we need to make any modeling decision, consulting the test set to do so can interfere. The test set serves as an honest final evaluation if it plays no role in any decision made along the way. 
 
-The fix is straightforward: **make modeling decisions using only the training data**, and keep the test set sealed until the very final evaluation. Cross-validation (a type of resampling method) is a standard tool for doing this.
+The fix is: **make modeling decisions using only the training data**, and keep the test set sealed until the very final evaluation. Cross-validation is a standard tool for doing this.
 
 
 ## The validation set approach
@@ -174,11 +174,11 @@ Before going into cross-validation, let's talk about the **validation set approa
 3. Compute the error using the fitted model on the validation set.
 
 
-The validation error obtained in step 3 is the estimate for the test error.
+The validation error obtained in step 3 is the **estimate for the test error**.
 
 ![Diagram from [Google's ML Concepts Crash Course.](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets)](training-validation-test.png)
 
-Notice that when we divide our data into training and validation sets in step 1, the test error estimate depends on the particular randomly selected validation set. This is a drawback of this approach since different validation sets can greatly vary the test error estimate (high variance). We can see this variation in our example kelp classification data when we use different random splits to create the validation set:
+Notice that when we divide our data into training and validation sets in step 1, the test error estimate depends on the particular randomly selected validation set. This is a drawback of the validation set approach since different validation sets can greatly vary the test error estimate (high variance). We can see this variation in our example kelp classification data when we use different random splits to create the validation set:
 
 ```{python}
 #| label: validation-set-example
@@ -226,12 +226,10 @@ The training set for the kelp data has 210 points and 90 test points. The plot a
 ## Discussion
 The bigger concern is the validation error being much higher than the test error. 
 
-The validation error estimates how well a model trained on 110 observations performs. But the model you will ultimately deploy is trained on all 210 observations. More training data almost always produces a better-fitting model, so the final model will perform better than the one evaluated during validation.  
+The validation error estimates how well a model trained on 105 observations performs. But the model you will ultimately deploy is trained on all 210 observations. More training data almost always produces a better-fitting model, so the final model will perform better than the one evaluated during validation.  
 :::
 
-A second drawback is that setting aside part of the training data for validation means the model is fit on fewer observations than we will ultimately use (introducing higher bias). Models fit on less data tend to perform worse, so the validation error will tend to *overestimate* the true test error of the final model (which will be trained on more data).
-
-
+A second drawback is that setting aside part of the training data for validation means the model is fit on fewer observations than we will ultimately use. Models fit on less data tend to perform worse, so the validation error will tend to *overestimate* the true test error of the final model (which will be trained on more data).
 
 <!-- 
 Steps 1-4 let us obtain an estimate of test error for a given model. We would then compare models by following these steps:
@@ -253,20 +251,20 @@ This is a very flexible approach and can be applied to both classification and r
 1. Randomly divide the training set into $k$ roughly equal-sized **folds**.
 2. Hold out the first fold as the validation set; fit the model on the remaining $k - 1$ folds.
 3. Compute the error $\text{Err}_1$ on the held-out fold.
-4. Repeat steps 2–3 for each of the $k$ folds, each time holding out a different fold.
-5. Average the $k$ fold errors $\text{Err}_1, \ldots, \text{Err}_k$ to obtain an estimate of the test errors:
+4. Repeat steps 2–3 for each of the $k$ folds, each time holding out a different fold. We obtain one error rate for each fold: $\text{Err}_1, \ldots, \text{Err}_k$
+5. Average the $k$ fold errors $\text{Err}_1, \ldots, \text{Err}_k$ to obtain an estimate of the test error:
 
 $$\text{CV}_{(k)} = \frac{1}{k} \sum_{i=1}^{k} \text{Err}_i.$$
 
 
-In practice we **use $k=5$ or $k=10$ for the number of folds**. These values strike a good balance: each fold uses 80–90% of the training data per fit and fitting only 5 or 10 models is also computationally cheap. The fold errors are less correlated with each other than in approaches that use more folds, which tends to produce stable estimates of the test error.
+In practice we **use $k=5$ or $k=10$ for the number of folds**. These values strike a good balance since each fold uses 80–90% of the training data per fit and fitting only 5 or 10 models is also not as computationally intensive.
 
 ![Diagram adapted from [`scikit-learn`'s documentation on cross-validation](https://scikit-learn.org/stable/modules/cross_validation.html)](grid_search_cross_validation.png)
 
 
 :::{.callout-tip}
 ## Check-in
-In 5-fold CV on our 210-observation training set:
+Our dataset has 210 observations in the training set and 90 in the test set. By using 5-fold CV on our workflow:
 
 1. Approximately how many observations are in each fold?
 2. How many observations are used to train the model in each iteration?
@@ -295,6 +293,8 @@ where $n_i$ is the number of observations in fold $i$, $y_j$ is the true respons
 $$\text{Err}_i = \text{error rate in fold $i$} =  \frac{1}{n_i} \sum_{j \in \text{fold } i} \mathbf{1}(\hat{y}_j \neq y_j)$$
 
 where $\mathbf{1}(\hat{y}_i \neq y_i)$ equals 1 if observation $i$ was assigned the wrong class and 0 otherwise. This is simply the fraction of observations within the fold that were misclassified.
+
+The error rate or MSE are not the only metrics that can be estimated with cross-validation. Other performance metrics can be substituted.
 
 <!-- 
 
@@ -363,11 +363,11 @@ Two caveats for implementation:
 
 1. Feature scaling must happen inside the CV loop
 
-Models that rely on distances (like KNN) are sensitive to feature scale: a feature with a larger numeric range will dominate the distance calculation. In practice you would standardize features before fitting these models. The critical constraint is that **the scaler must be fit on the training folds only** and then applied to the validation fold. 
+Models that rely on distances (like KNN) are sensitive to feature scale. In practice you would standardize features before fitting these models. The critical constraint is that **the scaler must be fit on the training folds only** and then applied to the validation fold. 
 
 2. Use stratified folds for classification if classes are imbalanced
 
-Plain $k$-fold CV shuffles observations without regard to class labels. For classification problems — especially with class imbalance — this can produce folds where one class is barely represented, making fold error estimates noisy. **Stratified K-fold** preserves the class proportion of the full training set in each fold and is the standard practice for classification tasks.
+Plain $k$-fold CV shuffles observations without regard to class labels. For classification problems (especially with class imbalance) this can produce folds where one class is barely represented, making fold error estimates noisy. **Stratified K-fold** preserves the class proportion of the full training set in each fold and is the standard practice for classification tasks.
 
 ## Using CV to select a hyperparameter
 
