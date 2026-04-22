@@ -223,11 +223,6 @@ print(f'KNN (k=3) test accuracy: {knn3_accuracy:.4f}')
 
 A **confusion matrix** shows how predictions map to true labels. Each row is the *true* class; each column is the *predicted* class. The diagonal entries are correct predictions; off-diagonal entries are mistakes.
 
-|  | Pred Low | Pred Med | Pred High |
-|---|---|---|---|
-| **True Low** | TP (Low) | FP → Med | FP → High |
-| **True Med** | FN → Low | TP (Med) | FP → High |
-| **True High** | FN → Low | FN → Med | TP (High) |
 
 1. Compute the confusion matrix for `knn3` using `y_test` and `y_pred_knn3`.
 2. Display it with `ConfusionMatrixDisplay`, using `display_labels=['Low','Medium','High']`.
@@ -251,17 +246,9 @@ plt.show()
 
 Accuracy alone can be misleading when classes are imbalanced or when certain errors matter more than others. We'll calculate all four metrics by hand from the confusion matrix so you can see exactly what each one is measuring.
 
-**Accuracy** is the simplest: the fraction of all predictions that landed on the diagonal:
-
 $$\text{Accuracy} = \frac{\text{sum of diagonal}}{\text{sum of all cells}} = \frac{TP_{Low} + TP_{Med} + TP_{High}}{N}$$
 
-For precision, recall, and F₁, each class gets its own TP, FP, and FN read directly from `cm`:
 
-| Term | How to read it from `cm` |
-|---|---|
-| **TP** for class *i* | `cm[i, i]` — correctly predicted as class *i* |
-| **FP** for class *i* | column *i* sum minus `cm[i, i]` — other classes predicted as *i* |
-| **FN** for class *i* | row *i* sum minus `cm[i, i]` — class *i* predicted as something else |
 
 $$\text{Precision}_i = \frac{TP_i}{TP_i + FP_i} \qquad \text{Recall}_i = \frac{TP_i}{TP_i + FN_i} \qquad F1_i = \frac{2 \cdot P_i \cdot R_i}{P_i + R_i}$$
 
