@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>cross_validation-slides – EDS 232 - Machine Learning for Environmental Science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../notes/week-by-week/week-by-week.html"> 
+<span class="menu-text">notes</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">assignments</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-1.html">
+ <span class="dropdown-text">Assignment 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-2.html">
+ <span class="dropdown-text">Assignment 2</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">weekly labs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
+        <li>
+    <a class="dropdown-item" href="../../lab/lab1.html">
+ <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab2.html">
+ <span class="dropdown-text">Lab 2: No lab this week!</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab3.html">
+ <span class="dropdown-text">Lab 3: Classification</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website">
+ <span class="dropdown-text">Source code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website/issues">
+ <span class="dropdown-text">Report a bug</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p>This wesbite is under construction.</p>
+</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#title-slide" id="toc-title-slide" class="nav-link active" data-scroll-target="#title-slide"></a></li>
+  <li><a href="#in-this-lesson" id="toc-in-this-lesson" class="nav-link" data-scroll-target="#in-this-lesson"></a></li>
+  <li><a href="#section-example" id="toc-section-example" class="nav-link" data-scroll-target="#section-example"></a></li>
+  <li><a href="#kelpwatch" id="toc-kelpwatch" class="nav-link" data-scroll-target="#kelpwatch"></a></li>
+  <li><a href="#kelpwatch-plot" id="toc-kelpwatch-plot" class="nav-link" data-scroll-target="#kelpwatch-plot"></a></li>
+  <li><a href="#section-why-cv" id="toc-section-why-cv" class="nav-link" data-scroll-target="#section-why-cv"></a></li>
+  <li><a href="#threshold-problem" id="toc-threshold-problem" class="nav-link" data-scroll-target="#threshold-problem"></a></li>
+  <li><a href="#data-leakage" id="toc-data-leakage" class="nav-link" data-scroll-target="#data-leakage"></a></li>
+  <li><a href="#previous-workflow" id="toc-previous-workflow" class="nav-link" data-scroll-target="#previous-workflow"></a></li>
+  <li><a href="#cv-fix" id="toc-cv-fix" class="nav-link" data-scroll-target="#cv-fix"></a></li>
+  <li><a href="#section-validation" id="toc-section-validation" class="nav-link" data-scroll-target="#section-validation"></a></li>
+  <li><a href="#validation-approach" id="toc-validation-approach" class="nav-link" data-scroll-target="#validation-approach"></a></li>
+  <li><a href="#validation-variability" id="toc-validation-variability" class="nav-link" data-scroll-target="#validation-variability"></a></li>
+  <li><a href="#validation-checkin" id="toc-validation-checkin" class="nav-link" data-scroll-target="#validation-checkin"></a></li>
+  <li><a href="#validation-drawback2" id="toc-validation-drawback2" class="nav-link" data-scroll-target="#validation-drawback2"></a></li>
+  <li><a href="#section-kfold" id="toc-section-kfold" class="nav-link" data-scroll-target="#section-kfold"></a></li>
+  <li><a href="#kfold-approach-1" id="toc-kfold-approach-1" class="nav-link" data-scroll-target="#kfold-approach-1"></a></li>
+  <li><a href="#kfold-approach-2" id="toc-kfold-approach-2" class="nav-link" data-scroll-target="#kfold-approach-2"></a></li>
+  <li><a href="#kfold-approach-3" id="toc-kfold-approach-3" class="nav-link" data-scroll-target="#kfold-approach-3"></a></li>
+  <li><a href="#kfold-approach-4" id="toc-kfold-approach-4" class="nav-link" data-scroll-target="#kfold-approach-4"></a></li>
+  <li><a href="#kfold-approach-5" id="toc-kfold-approach-5" class="nav-link" data-scroll-target="#kfold-approach-5"></a></li>
+  <li><a href="#kfold-approach-6" id="toc-kfold-approach-6" class="nav-link" data-scroll-target="#kfold-approach-6"></a></li>
+  <li><a href="#kfold-approach-7" id="toc-kfold-approach-7" class="nav-link" data-scroll-target="#kfold-approach-7"></a></li>
+  <li><a href="#kfold-approach-8" id="toc-kfold-approach-8" class="nav-link" data-scroll-target="#kfold-approach-8"></a></li>
+  <li><a href="#kfold-approach" id="toc-kfold-approach" class="nav-link" data-scroll-target="#kfold-approach"></a></li>
+  <li><a href="#kfold-checkin" id="toc-kfold-checkin" class="nav-link" data-scroll-target="#kfold-checkin"></a></li>
+  <li><a href="#fold-error" id="toc-fold-error" class="nav-link" data-scroll-target="#fold-error"></a></li>
+  <li><a href="#cv-caveats" id="toc-cv-caveats" class="nav-link" data-scroll-target="#cv-caveats"></a></li>
+  <li><a href="#section-hyperparameter" id="toc-section-hyperparameter" class="nav-link" data-scroll-target="#section-hyperparameter"></a></li>
+  <li><a href="#hyperparameter-def" id="toc-hyperparameter-def" class="nav-link" data-scroll-target="#hyperparameter-def"></a></li>
+  <li><a href="#hyperparameter-procedure" id="toc-hyperparameter-procedure" class="nav-link" data-scroll-target="#hyperparameter-procedure"></a></li>
+  <li><a href="#knn-cv-plot" id="toc-knn-cv-plot" class="nav-link" data-scroll-target="#knn-cv-plot"></a></li>
+  <li><a href="#knn-checkin-q" id="toc-knn-checkin-q" class="nav-link" data-scroll-target="#knn-checkin-q"></a></li>
+  <li><a href="#knn-checkin-a" id="toc-knn-checkin-a" class="nav-link" data-scroll-target="#knn-checkin-a"></a></li>
+  <li><a href="#knn-test-eval" id="toc-knn-test-eval" class="nav-link" data-scroll-target="#knn-test-eval"></a></li>
+  <li><a href="#model-comparison-q" id="toc-model-comparison-q" class="nav-link" data-scroll-target="#model-comparison-q"></a></li>
+  <li><a href="#cv-workflow" id="toc-cv-workflow" class="nav-link" data-scroll-target="#cv-workflow"></a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="5_1_cross_validation-SLIDES.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+
+
+
+
+<section id="title-slide" class="level2" data-menu-title="Title Slide" data-background="#053660">
+<h2 data-menu-title="Title Slide" data-background="#053660" class="anchored" data-anchor-id="title-slide"></h2>
+<p><span class="custom-title">EDS 232</span></p>
+<hr class="hr-teal">
+<p><span class="custom-subtitle">Lesson 7</span></p>
+<p><span class="custom-subtitle"><em>Cross-validation</em></span></p>
+<hr>
+</section>
+<section id="in-this-lesson" class="level2" data-menu-title="In this lesson">
+<h2 data-menu-title="In this lesson" class="anchored" data-anchor-id="in-this-lesson"></h2>
+<p><span class="slide-title">In this lesson</span></p>
+<hr>
+<p><br></p>
+<ul>
+<li>The validation set approach</li>
+<li>K-fold cross-validation and how to compute fold errors</li>
+<li>Using cross-validation to select hyperparameters</li>
+<li>Using cross-validation to compare models</li>
+</ul>
+<hr>
+</section>
+<section id="section-example" class="level2" data-menu-title="# A guiding example #" data-background="#047C90">
+<h2 data-menu-title="# A guiding example #" data-background="#047C90" class="anchored" data-anchor-id="section-example"></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+A guiding example
+</p>
+</div>
+<hr>
+</section>
+<section id="kelpwatch" class="level2" data-menu-title="The KelpWatch dataset">
+<h2 data-menu-title="The KelpWatch dataset" class="anchored" data-anchor-id="kelpwatch"></h2>
+<p><span class="slide-title">Our example dataset</span></p>
+<hr>
+<p>The same synthetic dataset from the previous lessons — 300 coastal monitoring stations:</p>
+<p><br></p>
+<div class="body-text-m">
+<ul>
+<li><strong><code>temp_anomaly</code></strong> — sea surface temperature anomaly (°C)</li>
+<li><strong><code>nitrate</code></strong> — nitrate concentration (μmol/L)</li>
+<li><strong><code>status</code></strong> — kelp forest condition: <em>healthy</em> or <em>degraded</em></li>
+</ul>
+</div>
+<p><br></p>
+<div class="center-text teal-text body-text-m">
+<p><em>Previous lesson: used logistic regression to predict kelp forest status.</em></p>
+<p><em>Today: how to make that process more rigorous.</em></p>
+</div>
+<hr>
+</section>
+<section id="kelpwatch-plot" class="level2" data-menu-title="KelpWatch: data overview">
+<h2 data-menu-title="KelpWatch: data overview" class="anchored" data-anchor-id="kelpwatch-plot"></h2>
+<p><span class="slide-title">Data overview</span></p>
+<hr>
+<div id="cell-example-data-plot" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="5_1_cross_validation-SLIDES_files/figure-revealjs/example-data-plot-output-1.png" id="example-data-plot" class="quarto-figure quarto-figure-center anchored figure-img" width="1186" height="535"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="center-text body-text-s">
+<p><em>Synthetic data generated for educational purposes only</em></p>
+</div>
+<hr>
+</section>
+<section id="section-why-cv" class="level2" data-menu-title="# Why cross-validation? #" data-background="#047C90">
+<h2 data-menu-title="# Why cross-validation? #" data-background="#047C90" class="anchored" data-anchor-id="section-why-cv"></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Why cross-validation?
+</p>
+</div>
+<hr>
+</section>
+<section id="threshold-problem" class="level2" data-menu-title="Motivating example: threshold selection">
+<h2 data-menu-title="Motivating example: threshold selection" class="anchored" data-anchor-id="threshold-problem"></h2>
+<p><span class="slide-title">A motivating example</span></p>
+<hr>
+<p>Recall: we classify a site as healthy if <span class="math inline">\(p(X) \geq \alpha\)</span>, degraded otherwise.</p>
+<p>The default is <span class="math inline">\(\alpha = 0.5\)</span>, but the best threshold for our data may be different.</p>
+<p>. . .</p>
+<p><br></p>
+<p><strong>Idea:</strong> try many values of <span class="math inline">\(\alpha\)</span>, measure accuracy on the test set, pick the best.</p>
+<div id="17551fb4" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy at default  α = 0.50:        0.711
+Best threshold found on test set: α = 0.59
+Accuracy at that threshold:           0.722</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<p><br></p>
+<div class="teal-text body-text-m">
+<p>We found a threshold that beats the default: but is there something wrong with this process?</p>
+</div>
+<hr>
+</section>
+<section id="data-leakage" class="level2" data-menu-title="Data leakage">
+<h2 data-menu-title="Data leakage" class="anchored" data-anchor-id="data-leakage"></h2>
+<p><span class="slide-title">Data leakage</span></p>
+<hr>
+<p>We <strong>used the test set to make a modeling decision</strong>: we examined the test set outcomes to figure out which threshold works best, then reported accuracy on those same observations.</p>
+<p><br></p>
+<p>We selected <span class="math inline">\(\alpha\)</span> <em>because</em> it happened to work well on these 90 test observations — not because it generalizes well.</p>
+<p>. . .</p>
+<p><br></p>
+<p>This is called <strong>data leakage</strong>: information from the test set leaked into our modeling process. The reported accuracy is no longer an honest estimate of performance on truly new data.</p>
+<hr>
+</section>
+<section id="previous-workflow" class="level2" data-menu-title="The workflow so far">
+<h2 data-menu-title="The workflow so far" class="anchored" data-anchor-id="previous-workflow"></h2>
+<p><span class="slide-title">The workflow we have been using</span></p>
+<hr>
+<ol type="1">
+<li>Split data into a <strong>training set</strong> and a <strong>test set</strong>.</li>
+<li>Fit the model on the training set.</li>
+<li>Evaluate performance on the test set.</li>
+</ol>
+<p><img src="training-test.png" class="img-fluid"></p>
+<div class="body-text-s">
+<p>Diagram from <a href="https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets">Google’s ML Concepts Crash Course.</a></p>
+</div>
+<p><br></p>
+<p>This works well to report metrics for a <strong>single, already-decided model</strong>, but breaks down when we need to make any modeling decision.</p>
+<hr>
+</section>
+<section id="cv-fix" class="level2" data-menu-title="The fix: cross-validation">
+<h2 data-menu-title="The fix: cross-validation" class="anchored" data-anchor-id="cv-fix"></h2>
+<p><span class="slide-title">A fix: cross-validation</span></p>
+<hr>
+<p>We would want to:</p>
+<ul>
+<li>make all modeling decisions using only the training data,</li>
+<li>estimate the test set’s accuracy metrics, and</li>
+<li>keep the test set sealed until the very final evaluation.</li>
+</ul>
+<p>. . .</p>
+<p><strong>Cross-validation</strong> is a standard tool for doing this:</p>
+<ul>
+<li>splits the training data into temporary training and validation subsets,</li>
+<li>fits the model on each split, and</li>
+<li>averages the resulting errors to produce an estimate of test performance.</li>
+</ul>
+<div class="center-text teal-text body-text-m">
+<p>The test set is only used once, for the final reported result.</p>
+</div>
+<hr>
+</section>
+<section id="section-validation" class="level2" data-menu-title="# The validation set approach #" data-background="#047C90">
+<h2 data-menu-title="# The validation set approach #" data-background="#047C90" class="anchored" data-anchor-id="section-validation"></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+The validation set approach
+</p>
+</div>
+<hr>
+</section>
+<section id="validation-approach" class="level2" data-menu-title="The validation set approach">
+<h2 data-menu-title="The validation set approach" class="anchored" data-anchor-id="validation-approach"></h2>
+<p><span class="slide-title">The validation set approach</span></p>
+<hr>
+<p>The simplest resampling method:</p>
+<ol type="1">
+<li>Randomly divide the training observations into a <strong>training set</strong> and a <strong>validation set</strong>.</li>
+<li>Fit the model on the (smaller) training set.</li>
+<li>Compute the error on the validation set.</li>
+<li>The validation error <strong>estimates the test error</strong>.</li>
+</ol>
+<p><br></p>
+<p><img src="training-validation-test.png" class="img-fluid" style="width:85.0%"></p>
+<div class="body-text-s">
+<p>Diagram from <a href="https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets">Google’s ML Concepts Crash Course.</a></p>
+</div>
+<hr>
+</section>
+<section id="validation-variability" class="level2" data-menu-title="Validation set: variability">
+<h2 data-menu-title="Validation set: variability" class="anchored" data-anchor-id="validation-variability"></h2>
+<p><span class="slide-title">Drawback 1: high variance</span></p>
+<hr>
+<div id="aa3e31fb" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="5_1_cross_validation-SLIDES_files/figure-revealjs/cell-5-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="1106" height="435"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="body-text-s center-text">
+<p>Same model, same data, only the split changes. The error estimate varies substantially across splits.</p>
+</div>
+<hr>
+</section>
+<section id="validation-checkin" class="level2" data-menu-title="Check-in: validation set">
+<h2 data-menu-title="Check-in: validation set" class="anchored" data-anchor-id="validation-checkin"></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="teal-text body-text-m">
+<p>The training set for the kelp data has 210 points.</p>
+<p>If you used a 50/50 split (105 points for training / 105 for validation),</p>
+<p>what would be a bigger concern:</p>
+<p>the validation error being much higher or much lower than the test error?</p>
+</div>
+<p>. . .</p>
+<p><strong>The concern would be that the validation error is higher than the test error</strong> the validation error estimates performance of a model trained on only 105 observations, but the final model will be trained on all 210.</p>
+<p>More training data almost always produces a better model, so the validation error <em>overestimates</em> the true test error.</p>
+<hr>
+</section>
+<section id="validation-drawback2" class="level2" data-menu-title="Validation set: drawback 2">
+<h2 data-menu-title="Validation set: drawback 2" class="anchored" data-anchor-id="validation-drawback2"></h2>
+<p><span class="slide-title">Drawback 2: missing training data</span></p>
+<hr>
+<p><br></p>
+<p>Setting aside part of the training data for validation means the model is <strong>fit on fewer observations than we will ultimately use</strong>.</p>
+<p><br></p>
+<p>Models fit on less data tend to perform worse, so the validation error will tend to <strong>overestimate</strong> the true test error of the final model (which will be trained on all the data). This could lead to us selecting a sub-optimal model.</p>
+<p><br></p>
+<p>. . .</p>
+<div class="center-text teal-text body-text-m">
+<p>K-fold cross-validation addresses both of these drawbacks.</p>
+</div>
+<hr>
+</section>
+<section id="section-kfold" class="level2" data-menu-title="# K-fold cross-validation #" data-background="#047C90">
+<h2 data-menu-title="# K-fold cross-validation #" data-background="#047C90" class="anchored" data-anchor-id="section-kfold"></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+<span class="math inline">\(k\)</span>-fold cross-validation
+</p>
+</div>
+<hr>
+</section>
+<section id="kfold-approach-1" class="level2" data-menu-title="K-fold CV: approach">
+<h2 data-menu-title="K-fold CV: approach" class="anchored" data-anchor-id="kfold-approach-1"></h2>
+<p><span class="slide-title"><span class="math inline">\(k\)</span>-fold cross-validation</span></p>
+<hr>
+<p><img src="slides-images/grid_search_cross_validation_1.jpg" class="img-fluid"></p>
+<div class="body-text-s">
+<p>Diagram adapted from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></p>
+</div>
+<hr>
+</section>
+<section id="kfold-approach-2" class="level2" data-menu-title="K-fold CV: approach">
+<h2 data-menu-title="K-fold CV: approach" class="anchored" data-anchor-id="kfold-approach-2"></h2>
+<p><span class="slide-title"><span class="math inline">\(k\)</span>-fold cross-validation</span></p>
+<hr>
+<p><img src="slides-images/grid_search_cross_validation_2.jpg" class="img-fluid"></p>
+<div class="body-text-s">
+<p>Diagram adapted from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></p>
+</div>
+<hr>
+</section>
+<section id="kfold-approach-3" class="level2" data-menu-title="K-fold CV: approach">
+<h2 data-menu-title="K-fold CV: approach" class="anchored" data-anchor-id="kfold-approach-3"></h2>
+<p><span class="slide-title"><span class="math inline">\(k\)</span>-fold cross-validation</span></p>
+<hr>
+<p><img src="slides-images/grid_search_cross_validation_3.jpg" class="img-fluid"></p>
+<div class="body-text-s">
+<p>Diagram adapted from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></p>
+</div>
+<hr>
+</section>
+<section id="kfold-approach-4" class="level2" data-menu-title="K-fold CV: approach">
+<h2 data-menu-title="K-fold CV: approach" class="anchored" data-anchor-id="kfold-approach-4"></h2>
+<p><span class="slide-title"><span class="math inline">\(k\)</span>-fold cross-validation</span></p>
+<hr>
+<p><img src="slides-images/grid_search_cross_validation_4.jpg" class="img-fluid"></p>
+<div class="body-text-s">
+<p>Diagram adapted from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></p>
+</div>
+<hr>
+</section>
+<section id="kfold-approach-5" class="level2" data-menu-title="K-fold CV: approach">
+<h2 data-menu-title="K-fold CV: approach" class="anchored" data-anchor-id="kfold-approach-5"></h2>
+<p><span class="slide-title"><span class="math inline">\(k\)</span>-fold cross-validation</span></p>
+<hr>
+<p><img src="slides-images/grid_search_cross_validation_5.jpg" class="img-fluid"></p>
+<div class="body-text-s">
+<p>Diagram adapted from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></p>
+</div>
+<hr>
+</section>
+<section id="kfold-approach-6" class="level2" data-menu-title="K-fold CV: approach">
+<h2 data-menu-title="K-fold CV: approach" class="anchored" data-anchor-id="kfold-approach-6"></h2>
+<p><span class="slide-title"><span class="math inline">\(k\)</span>-fold cross-validation</span></p>
+<hr>
+<p><img src="slides-images/grid_search_cross_validation_6.jpg" class="img-fluid"></p>
+<div class="body-text-s">
+<p>Diagram adapted from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></p>
+</div>
+<hr>
+</section>
+<section id="kfold-approach-7" class="level2" data-menu-title="K-fold CV: approach">
+<h2 data-menu-title="K-fold CV: approach" class="anchored" data-anchor-id="kfold-approach-7"></h2>
+<p><span class="slide-title"><span class="math inline">\(k\)</span>-fold cross-validation</span></p>
+<hr>
+<p><img src="slides-images/grid_search_cross_validation_7.jpg" class="img-fluid"></p>
+<div class="body-text-s">
+<p>Diagram adapted from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></p>
+</div>
+<hr>
+</section>
+<section id="kfold-approach-8" class="level2" data-menu-title="K-fold CV: approach">
+<h2 data-menu-title="K-fold CV: approach" class="anchored" data-anchor-id="kfold-approach-8"></h2>
+<p><span class="slide-title"><span class="math inline">\(k\)</span>-fold cross-validation</span></p>
+<hr>
+<p><img src="slides-images/grid_search_cross_validation_8.PNG" class="img-fluid"></p>
+<div class="body-text-s">
+<p>Diagram adapted from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></p>
+</div>
+<hr>
+</section>
+<section id="kfold-approach" class="level2" data-menu-title="K-fold CV: approach">
+<h2 data-menu-title="K-fold CV: approach" class="anchored" data-anchor-id="kfold-approach"></h2>
+<p><span class="slide-title"><span class="math inline">\(k\)</span>-fold cross-validation</span></p>
+<hr>
+<p>A standard <strong>resampling method</strong>. We use the following steps:</p>
+<ol type="1">
+<li>Randomly divide the training set into <span class="math inline">\(k\)</span> roughly equal-sized <strong>folds</strong>.</li>
+<li>Hold out fold 1 as the validation set; fit the model on the remaining <span class="math inline">\(k - 1\)</span> folds.</li>
+<li>Compute the error <span class="math inline">\(\text{Err}_1\)</span> on the held-out fold.</li>
+<li>Repeat for each of the <span class="math inline">\(k\)</span> folds.</li>
+<li>Average the <span class="math inline">\(k\)</span> fold errors to get an estimate of the test error:</li>
+</ol>
+<p><span class="math display">\[\text{CV}_{(k)} = \frac{1}{k} \sum_{i=1}^{k} \text{Err}_i\]</span></p>
+<p>. . .</p>
+<p>In practice, use <strong><span class="math inline">\(k = 5\)</span> or <span class="math inline">\(k = 10\)</span></strong>: each fold trains on 80–90% of the data, fitting only 5 or 10 models.</p>
+<hr>
+</section>
+<section id="kfold-checkin" class="level2" data-menu-title="Check-in: K-fold CV">
+<h2 data-menu-title="Check-in: K-fold CV" class="anchored" data-anchor-id="kfold-checkin"></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="teal-text body-text-m">
+<p>Our dataset has 210 observations in the training set and 90 in the test set. By using 5-fold CV on our workflow:</p>
+<ol type="1">
+<li>How many observations are in each fold?</li>
+<li>How many observations are used to train the model in each iteration?</li>
+</ol>
+</div>
+<p>. . .</p>
+<ol type="1">
+<li><span class="math inline">\(210 / 5 = 42\)</span> observations per fold.</li>
+<li><span class="math inline">\(210 - 42 = 168\)</span> observations for training in each iteration.</li>
+</ol>
+<hr>
+</section>
+<section id="fold-error" class="level2" data-menu-title="Computing the fold error">
+<h2 data-menu-title="Computing the fold error" class="anchored" data-anchor-id="fold-error"></h2>
+<p><span class="slide-title">Computing the fold error</span></p>
+<hr>
+<div class="body-text-s">
+<p>We have:</p>
+<ul>
+<li><span class="math inline">\((x_1, y_1), ... (x_n, y_n)\)</span> = the training set which will be split into folds</li>
+<li><span class="math inline">\(n_i\)</span> = number of observations in the <span class="math inline">\(i\)</span>-th fold</li>
+<li><span class="math inline">\(\hat{y}_j\)</span> = the prediction made on <span class="math inline">\(y_j\)</span> by the corresponding CV model</li>
+</ul>
+</div>
+<p>. . .</p>
+<p>How we measure <span class="math inline">\(\text{Err}_i\)</span> on the <span class="math inline">\(i\)</span>-th fold depends on the type of problem.</p>
+<p><strong>Regression</strong>: typically use the Mean Squared Error (MSE):</p>
+<p><span class="math display">\[\text{Err}_i = \frac{1}{n_i} \sum_{j \in \text{fold } i} (y_j - \hat{y}_j)^2\]</span></p>
+<p>. . .</p>
+<p><strong>Classification</strong>: typically use the error rate:</p>
+<p><span class="math display">\[\text{Err}_i = \frac{\text{number of misclassified observations in $i$-th fold }}{\text{number of observations in $i$-th fold}}\]</span></p>
+<hr>
+</section>
+<section id="cv-caveats" class="level2" data-menu-title="Two caveats for practice">
+<h2 data-menu-title="Two caveats for practice" class="anchored" data-anchor-id="cv-caveats"></h2>
+<p><span class="slide-title">Two caveats for implementation</span></p>
+<hr>
+<p><strong>Caveat 1: feature scaling must happen inside the CV loop</strong></p>
+<p>Models that rely on distances (e.g., KNN) are sensitive to feature scale. If you standardize the full training set <em>before</em> splitting into folds, the validation fold’s statistics were computed using the whole dataset (data leakage). The <strong>scaler must be fit on the training folds only</strong> and then applied to the validation fold.</p>
+<p>. . .</p>
+<p><br></p>
+<p><strong>Caveat 2: use stratified folds for classification</strong></p>
+<p>Plain k-fold shuffles without regard to class labels. For classification — especially with class imbalance — this can produce folds where one class is barely represented, making error estimates noisy. <strong>Stratified K-fold</strong> preserves the class proportion of the full training set in each fold and is the standard practice.</p>
+<hr>
+</section>
+<section id="section-hyperparameter" class="level2" data-menu-title="# Using CV to select a hyperparameter #" data-background="#047C90">
+<h2 data-menu-title="# Using CV to select a hyperparameter #" data-background="#047C90" class="anchored" data-anchor-id="section-hyperparameter"></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Using CV to select a hyperparameter
+</p>
+</div>
+<hr>
+</section>
+<section id="hyperparameter-def" class="level2" data-menu-title="Hyperparameters">
+<h2 data-menu-title="Hyperparameters" class="anchored" data-anchor-id="hyperparameter-def"></h2>
+<p><span class="slide-title">Hyperparameters</span></p>
+<hr>
+<p>A <strong>hyperparameter</strong> is any setting chosen by the analyst that <strong>cannot be learned from the training data</strong> during model fitting. For example, the number of neighbors <span class="math inline">\(K\)</span> in the <span class="math inline">\(K\)</span>-Nearest neihbors model</p>
+<p><br></p>
+<p>. . .</p>
+<div class="teal-text body-text-m">
+<p>Choosing a hyperparameter by optimizing against the test set is another example of data leakage.</p>
+</div>
+<hr>
+</section>
+<section id="hyperparameter-procedure" class="level2" data-menu-title="Hyperparameter selection procedure">
+<h2 data-menu-title="Hyperparameter selection procedure" class="anchored" data-anchor-id="hyperparameter-procedure"></h2>
+<p><span class="slide-title">Selecting a hyperparameter with CV</span></p>
+<hr>
+<p><br></p>
+<ol start="0" type="1">
+<li>Identify the hyperparameter to tune.</li>
+<li>For each hyperparameter candidate value, compute the <span class="math inline">\(k\)</span>-fold CV error on the training set.</li>
+<li>Select the hyperparameter value with the lowest CV error.</li>
+<li>Refit the model using the selected hyperparameter on the full training set.</li>
+<li>Evaluate the final model once on the test set to report the accuracy metrics.</li>
+</ol>
+<p><br></p>
+<p>. . .</p>
+<div class="center-text teal-text body-text-m">
+<p>The test set never influences the selection, so we are not inadvertently tuning our model to perform on the test set.</p>
+</div>
+<hr>
+</section>
+<section id="knn-cv-plot" class="level2" data-menu-title="KNN: CV error vs K">
+<h2 data-menu-title="KNN: CV error vs K" class="anchored" data-anchor-id="knn-cv-plot"></h2>
+<p><span class="slide-title">KNN hyperparameter selection: kelp data</span></p>
+<hr>
+<p>We decide to tune the hyperparameter <span class="math inline">\(K\)</span> using CV.</p>
+<p>For each value of <span class="math inline">\(K\)</span> we estimate the test error rate using 10-fold CV.</p>
+<div id="353e03f3" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="5_1_cross_validation-SLIDES_files/figure-revealjs/cell-6-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="1106" height="435"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="knn-checkin-q" class="level2" data-menu-title="Check-in: KNN selection (Q)">
+<h2 data-menu-title="Check-in: KNN selection (Q)" class="anchored" data-anchor-id="knn-checkin-q"></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:55%;">
+<div id="68cc4127" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="5_1_cross_validation-SLIDES_files/figure-revealjs/cell-7-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="746" height="435"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:45%;">
+<div class="teal-text">
+<ol type="1">
+<li><p>Once <span class="math inline">\(K\)</span> is selected, on what data would you fit the final model?</p></li>
+<li><p>Why is using the test set to select <span class="math inline">\(K\)</span> not the best practice?</p></li>
+</ol>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="knn-checkin-a" class="level2" data-menu-title="Check-in: KNN selection (A)">
+<h2 data-menu-title="Check-in: KNN selection (A)" class="anchored" data-anchor-id="knn-checkin-a"></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:55%;">
+<div id="cdd34ad5" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="5_1_cross_validation-SLIDES_files/figure-revealjs/cell-8-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="746" height="435"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:45%;">
+<div class="teal-text">
+<ol type="1">
+<li><p>Once <span class="math inline">\(K\)</span> is selected, on what data would you fit the final model?</p></li>
+<li><p>Why is using the test set to select <span class="math inline">\(K\)</span> not the best practice?</p></li>
+</ol>
+</div>
+<ol type="1">
+<li><p>On the full training set (all 210 obs). CV only informs the choice of <span class="math inline">\(K\)</span>.</p></li>
+<li><p>The test set would influence the modeling decision. The reported accuracy would reflect optimization for the specific test set observations, not true generalization.</p></li>
+</ol>
+</div>
+</div>
+<hr>
+</section>
+<section id="knn-test-eval" class="level2" data-menu-title="KNN: final test evaluation">
+<h2 data-menu-title="KNN: final test evaluation" class="anchored" data-anchor-id="knn-test-eval"></h2>
+<p><span class="slide-title">Final evaluation on the test set</span></p>
+<hr>
+<p>Once <span class="math inline">\(K\)</span> is selected via CV, refit on the full training set and evaluate once on the test set.</p>
+<p>. . .</p>
+<p><br></p>
+<p>In our example data we obtain the following:</p>
+<div id="d1499669" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-stdout">
+<pre><code>Selected K (via CV):   20
+CV error estimate:     0.2429
+Actual test error:     0.3333</code></pre>
+</div>
+</div>
+<p><br></p>
+<p>If the CV error and test error are in a similar range, cross-validation gave us a reliable estimate of generalization before we ever touched the test set.</p>
+<hr>
+</section>
+<section id="model-comparison-q" class="level2" data-menu-title="Check-in: model comparison (Q)">
+<h2 data-menu-title="Check-in: model comparison (Q)" class="anchored" data-anchor-id="model-comparison-q"></h2>
+<p><span class="slide-title">Comparing models with CV</span></p>
+<hr>
+<p>CV can be used to <strong>compare different model types on the same training data before touching the test set</strong>.</p>
+<p>Once a model is selected using CV, we can <strong>refit on the full training set</strong> and report its performance on the test set once, as a final evaluation.</p>
+<p>We <strong>use the same folds for all models</strong> so that differences in CV error reflect the model, not randomness in how the data was split.</p>
+<p>. . .</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="teal-text">
+<p><strong>Check-in</strong></p>
+</div>
+<p>10-fold CV error for three candidate models on the kelp training data:</p>
+<div id="b088cb8e" class="cell" data-execution_count="9">
+<div class="cell-output cell-output-stdout">
+<pre><code>                    Model CV error
+               KNN (K=20)    0.243
+     Logistic (temp only)    0.295
+Logistic (temp + nitrate)    0.243</code></pre>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="teal-text">
+<ol type="1">
+<li><p>Which model would you select and why? What other considerations would you take into account to decide?</p></li>
+<li><p>Earlier we saw that selecting the classification threshold using the test set leads to data leakage. How is using CV to compare these three models solving the same underlying problem?</p></li>
+</ol>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="cv-workflow" class="level2" data-menu-title="CV workflow diagram">
+<h2 data-menu-title="CV workflow diagram" class="anchored" data-anchor-id="cv-workflow"></h2>
+<p><span class="slide-title">The full modeling workflow</span></p>
+<hr>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="parameters_workflow.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:70.0%"></p>
+</figure>
+</div>
+<div class="body-text-s">
+<p>Diagram from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></p>
+</div>
+<div class="center-text">
+<p>CV guides decisions made during model development.</p>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>This work is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License</a></p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This website is built with <a href="https://quarto.org/">Quarto</a> and <a href="https://github.com/MEDS-eds-220/MEDS-eds-220-course">GitHub pages</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
