@@ -248,7 +248,7 @@ window.Quarto = {
   <li><a href="#polynomial-regression" id="toc-polynomial-regression" class="nav-link" data-scroll-target="#polynomial-regression">Polynomial Regression</a></li>
   <li><a href="#step-4-fit-a-degree-2-polynomial" id="toc-step-4-fit-a-degree-2-polynomial" class="nav-link" data-scroll-target="#step-4-fit-a-degree-2-polynomial">Step 4: Fit a Degree-2 Polynomial</a></li>
   <li><a href="#step-5-compare-polynomial-degrees-with-cross-validation" id="toc-step-5-compare-polynomial-degrees-with-cross-validation" class="nav-link" data-scroll-target="#step-5-compare-polynomial-degrees-with-cross-validation">Step 5: Compare Polynomial Degrees with Cross-Validation</a></li>
-  <li><a href="#step-6-visualize-cv-mse-across-polynomial-degrees-3-of-our-polynomial-fits" id="toc-step-6-visualize-cv-mse-across-polynomial-degrees-3-of-our-polynomial-fits" class="nav-link" data-scroll-target="#step-6-visualize-cv-mse-across-polynomial-degrees-3-of-our-polynomial-fits">Step 6: Visualize CV MSE Across Polynomial Degrees + 3 of our polynomial fits</a></li>
+  <li><a href="#step-6-visualize-tuning-results" id="toc-step-6-visualize-tuning-results" class="nav-link" data-scroll-target="#step-6-visualize-tuning-results">Step 6: Visualize tuning results</a></li>
   <li><a href="#step-7-evaluate-the-best-degree-on-the-test-set" id="toc-step-7-evaluate-the-best-degree-on-the-test-set" class="nav-link" data-scroll-target="#step-7-evaluate-the-best-degree-on-the-test-set">Step 7: Evaluate the Best Degree on the Test Set</a></li>
   </ul>
 </nav>
@@ -303,7 +303,7 @@ window.Quarto = {
 </section>
 <section id="setup-load-libraries-and-read-in-data" class="level2">
 <h2 class="anchored" data-anchor-id="setup-load-libraries-and-read-in-data">Setup: Load Libraries and Read in Data</h2>
-<div id="d267b243" class="cell" data-execution_count="1">
+<div id="6ac9e8c8" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -320,18 +320,20 @@ window.Quarto = {
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>hurricane_do        <span class="op">=</span> pd.read_excel(url, sheet_name<span class="op">=</span><span class="dv">5</span>)</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>hurricane_turbidity <span class="op">=</span> pd.read_excel(url, sheet_name<span class="op">=</span><span class="dv">2</span>)</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> hurricane_do.merge(hurricane_turbidity, on<span class="op">=</span><span class="st">'Date Time (ET)'</span>).drop(</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'Piermont D.O. (ppm)'</span>, <span class="st">'Piermont Turbidity in NTU'</span>, <span class="st">'Norrie Point Turbidity in NTU'</span>,<span class="st">'Norrie Point D.O. (ppm)'</span>], axis<span class="op">=</span><span class="dv">1</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>df.columns <span class="op">=</span> [<span class="st">'date'</span>, <span class="st">'albany_DO'</span>, <span class="st">'albany_turbidity'</span>]</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Shape: </span><span class="sc">{</span>df<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge two sheets together and drop locations that aren't Albany</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> hurricane_do.merge(hurricane_turbidity, on<span class="op">=</span><span class="st">'Date Time (ET)'</span>).drop(</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'Piermont D.O. (ppm)'</span>, <span class="st">'Piermont Turbidity in NTU'</span>, <span class="st">'Norrie Point Turbidity in NTU'</span>,<span class="st">'Norrie Point D.O. (ppm)'</span>], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename columns</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>df.columns <span class="op">=</span> [<span class="st">'date'</span>, <span class="st">'albany_DO'</span>, <span class="st">'albany_turbidity'</span>]</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Shape: </span><span class="sc">{</span>df<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Shape: (1152, 3)</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="73">
+<div class="cell-output cell-output-display" data-execution_count="1">
 <div>
 
 
@@ -386,16 +388,17 @@ window.Quarto = {
 <section id="step-1-explore-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="step-1-explore-the-data">Step 1: Explore the Data</h2>
 <p>Plot dissolved oxygen against turbidity at Port of Albany to see whether the relationship looks linear or curved.</p>
-<div id="cf397692" class="cell" data-execution_count="2">
+<div id="ac2a3682" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">4</span>))</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ax.scatter(df[<span class="st">'albany_turbidity'</span>], df[<span class="st">'albany_DO'</span>], alpha<span class="op">=</span><span class="fl">0.3</span>, s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">'steelblue'</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Turbidity (NTU)'</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Dissolved Oxygen (ppm)'</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'DO vs. Turbidity at Port of Albany</span><span class="ch">\n</span><span class="st">Hurricane Irene, August–September 2011'</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create scatterplot of turbidity and dissolved oxygen relationship </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">4</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ax.scatter(df[<span class="st">'albany_turbidity'</span>], df[<span class="st">'albany_DO'</span>], alpha<span class="op">=</span><span class="fl">0.3</span>,  color<span class="op">=</span><span class="st">'steelblue'</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Turbidity (NTU)'</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Dissolved Oxygen (ppm)'</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'DO vs. Turbidity at Port of Albany</span><span class="ch">\n</span><span class="st">Hurricane Irene, August–September 2011'</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -416,18 +419,20 @@ window.Quarto = {
 <li>Build <code>X</code> from <code>albany_turbidity</code> (reshape to a 2D column vector with <code>.reshape(-1, 1)</code>) and <code>y</code> from <code>albany_DO</code>.</li>
 <li>Split into 70% train / 30% test using <code>train_test_split</code> with <code>random_state=42</code>.</li>
 </ol>
-<div id="7ba1f662" class="cell" data-execution_count="3">
+<div id="3410bdd1" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[<span class="st">'albany_turbidity'</span>].values.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">'albany_DO'</span>]</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.30</span>, random_state<span class="op">=</span><span class="dv">42</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Training observations : </span><span class="sc">{</span><span class="bu">len</span>(X_train)<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test observations     : </span><span class="sc">{</span><span class="bu">len</span>(X_test)<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define predictor and response variable</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[[<span class="st">'albany_turbidity'</span>]]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">'albany_DO'</span>]</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Split data into training and testing</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.30</span>, random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Training observations : </span><span class="sc">{</span><span class="bu">len</span>(X_train)<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test observations     : </span><span class="sc">{</span><span class="bu">len</span>(X_test)<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Training observations : 806
@@ -444,27 +449,28 @@ Test observations     : 346</code></pre>
 <li>Predict on <code>X_test</code> and compute test MSE.</li>
 <li>Plot the fitted line over the test scatter.</li>
 </ol>
-<div id="18513f5a" class="cell" data-execution_count="4">
+<div id="42a73a15" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> LinearRegression()</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>lr.fit(X_train, y_train)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>y_pred_lr <span class="op">=</span> lr.predict(X_test)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>mse_linear <span class="op">=</span> mean_squared_error(y_test, y_pred_lr)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Linear regression test MSE: </span><span class="sc">{</span>mse_linear<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">4</span>))</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>ax.scatter(X_test, y_test, alpha<span class="op">=</span><span class="fl">0.3</span>, s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">'steelblue'</span>, label<span class="op">=</span><span class="st">'Test data'</span>)</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>ax.plot(X_test, y_pred_lr, color<span class="op">=</span><span class="st">'tomato'</span>, linewidth<span class="op">=</span><span class="dv">2</span>,</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f'Linear fit  (MSE = </span><span class="sc">{</span>mse_linear<span class="sc">:.3f}</span><span class="ss">)'</span>)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Turbidity (NTU)'</span>)</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Dissolved Oxygen (ppm)'</span>)</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Baseline Linear Regression'</span>)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run Linear Regression (polynomial with degree = 1)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> LinearRegression()</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>lr.fit(X_train, y_train)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>y_pred_lr <span class="op">=</span> lr.predict(X_test)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>mse_linear <span class="op">=</span> mean_squared_error(y_test, y_pred_lr)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Linear regression test MSE: </span><span class="sc">{</span>mse_linear<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">4</span>))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>ax.scatter(X_test, y_test, alpha<span class="op">=</span><span class="fl">0.3</span>, s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">'steelblue'</span>, label<span class="op">=</span><span class="st">'Test data'</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>ax.plot(X_test, y_pred_lr, color<span class="op">=</span><span class="st">'tomato'</span>, linewidth<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f'Linear fit  (MSE = </span><span class="sc">{</span>mse_linear<span class="sc">:.3f}</span><span class="ss">)'</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Turbidity (NTU)'</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Dissolved Oxygen (ppm)'</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Baseline Linear Regression'</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear regression test MSE: 0.2895</code></pre>
@@ -498,20 +504,22 @@ Test observations     : 346</code></pre>
 <li>Fit a <code>LinearRegression</code> on the transformed training data</li>
 <li>Compute and print the test MSE</li>
 </ul>
-<div id="cc049aff" class="cell" data-execution_count="5">
+<div id="48840ff3" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>poly <span class="op">=</span> PolynomialFeatures(degree<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>X_train_poly <span class="op">=</span> poly.fit_transform(X_train)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>X_test_poly  <span class="op">=</span> poly.transform(X_test)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>lr_poly <span class="op">=</span> LinearRegression()</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>lr_poly.fit(X_train_poly, y_train)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>y_pred_poly <span class="op">=</span> lr_poly.predict(X_test_poly)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>mse_poly <span class="op">=</span> mean_squared_error(y_test, y_pred_poly)</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Linear regression test MSE  : </span><span class="sc">{</span>mse_linear<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Degree-2 polynomial test MSE: </span><span class="sc">{</span>mse_poly<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run 2 degree polynomial model</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>poly <span class="op">=</span> PolynomialFeatures(degree<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>X_train_poly <span class="op">=</span> poly.fit_transform(X_train)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>X_test_poly  <span class="op">=</span> poly.transform(X_test)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>lr_poly <span class="op">=</span> LinearRegression()</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>lr_poly.fit(X_train_poly, y_train)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>y_pred_poly <span class="op">=</span> lr_poly.predict(X_test_poly)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare 1 and 2 degree polynomial results </span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>mse_poly <span class="op">=</span> mean_squared_error(y_test, y_pred_poly)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Linear regression test MSE  : </span><span class="sc">{</span>mse_linear<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Degree-2 polynomial test MSE: </span><span class="sc">{</span>mse_poly<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear regression test MSE  : 0.2895
@@ -522,30 +530,43 @@ Degree-2 polynomial test MSE: 0.1511</code></pre>
 </section>
 <section id="step-5-compare-polynomial-degrees-with-cross-validation" class="level2">
 <h2 class="anchored" data-anchor-id="step-5-compare-polynomial-degrees-with-cross-validation">Step 5: Compare Polynomial Degrees with Cross-Validation</h2>
-<p>Picking the best degree by checking test MSE is an example of data leakage since we would be using the test set to choose the model. Instead, we use <strong>k-fold cross-validation on the training set</strong> to estimate the error for every degree.</p>
-<p>We will iterate over 10 different polynomial degress and perform cross validation with each one to find the lowest MSE.</p>
+<p>Picking the best degree by checking test MSE is an example of data leakage since we would be using the test set to choose the model. Instead, we use <strong>k-fold cross-validation on the training set</strong> to estimate the error for every degree. Recall the steps for the hyperparameter use case of cross validation:</p>
+<ol start="0" type="1">
+<li>Identify the hyperparameter you want to examine.</li>
+<li>For each candidate value of the hyperparameter, compute the k-fold CV error on the training set.</li>
+<li>Select the hyperparameter that resulted in the lowest CV error. If there are several candidates, opt for the one that gives the simpler model.</li>
+<li>Refit the model using the selected hyperaparameter on the full training set.</li>
+<li>Evaluate the final model once on the test set.</li>
+</ol>
+<section id="identify-the-hyperparameter-you-want-to-examine." class="level4">
+<h4 class="anchored" data-anchor-id="identify-the-hyperparameter-you-want-to-examine.">0. Identify the hyperparameter you want to examine.</h4>
+<p>We identify the hyperparamter we want to tune as the number of degrees used in our polynomial regression. We will iterate over 11 different polynomial degress and perform cross validation with each one to find the lowest MSE.</p>
 <p>Note: <code>cross_val_score</code> with <code>scoring='neg_mean_squared_error'</code> returns <strong>negative</strong> MSE, so we negate the scores to get positive MSE values.</p>
-<div id="4e0dfb5c" class="cell" data-execution_count="6">
+</section>
+<section id="for-each-candidate-value-of-the-hyperparameter-compute-the-k-fold-cv-error-on-the-training-set." class="level4">
+<h4 class="anchored" data-anchor-id="for-each-candidate-value-of-the-hyperparameter-compute-the-k-fold-cv-error-on-the-training-set.">1. For each candidate value of the hyperparameter, compute the k-fold CV error on the training set.</h4>
+<div id="6e70b2d9" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>degrees      <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">12</span>))</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>cv_mean_mses <span class="op">=</span> []</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> degree <span class="kw">in</span> degrees:</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    poly         <span class="op">=</span> PolynomialFeatures(degree)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    X_train_poly <span class="op">=</span> poly.fit_transform(X_train)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    lr     <span class="op">=</span> LinearRegression()</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> cross_val_score(lr, X_train_poly, y_train, cv<span class="op">=</span><span class="dv">5</span>, scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>)</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    cv_mean_mses.append(<span class="op">-</span>scores.mean())</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>cv_mean_mses <span class="op">=</span> np.array(cv_mean_mses)</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>optimal_degree <span class="op">=</span> degrees[np.argmin(cv_mean_mses)]</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>best_cv_mse    <span class="op">=</span> cv_mean_mses.<span class="bu">min</span>()</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> degree, mse <span class="kw">in</span> <span class="bu">zip</span>(degrees, cv_mean_mses):</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Degree </span><span class="sc">{</span>degree<span class="sc">}</span><span class="ss">: MSE = </span><span class="sc">{</span>mse<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># k fold cross validation with polynomial degree tuning</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>degrees      <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">12</span>))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>cv_mean_mses <span class="op">=</span> []</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> degree <span class="kw">in</span> degrees:</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    poly         <span class="op">=</span> PolynomialFeatures(degree)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    X_train_poly <span class="op">=</span> poly.fit_transform(X_train)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    lr     <span class="op">=</span> LinearRegression()</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> cross_val_score(lr, X_train_poly, y_train, cv<span class="op">=</span><span class="dv">5</span>, scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    cv_mean_mses.append(<span class="op">-</span>scores.mean())</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>cv_mean_mses <span class="op">=</span> np.array(cv_mean_mses)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>optimal_degree <span class="op">=</span> degrees[np.argmin(cv_mean_mses)]</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>best_cv_mse    <span class="op">=</span> cv_mean_mses.<span class="bu">min</span>()</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> degree, mse <span class="kw">in</span> <span class="bu">zip</span>(degrees, cv_mean_mses):</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Degree </span><span class="sc">{</span>degree<span class="sc">}</span><span class="ss">: MSE = </span><span class="sc">{</span>mse<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Degree 1: MSE = 0.2841
@@ -563,56 +584,33 @@ Degree 11: MSE = 0.4105</code></pre>
 </div>
 <hr>
 </section>
-<section id="step-6-visualize-cv-mse-across-polynomial-degrees-3-of-our-polynomial-fits" class="level2">
-<h2 class="anchored" data-anchor-id="step-6-visualize-cv-mse-across-polynomial-degrees-3-of-our-polynomial-fits">Step 6: Visualize CV MSE Across Polynomial Degrees + 3 of our polynomial fits</h2>
-<p>Plot mean CV MSE for each degree and mark the best one.</p>
-<div id="49f2ad75" class="cell" data-execution_count="7">
+</section>
+<section id="step-6-visualize-tuning-results" class="level2">
+<h2 class="anchored" data-anchor-id="step-6-visualize-tuning-results">Step 6: Visualize tuning results</h2>
+<ul>
+<li>Creat a line plot of CV MSE Across Polynomial Degrees</li>
+<li>Create a plot of how our model performs on polynomial degrees 1, 5, and 10</li>
+</ul>
+<div id="8f69ab35" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>best_degree <span class="op">=</span> degrees[np.argmin(cv_mean_mses)]</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>best_cv_mse <span class="op">=</span> cv_mean_mses.<span class="bu">min</span>()</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot 1: CV MSE across degrees</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>ax.plot(degrees, cv_mean_mses, marker<span class="op">=</span><span class="st">'o'</span>, color<span class="op">=</span><span class="st">'steelblue'</span>,</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        linewidth<span class="op">=</span><span class="dv">2</span>, markersize<span class="op">=</span><span class="dv">6</span>, label<span class="op">=</span><span class="st">'Mean CV MSE'</span>)</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>ax.axvline(best_degree, color<span class="op">=</span><span class="st">'tomato'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="fl">1.5</span>,</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="ss">f'Best degree = </span><span class="sc">{</span>best_degree<span class="sc">}</span><span class="ss">  (CV MSE = </span><span class="sc">{</span>best_cv_mse<span class="sc">:.4f}</span><span class="ss">)'</span>)</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Polynomial Degree'</span>)</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Mean CV MSE'</span>)</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'CV MSE vs. Polynomial Degree</span><span class="ch">\n</span><span class="st">(5-fold CV on training set)'</span>)</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(degrees)</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Best polynomial degree : </span><span class="sc">{</span>best_degree<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Best mean CV MSE       : </span><span class="sc">{</span>best_cv_mse<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot 2: Fitted curves for degrees 1, 5, 10 to illustrate under/overfitting</span></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>X_range <span class="op">=</span> np.linspace(X_train.<span class="bu">min</span>(), X_train.<span class="bu">max</span>(), <span class="dv">300</span>).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> {<span class="st">'Linear'</span>: <span class="st">'tomato'</span>, <span class="st">'Degree 5'</span>: <span class="st">'seagreen'</span>, <span class="st">'Degree 10'</span>: <span class="st">'darkorchid'</span>}</span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>degree_map <span class="op">=</span> {<span class="dv">1</span>: <span class="st">'Linear'</span>, <span class="dv">5</span>: <span class="st">'Degree 5'</span>, <span class="dv">10</span>: <span class="st">'Degree 10'</span>}</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>ax.scatter(X_train, y_train, alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">'steelblue'</span>, label<span class="op">=</span><span class="st">'Training data'</span>)</span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> deg, label <span class="kw">in</span> degree_map.items():</span>
-<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> PolynomialFeatures(degree<span class="op">=</span>deg)</span>
-<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    X_tr_p <span class="op">=</span> p.fit_transform(X_train)</span>
-<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> LinearRegression().fit(X_tr_p, y_train)</span>
-<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    y_range <span class="op">=</span> m.predict(p.transform(X_range))</span>
-<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    ax.plot(X_range, y_range, linewidth<span class="op">=</span><span class="dv">2</span>, color<span class="op">=</span>colors[label], label<span class="op">=</span>label)</span>
-<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Turbidity (NTU)'</span>)</span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Dissolved Oxygen (ppm)'</span>)</span>
-<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Polynomial Fits'</span>)</span>
-<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot 1: CV MSE across degrees</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>ax.plot(degrees, cv_mean_mses, marker<span class="op">=</span><span class="st">'o'</span>, color<span class="op">=</span><span class="st">'steelblue'</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        linewidth<span class="op">=</span><span class="dv">2</span>, markersize<span class="op">=</span><span class="dv">6</span>, label<span class="op">=</span><span class="st">'Mean CV MSE'</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>ax.axvline(optimal_degree, color<span class="op">=</span><span class="st">'tomato'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="ss">f'Best degree = </span><span class="sc">{</span>optimal_degree<span class="sc">}</span><span class="ss">  (CV MSE = </span><span class="sc">{</span>best_cv_mse<span class="sc">:.4f}</span><span class="ss">)'</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Polynomial Degree'</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Mean CV MSE'</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'CV MSE vs. Polynomial Degree</span><span class="ch">\n</span><span class="st">(5-fold CV on training set)'</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(degrees)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Best polynomial degree : </span><span class="sc">{</span>optimal_degree<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Best mean CV MSE       : </span><span class="sc">{</span>best_cv_mse<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -625,66 +623,107 @@ Degree 11: MSE = 0.4105</code></pre>
 <pre><code>Best polynomial degree : 5
 Best mean CV MSE       : 0.0340</code></pre>
 </div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="lab4_files/figure-html/cell-8-output-3.png" width="757" height="468" class="figure-img"></p>
-</figure>
 </div>
-</div>
-</div>
-<hr>
-</section>
-<section id="step-7-evaluate-the-best-degree-on-the-test-set" class="level2">
-<h2 class="anchored" data-anchor-id="step-7-evaluate-the-best-degree-on-the-test-set">Step 7: Evaluate the Best Degree on the Test Set</h2>
-<p>Fit a final model on <strong>all training data</strong> using the CV-selected degree and evaluate it once on the test set.</p>
-<ol type="1">
-<li>Fit <code>PolynomialFeatures(degree=best_degree)</code> on <code>X_train</code>, transform both sets.</li>
-<li>Fit <code>LinearRegression</code> on the transformed training data.</li>
-<li>Compute test MSE and compare against the linear baseline.</li>
-<li>Plot the fitted curve over the test scatter.</li>
-</ol>
-<div id="bbeb8215" class="cell" data-execution_count="8">
+<div id="4f38e842" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>poly_best  <span class="op">=</span> PolynomialFeatures(degree<span class="op">=</span>best_degree)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>X_train_p  <span class="op">=</span> poly_best.fit_transform(X_train)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>X_test_p   <span class="op">=</span> poly_best.transform(X_test)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>model_best <span class="op">=</span> LinearRegression()</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>model_best.fit(X_train_p, y_train)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>y_pred_best <span class="op">=</span> model_best.predict(X_test_p)</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>mse_best    <span class="op">=</span> mean_squared_error(y_test, y_pred_best)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Linear regression test MSE    : </span><span class="sc">{</span>mse_linear<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Degree-</span><span class="sc">{</span>best_degree<span class="sc">}</span><span class="ss"> polynomial test MSE : </span><span class="sc">{</span>mse_best<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'MSE improvement               : </span><span class="sc">{</span>mse_linear <span class="op">-</span> mse_best<span class="sc">:+.4f}</span><span class="ss">'</span>)</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>X_range      <span class="op">=</span> np.linspace(X_test.<span class="bu">min</span>(), X_test.<span class="bu">max</span>(), <span class="dv">300</span>).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>y_range_pred <span class="op">=</span> model_best.predict(poly_best.transform(X_range))</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">4</span>))</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>ax.scatter(X_test, y_test, alpha<span class="op">=</span><span class="fl">0.3</span>, s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">'steelblue'</span>, label<span class="op">=</span><span class="st">'Test data'</span>)</span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>ax.plot(X_range, y_range_pred, color<span class="op">=</span><span class="st">'tomato'</span>, linewidth<span class="op">=</span><span class="dv">2</span>,</span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f'Degree-</span><span class="sc">{</span>best_degree<span class="sc">}</span><span class="ss"> fit  (MSE = </span><span class="sc">{</span>mse_best<span class="sc">:.3f}</span><span class="ss">)'</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot 2: Fitted curves for degrees 1, 5, 10 </span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>X_range <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    np.linspace(X_test.<span class="bu">min</span>(), X_test.<span class="bu">max</span>(), <span class="dv">300</span>),</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[<span class="st">'albany_turbidity'</span>]</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>plot_degrees <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>]</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>labels       <span class="op">=</span> [<span class="st">'Linear (Degree 1)'</span>, <span class="st">'Degree 5'</span>, <span class="st">'Degree 10'</span>]</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>colors_list  <span class="op">=</span> [<span class="st">'tomato'</span>, <span class="st">'seagreen'</span>, <span class="st">'darkorchid'</span>]</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>ax.scatter(X_train, y_train, alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">'steelblue'</span>, label<span class="op">=</span><span class="st">'Training data'</span>)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> deg, label, color <span class="kw">in</span> <span class="bu">zip</span>(plot_degrees, labels, colors_list):</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    poly <span class="op">=</span> PolynomialFeatures(degree<span class="op">=</span>deg)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    X_train_poly <span class="op">=</span> poly.fit_transform(X_train)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> LinearRegression()</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    model.fit(X_train_poly, y_train)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    X_range_poly <span class="op">=</span> poly.transform(X_range)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> model.predict(X_range_poly)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    ax.plot(X_range, y_pred, linewidth<span class="op">=</span><span class="dv">2</span>, color<span class="op">=</span>color, label<span class="op">=</span>label)</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Turbidity (NTU)'</span>)</span>
 <span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Dissolved Oxygen (ppm)'</span>)</span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="ss">f'Best Polynomial Regression (Degree </span><span class="sc">{</span>best_degree<span class="sc">}</span><span class="ss">)'</span>)</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Polynomial Fits'</span>)</span>
 <span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
 <span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
 <span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="lab4_files/figure-html/cell-9-output-1.png" width="757" height="468" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="select-the-hyperparameter-that-resulted-in-the-lowest-cv-error.-if-there-are-several-candidates-opt-for-the-one-that-gives-the-simpler-model." class="level4">
+<h4 class="anchored" data-anchor-id="select-the-hyperparameter-that-resulted-in-the-lowest-cv-error.-if-there-are-several-candidates-opt-for-the-one-that-gives-the-simpler-model.">2. Select the hyperparameter that resulted in the lowest CV error. If there are several candidates, opt for the one that gives the simpler model.</h4>
+<p>From the line plot above, we can see that the polynomial degree that yielded the lowest MSE was a degree of 5. We will use this degree for our test set.</p>
+<hr>
+</section>
+</section>
+<section id="step-7-evaluate-the-best-degree-on-the-test-set" class="level2">
+<h2 class="anchored" data-anchor-id="step-7-evaluate-the-best-degree-on-the-test-set">Step 7: Evaluate the Best Degree on the Test Set</h2>
+<p>We will now address the last two step of our hyperparamter selection process with cross validation: Refit the model using the selected hyperaparameter on the full training set (Step 3) &amp; Evaluate the final model once on the test set (Step 4).</p>
+<p>Fit a final model on <strong>all training data</strong> using the CV-selected degree and evaluate it once on the test set.</p>
+<ol type="1">
+<li>Fit <code>PolynomialFeatures(degree=optimal_degree)</code> on <code>X_train</code>, transform both sets.</li>
+<li>Fit <code>LinearRegression</code> on the transformed training data.</li>
+<li>Compute test MSE and compare against the linear baseline.</li>
+<li>Plot the fitted curve over the test scatter.</li>
+</ol>
+<div id="15a94051" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit polynomial with degree that yielded lowest MSE</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>poly_best  <span class="op">=</span> PolynomialFeatures(degree<span class="op">=</span>optimal_degree)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>X_train_p  <span class="op">=</span> poly_best.fit_transform(X_train)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>X_test_p   <span class="op">=</span> poly_best.transform(X_test)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>model_best <span class="op">=</span> LinearRegression()</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>model_best.fit(X_train_p, y_train)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>y_pred_best <span class="op">=</span> model_best.predict(X_test_p)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>mse_best    <span class="op">=</span> mean_squared_error(y_test, y_pred_best)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Linear regression test MSE    : </span><span class="sc">{</span>mse_linear<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Degree-</span><span class="sc">{</span>optimal_degree<span class="sc">}</span><span class="ss"> polynomial test MSE : </span><span class="sc">{</span>mse_best<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>X_range <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    np.linspace(X_test.<span class="bu">min</span>(), X_test.<span class="bu">max</span>(), <span class="dv">300</span>),</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[<span class="st">'albany_turbidity'</span>]</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>y_range_pred <span class="op">=</span> model_best.predict(poly_best.transform(X_range))</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize results of final model evaluated on test set</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">4</span>))</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>ax.scatter(X_test, y_test, alpha<span class="op">=</span><span class="fl">0.3</span>, s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">'steelblue'</span>, label<span class="op">=</span><span class="st">'Test data'</span>)</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>ax.plot(X_range, y_range_pred, color<span class="op">=</span><span class="st">'tomato'</span>, linewidth<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f'Degree-</span><span class="sc">{</span>optimal_degree<span class="sc">}</span><span class="ss"> fit  (MSE = </span><span class="sc">{</span>mse_best<span class="sc">:.3f}</span><span class="ss">)'</span>)</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Turbidity (NTU)'</span>)</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Dissolved Oxygen (ppm)'</span>)</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="ss">f'Best Polynomial Regression (Degree </span><span class="sc">{</span>optimal_degree<span class="sc">}</span><span class="ss">)'</span>)</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear regression test MSE    : 0.2895
-Degree-5 polynomial test MSE : 0.0319
-MSE improvement               : +0.2575</code></pre>
+Degree-5 polynomial test MSE : 0.0319</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="lab4_files/figure-html/cell-9-output-2.png" width="660" height="372" class="figure-img"></p>
+<p><img src="lab4_files/figure-html/cell-10-output-2.png" width="660" height="372" class="figure-img"></p>
 </figure>
 </div>
 </div>
