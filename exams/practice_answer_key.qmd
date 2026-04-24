@@ -24,7 +24,7 @@ Supervised, because each observation has a labeled response variable (survival r
 
 **Q4. Problem with the workflow**
 
-The test set is used multiple times — once per candidate model — to select the best model. This means the chosen model's test MSE is no longer an unbiased estimate of generalization performance; the team has effectively "peeked" at the test set during model selection.
+The test set is used multiple times — once per candidate model — to select the best model. This means the chosen model's test MSE is no longer an unbiased estimate of generalization performance. mMdel selection using the test set causes optimistic bias in the reported MSE
 
 *Correction:* Use cross-validation on the training set to select the best model, then evaluate that model once on the held-out test set.
 
@@ -90,6 +90,6 @@ In this context, setting the threshold too low means more sites get flagged as H
 
 Yes, the teammate is correct. In logistic regression, a negative coefficient means that as the predictor increases, the log-odds of belonging to the positive class decrease, which corresponds to a lower predicted probability of being classified as High Carbon. So sites with higher bulk density index are indeed less likely to be flagged as High Carbon by the model, all else held constant.
 
-**Q6. k-fold cross-validation**
+**Q7. k-fold cross-validation**
 
 The team member is correct that $k$ models are trained during cross-validation, but CV is not meant to produce the final model — it is used to evaluate performance and/or select hyperparameters (such as $K$ in KNN). Once that evaluation is complete, the final model is refit on the entire training set using the chosen configuration. The CV score estimates how well that final model is expected to generalize to unseen data.
