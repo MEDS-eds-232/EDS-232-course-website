@@ -65,20 +65,31 @@ However, a non-significant p-value does not mean the true effect is exactly zero
 
 Precision. Incorrectly certifying a Low Carbon site as High Carbon (a false positive) has direct financial and credibility consequences. Precision measures how many of the predicted High Carbon sites are truly High Carbon, which directly captures this concern.
 
-**Q2. False Positive Rate**
+**Q2. False positive in context**
+
+A false positive is a site that is truly Low Carbon but is predicted by the model to be High Carbon. From the plot, T2 is a false positive: its true label is Low Carbon (red diamond) but it falls in the High Carbon decision region (green background).
+
+**Q3. False Positive Rate**
 
 $$FPR = \frac{FP}{FP + TN} = \frac{5}{5 + 20} = \frac{5}{25} = 0.20$$
 
 Of all sites that are truly Low Carbon, 20% were incorrectly classified as High Carbon by the model.
 
-**Q3. False positive in context**
-
-A false positive is a site that is truly Low Carbon but is predicted by the model to be High Carbon. From the plot, T2 is a false positive: its true label is Low Carbon (red diamond) but it falls in the High Carbon decision region (green background).
-
 **Q4. Overfitting: K = 1 vs K = 9**
 
-$K = 1$ is more likely to overfit. With $K = 1$, the model is maximally flexible — it bases each prediction on a single neighbor, resulting in a highly irregular decision boundary that follows the training data closely. This leads to low bias but high variance. $K = 9$ averages over more neighbors, producing a smoother boundary with higher bias but lower variance, which generalizes better to new data.
+$K = 1$ is more likely to overfit. With $K = 1$, the model is maximally flexible: it bases each prediction on a single neighbor, resulting in a highly irregular decision boundary that follows the training data closely. This leads to low bias but high variance. $K = 9$ averages over more neighbors, producing a smoother boundary with higher bias but lower variance, which could generalize better to new data.
 
-**BONUS**
+**Q5. Logistic regression process**
 
-The team would use k-fold cross-validation by dividing the training data into $k$ folds. In each iteration, one fold is held out as a validation set and the model is trained on the remaining $k-1$ folds. This is repeated $k$ times so every fold serves as the validation set once. The CV score is the average performance across all $k$ folds, and provides an estimate of how well the model generalizes to unseen data. To select the best $K$, they would repeat this process for each candidate value of $K$ and choose the one with the best average CV score.
+The team must select a classification threshold — a cutoff on $\hat{p}(X)$ 
+above which a site is labeled High Carbon and below which it is labeled Low Carbon. The default is often 0.5, but this is not always appropriate.
+
+In this context, setting the threshold too low means more sites get flagged as High Carbon, increasing recall but reducing precision — the program risks certifying Low Carbon sites, which has financial and credibility consequences. Setting it too high means fewer sites are flagged, improving precision but potentially missing truly High Carbon sites. The team should choose a threshold that reflects the relative cost of each type of error.
+
+**Q6. Sign of logistic regression coefficients**
+
+Yes, the teammate is correct. In logistic regression, a negative coefficient means that as the predictor increases, the log-odds of belonging to the positive class decrease, which corresponds to a lower predicted probability of being classified as High Carbon. So sites with higher bulk density index are indeed less likely to be flagged as High Carbon by the model, all else held constant.
+
+**Q6. k-fold cross-validation**
+
+The team member is correct that $k$ models are trained during cross-validation, but CV is not meant to produce the final model — it is used to evaluate performance and/or select hyperparameters (such as $K$ in KNN). Once that evaluation is complete, the final model is refit on the entire training set using the chosen configuration. The CV score estimates how well that final model is expected to generalize to unseen data.

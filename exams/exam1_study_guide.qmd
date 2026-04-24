@@ -90,13 +90,15 @@ format:
 :::{.callout-note}
 ## Please read
 
-- These are examples for the kind of questions the exam will have and the format of the exam, not necessarily these exact topics.
+- These are *examples for the kind of questions the exam will have* and the format of the exam, not necessarily these exact topics.
 - The exam will have two scenarios (10 questions each) in which you are requested to interpret results and discuss statements. 
 - The exam will cover all models discussed in the course, including but not limited to those in these practice exercises."
 
 :::
 
-[✅ **Solutions to practice exercises**](practice_answer_key.qmd)
+[✅ **Solutions to practice exercises**](practice_answer_key.qmd) 
+
+The answers presented are quite comprehensive, so they can help you study and clarify any misconceptions. 
 
 ### Practice 1 — Salmon Survival Study
 
@@ -176,23 +178,17 @@ A team of soil scientists is building a classifier to label soil samples accordi
 - **Bulk density index ($X_1$)**: normalized bulk density of the soil sample, on a 0–10 scale
 - **Clay content index ($X_2$)**: normalized clay content of the soil sample, on a 0–10 scale
 
-Soil samples flagged as High Carbon will be published in a public database and used to certify land for carbon credit markets. Incorrectly certifying a Low Carbon site as High Carbon would undermine the program's credibility and have financial consequences.
+The team will be using *High Carbon* as the positive class.
 
-**Q1.**  Which metric should the team prioritize recall or precision? Use High Carbon as the positive class and explain why.
+Soil samples flagged as *High Carbon* will be published in a public database and used to certify land for carbon credit markets. Incorrectly certifying a *Low Carbon* site as *High Carbon* would undermine the program's credibility and have financial consequences.
 
-The team applies their KNN classifier ($K = 3$) to a test set of 37 soil samples. The confusion matrix below shows the results, where the positive class is High Carbon.
+**Q1.**  Which metric should the team prioritize recall or precision? Explain why.
 
-|  | Predicted: High | Predicted: Low |
-|:--|:---:|:---:|
-| **Actual: High** | 9 | 3 |
-| **Actual: Low** | 5 | 20 |
+The team applies their KNN classifier ($K = 3$) to a test set of 37 soil samples. 
 
-**Q2.** Calculate the False Positive Rate (FPR). Explain in plain language what this value means. Use the class names, not “positive” and “negative.”
+The figure below shows the KNN decision boundary ($K = 3$) fitted on the training data . Four test points (T1, T2, T3, T4) have been plotted. Their true labels are shown in the table. 
 
-The figure below shows the KNN decision boundary ($K = 3$) fitted on the training data. Four additional test points (T1, T2, T3, T4) have been plotted. Their true labels are shown in the table. 
-
-**Q3.** Explain to the team what a false positive is in the context of this problem and identify one from the test points in the plot.
-
+**Q2.** Explain to the team what a false positive is in the context of this problem and identify one from the test points in the plot.
 
 ```{python}
 import numpy as np
@@ -265,6 +261,29 @@ plt.show()
 | T3 |  High Carbon |
 | T4 |  High Carbon |
 
+The confusion matrix below shows the results.
+
+|  | Predicted: High | Predicted: Low |
+|:--|:---:|:---:|
+| **Actual: High** | 9 | 3 |
+| **Actual: Low** | 5 | 20 |
+
+**Q3.** Calculate the False Positive Rate (FPR). Explain in plain language what this value means. Use the class names, not “positive” and “negative.”
+
 **Q4.** The team considers using $K = 1$ versus $K = 9$. Which value of $K$ is more likely to overfit the training data? Explain using the concepts of model flexibility, bias, and variance.
 
-**BONUS** Describe the steps of k-fold cross-validation. What does the final CV score estimate?
+Instead of KNN, the team decides to fit a logistic regression model to predict carbon status.
+
+**Q5.** Once the logistic regression model is fitted, what additional decision must the team make before it can output class labels? What are the tradeoffs of setting this value too high or too low in the context of the carbon certification program?
+
+**Q6.** The coefficient for bulk density index ($X_1$) is $-0.9$. A teammate says: 
+
+> *"This means sites with higher bulk density are less likely to be classified as High Carbon, given all else is held fixed."* 
+
+Are they correct? Explain.
+
+**Q7.** Someone else suggests: 
+
+>*"In $k$-fold cross-validation, we end up with $k$ different trained models. We need to choose one of these to actually use to get the final predictions."* 
+
+Is this statement true or false? Explain.
