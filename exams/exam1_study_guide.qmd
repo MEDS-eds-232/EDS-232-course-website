@@ -91,10 +91,12 @@ format:
 ## Please read
 
 - These are examples for the kind of questions the exam will have and the format of the exam, not necessarily these exact topics.
-- The exam will have two (slightly longer) scenarios, in which you are requested to interpret results and discuss statements. 
+- The exam will have two scenarios (10 questions each) in which you are requested to interpret results and discuss statements. 
 - The exam will cover all models discussed in the course, including but not limited to those in these practice exercises."
 
 :::
+
+[✅ **Solutions to practice exercises**](practice_answer_key.qmd)
 
 ### Practice 1 — Salmon Survival Study
 
@@ -132,23 +134,38 @@ The model output and summary statistics are shown below.
 - 95% confidence interval for $\hat{\beta}_1$: $[-4.7,\ -1.5]$
 - $R^2 = 0.25$
 
-One team member states:
+**Q5.** Interpret the slope coefficient $\hat{\beta}_1 = -3.1$ in the context of this study.
+
+**Q6.** Use the $p$-value to draw a conclusion about whether SST is a statistically significant predictor of survival rate.
+
+**Q7.**  One team member states:
 
 > *"An $R^2$ of 0.25 means the model is incorrect 75% of the time."*
 
-**Q5.** Is this statement true or false? Explain your reasoning.
+Is this statement true or false? Explain your reasoning.
 
-**Q6.** Interpret the slope coefficient $\hat{\beta}_1 = -3.1$ in the context of this study.
-
-**Q7.** Use the $p$-value to draw a conclusion about whether SST is a statistically significant predictor of survival rate.
-
-**Q8.** A monitoring site has SST = 16 °C. Use the fitted model to predict the survival rate at that site.
-
-**Q9.** Another team member suggests:
+**Q8.** Another team member suggests:
 
 > *"Let's calculate the AUC to get a metric on the model's performance."*
 
 Is AUC an appropriate metric here? Explain.
+
+The team expands their model to include two additional predictors: salinity (parts per thousand) and river discharge (m³/s):
+
+$$\widehat{\text{survival rate}} = \hat{\beta}_0 + \hat{\beta}_1 \times  \text{SST} + \hat{\beta}_2 \times \text{salinity} + \hat{\beta}_3 \times  \text{discharge}$$
+
+**Q9.** Interpret what the coefficient for salinity represents in this multiple regression model.
+
+The expanded model produces the following results:
+
+| | Estimate | Std. Error | $t$-statistic | $p$-value |
+|:--|:---:|:---:|:---:|:---:|
+| Intercept | 78.1 | 7.2 | 10.85 | < 0.001 |
+| SST | −2.8 | 0.9 | −3.11 | 0.003 |
+| Salinity | 0.4 | 0.6 | 0.67 | 0.510 |
+| Discharge | 1.2 | 0.3 | 4.00 | < 0.001 |
+
+**Q10.** Based on the p-value for salinity, what conclusion do you draw about its relationship with survival rate? Explain. 
 
 ---
 
