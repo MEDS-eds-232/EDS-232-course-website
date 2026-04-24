@@ -1,0 +1,75 @@
+---
+title: "Practice Answer Key"
+subtitle: "EDS 232"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+---
+
+## Practice 1 — Salmon Survival Study
+
+**Q1. Predictor and response variables**
+
+- Predictor: sea surface temperature (SST)
+- Response: juvenile salmon survival rate
+
+**Q2. Regression or classification?**
+
+This is a regression problem because the response variable (survival rate) is continuous.
+
+**Q3. Supervised or unsupervised?**
+
+Supervised, because each observation has a labeled response variable (survival rate) that the model is trained to predict.
+
+**Q4. Problem with the workflow**
+
+The test set is used multiple times — once per candidate model — to select the best model. This means the chosen model's test MSE is no longer an unbiased estimate of generalization performance; the team has effectively "peeked" at the test set during model selection.
+
+*Correction:* Use cross-validation on the training set to select the best model, then evaluate that model once on the held-out test set.
+
+**Q5. Is the R² interpretation correct?**
+
+False. $R^2 = 0.25$ means that SST explains 25% of the variance in survival rate. It says nothing about how often the model is "correct" or "incorrect" — that framing applies to classifiers, not regression models.
+
+**Q6. Slope interpretation**
+
+For each 1°C increase in SST, the predicted juvenile salmon survival rate decreases by 3.1 percentage points, on average.
+
+**Q7. Statistical significance of SST**
+
+The p-value for SST is < 0.001, which is well below any conventional significance threshold (e.g., 0.05). We reject the null hypothesis that $\beta_1 = 0$ and conclude that SST is a statistically significant predictor of survival rate.
+
+**Q8. Prediction at SST = 16°C**
+
+$$\widehat{\text{survival rate}} = 82.4 + (-3.1 \times 16) = 82.4 - 49.6 = 32.8\%$$
+
+**Q9. Is AUC appropriate here?**
+
+No. AUC is a classification metric that evaluates how well a model separates two classes. This is a regression problem with a continuous response, so AUC is not applicable. An appropriate metric would be, for example, the MSE.
+
+---
+
+## Practice 2 — Soil Carbon Classification
+
+**Q1. Recall or precision?**
+
+Precision. Incorrectly certifying a Low Carbon site as High Carbon (a false positive) has direct financial and credibility consequences. Precision measures how many of the predicted High Carbon sites are truly High Carbon, which directly captures this concern.
+
+**Q2. False Positive Rate**
+
+$$FPR = \frac{FP}{FP + TN} = \frac{5}{5 + 20} = \frac{5}{25} = 0.20$$
+
+Of all sites that are truly Low Carbon, 20% were incorrectly classified as High Carbon by the model.
+
+**Q3. False positive in context**
+
+A false positive is a site that is truly Low Carbon but is predicted by the model to be High Carbon. From the plot, T2 is a false positive: its true label is Low Carbon (red diamond) but it falls in the High Carbon decision region (green background).
+
+**Q4. Overfitting: K = 1 vs K = 9**
+
+$K = 1$ is more likely to overfit. With $K = 1$, the model is maximally flexible — it bases each prediction on a single neighbor, resulting in a highly irregular decision boundary that follows the training data closely. This leads to low bias but high variance. $K = 9$ averages over more neighbors, producing a smoother boundary with higher bias but lower variance, which generalizes better to new data.
+
+**BONUS**
+
+The team would use k-fold cross-validation by dividing the training data into $k$ folds. In each iteration, one fold is held out as a validation set and the model is trained on the remaining $k-1$ folds. This is repeated $k$ times so every fold serves as the validation set once. The CV score is the average performance across all $k$ folds, and provides an estimate of how well the model generalizes to unseen data. To select the best $K$, they would repeat this process for each candidate value of $K$ and choose the one with the best average CV score.
