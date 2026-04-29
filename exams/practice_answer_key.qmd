@@ -1,0 +1,95 @@
+---
+title: "Practice Answer Key"
+subtitle: "EDS 232"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+---
+
+## Practice 1 — Salmon Survival Study
+
+**Q1. Predictor and response variables**
+
+- Predictor: sea surface temperature (SST)
+- Response: juvenile salmon survival rate
+
+**Q2. Regression or classification?**
+
+This is a regression problem because the response variable (survival rate) is continuous.
+
+**Q3. Supervised or unsupervised?**
+
+Supervised, because each observation has a labeled response variable (survival rate) that the model is trained to predict.
+
+**Q4. Problem with the workflow**
+
+The test set is used multiple times — once per candidate model — to select the best model. This means the chosen model's test MSE is no longer an unbiased estimate of generalization performance. mMdel selection using the test set causes optimistic bias in the reported MSE
+
+*Correction:* Use cross-validation on the training set to select the best model, then evaluate that model once on the held-out test set.
+
+**Q5. Slope interpretation**
+
+For each 1°C increase in SST, the predicted juvenile salmon survival rate decreases by 3.1 percentage points, on average.
+
+**Q6. Statistical significance of SST**
+
+The p-value for SST is < 0.001, which is well below any conventional significance threshold (e.g., 0.05). We reject the null hypothesis that $\beta_1 = 0$ and conclude that SST is a statistically significant predictor of survival rate.
+
+**Q7. Is the R² interpretation correct?**
+
+False. $R^2 = 0.25$ means that SST explains 25% of the variance in survival rate. It says nothing about how often the model is "correct" or "incorrect" — that framing applies to classifiers, not regression models.
+
+**Q8. Is AUC appropriate here?**
+
+No. AUC is a classification metric that evaluates how well a model separates two classes. This is a regression problem with a continuous response, so AUC is not applicable. An appropriate metric would be, for example, the MSE.
+
+**Q9. Is AUC appropriate here?**
+
+The coefficient $\hat{\beta}_2$ represents the expected change in survival 
+rate for a one-unit increase in salinity, holding SST and discharge constant.
+
+**Q10. Hypothesis testing and coefficient interpretation**
+
+With $p = 0.510$, we fail to reject the null hypothesis that the salinity 
+coefficient equals zero. We do not have sufficient evidence that salinity 
+predicts survival rate after accounting for SST and discharge.
+
+However, a non-significant p-value does not mean the true effect is exactly zero — it means the data do not provide enough evidence to distinguish the estimated effect (0.4) from chance. The coefficient is uncertain, as reflected by the large standard error (0.6) relative to the estimate.
+
+---
+
+## Practice 2 — Soil Carbon Classification
+
+**Q1. Recall or precision?**
+
+Precision. Incorrectly certifying a Low Carbon site as High Carbon (a false positive) has direct financial and credibility consequences. Precision measures how many of the predicted High Carbon sites are truly High Carbon, which directly captures this concern.
+
+**Q2. False positive in context**
+
+A false positive is a site that is truly Low Carbon but is predicted by the model to be High Carbon. From the plot, T2 is a false positive: its true label is Low Carbon (red diamond) but it falls in the High Carbon decision region (green background).
+
+**Q3. False Positive Rate**
+
+$$FPR = \frac{FP}{FP + TN} = \frac{5}{5 + 20} = \frac{5}{25} = 0.20$$
+
+Of all sites that are truly Low Carbon, 20% were incorrectly classified as High Carbon by the model.
+
+**Q4. Overfitting: K = 1 vs K = 9**
+
+$K = 1$ is more likely to overfit. With $K = 1$, the model is maximally flexible: it bases each prediction on a single neighbor, resulting in a highly irregular decision boundary that follows the training data closely. This leads to low bias but high variance. $K = 9$ averages over more neighbors, producing a smoother boundary with higher bias but lower variance, which could generalize better to new data.
+
+**Q5. Logistic regression process**
+
+The team must select a classification threshold — a cutoff on $\hat{p}(X)$ 
+above which a site is labeled High Carbon and below which it is labeled Low Carbon. The default is often 0.5, but this is not always appropriate.
+
+In this context, setting the threshold too low means more sites get flagged as High Carbon, increasing recall but reducing precision — the program risks certifying Low Carbon sites, which has financial and credibility consequences. Setting it too high means fewer sites are flagged, improving precision but potentially missing truly High Carbon sites. The team should choose a threshold that reflects the relative cost of each type of error.
+
+**Q6. Sign of logistic regression coefficients**
+
+Yes, the teammate is correct. In logistic regression, a negative coefficient means that as the predictor increases, the log-odds of belonging to the positive class decrease, which corresponds to a lower predicted probability of being classified as High Carbon. So sites with higher bulk density index are indeed less likely to be flagged as High Carbon by the model, all else held constant.
+
+**Q7. k-fold cross-validation**
+
+The team member is correct that $k$ models are trained during cross-validation, but CV is not meant to produce the final model — it is used to evaluate performance and/or select hyperparameters (such as $K$ in KNN). Once that evaluation is complete, the final model is refit on the entire training set using the chosen configuration. The CV score estimates how well that final model is expected to generalize to unseen data.

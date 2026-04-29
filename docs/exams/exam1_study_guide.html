@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>EDS 232 - Midterm Exam Study Guide – EDS 232 - Machine Learning for Environmental Science</title>
+<title>Midterm Exam Study Guide – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -170,7 +170,7 @@ window.Quarto = {
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-study-guides">    
         <li>
     <a class="dropdown-item" href="../exams/exam1_study_guide.html">
- <span class="dropdown-text">EDS 232 - Midterm Exam Study Guide</span></a>
+ <span class="dropdown-text">Midterm Exam Study Guide</span></a>
   </li>  
     </ul>
   </li>
@@ -219,6 +219,11 @@ window.Quarto = {
   <li><a href="#k-nearest-neighbors-classifier" id="toc-k-nearest-neighbors-classifier" class="nav-link" data-scroll-target="#k-nearest-neighbors-classifier">15. K-Nearest Neighbors Classifier</a></li>
   <li><a href="#logistic-regression" id="toc-logistic-regression" class="nav-link" data-scroll-target="#logistic-regression">16. Logistic Regression</a></li>
   </ul></li>
+  <li><a href="#practice-scenarios" id="toc-practice-scenarios" class="nav-link" data-scroll-target="#practice-scenarios">Practice Scenarios</a>
+  <ul class="collapse">
+  <li><a href="#practice-1-salmon-survival-study" id="toc-practice-1-salmon-survival-study" class="nav-link" data-scroll-target="#practice-1-salmon-survival-study">Practice 1 — Salmon Survival Study</a></li>
+  <li><a href="#practice-2-soil-carbon-classification" id="toc-practice-2-soil-carbon-classification" class="nav-link" data-scroll-target="#practice-2-soil-carbon-classification">Practice 2 — Soil Carbon Classification</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -227,7 +232,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">EDS 232 - Midterm Exam Study Guide</h1>
+<h1 class="title">Midterm Exam Study Guide</h1>
 </div>
 
 
@@ -327,6 +332,226 @@ window.Quarto = {
 <li>16.4 Apply metrics, statistics, and results from a fitted model to solve inference and prediction questions</li>
 <li>16.5 Understand how an ROC curve is constructed and rank models according to their ROC curves and AUCs</li>
 </ul>
+<hr>
+</section>
+</section>
+<section id="practice-scenarios" class="level2">
+<h2 class="anchored" data-anchor-id="practice-scenarios">Practice Scenarios</h2>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Please read
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>These are <em>examples for the kind of questions the exam will have</em> and the format of the exam, not necessarily these exact topics.</li>
+<li>The exam will have two scenarios (10 questions each) in which you are requested to interpret results and discuss statements.</li>
+<li>The exam will cover all models discussed in the course, including but not limited to those in these practice exercises.”</li>
+</ul>
+</div>
+</div>
+<p><a href="../exams/practice_answer_key.html">✅ <strong>Solutions to practice exercises</strong></a></p>
+<p>The answers presented are quite comprehensive, so they can help you study and clarify any misconceptions.</p>
+<section id="practice-1-salmon-survival-study" class="level3">
+<h3 class="anchored" data-anchor-id="practice-1-salmon-survival-study">Practice 1 — Salmon Survival Study</h3>
+<p>A team is studying the relationship between ocean conditions and juvenile salmon survival in a coastal estuary. They collect data from 45 monitoring sites and are interested in understanding whether ocean temperature can predict how many juvenile salmon survive. The following variables are recorded at each site:</p>
+<ul>
+<li><strong>Sea surface temperature (SST)</strong>: water temperature (°C) at each monitoring site</li>
+<li><strong>Juvenile salmon survival rate</strong>: percentage (%) of juvenile salmon that survived to a given life stage at each site</li>
+</ul>
+<p><strong>Q1.</strong> What is the predictor variable in this study? What is the response variable?</p>
+<p><strong>Q2.</strong> Is this a regression or a classification problem? Justify your answer in one sentence.</p>
+<p><strong>Q3.</strong> Is this a supervised or unsupervised learning task? Justify your answer.</p>
+<p>Before fitting a model, the team is planning to use the following workflow:</p>
+<ol type="1">
+<li>Collect all 45 observations and split into a training set (80%) and a test set (20%).</li>
+<li>Fit three candidate models on the training set: simple linear regression with SST, simple linear regression with log(SST), and a polynomial regression.</li>
+<li>Evaluate all three models on the test set and choose the one with the lowest test MSE.</li>
+<li>Report the test MSE of the chosen model as its performance estimate.</li>
+</ol>
+<p><strong>Q4.</strong> Identify the problem in this workflow. How can it be corrected?</p>
+<p>The team fits a simple linear regression model on the training set:</p>
+<p><span class="math display">\[\widehat{\text{survival rate}} = \hat{\beta}_0 + \hat{\beta}_1 \times \text{SST}\]</span></p>
+<p>The model output and summary statistics are shown below.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: center;">Estimate</th>
+<th style="text-align: center;">Std. Error</th>
+<th style="text-align: center;"><span class="math inline">\(t\)</span>-statistic</th>
+<th style="text-align: center;"><span class="math inline">\(p\)</span>-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Intercept (<span class="math inline">\(\hat{\beta}_0\)</span>)</td>
+<td style="text-align: center;">82.4</td>
+<td style="text-align: center;">6.3</td>
+<td style="text-align: center;">13.08</td>
+<td style="text-align: center;">&lt; 0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SST (<span class="math inline">\(\hat{\beta}_1\)</span>)</td>
+<td style="text-align: center;">−3.1</td>
+<td style="text-align: center;">0.8</td>
+<td style="text-align: center;">−3.88</td>
+<td style="text-align: center;">&lt; 0.001</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>95% confidence interval for <span class="math inline">\(\hat{\beta}_1\)</span>: <span class="math inline">\([-4.7,\ -1.5]\)</span></li>
+<li><span class="math inline">\(R^2 = 0.25\)</span></li>
+</ul>
+<p><strong>Q5.</strong> Interpret the slope coefficient <span class="math inline">\(\hat{\beta}_1 = -3.1\)</span> in the context of this study.</p>
+<p><strong>Q6.</strong> Use the <span class="math inline">\(p\)</span>-value to draw a conclusion about whether SST is a statistically significant predictor of survival rate.</p>
+<p><strong>Q7.</strong> One team member states:</p>
+<blockquote class="blockquote">
+<p><em>“An <span class="math inline">\(R^2\)</span> of 0.25 means the model is incorrect 75% of the time.”</em></p>
+</blockquote>
+<p>Is this statement true or false? Explain your reasoning.</p>
+<p><strong>Q8.</strong> Another team member suggests:</p>
+<blockquote class="blockquote">
+<p><em>“Let’s calculate the AUC to get a metric on the model’s performance.”</em></p>
+</blockquote>
+<p>Is AUC an appropriate metric here? Explain.</p>
+<p>The team expands their model to include two additional predictors: salinity (parts per thousand) and river discharge (m³/s):</p>
+<p><span class="math display">\[\widehat{\text{survival rate}} = \hat{\beta}_0 + \hat{\beta}_1 \times  \text{SST} + \hat{\beta}_2 \times \text{salinity} + \hat{\beta}_3 \times  \text{discharge}\]</span></p>
+<p><strong>Q9.</strong> Interpret what the coefficient for salinity represents in this multiple regression model.</p>
+<p>The expanded model produces the following results:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: center;">Estimate</th>
+<th style="text-align: center;">Std. Error</th>
+<th style="text-align: center;"><span class="math inline">\(t\)</span>-statistic</th>
+<th style="text-align: center;"><span class="math inline">\(p\)</span>-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Intercept</td>
+<td style="text-align: center;">78.1</td>
+<td style="text-align: center;">7.2</td>
+<td style="text-align: center;">10.85</td>
+<td style="text-align: center;">&lt; 0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SST</td>
+<td style="text-align: center;">−2.8</td>
+<td style="text-align: center;">0.9</td>
+<td style="text-align: center;">−3.11</td>
+<td style="text-align: center;">0.003</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Salinity</td>
+<td style="text-align: center;">0.4</td>
+<td style="text-align: center;">0.6</td>
+<td style="text-align: center;">0.67</td>
+<td style="text-align: center;">0.510</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Discharge</td>
+<td style="text-align: center;">1.2</td>
+<td style="text-align: center;">0.3</td>
+<td style="text-align: center;">4.00</td>
+<td style="text-align: center;">&lt; 0.001</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Q10.</strong> Based on the p-value for salinity, what conclusion do you draw about its relationship with survival rate? Explain.</p>
+<hr>
+</section>
+<section id="practice-2-soil-carbon-classification" class="level3">
+<h3 class="anchored" data-anchor-id="practice-2-soil-carbon-classification">Practice 2 — Soil Carbon Classification</h3>
+<p>A team of soil scientists is building a classifier to label soil samples according to carbon status. The samples are labeled as <em>High Carbon</em> or <em>Low Carbon</em> based on two soil measurements:</p>
+<ul>
+<li><strong>Bulk density index (<span class="math inline">\(X_1\)</span>)</strong>: normalized bulk density of the soil sample, on a 0–10 scale</li>
+<li><strong>Clay content index (<span class="math inline">\(X_2\)</span>)</strong>: normalized clay content of the soil sample, on a 0–10 scale</li>
+</ul>
+<p>The team will be using <em>High Carbon</em> as the positive class.</p>
+<p>Soil samples flagged as <em>High Carbon</em> will be published in a public database and used to certify land for carbon credit markets. Incorrectly certifying a <em>Low Carbon</em> site as <em>High Carbon</em> would undermine the program’s credibility and have financial consequences.</p>
+<p><strong>Q1.</strong> Which metric should the team prioritize recall or precision? Explain why.</p>
+<p>The team applies their KNN classifier (<span class="math inline">\(K = 3\)</span>) to a test set of 37 soil samples.</p>
+<p>The figure below shows the KNN decision boundary (<span class="math inline">\(K = 3\)</span>) fitted on the training data . Four test points (T1, T2, T3, T4) have been plotted. Their true labels are shown in the table.</p>
+<p><strong>Q2.</strong> Explain to the team what a false positive is in the context of this problem and identify one from the test points in the plot.</p>
+<div id="8865d37a" class="cell" data-execution_count="1">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="exam1_study_guide_files/figure-html/cell-2-output-1.png" width="517" height="467" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Test Point</th>
+<th style="text-align: center;">True Label</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">T1</td>
+<td style="text-align: center;">Low Carbon</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">T2</td>
+<td style="text-align: center;">Low Carbon</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">T3</td>
+<td style="text-align: center;">High Carbon</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">T4</td>
+<td style="text-align: center;">High Carbon</td>
+</tr>
+</tbody>
+</table>
+<p>The confusion matrix below shows the results.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: center;">Predicted: High</th>
+<th style="text-align: center;">Predicted: Low</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Actual: High</strong></td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Actual: Low</strong></td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">20</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Q3.</strong> Calculate the False Positive Rate (FPR). Explain in plain language what this value means. Use the class names, not “positive” and “negative.”</p>
+<p><strong>Q4.</strong> The team considers using <span class="math inline">\(K = 1\)</span> versus <span class="math inline">\(K = 9\)</span>. Which value of <span class="math inline">\(K\)</span> is more likely to overfit the training data? Explain using the concepts of model flexibility, bias, and variance.</p>
+<p>Instead of KNN, the team decides to fit a logistic regression model to predict carbon status.</p>
+<p><strong>Q5.</strong> Once the logistic regression model is fitted, what additional decision must the team make before it can output class labels? What are the tradeoffs of setting this value too high or too low in the context of the carbon certification program?</p>
+<p><strong>Q6.</strong> The coefficient for bulk density index (<span class="math inline">\(X_1\)</span>) is <span class="math inline">\(-0.9\)</span>. A teammate says:</p>
+<blockquote class="blockquote">
+<p><em>“This means sites with higher bulk density are less likely to be classified as High Carbon, given all else is held fixed.”</em></p>
+</blockquote>
+<p>Are they correct? Explain.</p>
+<p><strong>Q7.</strong> Someone else suggests:</p>
+<blockquote class="blockquote">
+<p><em>“When we apply <span class="math inline">\(k\)</span>-fold cross-validation to evaluate a single model, we end up with <span class="math inline">\(k\)</span> different intermediate trained models. We need to choose one of these to actually use to get the final predictions.”</em></p>
+</blockquote>
+<p>Is this statement true or false? Explain.</p>
 
 
 </section>

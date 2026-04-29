@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-04-29">
 
-<title>Assignment 2 – EDS 232 - Machine Learning for Environmental Science</title>
+<title>Practice Answer Key – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,41 +19,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -104,6 +68,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -216,19 +209,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
-  <ul>
-  <li><a href="#submission-instructions" id="toc-submission-instructions" class="nav-link active" data-scroll-target="#submission-instructions">Submission Instructions</a></li>
-  <li><a href="#how-to-submit-via-github-to-gradescope" id="toc-how-to-submit-via-github-to-gradescope" class="nav-link" data-scroll-target="#how-to-submit-via-github-to-gradescope">How to Submit via GitHub to Gradescope</a></li>
-  <li><a href="#how-the-otter-grader-works" id="toc-how-the-otter-grader-works" class="nav-link" data-scroll-target="#how-the-otter-grader-works">How the Otter Grader Works</a></li>
-  <li><a href="#ai-policy" id="toc-ai-policy" class="nav-link" data-scroll-target="#ai-policy">AI Policy</a></li>
-  <li><a href="#task-1-potential-problems-in-linear-regression" id="toc-task-1-potential-problems-in-linear-regression" class="nav-link" data-scroll-target="#task-1-potential-problems-in-linear-regression">Task 1: Potential problems in linear regression</a>
   <ul class="collapse">
-  <li><a href="#rubric" id="toc-rubric" class="nav-link" data-scroll-target="#rubric">Rubric</a></li>
-  </ul></li>
-  <li><a href="#task-2-classification" id="toc-task-2-classification" class="nav-link" data-scroll-target="#task-2-classification">Task 2: Classification</a>
-  <ul class="collapse">
-  <li><a href="#do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk" id="toc-do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk" class="nav-link" data-scroll-target="#do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk">Do Social and Economic Conditions Predict Whether a Community Has Elevated Asthma Risk?</a></li>
-  </ul></li>
+  <li><a href="#practice-1-salmon-survival-study" id="toc-practice-1-salmon-survival-study" class="nav-link active" data-scroll-target="#practice-1-salmon-survival-study">Practice 1 — Salmon Survival Study</a></li>
+  <li><a href="#practice-2-soil-carbon-classification" id="toc-practice-2-soil-carbon-classification" class="nav-link" data-scroll-target="#practice-2-soil-carbon-classification">Practice 2 — Soil Carbon Classification</a></li>
   </ul>
 </nav>
     </div>
@@ -237,8 +220,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Assignment 2</h1>
-<p class="subtitle lead">Classification and Potential Problems in Linear Regression</p>
+<h1 class="title">Practice Answer Key</h1>
+<p class="subtitle lead">EDS 232</p>
 </div>
 
 
@@ -246,12 +229,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="quarto-title-meta">
 
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">April 29, 2026</p>
-    </div>
-  </div>
   
     
   </div>
@@ -261,248 +238,55 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This assignment covers topics from the course on classification, specifically KNN and Logistic Regression. Task 1 will contribute 35% to the total grade and Task 2 will contribute 65%. Review the rubric for this assignment <a href="https://docs.google.com/document/d/1a5_Eu_RZ24BMorTcvYepYpxLLjZdb79rRsCvU7LMaFQ/edit?tab=t.0#heading=h.kx0dpavp3fk4">here</a>.</p>
-<hr>
-<section id="submission-instructions" class="level2">
-<h2 class="anchored" data-anchor-id="submission-instructions">Submission Instructions</h2>
-<div class="callout callout-style-simple callout-warning no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<p>This assignment is submitted as a <strong>GitHub repository</strong> to Gradescope. Before submitting, make sure you satisfy every item in this checklist:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Your repository is properly forked and all work is committed and pushed to <strong>your own GitHub repository</strong>.</label></li>
-<li><label><input type="checkbox">Your notebooks must include your code <strong>and</strong> all required rendered outputs (printed results, plots, tables). <strong>Run all cells before committing</strong> and verify all outputs are visible.</label></li>
-<li><label><input type="checkbox">Any notebook containing an autograder must include the output from the final <code>grader.check_all()</code> cell.</label></li>
-<li><label><input type="checkbox">The notebooks you submit must contain <strong>your solutions</strong>: do not submit the blank template notebooks.</label></li>
-<li><label><input type="checkbox">Double-check that each file is in the correct folder in your repository and that all code and outputs are visible.</label></li>
+<section id="practice-1-salmon-survival-study" class="level2">
+<h2 class="anchored" data-anchor-id="practice-1-salmon-survival-study">Practice 1 — Salmon Survival Study</h2>
+<p><strong>Q1. Predictor and response variables</strong></p>
+<ul>
+<li>Predictor: sea surface temperature (SST)</li>
+<li>Response: juvenile salmon survival rate</li>
 </ul>
-<p><strong>Resubmissions after the due date that fail to satisfy one of the checks above will be strictly held to the course’s 50%-regrade resubmission policy (see syllabus).</strong></p>
-<p>If you have any questions about assignment logistics, please reach out to the instructional team.</p>
-</div>
-</div>
-</div>
+<p><strong>Q2. Regression or classification?</strong></p>
+<p>This is a regression problem because the response variable (survival rate) is continuous.</p>
+<p><strong>Q3. Supervised or unsupervised?</strong></p>
+<p>Supervised, because each observation has a labeled response variable (survival rate) that the model is trained to predict.</p>
+<p><strong>Q4. Problem with the workflow</strong></p>
+<p>The test set is used multiple times — once per candidate model — to select the best model. This means the chosen model’s test MSE is no longer an unbiased estimate of generalization performance. mMdel selection using the test set causes optimistic bias in the reported MSE</p>
+<p><em>Correction:</em> Use cross-validation on the training set to select the best model, then evaluate that model once on the held-out test set.</p>
+<p><strong>Q5. Slope interpretation</strong></p>
+<p>For each 1°C increase in SST, the predicted juvenile salmon survival rate decreases by 3.1 percentage points, on average.</p>
+<p><strong>Q6. Statistical significance of SST</strong></p>
+<p>The p-value for SST is &lt; 0.001, which is well below any conventional significance threshold (e.g., 0.05). We reject the null hypothesis that <span class="math inline">\(\beta_1 = 0\)</span> and conclude that SST is a statistically significant predictor of survival rate.</p>
+<p><strong>Q7. Is the R² interpretation correct?</strong></p>
+<p>False. <span class="math inline">\(R^2 = 0.25\)</span> means that SST explains 25% of the variance in survival rate. It says nothing about how often the model is “correct” or “incorrect” — that framing applies to classifiers, not regression models.</p>
+<p><strong>Q8. Is AUC appropriate here?</strong></p>
+<p>No.&nbsp;AUC is a classification metric that evaluates how well a model separates two classes. This is a regression problem with a continuous response, so AUC is not applicable. An appropriate metric would be, for example, the MSE.</p>
+<p><strong>Q9. Is AUC appropriate here?</strong></p>
+<p>The coefficient <span class="math inline">\(\hat{\beta}_2\)</span> represents the expected change in survival rate for a one-unit increase in salinity, holding SST and discharge constant.</p>
+<p><strong>Q10. Hypothesis testing and coefficient interpretation</strong></p>
+<p>With <span class="math inline">\(p = 0.510\)</span>, we fail to reject the null hypothesis that the salinity coefficient equals zero. We do not have sufficient evidence that salinity predicts survival rate after accounting for SST and discharge.</p>
+<p>However, a non-significant p-value does not mean the true effect is exactly zero — it means the data do not provide enough evidence to distinguish the estimated effect (0.4) from chance. The coefficient is uncertain, as reflected by the large standard error (0.6) relative to the estimate.</p>
 <hr>
 </section>
-<section id="how-to-submit-via-github-to-gradescope" class="level2">
-<h2 class="anchored" data-anchor-id="how-to-submit-via-github-to-gradescope">How to Submit via GitHub to Gradescope</h2>
-<div class="callout callout-style-simple callout-tip no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<ol type="1">
-<li><strong>Fork</strong> <a href="https://github.com/MEDS-eds-232/assignment-2">this repository</a> from the course GitHub organization.</li>
-<li><strong>Clone</strong> your forked repository to your local machine or the workbench server.</li>
-<li>Complete the tasks inside your cloned repository. Do not move files out of the repo.</li>
-<li>As you work, <strong>commit and push</strong> your changes regularly.</li>
-<li>When you are finished, <strong>make a final push</strong> to ensure your most recent work is on GitHub.</li>
-<li>On Gradescope, select “GitHub” as your submission method and choose your forked repository and the correct branch (usually <code>main</code>).</li>
-</ol>
-<p><strong>Your Gradescope submission will pull directly from whatever is in your GitHub repo at the time of submission, so be sure to submit only once you are completely finished.</strong></p>
-</div>
-</div>
-</div>
-<hr>
-</section>
-<section id="how-the-otter-grader-works" class="level2">
-<h2 class="anchored" data-anchor-id="how-the-otter-grader-works">How the Otter Grader Works</h2>
-<div class="callout callout-style-simple callout-note no-icon callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Expand to learn how to use the autograder
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>These notebooks use the <code>otter-grader</code> library to provide instant feedback on your answers as you work. Here is how it works:</p>
-<section id="step-1-initialize-otter" class="level3">
-<h3 class="anchored" data-anchor-id="step-1-initialize-otter">Step 1 — Initialize Otter</h3>
-<p>The very first cell of each notebook initializes the grader. <strong>Always run this cell first before anything else</strong>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize Otter</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> otter</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>grader <span class="op">=</span> otter.Notebook(<span class="st">"hw2-task2.ipynb"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="step-2-complete-the-exercises" class="level3">
-<h3 class="anchored" data-anchor-id="step-2-complete-the-exercises">Step 2 — Complete the exercises</h3>
-<p>Fill in code in the cells marked with <code>...</code> or <code># Your answer here</code>. Read each question carefully and make sure your variable names match exactly what is asked since the autograder checks specific variable names.</p>
-</section>
-<section id="step-3-run-individual-checks" class="level3">
-<h3 class="anchored" data-anchor-id="step-3-run-individual-checks">Step 3 — Run individual checks</h3>
-<p>After completing an exercise, run the <code>grader.check("qN")</code> cell immediately following it. This will tell you right away whether your answer is correct:</p>
-<ul>
-<li>✅ <strong>Passed:</strong> You’ll see something like <code>q3 passed!</code>. If so, you’re good to move on.</li>
-<li>❌ <strong>Failed:</strong> You’ll see a description of what went wrong. Re-read the question, inspect your output, and try again.</li>
-</ul>
-<div class="callout callout-style-simple callout-tip no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<p><strong>Stuck?</strong> Check that your variable names, data types, and shapes all match what the question asks for. Most failures come from a small mismatch. For example, returning a list instead of a DataFrame.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="step-4-run-grader.check_all-before-submitting" class="level3">
-<h3 class="anchored" data-anchor-id="step-4-run-grader.check_all-before-submitting">Step 4 — Run <code>grader.check_all()</code> before submitting</h3>
-<p>The <strong>very last cell</strong> of each notebook runs all checks at once and gives you a summary:</p>
-<pre><code>q3  ✅ passed
-q5  ✅ passed
-q6  ❌ failed
-...</code></pre>
-<p><strong>You must run this cell and leave its output visible before committing and pushing your notebook.</strong> This summary will be used to grade your autograded answers. You will not receive credit for questions that failed in this section. If this cell has not been run, or its output is missing, you may lose points.</p>
-<div class="callout callout-style-simple callout-warning no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<ul>
-<li><strong>Do not modify or delete</strong> any <code>grader.check()</code> or <code>grader.check_all()</code> cells.</li>
-<li>Passing all autograder checks does <strong>not</strong> guarantee full credit on the assignemnt. Some questions are graded manually as well.</li>
-<li>Always re-run all cells from top to bottom before your final commit to make sure everything still passes in sequence.</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
-</div>
-</div>
-</div>
-<hr>
-</section>
-<section id="ai-policy" class="level2">
-<h2 class="anchored" data-anchor-id="ai-policy">AI Policy</h2>
-<div class="callout callout-style-simple callout-note no-icon callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Expand to read the course AI policy
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>If you use generative AI on this assignment, you are expected to adhere to the following course policies:</p>
-<ul>
-<li>✅ <strong>Cultivate understanding:</strong> You should be able to fully understand, justify, and explain all the work you submit.</li>
-<li>🤔 <strong>Question AI outputs:</strong> Assume AI-generated answers may be incorrect and verify all information independently.</li>
-<li>🚫 <strong>Academic integrity:</strong> Submitting work you don’t understand or cannot explain will be considered plagiarism, regardless of whether AI use was disclosed.</li>
-</ul>
-<p>If there are concerns about AI use in your work, your instructor will ask you to meet and discuss it. If understanding is clearly lacking and this is the first occurrence, you will have the chance to revise and resubmit for 50% of the original maximum grade within two days.</p>
-</div>
-</div>
-</div>
-<hr>
-</section>
-<section id="task-1-potential-problems-in-linear-regression" class="level1">
-<h1>Task 1: Potential problems in linear regression</h1>
-<p>In this task you will explore common problems that may arise when fitting a linear regression model and use generative AI to create examples that illustrate these issues.</p>
-<ol type="1">
-<li><p>Read section 3.3.3 <em>Potential problems</em> in the course textbook: <a href="https://www.statlearning.com">An Introduction to Statistical Learning with applications in Python</a>. The section covers six common issues when fitting a linear model:</p>
-<ul>
-<li>Non-linearity of the response-predictor relationships</li>
-<li>Correlation of error terms</li>
-<li>Non-constant variance of error terms</li>
-<li>Outliers</li>
-<li>High-leverage points</li>
-<li>Collinearity</li>
-</ul></li>
-<li><p>Select 3 of the issues above and, for each one, write:</p>
-<ul>
-<li>a short paragraph explaining what the problem is, why it matters, and how to detect it (and how to address it, if applicable)</li>
-<li>a question that came up while reading that you couldn’t answer from the text alone, and the answer you investigated</li>
-</ul></li>
-<li><p>For each of the three issues, use a generative AI tool (such as ChatGPT, Claude, or Claude code) to write Python code that:</p>
-<ul>
-<li>generates synthetic data that clearly illustrates the issue</li>
-<li>produces plots making the issue visually clear</li>
-<li>where applicable, produces additional plots showing how the issue can be addressed</li>
-</ul></li>
-</ol>
-<p>Add a brief caption (2-3 sentences) describiing what the plots show, or integrate this explanation into your paragraph from step 2.</p>
-<ol start="4" type="1">
-<li>In a short paragraph (4–6 sentences), reflect on your use of generative AI in this task: which tool did you use, what prompts did you give it, and how many iterations did it take to get working code? Note any mistakes the AI made and how you identified and fixed them.</li>
-</ol>
-<p>Your submission should be a Jupyter notebook (inside your forked repo) with the following structure:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Section</th>
-<th>Content</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Title + intro</strong></td>
-<td>Title + one sentence explaining the content of the document</td>
-</tr>
-<tr class="even">
-<td><strong>Issue 1</strong></td>
-<td>Explanation + plots + question</td>
-</tr>
-<tr class="odd">
-<td><strong>Issue 2</strong></td>
-<td>Explanation + plots + question</td>
-</tr>
-<tr class="even">
-<td><strong>Issue 3</strong></td>
-<td>Explanation + plots + question</td>
-</tr>
-<tr class="odd">
-<td><strong>Generative AI reflection</strong></td>
-<td>Answer to step 4</td>
-</tr>
-</tbody>
-</table>
-<p>Before submitting, restart your kernel and run all cells from top to bottom. Make sure all code has been executed and all plots are visible in the notebook.</p>
-<section id="rubric" class="level2">
-<h2 class="anchored" data-anchor-id="rubric">Rubric</h2>
-<ul>
-<li><p>For each issue you explore, you will be graded on the plots and graphs and conceptual accuracy of your explanations using the <a href="https://docs.google.com/document/d/1a5_Eu_RZ24BMorTcvYepYpxLLjZdb79rRsCvU7LMaFQ/edit?usp=sharing">course rubric</a>.</p></li>
-<li><p>The answer to step 4 will be graded as 1: complete, 0: incomplete.</p></li>
-</ul>
-<hr>
-</section>
-</section>
-<section id="task-2-classification" class="level1">
-<h1>Task 2: Classification</h1>
-<section id="do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk" class="level2">
-<h2 class="anchored" data-anchor-id="do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk">Do Social and Economic Conditions Predict Whether a Community Has Elevated Asthma Risk?</h2>
-<p><strong>Follow the instructions in <code>hw2-task2.ipynb</code> to complete this task.</strong> You will practice:</p>
-<ul>
-<li>Visualizing class imbalance</li>
-<li>Preparing features for classification: selecting predictors, dropping missing values, and performing a stratified train/test split</li>
-<li>Fitting a K-Nearest Neighbors (KNN) classifier and evaluating test-set accuracy</li>
-<li>Selecting the optimal value of k using 5-fold cross-validation with<code>cross_val_score</code><br>
-</li>
-<li>Fitting a Logistic Regression model with built-in cross-validation using <code>LogisticRegressionCV</code><br>
-</li>
-<li>Computing and interpretting a confusion matrix</li>
-<li>Calculating accuracy, precision, recall and F1 score using <code>sklearn.metrics</code><br>
-</li>
-<li>Comparring KNN and Logistic Regression model performance</li>
-<li>Evaluating a classifier with an ROC Curve and AUC score</li>
-</ul>
-<hr>
+<section id="practice-2-soil-carbon-classification" class="level2">
+<h2 class="anchored" data-anchor-id="practice-2-soil-carbon-classification">Practice 2 — Soil Carbon Classification</h2>
+<p><strong>Q1. Recall or precision?</strong></p>
+<p>Precision. Incorrectly certifying a Low Carbon site as High Carbon (a false positive) has direct financial and credibility consequences. Precision measures how many of the predicted High Carbon sites are truly High Carbon, which directly captures this concern.</p>
+<p><strong>Q2. False positive in context</strong></p>
+<p>A false positive is a site that is truly Low Carbon but is predicted by the model to be High Carbon. From the plot, T2 is a false positive: its true label is Low Carbon (red diamond) but it falls in the High Carbon decision region (green background).</p>
+<p><strong>Q3. False Positive Rate</strong></p>
+<p><span class="math display">\[FPR = \frac{FP}{FP + TN} = \frac{5}{5 + 20} = \frac{5}{25} = 0.20\]</span></p>
+<p>Of all sites that are truly Low Carbon, 20% were incorrectly classified as High Carbon by the model.</p>
+<p><strong>Q4. Overfitting: K = 1 vs K = 9</strong></p>
+<p><span class="math inline">\(K = 1\)</span> is more likely to overfit. With <span class="math inline">\(K = 1\)</span>, the model is maximally flexible: it bases each prediction on a single neighbor, resulting in a highly irregular decision boundary that follows the training data closely. This leads to low bias but high variance. <span class="math inline">\(K = 9\)</span> averages over more neighbors, producing a smoother boundary with higher bias but lower variance, which could generalize better to new data.</p>
+<p><strong>Q5. Logistic regression process</strong></p>
+<p>The team must select a classification threshold — a cutoff on <span class="math inline">\(\hat{p}(X)\)</span> above which a site is labeled High Carbon and below which it is labeled Low Carbon. The default is often 0.5, but this is not always appropriate.</p>
+<p>In this context, setting the threshold too low means more sites get flagged as High Carbon, increasing recall but reducing precision — the program risks certifying Low Carbon sites, which has financial and credibility consequences. Setting it too high means fewer sites are flagged, improving precision but potentially missing truly High Carbon sites. The team should choose a threshold that reflects the relative cost of each type of error.</p>
+<p><strong>Q6. Sign of logistic regression coefficients</strong></p>
+<p>Yes, the teammate is correct. In logistic regression, a negative coefficient means that as the predictor increases, the log-odds of belonging to the positive class decrease, which corresponds to a lower predicted probability of being classified as High Carbon. So sites with higher bulk density index are indeed less likely to be flagged as High Carbon by the model, all else held constant.</p>
+<p><strong>Q7. k-fold cross-validation</strong></p>
+<p>The team member is correct that <span class="math inline">\(k\)</span> models are trained during cross-validation, but CV is not meant to produce the final model — it is used to evaluate performance and/or select hyperparameters (such as <span class="math inline">\(K\)</span> in KNN). Once that evaluation is complete, the final model is refit on the entire training set using the chosen configuration. The CV score estimates how well that final model is expected to generalize to unseen data.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

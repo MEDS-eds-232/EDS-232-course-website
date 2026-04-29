@@ -1,6 +1,9 @@
 ---
-title: "EDS 232 - Midterm Exam Study Guide"
-format: html
+title: "Midterm Exam Study Guide"
+jupyter: eds232-env
+format:
+  html:
+    echo: false
 ---
 ## Day-of instructions
 
@@ -78,3 +81,209 @@ format: html
 - 16.3 Explain the hypothesis testing process and interpret p-values
 - 16.4 Apply metrics, statistics, and results from a fitted model to solve inference and prediction questions
 - 16.5 Understand how an ROC curve is constructed and rank models according to their ROC curves and AUCs
+
+
+---
+
+## Practice Scenarios
+
+:::{.callout-note}
+## Please read
+
+- These are *examples for the kind of questions the exam will have* and the format of the exam, not necessarily these exact topics.
+- The exam will have two scenarios (10 questions each) in which you are requested to interpret results and discuss statements. 
+- The exam will cover all models discussed in the course, including but not limited to those in these practice exercises."
+
+:::
+
+[✅ **Solutions to practice exercises**](practice_answer_key.qmd) 
+
+The answers presented are quite comprehensive, so they can help you study and clarify any misconceptions. 
+
+### Practice 1 — Salmon Survival Study
+
+A team is studying the relationship between ocean conditions and juvenile salmon survival in a coastal estuary. They collect data from 45 monitoring sites and are interested in understanding whether ocean temperature can predict how many juvenile salmon survive. The following variables are recorded at each site:
+
+- **Sea surface temperature (SST)**: water temperature (°C) at each monitoring site
+- **Juvenile salmon survival rate**: percentage (%) of juvenile salmon that survived to a given life stage at each site
+
+**Q1.** What is the predictor variable in this study? What is the response variable?
+
+**Q2.** Is this a regression or a classification problem? Justify your answer in one sentence.
+
+**Q3.** Is this a supervised or unsupervised learning task? Justify your answer.
+
+Before fitting a model, the team is planning to use the following workflow:
+
+  1. Collect all 45 observations and split into a training set (80%) and a test set (20%).
+  2. Fit three candidate models on the training set: simple linear regression with SST, simple linear regression with log(SST), and a polynomial regression.
+  3. Evaluate all three models on the test set and choose the one with the lowest test MSE.
+  4. Report the test MSE of the chosen model as its performance estimate.
+
+**Q4.** Identify the problem in this workflow. How can it be corrected?
+
+The team fits a simple linear regression model on the training set:
+
+$$\widehat{\text{survival rate}} = \hat{\beta}_0 + \hat{\beta}_1 \times \text{SST}$$
+
+The model output and summary statistics are shown below.
+
+| | Estimate | Std. Error | $t$-statistic | $p$-value |
+|:--|:---:|:---:|:---:|:---:|
+| Intercept ($\hat{\beta}_0$) | 82.4 | 6.3 | 13.08 | < 0.001 |
+| SST ($\hat{\beta}_1$) | −3.1 | 0.8 | −3.88 | < 0.001 |
+
+- 95% confidence interval for $\hat{\beta}_1$: $[-4.7,\ -1.5]$
+- $R^2 = 0.25$
+
+**Q5.** Interpret the slope coefficient $\hat{\beta}_1 = -3.1$ in the context of this study.
+
+**Q6.** Use the $p$-value to draw a conclusion about whether SST is a statistically significant predictor of survival rate.
+
+**Q7.**  One team member states:
+
+> *"An $R^2$ of 0.25 means the model is incorrect 75% of the time."*
+
+Is this statement true or false? Explain your reasoning.
+
+**Q8.** Another team member suggests:
+
+> *"Let's calculate the AUC to get a metric on the model's performance."*
+
+Is AUC an appropriate metric here? Explain.
+
+The team expands their model to include two additional predictors: salinity (parts per thousand) and river discharge (m³/s):
+
+$$\widehat{\text{survival rate}} = \hat{\beta}_0 + \hat{\beta}_1 \times  \text{SST} + \hat{\beta}_2 \times \text{salinity} + \hat{\beta}_3 \times  \text{discharge}$$
+
+**Q9.** Interpret what the coefficient for salinity represents in this multiple regression model.
+
+The expanded model produces the following results:
+
+| | Estimate | Std. Error | $t$-statistic | $p$-value |
+|:--|:---:|:---:|:---:|:---:|
+| Intercept | 78.1 | 7.2 | 10.85 | < 0.001 |
+| SST | −2.8 | 0.9 | −3.11 | 0.003 |
+| Salinity | 0.4 | 0.6 | 0.67 | 0.510 |
+| Discharge | 1.2 | 0.3 | 4.00 | < 0.001 |
+
+**Q10.** Based on the p-value for salinity, what conclusion do you draw about its relationship with survival rate? Explain. 
+
+---
+
+### Practice 2 — Soil Carbon Classification
+
+A team of soil scientists is building a classifier to label soil samples according to carbon status. The samples are labeled as *High Carbon* or *Low Carbon* based on two soil measurements: 
+
+- **Bulk density index ($X_1$)**: normalized bulk density of the soil sample, on a 0–10 scale
+- **Clay content index ($X_2$)**: normalized clay content of the soil sample, on a 0–10 scale
+
+The team will be using *High Carbon* as the positive class.
+
+Soil samples flagged as *High Carbon* will be published in a public database and used to certify land for carbon credit markets. Incorrectly certifying a *Low Carbon* site as *High Carbon* would undermine the program's credibility and have financial consequences.
+
+**Q1.**  Which metric should the team prioritize recall or precision? Explain why.
+
+The team applies their KNN classifier ($K = 3$) to a test set of 37 soil samples. 
+
+The figure below shows the KNN decision boundary ($K = 3$) fitted on the training data . Four test points (T1, T2, T3, T4) have been plotted. Their true labels are shown in the table. 
+
+**Q2.** Explain to the team what a false positive is in the context of this problem and identify one from the test points in the plot.
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.neighbors import KNeighborsClassifier
+from matplotlib.colors import ListedColormap
+from matplotlib.lines import Line2D
+
+# Training data (1 = High Carbon, 0 = Low Carbon)
+X_train = np.array([[2, 5], [4, 2], [1, 4], [5, 1], [3, 6], [6, 3]])
+y_train = np.array([1, 0, 1, 0, 1, 0])
+train_names = list('ABCDEF')
+
+# Test points: T1=(4,3) TN, T2=(3,4) FP, T3=(1,6) TP, T4=(5,4) FN
+test_points = np.array([[4, 3], [3, 4], [1, 6], [5, 4]])
+test_true   = np.array([0, 0, 1, 1])   # Low, Low, High, High
+test_names  = ['T1', 'T2', 'T3', 'T4']
+
+# Fit KNN K=3
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train, y_train)
+
+# Decision boundary mesh
+xx, yy = np.meshgrid(np.arange(0, 8.05, 0.05), np.arange(0, 8.05, 0.05))
+Z = knn.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+
+# Colors
+high_light, low_light = '#C8E6C9', '#FFCCBC'   # light green / light orange
+high_dark,  low_dark  = '#2E7D32', '#E64A19'    # dark green / dark orange
+cmap_bg = ListedColormap([low_light, high_light])
+
+fig, ax = plt.subplots(figsize=(5.5, 5))
+ax.pcolormesh(xx, yy, Z, cmap=cmap_bg, alpha=0.85, shading='auto')
+
+# Training points
+for xi, label, name in zip(X_train, y_train, train_names):
+    c = high_dark if label == 1 else low_dark
+    ax.scatter(*xi, c=c, s=90, edgecolors='k', linewidths=0.8, zorder=3)
+    ax.annotate(name, xi, textcoords='offset points', xytext=(6, 4), fontsize=9)
+
+# Test points (diamond markers, color = true label)
+for pt, true_label, name in zip(test_points, test_true, test_names):
+    c = high_dark if true_label == 1 else low_dark
+    ax.scatter(*pt, c=c, s=140, edgecolors='k', linewidths=1.5,
+               marker='D', zorder=4)
+    ax.annotate(name, pt, textcoords='offset points', xytext=(6, 4),
+                fontsize=10, fontweight='bold')
+
+legend_elements = [
+    Line2D([0], [0], marker='o', color='w', markerfacecolor=high_dark,
+           markersize=10, label='High Carbon (training)', markeredgecolor='k'),
+    Line2D([0], [0], marker='o', color='w', markerfacecolor=low_dark,
+           markersize=10, label='Low Carbon (training)', markeredgecolor='k'),
+    Line2D([0], [0], marker='D', color='w', markerfacecolor='gray',
+           markersize=10, label='Test points (color = true label)', markeredgecolor='k'),
+]
+ax.legend(handles=legend_elements, fontsize=8, loc='upper right')
+ax.set_xlabel('$X_1$ (Bulk density index)', fontsize=11)
+ax.set_ylabel('$X_2$ (Clay content index)', fontsize=11)
+ax.set_title('KNN Decision Boundary ($K = 3$)', fontsize=12)
+ax.set_xlim(0, 8); ax.set_ylim(0, 8)
+plt.tight_layout()
+plt.show()
+```
+
+| Test Point |  True Label |
+|:----------:|:----------:|
+| T1 |  Low Carbon |
+| T2 |  Low Carbon |
+| T3 |  High Carbon |
+| T4 |  High Carbon |
+
+The confusion matrix below shows the results.
+
+|  | Predicted: High | Predicted: Low |
+|:--|:---:|:---:|
+| **Actual: High** | 9 | 3 |
+| **Actual: Low** | 5 | 20 |
+
+**Q3.** Calculate the False Positive Rate (FPR). Explain in plain language what this value means. Use the class names, not “positive” and “negative.”
+
+**Q4.** The team considers using $K = 1$ versus $K = 9$. Which value of $K$ is more likely to overfit the training data? Explain using the concepts of model flexibility, bias, and variance.
+
+Instead of KNN, the team decides to fit a logistic regression model to predict carbon status.
+
+**Q5.** Once the logistic regression model is fitted, what additional decision must the team make before it can output class labels? What are the tradeoffs of setting this value too high or too low in the context of the carbon certification program?
+
+**Q6.** The coefficient for bulk density index ($X_1$) is $-0.9$. A teammate says: 
+
+> *"This means sites with higher bulk density are less likely to be classified as High Carbon, given all else is held fixed."* 
+
+Are they correct? Explain.
+
+**Q7.** Someone else suggests: 
+
+>*"When we apply $k$-fold cross-validation to evaluate a single model, we end up with $k$ different intermediate trained models. We need to choose one of these to actually use to get the final predictions."* 
+
+Is this statement true or false? Explain.
