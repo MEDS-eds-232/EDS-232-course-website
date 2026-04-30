@@ -369,7 +369,8 @@ window.Quarto = {
    
   <ul>
   <li><a href="#a-guiding-example-meadow-plant-diversity" id="toc-a-guiding-example-meadow-plant-diversity" class="nav-link active" data-scroll-target="#a-guiding-example-meadow-plant-diversity">A guiding example: meadow plant diversity</a></li>
-  <li><a href="#variable-selection" id="toc-variable-selection" class="nav-link" data-scroll-target="#variable-selection">Variable selection</a>
+  <li><a href="#variable-selection" id="toc-variable-selection" class="nav-link" data-scroll-target="#variable-selection">Variable selection</a></li>
+  <li><a href="#best-subset-selection" id="toc-best-subset-selection" class="nav-link" data-scroll-target="#best-subset-selection">Best subset selection</a>
   <ul class="collapse">
   <li><a href="#forward-selection" id="toc-forward-selection" class="nav-link" data-scroll-target="#forward-selection">Forward selection</a></li>
   <li><a href="#backward-selection" id="toc-backward-selection" class="nav-link" data-scroll-target="#backward-selection">Backward selection</a></li>
@@ -452,7 +453,12 @@ window.Quarto = {
 <li>Check individual <span class="math inline">\(p\)</span>-values for predictors.</li>
 </ol>
 <p>If there is evidence that <em>some</em> predictors are associated with the response, an important question is: <em>which predictors should we include in the model?</em> This is called <strong>variable selection</strong>. Including unnecessary predictors does not help predictions and increases variance; leaving out important ones biases our estimates.</p>
-<p>With <span class="math inline">\(p\)</span> predictors there are <span class="math inline">\(2^p\)</span> possible subsets of variables to consider. For <span class="math inline">\(p = 8\)</span> that is already 256 models; for even moderate <span class="math inline">\(p\)</span> (say, 30 or 40) exhaustive search is completely infeasible. Three common automated approaches are:</p>
+</section>
+<section id="best-subset-selection" class="level2">
+<h2 class="anchored" data-anchor-id="best-subset-selection">Best subset selection</h2>
+<p>A natural but computationally expensive approach is <strong>best subset selection</strong>: fit all <span class="math inline">\(2^p\)</span> possible models and choose the one with the lowest RSS, where</p>
+<p><span class="math display">\[RSS = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2.\]</span></p>
+<p>For <span class="math inline">\(p = 8\)</span> that is already 256 models; for even moderate <span class="math inline">\(p\)</span> (say, 30 or 40) exhaustive search is completely infeasible. The three automated approaches below are practical alternatives.</p>
 <section id="forward-selection" class="level3">
 <h3 class="anchored" data-anchor-id="forward-selection">Forward selection</h3>
 <p>Start with the simplest model and build up:</p>
@@ -539,7 +545,13 @@ Discussion
 </div>
 <p>Forward and backward selection can be run using metrics other than RSS. Using raw RSS as the sole criterion would always favor adding more predictors (RSS can only decrease or stay the same when a predictor is added). An alternative that penalizes model complexity is the adjusted <span class="math inline">\(R^2\)</span>:</p>
 <p><span class="math display">\[\bar{R}^2 = 1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}\]</span></p>
-<p>Unlike <span class="math inline">\(R^2\)</span>, the adjusted <span class="math inline">\(R^2\)</span> can <em>decrease</em> when adding a predictor that does not improve the fit enough to justify the added complexity.</p>
+<p>Unlike <span class="math inline">\(R^2\)</span>, the adjusted <span class="math inline">\(R^2\)</span> can <em>decrease</em> when adding a predictor that does not improve the fit enough to justify the added complexity. <!-- 
+Another commonly used criterion is the **Akaike Information Criterion (AIC)**:
+
+$$AIC = \frac{1}{n\hat{\sigma}^2}(RSS + 2p\hat{\sigma}^2)$$
+
+where $\hat{\sigma}^2$ is an estimate of the error variance. Like adjusted $R^2$, AIC penalizes model complexity, the $2p\hat{\sigma}^2$ term grows with each additional predictor. The model with the minimum AIC is preferred.
+ --></p>
 </section>
 </section>
 <section id="shrinkage-methods" class="level2">
@@ -676,7 +688,7 @@ Ridge is primarily a predictive tool; when the goal is inference (understanding 
 -->
 <section id="selecting-the-tuning-parameter" class="level3">
 <h3 class="anchored" data-anchor-id="selecting-the-tuning-parameter">Selecting the tuning parameter</h3>
-<p>As noted above, <span class="math inline">\(\lambda\)</span> is chosen by cross-validation. The figure below shows the 10-fold CV mean squared error as a function of <span class="math inline">\(\log_{10}(\lambda)\)</span> for ridge regression on the EcoRich data. The vertical dashed line marks the optimal <span class="math inline">\(\lambda\)</span>.</p>
+<p>As noted above, <span class="math inline">\(\lambda\)</span> is chosen by cross-validation. The figure below shows the 10-fold CV mean squared error as a function of <span class="math inline">\(\lambda\)</span> for ridge regression on the EcoRich data.</p>
 <div id="cell-ridge-cv-lambda" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div>
@@ -766,7 +778,7 @@ Discussion
 </div>
 <div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p><code>aspect</code> and <code>canopy</code> are driven to exactly zero at the smallest <span class="math inline">\(\lambda\)</span> values, followed by <code>slope</code>. This creates a “kink” in those profiles where the line hits zero and stays there — a distinctive feature of the lasso. <!-- 
+<p><code>aspect</code> and <code>canopy</code> are driven to exactly zero at the smallest <span class="math inline">\(\lambda\)</span> values, followed by <code>slope</code>. As <span class="math inline">\(\lambda\)</span> increases from left to right, you can see these lines flatten to zero and stay ther. This is a distinctive feature of the lasso. <!-- 
 2. Yes. In the true data-generating model, `aspect` and `canopy` have true coefficients of exactly zero, and `slope` has a very small true coefficient (0.15). The lasso correctly identifies these as unimportant and removes them as $\lambda$ grows. --></p>
 </div>
 </div>

@@ -179,7 +179,12 @@ Once we decide to use multiple linear regression we follow the steps:
 
 If there is evidence that *some* predictors are associated with the response, an important question is: *which predictors should we include in the model?* This is called **variable selection**. Including unnecessary predictors does not help predictions and increases variance; leaving out important ones biases our estimates.
 
-With $p$ predictors there are $2^p$ possible subsets of variables to consider. For $p = 8$ that is already 256 models; for even moderate $p$ (say, 30 or 40) exhaustive search is completely infeasible. Three common automated approaches are:
+## Best subset selection
+A natural but computationally expensive approach is **best subset selection**: fit all $2^p$ possible models and choose the one with the lowest RSS, where
+
+$$RSS = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2.$$
+
+For $p = 8$ that is already 256 models; for even moderate $p$ (say, 30 or 40) exhaustive search is completely infeasible. The three automated approaches below are practical alternatives.
 
 ### Forward selection
 
@@ -263,6 +268,13 @@ Forward and backward selection can be run using metrics other than RSS. Using ra
 $$\bar{R}^2 = 1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}$$
 
 Unlike $R^2$, the adjusted $R^2$ can *decrease* when adding a predictor that does not improve the fit enough to justify the added complexity.
+<!-- 
+Another commonly used criterion is the **Akaike Information Criterion (AIC)**:
+
+$$AIC = \frac{1}{n\hat{\sigma}^2}(RSS + 2p\hat{\sigma}^2)$$
+
+where $\hat{\sigma}^2$ is an estimate of the error variance. Like adjusted $R^2$, AIC penalizes model complexity, the $2p\hat{\sigma}^2$ term grows with each additional predictor. The model with the minimum AIC is preferred.
+ -->
 
 ## Shrinkage methods
 
@@ -325,14 +337,14 @@ The figure below shows how the standardized ridge regression coefficients change
 fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
 
 for j, (name, color) in enumerate(zip(predictor_names, pred_colors)):
-    ax.plot(np.log10(lambdas_ridge), ridge_coefs[:, j],
+    ax.plot(lambdas_ridge, ridge_coefs[:, j],
             color=color, linewidth=1.8, label=name)
 
 ax.axhline(0, color='gray', linestyle='--', linewidth=0.8)
-ax.axvline(np.log10(best_lam_ridge), color='black', linestyle=':', linewidth=1.2,
-           label=f'CV optimal λ (10^{np.log10(best_lam_ridge):.1f})')
+ax.set_xscale('log')
+ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:g}'))
 
-ax.set_xlabel('log₁₀(λ)')
+ax.set_xlabel('λ')
 ax.set_ylabel('Standardized coefficient')
 ax.set_title('Ridge regression: coefficient profiles\n'
              '*Each line is one predictor; all shrink towards zero as λ grows*')
@@ -384,19 +396,19 @@ Ridge is primarily a predictive tool; when the goal is inference (understanding 
 
 ### Selecting the tuning parameter
 
-As noted above, $\lambda$ is chosen by cross-validation. The figure below shows the 10-fold CV mean squared error as a function of $\log_{10}(\lambda)$ for ridge regression on the EcoRich data. The vertical dashed line marks the optimal $\lambda$.
+As noted above, $\lambda$ is chosen by cross-validation. The figure below shows the 10-fold CV mean squared error as a function of $\lambda$ for ridge regression on the EcoRich data.
 
 ```{python}
 #| label: ridge-cv-lambda
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
 
-ax.plot(np.log10(lambdas_cv_ridge), cv_mse_ridge,
+ax.plot(lambdas_cv_ridge, cv_mse_ridge,
         color='steelblue', linewidth=2, label='10-fold CV MSE')
-ax.axvline(np.log10(best_lam_ridge), color='tomato', linestyle='--', linewidth=1.5,
-           label=f'Optimal λ = {best_lam_ridge:.2f}  (log₁₀ = {np.log10(best_lam_ridge):.2f})')
+ax.set_xscale('log')
+ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:g}'))
 
-ax.set_xlabel('log₁₀(λ)')
+ax.set_xlabel('λ')
 ax.set_ylabel('CV mean squared error')
 ax.set_title('Ridge regression: selecting λ via cross-validation')
 ax.legend(fontsize=9)
@@ -441,14 +453,14 @@ The figure below shows how the standardized lasso coefficients change as $\lambd
 fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
 
 for j, (name, color) in enumerate(zip(predictor_names, pred_colors)):
-    ax.plot(np.log10(lambdas_lasso), lasso_coefs[:, j],
+    ax.plot(lambdas_lasso, lasso_coefs[:, j],
             color=color, linewidth=1.8, label=name)
 
 ax.axhline(0, color='gray', linestyle='--', linewidth=0.8)
-ax.axvline(np.log10(best_lam_lasso), color='black', linestyle=':', linewidth=1.2,
-           label=f'CV optimal λ (10^{np.log10(best_lam_lasso):.1f})')
+ax.set_xscale('log')
+ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:g}'))
 
-ax.set_xlabel('log₁₀(λ)')
+ax.set_xlabel('λ')
 ax.set_ylabel('Standardized coefficient')
 ax.set_title('Lasso: coefficient profiles\n'
              '*Some coefficients are driven to exactly zero (variable selection)*')
@@ -461,14 +473,14 @@ plt.close()
 
 :::{.callout-tip}
 ## Check-in
-Based on the  lasso coefficient profile plot.
+Based on the lasso coefficient profile plot.
 Which predictors are driven to exactly zero first as $\lambda$ increases?
 <!-- 2. Is this consistent with what you know about the true data-generating model? -->
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
-`aspect` and `canopy` are driven to exactly zero at the smallest $\lambda$ values, followed by `slope`. This creates a "kink" in those profiles where the line hits zero and stays there — a distinctive feature of the lasso.
+`aspect` and `canopy` are driven to exactly zero at the smallest $\lambda$ values, followed by `slope`. As $\lambda$ increases from left to right, you can see these lines flatten to zero and stay ther. This is a distinctive feature of the lasso.
 <!-- 
 2. Yes. In the true data-generating model, `aspect` and `canopy` have true coefficients of exactly zero, and `slope` has a very small true coefficient (0.15). The lasso correctly identifies these as unimportant and removes them as $\lambda$ grows. -->
 :::
@@ -480,12 +492,12 @@ The lasso tuning parameter is selected by cross-validation in the same way as fo
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
 
-ax.plot(np.log10(lambdas_cv_lasso), cv_mse_lasso,
+ax.plot(lambdas_cv_lasso, cv_mse_lasso,
         color='seagreen', linewidth=2, label='10-fold CV MSE')
-ax.axvline(np.log10(best_lam_lasso), color='tomato', linestyle='--', linewidth=1.5,
-           label=f'Optimal λ = {best_lam_lasso:.3f}  (log₁₀ = {np.log10(best_lam_lasso):.2f})')
+ax.set_xscale('log')
+ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:g}'))
 
-ax.set_xlabel('log₁₀(λ)')
+ax.set_xlabel('λ')
 ax.set_ylabel('CV mean squared error')
 ax.set_title('Lasso: selecting λ via cross-validation')
 ax.legend(fontsize=9)
