@@ -42,6 +42,8 @@ and add a penalty term that shrinks coefficient estimates toward zero, trading a
 
 ---
 
+# Creating and running Ridge Regression Models
+
 ## Step 1: Load Libraries and Generate Synthetic Data
 
 Run the cells below to import packages and generate the synthetic dataset used throughout the lab.
@@ -134,6 +136,9 @@ print("Lasso Regression R²:", lasso_r2)
 
 ---
 
+# Visualizing Ridge Regression
+
+
 ## Step 4: Tune λ and Compare MSE Across Regularization Strengths
 
 Create a visualization of λ values ranging from 0.001 to 100 and the MSE that these values yield. Create a line for both Ridge and Lasso.
@@ -145,7 +150,7 @@ mse_ridge = []
 lambdas = np.logspace(-3, 2, 100)  # 100 values from 0.001 to 100
 
 for lam in lambdas:
-    lasso = Lasso(alpha=lam, max_iter=10000)
+    lasso = Lasso(alpha=lam)
     ridge = Ridge(alpha=lam)
 
     lasso.fit(X_train, y_train)
@@ -183,7 +188,7 @@ model_dropdown = Dropdown(options=['Lasso', 'Ridge'], description='Model:')
 
 def plot_predictions(lam, model_type):
     color = '#2196F3' if model_type == 'Lasso' else '#E05B2B'
-    model = Lasso(alpha=lam, max_iter=10000) if model_type == 'Lasso' else Ridge(alpha=lam)
+    model = Lasso(alpha=lam) if model_type == 'Lasso' else Ridge(alpha=lam)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
@@ -240,7 +245,8 @@ for lam in lambdas:
             'Lasso': lasso.coef_
         }, index=['X1', 'X2', 'X1_corr', 'X2_corr', 'Noise1', 'Noise2']))
 
-fig, axes = plt.subplots(1, 4, figsize=(20, 5), sharey=True)
+fig, axes = plt.subplots(2, 2, figsize=(8, 6), sharey=True)
+axes = axes.flatten()
 for i, df in enumerate(data):
     df.plot.bar(ax=axes[i], width=0.8)
     title = 'OLS fit (λ = 0)' if lambdas[i] == 0 else f'λ = {lambdas[i]}'
