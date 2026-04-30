@@ -53,7 +53,7 @@ scaler_gen   = StandardScaler()
 pred_std_gen = scaler_gen.fit_transform(pred_raw)
 
 beta_true        = np.array([2.5, -1.8, 1.5, 1.0, 0.5, 0.15, 0.0, 0.0])
-species_richness = 25 + pred_std_gen @ beta_true + np.random.normal(0, 1.5, n)
+species_richness = 25 + pred_std_gen @ beta_true + np.random.normal(0, 3.5, n)
 
 predictor_names = ['precip', 'temp', 'forest_cover', 'soil_N',
                    'elevation', 'slope', 'aspect', 'canopy']
@@ -85,14 +85,14 @@ for i, lam in enumerate(lambdas_lasso):
     lasso_coefs[i] = l.coef_
 
 # ── CV MSE curves for tuning parameter selection ───────────────────────────────
-lambdas_cv_ridge = np.logspace(-2, 6, 80)
+lambdas_cv_ridge = np.logspace(-1, 4, 80)
 cv_mse_ridge = np.array([
     -cross_val_score(Ridge(alpha=lam), X_std, y,
                      cv=10, scoring='neg_mean_squared_error').mean()
     for lam in lambdas_cv_ridge
 ])
 
-lambdas_cv_lasso = np.logspace(-3, 1.2, 80)
+lambdas_cv_lasso = np.logspace(-3, 0.5, 80)
 cv_mse_lasso = np.array([
     -cross_val_score(Lasso(alpha=lam, max_iter=20000, tol=1e-4), X_std, y,
                      cv=10, scoring='neg_mean_squared_error').mean()
@@ -105,6 +105,9 @@ best_lam_lasso = lambdas_cv_lasso[np.argmin(cv_mse_lasso)]
 # ── Color palette for 8 predictors ────────────────────────────────────────────
 pred_colors = [plt.cm.tab10(i) for i in range(8)]
 ```
+
+[📊 Slides](6_linear_model_selection_and_regularization-SLIDES.qmd) / [📊 Blank slides](6_linear_model_selection_and_regularization-BLANK.qmd)
+
 
 In this lesson we introduce:
 
@@ -405,6 +408,8 @@ fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
 
 ax.plot(lambdas_cv_ridge, cv_mse_ridge,
         color='steelblue', linewidth=2, label='10-fold CV MSE')
+ax.axvline(best_lam_ridge, color='tomato', linestyle='--', linewidth=1.5,
+           label=f'Optimal λ = {best_lam_ridge:.2f}')
 ax.set_xscale('log')
 ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:g}'))
 
@@ -494,6 +499,8 @@ fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
 
 ax.plot(lambdas_cv_lasso, cv_mse_lasso,
         color='seagreen', linewidth=2, label='10-fold CV MSE')
+ax.axvline(best_lam_lasso, color='tomato', linestyle='--', linewidth=1.5,
+           label=f'Optimal λ = {best_lam_lasso:.3f}')
 ax.set_xscale('log')
 ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:g}'))
 
