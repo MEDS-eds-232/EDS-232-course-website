@@ -2,16 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.7.33">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Lab 3: Classification – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -74,10 +71,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -110,7 +107,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -123,7 +120,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+      if (mathElements[i].tagName == "SPAN") {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -299,7 +296,7 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Download the Lab Template
+Download the Lab Template
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -401,7 +398,7 @@ window.Quarto = {
 <div id="aa0cc612" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
@@ -418,13 +415,13 @@ window.Quarto = {
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 10,000-tract sample</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df_raw.sample(n<span class="op">=</span><span class="dv">10_000</span>, random_state<span class="op">=</span><span class="dv">42</span>).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>df.head(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>df.head(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="1">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -453,7 +450,7 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
+<td data-quarto-table-cell-role="th">0</td>
 <td>72</td>
 <td>21</td>
 <td>31023</td>
@@ -477,7 +474,7 @@ window.Quarto = {
 <td>NaN</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
+<td data-quarto-table-cell-role="th">1</td>
 <td>51</td>
 <td>810</td>
 <td>46400</td>
@@ -501,7 +498,7 @@ window.Quarto = {
 <td>NaN</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
+<td data-quarto-table-cell-role="th">2</td>
 <td>30</td>
 <td>47</td>
 <td>940600</td>
@@ -569,7 +566,7 @@ window.Quarto = {
 <div id="92d917d5" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_risk_class(epl):</span>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_risk_class(epl):</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> pd.isna(epl):</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.nan</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> epl <span class="op">&lt;</span> <span class="fl">0.33</span>:</span>
@@ -590,7 +587,7 @@ window.Quarto = {
 <span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Number of Census Tracts'</span>)</span>
 <span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">Class counts:</span><span class="ch">\n</span><span class="st">'</span>, counts.rename({<span class="dv">0</span>: <span class="st">'Low'</span>, <span class="dv">1</span>: <span class="st">'Medium'</span>, <span class="dv">2</span>: <span class="st">'High'</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">Class counts:</span><span class="ch">\n</span><span class="st">'</span>, counts.rename({<span class="dv">0</span>: <span class="st">'Low'</span>, <span class="dv">1</span>: <span class="st">'Medium'</span>, <span class="dv">2</span>: <span class="st">'High'</span>}))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -619,13 +616,13 @@ Name: count, dtype: int64</code></pre>
 <div id="852ffb4d" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>FEATURES <span class="op">=</span> [<span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>]</span>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>FEATURES <span class="op">=</span> [<span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>]</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> FEATURES:</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    lo  <span class="op">=</span> df[f].<span class="bu">min</span>()</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    hi  <span class="op">=</span> df[f].<span class="bu">max</span>()</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> hi <span class="op">-</span> lo</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>f<span class="sc">:&lt;14}</span><span class="ss">  </span><span class="sc">{</span>lo<span class="sc">:&gt;10.4f}</span><span class="ss">  </span><span class="sc">{</span>hi<span class="sc">:&gt;10.4f}</span><span class="ss">  </span><span class="sc">{</span>rng<span class="sc">:&gt;10.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>f<span class="sc">:&lt;14}</span><span class="ss">  </span><span class="sc">{</span>lo<span class="sc">:&gt;10.4f}</span><span class="ss">  </span><span class="sc">{</span>hi<span class="sc">:&gt;10.4f}</span><span class="ss">  </span><span class="sc">{</span>rng<span class="sc">:&gt;10.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>E_DSLPM             0.0069      1.7343      1.7274
@@ -652,7 +649,7 @@ E_MINRTY            0.0000    100.0000    100.0000</code></pre>
 <div id="336fde55" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>var_of_interest <span class="op">=</span> [<span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>, <span class="st">'risk_class'</span>]</span>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>var_of_interest <span class="op">=</span> [<span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>, <span class="st">'risk_class'</span>]</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>df_model <span class="op">=</span> df[var_of_interest].dropna()</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df_model[[<span class="st">'E_NPL'</span>, <span class="st">'E_TRI'</span>, <span class="st">'E_TSD'</span>, <span class="st">'E_RMP'</span>, <span class="st">'E_DSLPM'</span>, <span class="st">'E_PM'</span>, <span class="st">'E_POV200'</span>, <span class="st">'E_MINRTY'</span>]]</span>
@@ -666,7 +663,7 @@ E_MINRTY            0.0000    100.0000    100.0000</code></pre>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>X_test_s  <span class="op">=</span> scaler.transform(X_test)</span>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Training set : </span><span class="sc">{</span>X_train_s<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> tracts'</span>)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test set     : </span><span class="sc">{</span>X_test_s<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> tracts'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test set     : </span><span class="sc">{</span>X_test_s<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> tracts'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Training set : 6,815 tracts
@@ -681,7 +678,7 @@ Test set     : 2,921 tracts</code></pre>
 <div id="932402d3" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># KNN on UNSCALED features</span></span>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># KNN on UNSCALED features</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>knn_raw <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span><span class="dv">5</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>knn_raw.fit(X_train, y_train)</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>acc_raw <span class="op">=</span> accuracy_score(y_test, knn_raw.predict(X_test))</span>
@@ -693,7 +690,7 @@ Test set     : 2,921 tracts</code></pre>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test accuracy — unscaled features : </span><span class="sc">{</span>acc_raw<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test accuracy — scaled features   : </span><span class="sc">{</span>acc_scaled<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Accuracy gain from scaling        : +</span><span class="sc">{</span>acc_scaled <span class="op">-</span> acc_raw<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Accuracy gain from scaling        : +</span><span class="sc">{</span>acc_scaled <span class="op">-</span> acc_raw<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Test accuracy — unscaled features : 0.5430
@@ -706,9 +703,9 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 <section id="step-3-fit-a-k-nearest-neighbors-classifier-k-3" class="level2">
 <h2 class="anchored" data-anchor-id="step-3-fit-a-k-nearest-neighbors-classifier-k-3">Step 3: Fit a K-Nearest Neighbors Classifier (k = 3)</h2>
 <p>A reminder on the <code>sklearn</code> workflow:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SomeClassifier(hyperparameters)   <span class="co"># 1. Initialize</span></span>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SomeClassifier(hyperparameters)   <span class="co"># 1. Initialize</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train)               <span class="co"># 2. Train</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> model.predict(X_test)            <span class="co"># 3. Predict</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> model.predict(X_test)            <span class="co"># 3. Predict</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Using <strong>scaled</strong> training and test data:</p>
 <ol type="1">
 <li>Initialize a <code>KNeighborsClassifier</code> with <code>n_neighbors=3</code> and store it in <code>knn3</code>.</li>
@@ -719,13 +716,13 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 <div id="05961a28" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>knn3 <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span><span class="dv">3</span>)</span>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>knn3 <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span><span class="dv">3</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>knn3.fit(X_train_s, y_train)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>y_pred_knn3   <span class="op">=</span> knn3.predict(X_test_s)</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>knn3_accuracy <span class="op">=</span> accuracy_score(y_test, y_pred_knn3)</span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'KNN (k=3) test accuracy: </span><span class="sc">{</span>knn3_accuracy<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'KNN (k=3) test accuracy: </span><span class="sc">{</span>knn3_accuracy<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>KNN (k=3) test accuracy: 0.6039</code></pre>
@@ -743,7 +740,7 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 <div id="23b798b6" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred_knn3)</span>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred_knn3)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>disp <span class="op">=</span> ConfusionMatrixDisplay(confusion_matrix<span class="op">=</span>cm,</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                               display_labels<span class="op">=</span>[<span class="st">'Low'</span>, <span class="st">'Medium'</span>, <span class="st">'High'</span>])</span>
@@ -752,7 +749,7 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>disp.plot(ax<span class="op">=</span>ax, colorbar<span class="op">=</span><span class="va">False</span>, cmap<span class="op">=</span><span class="st">'Blues'</span>)</span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'KNN (k=3) — Confusion Matrix'</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -775,7 +772,7 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 <div id="4ffabdf1" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Accuracy ──────────────────────────────────────────────────────────────────</span></span>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Accuracy ──────────────────────────────────────────────────────────────────</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>correct <span class="op">=</span> np.trace(cm)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>total   <span class="op">=</span> cm.<span class="bu">sum</span>()</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>accuracy_manual <span class="op">=</span> correct <span class="op">/</span> total</span>
@@ -823,7 +820,7 @@ Accuracy gain from scaling        : +0.0911</code></pre>
 <span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>macro_recall    <span class="op">=</span> (recall_low    <span class="op">+</span> recall_med    <span class="op">+</span> recall_high)    <span class="op">/</span> <span class="dv">3</span></span>
 <span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>macro_f1        <span class="op">=</span> (f1_low        <span class="op">+</span> f1_med        <span class="op">+</span> f1_high)        <span class="op">/</span> <span class="dv">3</span></span>
 <span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro avg — Precision: </span><span class="sc">{</span>macro_precision<span class="sc">:.4f}</span><span class="ss">  Recall: </span><span class="sc">{</span>macro_recall<span class="sc">:.4f}</span><span class="ss">  F1: </span><span class="sc">{</span>macro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro avg — Precision: </span><span class="sc">{</span>macro_precision<span class="sc">:.4f}</span><span class="ss">  Recall: </span><span class="sc">{</span>macro_recall<span class="sc">:.4f}</span><span class="ss">  F1: </span><span class="sc">{</span>macro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Accuracy = 1764 / 2921 = 0.6039
@@ -845,7 +842,7 @@ Macro avg — Precision: 0.5202  Recall: 0.4665  F1: 0.4765</code></pre>
 <div id="4e4fb927" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Accuracy ──────────────────────────────────────────────────────────────────</span></span>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Accuracy ──────────────────────────────────────────────────────────────────</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>sk_accuracy <span class="op">=</span> accuracy_score(y_test, y_pred_knn3)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Macro-averaged metrics ────────────────────────────────────────────────────</span></span>
@@ -859,7 +856,7 @@ Macro avg — Precision: 0.5202  Recall: 0.4665  F1: 0.4765</code></pre>
 <span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
 <span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro Precision   : </span><span class="sc">{</span>sk_macro_precision<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
 <span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro Recall      : </span><span class="sc">{</span>sk_macro_recall<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro F1          : </span><span class="sc">{</span>sk_macro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Macro F1          : </span><span class="sc">{</span>sk_macro_f1<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>=== Sklearn Built-in Metrics ===
@@ -926,14 +923,13 @@ Macro F1          : 0.4765</code></pre>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
         }
-      }
-      return codeEl.innerText;
+        return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

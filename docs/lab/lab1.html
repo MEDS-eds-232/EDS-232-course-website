@@ -2,16 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.7.33">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Lab 01: Introduction to Machine Learning in Python – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -74,10 +71,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -110,7 +107,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -123,7 +120,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+      if (mathElements[i].tagName == "SPAN") {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -313,7 +310,7 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Download the Lab Template
+Download the Lab Template
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -335,7 +332,7 @@ window.Quarto = {
 <div id="ea22df59" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulated daily weather readings from a forest monitoring station</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>temperatures <span class="op">=</span> np.array([<span class="fl">28.0</span>, <span class="fl">32.5</span>, <span class="fl">36.1</span>, <span class="fl">29.8</span>, <span class="fl">41.0</span>, <span class="fl">38.3</span>, <span class="fl">22.5</span>, <span class="fl">35.7</span>])</span>
@@ -349,7 +346,7 @@ window.Quarto = {
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Operations apply element-wise — no loops needed!</span></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Rough heat-dryness index: higher = greater fire concern</span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>heat_dryness <span class="op">=</span> temperatures <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> humidity <span class="op">/</span> <span class="dv">100</span>)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Heat-dryness index:"</span>, np.<span class="bu">round</span>(heat_dryness, <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Heat-dryness index:"</span>, np.<span class="bu">round</span>(heat_dryness, <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Temperatures (C): [28.  32.5 36.1 29.8 41.  38.3 22.5 35.7]
@@ -405,7 +402,7 @@ Heat-dryness index: [12.04 18.85 24.19 10.43 33.62 28.72  4.95 22.13]</code></pr
 <div id="9bb25217" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats <span class="im">as</span> stats</span>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats <span class="im">as</span> stats</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.spatial.distance <span class="im">import</span> euclidean</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># --- scipy.stats: Are fire-day temperatures statistically different? ---</span></span>
@@ -427,7 +424,7 @@ Heat-dryness index: [12.04 18.85 24.19 10.43 33.62 28.72  4.95 22.13]</code></pr
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>day_B <span class="op">=</span> [<span class="fl">22.0</span>, <span class="fl">75.0</span>,  <span class="fl">5.0</span>, <span class="fl">2.5</span>]   <span class="co"># cool, humid, calm, rainy — fire unlikely</span></span>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Euclidean distance between day A and day B: </span><span class="sc">{</span>euclidean(day_A, day_B)<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"(Large distance = very different weather conditions)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"(Large distance = very different weather conditions)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>=== t-test: fire-day vs no-fire-day temperatures ===
@@ -455,12 +452,12 @@ Euclidean distance between day A and day B: 49.84
 </ul>
 <section id="the-sklearn-api-pattern-learn-it-once-use-it-everywhere" class="level4">
 <h4 class="anchored" data-anchor-id="the-sklearn-api-pattern-learn-it-once-use-it-everywhere">The sklearn API pattern — learn it once, use it everywhere:</h4>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.some_module <span class="im">import</span> SomeModel</span>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.some_module <span class="im">import</span> SomeModel</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> SomeModel()                    <span class="co"># 1. Create the model</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train)            <span class="co"># 2. Train it on data</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> model.predict(X_test)    <span class="co"># 3. Make predictions</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> model.score(X_test, y_test)    <span class="co"># 4. Evaluate it</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> model.score(X_test, y_test)    <span class="co"># 4. Evaluate it</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This same 4-step pattern works for <strong>every</strong> sklearn algorithm.</p>
 <table class="caption-top table">
 <thead>
@@ -523,11 +520,11 @@ Euclidean distance between day A and day B: 49.84
 </ul>
 <section id="the-statsmodels-pattern" class="level4">
 <h4 class="anchored" data-anchor-id="the-statsmodels-pattern">The statsmodels pattern:</h4>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>X_with_const <span class="op">=</span> sm.add_constant(X)      <span class="co"># 1. Add intercept manually</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> sm.OLS(y, X_with_const).fit()  <span class="co"># 2. Fit the model</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model.summary())                 <span class="co"># 3. Get the full stats breakdown</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model.summary())                 <span class="co"># 3. Get the full stats breakdown</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="key-attributes-after-fitting" class="level4">
 <h4 class="anchored" data-anchor-id="key-attributes-after-fitting">Key attributes after fitting:</h4>
@@ -623,20 +620,20 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <div id="84eb6cfb" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ucimlrepo <span class="im">import</span> fetch_ucirepo</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>forest_fires <span class="op">=</span> fetch_ucirepo(<span class="bu">id</span><span class="op">=</span><span class="dv">547</span>)</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> forest_fires.data.features.reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -658,7 +655,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
+<td data-quarto-table-cell-role="th">0</td>
 <td>Bejaia</td>
 <td>1</td>
 <td>6</td>
@@ -675,7 +672,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <td>0.5</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
+<td data-quarto-table-cell-role="th">1</td>
 <td>Bejaia</td>
 <td>2</td>
 <td>6</td>
@@ -692,7 +689,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <td>0.4</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
+<td data-quarto-table-cell-role="th">2</td>
 <td>Bejaia</td>
 <td>3</td>
 <td>6</td>
@@ -709,7 +706,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <td>0.1</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
+<td data-quarto-table-cell-role="th">3</td>
 <td>Bejaia</td>
 <td>4</td>
 <td>6</td>
@@ -726,7 +723,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <td>0</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
+<td data-quarto-table-cell-role="th">4</td>
 <td>Bejaia</td>
 <td>5</td>
 <td>6</td>
@@ -743,7 +740,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <td>0.5</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">...</th>
+<td data-quarto-table-cell-role="th">...</td>
 <td>...</td>
 <td>...</td>
 <td>...</td>
@@ -760,7 +757,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <td>...</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">239</th>
+<td data-quarto-table-cell-role="th">239</td>
 <td>Sidi-Bel Abbes</td>
 <td>26</td>
 <td>9</td>
@@ -777,7 +774,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <td>6.5</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">240</th>
+<td data-quarto-table-cell-role="th">240</td>
 <td>Sidi-Bel Abbes</td>
 <td>27</td>
 <td>9</td>
@@ -794,7 +791,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <td>0</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">241</th>
+<td data-quarto-table-cell-role="th">241</td>
 <td>Sidi-Bel Abbes</td>
 <td>28</td>
 <td>9</td>
@@ -811,7 +808,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <td>0.2</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">242</th>
+<td data-quarto-table-cell-role="th">242</td>
 <td>Sidi-Bel Abbes</td>
 <td>29</td>
 <td>9</td>
@@ -828,7 +825,7 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <td>0.7</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">243</th>
+<td data-quarto-table-cell-role="th">243</td>
 <td>Sidi-Bel Abbes</td>
 <td>30</td>
 <td>9</td>
@@ -866,11 +863,11 @@ statsmodels    -&gt;  Statistical Analysis and inference</code></pre>
 <div id="833599e5" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Column names before cleaning:"</span>, df.columns.tolist())</span>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Column names before cleaning:"</span>, df.columns.tolist())</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>df.columns <span class="op">=</span> df.columns.<span class="bu">str</span>.strip()</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Column names after cleaning:"</span>, df.columns.tolist())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Column names after cleaning:"</span>, df.columns.tolist())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Column names before cleaning: ['region', 'day', 'month', 'year', 'Temperature', ' RH', ' Ws', 'Rain ', 'FFMC', 'DMC', 'DC', 'ISI', 'BUI', 'FWI']
@@ -884,8 +881,8 @@ Column names after cleaning: ['region', 'day', 'month', 'year', 'Temperature', '
 <div id="e05227fc" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"DC and FWI column types before conversion:"</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[[<span class="st">'DC'</span>, <span class="st">'FWI'</span>]].dtypes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"DC and FWI column types before conversion:"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[[<span class="st">'DC'</span>, <span class="st">'FWI'</span>]].dtypes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>DC and FWI column types before conversion:
@@ -897,11 +894,11 @@ dtype: object</code></pre>
 <div id="3dad7576" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>numeric_cols <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> df.columns <span class="cf">if</span> c <span class="op">!=</span> <span class="st">'region'</span>]</span>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>numeric_cols <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> df.columns <span class="cf">if</span> c <span class="op">!=</span> <span class="st">'region'</span>]</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>df[numeric_cols] <span class="op">=</span> df[numeric_cols].<span class="bu">apply</span>(pd.to_numeric, errors<span class="op">=</span><span class="st">'coerce'</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"DC and FWI column types after conversion:"</span>)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[[<span class="st">'DC'</span>, <span class="st">'FWI'</span>]].dtypes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[[<span class="st">'DC'</span>, <span class="st">'FWI'</span>]].dtypes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>DC and FWI column types after conversion:
@@ -917,9 +914,9 @@ dtype: object</code></pre>
 <div id="ccd30669" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.dropna().reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.dropna().reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.dtypes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.dtypes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>region          object
@@ -953,7 +950,7 @@ dtype: object</code></pre>
 <div id="c1961704" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -971,7 +968,7 @@ dtype: object</code></pre>
 <span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>plt.suptitle(<span class="st">'Algerian Forest Fires — Exploratory Data Analysis'</span>, fontsize<span class="op">=</span><span class="dv">13</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
 <span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -989,11 +986,11 @@ dtype: object</code></pre>
 <div id="921b7507" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[[<span class="st">'ISI'</span>]].values   <span class="co"># shape (n, 1) — 2D required by sklearn</span></span>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[[<span class="st">'ISI'</span>]].values   <span class="co"># shape (n, 1) — 2D required by sklearn</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">'FWI'</span>].values     <span class="co"># shape (n,)</span></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"X shape: </span><span class="sc">{</span>X<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"y shape: </span><span class="sc">{</span>y<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"y shape: </span><span class="sc">{</span>y<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>X shape: (243, 1)
@@ -1017,14 +1014,14 @@ y shape: (243,)</code></pre>
 <section id="train_test_split-in-depth" class="level2">
 <h2 class="anchored" data-anchor-id="train_test_split-in-depth"><code>train_test_split</code> in Depth</h2>
 <p>scikit-learn provides <code>train_test_split</code> to split data automatically and safely.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    X,            <span class="co"># feature matrix</span></span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    y,            <span class="co"># target vector</span></span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    test_size,    <span class="co"># fraction or count to put in the test set</span></span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    random_state  <span class="co"># integer seed for reproducibility</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Let’s dig into each parameter.</p>
 <section id="random_state" class="level3">
 <h3 class="anchored" data-anchor-id="random_state"><code>random_state</code></h3>
@@ -1091,7 +1088,7 @@ y shape: (243,)</code></pre>
 <div id="aaee9331" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Standard 80/20 split</span></span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
@@ -1108,7 +1105,7 @@ y shape: (243,)</code></pre>
 <span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
 <span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Test set:"</span>)</span>
 <span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  X_test : </span><span class="sc">{</span>X_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">   -&gt; </span><span class="sc">{</span><span class="bu">len</span>(X_test)<span class="sc">}</span><span class="ss"> days"</span>)</span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  y_test : </span><span class="sc">{</span>y_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  y_test : </span><span class="sc">{</span>y_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Original dataset : 243 observations
@@ -1125,7 +1122,7 @@ Test set:
 <div id="479ef8fb" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression()</span>
@@ -1135,7 +1132,7 @@ Test set:
 <span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>mse <span class="op">=</span> mean_squared_error(y_test, y_pred)</span>
 <span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test MSE: </span><span class="sc">{</span>mse<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test MSE: </span><span class="sc">{</span>mse<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Test MSE: 3.111</code></pre>
@@ -1198,14 +1195,13 @@ Test set:
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
         }
-      }
-      return codeEl.innerText;
+        return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

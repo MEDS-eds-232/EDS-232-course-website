@@ -1,0 +1,556 @@
+---
+title: Linear model selection and regularization
+jupyter: eds232-env
+echo: false
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.linear_model import Ridge, Lasso
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import cross_val_score
+import statsmodels.api as sm
+from itertools import combinations
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+# ── EcoRich synthetic dataset ──────────────────────────────────────────────────
+# 200 mountain meadow survey plots in a national park.
+# Response: plant species richness (species per 25 m² plot)
+# 8 environmental/habitat predictors
+#
+# True data-generating model (on standardized predictors):
+#   species_richness = 25 + 2.5·precip − 1.8·temp + 1.5·forest_cover + 1.0·soil_N
+#                        + 0.5·elevation + 0.15·slope + 0·aspect + 0·canopy + ε
+#
+# Note: aspect and canopy have true coefficients of zero (irrelevant predictors).
+#       This lets us see how ridge vs. lasso handle truly uninformative variables.
+# ──────────────────────────────────────────────────────────────────────────────
+
+np.random.seed(42)
+n = 200
+
+precip       = np.random.normal(600, 120, n)    # mean annual precipitation (mm)
+temp         = np.random.normal(14, 3, n)        # mean summer temperature (°C)
+forest_cover = np.random.uniform(10, 80, n)      # surrounding forest cover (%)
+soil_N       = np.random.normal(40, 10, n)       # soil nitrogen (mg/kg)
+elevation    = np.random.normal(1500, 400, n)    # elevation (m)
+slope        = np.random.uniform(0, 35, n)       # terrain slope (degrees)
+aspect       = np.random.uniform(0, 360, n)      # terrain aspect (degrees, 0–360)
+canopy       = np.random.uniform(0, 60, n)       # canopy cover (%)
+
+pred_raw = np.column_stack([precip, temp, forest_cover, soil_N,
+                             elevation, slope, aspect, canopy])
+
+# Standardize for data generation so beta_true is on a common scale
+scaler_gen   = StandardScaler()
+pred_std_gen = scaler_gen.fit_transform(pred_raw)
+
+beta_true        = np.array([2.5, -1.8, 1.5, 1.0, 0.5, 0.15, 0.0, 0.0])
+species_richness = 25 + pred_std_gen @ beta_true + np.random.normal(0, 1.5, n)
+
+predictor_names = ['precip', 'temp', 'forest_cover', 'soil_N',
+                   'elevation', 'slope', 'aspect', 'canopy']
+
+df = pd.DataFrame(dict(zip(predictor_names, pred_raw.T)))
+df['species_richness'] = species_richness
+
+X = df[predictor_names].values
+y = df['species_richness'].values
+
+# Standardize X for fitting ridge and lasso
+scaler = StandardScaler()
+X_std  = scaler.fit_transform(X)
+
+# ── Ridge coefficient profiles ─────────────────────────────────────────────────
+lambdas_ridge = np.logspace(-2, 6, 300)
+ridge_coefs   = np.zeros((len(lambdas_ridge), len(predictor_names)))
+for i, lam in enumerate(lambdas_ridge):
+    r = Ridge(alpha=lam, fit_intercept=True)
+    r.fit(X_std, y)
+    ridge_coefs[i] = r.coef_
+
+# ── Lasso coefficient profiles ─────────────────────────────────────────────────
+lambdas_lasso = np.logspace(-3, 1.2, 300)
+lasso_coefs   = np.zeros((len(lambdas_lasso), len(predictor_names)))
+for i, lam in enumerate(lambdas_lasso):
+    l = Lasso(alpha=lam, fit_intercept=True, max_iter=20000, tol=1e-4)
+    l.fit(X_std, y)
+    lasso_coefs[i] = l.coef_
+
+# ── CV MSE curves for tuning parameter selection ───────────────────────────────
+lambdas_cv_ridge = np.logspace(-2, 6, 80)
+cv_mse_ridge = np.array([
+    -cross_val_score(Ridge(alpha=lam), X_std, y,
+                     cv=10, scoring='neg_mean_squared_error').mean()
+    for lam in lambdas_cv_ridge
+])
+
+lambdas_cv_lasso = np.logspace(-3, 1.2, 80)
+cv_mse_lasso = np.array([
+    -cross_val_score(Lasso(alpha=lam, max_iter=20000, tol=1e-4), X_std, y,
+                     cv=10, scoring='neg_mean_squared_error').mean()
+    for lam in lambdas_cv_lasso
+])
+
+best_lam_ridge = lambdas_cv_ridge[np.argmin(cv_mse_ridge)]
+best_lam_lasso = lambdas_cv_lasso[np.argmin(cv_mse_lasso)]
+
+# ── Color palette for 8 predictors ────────────────────────────────────────────
+pred_colors = [plt.cm.tab10(i) for i in range(8)]
+```
+
+In this lesson we introduce:
+
+- The problem of **variable selection** in multiple linear regression and three common search strategies: forward, backward, and mixed selection
+- **Shrinkage methods** as an alternative approach: instead of searching for the best subset, we constrain the coefficient estimates to reduce model complexity and variance
+- **Ridge regression**: shrinks all coefficients towards zero without eliminating any predictor
+- **The lasso**: shrinks coefficients and can set some exactly to zero, performing variable selection as part of the fitting process
+- How to use **cross-validation to select the tuning parameter** $\lambda$ for both methods
+
+These notes are based on chapters 6.1–6.2 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
+
+## A guiding example: meadow plant diversity
+
+In this lesson we use a synthetic dataset — **EcoRich** — representing 200 survey plots in a mountain national park. For each plot we record:
+
+- **`precip`** — mean annual precipitation (mm); higher precipitation typically promotes plant diversity
+- **`temp`** — mean summer temperature (°C); extreme heat can suppress richness
+- **`forest_cover`** — surrounding forest cover (%); edge habitat can increase local diversity
+- **`soil_N`** — soil nitrogen content (mg/kg); a key nutrient for plant growth
+- **`elevation`** — elevation (m); diversity often peaks at intermediate elevations
+- **`slope`** — terrain slope (degrees); steep slopes may limit richness
+- **`aspect`** — terrain aspect (degrees, 0–360); a compass direction with no consistent linear effect
+- **`canopy`** — canopy cover (%); a structural variable not directly tied to richness in this scenario
+
+The response variable is **`species_richness`**: the number of vascular plant species recorded in a 25 m² plot.
+
+The central question is: *which environmental factors actually drive plant species richness, and can we build a parsimonious model that generalizes to new plots?*
+
+```{python}
+#| label: initial-data-plotting
+
+specs = [
+    ('precip',       'steelblue',   'Annual precip. (mm)'),
+    ('temp',         'tomato',      'Summer temp. (°C)'),
+    ('forest_cover', 'seagreen',    'Forest cover (%)'),
+    ('soil_N',       'darkorange',  'Soil N (mg/kg)'),
+    ('elevation',    'mediumpurple','Elevation (m)'),
+    ('slope',        'saddlebrown', 'Slope (°)'),
+    ('aspect',       'gray',        'Aspect (°)'),
+    ('canopy',       'olivedrab',   'Canopy cover (%)'),
+]
+
+fig, axes = plt.subplots(2, 4, figsize=(fig_size_x * 1.3, fig_size_y * 1.3))
+
+for ax, (col, color, xlabel) in zip(axes.flat, specs):
+    ax.scatter(df[col], df['species_richness'], s=10, alpha=0.4, color=color)
+    ax.set_xlabel(xlabel, fontsize=9)
+    ax.set_ylabel('Species richness', fontsize=9)
+    ax.grid(True, alpha=0.3)
+    ax.tick_params(labelsize=8)
+
+fig.suptitle(
+    'Species richness vs. each environmental predictor\n'
+    '*Synthetic data generated for educational purposes only*',
+    y=1.02
+)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+We have 8 potential predictors and a continuous response. Using all 8 predictors in a multiple linear regression is one option, but *not all of them may be informative*. The goal of this lesson is to explore principled ways to select predictors or constrain the model.
+
+## Variable selection
+
+Once we decide to use multiple linear regression we follow the steps:
+
+1. Fit the model
+2. Compute the $F$-statistic and its $p$-value
+3. Check individual $p$-values for predictors.
+
+If there is evidence that *some* predictors are associated with the response, an important question is: *which predictors should we include in the model?* This is called **variable selection**. Including unnecessary predictors does not help predictions and increases variance; leaving out important ones biases our estimates.
+
+With $p$ predictors there are $2^p$ possible subsets of variables to consider. For $p = 8$ that is already 256 models; for even moderate $p$ (say, 30 or 40) exhaustive search is completely infeasible. Three common automated approaches are:
+
+### Forward selection
+
+Start with the simplest model and build up:
+
+1. Start with the null model: only an intercept, no predictors.
+2. Fit $p$ simple regressions (one per predictor) and add the predictor that results in the lowest RSS.
+3. Fit all two-variable models that include the predictor chosen in step 2, and add the next predictor that gives the lowest RSS.
+4. Continue adding predictors until a stopping criterion is met (e.g., no remaining predictor produces a statistically significant improvement).
+
+Forward selection is always applicable, but it might include variables early that later become redundant.
+
+### Backward selection
+
+Start with the most complex model and simplify:
+
+1. Start with the full model: the MLR with all $p$ predictors included.
+2. Remove the predictor with the largest $p$-value (least statistically significant).
+3. Refit the model with the remaining $p - 1$ predictors and repeat.
+4. Stop when all remaining predictors are significant at the chosen threshold.
+
+Backward selection cannot be used when $p > n$ (more predictors than observations), because the full model cannot be fit.
+
+### Mixed selection
+
+Mixed selection combines the forward and backward approaches to avoid their respective limitations:
+
+1. Start with the null model.
+2. **Forward step**: add the variable that most improves the model (largest reduction in RSS).
+3. **Backward step**: after each addition, check if any currently included variable now has a $p$-value above the removal threshold. Adding a new variable can sometimes make a previously added one redundant. If so, remove it.
+4. Continue alternating forward and backward steps until no variables are added or removed.
+
+This addresses the main limitation of forward selection: a variable added early can become unnecessary once other variables are included. Mixed selection allows such variables to be dropped rather than staying in the model indefinitely.
+
+:::{.callout-tip}
+## Check-in
+
+For our EcoRich data, consider the three predictors `precip`, `temp`, and `forest_cover`. There are $2^3 = 8$ possible subsets. The table below shows the RSS for every possible model:
+
+```{python}
+#| label: all-models-rss
+
+predictors_3 = ['precip', 'temp', 'forest_cover']
+rows = []
+
+for r in range(0, len(predictors_3) + 1):
+    for subset in combinations(predictors_3, r):
+        if len(subset) == 0:
+            y_hat_null = np.full(n, df['species_richness'].mean())
+            rss = np.sum((df['species_richness'] - y_hat_null) ** 2)
+            rows.append({'Predictors in model': '(intercept only)', 'RSS': round(rss, 1)})
+        else:
+            X_tmp  = sm.add_constant(df[list(subset)])
+            res_tmp = sm.OLS(df['species_richness'], X_tmp).fit()
+            rss     = np.sum(res_tmp.resid ** 2)
+            rows.append({'Predictors in model': ' + '.join(subset), 'RSS': round(rss, 1)})
+
+all_models_df = pd.DataFrame(rows)
+print(all_models_df.to_string(index=False))
+```
+
+Using the table above, manually trace through the three steps of forward selection:
+
+1. **Step 1** — Start with the null model. Which single predictor gives the largest reduction in RSS? What is the RSS after adding it?
+2. **Step 2** — With that predictor already in the model, which one would be added in second place?
+3. **Step 3** — Adding the final predictor, does it meaningfully reduce the RSS? What criterion could help you decide?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. **Step 1**: Comparing the three single-predictor models, `precip` gives the lowest RSS. Forward selection adds `precip` first, consistent with precipitation being the strongest true driver in the data-generating model ($\beta = 2.5$).
+
+2. **Step 2**: With `precip` already included, we compare `precip + temp` and `precip + forest_cover`. The `precip + temp` model has the lower RSS, so `temp` is added second ($\beta = -1.8$ in the true model).
+
+3. **Step 3**: Adding `forest_cover` reduces the RSS further. Whether to include it depends on the stopping criterion: a formal significance test, a minimum RSS improvement threshold, or an information criterion such as adjusted $R^2$ or AIC. If we use adjusted $R^2$ and the improvement is negligible, we might stop at the two-predictor model.
+:::
+
+Forward and backward selection can be run using metrics other than RSS. Using raw RSS as the sole criterion would always favor adding more predictors (RSS can only decrease or stay the same when a predictor is added). An alternative that penalizes model complexity is the adjusted $R^2$:
+
+$$\bar{R}^2 = 1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}$$
+
+Unlike $R^2$, the adjusted $R^2$ can *decrease* when adding a predictor that does not improve the fit enough to justify the added complexity.
+
+## Shrinkage methods
+
+The variable selection strategies above search over subsets of predictors, choosing some to keep and discarding the rest. There is a fundamentally different approach: rather than searching for a good subset, we can **alter the fitting method itself** so that it naturally shrinks less important predictors towards zero.
+
+:::{.callout-tip}
+## Check-in
+In the linear model
+
+$$Y = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \cdots + \hat{\beta}_p X_p,$$
+
+how would you "remove" the variable $X_i$ by changing the coefficient estimates?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+Set $\hat{\beta}_i = 0$. The contribution of $X_i$ to the predicted value is $\hat{\beta}_i X_i = 0 \cdot X_i = 0$, so $X_i$ has no effect on the predictions — equivalent to removing it from the model.
+:::
+
+**Idea**: fit a model with all $p$ predictors using a method that *shrinks* the coefficient estimates towards zero. This is called **regularization** (or **constraining**).
+
+Instead of minimizing the RSS alone, regularization minimizes a penalized objective:
+
+$$\text{minimize} \quad (RSS + \text{penalty})$$
+
+The penalty term is a function of the coefficients that grows as they move away from zero. This constrains the size of the coefficients: they can only grow if accompanied by a sufficient reduction in RSS. The penalty also takes the number of predictors into account, discouraging complexity.
+
+We will study two regularization methods that differ in how they define the penalty: **ridge regression** and **the lasso**.
+
+## Ridge regression
+
+In ridge regression the coefficients are estimated by minimizing
+
+$$RSS + \lambda \sum_{j=1}^{p} \beta_j^2, \qquad \underbrace{\lambda \sum_{j=1}^{p} \beta_j^2}_{\text{penalty}}$$
+
+where $\lambda \geq 0$ is a **tuning parameter** that is determined separately (e.g., by cross-validation).
+
+The shrinkage penalty $\lambda \sum_j \beta_j^2$ is small when $\beta_1, \ldots, \beta_p$ are close to zero, so it has the effect of pulling the estimates of $\beta_j$ towards zero. The tuning parameter $\lambda$ controls the **relative weight** of the RSS and the penalty on the final coefficient estimates:
+
+- When $\lambda = 0$, the penalty has no effect and the estimates are the same as ordinary least squares.
+- As $\lambda \to \infty$, the penalty dominates and all coefficients are forced towards zero.
+
+::: {.callout-note}
+## Standardizing predictors before ridge regression
+Ridge regression coefficients can change substantially when a predictor is multiplied by a constant (e.g., converting precipitation from mm to cm), because the penalty $\lambda \sum_j \beta_j^2$ treats all $\beta_j$ on the same footing. It is therefore important to **standardize** each predictor before fitting:
+
+$$\tilde{X}_{ij} = \frac{X_{ij}}{\sqrt{\frac{1}{n}\sum_{i=1}^{n}(X_{ij} - \bar{X}_j)^2}}$$
+
+so that all predictors are on the same scale (mean 0, standard deviation 1) and the penalty applies equally to each one.
+:::
+
+The figure below shows how the standardized ridge regression coefficients change as $\lambda$ increases — the analog of ISLP Figure 6.4 (left panel) for our EcoRich data.
+
+```{python}
+#| label: ridge-coef-profiles
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
+
+for j, (name, color) in enumerate(zip(predictor_names, pred_colors)):
+    ax.plot(np.log10(lambdas_ridge), ridge_coefs[:, j],
+            color=color, linewidth=1.8, label=name)
+
+ax.axhline(0, color='gray', linestyle='--', linewidth=0.8)
+ax.axvline(np.log10(best_lam_ridge), color='black', linestyle=':', linewidth=1.2,
+           label=f'CV optimal λ (10^{np.log10(best_lam_ridge):.1f})')
+
+ax.set_xlabel('log₁₀(λ)')
+ax.set_ylabel('Standardized coefficient')
+ax.set_title('Ridge regression: coefficient profiles\n'
+             '*Each line is one predictor; all shrink towards zero as λ grows*')
+ax.legend(fontsize=8, ncol=2, loc='upper right')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Check-in
+Using the coefficient profile plot above:
+
+1. What happens to the coefficient estimates when $\lambda = 0$? When $\lambda \to \infty$?
+2. Which predictors appear to be the most important (largest absolute coefficient at low $\lambda$)? Does this match what you would expect given the description of the dataset?
+3. Do any of the coefficients reach *exactly* zero for any value of $\lambda$?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+1. At $\lambda = 0$ the penalty is absent, so the estimates equal the ordinary least squares (OLS) estimates. As $\lambda \to \infty$ the penalty increasingly dominates and all coefficients are pushed towards zero (though they never reach exactly zero for any finite $\lambda$).
+
+2. `precip`, `temp`, `forest_cover`, and `soil_N` have the largest magnitudes at low $\lambda$, consistent with the true data-generating model where these four predictors have the largest true coefficients (2.5, −1.8, 1.5, and 1.0 respectively). `aspect` and `canopy` (the truly irrelevant predictors) stay near zero across the entire range.
+
+3. No. Ridge regression shrinks coefficients towards zero but never sets them to *exactly* zero for any finite $\lambda$. All 8 predictors remain in the final model regardless of $\lambda$. This is a key limitation of ridge when variable selection is desired.
+:::
+
+:::{.callout-tip}
+## Check-in
+Suppose you have fit ridge regression at a grid of $\lambda$ values and obtained a different set of coefficient estimates for each. Describe how you would use cross-validation to select a good value of $\lambda$.
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+Use $k$-fold cross-validation:
+
+1. For each candidate $\lambda$ in a grid (e.g., $10^{-3}$ to $10^6$ on a log scale), fit ridge regression on the training folds and compute the mean squared error (MSE) on the held-out fold.
+2. Average the MSE across all $k$ folds to get the CV-MSE for that $\lambda$.
+3. Select the $\lambda$ that minimizes the CV-MSE. This is the value that produces the best out-of-sample prediction accuracy.
+
+Importantly, the test set should not be used to select $\lambda$ — it should only be used for final evaluation after $\lambda$ has been chosen via cross-validation on the training data.
+:::
+
+:::{.callout-tip}
+## Check-in
+Are the ridge regression coefficients interpretable in the same way as ordinary least squares coefficients?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+Not quite. In OLS, $\hat{\beta}_j$ is interpreted as the average change in $Y$ associated with a one-unit increase in $X_j$, holding all other predictors fixed. Ridge coefficients share the same sign and direction, but their magnitudes are deliberately biased towards zero (the amount of bias depends on $\lambda$). This means:
+
+- The **sign** still tells us whether the predictor is positively or negatively associated with the response.
+- The **relative magnitudes** still give a rough sense of which predictors matter more.
+- The **exact values** should not be interpreted as unbiased marginal effects — they are shrunk and depend on the chosen $\lambda$.
+
+Ridge is primarily a predictive tool; when the goal is inference (understanding effect sizes), OLS or other methods may be more appropriate.
+:::
+
+### Selecting the tuning parameter
+
+As noted above, $\lambda$ is chosen by cross-validation. The figure below shows the 10-fold CV mean squared error as a function of $\log_{10}(\lambda)$ for ridge regression on the EcoRich data. The vertical dashed line marks the optimal $\lambda$.
+
+```{python}
+#| label: ridge-cv-lambda
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
+
+ax.plot(np.log10(lambdas_cv_ridge), cv_mse_ridge,
+        color='steelblue', linewidth=2, label='10-fold CV MSE')
+ax.axvline(np.log10(best_lam_ridge), color='tomato', linestyle='--', linewidth=1.5,
+           label=f'Optimal λ = {best_lam_ridge:.2f}  (log₁₀ = {np.log10(best_lam_ridge):.2f})')
+
+ax.set_xlabel('log₁₀(λ)')
+ax.set_ylabel('CV mean squared error')
+ax.set_title('Ridge regression: selecting λ via cross-validation')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+At very small $\lambda$ the model is close to OLS and may overfit; at very large $\lambda$ the model is too constrained and underfits. The optimal $\lambda$ balances these two extremes.
+
+## The lasso
+
+In the lasso, the coefficients are estimated by minimizing
+
+$$RSS + \lambda \sum_{j=1}^{p} |\beta_j|, \qquad \underbrace{\lambda \sum_{j=1}^{p} |\beta_j|}_{\text{penalty}}$$
+
+The only difference from ridge is that the penalty uses the **absolute value** of the coefficients ($\ell_1$ norm) rather than their squares ($\ell_2$ norm). This seemingly small change has a dramatic consequence: the lasso penalty has the effect of **forcing some coefficient estimates to be exactly equal to zero** when the tuning parameter $\lambda$ is sufficiently large.
+
+Because it produces sparse models — models that use only a subset of the predictors — the lasso effectively performs **variable selection** as part of the fitting process.
+
+As with ridge regression, the predictors should be standardized before fitting the lasso so that the penalty applies equally to all coefficients.
+
+:::{.callout-tip}
+## Check-in
+1. If $\lambda = 0$, how are the lasso coefficient estimates related to the least squares estimates?
+2. What happens to the lasso coefficients when $\lambda$ is very large?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+1. When $\lambda = 0$ there is no penalty term, so minimizing $RSS + 0 \cdot \sum |\beta_j|$ is the same as minimizing the RSS alone. The lasso estimates equal the ordinary least squares estimates.
+2. As $\lambda \to \infty$ the penalty term dominates and forces all coefficients to exactly zero. The model reduces to the null model (intercept only), predicting the mean response for every observation.
+:::
+
+The figure below shows how the standardized lasso coefficients change as $\lambda$ increases — the analog of ISLP Figure 6.6 (left panel) for our EcoRich data.
+
+```{python}
+#| label: lasso-coef-profiles
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
+
+for j, (name, color) in enumerate(zip(predictor_names, pred_colors)):
+    ax.plot(np.log10(lambdas_lasso), lasso_coefs[:, j],
+            color=color, linewidth=1.8, label=name)
+
+ax.axhline(0, color='gray', linestyle='--', linewidth=0.8)
+ax.axvline(np.log10(best_lam_lasso), color='black', linestyle=':', linewidth=1.2,
+           label=f'CV optimal λ (10^{np.log10(best_lam_lasso):.1f})')
+
+ax.set_xlabel('log₁₀(λ)')
+ax.set_ylabel('Standardized coefficient')
+ax.set_title('Lasso: coefficient profiles\n'
+             '*Some coefficients are driven to exactly zero (variable selection)*')
+ax.legend(fontsize=8, ncol=2, loc='upper right')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Check-in
+Compare the lasso coefficient profile plot to the ridge coefficient profile plot above.
+
+1. Which predictors are driven to exactly zero first as $\lambda$ increases?
+2. Is this consistent with what you know about the true data-generating model?
+3. What is the key visual difference between the lasso and ridge profiles near $\lambda = 0$?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+1. `aspect` and `canopy` are driven to exactly zero at the smallest $\lambda$ values, followed by `slope`. This creates a "kink" in those profiles where the line hits zero and stays there — a distinctive feature of the lasso.
+
+2. Yes. In the true data-generating model, `aspect` and `canopy` have true coefficients of exactly zero, and `slope` has a very small true coefficient (0.15). The lasso correctly identifies these as unimportant and removes them as $\lambda$ grows.
+
+3. Near $\lambda = 0$ the profiles look similar (both converge to the OLS estimates). The key difference appears as $\lambda$ increases: ridge coefficients gradually shrink towards zero but never reach it, while lasso coefficients hit zero sharply and stay there. The lasso profiles show corners and flat segments at zero; the ridge profiles are smooth curves that asymptote to zero.
+:::
+
+The lasso tuning parameter is selected by cross-validation in the same way as for ridge regression: fit the model at many $\lambda$ values, compute CV-MSE at each, and select the $\lambda$ that minimizes it.
+
+```{python}
+#| label: lasso-cv-lambda
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
+
+ax.plot(np.log10(lambdas_cv_lasso), cv_mse_lasso,
+        color='seagreen', linewidth=2, label='10-fold CV MSE')
+ax.axvline(np.log10(best_lam_lasso), color='tomato', linestyle='--', linewidth=1.5,
+           label=f'Optimal λ = {best_lam_lasso:.3f}  (log₁₀ = {np.log10(best_lam_lasso):.2f})')
+
+ax.set_xlabel('log₁₀(λ)')
+ax.set_ylabel('CV mean squared error')
+ax.set_title('Lasso: selecting λ via cross-validation')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+## Comparing lasso and ridge
+
+```{python}
+#| label: ridge-vs-lasso-comparison
+
+# Fit final ridge and lasso at their CV-optimal lambda
+ridge_final = Ridge(alpha=best_lam_ridge).fit(X_std, y)
+lasso_final = Lasso(alpha=best_lam_lasso, max_iter=20000).fit(X_std, y)
+
+comp_df = pd.DataFrame({
+    'Predictor':    predictor_names,
+    'True β':       beta_true,
+    'OLS':          np.linalg.lstsq(np.column_stack([np.ones(n), X_std]), y,
+                                    rcond=None)[0][1:],
+    'Ridge (CV λ)': ridge_final.coef_,
+    'Lasso (CV λ)': lasso_final.coef_,
+})
+comp_df = comp_df.round(3)
+print(comp_df.to_string(index=False))
+```
+
+**Ridge** will always include all $p$ predictors in the final model. The ridge penalty $\lambda \sum_j \beta_j^2$ shrinks all coefficients towards zero but will not set any of them to exactly zero. When the true model involves many predictors all with moderate effects, ridge tends to perform well.
+
+**The lasso** performs simultaneous shrinkage and variable selection: the $\ell_1$ penalty drives some coefficients to exactly zero, producing a sparse model that is easier to interpret. We would expect lasso to perform better when a relatively small number of predictors has substantial coefficients and the remaining predictors have coefficients that are very small or exactly zero.
+
+Neither method consistently outperforms the other:
+
+- **Prefer lasso** when the response is believed to depend on a small number of strong predictors (sparse setting). The resulting model is sparser and easier to interpret.
+- **Prefer ridge** when the response is a function of many predictors, each contributing a roughly equal amount. Ridge will outperform lasso in this dense setting because lasso may incorrectly discard informative predictors.
+
+In practice, the number of truly relevant predictors is never known in advance for real data. **Cross-validation** can be used to compare both approaches and select the one with lower CV-MSE on held-out data.
+
+:::{.callout-tip}
+## Check-in
+Looking at the coefficient comparison table above:
+
+1. How do the ridge and lasso estimates compare to the true coefficients for `precip`, `temp`, `forest_cover`, and `soil_N` (the four predictors with the largest true effects)?
+2. What has the lasso done to `aspect` and `canopy`, the two truly irrelevant predictors? What has ridge done?
+3. In which setting — sparse true model or dense true model — would you expect lasso to outperform ridge? Why?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+1. Both ridge and lasso shrink the estimates towards zero relative to OLS, but they recover the correct ranking of importance (precip, then temp, then forest_cover, then soil_N). The signs are correct for all four.
+
+2. The lasso has set both `aspect` and `canopy` to exactly zero — correctly identifying them as irrelevant. Ridge has kept both in the model with small (but non-zero) coefficients.
+
+3. Lasso performs better in a **sparse setting** — when only a few predictors truly matter. By setting irrelevant coefficients to zero, it reduces model complexity and avoids fitting noise. In a dense setting (many predictors each with a small but real effect), lasso may incorrectly zero out informative predictors and ridge tends to be more accurate because it keeps all coefficients while shrinking them proportionally.
+:::
