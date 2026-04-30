@@ -552,14 +552,11 @@ print(comp_df.to_string(index=False))
 
 1. How do the ridge and lasso estimates compare to the true coefficients for `precip`, `temp`, `forest_cover`, and `soil_N` (the four predictors with the largest true effects)?
 2. What has the lasso done to `aspect` and `canopy`, the two truly irrelevant predictors? What has ridge done?
-3. In which setting — sparse true model or dense true model — would you expect lasso to outperform ridge? Why?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 1. Both ridge and lasso shrink the estimates towards zero relative to OLS. They recover the correct ranking of importance (precip, then temp, then forest_cover, then soil_N). The signs are correct for all four.
 
-2. The lasso has set both `aspect` and `canopy` to exactly zero — correctly identifying them as irrelevant. Ridge has kept both in the model with small (but non-zero) coefficients.
-
-3. Lasso performs better in a **sparse setting** — when only a few predictors truly matter. By setting irrelevant coefficients to zero, it reduces model complexity and avoids fitting noise. In a dense setting (many predictors each with a small but real effect), lasso may incorrectly zero out informative predictors and ridge tends to be more accurate because it keeps all coefficients while shrinking them proportionally.
+2. The lasso has set both`canopy` to exactly zero: correctly identifies it as irrelevant. Ridge has kept both in the model with small (but non-zero) coefficients.
 :::

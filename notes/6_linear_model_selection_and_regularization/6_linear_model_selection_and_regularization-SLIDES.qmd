@@ -167,21 +167,24 @@ comp_df[numeric_cols] = comp_df[numeric_cols] + 0.0
 
 <hr>
 
-200 mountain meadow survey plots. Response: **plant species richness** (species per 25 m² plot).
+200 mountain meadow survey plots. 
 
-- **`precip`** — mean annual precipitation (mm)
-- **`temp`** — mean summer temperature (°C)
-- **`forest_cover`** — surrounding forest cover (%)
-- **`soil_N`** — soil nitrogen content (mg/kg)
-- **`elevation`** — elevation (m)
-- **`slope`** — terrain slope (°)
-- **`aspect`** — terrain aspect (°, 0–360): no consistent linear effect on richness
-- **`canopy`** — canopy cover (%): not directly tied to richness
+- Response: **plant species richness** (species per 25 m² plot).
+- Predictors:
+
+    - **`precip`** — mean annual precipitation (mm)
+    - **`temp`** — mean summer temperature (°C)
+    - **`forest_cover`** — surrounding forest cover (%)
+    - **`soil_N`** — soil nitrogen content (mg/kg)
+    - **`elevation`** — elevation (m)
+    - **`slope`** — terrain slope (°)
+    - **`aspect`** — terrain aspect (°, 0–360): no consistent linear effect on richness
+    - **`canopy`** — canopy cover (%): not directly tied to richness
 
 <br>
 
 ::: {.center-text .teal-text .body-text-m}
-*We want a simple, efficient model good at predicting species richness, with the feweset possible variables.*
+*We want a simple, efficient model good at predicting the response, with the feweset possible variables.*
 :::
 
 ---
@@ -273,8 +276,8 @@ $$
 
 After fitting a multiple linear regression we check:
 
-1. The $F$-statistic and its $p$-value — is there evidence that any predictor matters?
-2. Individual $p$-values — which predictors are associated with the response, assuming all others are also in the model?
+1. The $F$-statistic and its $p$-value: is there evidence that any predictor matters?
+2. Individual $p$-values: which predictors are associated with the response, assuming all others are also in the model?
 
 . . .
 
@@ -285,11 +288,19 @@ If some predictors are important, the key question is: **which predictors should
 
 . . .
 
+::: {.center-text .teal-text}
+What would be a straightforward way to find which subset of the predictors $X_1, \ldots, X_p$ will give us the best model?
+:::
+
+. . .
+
+::: {.body-text-s}
 With $p$ predictors there are $2^p$ possible ways of choosing which predictors to use:
 
 - $p = 3$: 8 models — feasible to compare exhaustively
 - $p = 8$: 256 models
 - $p = 30$: over 1 billion models — completely infeasible
+:::
 
 ---
 
@@ -315,7 +326,7 @@ Variable selection searches over subsets: keeping some predictors, discarding ot
 
 . . .
 
-::: {.teal-text .body-text-m}
+::: {.teal-text}
 **Check-in**
 
 In the linear model 
@@ -337,7 +348,12 @@ Set $\hat{\beta}_i = 0$. Then the contribution $\hat{\beta}_i X_i = 0 \cdot X_i 
 
 <hr>
 
-Instead of minimizing RSS alone, regularization minimizes:
+Remember the usual fit of the MLR model is done by minimizing
+
+$$\text{minimize} \quad ( RSS + \text{penalty})$$
+
+
+Instead of minimizing RSS alone, regularization fits MLR by minimizing:
 
 $$\text{minimize} \quad ( RSS + \text{penalty})$$
 
@@ -348,13 +364,6 @@ The penalty term:
 - Is small when $\beta_1, \ldots, \beta_p$ are close to zero
 - **Constrains** coefficient size: they can only grow if accompanied by a sufficient reduction in RSS
 - Discourages model complexity
-
-. . .
-
-Two methods differ in how they define the penalty:
-
-- **Ridge regression**: penalty uses **squared** coefficients
-- **The lasso**: penalty uses **absolute values** of coefficients
 
 ---
 
@@ -380,7 +389,7 @@ where $\lambda \geq 0$ is a **tuning parameter** chosen separately.
 
 . . .
 
-The shrinkage penalty $\lambda \sum_j \beta_j^2$ pulls all $\hat\beta_j$ towards zero. $\lambda$ controls the tradeoff:
+The shrinkage penalty $\lambda \sum_j \beta_j^2$ pulls all $\hat\beta_j$ towards zero. 
 
 - $\lambda = 0$: no penalty → same estimates as OLS
 - $\lambda \to \infty$: penalty dominates → all coefficients shrink to zero
@@ -390,8 +399,8 @@ The shrinkage penalty $\lambda \sum_j \beta_j^2$ pulls all $\hat\beta_j$ towards
 
 
 ::: {.body-text-s}
-- Ridge keeps **all $p$ predictors** in the final model. It shrinks coefficients towards zero but never sets any exactly to zero.
-- The ridge penalty reats all $\beta_j$ in the same way, regardless of scale. Standardize each predictor before fitting
+- Ridge keeps **all $p$ predictors** in the final model. It shrinks coefficients towards zero but doesn't make them exactly zero.
+- The ridge penalty reats all $\beta_j$ in the same way, regardless of scale. All predictors should be standardized  before fitting.
 
 :::
 
@@ -846,7 +855,7 @@ print(comp_df.to_string(index=False))
 ::: {.teal-text}
 1. How do ridge and lasso estimates compare to the true $\beta$ for `precip`, `temp`, `forest_cover`, and `soil_N`?
 
-2. What has lasso done to `aspect` and `canopy`? What has ridge done?
+2. What has lasso done to `canopy`? What has ridge done?
 :::
 
 :::
@@ -874,6 +883,12 @@ print(comp_df.to_string(index=False))
 :::
 
 ::: {.column width="30%"}
+
+::: {.teal-text}
+1. How do ridge and lasso estimates compare to the true $\beta$ for `precip`, `temp`, `forest_cover`, and `soil_N`?
+
+2. What has lasso done to `canopy`? What has ridge done?
+:::
 
 ::: {.body-text-s}
 1. Both methods shrink estimates towards zero relative to OLS, but they recover the correct ranking and signs for the four important predictors.

@@ -159,7 +159,10 @@ A guiding example
 <h2></h2>
 <p><span class="slide-title">Our example dataset</span></p>
 <hr>
-<p>200 mountain meadow survey plots. Response: <strong>plant species richness</strong> (species per 25 m² plot).</p>
+<p>200 mountain meadow survey plots.</p>
+<ul>
+<li><p>Response: <strong>plant species richness</strong> (species per 25 m² plot).</p></li>
+<li><p>Predictors:</p>
 <ul>
 <li><strong><code>precip</code></strong> — mean annual precipitation (mm)</li>
 <li><strong><code>temp</code></strong> — mean summer temperature (°C)</li>
@@ -169,17 +172,18 @@ A guiding example
 <li><strong><code>slope</code></strong> — terrain slope (°)</li>
 <li><strong><code>aspect</code></strong> — terrain aspect (°, 0–360): no consistent linear effect on richness</li>
 <li><strong><code>canopy</code></strong> — canopy cover (%): not directly tied to richness</li>
+</ul></li>
 </ul>
 <p><br></p>
 <div class="center-text teal-text body-text-m">
-<p><em>We want a simple, efficient model good at predicting species richness, with the feweset possible variables.</em></p>
+<p><em>We want a simple, efficient model good at predicting the response, with the feweset possible variables.</em></p>
 </div>
 </section>
 <section id="data-overview" class="slide level2" data-menu-title="EcoRich: data overview">
 <h2></h2>
 <p><span class="slide-title">Data overview</span></p>
 <hr>
-<div id="6a2f6c86" class="cell" data-execution_count="2">
+<div id="2a6d9f0a" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -224,8 +228,8 @@ RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2.
 <hr>
 <p>After fitting a multiple linear regression we check:</p>
 <ol type="1">
-<li>The <span class="math inline">\(F\)</span>-statistic and its <span class="math inline">\(p\)</span>-value — is there evidence that any predictor matters?</li>
-<li>Individual <span class="math inline">\(p\)</span>-values — which predictors are associated with the response, assuming all others are also in the model?</li>
+<li>The <span class="math inline">\(F\)</span>-statistic and its <span class="math inline">\(p\)</span>-value: is there evidence that any predictor matters?</li>
+<li>Individual <span class="math inline">\(p\)</span>-values: which predictors are associated with the response, assuming all others are also in the model?</li>
 </ol>
 <div class="fragment">
 <p>If some predictors are important, the key question is: <strong>which predictors should we include?</strong></p>
@@ -235,12 +239,19 @@ RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2.
 </ul>
 </div>
 <div class="fragment">
+<div class="center-text teal-text">
+<p>What would be a straightforward way to find which subset of the predictors <span class="math inline">\(X_1, \ldots, X_p\)</span> will give us the best model?</p>
+</div>
+</div>
+<div class="fragment">
+<div class="body-text-s">
 <p>With <span class="math inline">\(p\)</span> predictors there are <span class="math inline">\(2^p\)</span> possible ways of choosing which predictors to use:</p>
 <ul>
 <li><span class="math inline">\(p = 3\)</span>: 8 models — feasible to compare exhaustively</li>
 <li><span class="math inline">\(p = 8\)</span>: 256 models</li>
 <li><span class="math inline">\(p = 30\)</span>: over 1 billion models — completely infeasible</li>
 </ul>
+</div>
 </div>
 </section>
 <section id="section-shrinkage" class="slide level2" data-menu-title="# Shrinkage methods #" data-background="#047C90">
@@ -259,7 +270,7 @@ Shrinkage methods
 <p><strong>Shrinkage methods</strong>: keep all <span class="math inline">\(p\)</span> predictors but <strong>alter the fitting method itself</strong> so that it naturally shrinks less important coefficients towards zero.</p>
 <p><br></p>
 <div class="fragment">
-<div class="teal-text body-text-m">
+<div class="teal-text">
 <p><strong>Check-in</strong></p>
 <p>In the linear model</p>
 <p><span class="math display">\[Y = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \cdots + \hat{\beta}_p X_p,\]</span></p>
@@ -274,7 +285,9 @@ Shrinkage methods
 <h2></h2>
 <p><span class="slide-title">The penalized objective</span></p>
 <hr>
-<p>Instead of minimizing RSS alone, regularization minimizes:</p>
+<p>Remember the usual fit of the MLR model is done by minimizing</p>
+<p><span class="math display">\[\text{minimize} \quad ( RSS + \text{penalty})\]</span></p>
+<p>Instead of minimizing RSS alone, regularization fits MLR by minimizing:</p>
 <p><span class="math display">\[\text{minimize} \quad ( RSS + \text{penalty})\]</span></p>
 <div class="fragment">
 <p>The penalty term:</p>
@@ -282,13 +295,6 @@ Shrinkage methods
 <li>Is small when <span class="math inline">\(\beta_1, \ldots, \beta_p\)</span> are close to zero</li>
 <li><strong>Constrains</strong> coefficient size: they can only grow if accompanied by a sufficient reduction in RSS</li>
 <li>Discourages model complexity</li>
-</ul>
-</div>
-<div class="fragment">
-<p>Two methods differ in how they define the penalty:</p>
-<ul>
-<li><strong>Ridge regression</strong>: penalty uses <strong>squared</strong> coefficients</li>
-<li><strong>The lasso</strong>: penalty uses <strong>absolute values</strong> of coefficients</li>
 </ul>
 </div>
 </section>
@@ -308,7 +314,7 @@ Ridge regression
 <p><span class="math display">\[RSS + \underbrace{\lambda \sum_{j=1}^{p} \beta_j^2}_{\text{ penalty}}\]</span></p>
 <p>where <span class="math inline">\(\lambda \geq 0\)</span> is a <strong>tuning parameter</strong> chosen separately.</p>
 <div class="fragment">
-<p>The shrinkage penalty <span class="math inline">\(\lambda \sum_j \beta_j^2\)</span> pulls all <span class="math inline">\(\hat\beta_j\)</span> towards zero. <span class="math inline">\(\lambda\)</span> controls the tradeoff:</p>
+<p>The shrinkage penalty <span class="math inline">\(\lambda \sum_j \beta_j^2\)</span> pulls all <span class="math inline">\(\hat\beta_j\)</span> towards zero.</p>
 <ul>
 <li><span class="math inline">\(\lambda = 0\)</span>: no penalty → same estimates as OLS</li>
 <li><span class="math inline">\(\lambda \to \infty\)</span>: penalty dominates → all coefficients shrink to zero</li>
@@ -317,8 +323,8 @@ Ridge regression
 <div class="fragment">
 <div class="body-text-s">
 <ul>
-<li>Ridge keeps <strong>all <span class="math inline">\(p\)</span> predictors</strong> in the final model. It shrinks coefficients towards zero but never sets any exactly to zero.</li>
-<li>The ridge penalty reats all <span class="math inline">\(\beta_j\)</span> in the same way, regardless of scale. Standardize each predictor before fitting</li>
+<li>Ridge keeps <strong>all <span class="math inline">\(p\)</span> predictors</strong> in the final model. It shrinks coefficients towards zero but doesn’t make them exactly zero.</li>
+<li>The ridge penalty reats all <span class="math inline">\(\beta_j\)</span> in the same way, regardless of scale. All predictors should be standardized before fitting.</li>
 </ul>
 </div>
 <!-- ---
@@ -349,7 +355,7 @@ so all predictors have mean 0 and standard deviation 1, and the penalty applies 
 <h2></h2>
 <p><span class="slide-title">Ridge coefficient profiles</span></p>
 <hr>
-<div id="13022248" class="cell" data-execution_count="3">
+<div id="d1a5174c" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -365,7 +371,7 @@ so all predictors have mean 0 and standard deviation 1, and the penalty applies 
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="e70d66b9" class="cell" data-execution_count="4">
+<div id="cbc045e9" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -389,7 +395,7 @@ so all predictors have mean 0 and standard deviation 1, and the penalty applies 
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="141c6180" class="cell" data-execution_count="5">
+<div id="f8a11a45" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -417,7 +423,7 @@ so all predictors have mean 0 and standard deviation 1, and the penalty applies 
 <h2></h2>
 <p><span class="slide-title">Selecting the tuning parameter</span></p>
 <hr>
-<div id="3d9f65e8" class="cell" data-execution_count="6">
+<div id="8a2054b0" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -475,7 +481,7 @@ The lasso
 <h2></h2>
 <p><span class="slide-title">Lasso coefficient profiles</span></p>
 <hr>
-<div id="1a0bfe91" class="cell" data-execution_count="7">
+<div id="fd88c2da" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -491,7 +497,7 @@ The lasso
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="12509880" class="cell" data-execution_count="8">
+<div id="361e9386" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -512,7 +518,7 @@ The lasso
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="b1fa497a" class="cell" data-execution_count="9">
+<div id="2a21fcd8" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -534,7 +540,7 @@ The lasso
 <h2></h2>
 <p><span class="slide-title">Selecting the tuning parameter</span></p>
 <hr>
-<div id="08d75115" class="cell" data-execution_count="10">
+<div id="2071306d" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -580,7 +586,7 @@ Comparing lasso and ridge
 <hr>
 <div class="columns">
 <div class="column" style="width:70%;">
-<div id="6f5c7141" class="cell" data-execution_count="11">
+<div id="39f9fd82" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-stdout">
 <pre><code>   Predictor  True β    OLS  Ridge (CV λ)  Lasso (CV λ)
       precip    2.50  2.442         2.323         2.283
@@ -597,7 +603,7 @@ forest_cover    1.50  1.391         1.335         1.284
 <div class="teal-text">
 <ol type="1">
 <li><p>How do ridge and lasso estimates compare to the true <span class="math inline">\(\beta\)</span> for <code>precip</code>, <code>temp</code>, <code>forest_cover</code>, and <code>soil_N</code>?</p></li>
-<li><p>What has lasso done to <code>aspect</code> and <code>canopy</code>? What has ridge done?</p></li>
+<li><p>What has lasso done to <code>canopy</code>? What has ridge done?</p></li>
 </ol>
 </div>
 </div></div>
@@ -608,7 +614,7 @@ forest_cover    1.50  1.391         1.335         1.284
 <hr>
 <div class="columns">
 <div class="column" style="width:70%;">
-<div id="2563a949" class="cell" data-execution_count="12">
+<div id="e1d1d816" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-stdout">
 <pre><code>   Predictor  True β    OLS  Ridge (CV λ)  Lasso (CV λ)
       precip    2.50  2.442         2.323         2.283
@@ -622,6 +628,12 @@ forest_cover    1.50  1.391         1.335         1.284
 </div>
 </div>
 </div><div class="column" style="width:30%;">
+<div class="teal-text">
+<ol type="1">
+<li><p>How do ridge and lasso estimates compare to the true <span class="math inline">\(\beta\)</span> for <code>precip</code>, <code>temp</code>, <code>forest_cover</code>, and <code>soil_N</code>?</p></li>
+<li><p>What has lasso done to <code>canopy</code>? What has ridge done?</p></li>
+</ol>
+</div>
 <div class="body-text-s">
 <ol type="1">
 <li><p>Both methods shrink estimates towards zero relative to OLS, but they recover the correct ranking and signs for the four important predictors.</p></li>
