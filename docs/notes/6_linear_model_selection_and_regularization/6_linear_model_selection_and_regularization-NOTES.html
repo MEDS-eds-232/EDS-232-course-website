@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.7.33">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -52,15 +52,14 @@ div.csl-indent {
 <meta name="quarto:offset" content="../../">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -103,7 +102,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+      if (mathElements[i].tagName == "SPAN") {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -121,15 +120,13 @@ window.Quarto = {
 
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-sidebar floating nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
     </a>
@@ -145,7 +142,7 @@ window.Quarto = {
 <span class="menu-text">home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../notes/week-by-week/week-by-week.html"> 
+    <a class="nav-link active" href="../../notes/week-by-week/week-by-week.html" aria-current="page"> 
 <span class="menu-text">notes</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -224,6 +221,16 @@ window.Quarto = {
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html">Linear Model Selection &amp; Regularization</a></li><li class="breadcrumb-item"><a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html">Linear model selection and regularization</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
   <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
 <p>This wesbite is under construction.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
@@ -231,6 +238,134 @@ window.Quarto = {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/week-by-week/week-by-week.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week by week</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/setup/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What is machine learning?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Learning from data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Training and test errors, and model flexibility</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Linear regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simple linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/3_2_multiple_linear_regression/3_2_multiple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple linear regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Classification</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">KNN and accuracy metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/4_3_logistic_regression/4_3_logistic_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Logistic regression and ROC curves</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Resampling Methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Cross-validation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Linear Model Selection &amp; Regularization</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Linear model selection and regularization</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -238,7 +373,8 @@ window.Quarto = {
    
   <ul>
   <li><a href="#a-guiding-example-meadow-plant-diversity" id="toc-a-guiding-example-meadow-plant-diversity" class="nav-link active" data-scroll-target="#a-guiding-example-meadow-plant-diversity">A guiding example: meadow plant diversity</a></li>
-  <li><a href="#variable-selection" id="toc-variable-selection" class="nav-link" data-scroll-target="#variable-selection">Variable selection</a>
+  <li><a href="#variable-selection" id="toc-variable-selection" class="nav-link" data-scroll-target="#variable-selection">Variable selection</a></li>
+  <li><a href="#best-subset-selection" id="toc-best-subset-selection" class="nav-link" data-scroll-target="#best-subset-selection">Best subset selection</a>
   <ul class="collapse">
   <li><a href="#forward-selection" id="toc-forward-selection" class="nav-link" data-scroll-target="#forward-selection">Forward selection</a></li>
   <li><a href="#backward-selection" id="toc-backward-selection" class="nav-link" data-scroll-target="#backward-selection">Backward selection</a></li>
@@ -257,7 +393,7 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html">Linear Model Selection &amp; Regularization</a></li><li class="breadcrumb-item"><a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html">Linear model selection and regularization</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Linear model selection and regularization</h1>
 </div>
@@ -276,18 +412,20 @@ window.Quarto = {
 </header>
 
 
+<p><a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-SLIDES.html">📊 Slides</a> / <a href="6_linear_model_selection_and_regularization-BLANK.qmd">📊 Blank slides</a></p>
 <p>In this lesson we introduce:</p>
 <ul>
-<li>The problem of <strong>variable selection</strong> in multiple linear regression and three common search strategies: forward, backward, and mixed selection</li>
+<li>The problem of <strong>variable selection</strong> in multiple linear regression</li>
+<li>Three common variable search strategies: forward, backward, and mixed selection</li>
 <li><strong>Shrinkage methods</strong> as an alternative approach: instead of searching for the best subset, we constrain the coefficient estimates to reduce model complexity and variance</li>
-<li><strong>Ridge regression</strong>: shrinks all coefficients towards zero without eliminating any predictor</li>
-<li><strong>The lasso</strong>: shrinks coefficients and can set some exactly to zero, performing variable selection as part of the fitting process</li>
+<li><strong>Ridge regression</strong></li>
+<li><strong>The lasso</strong></li>
 <li>How to use <strong>cross-validation to select the tuning parameter</strong> <span class="math inline">\(\lambda\)</span> for both methods</li>
 </ul>
 <p>These notes are based on chapters 6.1–6.2 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.</p>
 <section id="a-guiding-example-meadow-plant-diversity" class="level2">
 <h2 class="anchored" data-anchor-id="a-guiding-example-meadow-plant-diversity">A guiding example: meadow plant diversity</h2>
-<p>In this lesson we use a synthetic dataset — <strong>EcoRich</strong> — representing 200 survey plots in a mountain national park. For each plot we record:</p>
+<p>In this lesson we use a synthetic dataset representing 200 survey plots in a mountain national park. For each plot we record:</p>
 <ul>
 <li><strong><code>precip</code></strong> — mean annual precipitation (mm); higher precipitation typically promotes plant diversity</li>
 <li><strong><code>temp</code></strong> — mean summer temperature (°C); extreme heat can suppress richness</li>
@@ -299,7 +437,7 @@ window.Quarto = {
 <li><strong><code>canopy</code></strong> — canopy cover (%); a structural variable not directly tied to richness in this scenario</li>
 </ul>
 <p>The response variable is <strong><code>species_richness</code></strong>: the number of vascular plant species recorded in a 25 m² plot.</p>
-<p>The central question is: <em>which environmental factors actually drive plant species richness, and can we build a parsimonious model that generalizes to new plots?</em></p>
+<p>The central question is: <em>which environmental factors actually drive plant species richness, and can we build a model that generalizes to new plots?</em></p>
 <div id="cell-initial-data-plotting" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div>
@@ -320,7 +458,12 @@ window.Quarto = {
 <li>Check individual <span class="math inline">\(p\)</span>-values for predictors.</li>
 </ol>
 <p>If there is evidence that <em>some</em> predictors are associated with the response, an important question is: <em>which predictors should we include in the model?</em> This is called <strong>variable selection</strong>. Including unnecessary predictors does not help predictions and increases variance; leaving out important ones biases our estimates.</p>
-<p>With <span class="math inline">\(p\)</span> predictors there are <span class="math inline">\(2^p\)</span> possible subsets of variables to consider. For <span class="math inline">\(p = 8\)</span> that is already 256 models; for even moderate <span class="math inline">\(p\)</span> (say, 30 or 40) exhaustive search is completely infeasible. Three common automated approaches are:</p>
+</section>
+<section id="best-subset-selection" class="level2">
+<h2 class="anchored" data-anchor-id="best-subset-selection">Best subset selection</h2>
+<p>A natural but computationally expensive approach is <strong>best subset selection</strong>: fit all <span class="math inline">\(2^p\)</span> possible models and choose the one with the lowest RSS, where</p>
+<p><span class="math display">\[RSS = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2.\]</span></p>
+<p>For <span class="math inline">\(p = 8\)</span> that is already 256 models; for even moderate <span class="math inline">\(p\)</span> (say, 30 or 40) exhaustive search is completely infeasible. The three automated approaches below are practical alternatives.</p>
 <section id="forward-selection" class="level3">
 <h3 class="anchored" data-anchor-id="forward-selection">Forward selection</h3>
 <p>Start with the simplest model and build up:</p>
@@ -359,22 +502,22 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>For our EcoRich data, consider the three predictors <code>precip</code>, <code>temp</code>, and <code>forest_cover</code>. There are <span class="math inline">\(2^3 = 8\)</span> possible subsets. The table below shows the RSS for every possible model:</p>
+<p>For our example data, consider the three predictors <code>precip</code>, <code>temp</code>, and <code>forest_cover</code>. There are <span class="math inline">\(2^3 = 8\)</span> possible subsets. The table below shows the RSS for every possible model:</p>
 <div id="all-models-rss" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-stdout">
 <pre><code>         Predictors in model    RSS
-            (intercept only) 2852.1
-                      precip 1804.1
-                        temp 2438.4
-                forest_cover 2403.4
-               precip + temp 1250.6
-       precip + forest_cover 1385.7
-         temp + forest_cover 1966.4
-precip + temp + forest_cover  808.3</code></pre>
+            (intercept only) 4921.1
+                      precip 3927.3
+                        temp 4574.8
+                forest_cover 4488.1
+               precip + temp 3456.2
+       precip + forest_cover 3523.4
+         temp + forest_cover 4120.9
+precip + temp + forest_cover 3030.6</code></pre>
 </div>
 </div>
 <p>Using the table above, manually trace through the three steps of forward selection:</p>
@@ -386,12 +529,12 @@ precip + temp + forest_cover  808.3</code></pre>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -400,14 +543,20 @@ precip + temp + forest_cover  808.3</code></pre>
 <ol type="1">
 <li><p><strong>Step 1</strong>: Comparing the three single-predictor models, <code>precip</code> gives the lowest RSS. Forward selection adds <code>precip</code> first, consistent with precipitation being the strongest true driver in the data-generating model (<span class="math inline">\(\beta = 2.5\)</span>).</p></li>
 <li><p><strong>Step 2</strong>: With <code>precip</code> already included, we compare <code>precip + temp</code> and <code>precip + forest_cover</code>. The <code>precip + temp</code> model has the lower RSS, so <code>temp</code> is added second (<span class="math inline">\(\beta = -1.8\)</span> in the true model).</p></li>
-<li><p><strong>Step 3</strong>: Adding <code>forest_cover</code> reduces the RSS further. Whether to include it depends on the stopping criterion: a formal significance test, a minimum RSS improvement threshold, or an information criterion such as adjusted <span class="math inline">\(R^2\)</span> or AIC. If we use adjusted <span class="math inline">\(R^2\)</span> and the improvement is negligible, we might stop at the two-predictor model.</p></li>
+<li><p><strong>Step 3</strong>: Adding <code>forest_cover</code> reduces the RSS further. Whether to include it depends on the stopping criterion: a formal significance test, a minimum RSS improvement threshold, or an information criterion such as adjusted <span class="math inline">\(R^2\)</span> (see below). If we use adjusted <span class="math inline">\(R^2\)</span> and the improvement is negligible, we might stop at the two-predictor model.</p></li>
 </ol>
 </div>
 </div>
 </div>
 <p>Forward and backward selection can be run using metrics other than RSS. Using raw RSS as the sole criterion would always favor adding more predictors (RSS can only decrease or stay the same when a predictor is added). An alternative that penalizes model complexity is the adjusted <span class="math inline">\(R^2\)</span>:</p>
 <p><span class="math display">\[\bar{R}^2 = 1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}\]</span></p>
-<p>Unlike <span class="math inline">\(R^2\)</span>, the adjusted <span class="math inline">\(R^2\)</span> can <em>decrease</em> when adding a predictor that does not improve the fit enough to justify the added complexity.</p>
+<p>Unlike <span class="math inline">\(R^2\)</span>, the adjusted <span class="math inline">\(R^2\)</span> can <em>decrease</em> when adding a predictor that does not improve the fit enough to justify the added complexity. <!-- 
+Another commonly used criterion is the **Akaike Information Criterion (AIC)**:
+
+$$AIC = \frac{1}{n\hat{\sigma}^2}(RSS + 2p\hat{\sigma}^2)$$
+
+where $\hat{\sigma}^2$ is an estimate of the error variance. Like adjusted $R^2$, AIC penalizes model complexity, the $2p\hat{\sigma}^2$ term grows with each additional predictor. The model with the minimum AIC is preferred.
+ --></p>
 </section>
 </section>
 <section id="shrinkage-methods" class="level2">
@@ -419,7 +568,7 @@ precip + temp + forest_cover  808.3</code></pre>
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -429,12 +578,12 @@ precip + temp + forest_cover  808.3</code></pre>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -444,7 +593,7 @@ precip + temp + forest_cover  808.3</code></pre>
 </div>
 </div>
 </div>
-<p><strong>Idea</strong>: fit a model with all <span class="math inline">\(p\)</span> predictors using a method that <em>shrinks</em> the coefficient estimates towards zero. This is called <strong>regularization</strong> (or <strong>constraining</strong>).</p>
+<p>The idea is then to fit a model with all <span class="math inline">\(p\)</span> predictors using a method that <em>shrinks</em> the coefficient estimates towards zero. This is called <strong>regularization</strong> (or <strong>constraining</strong>).</p>
 <p>Instead of minimizing the RSS alone, regularization minimizes a penalized objective:</p>
 <p><span class="math display">\[\text{minimize} \quad (RSS + \text{penalty})\]</span></p>
 <p>The penalty term is a function of the coefficients that grows as they move away from zero. This constrains the size of the coefficients: they can only grow if accompanied by a sufficient reduction in RSS. The penalty also takes the number of predictors into account, discouraging complexity.</p>
@@ -453,29 +602,30 @@ precip + temp + forest_cover  808.3</code></pre>
 <section id="ridge-regression" class="level2">
 <h2 class="anchored" data-anchor-id="ridge-regression">Ridge regression</h2>
 <p>In ridge regression the coefficients are estimated by minimizing</p>
-<p><span class="math display">\[RSS + \lambda \sum_{j=1}^{p} \beta_j^2, \qquad \underbrace{\lambda \sum_{j=1}^{p} \beta_j^2}_{\text{penalty}}\]</span></p>
+<p><span class="math display">\[RSS + \underbrace{\lambda \sum_{j=1}^{p} \beta_j^2}_{\text{penalty}},\]</span></p>
 <p>where <span class="math inline">\(\lambda \geq 0\)</span> is a <strong>tuning parameter</strong> that is determined separately (e.g., by cross-validation).</p>
-<p>The shrinkage penalty <span class="math inline">\(\lambda \sum_j \beta_j^2\)</span> is small when <span class="math inline">\(\beta_1, \ldots, \beta_p\)</span> are close to zero, so it has the effect of pulling the estimates of <span class="math inline">\(\beta_j\)</span> towards zero. The tuning parameter <span class="math inline">\(\lambda\)</span> controls the <strong>relative weight</strong> of the RSS and the penalty on the final coefficient estimates:</p>
+<p>The <strong>shrinkage penalty</strong> <span class="math inline">\(\lambda \sum_j \beta_j^2\)</span> is small when <span class="math inline">\(\beta_1, \ldots, \beta_p\)</span> are close to zero, so it has the effect of pulling the estimates of <span class="math inline">\(\beta_j\)</span> towards zero. The tuning parameter <span class="math inline">\(\lambda\)</span> controls the <strong>relative weight</strong> of the RSS and the penalty on the final coefficient estimates.</p>
 <ul>
 <li>When <span class="math inline">\(\lambda = 0\)</span>, the penalty has no effect and the estimates are the same as ordinary least squares.</li>
 <li>As <span class="math inline">\(\lambda \to \infty\)</span>, the penalty dominates and all coefficients are forced towards zero.</li>
 </ul>
+<p>Ridge will include all <span class="math inline">\(p\)</span> predictors in the final model. The ridge penalty <span class="math inline">\(\lambda \sum_j \beta_j^2\)</span> will only shrink all coefficients towards zero but will not set any of them to exactly zero.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Standardizing predictors before ridge regression
+Standardizing predictors before ridge regression
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <p>Ridge regression coefficients can change substantially when a predictor is multiplied by a constant (e.g., converting precipitation from mm to cm), because the penalty <span class="math inline">\(\lambda \sum_j \beta_j^2\)</span> treats all <span class="math inline">\(\beta_j\)</span> on the same footing. It is therefore important to <strong>standardize</strong> each predictor before fitting:</p>
-<p><span class="math display">\[\tilde{X}_{ij} = \frac{X_{ij}}{\sqrt{\frac{1}{n}\sum_{i=1}^{n}(X_{ij} - \bar{X}_j)^2}}\]</span></p>
+<p><span class="math display">\[\tilde{x}_{ij} = \frac{x_{ij}}{\sqrt{\frac{1}{n}\sum_{i=1}^{n}(x_{ij} - \bar{x}_j)^2}}\]</span></p>
 <p>so that all predictors are on the same scale (mean 0, standard deviation 1) and the penalty applies equally to each one.</p>
 </div>
 </div>
-<p>The figure below shows how the standardized ridge regression coefficients change as <span class="math inline">\(\lambda\)</span> increases — the analog of ISLP Figure 6.4 (left panel) for our EcoRich data.</p>
+<p>The figure below shows how the standardized ridge regression coefficients change as <span class="math inline">\(\lambda\)</span> increases.</p>
 <div id="cell-ridge-coef-profiles" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div>
@@ -491,111 +641,59 @@ precip + temp + forest_cover  808.3</code></pre>
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Using the coefficient profile plot above:</p>
 <ol type="1">
-<li>What happens to the coefficient estimates when <span class="math inline">\(\lambda = 0\)</span>? When <span class="math inline">\(\lambda \to \infty\)</span>?</li>
-<li>Which predictors appear to be the most important (largest absolute coefficient at low <span class="math inline">\(\lambda\)</span>)? Does this match what you would expect given the description of the dataset?</li>
-<li>Do any of the coefficients reach <em>exactly</em> zero for any value of <span class="math inline">\(\lambda\)</span>?</li>
+<li><p>Which predictors appear to be the most important (largest absolute coefficient at low <span class="math inline">\(\lambda\)</span>) in the coefficient profile above?</p></li>
+<li><p>Suppose you have fit ridge regression at a grid of <span class="math inline">\(\lambda\)</span> values and obtained a different set of coefficient estimates for each. What method could you use to select a good value of <span class="math inline">\(\lambda\)</span>?</p></li>
 </ol>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p>At <span class="math inline">\(\lambda = 0\)</span> the penalty is absent, so the estimates equal the ordinary least squares (OLS) estimates. As <span class="math inline">\(\lambda \to \infty\)</span> the penalty increasingly dominates and all coefficients are pushed towards zero (though they never reach exactly zero for any finite <span class="math inline">\(\lambda\)</span>).</p></li>
-<li><p><code>precip</code>, <code>temp</code>, <code>forest_cover</code>, and <code>soil_N</code> have the largest magnitudes at low <span class="math inline">\(\lambda\)</span>, consistent with the true data-generating model where these four predictors have the largest true coefficients (2.5, −1.8, 1.5, and 1.0 respectively). <code>aspect</code> and <code>canopy</code> (the truly irrelevant predictors) stay near zero across the entire range.</p></li>
-<li><p>No.&nbsp;Ridge regression shrinks coefficients towards zero but never sets them to <em>exactly</em> zero for any finite <span class="math inline">\(\lambda\)</span>. All 8 predictors remain in the final model regardless of <span class="math inline">\(\lambda\)</span>. This is a key limitation of ridge when variable selection is desired.</p></li>
-</ol>
-</div>
-</div>
-</div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Suppose you have fit ridge regression at a grid of <span class="math inline">\(\lambda\)</span> values and obtained a different set of coefficient estimates for each. Describe how you would use cross-validation to select a good value of <span class="math inline">\(\lambda\)</span>.</p>
-</div>
-</div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-9" class="callout-9-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>Use <span class="math inline">\(k\)</span>-fold cross-validation:</p>
-<ol type="1">
-<li>For each candidate <span class="math inline">\(\lambda\)</span> in a grid (e.g., <span class="math inline">\(10^{-3}\)</span> to <span class="math inline">\(10^6\)</span> on a log scale), fit ridge regression on the training folds and compute the mean squared error (MSE) on the held-out fold.</li>
-<li>Average the MSE across all <span class="math inline">\(k\)</span> folds to get the CV-MSE for that <span class="math inline">\(\lambda\)</span>.</li>
-<li>Select the <span class="math inline">\(\lambda\)</span> that minimizes the CV-MSE. This is the value that produces the best out-of-sample prediction accuracy.</li>
+<li><p><code>precip</code>, <code>temp</code>, <code>forest_cover</code>, and <code>soil_N</code> have the largest magnitudes at low <span class="math inline">\(\lambda\)</span>, so they appear to be the most important predictors. <code>aspect</code> and <code>canopy</code> seem to be irrelevant as they stay near zero across the entire range.</p></li>
+<li><p>Use <span class="math inline">\(k\)</span>-fold cross-validation:</p></li>
+<li><p>For each candidate <span class="math inline">\(\lambda\)</span> in a grid (e.g., <span class="math inline">\(10^{-3}\)</span> to <span class="math inline">\(10^6\)</span> on a log scale), fit ridge regression on the training folds and compute the mean squared error (MSE) on the held-out fold.</p></li>
+<li><p>Average the MSE across all <span class="math inline">\(k\)</span> folds to get the CV-MSE for that <span class="math inline">\(\lambda\)</span>.</p></li>
+<li><p>Select the <span class="math inline">\(\lambda\)</span> that minimizes the CV-MSE. This is the value that produces the best out-of-sample prediction accuracy.</p></li>
 </ol>
 <p>Importantly, the test set should not be used to select <span class="math inline">\(\lambda\)</span> — it should only be used for final evaluation after <span class="math inline">\(\lambda\)</span> has been chosen via cross-validation on the training data.</p>
 </div>
 </div>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Are the ridge regression coefficients interpretable in the same way as ordinary least squares coefficients?</p>
-</div>
-</div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-11" class="callout-11-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>Not quite. In OLS, <span class="math inline">\(\hat{\beta}_j\)</span> is interpreted as the average change in <span class="math inline">\(Y\)</span> associated with a one-unit increase in <span class="math inline">\(X_j\)</span>, holding all other predictors fixed. Ridge coefficients share the same sign and direction, but their magnitudes are deliberately biased towards zero (the amount of bias depends on <span class="math inline">\(\lambda\)</span>). This means:</p>
-<ul>
-<li>The <strong>sign</strong> still tells us whether the predictor is positively or negatively associated with the response.</li>
-<li>The <strong>relative magnitudes</strong> still give a rough sense of which predictors matter more.</li>
-<li>The <strong>exact values</strong> should not be interpreted as unbiased marginal effects — they are shrunk and depend on the chosen <span class="math inline">\(\lambda\)</span>.</li>
-</ul>
-<p>Ridge is primarily a predictive tool; when the goal is inference (understanding effect sizes), OLS or other methods may be more appropriate.</p>
-</div>
-</div>
-</div>
+<!-- 
+:::{.callout-tip}
+## Check-in
+Are the ridge regression coefficients interpretable in the same way as ordinary least squares coefficients?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+Not quite. In OLS, $\hat{\beta}_j$ is interpreted as the average change in $Y$ associated with a one-unit increase in $X_j$, holding all other predictors fixed. Ridge coefficients share the same sign and direction, but their magnitudes are deliberately biased towards zero (the amount of bias depends on $\lambda$). This means:
+
+- The **sign** still tells us whether the predictor is positively or negatively associated with the response.
+- The **relative magnitudes** still give a rough sense of which predictors matter more.
+- The **exact values** should not be interpreted as unbiased marginal effects — they are shrunk and depend on the chosen $\lambda$.
+
+Ridge is primarily a predictive tool; when the goal is inference (understanding effect sizes), OLS or other methods may be more appropriate.
+::: 
+-->
 <section id="selecting-the-tuning-parameter" class="level3">
 <h3 class="anchored" data-anchor-id="selecting-the-tuning-parameter">Selecting the tuning parameter</h3>
-<p>As noted above, <span class="math inline">\(\lambda\)</span> is chosen by cross-validation. The figure below shows the 10-fold CV mean squared error as a function of <span class="math inline">\(\log_{10}(\lambda)\)</span> for ridge regression on the EcoRich data. The vertical dashed line marks the optimal <span class="math inline">\(\lambda\)</span>.</p>
+<p>As noted above, <span class="math inline">\(\lambda\)</span> is chosen by cross-validation. The figure below shows the 10-fold CV mean squared error as a function of <span class="math inline">\(\lambda\)</span> for ridge regression on the EcoRich data.</p>
 <div id="cell-ridge-cv-lambda" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div>
@@ -611,9 +709,9 @@ precip + temp + forest_cover  808.3</code></pre>
 <section id="the-lasso" class="level2">
 <h2 class="anchored" data-anchor-id="the-lasso">The lasso</h2>
 <p>In the lasso, the coefficients are estimated by minimizing</p>
-<p><span class="math display">\[RSS + \lambda \sum_{j=1}^{p} |\beta_j|, \qquad \underbrace{\lambda \sum_{j=1}^{p} |\beta_j|}_{\text{penalty}}\]</span></p>
+<p><span class="math display">\[RSS + \underbrace{\lambda \sum_{j=1}^{p} |\beta_j|}_{\text{penalty}}.\]</span></p>
 <p>The only difference from ridge is that the penalty uses the <strong>absolute value</strong> of the coefficients (<span class="math inline">\(\ell_1\)</span> norm) rather than their squares (<span class="math inline">\(\ell_2\)</span> norm). This seemingly small change has a dramatic consequence: the lasso penalty has the effect of <strong>forcing some coefficient estimates to be exactly equal to zero</strong> when the tuning parameter <span class="math inline">\(\lambda\)</span> is sufficiently large.</p>
-<p>Because it produces sparse models — models that use only a subset of the predictors — the lasso effectively performs <strong>variable selection</strong> as part of the fitting process.</p>
+<p>Lasso performs simultaneous shrinkage and variable selection: the <span class="math inline">\(\ell_1\)</span> penalty drives some coefficients to exactly zero. Because it produces sparse models (models that use only a subset of the predictors) the lasso effectively performs <strong>variable selection</strong> as part of the fitting process.</p>
 <p>As with ridge regression, the predictors should be standardized before fitting the lasso so that the penalty applies equally to all coefficients.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -621,27 +719,27 @@ precip + temp + forest_cover  808.3</code></pre>
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li>If <span class="math inline">\(\lambda = 0\)</span>, how are the lasso coefficient estimates related to the least squares estimates?</li>
-<li>What happens to the lasso coefficients when <span class="math inline">\(\lambda\)</span> is very large?</li>
+<li>What happens to all the lasso coefficients when <span class="math inline">\(\lambda\)</span> is very large?</li>
 </ol>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li>When <span class="math inline">\(\lambda = 0\)</span> there is no penalty term, so minimizing <span class="math inline">\(RSS + 0 \cdot \sum |\beta_j|\)</span> is the same as minimizing the RSS alone. The lasso estimates equal the ordinary least squares estimates.</li>
@@ -650,7 +748,7 @@ precip + temp + forest_cover  808.3</code></pre>
 </div>
 </div>
 </div>
-<p>The figure below shows how the standardized lasso coefficients change as <span class="math inline">\(\lambda\)</span> increases — the analog of ISLP Figure 6.6 (left panel) for our EcoRich data.</p>
+<p>The figure below shows how the standardized lasso coefficients change as <span class="math inline">\(\lambda\)</span> increases for our example data.</p>
 <div id="cell-lasso-coef-profiles" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
 <div>
@@ -666,35 +764,27 @@ precip + temp + forest_cover  808.3</code></pre>
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Compare the lasso coefficient profile plot to the ridge coefficient profile plot above.</p>
-<ol type="1">
-<li>Which predictors are driven to exactly zero first as <span class="math inline">\(\lambda\)</span> increases?</li>
-<li>Is this consistent with what you know about the true data-generating model?</li>
-<li>What is the key visual difference between the lasso and ridge profiles near <span class="math inline">\(\lambda = 0\)</span>?</li>
-</ol>
+<p>Based on the lasso coefficient profile plot. Which predictors are driven to exactly zero first as <span class="math inline">\(\lambda\)</span> increases? <!-- 2. Is this consistent with what you know about the true data-generating model? --></p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-15" class="callout-15-contents callout-collapse collapse">
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ol type="1">
-<li><p><code>aspect</code> and <code>canopy</code> are driven to exactly zero at the smallest <span class="math inline">\(\lambda\)</span> values, followed by <code>slope</code>. This creates a “kink” in those profiles where the line hits zero and stays there — a distinctive feature of the lasso.</p></li>
-<li><p>Yes. In the true data-generating model, <code>aspect</code> and <code>canopy</code> have true coefficients of exactly zero, and <code>slope</code> has a very small true coefficient (0.15). The lasso correctly identifies these as unimportant and removes them as <span class="math inline">\(\lambda\)</span> grows.</p></li>
-<li><p>Near <span class="math inline">\(\lambda = 0\)</span> the profiles look similar (both converge to the OLS estimates). The key difference appears as <span class="math inline">\(\lambda\)</span> increases: ridge coefficients gradually shrink towards zero but never reach it, while lasso coefficients hit zero sharply and stay there. The lasso profiles show corners and flat segments at zero; the ridge profiles are smooth curves that asymptote to zero.</p></li>
-</ol>
+<p><code>aspect</code> and <code>canopy</code> are driven to exactly zero at the smallest <span class="math inline">\(\lambda\)</span> values, followed by <code>slope</code>. As <span class="math inline">\(\lambda\)</span> increases from left to right, you can see these lines flatten to zero and stay ther. This is a distinctive feature of the lasso. <!-- 
+2. Yes. In the true data-generating model, `aspect` and `canopy` have true coefficients of exactly zero, and `slope` has a very small true coefficient (0.15). The lasso correctly identifies these as unimportant and removes them as $\lambda$ grows. --></p>
 </div>
 </div>
 </div>
@@ -711,21 +801,6 @@ precip + temp + forest_cover  808.3</code></pre>
 </section>
 <section id="comparing-lasso-and-ridge" class="level2">
 <h2 class="anchored" data-anchor-id="comparing-lasso-and-ridge">Comparing lasso and ridge</h2>
-<div id="ridge-vs-lasso-comparison" class="cell" data-execution_count="8">
-<div class="cell-output cell-output-stdout">
-<pre><code>   Predictor  True β    OLS  Ridge (CV λ)  Lasso (CV λ)
-      precip    2.50  2.475         2.464         2.409
-        temp   -1.80 -1.684        -1.676        -1.631
-forest_cover    1.50  1.453         1.447         1.409
-      soil_N    1.00  1.156         1.151         1.100
-   elevation    0.50  0.456         0.454         0.405
-       slope    0.15  0.285         0.283         0.228
-      aspect    0.00  0.175         0.173         0.114
-      canopy    0.00 -0.000         0.000        -0.000</code></pre>
-</div>
-</div>
-<p><strong>Ridge</strong> will always include all <span class="math inline">\(p\)</span> predictors in the final model. The ridge penalty <span class="math inline">\(\lambda \sum_j \beta_j^2\)</span> shrinks all coefficients towards zero but will not set any of them to exactly zero. When the true model involves many predictors all with moderate effects, ridge tends to perform well.</p>
-<p><strong>The lasso</strong> performs simultaneous shrinkage and variable selection: the <span class="math inline">\(\ell_1\)</span> penalty drives some coefficients to exactly zero, producing a sparse model that is easier to interpret. We would expect lasso to perform better when a relatively small number of predictors has substantial coefficients and the remaining predictors have coefficients that are very small or exactly zero.</p>
 <p>Neither method consistently outperforms the other:</p>
 <ul>
 <li><strong>Prefer lasso</strong> when the response is believed to depend on a small number of strong predictors (sparse setting). The resulting model is sparser and easier to interpret.</li>
@@ -738,11 +813,24 @@ forest_cover    1.50  1.453         1.447         1.409
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Check-in
+Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Looking at the coefficient comparison table above:</p>
+<p>Looking at the coefficient comparison table below:</p>
+<div id="ridge-vs-lasso-comparison" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-stdout">
+<pre><code>   Predictor  True β    OLS  Ridge (CV λ)  Lasso (CV λ)
+      precip    2.50  2.442         2.323         2.283
+        temp   -1.80 -1.529        -1.453        -1.402
+forest_cover    1.50  1.391         1.335         1.284
+      soil_N    1.00  1.364         1.301         1.230
+   elevation    0.50  0.398         0.381         0.276
+       slope    0.15  0.464         0.439         0.329
+      aspect    0.00  0.408         0.375         0.263
+      canopy    0.00 -0.001         0.002         0.000</code></pre>
+</div>
+</div>
 <ol type="1">
 <li>How do the ridge and lasso estimates compare to the true coefficients for <code>precip</code>, <code>temp</code>, <code>forest_cover</code>, and <code>soil_N</code> (the four predictors with the largest true effects)?</li>
 <li>What has the lasso done to <code>aspect</code> and <code>canopy</code>, the two truly irrelevant predictors? What has ridge done?</li>
@@ -751,19 +839,19 @@ forest_cover    1.50  1.453         1.447         1.409
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Discussion
+Discussion
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-17" class="callout-17-contents callout-collapse collapse">
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p>Both ridge and lasso shrink the estimates towards zero relative to OLS, but they recover the correct ranking of importance (precip, then temp, then forest_cover, then soil_N). The signs are correct for all four.</p></li>
+<li><p>Both ridge and lasso shrink the estimates towards zero relative to OLS. They recover the correct ranking of importance (precip, then temp, then forest_cover, then soil_N). The signs are correct for all four.</p></li>
 <li><p>The lasso has set both <code>aspect</code> and <code>canopy</code> to exactly zero — correctly identifying them as irrelevant. Ridge has kept both in the model with small (but non-zero) coefficients.</p></li>
 <li><p>Lasso performs better in a <strong>sparse setting</strong> — when only a few predictors truly matter. By setting irrelevant coefficients to zero, it reduces model complexity and avoids fitting noise. In a dense setting (many predictors each with a small but real effect), lasso may incorrectly zero out informative predictors and ridge tends to be more accurate because it keeps all coefficients while shrinking them proportionally.</p></li>
 </ol>
@@ -831,14 +919,13 @@ James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
         }
-      }
-      return codeEl.innerText;
+        return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
