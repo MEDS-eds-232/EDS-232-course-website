@@ -8,8 +8,6 @@ jupyter: eds232-env
 Download the lab template [here](https://github.com/MEDS-eds-232/weekly-lab-templates/blob/main/lab5/lab5.ipynb) and move to your `eds232-labs` repository.
 :::
 
----
-
 ## Background
 
 Regression problems can often contain dozens of predictors that are correlated with each other, redundant, or simply noise. Standard linear regression struggles in these settings because it spreads coefficient estimates across correlated features, inflates variance, and can overfit.
@@ -26,11 +24,9 @@ To clearly observe how regularization behaves, we use a **synthetic dataset** wi
 
 In this lab we will:
 
-- Fit Ridge and Lasso regression models and compare their test performance
-- Understand how the regularization parameter λ controls the bias–variance trade-off
+- Fit **Ridge** and **Lasso** regression models and compare their test performance
+- Understand how the regularization parameter **λ** controls the bias–variance trade-off
 - Visualize how Ridge and Lasso treat correlated and irrelevant features differently
-
----
 
 ## Background: The Regularization Penalty
 
@@ -39,10 +35,6 @@ Both Ridge and Lasso start from the standard least squares criterion:
 $$\text{RSS} = \sum_{i=1}^{n} \left(y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{ij}\right)^2$$
 
 and add a penalty term that shrinks coefficient estimates toward zero, trading a small increase in bias for a potentially large reduction in variance.
-
----
-
-# Creating and running Ridge Regression Models
 
 ## Step 1: Load Libraries and Generate Synthetic Data
 
@@ -61,15 +53,21 @@ from ipywidgets import interact, FloatLogSlider
 # Seed for reproducibility
 np.random.seed(42)
 n_samples = 200
-X = np.zeros((n_samples, 6))
-X[:, 0] = np.random.normal(0, 1, n_samples)  # Important feature
-X[:, 1] = np.random.normal(0, 1, n_samples)  # Important feature
-X[:, 2] = X[:, 0] + np.random.normal(0, 0.1, n_samples)  # Correlated with X1
-X[:, 3] = X[:, 1] + np.random.normal(0, 0.1, n_samples)  # Correlated with X2
-X[:, 4] = np.random.normal(0, 0.1, n_samples)  # Noise
-X[:, 5] = np.random.normal(0, 0.1, n_samples)  # Noise
 
-y = 3 * X[:, 0] + 2 * X[:, 1] + 0.5 * X[:, 2] + np.random.normal(0, 0.1, n_samples)
+# True predictors (strong signal)
+X1 = np.random.normal(0, 1, n_samples)
+X2 = np.random.normal(0, 1, n_samples)
+
+# Correlated but redundant features — highly correlated with X1/X2, true coefficient = 0
+X3 = X1 + np.random.normal(0, 0.1, n_samples)
+X4 = X2 + np.random.normal(0, 0.1, n_samples)
+
+# Pure noise features — same scale as true features so they genuinely compete
+X5 = np.random.normal(0, 1, n_samples)
+X6 = np.random.normal(0, 1, n_samples)
+
+X = np.column_stack([X1, X2, X3, X4, X5, X6])
+y = 3 * X1 + 2 * X2 + np.random.normal(0, 0.5, n_samples)
 ```
 
 ```{python}
@@ -77,7 +75,7 @@ y = 3 * X[:, 0] + 2 * X[:, 1] + 0.5 * X[:, 2] + np.random.normal(0, 0.1, n_sampl
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 ```
 
----
+**Note**: Our synthetic data were drawn from N(0,1), so they are already on the same scale. However, with real environmental data that is often not on the same scale, you would need to scale at this point.
 
 ## Step 2: Fit Ridge Regression
 
@@ -107,8 +105,6 @@ print("Ridge Regression MSE:", ridge_mse)
 print("Ridge Regression R²:", ridge_r2)
 ```
 
----
-
 ## Step 3: Fit Lasso Regression
 
 The Lasso swaps the $\ell_2$ penalty for an $\ell_1$ penalty:
@@ -134,14 +130,9 @@ print("Lasso Regression R²:", lasso_r2)
 
 > **What do you notice?** Compare the Lasso MSE to Ridge. Why might Lasso perform worse at the default λ? What does this suggest about the default regularization strength?
 
----
+## Step 4: Tune λ and compare MSE Across Regularization Strengths
 
-# Visualizing Ridge Regression
-
-
-## Step 4: Tune λ and Compare MSE Across Regularization Strengths
-
-Create a visualization of λ values ranging from 0.001 to 100 and the MSE that these values yield. Create a line for both Ridge and Lasso.
+Create a visualization of λ values ranging from 0.001 to 100 and the MSE that these values yield. Create a line for both ridge and lasso.
 
 ```{python}
 # Visualize lambdas against MSE for Lasso and Ridge
@@ -172,8 +163,6 @@ plt.show()
 ```
 
 > **What do you notice?** At what λ does each model reach its minimum test MSE? Which model is more sensitive to the choice of λ? What happens to both models as λ becomes very large?
-
----
 
 ## Step 5: Explore Predictions Interactively
 
@@ -216,9 +205,7 @@ out = interactive_output(plot_predictions, {'lam': lambda_slider, 'model_type': 
 display(VBox([HBox([lambda_slider, model_dropdown]), out]))
 ```
 
-> **Try this:** Set λ to a very large value (e.g., 10 or 100) for both models. What happens to the predictions? Now set λ very small (e.g., 0.001). Why do you think a λ of 0 fits the best with this data?
-
----
+> **Try this:** Set λ to a very large value (e.g., 10 or 100) for both models. What happens to the predictions? Now set λ very small (e.g., 0.001). Why do you think a $\lambda$ of 0 fits the best with this data?
 
 ## Step 6: Compare Coefficient Behavior Across λ Values
 
@@ -245,18 +232,22 @@ for lam in lambdas:
             'Lasso': lasso.coef_
         }, index=['X1', 'X2', 'X1_corr', 'X2_corr', 'Noise1', 'Noise2']))
 
-fig, axes = plt.subplots(2, 2, figsize=(8, 6), sharey=True)
+fig, axes = plt.subplots(2, 2, figsize=(8, 4))
 axes = axes.flatten()
 for i, df in enumerate(data):
     df.plot.bar(ax=axes[i], width=0.8)
-    title = 'OLS fit (λ = 0)' if lambdas[i] == 0 else f'λ = {lambdas[i]}'
+    title = 'λ = 0 (OLS)' if lambdas[i] == 0 else f'λ = {lambdas[i]}'
     axes[i].set_title(title)
     axes[i].set_xticklabels(df.index, rotation=45)
+    axes[i].axhline(0, color='black', linewidth=0.8, linestyle='--')
+    ymin = min(df.values.min(), 0)
+    ymax = max(df.values.max(), 0)
+    pad = max((ymax - ymin) * 0.15, 0.5)
+    axes[i].set_ylim(ymin - pad, ymax + pad)
 
 plt.tight_layout()
 plt.show()
 ```
 
-> **What do you notice?** Compare the Ridge and Lasso bars at each λ level. Which features does Lasso zero out first? How does Ridge handle the correlated features X3 and X4 compared to Lasso? What are the trade-offs between the two approaches for model interpretability?
 
----
+> **What do you notice?** Compare the Ridge and Lasso bars at each λ level. Which features does Lasso zero out first? How does Ridge handle the correlated features X3 and X4 compared to Lasso? What are the trade-offs between the two approaches for model interpretability?
