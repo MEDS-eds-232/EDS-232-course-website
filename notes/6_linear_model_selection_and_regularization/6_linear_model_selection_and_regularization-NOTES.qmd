@@ -362,7 +362,7 @@ plt.close()
 ## Check-in
 1. Which predictors appear to be the most important (largest absolute coefficient at low $\lambda$) in the coefficient profile above? 
 
-2. Suppose you have fit ridge regression at a grid of $\lambda$ values and obtained a different set of coefficient estimates for each. What method could you use toselect a good value of $\lambda$?
+2. Suppose you have fit ridge regression at a grid of $\lambda$ values and obtained a different set of coefficient estimates for each. What method could you use to select a good value of $\lambda$?
 
 :::
 
@@ -544,6 +544,8 @@ comp_df = pd.DataFrame({
     'Lasso (CV λ)': lasso_final.coef_,
 })
 comp_df = comp_df.round(3)
+numeric_cols = ['True β', 'OLS', 'Ridge (CV λ)', 'Lasso (CV λ)']
+comp_df[numeric_cols] = comp_df[numeric_cols] + 0.0
 print(comp_df.to_string(index=False))
 ```
 
@@ -555,7 +557,7 @@ print(comp_df.to_string(index=False))
 
 :::{.callout-tip collapse="true"}
 ## Discussion
-1. Both ridge and lasso shrink the estimates towards zero relative to OLS, but they recover the correct ranking of importance (precip, then temp, then forest_cover, then soil_N). The signs are correct for all four.
+1. Both ridge and lasso shrink the estimates towards zero relative to OLS. They recover the correct ranking of importance (precip, then temp, then forest_cover, then soil_N). The signs are correct for all four.
 
 2. The lasso has set both `aspect` and `canopy` to exactly zero — correctly identifying them as irrelevant. Ridge has kept both in the model with small (but non-zero) coefficients.
 

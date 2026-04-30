@@ -408,6 +408,7 @@ window.Quarto = {
 </header>
 
 
+<p><a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-SLIDES.html">📊 Slides</a> / <a href="6_linear_model_selection_and_regularization-BLANK.qmd">📊 Blank slides</a></p>
 <p>In this lesson we introduce:</p>
 <ul>
 <li>The problem of <strong>variable selection</strong> in multiple linear regression</li>
@@ -505,14 +506,14 @@ Check-in
 <div id="all-models-rss" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-stdout">
 <pre><code>         Predictors in model    RSS
-            (intercept only) 2852.1
-                      precip 1804.1
-                        temp 2438.4
-                forest_cover 2403.4
-               precip + temp 1250.6
-       precip + forest_cover 1385.7
-         temp + forest_cover 1966.4
-precip + temp + forest_cover  808.3</code></pre>
+            (intercept only) 4921.1
+                      precip 3927.3
+                        temp 4574.8
+                forest_cover 4488.1
+               precip + temp 3456.2
+       precip + forest_cover 3523.4
+         temp + forest_cover 4120.9
+precip + temp + forest_cover 3030.6</code></pre>
 </div>
 </div>
 <p>Using the table above, manually trace through the three steps of forward selection:</p>
@@ -642,7 +643,7 @@ Check-in
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li><p>Which predictors appear to be the most important (largest absolute coefficient at low <span class="math inline">\(\lambda\)</span>) in the coefficient profile above?</p></li>
-<li><p>Suppose you have fit ridge regression at a grid of <span class="math inline">\(\lambda\)</span> values and obtained a different set of coefficient estimates for each. What method could you use toselect a good value of <span class="math inline">\(\lambda\)</span>?</p></li>
+<li><p>Suppose you have fit ridge regression at a grid of <span class="math inline">\(\lambda\)</span> values and obtained a different set of coefficient estimates for each. What method could you use to select a good value of <span class="math inline">\(\lambda\)</span>?</p></li>
 </ol>
 </div>
 </div>
@@ -816,14 +817,14 @@ Check-in
 <div id="ridge-vs-lasso-comparison" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-stdout">
 <pre><code>   Predictor  True β    OLS  Ridge (CV λ)  Lasso (CV λ)
-      precip    2.50  2.475         2.464         2.409
-        temp   -1.80 -1.684        -1.676        -1.631
-forest_cover    1.50  1.453         1.447         1.409
-      soil_N    1.00  1.156         1.151         1.100
-   elevation    0.50  0.456         0.454         0.405
-       slope    0.15  0.285         0.283         0.228
-      aspect    0.00  0.175         0.173         0.114
-      canopy    0.00 -0.000         0.000        -0.000</code></pre>
+      precip    2.50  2.442         2.323         2.283
+        temp   -1.80 -1.529        -1.453        -1.402
+forest_cover    1.50  1.391         1.335         1.284
+      soil_N    1.00  1.364         1.301         1.230
+   elevation    0.50  0.398         0.381         0.276
+       slope    0.15  0.464         0.439         0.329
+      aspect    0.00  0.408         0.375         0.263
+      canopy    0.00 -0.001         0.002         0.000</code></pre>
 </div>
 </div>
 <ol type="1">
@@ -846,7 +847,7 @@ Discussion
 <div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p>Both ridge and lasso shrink the estimates towards zero relative to OLS, but they recover the correct ranking of importance (precip, then temp, then forest_cover, then soil_N). The signs are correct for all four.</p></li>
+<li><p>Both ridge and lasso shrink the estimates towards zero relative to OLS. They recover the correct ranking of importance (precip, then temp, then forest_cover, then soil_N). The signs are correct for all four.</p></li>
 <li><p>The lasso has set both <code>aspect</code> and <code>canopy</code> to exactly zero — correctly identifying them as irrelevant. Ridge has kept both in the model with small (but non-zero) coefficients.</p></li>
 <li><p>Lasso performs better in a <strong>sparse setting</strong> — when only a few predictors truly matter. By setting irrelevant coefficients to zero, it reduces model complexity and avoids fitting noise. In a dense setting (many predictors each with a small but real effect), lasso may incorrectly zero out informative predictors and ridge tends to be more accurate because it keeps all coefficients while shrinking them proportionally.</p></li>
 </ol>
