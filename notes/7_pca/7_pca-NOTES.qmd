@@ -1,0 +1,489 @@
+---
+title: Principal Component Analysis
+jupyter: eds232-env
+echo: false
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.linear_model import Ridge, Lasso, LinearRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import Pipeline
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+# ── EcoRich synthetic dataset (same as linear model selection lesson) ──────────
+# 200 mountain meadow survey plots
+# Response: plant species richness (species per 25 m² plot)
+# 8 environmental predictors
+#
+# True data-generating model (on standardized predictors):
+#   species_richness = 25 + 2.5·precip − 1.8·temp + 1.5·forest_cover + 1.0·soil_N
+#                        + 0.5·elevation + 0.15·slope + 0·aspect + 0·canopy + ε
+# ──────────────────────────────────────────────────────────────────────────────
+np.random.seed(42)
+n = 200
+
+precip       = np.random.normal(600, 120, n)
+temp         = np.random.normal(14, 3, n)
+forest_cover = np.random.uniform(10, 80, n)
+soil_N       = np.random.normal(40, 10, n)
+elevation    = np.random.normal(1500, 400, n)
+slope        = np.random.uniform(0, 35, n)
+aspect       = np.random.uniform(0, 360, n)
+canopy       = np.random.uniform(0, 60, n)
+
+pred_raw = np.column_stack([precip, temp, forest_cover, soil_N,
+                             elevation, slope, aspect, canopy])
+
+scaler_gen   = StandardScaler()
+pred_std_gen = scaler_gen.fit_transform(pred_raw)
+
+beta_true        = np.array([2.5, -1.8, 1.5, 1.0, 0.5, 0.15, 0.0, 0.0])
+species_richness = 25 + pred_std_gen @ beta_true + np.random.normal(0, 3.5, n)
+
+predictor_names = ['precip', 'temp', 'forest_cover', 'soil_N',
+                   'elevation', 'slope', 'aspect', 'canopy']
+
+df = pd.DataFrame(dict(zip(predictor_names, pred_raw.T)))
+df['species_richness'] = species_richness
+
+X = df[predictor_names].values
+y = df['species_richness'].values
+
+scaler = StandardScaler()
+X_std  = scaler.fit_transform(X)
+
+# ── PCA on all 8 standardized predictors ──────────────────────────────────────
+p        = X_std.shape[1]
+pca      = PCA()
+pca.fit(X_std)
+scores   = pca.transform(X_std)           # (200, 8) — PC scores for every observation
+loadings = pca.components_                # (8, 8)   — rows are PCs, columns are variables
+pve      = pca.explained_variance_ratio_  # fraction of variance explained by each PC
+cum_pve  = np.cumsum(pve)
+
+# ── PCA on just precip and temp (2D illustration) ─────────────────────────────
+X_2d      = X_std[:, :2]
+pca_2d    = PCA()
+pca_2d.fit(X_2d)
+scores_2d   = pca_2d.transform(X_2d)
+loadings_2d = pca_2d.components_
+
+# ── PCR: 10-fold CV-MSE for M = 1, …, p components ───────────────────────────
+cv_mse_pcr = []
+for m in range(1, p + 1):
+    pipe = Pipeline([('pca', PCA(n_components=m)),
+                     ('lr',  LinearRegression())])
+    mse = -cross_val_score(pipe, X_std, y,
+                            cv=10, scoring='neg_mean_squared_error').mean()
+    cv_mse_pcr.append(mse)
+best_m = int(np.argmin(cv_mse_pcr)) + 1
+
+# ── Ridge and lasso best CV-MSE (for comparison table) ────────────────────────
+lambdas_cv_ridge = np.logspace(-1, 4, 80)
+cv_mse_ridge_arr = np.array([
+    -cross_val_score(Ridge(alpha=lam), X_std, y,
+                     cv=10, scoring='neg_mean_squared_error').mean()
+    for lam in lambdas_cv_ridge
+])
+best_mse_ridge = cv_mse_ridge_arr.min()
+
+lambdas_cv_lasso = np.logspace(-3, 0.5, 80)
+cv_mse_lasso_arr = np.array([
+    -cross_val_score(Lasso(alpha=lam, max_iter=20000, tol=1e-4), X_std, y,
+                     cv=10, scoring='neg_mean_squared_error').mean()
+    for lam in lambdas_cv_lasso
+])
+best_mse_lasso = cv_mse_lasso_arr.min()
+
+pred_colors = [plt.cm.tab10(i) for i in range(8)]
+```
+
+In this lesson we introduce:
+
+- **Principal Component Analysis (PCA)** as a technique for dimensionality reduction
+- Principal components as directions of maximum variance in multivariate data
+- **Loadings** and **scores**: how PCA re-expresses observations in a new coordinate system
+- The **scree plot** and proportion of variance explained (PVE) for choosing how many components to retain
+- **Principal Component Regression (PCR)**: fitting a regression model on PC scores instead of the original predictors
+- **Cross-validation** to select the optimal number of components in PCR
+
+These notes are based on chapter 6.3 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
+
+## A guiding example: meadow plant diversity
+
+We continue with the same EcoRich dataset from the [previous lesson](../6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.qmd). Recall that we have 200 mountain meadow survey plots, each described by 8 environmental predictors:
+
+| Predictor | Description |
+|---|---|
+| `precip` | mean annual precipitation (mm) |
+| `temp` | mean summer temperature (°C) |
+| `forest_cover` | surrounding forest cover (%) |
+| `soil_N` | soil nitrogen content (mg/kg) |
+| `elevation` | elevation (m) |
+| `slope` | terrain slope (°) |
+| `aspect` | terrain aspect (°, 0–360) |
+| `canopy` | canopy cover (%) |
+
+The response is **`species_richness`**: the number of vascular plant species per 25 m² plot.
+
+In the previous lesson, we used ridge regression and the lasso to predict species richness from all 8 predictors simultaneously, shrinking the coefficients to manage the bias-variance tradeoff. In this lesson we take a different approach: *can we first reduce the 8 predictors to a smaller set of derived variables that capture most of their information, and then fit a regression on those?*
+
+## Principal Component Analysis
+
+### Motivation
+
+Imagine you are a whale shark approaching a dense cluster of krill. To capture as much krill as possible in a single pass, you would align yourself with the **direction of greatest spread** in the krill cloud — the axis along which the krill are most dispersed. Moving perpendicular to that spread (along a direction of low variance) would mean passing through a thin slice of the cluster.
+
+The same intuition applies to data. When we have many correlated predictors, some linear combinations of those predictors capture a great deal of the variation while others capture very little. **Principal Component Analysis (PCA)** finds those directions automatically.
+
+:::{.callout-tip}
+## Check-in
+Consider the 8 environmental predictors in the EcoRich dataset. If you had to create a single new variable — a linear combination of all 8 — to describe the dominant environmental gradient across survey plots, what do you think it would capture? Which predictors would you expect to contribute most?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+Given that `precip`, `temp`, `forest_cover`, and `soil_N` are the four predictors most strongly associated with species richness (as established in the previous lesson), the dominant composite variable would likely emphasize these. Broadly, it might capture a gradient from "dry, warm, open, low-nutrient" plots at one extreme to "wet, cool, forested, high-nutrient" plots at the other — a common environmental axis in mountain meadow systems.
+
+PCA will find this direction automatically by maximizing variance, without any knowledge of the response variable.
+:::
+
+### What are principal components?
+
+**PCA** creates a new set of axes — the **principal components (PCs)** — that are linear combinations of the original variables:
+
+$$Z_m = \phi_{1m} X_1 + \phi_{2m} X_2 + \cdots + \phi_{pm} X_p$$
+
+The axes are chosen so that:
+
+- **PC1** points in the direction of **maximum variance** in the data
+- **PC2** points in the direction of maximum remaining variance, **orthogonal to PC1**
+- **PC3** is orthogonal to both PC1 and PC2 and explains the most remaining variance, and so on
+
+The coefficients $\phi_{jm}$ are called **loadings** and are constrained to have unit length ($\sum_j \phi_{jm}^2 = 1$), ensuring the variance of each PC is well-defined. The **score** of observation $i$ on PC$m$ is the value $z_{im} = \sum_j \phi_{jm} x_{ij}$ — its coordinate in the new PC coordinate system.
+
+There are always as many principal components as original variables, but because the first few PCs capture most of the variance, we can often describe the data well with far fewer. This is the core idea of **dimensionality reduction**: converting complex multivariate data into fewer dimensions while retaining as much information as possible.
+
+### A two-variable illustration
+
+Before working with all 8 predictors, it helps to see PCA geometrically in two dimensions. The figure below uses only the standardized `precip` and `temp` predictors.
+
+```{python}
+#| label: pca-2d-illustration
+#| fig-align: center
+
+scale = 2.0
+pc_colors = ['tomato', 'seagreen']
+pc_labels = ['PC1 (max variance)', 'PC2 (orthogonal)']
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.3, fig_size_y + 0.5))
+
+# ── Left: original (precip, temp) space with PC direction arrows ───────────────
+ax = axes[0]
+ax.scatter(X_2d[:, 0], X_2d[:, 1],
+           alpha=0.4, s=15, color='steelblue', edgecolors='none')
+for k in range(2):
+    dx = loadings_2d[k, 0] * scale
+    dy = loadings_2d[k, 1] * scale
+    ax.annotate('', xy=(dx, dy), xytext=(0, 0),
+                arrowprops=dict(arrowstyle='->', color=pc_colors[k], lw=2.2))
+    ax.text(dx * 1.18, dy * 1.18, pc_labels[k],
+            color=pc_colors[k], fontsize=9, ha='center')
+ax.axhline(0, color='gray', linewidth=0.5, linestyle='--')
+ax.axvline(0, color='gray', linewidth=0.5, linestyle='--')
+ax.set_xlabel('precip (standardized)')
+ax.set_ylabel('temp (standardized)')
+ax.set_title('Original axes with PC directions')
+ax.grid(True, alpha=0.3)
+ax.set_aspect('equal')
+
+# ── Right: same data re-expressed in PC space ─────────────────────────────────
+ax = axes[1]
+ax.scatter(scores_2d[:, 0], scores_2d[:, 1],
+           alpha=0.4, s=15, color='steelblue', edgecolors='none')
+ax.axhline(0, color='gray', linewidth=0.5, linestyle='--')
+ax.axvline(0, color='gray', linewidth=0.5, linestyle='--')
+ax.set_xlabel(f'PC1  ({pca_2d.explained_variance_ratio_[0]*100:.1f}% of variance)')
+ax.set_ylabel(f'PC2  ({pca_2d.explained_variance_ratio_[1]*100:.1f}% of variance)')
+ax.set_title('Data projected onto PC1 and PC2')
+ax.grid(True, alpha=0.3)
+ax.set_aspect('equal')
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The left panel shows the data in the original `(precip, temp)` space. The red arrow points in the direction of maximum variance (PC1) and the green arrow is orthogonal to it (PC2). The right panel shows the same data after projecting onto these two new axes — the data has simply been **rotated** so that the direction of greatest spread aligns with the horizontal axis. No information is lost in this two-variable case; the rotation just re-expresses the same data in a more convenient coordinate system.
+
+### The biplot: loadings and scores together
+
+The **biplot** is the standard visualization for PCA results. It overlays the PC **scores** for each observation (the points) with the **loading arrows** for each variable. The biplot below uses the first two principal components of all 8 EcoRich predictors.
+
+```{python}
+#| label: pca-biplot
+#| fig-align: center
+
+scale_b = 3.2
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.1, fig_size_y + 1.5))
+
+sc = ax.scatter(scores[:, 0], scores[:, 1],
+                c=y, cmap='YlGn', s=20, alpha=0.7, edgecolors='none', zorder=2)
+plt.colorbar(sc, ax=ax, label='Species richness', shrink=0.8)
+
+for j, (name, color) in enumerate(zip(predictor_names, pred_colors)):
+    ax.annotate('', xy=(loadings[0, j] * scale_b, loadings[1, j] * scale_b),
+                xytext=(0, 0),
+                arrowprops=dict(arrowstyle='->', color=color, lw=1.6), zorder=3)
+    ax.text(loadings[0, j] * scale_b * 1.14, loadings[1, j] * scale_b * 1.14,
+            name, color=color, fontsize=9, ha='center', fontweight='bold')
+
+ax.axhline(0, color='gray', linewidth=0.5, linestyle='--')
+ax.axvline(0, color='gray', linewidth=0.5, linestyle='--')
+ax.set_xlabel(f'PC1  ({pve[0]*100:.1f}% of variance)')
+ax.set_ylabel(f'PC2  ({pve[1]*100:.1f}% of variance)')
+ax.set_title('PCA biplot — PC scores (points) and variable loadings (arrows)\n'
+             '*Point color = species richness*')
+ax.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+How to read a biplot:
+
+- **Arrow direction**: shows how each variable relates to PC1 (horizontal) and PC2 (vertical)
+- **Arrows pointing the same direction**: those variables are positively correlated
+- **Arrows pointing opposite directions**: those variables are negatively correlated
+- **Arrow length**: reflects how well the variable is captured in this 2D projection — longer means better represented
+
+The loading values for the first two PCs are:
+
+```{python}
+#| label: loading-table
+
+load_df = pd.DataFrame(
+    np.round(loadings[:2, :].T, 3),
+    index=predictor_names,
+    columns=['PC1 loading', 'PC2 loading']
+)
+print(load_df.to_string())
+```
+
+:::{.callout-tip}
+## Check-in
+
+1. Which predictors have the largest absolute loadings on PC1? What environmental gradient might PC1 be representing?
+
+2. Looking at the point colors in the biplot, does species richness appear to increase or decrease along the PC1 axis? Is this consistent with the loading directions and with what we know about the true data-generating model?
+
+3. `aspect` and `canopy` have true coefficients of zero in the data-generating model. Where do their loading arrows tend to fall in the biplot? What does this suggest about how PCA treats irrelevant variables?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. `precip`, `temp`, `forest_cover`, and `soil_N` tend to load most strongly on PC1 — consistent with these being the four strongest true predictors. PC1 captures a composite gradient of site productivity and moisture conditions.
+
+2. Plots with higher species richness (darker green points) cluster on the side of PC1 where `precip` and `soil_N` arrows point (positive precipitation and soil nutrients → higher richness). This is consistent with the true model coefficients.
+
+3. `aspect` and `canopy` have smaller loading magnitudes and their arrows do not strongly align with either axis — reflecting that they carry little systematic signal. However, PCA does not set their loadings to exactly zero; it just assigns them small values because they don't explain much variance. This is different from the lasso, which can set coefficients to exactly zero. It is a known limitation of PCR: it cannot perform variable selection.
+:::
+
+### Proportion of variance explained
+
+The **proportion of variance explained (PVE)** by PC$m$ is the fraction of total variance that PC$m$ accounts for:
+
+$$\text{PVE}_m = \frac{\text{Var}(Z_m)}{\sum_{j=1}^{p} \text{Var}(X_j)}$$
+
+Since we standardize the predictors before fitting (each has variance 1), the denominator equals $p$. The PVE values sum to 1 across all $p$ components.
+
+The **scree plot** displays both the individual and cumulative PVE:
+
+```{python}
+#| label: scree-plot
+#| fig-align: center
+
+comp_labels = [f'PC{i+1}' for i in range(p)]
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.2, fig_size_y))
+
+axes[0].bar(comp_labels, pve * 100, color='steelblue', edgecolor='white', linewidth=0.5)
+axes[0].set_xlabel('Principal component')
+axes[0].set_ylabel('Variance explained (%)')
+axes[0].set_title('Individual PVE')
+axes[0].grid(True, alpha=0.3, axis='y')
+
+axes[1].plot(comp_labels, cum_pve * 100, marker='o',
+             color='steelblue', linewidth=2, markersize=6)
+axes[1].axhline(90, color='tomato', linestyle='--', linewidth=1, label='90% threshold')
+axes[1].set_xlabel('Principal component')
+axes[1].set_ylabel('Cumulative variance explained (%)')
+axes[1].set_title('Cumulative PVE')
+axes[1].set_ylim(0, 105)
+axes[1].legend(fontsize=9)
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Check-in
+
+Looking at the scree plot:
+
+1. How many components are needed to explain at least 90% of the total variance in the 8 predictors?
+2. Is there a visible "elbow" in the individual PVE plot? At which component does the curve start to flatten?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+```{python}
+#| label: pve-discussion
+
+n_90 = int(np.argmax(cum_pve >= 0.90)) + 1
+print(f'Components needed for ≥90% cumulative PVE: {n_90}')
+print()
+print('Cumulative PVE:')
+for i, (pv, cpv) in enumerate(zip(pve, cum_pve)):
+    print(f'  PC{i+1}: individual = {pv*100:.1f}%,  cumulative = {cpv*100:.1f}%')
+```
+
+The elbow is typically found after the first few components, where each additional PC contributes a noticeably smaller fraction. Beyond the elbow, the components mostly capture noise or small idiosyncratic variation. That said, the elbow is a heuristic; cross-validation (used in PCR below) provides a more principled criterion tied directly to prediction accuracy.
+:::
+
+## Principal Component Regression
+
+### The guiding idea
+
+PCA summarizes the variability structure of the predictors without reference to the response $Y$. Principal Component Regression (PCR) connects that structure to prediction.
+
+**Guiding idea**: the directions in which the predictors $X_1, \ldots, X_p$ show the most variation are often also the directions most strongly associated with the response $Y$.
+
+This is an approximation — it is not guaranteed to hold — but it is a reasonable working assumption in many real settings. We saw from the EcoRich biplot that PC1, the direction of greatest predictor variance, does align with the species richness gradient, supporting the assumption here.
+
+:::{.callout-tip}
+## Check-in
+Why might the directions of greatest predictor variance also tend to be the most predictive of the response? Can you think of a realistic example where this assumption would break down?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+**Why it often holds**: in many real datasets, the same underlying processes drive both the most variation in predictors and the most variation in the response. In our example, the major environmental gradient (precipitation, temperature, nutrients) drives both the spread in the 8 predictors and the variation in species richness — so the dominant PC direction captures the biologically relevant signal.
+
+**When it breaks down**: suppose a soil toxin is nearly always absent (very low variance across sites) but is highly damaging when present. PCA assigns it a small loading because it contributes little variance, and PCR would discard its effect. In such cases, ridge or lasso would be more appropriate because they do not rely on variance structure to identify important predictors.
+:::
+
+### The PCR pipeline
+
+PCR replaces the original $p$ predictors with $M \leq p$ PC scores before fitting the regression:
+
+$$\text{complete dataset} \;\longrightarrow\; \text{find PCs} \;\longrightarrow\; \text{project onto } M \text{ PCs} \;\longrightarrow\; \text{fit OLS on scores}$$
+
+Concretely:
+
+1. **Standardize** the predictors (mean 0, SD 1)
+2. **Compute the principal components** of the standardized predictors
+3. **Project** each observation onto the first $M$ components to obtain an $n \times M$ matrix of scores $Z_1, \ldots, Z_M$
+4. **Fit ordinary least squares** of $Y$ on $Z_1, \ldots, Z_M$
+
+The key tuning parameter is $M$. When $M = p$, PCR is equivalent to OLS (all directions are retained and PCA is just a rotation). When $M < p$, the model has fewer degrees of freedom and lower variance, at the cost of some bias.
+
+Like ridge and lasso, PCR controls the **bias-variance tradeoff** — but through a different mechanism: instead of shrinking all coefficients, it discards the directions of lowest variance entirely.
+
+### Selecting $M$ by cross-validation
+
+$M$ is chosen by cross-validation, in the same way as $\lambda$ for ridge and lasso. The figure below shows the 10-fold CV-MSE for each value of $M$ from 1 to `{python} p`.
+
+```{python}
+#| label: pcr-cv-plot
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y))
+
+ax.plot(range(1, p + 1), cv_mse_pcr,
+        marker='o', color='mediumpurple', linewidth=2, markersize=6,
+        label='10-fold CV MSE')
+ax.axvline(best_m, color='tomato', linestyle='--', linewidth=1.5,
+           label=f'Optimal M = {best_m}')
+ax.set_xlabel('Number of principal components (M)')
+ax.set_ylabel('CV mean squared error')
+ax.set_title('PCR: selecting M via cross-validation')
+ax.set_xticks(range(1, p + 1))
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Check-in
+
+1. What is the optimal number of components selected by cross-validation?
+2. At $M = $ `{python} p` (all components), what is the relationship between PCR and OLS? Is this reflected in the plot?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. The optimal $M$ selected by CV is `{python} best_m`, meaning retaining `{python} best_m` principal component(s) gives the best out-of-sample prediction accuracy.
+
+2. When $M = p$, the $p$ PC scores span exactly the same space as the $p$ original predictors — PCA is a rotation, not a reduction. So PCR at $M = p$ is identical to OLS. The CV-MSE at the rightmost point in the plot is therefore the OLS CV-MSE.
+:::
+
+### Comparing PCR, ridge, and lasso
+
+All three methods control the bias-variance tradeoff and select their tuning parameter by cross-validation. The table below compares their best 10-fold CV-MSE on the EcoRich data:
+
+```{python}
+#| label: method-comparison
+
+ols_mse = cv_mse_pcr[-1]
+
+comp_df = pd.DataFrame({
+    'Method':  ['OLS (all 8 predictors)',
+                f'PCR (M = {best_m})',
+                'Ridge (CV-optimal λ)',
+                'Lasso (CV-optimal λ)'],
+    'CV-MSE':  [f'{ols_mse:.3f}',
+                f'{min(cv_mse_pcr):.3f}',
+                f'{best_mse_ridge:.3f}',
+                f'{best_mse_lasso:.3f}'],
+})
+print(comp_df.to_string(index=False))
+```
+
+:::{.callout-tip}
+## Check-in
+
+1. Does PCR improve on OLS? Is this the direction you expected based on the bias-variance tradeoff?
+
+2. Which method performs best? Does this make sense given the structure of the true data-generating model — 8 predictors, 2 with true coefficient of zero and several with moderate effects?
+
+3. What is a key limitation of PCR compared to lasso, given this data-generating model?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. PCR should improve on OLS here because OLS overfits when the noise level is moderate and the predictors include irrelevant ones. Reducing to the most informative PC directions lowers variance at a small cost in bias.
+
+2. **Lasso** tends to perform best on this dataset because it can exactly zero out the two truly irrelevant predictors (`aspect` and `canopy`), directly matching the structure of the true model. Ridge is competitive when many predictors have moderate non-zero effects. PCR is effective when the response is well-explained by a few dominant environmental gradients — which is approximately true here, but not perfectly so.
+
+3. PCR cannot perform **variable selection**: it retains all original predictors in each PC (with varying loadings) and cannot set any loading to exactly zero. In a truly sparse setting — where a small number of predictors matter and the rest are pure noise — lasso has a structural advantage over PCR. PCR works best when the signal is spread across many predictors that share a common underlying structure.
+:::
