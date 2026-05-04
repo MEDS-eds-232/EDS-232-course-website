@@ -106,6 +106,27 @@ cv_mse_lasso_arr = np.array([
 best_mse_lasso = cv_mse_lasso_arr.min()
 
 pred_colors = [plt.cm.tab10(i) for i in range(8)]
+
+# ── Synthetic 3D data: very elongated ellipsoid for PCA illustration ──────────
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 (registers 3d projection)
+
+np.random.seed(42)
+n_3d = 600
+
+# Very high pairwise correlations → tight cigar-shaped ellipsoid.
+# With ρ ≈ 0.95+, PC1 captures ~95 % of variance and the cloud is
+# unmistakably elongated along a single dominant axis.
+cov_3d = np.array([
+    [1.00, 0.97, 0.93],
+    [0.97, 1.00, 0.91],
+    [0.93, 0.91, 1.00]
+])
+X_3d      = np.random.multivariate_normal([0, 0, 0], cov_3d, n_3d)
+pca_3d    = PCA()
+pca_3d.fit(X_3d)
+scores_3d   = pca_3d.transform(X_3d)
+loadings_3d = pca_3d.components_   # (3, 3) — rows are PCs, columns are variables
+pve_3d      = pca_3d.explained_variance_ratio_
 ```
 
 In this lesson we introduce:
@@ -121,7 +142,7 @@ These notes are based on chapter 6.3 of *An Introduction to Statistical Learning
 
 ## A guiding example: meadow plant diversity
 
-We continue with the same EcoRich dataset from the [previous lesson](../6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.qmd). Recall that we have 200 mountain meadow survey plots, each described by 8 environmental predictors:
+We continue with the same dataset from the [previous lesson](../6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.qmd). Recall that we have 200 mountain meadow survey plots, each described by 8 environmental predictors:
 
 | Predictor | Description |
 |---|---|
@@ -142,37 +163,147 @@ In the previous lesson, we used ridge regression and the lasso to predict specie
 
 ### Motivation
 
-Imagine you are a whale shark approaching a dense cluster of krill. To capture as much krill as possible in a single pass, you would align yourself with the **direction of greatest spread** in the krill cloud — the axis along which the krill are most dispersed. Moving perpendicular to that spread (along a direction of low variance) would mean passing through a thin slice of the cluster.
+Imagine you are a whale shark approaching a dense cluster of krill. How would you align yourself to capture as much krill as possible in a single pass? 
 
-The same intuition applies to data. When we have many correlated predictors, some linear combinations of those predictors capture a great deal of the variation while others capture very little. **Principal Component Analysis (PCA)** finds those directions automatically.
+::: {layout-ncol=2}
 
-:::{.callout-tip}
-## Check-in
-Consider the 8 environmental predictors in the EcoRich dataset. If you had to create a single new variable — a linear combination of all 8 — to describe the dominant environmental gradient across survey plots, what do you think it would capture? Which predictors would you expect to contribute most?
+![Artwork by [Dr. Allison Horst](https://allisonhorst.com/everything-else)](allison_horst_PCA_1.png){fig-alt="Illustration of a whale shark, with the face directly facing the viewer. There are subtle x and y axes overlaid onto the illustration. The whale shark’s oblong mouth is oriented horizontally along the x-axis. The whale shark looks friendly and has a slight smile on its face."}
+
+![](allison_horst_PCA_2.png){fig-lat="A swarm of illustrated krill in an oblong shape extending from the lower left corner upward toward the top right corner. The longest axis of the krill swarm at about a 45 degree angle. A subtle x and y axis are overlaid onto the krill swarm."}
 :::
 
-:::{.callout-tip collapse="true"}
-## Discussion
-Given that `precip`, `temp`, `forest_cover`, and `soil_N` are the four predictors most strongly associated with species richness (as established in the previous lesson), the dominant composite variable would likely emphasize these. Broadly, it might capture a gradient from "dry, warm, open, low-nutrient" plots at one extreme to "wet, cool, forested, high-nutrient" plots at the other — a common environmental axis in mountain meadow systems.
+You would probably align yourself with the **direction of greatest spread** in the krill cloud, the axis along which the krill are most dispersed. The same intuition applies to data. When we have many correlated predictors, some directions in the data capture a great deal of the variation while others capture very little. **Principal Component Analysis (PCA)** finds those directions automatically.
 
-PCA will find this direction automatically by maximizing variance, without any knowledge of the response variable.
-:::
+The core idea is: with many predictor variables, sometimes it can be useful to simplify our view of our coordiante system to capture *as much about the data as possible in as few dimensions as possible*.
+
 
 ### What are principal components?
+
+**PCA** creates a new set of axes so that:
+
+- **PC1** points in the direction of **maximum variance** in the data
+- **PC2** points in the direction of maximum remaining variance, **orthogonal to PC1**
+- **PC3** is orthogonal to both PC1 and PC2 and explains the most remaining variance, and so on.
+
+There are always as many principal components as original variables, but if PC1 and PC2 explain most of the variance, we'd still be seeing modt of the important things about our data if we just use PC1 and PC2 to analyze it. This is the core idea of **dimensionality reduction**: converting complex multivariate data into fewer dimensions while retaining as much information as possible.
+
+Let's see an example with three variables:
+
+We generate 600 observations from three variables (x, y, z) with very high pairwise correlations (ρ ≈ 0.91–0.97). When all three variables tend to rise and fall together, the point cloud collapses into a **tight, cigar-shaped ellipsoid** — most of the variation is concentrated along a single dominant axis, with very little spread perpendicular to it.
+
+```{python}
+#| label: pca-3d-data-only
+#| fig-align: center
+
+fig = plt.figure(figsize=(6.5, 5.5))
+ax  = fig.add_subplot(111, projection='3d')
+
+ax.scatter(X_3d[:, 0], X_3d[:, 1], X_3d[:, 2],
+           c=X_3d[:, 2], cmap='viridis', s=10, alpha=0.45, edgecolors='none')
+
+ax.set_xlabel('x', labelpad=5)
+ax.set_ylabel('y', labelpad=5)
+ax.set_zlabel('z', labelpad=5)
+ax.set_title('3D data: cigar-shaped ellipsoid')
+ax.view_init(elev=18, azim=-55)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The elongated shape tells us that the three variables are highly correlated — knowing one variable tells you a lot about the others. The figure below overlays the three PC directions as full lines through the center of the cloud.
+
+```{python}
+#| label: pca-3d-scatter
+#| fig-align: center
+
+pc_colors_3d = ['#1cb8b8', '#e87070', '#9b9bcc']   # teal / salmon / lavender
+line_scale   = 5.0   # extend lines ± this many units from the center
+
+fig = plt.figure(figsize=(6.5, 5.5))
+ax  = fig.add_subplot(111, projection='3d')
+
+ax.scatter(X_3d[:, 0], X_3d[:, 1], X_3d[:, 2],
+           c=X_3d[:, 2], cmap='viridis', s=10, alpha=0.45, edgecolors='none')
+
+# Full lines through the origin along each PC direction
+for k in range(3):
+    d = loadings_3d[k]
+    t = np.linspace(-line_scale, line_scale, 200)
+    ax.plot(t*d[0], t*d[1], t*d[2],
+            color=pc_colors_3d[k], linewidth=2.5, label=f'PC{k+1}')
+
+ax.set_xlabel('x', labelpad=5)
+ax.set_ylabel('y', labelpad=5)
+ax.set_zlabel('z', labelpad=5)
+ax.set_title('3D data with PC1, PC2, and PC3 directions')
+ax.legend(loc='upper left', fontsize=9)
+ax.view_init(elev=18, azim=-55)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+Notice that **PC1 (teal)** runs along the long axis of the cigar — the direction where the data varies the most. **PC2 (salmon)** is perpendicular to PC1 and captures the remaining spread within the plane of the ellipsoid. **PC3 (lavender)** points through the very thin dimension of the cloud and explains almost no variance.
+
+**PCA gives us a new coordinate system** whose axes are these three PC directions. If we re-express every data point using PC scores instead of x/y/z coordinates, the ellipsoid becomes axis-aligned. The second plot (below left) shows the data in that new PC coordinate system: the cloud is stretched along PC1 and very flat along PC2 and PC3. The third plot (below right) shows what we get if we simply **drop PC3** and keep only the PC1 and PC2 scores — the 2D projection.
+
+```{python}
+#| label: pca-3d-aligned-and-projection
+#| fig-align: center
+
+fig = plt.figure(figsize=(6.5, 11))
+
+# ── Top: data re-expressed in PC coordinate system (3D) ──────────────────────
+ax1 = fig.add_subplot(211, projection='3d')
+
+ax1.scatter(scores_3d[:, 0], scores_3d[:, 1], scores_3d[:, 2],
+            c=scores_3d[:, 0], cmap='viridis', s=10, alpha=0.45, edgecolors='none')
+
+# Draw the three PC axes as dashed reference lines
+lim = 5.5
+for k, col in enumerate(pc_colors_3d):
+    coords = [np.zeros(2), np.zeros(2), np.zeros(2)]
+    coords[k] = [-lim, lim]
+    ax1.plot(*coords, color=col, linewidth=1.8, linestyle='--', alpha=0.7)
+
+ax1.set_xlabel(f'PC1 ({pve_3d[0]*100:.0f}%)', labelpad=5)
+ax1.set_ylabel(f'PC2 ({pve_3d[1]*100:.0f}%)', labelpad=5)
+ax1.set_zlabel(f'PC3 ({pve_3d[2]*100:.0f}%)', labelpad=5)
+ax1.set_title('Data re-expressed in PC axes\n(ellipsoid is now axis-aligned)')
+ax1.view_init(elev=18, azim=-55)
+
+# ── Bottom: 2D projection onto PC1 and PC2 ───────────────────────────────────
+ax2 = fig.add_subplot(212)
+
+ax2.scatter(scores_3d[:, 0], scores_3d[:, 1],
+            c=scores_3d[:, 0], cmap='viridis', s=12, alpha=0.5, edgecolors='none')
+ax2.axhline(0, color='gray', linewidth=0.8, linestyle='--')
+ax2.axvline(0, color='gray', linewidth=0.8, linestyle='--')
+ax2.set_xlabel(f'PC1  ({pve_3d[0]*100:.1f}% of variance)')
+ax2.set_ylabel(f'PC2  ({pve_3d[1]*100:.1f}% of variance)')
+ax2.set_title(
+    f'2D projection: keep PC1 + PC2\n'
+    f'({(pve_3d[0]+pve_3d[1])*100:.1f}% of total variance retained, '
+    f'{pve_3d[2]*100:.1f}% lost)'
+)
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+Because PC1 alone captures `{python} f"{pve_3d[0]*100:.0f}"` % of the variance, the 2D projection retains almost all of the structure in the data. The PC3 dimension, which we dropped, contained only `{python} f"{pve_3d[2]*100:.1f}"` % of the variance — very little information was lost.
+
+
 
 **PCA** creates a new set of axes — the **principal components (PCs)** — that are linear combinations of the original variables:
 
 $$Z_m = \phi_{1m} X_1 + \phi_{2m} X_2 + \cdots + \phi_{pm} X_p$$
 
-The axes are chosen so that:
-
-- **PC1** points in the direction of **maximum variance** in the data
-- **PC2** points in the direction of maximum remaining variance, **orthogonal to PC1**
-- **PC3** is orthogonal to both PC1 and PC2 and explains the most remaining variance, and so on
-
 The coefficients $\phi_{jm}$ are called **loadings** and are constrained to have unit length ($\sum_j \phi_{jm}^2 = 1$), ensuring the variance of each PC is well-defined. The **score** of observation $i$ on PC$m$ is the value $z_{im} = \sum_j \phi_{jm} x_{ij}$ — its coordinate in the new PC coordinate system.
 
-There are always as many principal components as original variables, but because the first few PCs capture most of the variance, we can often describe the data well with far fewer. This is the core idea of **dimensionality reduction**: converting complex multivariate data into fewer dimensions while retaining as much information as possible.
 
 ### A two-variable illustration
 
@@ -228,7 +359,51 @@ The left panel shows the data in the original `(precip, temp)` space. The red ar
 
 ### The biplot: loadings and scores together
 
-The **biplot** is the standard visualization for PCA results. It overlays the PC **scores** for each observation (the points) with the **loading arrows** for each variable. The biplot below uses the first two principal components of all 8 EcoRich predictors.
+The **biplot** is the standard visualization for PCA results. It overlays two things on the same plot:
+
+- **Points** — each observation plotted at its PC1 and PC2 scores (its location in the new coordinate system)
+- **Loading arrows** — one arrow per variable, showing how strongly and in which direction that variable contributes to PC1 and PC2
+
+The length of an arrow reflects how well that variable is captured by these two components. The angle between arrows reflects correlation: arrows pointing in the same direction indicate positively correlated variables; opposite directions indicate negative correlation.
+
+Let's build intuition with our simple x/y/z example before moving to the full EcoRich dataset. Recall that all three variables were highly correlated (ρ ≈ 0.91–0.97), so we expect their arrows to all point in roughly the same direction.
+
+```{python}
+#| label: pca-biplot-3d-example
+#| fig-align: center
+
+arrow_colors_xyz = ['#1cb8b8', '#e87070', '#9b9bcc']   # teal / salmon / lavender
+var_names_3d     = ['x', 'y', 'z']
+scale_b_xyz      = 3.5
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
+
+ax.scatter(scores_3d[:, 0], scores_3d[:, 1],
+           c=X_3d[:, 2], cmap='viridis', s=15, alpha=0.4,
+           edgecolors='none', zorder=2)
+
+for j, (name, col) in enumerate(zip(var_names_3d, arrow_colors_xyz)):
+    lx = loadings_3d[0, j] * scale_b_xyz
+    ly = loadings_3d[1, j] * scale_b_xyz
+    ax.annotate('', xy=(lx, ly), xytext=(0, 0),
+                arrowprops=dict(arrowstyle='->', color=col, lw=2.2), zorder=3)
+    ax.text(lx * 1.18, ly * 1.18, name,
+            color=col, fontsize=11, ha='center', fontweight='bold')
+
+ax.axhline(0, color='gray', linewidth=0.5, linestyle='--')
+ax.axvline(0, color='gray', linewidth=0.5, linestyle='--')
+ax.set_xlabel(f'PC1  ({pve_3d[0]*100:.1f}% of variance)')
+ax.set_ylabel(f'PC2  ({pve_3d[1]*100:.1f}% of variance)')
+ax.set_title('Biplot: x/y/z data projected onto PC1 and PC2')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The three arrows point in nearly the same direction along PC1, confirming that x, y, and z are all positively correlated with each other and all load heavily onto PC1. The spread of the points along PC1 is very wide — consistent with PC1 capturing `{python} f"{pve_3d[0]*100:.0f}"` % of the variance — while the spread along PC2 is much narrower. Because this is a simple 3-variable case, the biplot is easy to read. With more variables the picture becomes richer, as we'll see next.
+
+Now let's apply the same idea to the full EcoRich dataset with all 8 predictors.
 
 ```{python}
 #| label: pca-biplot
