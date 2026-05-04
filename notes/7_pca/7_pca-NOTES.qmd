@@ -16,8 +16,8 @@ from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
 
 plt.style.use('default')
-fig_size_x = 8
-fig_size_y = 4
+fig_size_x = 6.4
+fig_size_y = 3.2
 plt.rcParams['font.size'] = 10
 
 # ── EcoRich synthetic dataset (same as linear model selection lesson) ──────────
@@ -133,31 +133,13 @@ In this lesson we introduce:
 
 - **Principal Component Analysis (PCA)** as a technique for dimensionality reduction
 - Principal components as directions of maximum variance in multivariate data
-- **Loadings** and **scores**: how PCA re-expresses observations in a new coordinate system
-- The **scree plot** and proportion of variance explained (PVE) for choosing how many components to retain
+<!-- - **Loadings** and **scores**: how PCA re-expresses observations in a new coordinate system
+- The **scree plot** and proportion of variance explained (PVE) for choosing how many components to retain -->
 - **Principal Component Regression (PCR)**: fitting a regression model on PC scores instead of the original predictors
 - **Cross-validation** to select the optimal number of components in PCR
 
 These notes are based on chapter 6.3 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
 
-## A guiding example: meadow plant diversity
-
-We continue with the same dataset from the [previous lesson](../6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.qmd). Recall that we have 200 mountain meadow survey plots, each described by 8 environmental predictors:
-
-| Predictor | Description |
-|---|---|
-| `precip` | mean annual precipitation (mm) |
-| `temp` | mean summer temperature (°C) |
-| `forest_cover` | surrounding forest cover (%) |
-| `soil_N` | soil nitrogen content (mg/kg) |
-| `elevation` | elevation (m) |
-| `slope` | terrain slope (°) |
-| `aspect` | terrain aspect (°, 0–360) |
-| `canopy` | canopy cover (%) |
-
-The response is **`species_richness`**: the number of vascular plant species per 25 m² plot.
-
-In the previous lesson, we used ridge regression and the lasso to predict species richness from all 8 predictors simultaneously, shrinking the coefficients to manage the bias-variance tradeoff. In this lesson we take a different approach: *can we first reduce the 8 predictors to a smaller set of derived variables that capture most of their information, and then fit a regression on those?*
 
 ## Principal Component Analysis
 
@@ -179,23 +161,23 @@ The core idea is: with many predictor variables, sometimes it can be useful to s
 
 ### What are principal components?
 
-**PCA** creates a new set of axes so that:
+**Principal Component Analaysis (PCA)** creates a new set of axes so that:
 
 - **PC1** points in the direction of **maximum variance** in the data
 - **PC2** points in the direction of maximum remaining variance, **orthogonal to PC1**
 - **PC3** is orthogonal to both PC1 and PC2 and explains the most remaining variance, and so on.
 
-There are always as many principal components as original variables, but if PC1 and PC2 explain most of the variance, we'd still be seeing modt of the important things about our data if we just use PC1 and PC2 to analyze it. This is the core idea of **dimensionality reduction**: converting complex multivariate data into fewer dimensions while retaining as much information as possible.
+There are always as many principal components as original variables. But, if PC1 and PC2 explain most of the variance, we'd still be seeing most of the important things about our data if we just use PC1 and PC2 to analyze it. This is the core idea of **dimensionality reduction**: converting complex multivariate data into fewer dimensions while retaining as much information as possible.
 
 Let's see an example with three variables:
 
-We generate 600 observations from three variables (x, y, z) with very high pairwise correlations (ρ ≈ 0.91–0.97). When all three variables tend to rise and fall together, the point cloud collapses into a **tight, cigar-shaped ellipsoid** — most of the variation is concentrated along a single dominant axis, with very little spread perpendicular to it.
+We generate 600 observations from three variables (x, y, z) with very high pairwise correlations. We can see from the figure below that most of the variation is concentrated along a single dominant axis, with very little spread perpendicular to it.
 
 ```{python}
 #| label: pca-3d-data-only
 #| fig-align: center
 
-fig = plt.figure(figsize=(6.5, 5.5))
+fig = plt.figure(figsize=(5.2, 4.4))
 ax  = fig.add_subplot(111, projection='3d')
 
 ax.scatter(X_3d[:, 0], X_3d[:, 1], X_3d[:, 2],
@@ -204,23 +186,27 @@ ax.scatter(X_3d[:, 0], X_3d[:, 1], X_3d[:, 2],
 ax.set_xlabel('x', labelpad=5)
 ax.set_ylabel('y', labelpad=5)
 ax.set_zlabel('z', labelpad=5)
-ax.set_title('3D data: cigar-shaped ellipsoid')
 ax.view_init(elev=18, azim=-55)
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
-The elongated shape tells us that the three variables are highly correlated — knowing one variable tells you a lot about the others. The figure below overlays the three PC directions as full lines through the center of the cloud.
+:::{.callout-tip}
+## Check-in
+Recall that PC1 will be an axis in the direction of maximum variance in the data. Where would you place PC1? What about PC2?
+:::
+
+The figure below overlays the three PC directions as full lines through the center of the cloud.
 
 ```{python}
 #| label: pca-3d-scatter
 #| fig-align: center
 
-pc_colors_3d = ['#1cb8b8', '#e87070', '#9b9bcc']   # teal / salmon / lavender
+pc_colors_3d = ['#e5cf28', '#e87070', '#9b9bcc']   # teal / salmon / lavender
 line_scale   = 5.0   # extend lines ± this many units from the center
 
-fig = plt.figure(figsize=(6.5, 5.5))
+fig = plt.figure(figsize=(5.2, 4.4))
 ax  = fig.add_subplot(111, projection='3d')
 
 ax.scatter(X_3d[:, 0], X_3d[:, 1], X_3d[:, 2],
@@ -244,18 +230,16 @@ plt.show()
 plt.close()
 ```
 
-Notice that **PC1 (teal)** runs along the long axis of the cigar — the direction where the data varies the most. **PC2 (salmon)** is perpendicular to PC1 and captures the remaining spread within the plane of the ellipsoid. **PC3 (lavender)** points through the very thin dimension of the cloud and explains almost no variance.
+Notice that **PC1 (yellow)** runs along the long axis of the data cloud, this is direction where the data varies the most. **PC2 (salmon)** is perpendicular to PC1 and captures the remaining spread. **PC3 (lavender)** points through the thinest dimension of the cloud and explains almost no variance.
 
-**PCA gives us a new coordinate system** whose axes are these three PC directions. If we re-express every data point using PC scores instead of x/y/z coordinates, the ellipsoid becomes axis-aligned. The second plot (below left) shows the data in that new PC coordinate system: the cloud is stretched along PC1 and very flat along PC2 and PC3. The third plot (below right) shows what we get if we simply **drop PC3** and keep only the PC1 and PC2 scores — the 2D projection.
+**PCA gives us a new coordinate system** whose axes are these three PC directions. If we re-express every data point in thie new coordinates given by the principal components (using PC scores instead of x/y/z coordinates), the data cloud becomes axis-aligned. The plot below shows the data in that new PC coordinate system: the cloud is stretched along PC1 and very flat along PC2 and PC3. 
 
 ```{python}
-#| label: pca-3d-aligned-and-projection
+#| label: pca-3d-aligned
 #| fig-align: center
 
-fig = plt.figure(figsize=(6.5, 11))
-
-# ── Top: data re-expressed in PC coordinate system (3D) ──────────────────────
-ax1 = fig.add_subplot(211, projection='3d')
+fig = plt.figure(figsize=(5.2, 4.4))
+ax1 = fig.add_subplot(111, projection='3d')
 
 ax1.scatter(scores_3d[:, 0], scores_3d[:, 1], scores_3d[:, 2],
             c=scores_3d[:, 0], cmap='viridis', s=10, alpha=0.45, edgecolors='none')
@@ -272,9 +256,18 @@ ax1.set_ylabel(f'PC2 ({pve_3d[1]*100:.0f}%)', labelpad=5)
 ax1.set_zlabel(f'PC3 ({pve_3d[2]*100:.0f}%)', labelpad=5)
 ax1.set_title('Data re-expressed in PC axes\n(ellipsoid is now axis-aligned)')
 ax1.view_init(elev=18, azim=-55)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
-# ── Bottom: 2D projection onto PC1 and PC2 ───────────────────────────────────
-ax2 = fig.add_subplot(212)
+Because PC1 alone captures `{python} f"{pve_3d[0]*100:.0f}"` % of the variance, if we project onto two dimensions by keeping only PC1 and PC2, we retain almost all of the structure in the data. The PC3 dimension, which we drop, contains only `{python} f"{pve_3d[2]*100:.1f}"` % of the variance, so very little information is lost.
+
+```{python}
+#| label: pca-3d-projection
+#| fig-align: center
+
+fig, ax2 = plt.subplots(figsize=(5.2, 4.0))
 
 ax2.scatter(scores_3d[:, 0], scores_3d[:, 1],
             c=scores_3d[:, 0], cmap='viridis', s=12, alpha=0.5, edgecolors='none')
@@ -288,75 +281,80 @@ ax2.set_title(
     f'{pve_3d[2]*100:.1f}% lost)'
 )
 ax2.grid(True, alpha=0.3)
-
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
-Because PC1 alone captures `{python} f"{pve_3d[0]*100:.0f}"` % of the variance, the 2D projection retains almost all of the structure in the data. The PC3 dimension, which we dropped, contained only `{python} f"{pve_3d[2]*100:.1f}"` % of the variance — very little information was lost.
 
+Through this example we can see that **PCA** creates a new set of axes ,the **principal components (PCs)**. In math terms, these principal components are linear combinations of the original variables $X_1, \ldots, X_p$:
 
+$$Z_m = \phi_{1m} X_1 + \phi_{2m} X_2 + \cdots + \phi_{pm} X_p,$$
 
-**PCA** creates a new set of axes — the **principal components (PCs)** — that are linear combinations of the original variables:
+where the $\phi_{jm}$ are numbers called **loadings** that are chosen to have each PC capture the variance as explained. 
 
-$$Z_m = \phi_{1m} X_1 + \phi_{2m} X_2 + \cdots + \phi_{pm} X_p$$
+<!-- The coefficients $\phi_{jm}$ are called **loadings** and are constrained to have unit length ($\sum_j \phi_{jm}^2 = 1$), ensuring the variance of each PC is well-defined. -->
 
-The coefficients $\phi_{jm}$ are called **loadings** and are constrained to have unit length ($\sum_j \phi_{jm}^2 = 1$), ensuring the variance of each PC is well-defined. The **score** of observation $i$ on PC$m$ is the value $z_{im} = \sum_j \phi_{jm} x_{ij}$ — its coordinate in the new PC coordinate system.
+### Proportion of variance explained
 
-
-### A two-variable illustration
-
-Before working with all 8 predictors, it helps to see PCA geometrically in two dimensions. The figure below uses only the standardized `precip` and `temp` predictors.
+Every PC captures a certain share of the total variance in the data, this is the **proportion of variance explained (PVE) by PC$m$**. The PVE values always sum to 1 across all $p$ components, since together the PCs account for all the variance in the original data. We are usually interested in how much of that total is concentrated in the first few components. For our example data we have that
 
 ```{python}
-#| label: pca-2d-illustration
+#| label: pve-3d
 #| fig-align: center
 
-scale = 2.0
-pc_colors = ['tomato', 'seagreen']
-pc_labels = ['PC1 (max variance)', 'PC2 (orthogonal)']
+pc_labels_3d_bar = ['PC1', 'PC2', 'PC3']
 
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.3, fig_size_y + 0.5))
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.2, fig_size_y))
 
-# ── Left: original (precip, temp) space with PC direction arrows ───────────────
-ax = axes[0]
-ax.scatter(X_2d[:, 0], X_2d[:, 1],
-           alpha=0.4, s=15, color='steelblue', edgecolors='none')
-for k in range(2):
-    dx = loadings_2d[k, 0] * scale
-    dy = loadings_2d[k, 1] * scale
-    ax.annotate('', xy=(dx, dy), xytext=(0, 0),
-                arrowprops=dict(arrowstyle='->', color=pc_colors[k], lw=2.2))
-    ax.text(dx * 1.18, dy * 1.18, pc_labels[k],
-            color=pc_colors[k], fontsize=9, ha='center')
-ax.axhline(0, color='gray', linewidth=0.5, linestyle='--')
-ax.axvline(0, color='gray', linewidth=0.5, linestyle='--')
-ax.set_xlabel('precip (standardized)')
-ax.set_ylabel('temp (standardized)')
-ax.set_title('Original axes with PC directions')
-ax.grid(True, alpha=0.3)
-ax.set_aspect('equal')
+axes[0].bar(pc_labels_3d_bar, pve_3d * 100,
+            color=['#1cb8b8', '#e87070', '#9b9bcc'],
+            edgecolor='white', linewidth=0.5)
+axes[0].set_xlabel('Principal component')
+axes[0].set_ylabel('Variance explained (%)')
+axes[0].set_title('Individual PVE (x/y/z data)')
+axes[0].set_ylim(0, 105)
+axes[0].grid(True, alpha=0.3, axis='y')
 
-# ── Right: same data re-expressed in PC space ─────────────────────────────────
-ax = axes[1]
-ax.scatter(scores_2d[:, 0], scores_2d[:, 1],
-           alpha=0.4, s=15, color='steelblue', edgecolors='none')
-ax.axhline(0, color='gray', linewidth=0.5, linestyle='--')
-ax.axvline(0, color='gray', linewidth=0.5, linestyle='--')
-ax.set_xlabel(f'PC1  ({pca_2d.explained_variance_ratio_[0]*100:.1f}% of variance)')
-ax.set_ylabel(f'PC2  ({pca_2d.explained_variance_ratio_[1]*100:.1f}% of variance)')
-ax.set_title('Data projected onto PC1 and PC2')
-ax.grid(True, alpha=0.3)
-ax.set_aspect('equal')
+cum_pve_3d = np.cumsum(pve_3d)
+axes[1].plot(pc_labels_3d_bar, cum_pve_3d * 100, marker='o',
+             color='steelblue', linewidth=2, markersize=8)
+axes[1].axhline(100, color='gray', linestyle='--', linewidth=1, alpha=0.5)
+axes[1].set_xlabel('Principal component')
+axes[1].set_ylabel('Cumulative variance explained (%)')
+axes[1].set_title('Cumulative PVE (x/y/z data)')
+axes[1].set_ylim(0, 110)
+axes[1].grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
-The left panel shows the data in the original `(precip, temp)` space. The red arrow points in the direction of maximum variance (PC1) and the green arrow is orthogonal to it (PC2). The right panel shows the same data after projecting onto these two new axes — the data has simply been **rotated** so that the direction of greatest spread aligns with the horizontal axis. No information is lost in this two-variable case; the rotation just re-expresses the same data in a more convenient coordinate system.
+PC1 alone captures `{python} f"{pve_3d[0]*100:.1f}"` % of all the variance in the three variables. PC2 accounts for `{python} f"{pve_3d[1]*100:.1f}"` % and PC3 for only `{python} f"{pve_3d[2]*100:.1f}"` %. Together, PC1 and PC2 retain `{python} f"{(pve_3d[0]+pve_3d[1])*100:.1f}"` % of the total variance, which is why the 2D projection we showed earlier preserved the structure of the data so well.
 
+This is the key decision in any PCA workflow: **how many components do we keep?** A common heuristic is to keep enough components to explain 90–95% of the total variance, or to look for an "elbow" in the individual PVE bar chart where the bars drop sharply. We will revisit this decision with a more challenging dataset in the next section.
+
+## A guiding example: meadow plant diversity
+
+We continue with the same dataset from the [previous lesson](../6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.qmd). Recall that we have 200 mountain meadow survey plots, each described by 8 environmental predictors:
+
+| Predictor | Description |
+|---|---|
+| `precip` | mean annual precipitation (mm) |
+| `temp` | mean summer temperature (°C) |
+| `forest_cover` | surrounding forest cover (%) |
+| `soil_N` | soil nitrogen content (mg/kg) |
+| `elevation` | elevation (m) |
+| `slope` | terrain slope (°) |
+| `aspect` | terrain aspect (°, 0–360) |
+| `canopy` | canopy cover (%) |
+
+The response is **`species_richness`**: the number of vascular plant species per 25 m² plot.
+
+In the previous lesson, we used ridge regression and the lasso to predict species richness from all 8 predictors simultaneously, shrinking the coefficients to manage the bias-variance tradeoff. In this lesson we take a different approach: *can we first reduce the 8 predictors to a smaller set of derived variables that capture most of their information, and then fit a regression on those?*
+
+<!-- 
 ### The biplot: loadings and scores together
 
 The **biplot** is the standard visualization for PCA results. It overlays two things on the same plot:
@@ -474,15 +472,11 @@ print(load_df.to_string())
 2. Plots with higher species richness (darker green points) cluster on the side of PC1 where `precip` and `soil_N` arrows point (positive precipitation and soil nutrients → higher richness). This is consistent with the true model coefficients.
 
 3. `aspect` and `canopy` have smaller loading magnitudes and their arrows do not strongly align with either axis — reflecting that they carry little systematic signal. However, PCA does not set their loadings to exactly zero; it just assigns them small values because they don't explain much variance. This is different from the lasso, which can set coefficients to exactly zero. It is a known limitation of PCR: it cannot perform variable selection.
-:::
+::: -->
 
 ### Proportion of variance explained
 
-The **proportion of variance explained (PVE)** by PC$m$ is the fraction of total variance that PC$m$ accounts for:
-
-$$\text{PVE}_m = \frac{\text{Var}(Z_m)}{\sum_{j=1}^{p} \text{Var}(X_j)}$$
-
-Since we standardize the predictors before fitting (each has variance 1), the denominator equals $p$. The PVE values sum to 1 across all $p$ components.
+The **proportion of variance explained (PVE)** by PC$m$ is the fraction of total variance that PC$m$ accounts for. The PVE values sum to 1 across all $p$ components.
 
 The **scree plot** displays both the individual and cumulative PVE:
 
