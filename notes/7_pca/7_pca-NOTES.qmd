@@ -137,19 +137,62 @@ loadings_3d = pca_3d.components_   # (3, 3) — rows are PCs, columns are variab
 pve_3d      = pca_3d.explained_variance_ratio_
 
 # ── PCR illustration with 3D data ────────────────────────────────────────────
-# Response: depends equally on x, y, z (all highly correlated → driven by PC1)
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score as r2_score_sk, mean_squared_error
+
 np.random.seed(13)
 resp_3d = 2.0*X_3d[:, 0] + 2.0*X_3d[:, 1] + 2.0*X_3d[:, 2] + np.random.normal(0, 1.5, n_3d)
 
-from sklearn.metrics import r2_score as r2_score_sk
+# 75 / 25 train–test split (indices, so scores stay aligned with PCA fit on full data)
+idx_tr_3d, idx_te_3d = train_test_split(np.arange(n_3d), test_size=0.25, random_state=7)
+X_3d_tr,     X_3d_te     = X_3d[idx_tr_3d],      X_3d[idx_te_3d]
+resp_3d_tr,  resp_3d_te  = resp_3d[idx_tr_3d],   resp_3d[idx_te_3d]
+scores_3d_tr = scores_3d[idx_tr_3d]
+scores_3d_te = scores_3d[idx_te_3d]
 
-ols_3d  = LinearRegression().fit(X_3d,             resp_3d)
-pcr1_3d = LinearRegression().fit(scores_3d[:, :1], resp_3d)
-pcr2_3d = LinearRegression().fit(scores_3d[:, :2], resp_3d)
+ols_3d  = LinearRegression().fit(X_3d_tr,               resp_3d_tr)
+pcr1_3d = LinearRegression().fit(scores_3d_tr[:, :1],   resp_3d_tr)
+pcr2_3d = LinearRegression().fit(scores_3d_tr[:, :2],   resp_3d_tr)
 
-r2_ols_3d  = r2_score_sk(resp_3d, ols_3d.predict(X_3d))
-r2_pcr1_3d = r2_score_sk(resp_3d, pcr1_3d.predict(scores_3d[:, :1]))
-r2_pcr2_3d = r2_score_sk(resp_3d, pcr2_3d.predict(scores_3d[:, :2]))
+r2_ols_3d  = r2_score_sk(resp_3d_tr, ols_3d.predict(X_3d_tr))
+r2_pcr1_3d = r2_score_sk(resp_3d_tr, pcr1_3d.predict(scores_3d_tr[:, :1]))
+r2_pcr2_3d = r2_score_sk(resp_3d_tr, pcr2_3d.predict(scores_3d_tr[:, :2]))
+
+mse_ols_3d  = mean_squared_error(resp_3d_te, ols_3d.predict(X_3d_te))
+mse_pcr1_3d = mean_squared_error(resp_3d_te, pcr1_3d.predict(scores_3d_te[:, :1]))
+mse_pcr2_3d = mean_squared_error(resp_3d_te, pcr2_3d.predict(scores_3d_te[:, :2]))
+
+# ── Exercise data: PCR where optimal M < p ────────────────────────────────────
+# 6 predictors: u1,u2,u3 share a latent signal; v1,v2,v3 are pure noise.
+# Y depends only on the latent signal → optimal M by CV should be 1–2, not 6.
+np.random.seed(77)
+n_ex2   = 300
+latent  = np.random.normal(0, 2.0, n_ex2)
+u1 = latent + np.random.normal(0, 0.4, n_ex2)
+u2 = latent + np.random.normal(0, 0.4, n_ex2)
+u3 = latent + np.random.normal(0, 0.4, n_ex2)
+v1 = np.random.normal(0, 1.0, n_ex2)
+v2 = np.random.normal(0, 1.0, n_ex2)
+v3 = np.random.normal(0, 1.0, n_ex2)
+
+X_ex2_raw = np.column_stack([u1, u2, u3, v1, v2, v3])
+scaler_ex2 = StandardScaler()
+X_ex2_std  = scaler_ex2.fit_transform(X_ex2_raw)
+y_ex2      = 4.0 * latent + np.random.normal(0, 2.0, n_ex2)
+
+pred_names_ex2 = ['u1', 'u2', 'u3', 'v1', 'v2', 'v3']
+
+pca_ex2 = PCA()
+pca_ex2.fit(X_ex2_std)
+pve_ex2 = pca_ex2.explained_variance_ratio_
+
+cv_mse_pcr_ex2 = []
+for m_ex2 in range(1, 7):
+    pipe = Pipeline([('pca', PCA(n_components=m_ex2)), ('lr', LinearRegression())])
+    mse = -cross_val_score(pipe, X_ex2_std, y_ex2,
+                           cv=10, scoring='neg_mean_squared_error').mean()
+    cv_mse_pcr_ex2.append(mse)
+best_m_ex2 = int(np.argmin(cv_mse_pcr_ex2)) + 1
 ```
 
 In this lesson we introduce:
@@ -634,18 +677,21 @@ plt.close()
 #| label: pcr-comparison-3d
 
 comp_3d = pd.DataFrame({
-    'Model':      ['OLS  (3 predictors: x, y, z)',
-                   'PCR  (M = 1 component)',
-                   'PCR  (M = 2 components)'],
-    'Parameters': [3, 1, 2],
-    'R²':         [round(r2_ols_3d, 3),
-                   round(r2_pcr1_3d, 3),
-                   round(r2_pcr2_3d, 3)]
+    'Model':        ['OLS  (3 predictors: x, y, z)',
+                     'PCR  (M = 1 component)',
+                     'PCR  (M = 2 components)'],
+    'Parameters':   [3, 1, 2],
+    'Train R²':     [round(r2_ols_3d,  3),
+                     round(r2_pcr1_3d, 3),
+                     round(r2_pcr2_3d, 3)],
+    'Test MSE':     [round(mse_ols_3d,  3),
+                     round(mse_pcr1_3d, 3),
+                     round(mse_pcr2_3d, 3)]
 })
 print(comp_3d.to_string(index=False))
 ```
 
-The R² for PCR with just 1 component is nearly identical to the full OLS model — almost no predictive information was lost by dropping PC2 and PC3. The PCR model is dramatically simpler: one predictor, one coefficient, no multicollinearity. 
+Train R² and Test MSE tell different stories. Train R² is computed on the 450 observations used to fit each model — OLS can overfit by spreading coefficients across 3 correlated predictors, slightly inflating its training R². Test MSE is evaluated on the 150 held-out observations OLS has never seen. PCR with just 1 component achieves nearly the same test MSE as OLS despite using only a single predictor, confirming that almost all predictive signal lives in PC1. 
 
 ## General setup
 
@@ -668,24 +714,9 @@ The key tuning parameter is $M$. When $M = p$ (meaning you are using all the pri
 
 <!-- When $M < p$, the model has fewer degrees of freedom and lower variance, at the cost of some bias. -->
 
-## Example: meadow plant diversity
+## Exercise: meadow plant diversity
 
-We continue with the same dataset from the [previous lesson](../6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.qmd). Recall that we have 200 mountain meadow survey plots, each described by 8 environmental predictors:
-
-| Predictor | Description |
-|---|---|
-| `precip` | mean annual precipitation (mm) |
-| `temp` | mean summer temperature (°C) |
-| `forest_cover` | surrounding forest cover (%) |
-| `soil_N` | soil nitrogen content (mg/kg) |
-| `elevation` | elevation (m) |
-| `slope` | terrain slope (°) |
-| `aspect` | terrain aspect (°, 0–360) |
-| `canopy` | canopy cover (%) |
-
-The response is **`species_richness`**: the number of vascular plant species per 25 m² plot.
-
-In the previous lesson, we used ridge regression and the lasso to predict species richness from all 8 predictors simultaneously, shrinking the coefficients to manage the bias-variance tradeoff. In this lesson we take a different approach: *can we first reduce the 8 predictors to a smaller set of derived variables that capture most of their information, and then fit a regression on those?*
+We now apply PCA and PCR to the EcoRich dataset from the previous lesson: 200 mountain meadow survey plots with 8 environmental predictors (`precip`, `temp`, `forest_cover`, `soil_N`, `elevation`, `slope`, `aspect`, `canopy`) and response `species_richness`. Work through each check-in before expanding the discussion.
 
 <!-- 
 ### The biplot: loadings and scores together
@@ -807,11 +838,7 @@ print(load_df.to_string())
 3. `aspect` and `canopy` have smaller loading magnitudes and their arrows do not strongly align with either axis — reflecting that they carry little systematic signal. However, PCA does not set their loadings to exactly zero; it just assigns them small values because they don't explain much variance. This is different from the lasso, which can set coefficients to exactly zero. It is a known limitation of PCR: it cannot perform variable selection.
 ::: -->
 
-### Proportion of variance explained
-
-The **proportion of variance explained (PVE)** by PC$m$ is the fraction of total variance that PC$m$ accounts for. The PVE values sum to 1 across all $p$ components.
-
-The **scree plot** displays both the individual and cumulative PVE:
+### Check-in: Proportion of variance explained
 
 ```{python}
 #| label: scree-plot
@@ -845,28 +872,17 @@ plt.close()
 :::{.callout-tip}
 ## Check-in
 
-Looking at the scree plot:
+Looking at the scree plot above:
 
-1. How many components are needed to explain at least 90% of the total variance in the 8 predictors?
-2. Is there a visible "elbow" in the individual PVE plot? At which component does the curve start to flatten?
+How many components are needed to explain at least 90% of the total variance in the 8 predictors?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
-
-```{python}
-#| label: pve-discussion
-
-n_90 = int(np.argmax(cum_pve >= 0.90)) + 1
-print(f'Components needed for ≥90% cumulative PVE: {n_90}')
-print()
-print('Cumulative PVE:')
-for i, (pv, cpv) in enumerate(zip(pve, cum_pve)):
-    print(f'  PC{i+1}: individual = {pv*100:.1f}%,  cumulative = {cpv*100:.1f}%')
-```
-
-The elbow is typically found after the first few components, where each additional PC contributes a noticeably smaller fraction. Beyond the elbow, the components mostly capture noise or small idiosyncratic variation. That said, the elbow is a heuristic; cross-validation (used in PCR below) provides a more principled criterion tied directly to prediction accuracy.
+Seven components are needed to explain at least 90% variance in the predictors. 
 :::
+
+### Check-in: Selecting M via cross-validation
 
 The figure below shows the 10-fold CV-MSE for each value of $M$ from 1 to `{python} p`.
 
@@ -896,7 +912,7 @@ plt.close()
 ## Check-in
 
 1. What is the optimal number of components selected by cross-validation?
-2. At $M = $ `{python} p` (all components), what is the relationship between PCR and OLS? Is this reflected in the plot?
+2. At $M =$ `{python} p` (all components), what is the relationship between PCR and OLS? How are their CV-MSE related?
 :::
 
 :::{.callout-tip collapse="true"}
@@ -907,9 +923,7 @@ plt.close()
 2. When $M = p$, the $p$ PC scores span exactly the same space as the $p$ original predictors — PCA is a rotation, not a reduction. So PCR at $M = p$ is identical to OLS. The CV-MSE at the rightmost point in the plot is therefore the OLS CV-MSE.
 :::
 
-### Comparing PCR, ridge, and lasso
-
-All three methods control the bias-variance tradeoff and select their tuning parameter by cross-validation. The table below compares their best 10-fold CV-MSE on the EcoRich data:
+### Check-in: Comparing PCR, ridge, and lasso
 
 ```{python}
 #| label: method-comparison
@@ -948,3 +962,129 @@ print(comp_df.to_string(index=False))
 
 3. PCR cannot perform **variable selection**: it retains all original predictors in each PC (with varying loadings) and cannot set any loading to exactly zero. In a truly sparse setting — where a small number of predictors matter and the rest are pure noise — lasso has a structural advantage over PCR. PCR works best when the signal is spread across many predictors that share a common underlying structure.
 :::
+
+
+<!-- 
+## Exercise: when PCR actually reduces dimension
+
+The following exercise uses a dataset where PCR with far fewer than $p$ components outperforms OLS on held-out data.
+
+**Setup**: 300 observations, 6 predictors. Three of them (`u1`, `u2`, `u3`) share a single latent signal and are highly correlated with each other. The remaining three (`v1`, `v2`, `v3`) are independent noise. The response depends only on the latent signal, so the first PC should capture almost everything that matters for prediction.
+
+### Check-in: Scree plot
+
+```{python}
+#| label: ex2-scree
+#| fig-align: center
+
+comp_labels_ex2 = ['PC1','PC2','PC3','PC4','PC5','PC6']
+cum_pve_ex2 = np.cumsum(pve_ex2)
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.2, fig_size_y))
+
+axes[0].bar(comp_labels_ex2, pve_ex2 * 100,
+            color='steelblue', edgecolor='white', linewidth=0.5)
+axes[0].set_xlabel('Principal component')
+axes[0].set_ylabel('Variance explained (%)')
+axes[0].set_title('Individual PVE')
+axes[0].grid(True, alpha=0.3, axis='y')
+
+axes[1].plot(comp_labels_ex2, cum_pve_ex2 * 100, marker='o',
+             color='steelblue', linewidth=2, markersize=6)
+axes[1].axhline(90, color='tomato', linestyle='--', linewidth=1, label='90% threshold')
+axes[1].set_xlabel('Principal component')
+axes[1].set_ylabel('Cumulative variance explained (%)')
+axes[1].set_title('Cumulative PVE')
+axes[1].set_ylim(0, 105)
+axes[1].legend(fontsize=9)
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Check-in
+
+How many components does it take to reach 90% cumulative PVE?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+```{python}
+#| label: ex2-pve-vals
+
+n_90_ex2 = int(np.argmax(cum_pve_ex2 >= 0.90)) + 1
+print(f'Components needed for ≥90% PVE: {n_90_ex2}')
+for i, (pv, cpv) in enumerate(zip(pve_ex2, cum_pve_ex2)):
+    print(f'  PC{i+1}: individual = {pv*100:.1f}%,  cumulative = {cpv*100:.1f}%')
+```
+
+PC1 dominates because `u1`, `u2`, `u3` all load onto the same latent direction — their shared variance is concentrated in one component. The remaining PCs capture either tiny residuals within that group or the independent variance of `v1`, `v2`, `v3`. 
+:::
+
+### Check-in: Cross-validation to select M
+
+```{python}
+#| label: ex2-cv-plot
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y))
+
+ax.plot(range(1, 7), cv_mse_pcr_ex2,
+        marker='o', color='mediumpurple', linewidth=2, markersize=6,
+        label='10-fold CV MSE')
+ax.set_xlabel('Number of principal components (M)')
+ax.set_ylabel('CV mean squared error')
+ax.set_title('PCR: CV-MSE vs number of components')
+ax.set_xticks(range(1, 7))
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Check-in
+
+What is the optimal M you would select by cross-validation? Is this what you expected from the scree plot?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+CV selects M = `{python} best_m_ex2`, meaning one  component captures most of the predictive signal. Adding more PCs beyond the optimum increases test error because those PCs carry only noise.
+:::
+
+### Check-in: Does PCR outperform OLS here?
+
+```{python}
+#| label: ex2-comparison
+
+comp_ex2 = pd.DataFrame({
+    'Model':          [f'OLS  (M = 6, all components)',
+                       f'PCR  (M = {best_m_ex2}, CV-optimal)'],
+    '10-fold CV-MSE': [round(cv_mse_pcr_ex2[-1],          3),
+                       round(cv_mse_pcr_ex2[best_m_ex2-1], 3)]
+})
+print(comp_ex2.to_string(index=False))
+```
+
+:::{.callout-tip}
+## Check-in
+
+1. Does PCR at the CV-optimal M improve on OLS? By how much?
+2. Why is PCR with M = 6 equivalent to OLS here?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. Yes: CV-MSE at M = `{python} best_m_ex2` is lower than at M = 6 (OLS).
+
+2. PCR at M = 6 uses all six PC scores, which span exactly the same column space as the six original predictors, so it is mathematically identical to OLS.
+
+::: -->
