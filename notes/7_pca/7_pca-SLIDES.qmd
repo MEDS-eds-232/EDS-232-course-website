@@ -165,9 +165,7 @@ e2 = np.array([-1, 1]) / np.sqrt(2)
 
 - **Principal Component Analysis (PCA)** as a technique for dimensionality reduction
 - Principal components as directions of **maximum variance** in multivariate data
-- PCA as a new **coordinate system** for the data
 - **Principal Component Regression (PCR)**: fitting a regression model on PC scores instead of the original predictors
-- **Cross-validation** to select the optimal number of components in PCR
 
 ---
 
@@ -181,7 +179,7 @@ e2 = np.array([-1, 1]) / np.sqrt(2)
 
 ## {#motivation-slide data-menu-title="Motivation: the whale shark analogy"}
 
-[The big idea]{.slide-title}
+[To capture the most krill in a single pass, how would you align yourself?]{.slide-title}
 
 <hr>
 
@@ -197,8 +195,10 @@ e2 = np.array([-1, 1]) / np.sqrt(2)
 
 ::::
 
+. . .
+
 ::: {.body-text-s .center-text}
-Imagine a whale shark approaching a dense cluster of krill. To capture the most krill in a single pass, you would align yourself with the **direction of greatest spread** in the krill cloud — the axis along which krill are most dispersed.
+Imagine a whale shark approaching a dense cluster of krill. To capture the most krill in a single pass, you would align yourself with the **direction of greatest spread** in the krill cloud: the axis along which krill are most dispersed.
 :::
 
 ---
@@ -215,7 +215,7 @@ The same intuition applies to data. When we have many correlated predictors, som
 
 <br>
 
-**Principal Component Analysis (PCA)** finds those directions automatically.
+**Principal Component Analysis (PCA)** finds those directions of greatest variation automatically.
 
 <br>
 
@@ -371,7 +371,7 @@ Using a **different set of axes** $\tilde{X}_1$ and $\tilde{X}_2$ (rotated 45°)
 
 <br>
 
-Same points — different ways of representing them.
+Same points, just different ways of representing them.
 
 :::
 
@@ -471,6 +471,10 @@ The dashed red line shows the perpendicular drop from B to its projection on $\t
 
 ::::
 
+::: {.teal-text .center-text .body-text-m}
+We will use the idea of changing axes and projecting throughout. 
+:::
+
 ---
 
 ## {#section-pca data-menu-title="# Principal components #" background="#047C90"}
@@ -487,7 +491,7 @@ The dashed red line shows the perpendicular drop from B to its projection on $\t
 
 <hr>
 
-**Principal Component Analysis (PCA)** creates a new set of axes so that:
+**Principal Component Analysis (PCA)** creates a new set of axes/coordinates so that:
 
 - **PC1** points in the direction of **maximum variance** in the data
 - **PC2** points in the direction of maximum remaining variance, **orthogonal to PC1**
@@ -495,7 +499,9 @@ The dashed red line shows the perpendicular drop from B to its projection on $\t
 
 . . .
 
-There are always as many PCs as original variables. But if PC1 and PC2 explain most of the variance, we'd still see most of the important structure in our data using just those two.
+There are always as many PCs as original variables. 
+
+ If PC1 and PC2 explain most of the variance, we'd still see most of the important structure in our data using just those two.
 
 . . .
 
@@ -507,11 +513,13 @@ This is the core idea of **dimensionality reduction**: converting complex multiv
 
 ## {#pca-3d-intro data-menu-title="3D data example"}
 
-[A 3D example]{.slide-title}
+[A 3D example: 600 pts from three correlated variables $x$/$y$/$z$]{.slide-title}
 
 <hr>
 
-We generate 600 observations from three highly correlated variables ($x$, $y$, $z$).
+::: {.body-text-s .center-text}
+Most of the variation is concentrated along a single dominant axis — the data cloud is very elongated.
+:::
 
 ```{python}
 #| echo: false
@@ -529,9 +537,7 @@ plt.show()
 plt.close()
 ```
 
-::: {.body-text-s .center-text}
-Most of the variation is concentrated along a single dominant axis — the data cloud is very elongated.
-:::
+
 
 ---
 
@@ -566,7 +572,9 @@ plt.close()
 ::: {.column width="45%"}
 
 ::: {.teal-text .body-text-m}
-Recall that PC1 will be an axis in the direction of **maximum variance** in the data.
+Recall that PC1 will be an axis in the direction of **maximum variance** in the data. PC2 will be the direction of maximum remaining variance, orthogonal to PC1.
+
+<br>
 
 Where would you place PC1? What about PC2?
 :::
@@ -577,9 +585,9 @@ Where would you place PC1? What about PC2?
 
 ---
 
-## {#checkin-pc1-a data-menu-title="Check-in: where is PC1? (answer)"}
+## {#principal-components data-menu-title="PCA: identify PCs"}
 
-[Check-in]{.slide-title}
+[Identifying principal components]{.slide-title}
 
 <hr>
 
@@ -616,15 +624,14 @@ plt.close()
 
 ::: {.column width="45%"}
 
-::: {.teal-text .body-text-m}
-Recall that PC1 will be an axis in the direction of **maximum variance** in the data.
+<br>
 
-Where would you place PC1? What about PC2?
-:::
+<br>
 
-- **PC1 (yellow)** runs along the long axis of the cloud — the direction of greatest spread
-- **PC2 (salmon)** is perpendicular to PC1 and captures the remaining spread
-- **PC3 (lavender)** points through the thinnest dimension — almost no variance
+- **PC1** runs along the long axis of the cloud = the direction of greatest spread
+- **PC2** is perpendicular to PC1 and captures the remaining spread
+- **PC3** points through the thinnest dimension, almost no variance
+
 
 :::
 
@@ -638,7 +645,10 @@ Where would you place PC1? What about PC2?
 
 <hr>
 
-If we re-express every data point in PC coordinates (**PC scores** instead of $x/y/z$), the data cloud becomes axis-aligned:
+
+:::: {.columns}
+
+::: {.column width="55%"}
 
 ```{python}
 #| echo: false
@@ -659,16 +669,28 @@ for k, col in enumerate(pc_colors_3d):
 ax1.set_xlabel(f'PC1 ({pve_3d[0]*100:.0f}%)', labelpad=5)
 ax1.set_ylabel(f'PC2 ({pve_3d[1]*100:.0f}%)', labelpad=5)
 ax1.set_zlabel(f'PC3 ({pve_3d[2]*100:.0f}%)', labelpad=5)
-ax1.set_title('Data re-expressed in PC axes (ellipsoid is now axis-aligned)')
 ax1.view_init(elev=18, azim=-55)
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
-::: {.body-text-s .center-text}
-Each data point $(x, y, z)$ gets a new coordinate — its **scores** — in the PC coordinate system.
 :::
+
+::: {.column width="45%"}
+
+<br>
+
+If we re-express every data point in PC coordinates (**PC scores** instead of $x/y/z$), the data cloud becomes axis-aligned.
+
+<br>
+
+Each data point $(x, y, z)$ gets a new coordinate — its **scores** — in the PC coordinate system.
+
+:::
+
+::::
+
 
 ---
 
@@ -723,33 +745,21 @@ By projecting onto PC1 + PC2, we go from 3 dimensions to 2 while retaining `{pyt
 
 <hr>
 
-Every PC captures a certain share of the total variance — this is its **proportion of variance explained (PVE)**.
+Every PC captures a certain share of the total variance: this is its **proportion of variance explained (PVE)**.
 
-- The PVE values always **sum to 1** across all $p$ components
-- We are interested in how much variance is concentrated in the first few components
-- Use a **scree plot** to visualize the PVE for each PC
+::: {.body-text-s}
+- The PVE values always **sum to 1** across all components
+- We are usually interested in how much variance is concentrated in the first few components
+- Use a **scree plot** (left-hand side plot) to visualize the PVE for each PC
+:::
 
 . . .
 
-**Key decision**: how many components do we keep?
-
-::: {.body-text-s}
-- Keep enough components to explain **90–95% of total variance**, or
-- Look for an **"elbow"** in the individual PVE bar chart where bars drop sharply
-:::
-
----
-
-## {#pve-3d-slide data-menu-title="PVE: 3D example"}
-
-[PVE scree plot: 3D example]{.slide-title}
-
-<hr>
-
 ```{python}
 #| echo: false
+#| label: scree-plot
 #| fig-align: center
-#| out-width: "95%"
+#| out-width: "75%"
 
 pc_labels_3d_bar = ['PC1', 'PC2', 'PC3']
 
@@ -779,8 +789,55 @@ plt.close()
 ```
 
 ::: {.body-text-s .center-text}
-PC1 alone captures `{python} f"{pve_3d[0]*100:.1f}"` % of all variance. PC1 + PC2 together retain `{python} f"{(pve_3d[0]+pve_3d[1])*100:.1f}"` % — which is why the 2D projection preserved the data structure so well.
-:::
+PC1 alone captures `{python} f"{pve_3d[0]*100:.1f}"` % of all variance. 
+::: 
+
+---
+
+[How many components do we keep?]{.slide-title}
+
+<hr>
+
+
+```{python}
+#| echo: false
+#| label: how-many-components
+#| fig-align: center
+#| out-width: "75%"
+
+pc_labels_3d_bar = ['PC1', 'PC2', 'PC3']
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.3, fig_size_y))
+
+axes[0].bar(pc_labels_3d_bar, pve_3d * 100,
+            color=['#1cb8b8', '#e87070', '#9b9bcc'], edgecolor='white', linewidth=0.5)
+axes[0].set_xlabel('Principal component')
+axes[0].set_ylabel('Variance explained (%)')
+axes[0].set_title('Individual PVE (x/y/z data)')
+axes[0].set_ylim(0, 105)
+axes[0].grid(True, alpha=0.3, axis='y')
+
+cum_pve_3d = np.cumsum(pve_3d)
+axes[1].plot(pc_labels_3d_bar, cum_pve_3d * 100, marker='o',
+             color='steelblue', linewidth=2, markersize=8)
+axes[1].axhline(100, color='gray', linestyle='--', linewidth=1, alpha=0.5)
+axes[1].set_xlabel('Principal component')
+axes[1].set_ylabel('Cumulative variance explained (%)')
+axes[1].set_title('Cumulative PVE (x/y/z data)')
+axes[1].set_ylim(0, 110)
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
+- Keep enough components to explain **90–95% of total variance**, or
+- Look for an **"elbow"** in the individual PVE bar chart where bars drop sharply
+
+
+In this example: PC1 + PC2 together retain `{python} f"{(pve_3d[0]+pve_3d[1])*100:.1f}"` %, so the 2D projection preserved the data structure well. 
 
 ---
 
