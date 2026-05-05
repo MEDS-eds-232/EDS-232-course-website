@@ -1280,7 +1280,7 @@ How many components are needed to explain at least **90% of the total variance**
 
 ---
 
-## {#checkin-cv-q data-menu-title="Check-in: selecting M (question)"}
+## {#checkin-cv-q-1 data-menu-title="Check-in: selecting M (question)"}
 
 [Check-in]{.slide-title}
 
@@ -1404,7 +1404,6 @@ ax.axvline(best_m, color='tomato', linestyle='--', linewidth=1.5,
            label=f'Optimal M = {best_m}')
 ax.set_xlabel('Number of principal components (M)')
 ax.set_ylabel('CV mean squared error')
-ax.set_title('PCR: selecting M via cross-validation')
 ax.set_xticks(range(1, p + 1))
 ax.legend(fontsize=9)
 ax.grid(True, alpha=0.3)
@@ -1420,13 +1419,13 @@ plt.close()
 ::: {.teal-text .body-text-m}
 1. What is the **optimal number of components** selected by cross-validation?
 
-2. At $M = $ `{python} p` (all components), what is the relationship between **PCR and OLS**? How are their CV-MSEs related?
+2. How does this number of components relate with the OLS regression?
 :::
 
 ::: {.body-text-s}
 1. The optimal $M$ is `{python} best_m` — retaining `{python} best_m` component(s) gives the best out-of-sample prediction accuracy.
 
-2. So PCR at $M = p$ (number of predictors) is **identical to OLS**, and their CV-MSEs are equal.
+2. PCR at $M = p$ (number of predictors) is identical to OLS, and their CV-MSEs are equal.
 :::
 
 :::
@@ -1460,9 +1459,8 @@ print(comp_df.to_string(index=False))
 ```
 
 ::: {.teal-text .body-text-m}
-1. Does PCR improve on OLS? Is this the direction you expected based on the bias-variance tradeoff?
-2. Which method performs best? Does this make sense given the structure of the true data-generating model?
-3. What is a key limitation of PCR compared to lasso?
+1. Which method performs best? Does this make sense given the structure of the true data-generating model?
+2. What is a limitation of PCR compared to lasso?
 :::
 
 ---
@@ -1480,9 +1478,10 @@ print(comp_df.to_string(index=False))
 ```
 
 ::: {.body-text-s}
-1. **PCR should improve on OLS** because OLS overfits when predictors include irrelevant ones. Reducing to the most informative PC directions lowers variance at a small cost in bias.
+1. **Lasso** tends to perform best because it can exactly zero out the two truly irrelevant predictors (`aspect` and `canopy`), directly matching the structure of the true model.
 
-2. **Lasso** tends to perform best because it can exactly zero out the two truly irrelevant predictors (`aspect` and `canopy`), directly matching the structure of the true model.
+2. **PCR cannot perform variable selection and lasso can**.  PCR is still taking into account all variables when forming linear combinations of the predictors to create the principal components. PCR works best when the signal is spread across many predictors that may have correlation across them.
 
-3. **PCR cannot perform variable selection**: it retains all original predictors in each PC (with varying loadings) and cannot set any loading to exactly zero. In a truly sparse setting, lasso has a structural advantage. PCR works best when the signal is spread across many predictors that share a common underlying structure.
+<!-- 
+it retains all original predictors in each PC (with varying loadings) and cannot set any loading to exactly zero. In a truly sparse setting, lasso has a structural advantage.  -->
 :::

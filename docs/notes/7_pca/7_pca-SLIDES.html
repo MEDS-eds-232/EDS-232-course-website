@@ -143,9 +143,7 @@
 <ul>
 <li><strong>Principal Component Analysis (PCA)</strong> as a technique for dimensionality reduction</li>
 <li>Principal components as directions of <strong>maximum variance</strong> in multivariate data</li>
-<li>PCA as a new <strong>coordinate system</strong> for the data</li>
 <li><strong>Principal Component Regression (PCR)</strong>: fitting a regression model on PC scores instead of the original predictors</li>
-<li><strong>Cross-validation</strong> to select the optimal number of components in PCR</li>
 </ul>
 </section>
 <section id="section-motivation" class="slide level2" data-menu-title="# Motivation #" data-background="#047C90">
@@ -158,7 +156,7 @@ Motivation
 </section>
 <section id="motivation-slide" class="slide level2" data-menu-title="Motivation: the whale shark analogy">
 <h2></h2>
-<p><span class="slide-title">The big idea</span></p>
+<p><span class="slide-title">To capture the most krill in a single pass, how would you align yourself?</span></p>
 <hr>
 <div class="columns">
 <div class="column" style="width:50%;">
@@ -171,8 +169,10 @@ Motivation
 </div><div class="column" style="width:50%;">
 <p><img data-src="allison_horst_PCA_2.png" style="width:100.0%"></p>
 </div></div>
+<div class="fragment">
 <div class="body-text-s center-text">
-<p>Imagine a whale shark approaching a dense cluster of krill. To capture the most krill in a single pass, you would align yourself with the <strong>direction of greatest spread</strong> in the krill cloud — the axis along which krill are most dispersed.</p>
+<p>Imagine a whale shark approaching a dense cluster of krill. To capture the most krill in a single pass, you would align yourself with the <strong>direction of greatest spread</strong> in the krill cloud: the axis along which krill are most dispersed.</p>
+</div>
 </div>
 </section>
 <section id="motivation-idea" class="slide level2" data-menu-title="Motivation: core idea">
@@ -182,7 +182,7 @@ Motivation
 <p><br></p>
 <p>The same intuition applies to data. When we have many correlated predictors, some directions capture a great deal of the variation while others capture very little.</p>
 <p><br></p>
-<p><strong>Principal Component Analysis (PCA)</strong> finds those directions automatically.</p>
+<p><strong>Principal Component Analysis (PCA)</strong> finds those directions of greatest variation automatically.</p>
 <p><br></p>
 <div class="teal-text center-text body-text-m">
 <p>With many predictor variables, PCA simplifies our view of the coordinate system to capture <em>as much about the data as possible in as few dimensions as possible</em>.</p>
@@ -202,11 +202,11 @@ Axes, coordinates, and projections
 <hr>
 <div class="columns">
 <div class="column" style="width:45%;">
-<div id="454a6aa9" class="cell" data-execution_count="2">
+<div id="fea6439f" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-3-output-1.png" class="quarto-figure quarto-figure-center" width="436" height="429"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-3-output-1.png" class="quarto-figure quarto-figure-center" width="436" height="429"></p>
 </figure>
 </div>
 </div>
@@ -242,11 +242,11 @@ Axes, coordinates, and projections
 <hr>
 <div class="columns">
 <div class="column" style="width:45%;">
-<div id="939d106e" class="cell" data-execution_count="3">
+<div id="4c49d2d1" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-4-output-1.png" class="quarto-figure quarto-figure-center" width="436" height="429"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-4-output-1.png" class="quarto-figure quarto-figure-center" width="436" height="429"></p>
 </figure>
 </div>
 </div>
@@ -277,7 +277,7 @@ Axes, coordinates, and projections
 </tbody>
 </table>
 <p><br></p>
-<p>Same points — different ways of representing them.</p>
+<p>Same points, just different ways of representing them.</p>
 </div></div>
 </section>
 <section id="axes-projection-slide" class="slide level2" data-menu-title="Projecting onto an axis">
@@ -286,11 +286,11 @@ Axes, coordinates, and projections
 <hr>
 <div class="columns">
 <div class="column" style="width:45%;">
-<div id="9deeefbf" class="cell" data-execution_count="4">
+<div id="7e564e6c" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-5-output-1.png" class="quarto-figure quarto-figure-center" width="436" height="429"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-5-output-1.png" class="quarto-figure quarto-figure-center" width="436" height="429"></p>
 </figure>
 </div>
 </div>
@@ -322,6 +322,9 @@ Axes, coordinates, and projections
 <p>The dashed red line shows the perpendicular drop from B to its projection on <span class="math inline">\(\tilde{X}_1\)</span>.</p>
 </div>
 </div></div>
+<div class="teal-text center-text body-text-m">
+<p>We will use the idea of changing axes and projecting throughout.</p>
+</div>
 </section>
 <section id="section-pca" class="slide level2" data-menu-title="# Principal components #" data-background="#047C90">
 <h2></h2>
@@ -335,14 +338,15 @@ Principal components
 <h2></h2>
 <p><span class="slide-title">What are principal components?</span></p>
 <hr>
-<p><strong>Principal Component Analysis (PCA)</strong> creates a new set of axes so that:</p>
+<p><strong>Principal Component Analysis (PCA)</strong> creates a new set of axes/coordinates so that:</p>
 <ul>
 <li><strong>PC1</strong> points in the direction of <strong>maximum variance</strong> in the data</li>
 <li><strong>PC2</strong> points in the direction of maximum remaining variance, <strong>orthogonal to PC1</strong></li>
 <li><strong>PC3</strong> is orthogonal to both PC1 and PC2, and explains the most remaining variance, and so on</li>
 </ul>
 <div class="fragment">
-<p>There are always as many PCs as original variables. But if PC1 and PC2 explain most of the variance, we’d still see most of the important structure in our data using just those two.</p>
+<p>There are always as many PCs as original variables.</p>
+<p>If PC1 and PC2 explain most of the variance, we’d still see most of the important structure in our data using just those two.</p>
 </div>
 <div class="fragment">
 <div class="teal-text body-text-m center-text">
@@ -352,20 +356,19 @@ Principal components
 </section>
 <section id="pca-3d-intro" class="slide level2" data-menu-title="3D data example">
 <h2></h2>
-<p><span class="slide-title">A 3D example</span></p>
+<p><span class="slide-title">A 3D example: 600 pts from three correlated variables <span class="math inline">\(x\)</span>/<span class="math inline">\(y\)</span>/<span class="math inline">\(z\)</span></span></p>
 <hr>
-<p>We generate 600 observations from three highly correlated variables (<span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span>, <span class="math inline">\(z\)</span>).</p>
-<div id="a994d1d1" class="cell" data-execution_count="5">
+<div class="body-text-s center-text">
+<p>Most of the variation is concentrated along a single dominant axis — the data cloud is very elongated.</p>
+</div>
+<div id="7e60b4c6" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-6-output-1.png" class="quarto-figure quarto-figure-center" width="503" height="486"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-6-output-1.png" class="quarto-figure quarto-figure-center" width="503" height="486"></p>
 </figure>
 </div>
 </div>
-</div>
-<div class="body-text-s center-text">
-<p>Most of the variation is concentrated along a single dominant axis — the data cloud is very elongated.</p>
 </div>
 </section>
 <section id="checkin-pc1-q" class="slide level2" data-menu-title="Check-in: where is PC1?">
@@ -374,46 +377,45 @@ Principal components
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="7782ea96" class="cell" data-execution_count="6">
+<div id="616c015e" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-7-output-1.png" class="quarto-figure quarto-figure-center" width="503" height="486"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-7-output-1.png" class="quarto-figure quarto-figure-center" width="503" height="486"></p>
 </figure>
 </div>
 </div>
 </div>
 </div><div class="column" style="width:45%;">
 <div class="teal-text body-text-m">
-<p>Recall that PC1 will be an axis in the direction of <strong>maximum variance</strong> in the data.</p>
+<p>Recall that PC1 will be an axis in the direction of <strong>maximum variance</strong> in the data. PC2 will be the direction of maximum remaining variance, orthogonal to PC1.</p>
+<p><br></p>
 <p>Where would you place PC1? What about PC2?</p>
 </div>
 </div></div>
 </section>
-<section id="checkin-pc1-a" class="slide level2" data-menu-title="Check-in: where is PC1? (answer)">
+<section id="principal-components" class="slide level2" data-menu-title="PCA: identify PCs">
 <h2></h2>
-<p><span class="slide-title">Check-in</span></p>
+<p><span class="slide-title">Identifying principal components</span></p>
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="2d5ad0ea" class="cell" data-execution_count="7">
+<div id="da32086d" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-8-output-1.png" class="quarto-figure quarto-figure-center" width="502" height="486"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-8-output-1.png" class="quarto-figure quarto-figure-center" width="502" height="486"></p>
 </figure>
 </div>
 </div>
 </div>
 </div><div class="column" style="width:45%;">
-<div class="teal-text body-text-m">
-<p>Recall that PC1 will be an axis in the direction of <strong>maximum variance</strong> in the data.</p>
-<p>Where would you place PC1? What about PC2?</p>
-</div>
+<p><br></p>
+<p><br></p>
 <ul>
-<li><strong>PC1 (yellow)</strong> runs along the long axis of the cloud — the direction of greatest spread</li>
-<li><strong>PC2 (salmon)</strong> is perpendicular to PC1 and captures the remaining spread</li>
-<li><strong>PC3 (lavender)</strong> points through the thinnest dimension — almost no variance</li>
+<li><strong>PC1</strong> runs along the long axis of the cloud = the direction of greatest spread</li>
+<li><strong>PC2</strong> is perpendicular to PC1 and captures the remaining spread</li>
+<li><strong>PC3</strong> points through the thinnest dimension, almost no variance</li>
 </ul>
 </div></div>
 </section>
@@ -421,30 +423,34 @@ Principal components
 <h2></h2>
 <p><span class="slide-title">PCA gives us a new coordinate system</span></p>
 <hr>
-<p>If we re-express every data point in PC coordinates (<strong>PC scores</strong> instead of <span class="math inline">\(x/y/z\)</span>), the data cloud becomes axis-aligned:</p>
-<div id="b3afb099" class="cell" data-execution_count="8">
+<div class="columns">
+<div class="column" style="width:55%;">
+<div id="7dab996c" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-9-output-1.png" class="quarto-figure quarto-figure-center" width="564" height="506"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-9-output-1.png" class="quarto-figure quarto-figure-center" width="522" height="506"></p>
 </figure>
 </div>
 </div>
 </div>
-<div class="body-text-s center-text">
+</div><div class="column" style="width:45%;">
+<p><br></p>
+<p>If we re-express every data point in PC coordinates (<strong>PC scores</strong> instead of <span class="math inline">\(x/y/z\)</span>), the data cloud becomes axis-aligned.</p>
+<p><br></p>
 <p>Each data point <span class="math inline">\((x, y, z)\)</span> gets a new coordinate — its <strong>scores</strong> — in the PC coordinate system.</p>
-</div>
+</div></div>
 </section>
 <section id="pca-2d-projection" class="slide level2" data-menu-title="2D projection">
 <h2></h2>
 <p><span class="slide-title">Projecting to 2D: keeping PC1 + PC2</span></p>
 <hr>
 <p>Because PC1 alone captures 95 % of the variance, dropping PC3 (which contains only 1.1 % of the variance) loses very little information:</p>
-<div id="e3c3a739" class="cell" data-execution_count="9">
+<div id="475a5416" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-10-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="386"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-10-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="386"></p>
 </figure>
 </div>
 </div>
@@ -465,38 +471,47 @@ Proportion of variance explained
 <h2></h2>
 <p><span class="slide-title">Proportion of variance explained (PVE)</span></p>
 <hr>
-<p>Every PC captures a certain share of the total variance — this is its <strong>proportion of variance explained (PVE)</strong>.</p>
-<ul>
-<li>The PVE values always <strong>sum to 1</strong> across all <span class="math inline">\(p\)</span> components</li>
-<li>We are interested in how much variance is concentrated in the first few components</li>
-<li>Use a <strong>scree plot</strong> to visualize the PVE for each PC</li>
-</ul>
-<div class="fragment">
-<p><strong>Key decision</strong>: how many components do we keep?</p>
+<p>Every PC captures a certain share of the total variance: this is its <strong>proportion of variance explained (PVE)</strong>.</p>
 <div class="body-text-s">
 <ul>
-<li>Keep enough components to explain <strong>90–95% of total variance</strong>, or</li>
-<li>Look for an <strong>“elbow”</strong> in the individual PVE bar chart where bars drop sharply</li>
+<li>The PVE values always <strong>sum to 1</strong> across all components</li>
+<li>We are usually interested in how much variance is concentrated in the first few components</li>
+<li>Use a <strong>scree plot</strong> (left-hand side plot) to visualize the PVE for each PC</li>
 </ul>
 </div>
-</div>
-</section>
-<section id="pve-3d-slide" class="slide level2" data-menu-title="PVE: 3D example">
-<h2></h2>
-<p><span class="slide-title">PVE scree plot: 3D example</span></p>
-<hr>
-<div id="b7c15637" class="cell" data-execution_count="10">
+<div class="fragment">
+<div id="cell-scree-plot" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-11-output-1.png" class="quarto-figure quarto-figure-center" width="1026" height="386"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/scree-plot-output-1.png" id="scree-plot" class="quarto-figure quarto-figure-center" width="1026" height="386"></p>
 </figure>
 </div>
 </div>
 </div>
 <div class="body-text-s center-text">
-<p>PC1 alone captures 95.1 % of all variance. PC1 + PC2 together retain 98.9 % — which is why the 2D projection preserved the data structure so well.</p>
+<p>PC1 alone captures 95.1 % of all variance.</p>
 </div>
+</div>
+</section>
+<section class="slide level2">
+
+<p><span class="slide-title">How many components do we keep?</span></p>
+<hr>
+<div id="cell-how-many-components" class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/how-many-components-output-1.png" id="how-many-components" class="quarto-figure quarto-figure-center" width="1026" height="386"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>Keep enough components to explain <strong>90–95% of total variance</strong>, or</li>
+<li>Look for an <strong>“elbow”</strong> in the individual PVE bar chart where bars drop sharply</li>
+</ul>
+<p>In this example: PC1 + PC2 together retain 98.9 %, so the 2D projection preserved the data structure well. We could have projected only onto PC1 too!</p>
 </section>
 <section id="section-pcr" class="slide level2" data-menu-title="# Principal Component Regression #" data-background="#047C90">
 <h2></h2>
@@ -510,30 +525,30 @@ Principal Component Regression
 <h2></h2>
 <p><span class="slide-title">Principal Component Regression</span></p>
 <hr>
-<p>So far, PCA has been applied to the <strong>predictors only</strong> — the response variable <span class="math inline">\(Y\)</span> plays no role.</p>
+<p>So far, PCA has been applied to the <strong>predictors only</strong>: we have not used the response variable <span class="math inline">\(Y\)</span>.</p>
+<p><br></p>
 <div class="fragment">
-<p><strong>Principal Component Regression (PCR)</strong> connects this structure to the response:</p>
+<p><strong>Principal Component Regression (PCR)</strong> connects the predictors and their PCs to the response:</p>
 <div class="body-text-m teal-text center-text">
 <p>Replace the original <span class="math inline">\(p\)</span> predictors with <span class="math inline">\(M \leq p\)</span> principal components, then fit OLS on the projected data.</p>
 </div>
-</div>
-<div class="fragment">
+<p><br></p>
 <p>The guiding assumption: <strong>the directions in which the predictors vary the most are often also the directions most strongly associated with the response.</strong></p>
-</div>
-<div class="fragment">
-<p>This is an assumption — but a reasonable one in many real settings.</p>
+<p>Reasonable one in many real settings.</p>
 </div>
 </section>
 <section id="pcr-3d-setup" class="slide level2" data-menu-title="PCR 3D example">
 <h2></h2>
 <p><span class="slide-title">PCR: 3D example setup</span></p>
 <hr>
-<p>Using our 3D <span class="math inline">\(x/y/z\)</span> data, suppose we observe a response <span class="math inline">\(Y\)</span>:</p>
+<p>Using our 3D <span class="math inline">\(x/y/z\)</span> data, suppose we observe a response <span class="math inline">\(Y\)</span>. We generate it with the following formula:</p>
 <p><span class="math display">\[Y = 2x + 2y + 2z + \varepsilon\]</span></p>
-<p>So the true coefficients are <strong>2 for all three predictors</strong>.</p>
+<p>So the <strong>true coefficients</strong> are 2 for all three predictors.</p>
 <div class="fragment">
-<p><strong>Standard OLS</strong> must estimate three separate coefficients:</p>
-<div id="8f2c9a33" class="cell" data-execution_count="11">
+<p>If we model <span class="math inline">\(Y\)</span> using three predictors <span class="math inline">\(x\)</span>/<span class="math inline">\(y\)</span>/<span class="math inline">\(z\)</span> and a standard MLR fit by OLS then, our model is:</p>
+<p><span class="math display">\[\hat{Y} = \hat{\beta}_0 + \hat{\beta}_x \cdot x + \hat{\beta}_y \cdot y + \hat{\beta}_z \cdot z\]</span></p>
+<p>and we get the coefficient estimates:</p>
+<div id="b1debacb" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-stdout">
 <pre><code>Predictor  OLS coefficient
         x            2.039
@@ -544,22 +559,22 @@ OLS intercept: -0.072   |   OLS R²: 0.944</code></pre>
 </div>
 </div>
 </div>
-<div class="fragment">
-<p>Since PC1 captures 95.1 % of the variance in <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span>, <span class="math inline">\(z\)</span>, we can try replacing all three variables with just PC1.</p>
-</div>
 </section>
 <section id="pcr-1comp-slide" class="slide level2" data-menu-title="PCR with 1 component">
 <h2></h2>
 <p><span class="slide-title">PCR with M = 1 component</span></p>
 <hr>
+<p>Since PC1 captures 95.1 % of the variance in <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span>, <span class="math inline">\(z\)</span>, we can try replacing all three variables with just PC1.</p>
 <p>Instead of three predictors, we fit a <strong>simple linear regression</strong> on PC1:</p>
-<p><span class="math display">\[\hat{Y} = \hat{\alpha}_0 + \hat{\alpha}_1 \cdot \text{PC1}\]</span></p>
-<div id="8b28949c" class="cell" data-execution_count="12">
+<p><span class="math display">\[\hat{Y} = \hat{\alpha}_0 + \hat{\alpha}_1 \cdot \text{PC1}.\]</span></p>
+<div class="fragment">
+<div id="b7280082" class="cell" data-execution_count="13">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-13-output-1.png" class="quarto-figure quarto-figure-center" width="866" height="386"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-14-output-1.png" class="quarto-figure quarto-figure-center" width="866" height="386"></p>
 </figure>
+</div>
 </div>
 </div>
 </div>
@@ -568,7 +583,7 @@ OLS intercept: -0.072   |   OLS R²: 0.944</code></pre>
 <h2></h2>
 <p><span class="slide-title">OLS vs PCR: train and test performance</span></p>
 <hr>
-<div id="83dfc9f3" class="cell" data-execution_count="13">
+<div id="25eda793" class="cell" data-execution_count="14">
 <div class="cell-output cell-output-stdout">
 <pre><code>                       Model  Parameters  Train R²  Test MSE
 OLS  (3 predictors: x, y, z)           3     0.944     2.112
@@ -576,14 +591,16 @@ OLS  (3 predictors: x, y, z)           3     0.944     2.112
      PCR  (M = 2 components)           2     0.944     2.110</code></pre>
 </div>
 </div>
-<div class="fragment">
 <p><br></p>
-<div class="body-text-s">
 <ul>
-<li><strong>Train R²</strong>: OLS can slightly overfit by spreading coefficients across 3 correlated predictors</li>
-<li><strong>Test MSE</strong>: PCR with just 1 component achieves nearly the same test MSE as OLS — confirming that almost all predictive signal lives in PC1</li>
+<li><strong>Train R²</strong>: a measure of how well the model fits the data it was trained on</li>
+<li><strong>Test MSE</strong>: a measure of how well the model generalizes to predict values in previously unseen data</li>
 </ul>
+<div class="body-text-m teal-text center-text">
+<p>What do these results tell you about where most of the predictive signal from this data is coming from?</p>
 </div>
+<div class="fragment">
+<p>Here PCR with just 1 component achieves nearly the same test MSE as OLS. This confirmis that almost all predictive signal lives in PC1!</p>
 </div>
 </section>
 <section id="section-setup" class="slide level2" data-menu-title="# General setup #" data-background="#047C90">
@@ -598,15 +615,16 @@ General setup
 <h2></h2>
 <p><span class="slide-title">PCR: general setup</span></p>
 <hr>
-<p>We apply PCR in the context of <strong>multiple linear regression</strong> with <span class="math inline">\(p\)</span> predictors <span class="math inline">\(X_1, \ldots, X_p\)</span> and response <span class="math inline">\(Y\)</span>:</p>
+<p>We apply PCR in the context of <strong>multiple linear regression</strong> with <span class="math inline">\(p\)</span> predictors <span class="math inline">\(X_1, \ldots, X_p\)</span> and a response <span class="math inline">\(Y\)</span>:</p>
 <p><span class="math display">\[Y = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \cdots + \hat{\beta}_p X_p.\]</span></p>
 <div class="fragment">
 <p><strong>PCR works in four steps:</strong></p>
 <ol type="1">
 <li><strong>Standardize</strong> the predictors (mean 0, SD 1)</li>
 <li><strong>Compute the principal components</strong> of the standardized predictors</li>
-<li><strong>Project</strong> each observation onto the first <span class="math inline">\(M\)</span> components (the PC scores)</li>
-<li><strong>Fit ordinary least squares</strong> of <span class="math inline">\(Y\)</span> on these <span class="math inline">\(M\)</span> scores</li>
+<li><strong>Decide which PCs will be used</strong> to reduce dimensions</li>
+<li><strong>Project</strong> each observation onto the first <span class="math inline">\(M\)</span> components</li>
+<li><strong>Fit ordinary least squares</strong> of <span class="math inline">\(Y\)</span> on this new data</li>
 </ol>
 </div>
 <div class="fragment">
@@ -614,7 +632,13 @@ General setup
 <div class="body-text-s">
 <ul>
 <li>When <span class="math inline">\(M = p\)</span>, PCR is equivalent to OLS (all components retain all information)</li>
-<li>When <span class="math inline">\(M &lt; p\)</span>, the model has fewer parameters — lower variance at the cost of some bias</li>
+<li>When <span class="math inline">\(M &lt; p\)</span>, the model has fewer parameters: lower variance at the cost of some bias</li>
+</ul>
+</div>
+</div>
+<div class="fragment">
+<div class="body-text-s">
+<ul>
 <li><span class="math inline">\(M\)</span> is chosen by <strong>cross-validation</strong>, just like <span class="math inline">\(\lambda\)</span> for ridge and lasso</li>
 </ul>
 </div>
@@ -630,22 +654,60 @@ Exercise: meadow plant diversity
 </section>
 <section id="exercise-intro" class="slide level2" data-menu-title="EcoRich dataset">
 <h2></h2>
-<p><span class="slide-title">EcoRich dataset</span></p>
+<p><span class="slide-title">Meadow plant diversity dataset</span></p>
 <hr>
-<p>We apply PCA and PCR to the <strong>EcoRich dataset</strong> from the previous lesson:</p>
+<p>We apply PCA and PCR to the dataset from the previous lesson:</p>
 <p><br></p>
 <div class="body-text-m">
 <ul>
 <li><strong>200</strong> mountain meadow survey plots</li>
 <li><strong>8 environmental predictors</strong>: <code>precip</code>, <code>temp</code>, <code>forest_cover</code>, <code>soil_N</code>, <code>elevation</code>, <code>slope</code>, <code>aspect</code>, <code>canopy</code></li>
 <li><strong>Response</strong>: <code>species_richness</code> (plant species per 25 m² plot)</li>
-<li><strong>True model</strong>: only <code>precip</code>, <code>temp</code>, <code>forest_cover</code>, <code>soil_N</code>, <code>elevation</code>, <code>slope</code> have non-zero effects; <code>aspect</code> and <code>canopy</code> are pure noise</li>
 </ul>
 </div>
-<p><br></p>
-<div class="teal-text center-text body-text-m">
-<p>Work through each check-in before moving to the answer.</p>
+</section>
+<section id="data-overview" class="slide level2" data-menu-title="EcoRich: data overview">
+<h2></h2>
+<p><span class="slide-title">Data overview</span></p>
+<hr>
+<div id="1a1e7c96" class="cell" data-execution_count="15">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-16-output-1.png" class="quarto-figure quarto-figure-center" width="1265" height="529"></p>
+</figure>
 </div>
+</div>
+</div>
+<div class="center-text body-text-s">
+<p><strong>True model</strong>: only <code>precip</code>, <code>temp</code>, <code>forest_cover</code>, <code>soil_N</code>, <code>elevation</code>, <code>slope</code> have non-zero coefficients</p>
+<p><code>aspect</code> and <code>canopy</code> are pure noise</p>
+</div>
+</section>
+<section id="checkin-scree-1" class="slide level2" data-menu-title="Check-in: Scree (question)">
+<h2></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:58%;">
+<div id="fec13d67" class="cell" data-execution_count="16">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-17-output-1.png" class="quarto-figure quarto-figure-center" width="784" height="386"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:42%;">
+<div class="teal-text body-text-m">
+<p>Explain to the person you are working with:</p>
+<ol type="1">
+<li><p>how each of the PCs is computed and</p></li>
+<li><p>what is being depicted on each of the plots.</p></li>
+</ol>
+</div>
+</div></div>
 </section>
 <section id="checkin-pve-q" class="slide level2" data-menu-title="Check-in: PVE (question)">
 <h2></h2>
@@ -653,11 +715,11 @@ Exercise: meadow plant diversity
 <hr>
 <div class="columns">
 <div class="column" style="width:58%;">
-<div id="3fa503ad" class="cell" data-execution_count="14">
+<div id="df898cc3" class="cell" data-execution_count="17">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-15-output-1.png" class="quarto-figure quarto-figure-center" width="784" height="386"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-18-output-1.png" class="quarto-figure quarto-figure-center" width="784" height="386"></p>
 </figure>
 </div>
 </div>
@@ -675,11 +737,11 @@ Exercise: meadow plant diversity
 <hr>
 <div class="columns">
 <div class="column" style="width:58%;">
-<div id="8f515f19" class="cell" data-execution_count="15">
+<div id="9f5f90b4" class="cell" data-execution_count="18">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-16-output-1.png" class="quarto-figure quarto-figure-center" width="784" height="386"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-19-output-1.png" class="quarto-figure quarto-figure-center" width="784" height="386"></p>
 </figure>
 </div>
 </div>
@@ -691,7 +753,33 @@ Exercise: meadow plant diversity
 </div>
 <p><strong>Seven</strong> components are needed to reach 90% cumulative PVE.</p>
 <div class="body-text-s">
-<p>Because the 8 predictors were generated independently, no single dominant direction captures most of the variance — the PVE is spread fairly evenly across components.</p>
+<p><em>In this example the 8 predictors were generated independently, no single dominant direction captures most of the variance. The PVE is spread fairly evenly across components.</em></p>
+</div>
+</div></div>
+</section>
+<section id="checkin-cv-q-1" class="slide level2" data-menu-title="Check-in: selecting M (question)">
+<h2></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:58%;">
+<p>The figure below shows the 10-fold CV-MSE for each value of <span class="math inline">\(M\)</span> from 1 to 8.</p>
+<div id="148d4588" class="cell" data-execution_count="19">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-20-output-1.png" class="quarto-figure quarto-figure-center" width="786" height="385"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:42%;">
+<div class="teal-text body-text-m">
+<p>Explain to the person you are working with:</p>
+<ol type="1">
+<li><p>Why are we interested in selecting only a few of the principal components?</p></li>
+<li><p>How is CV used to select the optimal number of components?</p></li>
+</ol>
 </div>
 </div></div>
 </section>
@@ -702,11 +790,11 @@ Exercise: meadow plant diversity
 <div class="columns">
 <div class="column" style="width:58%;">
 <p>The figure below shows the 10-fold CV-MSE for each value of <span class="math inline">\(M\)</span> from 1 to 8.</p>
-<div id="5255bba0" class="cell" data-execution_count="16">
+<div id="0d0f3440" class="cell" data-execution_count="20">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-17-output-1.png" class="quarto-figure quarto-figure-center" width="786" height="386"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-21-output-1.png" class="quarto-figure quarto-figure-center" width="786" height="385"></p>
 </figure>
 </div>
 </div>
@@ -715,7 +803,7 @@ Exercise: meadow plant diversity
 <div class="teal-text body-text-m">
 <ol type="1">
 <li><p>What is the <strong>optimal number of components</strong> selected by cross-validation?</p></li>
-<li><p>At $M = $ 8 (all components), what is the relationship between <strong>PCR and OLS</strong>? How are their CV-MSEs related?</p></li>
+<li><p>How does this number of components relate with the OLS regression?</p></li>
 </ol>
 </div>
 </div></div>
@@ -727,11 +815,11 @@ Exercise: meadow plant diversity
 <div class="columns">
 <div class="column" style="width:58%;">
 <p>The figure below shows the 10-fold CV-MSE for each value of <span class="math inline">\(M\)</span> from 1 to 8.</p>
-<div id="fd8c89e2" class="cell" data-execution_count="17">
+<div id="2759c6c6" class="cell" data-execution_count="21">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="7_pca-SLIDES_files/figure-html/cell-18-output-1.png" class="quarto-figure quarto-figure-center" width="786" height="386"></p>
+<p><img data-src="7_pca-SLIDES_files/figure-revealjs/cell-22-output-1.png" class="quarto-figure quarto-figure-center" width="786" height="385"></p>
 </figure>
 </div>
 </div>
@@ -740,13 +828,13 @@ Exercise: meadow plant diversity
 <div class="teal-text body-text-m">
 <ol type="1">
 <li><p>What is the <strong>optimal number of components</strong> selected by cross-validation?</p></li>
-<li><p>At $M = $ 8 (all components), what is the relationship between <strong>PCR and OLS</strong>? How are their CV-MSEs related?</p></li>
+<li><p>How does this number of components relate with the OLS regression?</p></li>
 </ol>
 </div>
 <div class="body-text-s">
 <ol type="1">
 <li><p>The optimal <span class="math inline">\(M\)</span> is 8 — retaining 8 component(s) gives the best out-of-sample prediction accuracy.</p></li>
-<li><p>When <span class="math inline">\(M = p\)</span>, the <span class="math inline">\(p\)</span> PC scores span exactly the same space as the <span class="math inline">\(p\)</span> original predictors — PCA is a rotation, not a reduction. So PCR at <span class="math inline">\(M = p\)</span> is <strong>identical to OLS</strong>, and their CV-MSEs are equal.</p></li>
+<li><p>PCR at <span class="math inline">\(M = p\)</span> (number of predictors) is identical to OLS, and their CV-MSEs are equal.</p></li>
 </ol>
 </div>
 </div></div>
@@ -755,7 +843,7 @@ Exercise: meadow plant diversity
 <h2></h2>
 <p><span class="slide-title">Check-in: comparing PCR, ridge, and lasso</span></p>
 <hr>
-<div id="c8153bfc" class="cell" data-execution_count="18">
+<div id="4d961c8a" class="cell" data-execution_count="22">
 <div class="cell-output cell-output-stdout">
 <pre><code>                Method CV-MSE
 OLS (all 8 predictors) 14.664
@@ -766,9 +854,8 @@ OLS (all 8 predictors) 14.664
 </div>
 <div class="teal-text body-text-m">
 <ol type="1">
-<li>Does PCR improve on OLS? Is this the direction you expected based on the bias-variance tradeoff?</li>
 <li>Which method performs best? Does this make sense given the structure of the true data-generating model?</li>
-<li>What is a key limitation of PCR compared to lasso?</li>
+<li>What is a limitation of PCR compared to lasso?</li>
 </ol>
 </div>
 </section>
@@ -776,7 +863,7 @@ OLS (all 8 predictors) 14.664
 <h2></h2>
 <p><span class="slide-title">Check-in: comparing PCR, ridge, and lasso</span></p>
 <hr>
-<div id="b65bd871" class="cell" data-execution_count="19">
+<div id="38f71850" class="cell" data-execution_count="23">
 <div class="cell-output cell-output-stdout">
 <pre><code>                Method CV-MSE
 OLS (all 8 predictors) 14.664
@@ -787,10 +874,11 @@ OLS (all 8 predictors) 14.664
 </div>
 <div class="body-text-s">
 <ol type="1">
-<li><p><strong>PCR should improve on OLS</strong> because OLS overfits when predictors include irrelevant ones. Reducing to the most informative PC directions lowers variance at a small cost in bias.</p></li>
 <li><p><strong>Lasso</strong> tends to perform best because it can exactly zero out the two truly irrelevant predictors (<code>aspect</code> and <code>canopy</code>), directly matching the structure of the true model.</p></li>
-<li><p><strong>PCR cannot perform variable selection</strong>: it retains all original predictors in each PC (with varying loadings) and cannot set any loading to exactly zero. In a truly sparse setting, lasso has a structural advantage. PCR works best when the signal is spread across many predictors that share a common underlying structure.</p></li>
+<li><p><strong>PCR cannot perform variable selection and lasso can</strong>. PCR is still taking into account all variables when forming linear combinations of the predictors to create the principal components. PCR works best when the signal is spread across many predictors that may have correlation across them.</p></li>
 </ol>
+<!-- 
+it retains all original predictors in each PC (with varying loadings) and cannot set any loading to exactly zero. In a truly sparse setting, lasso has a structural advantage.  -->
 </div>
 
 

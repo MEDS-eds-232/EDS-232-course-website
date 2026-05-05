@@ -195,7 +195,9 @@ for m_ex2 in range(1, 7):
 best_m_ex2 = int(np.argmin(cv_mse_pcr_ex2)) + 1
 ```
 
-[📊 Slides](7_pca-SLIDES.qmd) / [📊 Blank slides](7_pca-BLANK.qmd)
+
+[📊 Slides](7_pca-SLIDES.qmd)
+<!--  / [📊 Blank slides](7_pca-BLANK.qmd) -->
 
 In this lesson we introduce:
 
@@ -693,7 +695,7 @@ comp_3d = pd.DataFrame({
 print(comp_3d.to_string(index=False))
 ```
 
-Train R² and Test MSE tell different stories. Train R² is computed on the 450 observations used to fit each model — OLS can overfit by spreading coefficients across 3 correlated predictors, slightly inflating its training R². Test MSE is evaluated on the 150 held-out observations OLS has never seen. PCR with just 1 component achieves nearly the same test MSE as OLS despite using only a single predictor, confirming that almost all predictive signal lives in PC1. 
+Train R² and Test MSE tell different stories. Train R² is computed on the 450 observations used to fit each model. Test MSE is evaluated on the 150 held-out observations OLS has never seen. PCR with just 1 component achieves nearly the same test MSE as OLS despite using only a single predictor, confirming that almost all predictive signal lives in PC1. 
 
 ## General setup
 
@@ -948,21 +950,16 @@ print(comp_df.to_string(index=False))
 :::{.callout-tip}
 ## Check-in
 
-1. Does PCR improve on OLS? Is this the direction you expected based on the bias-variance tradeoff?
-
-2. Which method performs best? Does this make sense given the structure of the true data-generating model — 8 predictors, 2 with true coefficient of zero and several with moderate effects?
-
-3. What is a key limitation of PCR compared to lasso, given this data-generating model?
+1. Which method performs best? Does this make sense given the structure of the true data-generating model?
+2. What is a limitation of PCR compared to lasso?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
+1. **Lasso** tends to perform best because it can exactly zero out the two truly irrelevant predictors (`aspect` and `canopy`), directly matching the structure of the true model.
 
-1. PCR should improve on OLS here because OLS overfits when the noise level is moderate and the predictors include irrelevant ones. Reducing to the most informative PC directions lowers variance at a small cost in bias.
+2. **PCR cannot perform variable selection and lasso can**.  PCR is still taking into account all variables when forming linear combinations of the predictors to create the principal components. PCR works best when the signal is spread across many predictors that may have correlation across them.
 
-2. **Lasso** tends to perform best on this dataset because it can exactly zero out the two truly irrelevant predictors (`aspect` and `canopy`), directly matching the structure of the true model. Ridge is competitive when many predictors have moderate non-zero effects. PCR is effective when the response is well-explained by a few dominant environmental gradients — which is approximately true here, but not perfectly so.
-
-3. PCR cannot perform **variable selection**: it retains all original predictors in each PC (with varying loadings) and cannot set any loading to exactly zero. In a truly sparse setting — where a small number of predictors matter and the rest are pure noise — lasso has a structural advantage over PCR. PCR works best when the signal is spread across many predictors that share a common underlying structure.
 :::
 
 

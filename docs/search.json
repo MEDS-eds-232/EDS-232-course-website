@@ -55,7 +55,7 @@
     "href": "notes/7_pca/7_pca-SLIDES.html#in-this-lesson",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "In this lesson\n\n\n\nPrincipal Component Analysis (PCA) as a technique for dimensionality reduction\nPrincipal components as directions of maximum variance in multivariate data\nPCA as a new coordinate system for the data\nPrincipal Component Regression (PCR): fitting a regression model on PC scores instead of the original predictors\nCross-validation to select the optimal number of components in PCR"
+    "text": "In this lesson\n\n\n\nPrincipal Component Analysis (PCA) as a technique for dimensionality reduction\nPrincipal components as directions of maximum variance in multivariate data\nPrincipal Component Regression (PCR): fitting a regression model on PC scores instead of the original predictors"
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#section-motivation",
@@ -69,14 +69,14 @@
     "href": "notes/7_pca/7_pca-SLIDES.html#motivation-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "The big idea\n\n\n\n\n\n\nArtwork by Dr. Allison Horst\n\n\n\n\n\n\nImagine a whale shark approaching a dense cluster of krill. To capture the most krill in a single pass, you would align yourself with the direction of greatest spread in the krill cloud — the axis along which krill are most dispersed."
+    "text": "To capture the most krill in a single pass, how would you align yourself?\n\n\n\n\n\n\nArtwork by Dr. Allison Horst\n\n\n\n\n\n\n\nImagine a whale shark approaching a dense cluster of krill. To capture the most krill in a single pass, you would align yourself with the direction of greatest spread in the krill cloud: the axis along which krill are most dispersed."
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#motivation-idea",
     "href": "notes/7_pca/7_pca-SLIDES.html#motivation-idea",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "The core idea\n\n\nThe same intuition applies to data. When we have many correlated predictors, some directions capture a great deal of the variation while others capture very little.\n\nPrincipal Component Analysis (PCA) finds those directions automatically.\n\n\nWith many predictor variables, PCA simplifies our view of the coordinate system to capture as much about the data as possible in as few dimensions as possible."
+    "text": "The core idea\n\n\nThe same intuition applies to data. When we have many correlated predictors, some directions capture a great deal of the variation while others capture very little.\n\nPrincipal Component Analysis (PCA) finds those directions of greatest variation automatically.\n\n\nWith many predictor variables, PCA simplifies our view of the coordinate system to capture as much about the data as possible in as few dimensions as possible."
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#section-axes",
@@ -97,14 +97,14 @@
     "href": "notes/7_pca/7_pca-SLIDES.html#axes-new-coords-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "A new coordinate system\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nUsing a different set of axes \\(\\tilde{X}_1\\) and \\(\\tilde{X}_2\\) (rotated 45°), the same points get new coordinates:\n\n\n\n\nPoint\nCoords in \\(X_1, X_2\\)\nCoords in \\(\\tilde{X}_1, \\tilde{X}_2\\)\n\n\n\n\nA\n(1, 1)\n(\\(\\sqrt{2}\\), 0)\n\n\nB\n(−1, 0)\n(−0.71, 0.71)\n\n\n\n\nSame points — different ways of representing them."
+    "text": "A new coordinate system\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nUsing a different set of axes \\(\\tilde{X}_1\\) and \\(\\tilde{X}_2\\) (rotated 45°), the same points get new coordinates:\n\n\n\n\nPoint\nCoords in \\(X_1, X_2\\)\nCoords in \\(\\tilde{X}_1, \\tilde{X}_2\\)\n\n\n\n\nA\n(1, 1)\n(\\(\\sqrt{2}\\), 0)\n\n\nB\n(−1, 0)\n(−0.71, 0.71)\n\n\n\n\nSame points, just different ways of representing them."
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#axes-projection-slide",
     "href": "notes/7_pca/7_pca-SLIDES.html#axes-projection-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Projecting onto an axis\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nProjecting onto a coordinate axis means keeping only the coordinate along that axis and dropping the rest.\nProjecting A and B onto \\(\\tilde{X}_1\\):\n\n\n\nPoint\nProjection onto \\(\\tilde{X}_1\\)\n\n\n\n\nA\nproj(A) \\(= \\sqrt{2}\\)\n\n\nB\nproj(B) \\(= -0.71\\)\n\n\n\n\n\nThe dashed red line shows the perpendicular drop from B to its projection on \\(\\tilde{X}_1\\)."
+    "text": "Projecting onto an axis\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nProjecting onto a coordinate axis means keeping only the coordinate along that axis and dropping the rest.\nProjecting A and B onto \\(\\tilde{X}_1\\):\n\n\n\nPoint\nProjection onto \\(\\tilde{X}_1\\)\n\n\n\n\nA\nproj(A) \\(= \\sqrt{2}\\)\n\n\nB\nproj(B) \\(= -0.71\\)\n\n\n\n\n\nThe dashed red line shows the perpendicular drop from B to its projection on \\(\\tilde{X}_1\\).\n\n\n\nWe will use the idea of changing axes and projecting throughout."
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#section-pca",
@@ -118,35 +118,35 @@
     "href": "notes/7_pca/7_pca-SLIDES.html#what-are-pcs",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "What are principal components?\n\nPrincipal Component Analysis (PCA) creates a new set of axes so that:\n\nPC1 points in the direction of maximum variance in the data\nPC2 points in the direction of maximum remaining variance, orthogonal to PC1\nPC3 is orthogonal to both PC1 and PC2, and explains the most remaining variance, and so on\n\n\nThere are always as many PCs as original variables. But if PC1 and PC2 explain most of the variance, we’d still see most of the important structure in our data using just those two.\n\n\n\nThis is the core idea of dimensionality reduction: converting complex multivariate data into fewer dimensions while retaining as much information as possible."
+    "text": "What are principal components?\n\nPrincipal Component Analysis (PCA) creates a new set of axes/coordinates so that:\n\nPC1 points in the direction of maximum variance in the data\nPC2 points in the direction of maximum remaining variance, orthogonal to PC1\nPC3 is orthogonal to both PC1 and PC2, and explains the most remaining variance, and so on\n\n\nThere are always as many PCs as original variables.\nIf PC1 and PC2 explain most of the variance, we’d still see most of the important structure in our data using just those two.\n\n\n\nThis is the core idea of dimensionality reduction: converting complex multivariate data into fewer dimensions while retaining as much information as possible."
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#pca-3d-intro",
     "href": "notes/7_pca/7_pca-SLIDES.html#pca-3d-intro",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "A 3D example\n\nWe generate 600 observations from three highly correlated variables (\\(x\\), \\(y\\), \\(z\\)).\n\n\n\n\n\n\n\n\n\n\nMost of the variation is concentrated along a single dominant axis — the data cloud is very elongated."
+    "text": "A 3D example: 600 pts from three correlated variables \\(x\\)/\\(y\\)/\\(z\\)\n\n\nMost of the variation is concentrated along a single dominant axis — the data cloud is very elongated."
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#checkin-pc1-q",
     "href": "notes/7_pca/7_pca-SLIDES.html#checkin-pc1-q",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nRecall that PC1 will be an axis in the direction of maximum variance in the data.\nWhere would you place PC1? What about PC2?"
+    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nRecall that PC1 will be an axis in the direction of maximum variance in the data. PC2 will be the direction of maximum remaining variance, orthogonal to PC1.\n\nWhere would you place PC1? What about PC2?"
   },
   {
-    "objectID": "notes/7_pca/7_pca-SLIDES.html#checkin-pc1-a",
-    "href": "notes/7_pca/7_pca-SLIDES.html#checkin-pc1-a",
+    "objectID": "notes/7_pca/7_pca-SLIDES.html#principal-components",
+    "href": "notes/7_pca/7_pca-SLIDES.html#principal-components",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nRecall that PC1 will be an axis in the direction of maximum variance in the data.\nWhere would you place PC1? What about PC2?\n\n\nPC1 (yellow) runs along the long axis of the cloud — the direction of greatest spread\nPC2 (salmon) is perpendicular to PC1 and captures the remaining spread\nPC3 (lavender) points through the thinnest dimension — almost no variance"
+    "text": "Identifying principal components\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPC1 runs along the long axis of the cloud = the direction of greatest spread\nPC2 is perpendicular to PC1 and captures the remaining spread\nPC3 points through the thinnest dimension, almost no variance"
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#pca-new-coords",
     "href": "notes/7_pca/7_pca-SLIDES.html#pca-new-coords",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "PCA gives us a new coordinate system\n\nIf we re-express every data point in PC coordinates (PC scores instead of \\(x/y/z\\)), the data cloud becomes axis-aligned:\n\n\n\n\n\n\n\n\n\n\nEach data point \\((x, y, z)\\) gets a new coordinate — its scores — in the PC coordinate system."
+    "text": "PCA gives us a new coordinate system\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nIf we re-express every data point in PC coordinates (PC scores instead of \\(x/y/z\\)), the data cloud becomes axis-aligned.\n\nEach data point \\((x, y, z)\\) gets a new coordinate — its scores — in the PC coordinate system."
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#pca-2d-projection",
@@ -167,14 +167,7 @@
     "href": "notes/7_pca/7_pca-SLIDES.html#pve-concept",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Proportion of variance explained (PVE)\n\nEvery PC captures a certain share of the total variance — this is its proportion of variance explained (PVE).\n\nThe PVE values always sum to 1 across all \\(p\\) components\nWe are interested in how much variance is concentrated in the first few components\nUse a scree plot to visualize the PVE for each PC\n\n\nKey decision: how many components do we keep?\n\n\nKeep enough components to explain 90–95% of total variance, or\nLook for an “elbow” in the individual PVE bar chart where bars drop sharply"
-  },
-  {
-    "objectID": "notes/7_pca/7_pca-SLIDES.html#pve-3d-slide",
-    "href": "notes/7_pca/7_pca-SLIDES.html#pve-3d-slide",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "PVE scree plot: 3D example\n\n\n\n\n\n\n\n\n\n\n\nPC1 alone captures 95.1 % of all variance. PC1 + PC2 together retain 98.9 % — which is why the 2D projection preserved the data structure so well."
+    "text": "Proportion of variance explained (PVE)\n\nEvery PC captures a certain share of the total variance: this is its proportion of variance explained (PVE).\n\n\nThe PVE values always sum to 1 across all components\nWe are usually interested in how much variance is concentrated in the first few components\nUse a scree plot (left-hand side plot) to visualize the PVE for each PC\n\n\n\n\n\n\n\n\n\n\n\n\n\nPC1 alone captures 95.1 % of all variance."
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#section-pcr",
@@ -188,28 +181,28 @@
     "href": "notes/7_pca/7_pca-SLIDES.html#pcr-concept",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Principal Component Regression\n\nSo far, PCA has been applied to the predictors only — the response variable \\(Y\\) plays no role.\n\nPrincipal Component Regression (PCR) connects this structure to the response:\n\nReplace the original \\(p\\) predictors with \\(M \\leq p\\) principal components, then fit OLS on the projected data.\n\n\n\nThe guiding assumption: the directions in which the predictors vary the most are often also the directions most strongly associated with the response.\n\n\nThis is an assumption — but a reasonable one in many real settings."
+    "text": "Principal Component Regression\n\nSo far, PCA has been applied to the predictors only: we have not used the response variable \\(Y\\).\n\n\nPrincipal Component Regression (PCR) connects the predictors and their PCs to the response:\n\nReplace the original \\(p\\) predictors with \\(M \\leq p\\) principal components, then fit OLS on the projected data.\n\n\nThe guiding assumption: the directions in which the predictors vary the most are often also the directions most strongly associated with the response.\nReasonable one in many real settings."
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#pcr-3d-setup",
     "href": "notes/7_pca/7_pca-SLIDES.html#pcr-3d-setup",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "PCR: 3D example setup\n\nUsing our 3D \\(x/y/z\\) data, suppose we observe a response \\(Y\\):\n\\[Y = 2x + 2y + 2z + \\varepsilon\\]\nSo the true coefficients are 2 for all three predictors.\n\nStandard OLS must estimate three separate coefficients:\n\n\nPredictor  OLS coefficient\n        x            2.039\n        y            1.884\n        z            2.127\n\nOLS intercept: -0.072   |   OLS R²: 0.944\n\n\n\n\nSince PC1 captures 95.1 % of the variance in \\(x\\), \\(y\\), \\(z\\), we can try replacing all three variables with just PC1."
+    "text": "PCR: 3D example setup\n\nUsing our 3D \\(x/y/z\\) data, suppose we observe a response \\(Y\\). We generate it with the following formula:\n\\[Y = 2x + 2y + 2z + \\varepsilon\\]\nSo the true coefficients are 2 for all three predictors.\n\nIf we model \\(Y\\) using three predictors \\(x\\)/\\(y\\)/\\(z\\) and a standard MLR fit by OLS then, our model is:\n\\[\\hat{Y} = \\hat{\\beta}_0 + \\hat{\\beta}_x \\cdot x + \\hat{\\beta}_y \\cdot y + \\hat{\\beta}_z \\cdot z\\]\nand we get the coefficient estimates:\n\n\nPredictor  OLS coefficient\n        x            2.039\n        y            1.884\n        z            2.127\n\nOLS intercept: -0.072   |   OLS R²: 0.944"
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#pcr-1comp-slide",
     "href": "notes/7_pca/7_pca-SLIDES.html#pcr-1comp-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "PCR with M = 1 component\n\nInstead of three predictors, we fit a simple linear regression on PC1:\n\\[\\hat{Y} = \\hat{\\alpha}_0 + \\hat{\\alpha}_1 \\cdot \\text{PC1}\\]"
+    "text": "PCR with M = 1 component\n\nSince PC1 captures 95.1 % of the variance in \\(x\\), \\(y\\), \\(z\\), we can try replacing all three variables with just PC1.\nInstead of three predictors, we fit a simple linear regression on PC1:\n\\[\\hat{Y} = \\hat{\\alpha}_0 + \\hat{\\alpha}_1 \\cdot \\text{PC1}.\\]"
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#pcr-comparison-slide",
     "href": "notes/7_pca/7_pca-SLIDES.html#pcr-comparison-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "OLS vs PCR: train and test performance\n\n\n\n                       Model  Parameters  Train R²  Test MSE\nOLS  (3 predictors: x, y, z)           3     0.944     2.112\n      PCR  (M = 1 component)           1     0.944     2.095\n     PCR  (M = 2 components)           2     0.944     2.110\n\n\n\n\n\n\nTrain R²: OLS can slightly overfit by spreading coefficients across 3 correlated predictors\nTest MSE: PCR with just 1 component achieves nearly the same test MSE as OLS — confirming that almost all predictive signal lives in PC1"
+    "text": "OLS vs PCR: train and test performance\n\n\n\n                       Model  Parameters  Train R²  Test MSE\nOLS  (3 predictors: x, y, z)           3     0.944     2.112\n      PCR  (M = 1 component)           1     0.944     2.095\n     PCR  (M = 2 components)           2     0.944     2.110\n\n\n\n\nTrain R²: a measure of how well the model fits the data it was trained on\nTest MSE: a measure of how well the model generalizes to predict values in previously unseen data\n\n\nWhat do these results tell you about where most of the predictive signal from this data is coming from?\n\n\nHere PCR with just 1 component achieves nearly the same test MSE as OLS. This confirmis that almost all predictive signal lives in PC1!"
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#section-setup",
@@ -223,7 +216,7 @@
     "href": "notes/7_pca/7_pca-SLIDES.html#general-setup-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "PCR: general setup\n\nWe apply PCR in the context of multiple linear regression with \\(p\\) predictors \\(X_1, \\ldots, X_p\\) and response \\(Y\\):\n\\[Y = \\hat{\\beta}_0 + \\hat{\\beta}_1 X_1 + \\cdots + \\hat{\\beta}_p X_p.\\]\n\nPCR works in four steps:\n\nStandardize the predictors (mean 0, SD 1)\nCompute the principal components of the standardized predictors\nProject each observation onto the first \\(M\\) components (the PC scores)\nFit ordinary least squares of \\(Y\\) on these \\(M\\) scores\n\n\n\nThe key tuning parameter is \\(M\\):\n\n\nWhen \\(M = p\\), PCR is equivalent to OLS (all components retain all information)\nWhen \\(M &lt; p\\), the model has fewer parameters — lower variance at the cost of some bias\n\\(M\\) is chosen by cross-validation, just like \\(\\lambda\\) for ridge and lasso"
+    "text": "PCR: general setup\n\nWe apply PCR in the context of multiple linear regression with \\(p\\) predictors \\(X_1, \\ldots, X_p\\) and a response \\(Y\\):\n\\[Y = \\hat{\\beta}_0 + \\hat{\\beta}_1 X_1 + \\cdots + \\hat{\\beta}_p X_p.\\]\n\nPCR works in four steps:\n\nStandardize the predictors (mean 0, SD 1)\nCompute the principal components of the standardized predictors\nDecide which PCs will be used to reduce dimensions\nProject each observation onto the first \\(M\\) components\nFit ordinary least squares of \\(Y\\) on this new data\n\n\n\nThe key tuning parameter is \\(M\\):\n\n\nWhen \\(M = p\\), PCR is equivalent to OLS (all components retain all information)\nWhen \\(M &lt; p\\), the model has fewer parameters: lower variance at the cost of some bias\n\n\n\n\n\n\n\\(M\\) is chosen by cross-validation, just like \\(\\lambda\\) for ridge and lasso"
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#section-exercise",
@@ -237,7 +230,21 @@
     "href": "notes/7_pca/7_pca-SLIDES.html#exercise-intro",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "EcoRich dataset\n\nWe apply PCA and PCR to the EcoRich dataset from the previous lesson:\n\n\n\n200 mountain meadow survey plots\n8 environmental predictors: precip, temp, forest_cover, soil_N, elevation, slope, aspect, canopy\nResponse: species_richness (plant species per 25 m² plot)\nTrue model: only precip, temp, forest_cover, soil_N, elevation, slope have non-zero effects; aspect and canopy are pure noise\n\n\n\n\nWork through each check-in before moving to the answer."
+    "text": "Meadow plant diversity dataset\n\nWe apply PCA and PCR to the dataset from the previous lesson:\n\n\n\n200 mountain meadow survey plots\n8 environmental predictors: precip, temp, forest_cover, soil_N, elevation, slope, aspect, canopy\nResponse: species_richness (plant species per 25 m² plot)"
+  },
+  {
+    "objectID": "notes/7_pca/7_pca-SLIDES.html#data-overview",
+    "href": "notes/7_pca/7_pca-SLIDES.html#data-overview",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Data overview\n\n\n\n\n\n\n\n\n\n\n\nTrue model: only precip, temp, forest_cover, soil_N, elevation, slope have non-zero coefficients\naspect and canopy are pure noise"
+  },
+  {
+    "objectID": "notes/7_pca/7_pca-SLIDES.html#checkin-scree-1",
+    "href": "notes/7_pca/7_pca-SLIDES.html#checkin-scree-1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nExplain to the person you are working with:\n\nhow each of the PCs is computed and\nwhat is being depicted on each of the plots."
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#checkin-pve-q",
@@ -251,35 +258,42 @@
     "href": "notes/7_pca/7_pca-SLIDES.html#checkin-pve-a",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLooking at the scree plot:\nHow many components are needed to explain at least 90% of the total variance in the 8 predictors?\n\nSeven components are needed to reach 90% cumulative PVE.\n\nBecause the 8 predictors were generated independently, no single dominant direction captures most of the variance — the PVE is spread fairly evenly across components."
+    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLooking at the scree plot:\nHow many components are needed to explain at least 90% of the total variance in the 8 predictors?\n\nSeven components are needed to reach 90% cumulative PVE.\n\nIn this example the 8 predictors were generated independently, no single dominant direction captures most of the variance. The PVE is spread fairly evenly across components."
+  },
+  {
+    "objectID": "notes/7_pca/7_pca-SLIDES.html#checkin-cv-q-1",
+    "href": "notes/7_pca/7_pca-SLIDES.html#checkin-cv-q-1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Check-in\n\n\n\nThe figure below shows the 10-fold CV-MSE for each value of \\(M\\) from 1 to 8.\n\n\n\n\n\n\n\n\n\n\n\nExplain to the person you are working with:\n\nWhy are we interested in selecting only a few of the principal components?\nHow is CV used to select the optimal number of components?"
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#checkin-cv-q",
     "href": "notes/7_pca/7_pca-SLIDES.html#checkin-cv-q",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\nThe figure below shows the 10-fold CV-MSE for each value of \\(M\\) from 1 to 8.\n\n\n\n\n\n\n\n\n\n\n\n\nWhat is the optimal number of components selected by cross-validation?\nAt $M = $ 8 (all components), what is the relationship between PCR and OLS? How are their CV-MSEs related?"
+    "text": "Check-in\n\n\n\nThe figure below shows the 10-fold CV-MSE for each value of \\(M\\) from 1 to 8.\n\n\n\n\n\n\n\n\n\n\n\n\nWhat is the optimal number of components selected by cross-validation?\nHow does this number of components relate with the OLS regression?"
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#checkin-cv-a",
     "href": "notes/7_pca/7_pca-SLIDES.html#checkin-cv-a",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\nThe figure below shows the 10-fold CV-MSE for each value of \\(M\\) from 1 to 8.\n\n\n\n\n\n\n\n\n\n\n\n\nWhat is the optimal number of components selected by cross-validation?\nAt $M = $ 8 (all components), what is the relationship between PCR and OLS? How are their CV-MSEs related?\n\n\n\n\nThe optimal \\(M\\) is 8 — retaining 8 component(s) gives the best out-of-sample prediction accuracy.\nWhen \\(M = p\\), the \\(p\\) PC scores span exactly the same space as the \\(p\\) original predictors — PCA is a rotation, not a reduction. So PCR at \\(M = p\\) is identical to OLS, and their CV-MSEs are equal."
+    "text": "Check-in\n\n\n\nThe figure below shows the 10-fold CV-MSE for each value of \\(M\\) from 1 to 8.\n\n\n\n\n\n\n\n\n\n\n\n\nWhat is the optimal number of components selected by cross-validation?\nHow does this number of components relate with the OLS regression?\n\n\n\n\nThe optimal \\(M\\) is 8 — retaining 8 component(s) gives the best out-of-sample prediction accuracy.\nPCR at \\(M = p\\) (number of predictors) is identical to OLS, and their CV-MSEs are equal."
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#checkin-compare-q",
     "href": "notes/7_pca/7_pca-SLIDES.html#checkin-compare-q",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in: comparing PCR, ridge, and lasso\n\n\n\n                Method CV-MSE\nOLS (all 8 predictors) 14.664\n           PCR (M = 8) 14.664\n  Ridge (CV-optimal λ) 14.628\n  Lasso (CV-optimal λ) 14.496\n\n\n\n\nDoes PCR improve on OLS? Is this the direction you expected based on the bias-variance tradeoff?\nWhich method performs best? Does this make sense given the structure of the true data-generating model?\nWhat is a key limitation of PCR compared to lasso?"
+    "text": "Check-in: comparing PCR, ridge, and lasso\n\n\n\n                Method CV-MSE\nOLS (all 8 predictors) 14.664\n           PCR (M = 8) 14.664\n  Ridge (CV-optimal λ) 14.628\n  Lasso (CV-optimal λ) 14.496\n\n\n\n\nWhich method performs best? Does this make sense given the structure of the true data-generating model?\nWhat is a limitation of PCR compared to lasso?"
   },
   {
     "objectID": "notes/7_pca/7_pca-SLIDES.html#checkin-compare-a",
     "href": "notes/7_pca/7_pca-SLIDES.html#checkin-compare-a",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in: comparing PCR, ridge, and lasso\n\n\n\n                Method CV-MSE\nOLS (all 8 predictors) 14.664\n           PCR (M = 8) 14.664\n  Ridge (CV-optimal λ) 14.628\n  Lasso (CV-optimal λ) 14.496\n\n\n\n\nPCR should improve on OLS because OLS overfits when predictors include irrelevant ones. Reducing to the most informative PC directions lowers variance at a small cost in bias.\nLasso tends to perform best because it can exactly zero out the two truly irrelevant predictors (aspect and canopy), directly matching the structure of the true model.\nPCR cannot perform variable selection: it retains all original predictors in each PC (with varying loadings) and cannot set any loading to exactly zero. In a truly sparse setting, lasso has a structural advantage. PCR works best when the signal is spread across many predictors that share a common underlying structure."
+    "text": "Check-in: comparing PCR, ridge, and lasso\n\n\n\n                Method CV-MSE\nOLS (all 8 predictors) 14.664\n           PCR (M = 8) 14.664\n  Ridge (CV-optimal λ) 14.628\n  Lasso (CV-optimal λ) 14.496\n\n\n\n\nLasso tends to perform best because it can exactly zero out the two truly irrelevant predictors (aspect and canopy), directly matching the structure of the true model.\nPCR cannot perform variable selection and lasso can. PCR is still taking into account all variables when forming linear combinations of the predictors to create the principal components. PCR works best when the signal is spread across many predictors that may have correlation across them."
   },
   {
     "objectID": "notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-SLIDES.html#title-slide",
@@ -5755,7 +5769,7 @@
     "href": "notes/7_pca/7_pca-NOTES.html",
     "title": "Principal Component Analysis",
     "section": "",
-    "text": "📊 Slides / 📊 Blank slides\nIn this lesson we introduce:\nThese notes are based on chapter 6.3 of An Introduction to Statistical Learning with Applications in Python (James et al. 2023). The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.",
+    "text": "📊 Slides\nIn this lesson we introduce:\nThese notes are based on chapter 6.3 of An Introduction to Statistical Learning with Applications in Python (James et al. 2023). The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.",
     "crumbs": [
       "notes",
       "Linear Model Selection & Regularization",
@@ -5791,7 +5805,7 @@
     "href": "notes/7_pca/7_pca-NOTES.html#principal-component-regression",
     "title": "Principal Component Analysis",
     "section": "Principal Component Regression",
-    "text": "Principal Component Regression\nNotice that so far we have not referenced the response variable. PCA summarizes the variability structure of the predictors without reference to the response. Principal Component Regression (PCR) connects that structure to the response variable to obtain simple models and better predictions. The guiding idea is that the directions in which the predictors show the most variation are often also the directions most strongly associated with the response. This is an assumption, but it is a reasonable in many real settings.\nLet’s see this with a concrete example using our 3D \\(x\\)/\\(y\\)/\\(z\\) data. Suppose we observe a response variable \\(Y\\) that depends on all three predictors. In our data, the variable \\(Y\\) is generated by:\n\\[Y = 2x + 2y + 2z + \\varepsilon.\\]\nSo the true coefficients are 2 for all predictors.\nIf we decided to model \\(Y\\) using the three predictors \\(x\\)/\\(y\\)/\\(z\\) and a standard multiple linear regression fit by OLS then, our model would be:\n\\[\\hat{Y} = \\hat{\\beta}_0 + \\hat{\\beta}_x \\cdot x + \\hat{\\beta}_y \\cdot y + \\hat{\\beta}_z \\cdot z\\]\nA standard multiple linear regression (OLS) must then estimate three separate coefficients, one for each predictor:\n\n\n\nPredictor  OLS coefficient\n        x            2.039\n        y            1.884\n        z            2.127\n\nOLS intercept: -0.072   |   OLS R²: 0.944\n\n\nInstead of using all three variables, we can instead replace all three predictors with PC1 as our single variable. Since PC1 captures 95.1 % of the variance in \\(x\\), \\(y\\), and \\(z\\), it summarizes almost all information in the three variables with one number. The regression model becomes then a simple linear regression:\n\\[\\hat{Y} = \\hat{\\alpha}_0 + \\hat{\\alpha}_1 \\cdot \\text{PC1}\\]\n\n\n\n\n\n\n\n\n\n\n\n                       Model  Parameters  Train R²  Test MSE\nOLS  (3 predictors: x, y, z)           3     0.944     2.112\n      PCR  (M = 1 component)           1     0.944     2.095\n     PCR  (M = 2 components)           2     0.944     2.110\n\n\nTrain R² and Test MSE tell different stories. Train R² is computed on the 450 observations used to fit each model — OLS can overfit by spreading coefficients across 3 correlated predictors, slightly inflating its training R². Test MSE is evaluated on the 150 held-out observations OLS has never seen. PCR with just 1 component achieves nearly the same test MSE as OLS despite using only a single predictor, confirming that almost all predictive signal lives in PC1.",
+    "text": "Principal Component Regression\nNotice that so far we have not referenced the response variable. PCA summarizes the variability structure of the predictors without reference to the response. Principal Component Regression (PCR) connects that structure to the response variable to obtain simple models and better predictions. The guiding idea is that the directions in which the predictors show the most variation are often also the directions most strongly associated with the response. This is an assumption, but it is a reasonable in many real settings.\nLet’s see this with a concrete example using our 3D \\(x\\)/\\(y\\)/\\(z\\) data. Suppose we observe a response variable \\(Y\\) that depends on all three predictors. In our data, the variable \\(Y\\) is generated by:\n\\[Y = 2x + 2y + 2z + \\varepsilon.\\]\nSo the true coefficients are 2 for all predictors.\nIf we decided to model \\(Y\\) using the three predictors \\(x\\)/\\(y\\)/\\(z\\) and a standard multiple linear regression fit by OLS then, our model would be:\n\\[\\hat{Y} = \\hat{\\beta}_0 + \\hat{\\beta}_x \\cdot x + \\hat{\\beta}_y \\cdot y + \\hat{\\beta}_z \\cdot z\\]\nA standard multiple linear regression (OLS) must then estimate three separate coefficients, one for each predictor:\n\n\n\nPredictor  OLS coefficient\n        x            2.039\n        y            1.884\n        z            2.127\n\nOLS intercept: -0.072   |   OLS R²: 0.944\n\n\nInstead of using all three variables, we can instead replace all three predictors with PC1 as our single variable. Since PC1 captures 95.1 % of the variance in \\(x\\), \\(y\\), and \\(z\\), it summarizes almost all information in the three variables with one number. The regression model becomes then a simple linear regression:\n\\[\\hat{Y} = \\hat{\\alpha}_0 + \\hat{\\alpha}_1 \\cdot \\text{PC1}\\]\n\n\n\n\n\n\n\n\n\n\n\n                       Model  Parameters  Train R²  Test MSE\nOLS  (3 predictors: x, y, z)           3     0.944     2.112\n      PCR  (M = 1 component)           1     0.944     2.095\n     PCR  (M = 2 components)           2     0.944     2.110\n\n\nTrain R² and Test MSE tell different stories. Train R² is computed on the 450 observations used to fit each model. Test MSE is evaluated on the 150 held-out observations OLS has never seen. PCR with just 1 component achieves nearly the same test MSE as OLS despite using only a single predictor, confirming that almost all predictive signal lives in PC1.",
     "crumbs": [
       "notes",
       "Linear Model Selection & Regularization",
@@ -5815,7 +5829,7 @@
     "href": "notes/7_pca/7_pca-NOTES.html#exercise-meadow-plant-diversity",
     "title": "Principal Component Analysis",
     "section": "Exercise: meadow plant diversity",
-    "text": "Exercise: meadow plant diversity\nWe now apply PCA and PCR to the EcoRich dataset from the previous lesson: 200 mountain meadow survey plots with 8 environmental predictors (precip, temp, forest_cover, soil_N, elevation, slope, aspect, canopy) and response species_richness. Work through each check-in before expanding the discussion.\n\n\nCheck-in: Proportion of variance explained\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nLooking at the scree plot above:\nHow many components are needed to explain at least 90% of the total variance in the 8 predictors?\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\nSeven components are needed to explain at least 90% variance in the predictors.\n\n\n\n\n\nCheck-in: Selecting M via cross-validation\nThe figure below shows the 10-fold CV-MSE for each value of \\(M\\) from 1 to 8.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\n\nWhat is the optimal number of components selected by cross-validation?\nAt \\(M =\\) 8 (all components), what is the relationship between PCR and OLS? How are their CV-MSE related?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\nThe optimal \\(M\\) selected by CV is 8, meaning retaining 8 principal component(s) gives the best out-of-sample prediction accuracy.\nWhen \\(M = p\\), the \\(p\\) PC scores span exactly the same space as the \\(p\\) original predictors — PCA is a rotation, not a reduction. So PCR at \\(M = p\\) is identical to OLS. The CV-MSE at the rightmost point in the plot is therefore the OLS CV-MSE.\n\n\n\n\n\n\nCheck-in: Comparing PCR, ridge, and lasso\n\n\n                Method CV-MSE\nOLS (all 8 predictors) 14.664\n           PCR (M = 8) 14.664\n  Ridge (CV-optimal λ) 14.628\n  Lasso (CV-optimal λ) 14.496\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\n\nDoes PCR improve on OLS? Is this the direction you expected based on the bias-variance tradeoff?\nWhich method performs best? Does this make sense given the structure of the true data-generating model — 8 predictors, 2 with true coefficient of zero and several with moderate effects?\nWhat is a key limitation of PCR compared to lasso, given this data-generating model?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\nPCR should improve on OLS here because OLS overfits when the noise level is moderate and the predictors include irrelevant ones. Reducing to the most informative PC directions lowers variance at a small cost in bias.\nLasso tends to perform best on this dataset because it can exactly zero out the two truly irrelevant predictors (aspect and canopy), directly matching the structure of the true model. Ridge is competitive when many predictors have moderate non-zero effects. PCR is effective when the response is well-explained by a few dominant environmental gradients — which is approximately true here, but not perfectly so.\nPCR cannot perform variable selection: it retains all original predictors in each PC (with varying loadings) and cannot set any loading to exactly zero. In a truly sparse setting — where a small number of predictors matter and the rest are pure noise — lasso has a structural advantage over PCR. PCR works best when the signal is spread across many predictors that share a common underlying structure.",
+    "text": "Exercise: meadow plant diversity\nWe now apply PCA and PCR to the EcoRich dataset from the previous lesson: 200 mountain meadow survey plots with 8 environmental predictors (precip, temp, forest_cover, soil_N, elevation, slope, aspect, canopy) and response species_richness. Work through each check-in before expanding the discussion.\n\n\nCheck-in: Proportion of variance explained\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\nLooking at the scree plot above:\nHow many components are needed to explain at least 90% of the total variance in the 8 predictors?\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\nSeven components are needed to explain at least 90% variance in the predictors.\n\n\n\n\n\nCheck-in: Selecting M via cross-validation\nThe figure below shows the 10-fold CV-MSE for each value of \\(M\\) from 1 to 8.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\n\nWhat is the optimal number of components selected by cross-validation?\nAt \\(M =\\) 8 (all components), what is the relationship between PCR and OLS? How are their CV-MSE related?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\nThe optimal \\(M\\) selected by CV is 8, meaning retaining 8 principal component(s) gives the best out-of-sample prediction accuracy.\nWhen \\(M = p\\), the \\(p\\) PC scores span exactly the same space as the \\(p\\) original predictors — PCA is a rotation, not a reduction. So PCR at \\(M = p\\) is identical to OLS. The CV-MSE at the rightmost point in the plot is therefore the OLS CV-MSE.\n\n\n\n\n\n\nCheck-in: Comparing PCR, ridge, and lasso\n\n\n                Method CV-MSE\nOLS (all 8 predictors) 14.664\n           PCR (M = 8) 14.664\n  Ridge (CV-optimal λ) 14.628\n  Lasso (CV-optimal λ) 14.496\n\n\n\n\n\n\n\n\nCheck-in\n\n\n\n\nWhich method performs best? Does this make sense given the structure of the true data-generating model?\nWhat is a limitation of PCR compared to lasso?\n\n\n\n\n\n\n\n\n\nDiscussion\n\n\n\n\n\n\nLasso tends to perform best because it can exactly zero out the two truly irrelevant predictors (aspect and canopy), directly matching the structure of the true model.\nPCR cannot perform variable selection and lasso can. PCR is still taking into account all variables when forming linear combinations of the predictors to create the principal components. PCR works best when the signal is spread across many predictors that may have correlation across them.",
     "crumbs": [
       "notes",
       "Linear Model Selection & Regularization",
