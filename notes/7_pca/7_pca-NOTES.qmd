@@ -314,9 +314,9 @@ plt.close()
 
 Through this example we can see that **PCA** creates a new set of axes ,the **principal components (PCs)** and each of our observations gets a new coordinate in this new system. By projecting our observations onto a subset of the principal components, we can get a simpler view of our data without (hopefully) losing much infromation. 
 
-### Proportion of variance explained
+## Proportion of variance explained
 
-Every PC captures a certain share of the total variance in the data, this is the **proportion of variance explained (PVE) by PC$m$**. The PVE values always sum to 1 across all $p$ components, since together the PCs account for all the variance in the original data. We are usually interested in how much of that total is concentrated in the first few components. For our example data we have that
+Every PC captures a certain share of the total variance in the data, this is the **proportion of variance explained (PVE) by $m$-th PC**. The PVE values always sum to 1 across all $p$ components, since together the PCs account for all the variance in the original data. We are usually interested in how much of that total is concentrated in the first few components. For our example data, we can visualize the PVE for each principal component in a **scree plot** such as the one on the left-hand side, or see the cumulate PVE as in the right-hand side plot. 
 
 ```{python}
 #| label: pve-3d
@@ -350,7 +350,7 @@ plt.show()
 plt.close()
 ```
 
-PC1 alone captures `{python} f"{pve_3d[0]*100:.1f}"` % of all the variance in the three variables. PC2 accounts for `{python} f"{pve_3d[1]*100:.1f}"` % and PC3 for only `{python} f"{pve_3d[2]*100:.1f}"` %. Together, PC1 and PC2 retain `{python} f"{(pve_3d[0]+pve_3d[1])*100:.1f}"` % of the total variance, which is why the 2D projection we showed earlier preserved the structure of the data so well.
+We see that PC1 alone captures `{python} f"{pve_3d[0]*100:.1f}"` % of all the variance in the three variables. PC2 accounts for `{python} f"{pve_3d[1]*100:.1f}"` % and PC3 for only `{python} f"{pve_3d[2]*100:.1f}"` %. Together, PC1 and PC2 retain `{python} f"{(pve_3d[0]+pve_3d[1])*100:.1f}"` % of the total variance, which is why the 2D projection we showed earlier preserved the structure of the data so well.
 
 This is the key decision in any PCA workflow: **how many components do we keep?** A common heuristic is to keep enough components to explain 90–95% of the total variance, or to look for an "elbow" in the individual PVE bar chart where the bars drop sharply. We will revisit this decision with a more challenging dataset in the next section.
 
@@ -441,7 +441,28 @@ print(comp_3d.to_string(index=False))
 
 The R² for PCR with just 1 component is nearly identical to the full OLS model — almost no predictive information was lost by dropping PC2 and PC3. The PCR model is dramatically simpler: one predictor, one coefficient, no multicollinearity. 
 
-## A guiding example: meadow plant diversity
+## General setup
+
+We apply $PCA$ and $PCR$ when we are in the context of multiple linear regression. This is, we have $p$ predictors $X_1, \ldots, X_p$ and a response variable $Y$ that we assume are related by
+
+$$Y = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \cdots + \hat{\beta}_p X_p.$$
+
+$PCA$ replaces the original coordinates for our data: instead of using the predictors $X_1, \ldots, X_p$, are our new axes are the principal components PC1, ..., PC$p$. We can then project our data onto a small number of principal components to simplify our set of observations data. 
+
+The response variable $Y$ comes in when we replace the original $p$ predictors with $M \leq p$ principal components before fitting the regression using OLS on the projected observations.
+
+Concretely, PCR works by doing the following steps:                         
+
+1. **Standardize** the predictors (mean 0, SD 1)
+2. **Compute the principal components** of the standardized predictors
+3. **Project** each observation onto the first $M$ components.
+4. **Fit ordinary least squares** of $Y$ on this new data.
+
+The key tuning parameter is $M$. When $M = p$ (meaning you are using all the principal components), PCR is equivalent to OLS. $M$ is chosen by cross-validation, in the same way as $\lambda$ for ridge and lasso. 
+
+<!-- When $M < p$, the model has fewer degrees of freedom and lower variance, at the cost of some bias. -->
+
+## Example: meadow plant diversity
 
 We continue with the same dataset from the [previous lesson](../6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.qmd). Recall that we have 200 mountain meadow survey plots, each described by 8 environmental predictors:
 
@@ -641,48 +662,7 @@ for i, (pv, cpv) in enumerate(zip(pve, cum_pve)):
 The elbow is typically found after the first few components, where each additional PC contributes a noticeably smaller fraction. Beyond the elbow, the components mostly capture noise or small idiosyncratic variation. That said, the elbow is a heuristic; cross-validation (used in PCR below) provides a more principled criterion tied directly to prediction accuracy.
 :::
 
-## Principal Component Regression
-
-### The guiding idea
-
-PCA summarizes the variability structure of the predictors without reference to the response $Y$. Principal Component Regression (PCR) connects that structure to prediction.
-
-**Guiding idea**: the directions in which the predictors $X_1, \ldots, X_p$ show the most variation are often also the directions most strongly associated with the response $Y$.
-
-This is an approximation — it is not guaranteed to hold — but it is a reasonable working assumption in many real settings. We saw from the EcoRich biplot that PC1, the direction of greatest predictor variance, does align with the species richness gradient, supporting the assumption here.
-
-:::{.callout-tip}
-## Check-in
-Why might the directions of greatest predictor variance also tend to be the most predictive of the response? Can you think of a realistic example where this assumption would break down?
-:::
-
-:::{.callout-tip collapse="true"}
-## Discussion
-**Why it often holds**: in many real datasets, the same underlying processes drive both the most variation in predictors and the most variation in the response. In our example, the major environmental gradient (precipitation, temperature, nutrients) drives both the spread in the 8 predictors and the variation in species richness — so the dominant PC direction captures the biologically relevant signal.
-
-**When it breaks down**: suppose a soil toxin is nearly always absent (very low variance across sites) but is highly damaging when present. PCA assigns it a small loading because it contributes little variance, and PCR would discard its effect. In such cases, ridge or lasso would be more appropriate because they do not rely on variance structure to identify important predictors.
-:::
-
-### The PCR pipeline
-
-PCR replaces the original $p$ predictors with $M \leq p$ PC scores before fitting the regression:
-
-$$\text{complete dataset} \;\longrightarrow\; \text{find PCs} \;\longrightarrow\; \text{project onto } M \text{ PCs} \;\longrightarrow\; \text{fit OLS on scores}$$
-
-Concretely:
-
-1. **Standardize** the predictors (mean 0, SD 1)
-2. **Compute the principal components** of the standardized predictors
-3. **Project** each observation onto the first $M$ components to obtain an $n \times M$ matrix of scores $Z_1, \ldots, Z_M$
-4. **Fit ordinary least squares** of $Y$ on $Z_1, \ldots, Z_M$
-
-The key tuning parameter is $M$. When $M = p$, PCR is equivalent to OLS (all directions are retained and PCA is just a rotation). When $M < p$, the model has fewer degrees of freedom and lower variance, at the cost of some bias.
-
-Like ridge and lasso, PCR controls the **bias-variance tradeoff** — but through a different mechanism: instead of shrinking all coefficients, it discards the directions of lowest variance entirely.
-
-### Selecting $M$ by cross-validation
-
-$M$ is chosen by cross-validation, in the same way as $\lambda$ for ridge and lasso. The figure below shows the 10-fold CV-MSE for each value of $M$ from 1 to `{python} p`.
+The figure below shows the 10-fold CV-MSE for each value of $M$ from 1 to `{python} p`.
 
 ```{python}
 #| label: pcr-cv-plot
