@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.33">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Principal Component Analysis – EDS 232 - Machine Learning for Environmental Science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../../notes/week-by-week/week-by-week.html" aria-current="page"> 
+<span class="menu-text">notes</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">assignments</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-1.html">
+ <span class="dropdown-text">Assignment 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-2.html">
+ <span class="dropdown-text">Assignment 2</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">weekly labs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
+        <li>
+    <a class="dropdown-item" href="../../lab/lab1.html">
+ <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab2.html">
+ <span class="dropdown-text">Lab 2: No lab this week!</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab3.html">
+ <span class="dropdown-text">Lab 3: Classification</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab4.html">
+ <span class="dropdown-text">Lab 4: Polynomial Regression and Cross-Validation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab5.html">
+ <span class="dropdown-text">Lab 5: Regularized Regression</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-study-guides" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">study guides</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-study-guides">    
+        <li>
+    <a class="dropdown-item" href="../../exams/exam1_study_guide.html">
+ <span class="dropdown-text">Midterm Exam Study Guide</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website">
+ <span class="dropdown-text">Source code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website/issues">
+ <span class="dropdown-text">Report a bug</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html">Linear Model Selection &amp; Regularization</a></li><li class="breadcrumb-item"><a href="../../notes/7_pca/7_pca-NOTES.html">Principal Component Analysis</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+  <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p>This wesbite is under construction.</p>
+</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/week-by-week/week-by-week.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week by week</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/setup/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What is machine learning?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Learning from data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Training and test errors, and model flexibility</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Linear regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simple linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/3_2_multiple_linear_regression/3_2_multiple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple linear regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Classification</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">KNN and accuracy metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/4_3_logistic_regression/4_3_logistic_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Logistic regression and ROC curves</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Resampling Methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Cross-validation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Linear Model Selection &amp; Regularization</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linear model selection and regularization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/7_pca/7_pca-NOTES.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Principal Component Analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#principal-component-analysis" id="toc-principal-component-analysis" class="nav-link active" data-scroll-target="#principal-component-analysis">Principal Component Analysis</a>
+  <ul class="collapse">
+  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation">Motivation</a></li>
+  <li><a href="#axes-coordinates-and-projections" id="toc-axes-coordinates-and-projections" class="nav-link" data-scroll-target="#axes-coordinates-and-projections">Axes, coordinates, and projections</a></li>
+  <li><a href="#what-are-principal-components" id="toc-what-are-principal-components" class="nav-link" data-scroll-target="#what-are-principal-components">What are principal components?</a></li>
+  </ul></li>
+  <li><a href="#proportion-of-variance-explained" id="toc-proportion-of-variance-explained" class="nav-link" data-scroll-target="#proportion-of-variance-explained">Proportion of variance explained</a></li>
+  <li><a href="#principal-component-regression" id="toc-principal-component-regression" class="nav-link" data-scroll-target="#principal-component-regression">Principal Component Regression</a></li>
+  <li><a href="#general-setup" id="toc-general-setup" class="nav-link" data-scroll-target="#general-setup">General setup</a></li>
+  <li><a href="#exercise-meadow-plant-diversity" id="toc-exercise-meadow-plant-diversity" class="nav-link" data-scroll-target="#exercise-meadow-plant-diversity">Exercise: meadow plant diversity</a>
+  <ul class="collapse">
+  <li><a href="#check-in-proportion-of-variance-explained" id="toc-check-in-proportion-of-variance-explained" class="nav-link" data-scroll-target="#check-in-proportion-of-variance-explained">Check-in: Proportion of variance explained</a></li>
+  <li><a href="#check-in-selecting-m-via-cross-validation" id="toc-check-in-selecting-m-via-cross-validation" class="nav-link" data-scroll-target="#check-in-selecting-m-via-cross-validation">Check-in: Selecting M via cross-validation</a></li>
+  <li><a href="#check-in-comparing-pcr-ridge-and-lasso" id="toc-check-in-comparing-pcr-ridge-and-lasso" class="nav-link" data-scroll-target="#check-in-comparing-pcr-ridge-and-lasso">Check-in: Comparing PCR, ridge, and lasso</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html">Linear Model Selection &amp; Regularization</a></li><li class="breadcrumb-item"><a href="../../notes/7_pca/7_pca-NOTES.html">Principal Component Analysis</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Principal Component Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- 
+NICE REFERENCES:
+- https://stats.stackexchange.com/questions/222/what-are-principal-component-scores 
+- https://geostatisticslessons.com/lessons/principalcomponentanalysis
+- https://cran.r-project.org/web/packages/LearnPCA/vignettes/Vig_04_Scores_Loadings.pdf
+-->
+<p><a href="../../notes/7_pca/7_pca-SLIDES.html">📊 Slides</a> / <a href="7_pca-BLANK.qmd">📊 Blank slides</a></p>
+<p>In this lesson we introduce:</p>
+<ul>
+<li><strong>Principal Component Analysis (PCA)</strong> as a technique for dimensionality reduction</li>
+<li>Principal components as directions of maximum variance in multivariate data <!-- - **Loadings** and **scores**: how PCA re-expresses observations in a new coordinate system
+- The **scree plot** and proportion of variance explained (PVE) for choosing how many components to retain --></li>
+<li><strong>Principal Component Regression (PCR)</strong>: fitting a regression model on PC scores instead of the original predictors</li>
+<li><strong>Cross-validation</strong> to select the optimal number of components in PCR</li>
+</ul>
+<p>These notes are based on chapter 6.3 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.</p>
+<section id="principal-component-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="principal-component-analysis">Principal Component Analysis</h2>
+<section id="motivation" class="level3">
+<h3 class="anchored" data-anchor-id="motivation">Motivation</h3>
+<p>Imagine you are a whale shark approaching a dense cluster of krill. How would you align yourself to capture as much krill as possible in a single pass?</p>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="allison_horst_PCA_1.png" class="img-fluid figure-img" alt="Illustration of a whale shark, with the face directly facing the viewer. There are subtle x and y axes overlaid onto the illustration. The whale shark’s oblong mouth is oriented horizontally along the x-axis. The whale shark looks friendly and has a slight smile on its face."></p>
+<figcaption>Artwork by <a href="https://allisonhorst.com/everything-else">Dr.&nbsp;Allison Horst</a></figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="allison_horst_PCA_2.png" class="img-fluid" data-fig-lat="A swarm of illustrated krill in an oblong shape extending from the lower left corner upward toward the top right corner. The longest axis of the krill swarm at about a 45 degree angle. A subtle x and y axis are overlaid onto the krill swarm."></p>
+</div>
+</div>
+</div>
+<p>You would probably align yourself with the <strong>direction of greatest spread</strong> in the krill cloud, the axis along which the krill are most dispersed. The same intuition applies to data. When we have many correlated predictors, some directions in the data capture a great deal of the variation while others capture very little. <strong>Principal Component Analysis (PCA)</strong> finds those directions automatically.</p>
+<p>The core idea is: with many predictor variables, sometimes it can be useful to simplify our view of our coordiante system to capture <em>as much about the data as possible in as few dimensions as possible</em>.</p>
+</section>
+<section id="axes-coordinates-and-projections" class="level3">
+<h3 class="anchored" data-anchor-id="axes-coordinates-and-projections">Axes, coordinates, and projections</h3>
+<p>A key concept in this lesson is that we are in control of changing the axes we use to present our data. Suppose that we start with our usual axes defined by <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> and we have two ponts with the following coordinates:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Point</th>
+<th style="text-align: center;">Coordinates in <span class="math inline">\(X_1, X_2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">(1,1)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">(-1,0)</td>
+</tr>
+</tbody>
+</table>
+<p>Visually they look like:</p>
+<div id="cell-axes-original" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="7_pca-NOTES_files/figure-html/axes-original-output-1.png" id="axes-original" class="quarto-figure quarto-figure-center anchored figure-img" width="325" height="318"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Say now we use a different set of coordinate axes, now given by the green lines <span class="math inline">\(\tilde{X}_1\)</span> and <span class="math inline">\(\tilde{X}_2\)</span>:</p>
+<div id="cell-axes-new-coords" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="7_pca-NOTES_files/figure-html/axes-new-coords-output-1.png" id="axes-new-coords" class="quarto-figure quarto-figure-center anchored figure-img" width="325" height="318"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Our points then change coordinates accordingly:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Point</th>
+<th style="text-align: center;">Coordinates in <span class="math inline">\(X_1, X_2\)</span></th>
+<th style="text-align: center;">Coordinates in <span class="math inline">\(\tilde{X}_1, \tilde{X}_2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">(1,1)</td>
+<td style="text-align: center;">(<span class="math inline">\(\sqrt{2}\)</span>,0)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">(-1,0)</td>
+<td style="text-align: center;">(-0.71, 0.71)</td>
+</tr>
+</tbody>
+</table>
+<p>Same points, different ways of representing them.</p>
+<p>Finally, another core idea in this lesson is that of projecting onto a coordinate, which essentially means only keeping the coordinates for the axes we are interested in. If we project our points onto the <span class="math inline">\(\tilde{X}_1\)</span> axes the we obtain the following:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Point</th>
+<th style="text-align: center;">Coordinates in <span class="math inline">\(X_1, X_2\)</span></th>
+<th style="text-align: center;">Coordinates in <span class="math inline">\(\tilde{X}_1, \tilde{X}_2\)</span></th>
+<th style="text-align: center;">Projection onto <span class="math inline">\(\tilde{X}_2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">(1,1)</td>
+<td style="text-align: center;">(<span class="math inline">\(\sqrt{2}\)</span>,0)</td>
+<td style="text-align: center;">proj(A) = <span class="math inline">\(\sqrt{2}\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">(-1,0)</td>
+<td style="text-align: center;">(-0.71, 0.71)</td>
+<td style="text-align: center;">proj(B) = -0.71</td>
+</tr>
+</tbody>
+</table>
+<div id="cell-axes-projection" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="7_pca-NOTES_files/figure-html/axes-projection-output-1.png" id="axes-projection" class="quarto-figure quarto-figure-center anchored figure-img" width="325" height="318"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We will keep using these ideas of changing coordinate systems and projecting througout.</p>
+</section>
+<section id="what-are-principal-components" class="level3">
+<h3 class="anchored" data-anchor-id="what-are-principal-components">What are principal components?</h3>
+<p><strong>Principal Component Analaysis (PCA)</strong> creates a new set of axes so that:</p>
+<ul>
+<li><strong>PC1</strong> points in the direction of <strong>maximum variance</strong> in the data</li>
+<li><strong>PC2</strong> points in the direction of maximum remaining variance, <strong>orthogonal to PC1</strong></li>
+<li><strong>PC3</strong> is orthogonal to both PC1 and PC2 and explains the most remaining variance, and so on.</li>
+</ul>
+<p>There are always as many principal components as original variables. But, if PC1 and PC2 explain most of the variance, we’d still be seeing most of the important things about our data if we just use PC1 and PC2 to analyze it. This is the core idea of <strong>dimensionality reduction</strong>: converting complex multivariate data into fewer dimensions while retaining as much information as possible.</p>
+<p>Let’s see an example with three variables:</p>
+<p>We generate 600 observations from three variables (x, y, z) with very high pairwise correlations. We can see from the figure below that most of the variation is concentrated along a single dominant axis, with very little spread perpendicular to it.</p>
+<div id="cell-pca-3d-data-only" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="7_pca-NOTES_files/figure-html/pca-3d-data-only-output-1.png" id="pca-3d-data-only" class="quarto-figure quarto-figure-center anchored figure-img" width="447" height="430"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Recall that PC1 will be an axis in the direction of maximum variance in the data. Where would you place PC1? What about PC2?</p>
+</div>
+</div>
+<p>The figure below overlays the three PC directions as full lines through the center of the cloud.</p>
+<div id="cell-pca-3d-scatter" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="7_pca-NOTES_files/figure-html/pca-3d-scatter-output-1.png" id="pca-3d-scatter" class="quarto-figure quarto-figure-center anchored figure-img" width="428" height="430"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Notice that <strong>PC1 (yellow)</strong> runs along the long axis of the data cloud, this is direction where the data varies the most. <strong>PC2 (salmon)</strong> is perpendicular to PC1 and captures the remaining spread. <strong>PC3 (lavender)</strong> points through the thinest dimension of the cloud and explains almost no variance.</p>
+<p><strong>PCA gives us a new coordinate system</strong> whose axes are these three PC directions. If we re-express every data point in thie new coordinates given by the principal components (using PC scores instead of x/y/z coordinates), the data cloud becomes axis-aligned. The plot below shows the data in that new PC coordinate system: the cloud is stretched along PC1 and very flat along PC2 and PC3.</p>
+<div id="cell-pca-3d-aligned" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="7_pca-NOTES_files/figure-html/pca-3d-aligned-output-1.png" id="pca-3d-aligned" class="quarto-figure quarto-figure-center anchored figure-img" width="411" height="432"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For each data point <span class="math inline">\((x, y, z)\)</span> the <strong>scores</strong> will be the new coordinates of the point in the new cartesian system defined by the principal componentes PC1, PC2, PC3.</p>
+<p>Because PC1 alone captures 95 % of the variance, if we project onto two dimensions by keeping only PC1 and PC2, we retain almost all of the structure in the data. The PC3 dimension, which we drop, contains only 1.1 % of the variance, so very little information is lost.</p>
+<div id="cell-pca-3d-projection" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="7_pca-NOTES_files/figure-html/pca-3d-projection-output-1.png" id="pca-3d-projection" class="quarto-figure quarto-figure-center anchored figure-img" width="509" height="392"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Through this example we can see that <strong>PCA</strong> creates a new set of axes ,the <strong>principal components (PCs)</strong> and each of our observations gets a new coordinate in this new system. By projecting our observations onto a subset of the principal components, we can get a simpler view of our data without (hopefully) losing much infromation.</p>
+</section>
+</section>
+<section id="proportion-of-variance-explained" class="level2">
+<h2 class="anchored" data-anchor-id="proportion-of-variance-explained">Proportion of variance explained</h2>
+<p>Every PC captures a certain share of the total variance in the data, this is the <strong>proportion of variance explained (PVE) by <span class="math inline">\(m\)</span>-th PC</strong>. The PVE values always sum to 1 across all <span class="math inline">\(p\)</span> components, since together the PCs account for all the variance in the original data. We are usually interested in how much of that total is concentrated in the first few components. For our example data, we can visualize the PVE for each principal component in a <strong>scree plot</strong> such as the one on the left-hand side, or see the cumulate PVE as in the right-hand side plot.</p>
+<div id="cell-pve-3d" class="cell" data-execution_count="9">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="7_pca-NOTES_files/figure-html/pve-3d-output-1.png" id="pve-3d" class="quarto-figure quarto-figure-center anchored figure-img" width="756" height="310"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We see that PC1 alone captures 95.1 % of all the variance in the three variables. PC2 accounts for 3.8 % and PC3 for only 1.1 %. Together, PC1 and PC2 retain 98.9 % of the total variance, which is why the 2D projection we showed earlier preserved the structure of the data so well.</p>
+<p>This is the key decision in any PCA workflow: <strong>how many components do we keep?</strong> A common heuristic is to keep enough components to explain 90–95% of the total variance, or to look for an “elbow” in the individual PVE bar chart where the bars drop sharply. We will revisit this decision with a more challenging dataset in the next section.</p>
+<!-- ### General setup
+
+In math terms, these principal components are linear combinations of the original variables $X_1, \ldots, X_p$:
+
+$$Z_m = \phi_{1m} X_1 + \phi_{2m} X_2 + \cdots + \phi_{pm} X_p,$$
+
+where the $\phi_{jm}$ are numbers called **loadings** that are chosen to have each PC capture the variance as explained. 
+
+For each data point $(x_1, \ldots, x_n)$ the **scores** will be the new coordinates of the point in the new cartesian system defined by the principal componentes PC1, ,..., PC$m$.  -->
+</section>
+<section id="principal-component-regression" class="level2">
+<h2 class="anchored" data-anchor-id="principal-component-regression">Principal Component Regression</h2>
+<p>Notice that so far we have not referenced the response variable. PCA summarizes the variability structure of the predictors without reference to the response. <strong>Principal Component Regression (PCR)</strong> connects that structure to the response variable to obtain simple models and better predictions. The guiding idea is that the directions in which the predictors show the most variation are often also the directions most strongly associated with the response. This is an assumption, but it is a reasonable in many real settings.</p>
+<p>Let’s see this with a concrete example using our 3D <span class="math inline">\(x\)</span>/<span class="math inline">\(y\)</span>/<span class="math inline">\(z\)</span> data. Suppose we observe a response variable <span class="math inline">\(Y\)</span> that depends on all three predictors. In our data, the variable <span class="math inline">\(Y\)</span> is generated by:</p>
+<p><span class="math display">\[Y = 2x + 2y + 2z + \varepsilon.\]</span></p>
+<p>So the true coefficients are 2 for all predictors.</p>
+<p>If we decided to model <span class="math inline">\(Y\)</span> using the three predictors <span class="math inline">\(x\)</span>/<span class="math inline">\(y\)</span>/<span class="math inline">\(z\)</span> and a standard multiple linear regression fit by OLS then, our model would be:</p>
+<p><span class="math display">\[\hat{Y} = \hat{\beta}_0 + \hat{\beta}_x \cdot x + \hat{\beta}_y \cdot y + \hat{\beta}_z \cdot z\]</span></p>
+<p>A standard multiple linear regression (OLS) must then estimate three separate coefficients, one for each predictor:</p>
+<!-- But fitting three parameters on highly correlated predictors is unstable: small perturbations in the data can cause the individual coefficients to swing dramatically, a problem called **multicollinearity**.-->
+<div id="pcr-ols-coefs-3d" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-stdout">
+<pre><code>Predictor  OLS coefficient
+        x            2.039
+        y            1.884
+        z            2.127
+
+OLS intercept: -0.072   |   OLS R²: 0.944</code></pre>
+</div>
+</div>
+<p>Instead of using all three variables, we can instead replace all three predictors with PC1 as our single variable. Since PC1 captures 95.1 % of the variance in <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span>, and <span class="math inline">\(z\)</span>, it summarizes almost all information in the three variables with one number. The regression model becomes then a simple linear regression:</p>
+<p><span class="math display">\[\hat{Y} = \hat{\alpha}_0 + \hat{\alpha}_1 \cdot \text{PC1}\]</span></p>
+<div id="cell-pcr-1comp-3d" class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="7_pca-NOTES_files/figure-html/pcr-1comp-3d-output-1.png" id="pcr-1comp-3d" class="quarto-figure quarto-figure-center anchored figure-img" width="664" height="351"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="pcr-comparison-3d" class="cell" data-execution_count="12">
+<div class="cell-output cell-output-stdout">
+<pre><code>                       Model  Parameters  Train R²  Test MSE
+OLS  (3 predictors: x, y, z)           3     0.944     2.112
+      PCR  (M = 1 component)           1     0.944     2.095
+     PCR  (M = 2 components)           2     0.944     2.110</code></pre>
+</div>
+</div>
+<p>Train R² and Test MSE tell different stories. Train R² is computed on the 450 observations used to fit each model — OLS can overfit by spreading coefficients across 3 correlated predictors, slightly inflating its training R². Test MSE is evaluated on the 150 held-out observations OLS has never seen. PCR with just 1 component achieves nearly the same test MSE as OLS despite using only a single predictor, confirming that almost all predictive signal lives in PC1.</p>
+</section>
+<section id="general-setup" class="level2">
+<h2 class="anchored" data-anchor-id="general-setup">General setup</h2>
+<p>We apply <span class="math inline">\(PCA\)</span> and <span class="math inline">\(PCR\)</span> when we are in the context of multiple linear regression. This is, we have <span class="math inline">\(p\)</span> predictors <span class="math inline">\(X_1, \ldots, X_p\)</span> and a response variable <span class="math inline">\(Y\)</span> that we assume are related by</p>
+<p><span class="math display">\[Y = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \cdots + \hat{\beta}_p X_p.\]</span></p>
+<p><span class="math inline">\(PCA\)</span> replaces the original coordinates for our data: instead of using the predictors <span class="math inline">\(X_1, \ldots, X_p\)</span>, are our new axes are the principal components PC1, …, PC<span class="math inline">\(p\)</span>. We can then project our data onto a small number of principal components to simplify our set of observations data.</p>
+<p>The response variable <span class="math inline">\(Y\)</span> comes in when we replace the original <span class="math inline">\(p\)</span> predictors with <span class="math inline">\(M \leq p\)</span> principal components before fitting the regression using OLS on the projected observations.</p>
+<p>Concretely, PCR works by doing the following steps:</p>
+<ol type="1">
+<li><strong>Standardize</strong> the predictors (mean 0, SD 1)</li>
+<li><strong>Compute the principal components</strong> of the standardized predictors</li>
+<li><strong>Project</strong> each observation onto the first <span class="math inline">\(M\)</span> components.</li>
+<li><strong>Fit ordinary least squares</strong> of <span class="math inline">\(Y\)</span> on this new data.</li>
+</ol>
+<p>The key tuning parameter is <span class="math inline">\(M\)</span>. When <span class="math inline">\(M = p\)</span> (meaning you are using all the principal components), PCR is equivalent to OLS. <span class="math inline">\(M\)</span> is chosen by cross-validation, in the same way as <span class="math inline">\(\lambda\)</span> for ridge and lasso.</p>
+<!-- When $M < p$, the model has fewer degrees of freedom and lower variance, at the cost of some bias. -->
+</section>
+<section id="exercise-meadow-plant-diversity" class="level2">
+<h2 class="anchored" data-anchor-id="exercise-meadow-plant-diversity">Exercise: meadow plant diversity</h2>
+<p>We now apply PCA and PCR to the EcoRich dataset from the previous lesson: 200 mountain meadow survey plots with 8 environmental predictors (<code>precip</code>, <code>temp</code>, <code>forest_cover</code>, <code>soil_N</code>, <code>elevation</code>, <code>slope</code>, <code>aspect</code>, <code>canopy</code>) and response <code>species_richness</code>. Work through each check-in before expanding the discussion.</p>
+<!-- 
+### The biplot: loadings and scores together
+
+The **biplot** is the standard visualization for PCA results. It overlays two things on the same plot:
+
+- **Points** — each observation plotted at its PC1 and PC2 scores (its location in the new coordinate system)
+- **Loading arrows** — one arrow per variable, showing how strongly and in which direction that variable contributes to PC1 and PC2
+
+The length of an arrow reflects how well that variable is captured by these two components. The angle between arrows reflects correlation: arrows pointing in the same direction indicate positively correlated variables; opposite directions indicate negative correlation.
+
+Let's build intuition with our simple x/y/z example before moving to the full EcoRich dataset. Recall that all three variables were highly correlated (ρ ≈ 0.91–0.97), so we expect their arrows to all point in roughly the same direction.
+
+::: {#cell-pca-biplot-3d-example .cell execution_count=13}
+
+::: {.cell-output .cell-output-stderr}
+```
+/var/folders/g8/f3j5vysd4pn88krh3zc0qv_h0000gn/T/ipykernel_6464/2308861650.py:25: UserWarning: Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all axes decorations.
+  plt.tight_layout()
+```
+:::
+
+::: {.cell-output .cell-output-display}
+![](7_pca-NOTES_files/figure-html/pca-biplot-3d-example-output-2.png){#pca-biplot-3d-example width=587 height=729 fig-align='center'}
+:::
+:::
+
+
+The three arrows point in nearly the same direction along PC1, confirming that x, y, and z are all positively correlated with each other and all load heavily onto PC1. The spread of the points along PC1 is very wide — consistent with PC1 capturing 95 % of the variance — while the spread along PC2 is much narrower. Because this is a simple 3-variable case, the biplot is easy to read. With more variables the picture becomes richer, as we'll see next.
+
+Now let's apply the same idea to the full EcoRich dataset with all 8 predictors.
+
+::: {#cell-pca-biplot .cell execution_count=14}
+
+::: {.cell-output .cell-output-display}
+![](7_pca-NOTES_files/figure-html/pca-biplot-output-1.png){#pca-biplot width=661 height=462 fig-align='center'}
+:::
+:::
+
+
+How to read a biplot:
+
+- **Arrow direction**: shows how each variable relates to PC1 (horizontal) and PC2 (vertical)
+- **Arrows pointing the same direction**: those variables are positively correlated
+- **Arrows pointing opposite directions**: those variables are negatively correlated
+- **Arrow length**: reflects how well the variable is captured in this 2D projection — longer means better represented
+
+The loading values for the first two PCs are:
+
+::: {#loading-table .cell execution_count=15}
+
+::: {.cell-output .cell-output-stdout}
+```
+              PC1 loading  PC2 loading
+precip             -0.127       -0.625
+temp               -0.179       -0.349
+forest_cover        0.179       -0.090
+soil_N             -0.591        0.172
+elevation          -0.462        0.165
+slope               0.431       -0.031
+aspect              0.341        0.487
+canopy              0.233       -0.430
+```
+:::
+:::
+
+
+:::{.callout-tip}
+## Check-in
+
+1. Which predictors have the largest absolute loadings on PC1? What environmental gradient might PC1 be representing?
+
+2. Looking at the point colors in the biplot, does species richness appear to increase or decrease along the PC1 axis? Is this consistent with the loading directions and with what we know about the true data-generating model?
+
+3. `aspect` and `canopy` have true coefficients of zero in the data-generating model. Where do their loading arrows tend to fall in the biplot? What does this suggest about how PCA treats irrelevant variables?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. `precip`, `temp`, `forest_cover`, and `soil_N` tend to load most strongly on PC1 — consistent with these being the four strongest true predictors. PC1 captures a composite gradient of site productivity and moisture conditions.
+
+2. Plots with higher species richness (darker green points) cluster on the side of PC1 where `precip` and `soil_N` arrows point (positive precipitation and soil nutrients → higher richness). This is consistent with the true model coefficients.
+
+3. `aspect` and `canopy` have smaller loading magnitudes and their arrows do not strongly align with either axis — reflecting that they carry little systematic signal. However, PCA does not set their loadings to exactly zero; it just assigns them small values because they don't explain much variance. This is different from the lasso, which can set coefficients to exactly zero. It is a known limitation of PCR: it cannot perform variable selection.
+::: -->
+<section id="check-in-proportion-of-variance-explained" class="level3">
+<h3 class="anchored" data-anchor-id="check-in-proportion-of-variance-explained">Check-in: Proportion of variance explained</h3>
+<div id="cell-scree-plot" class="cell" data-execution_count="16">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="7_pca-NOTES_files/figure-html/scree-plot-output-1.png" id="scree-plot" class="quarto-figure quarto-figure-center anchored figure-img" width="756" height="310"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Looking at the scree plot above:</p>
+<p>How many components are needed to explain at least 90% of the total variance in the 8 predictors?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Seven components are needed to explain at least 90% variance in the predictors.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="check-in-selecting-m-via-cross-validation" class="level3">
+<h3 class="anchored" data-anchor-id="check-in-selecting-m-via-cross-validation">Check-in: Selecting M via cross-validation</h3>
+<p>The figure below shows the 10-fold CV-MSE for each value of <span class="math inline">\(M\)</span> from 1 to 8.</p>
+<div id="cell-pcr-cv-plot" class="cell" data-execution_count="17">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="7_pca-NOTES_files/figure-html/pcr-cv-plot-output-1.png" id="pcr-cv-plot" class="quarto-figure quarto-figure-center anchored figure-img" width="565" height="310"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>What is the optimal number of components selected by cross-validation?</li>
+<li>At <span class="math inline">\(M =\)</span> 8 (all components), what is the relationship between PCR and OLS? How are their CV-MSE related?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>The optimal <span class="math inline">\(M\)</span> selected by CV is 8, meaning retaining 8 principal component(s) gives the best out-of-sample prediction accuracy.</p></li>
+<li><p>When <span class="math inline">\(M = p\)</span>, the <span class="math inline">\(p\)</span> PC scores span exactly the same space as the <span class="math inline">\(p\)</span> original predictors — PCA is a rotation, not a reduction. So PCR at <span class="math inline">\(M = p\)</span> is identical to OLS. The CV-MSE at the rightmost point in the plot is therefore the OLS CV-MSE.</p></li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+<section id="check-in-comparing-pcr-ridge-and-lasso" class="level3">
+<h3 class="anchored" data-anchor-id="check-in-comparing-pcr-ridge-and-lasso">Check-in: Comparing PCR, ridge, and lasso</h3>
+<div id="method-comparison" class="cell" data-execution_count="18">
+<div class="cell-output cell-output-stdout">
+<pre><code>                Method CV-MSE
+OLS (all 8 predictors) 14.664
+           PCR (M = 8) 14.664
+  Ridge (CV-optimal λ) 14.628
+  Lasso (CV-optimal λ) 14.496</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>Does PCR improve on OLS? Is this the direction you expected based on the bias-variance tradeoff?</p></li>
+<li><p>Which method performs best? Does this make sense given the structure of the true data-generating model — 8 predictors, 2 with true coefficient of zero and several with moderate effects?</p></li>
+<li><p>What is a key limitation of PCR compared to lasso, given this data-generating model?</p></li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>PCR should improve on OLS here because OLS overfits when the noise level is moderate and the predictors include irrelevant ones. Reducing to the most informative PC directions lowers variance at a small cost in bias.</p></li>
+<li><p><strong>Lasso</strong> tends to perform best on this dataset because it can exactly zero out the two truly irrelevant predictors (<code>aspect</code> and <code>canopy</code>), directly matching the structure of the true model. Ridge is competitive when many predictors have moderate non-zero effects. PCR is effective when the response is well-explained by a few dominant environmental gradients — which is approximately true here, but not perfectly so.</p></li>
+<li><p>PCR cannot perform <strong>variable selection</strong>: it retains all original predictors in each PC (with varying loadings) and cannot set any loading to exactly zero. In a truly sparse setting — where a small number of predictors matter and the rest are pure noise — lasso has a structural advantage over PCR. PCR works best when the signal is spread across many predictors that share a common underlying structure.</p></li>
+</ol>
+</div>
+</div>
+</div>
+<!-- 
+## Exercise: when PCR actually reduces dimension
+
+The following exercise uses a dataset where PCR with far fewer than $p$ components outperforms OLS on held-out data.
+
+**Setup**: 300 observations, 6 predictors. Three of them (`u1`, `u2`, `u3`) share a single latent signal and are highly correlated with each other. The remaining three (`v1`, `v2`, `v3`) are independent noise. The response depends only on the latent signal, so the first PC should capture almost everything that matters for prediction.
+
+### Check-in: Scree plot
+
+::: {#cell-ex2-scree .cell execution_count=19}
+
+::: {.cell-output .cell-output-display}
+![](7_pca-NOTES_files/figure-html/ex2-scree-output-1.png){#ex2-scree width=756 height=310 fig-align='center'}
+:::
+:::
+
+
+:::{.callout-tip}
+## Check-in
+
+How many components does it take to reach 90% cumulative PVE?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+::: {#ex2-pve-vals .cell execution_count=20}
+
+::: {.cell-output .cell-output-stdout}
+```
+Components needed for ≥90% PVE: 4
+  PC1: individual = 48.7%,  cumulative = 48.7%
+  PC2: individual = 18.3%,  cumulative = 66.9%
+  PC3: individual = 16.5%,  cumulative = 83.5%
+  PC4: individual = 15.2%,  cumulative = 98.6%
+  PC5: individual = 0.7%,  cumulative = 99.3%
+  PC6: individual = 0.7%,  cumulative = 100.0%
+```
+:::
+:::
+
+
+PC1 dominates because `u1`, `u2`, `u3` all load onto the same latent direction — their shared variance is concentrated in one component. The remaining PCs capture either tiny residuals within that group or the independent variance of `v1`, `v2`, `v3`. 
+:::
+
+### Check-in: Cross-validation to select M
+
+::: {#cell-ex2-cv-plot .cell execution_count=21}
+
+::: {.cell-output .cell-output-display}
+![](7_pca-NOTES_files/figure-html/ex2-cv-plot-output-1.png){#ex2-cv-plot width=565 height=310 fig-align='center'}
+:::
+:::
+
+
+:::{.callout-tip}
+## Check-in
+
+What is the optimal M you would select by cross-validation? Is this what you expected from the scree plot?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+CV selects M = 1, meaning one  component captures most of the predictive signal. Adding more PCs beyond the optimum increases test error because those PCs carry only noise.
+:::
+
+### Check-in: Does PCR outperform OLS here?
+
+::: {#ex2-comparison .cell execution_count=22}
+
+::: {.cell-output .cell-output-stdout}
+```
+                       Model  10-fold CV-MSE
+OLS  (M = 6, all components)           5.147
+    PCR  (M = 1, CV-optimal)           5.142
+```
+:::
+:::
+
+
+:::{.callout-tip}
+## Check-in
+
+1. Does PCR at the CV-optimal M improve on OLS? By how much?
+2. Why is PCR with M = 6 equivalent to OLS here?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. Yes: CV-MSE at M = 1 is lower than at M = 6 (OLS).
+
+2. PCR at M = 6 uses all six PC scores, which span exactly the same column space as the six original predictors, so it is mathematically identical to OLS.
+
+::: -->
+
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-islp_2023" class="csl-entry" role="listitem">
+James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E. Taylor. 2023. <em>An Introduction to Statistical Learning: With Applications in <span>Python</span></em>. Springer Texts in Statistics. Cham: Springer.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>This work is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License</a></p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This website is built with <a href="https://quarto.org/">Quarto</a> and <a href="https://github.com/MEDS-eds-220/MEDS-eds-220-course">GitHub pages</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
