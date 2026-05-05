@@ -837,7 +837,7 @@ plt.close()
 - Look for an **"elbow"** in the individual PVE bar chart where bars drop sharply
 
 
-In this example: PC1 + PC2 together retain `{python} f"{(pve_3d[0]+pve_3d[1])*100:.1f}"` %, so the 2D projection preserved the data structure well. 
+In this example: PC1 + PC2 together retain `{python} f"{(pve_3d[0]+pve_3d[1])*100:.1f}"` %, so the 2D projection preserved the data structure well. We could have projected only onto PC1 too!
 
 ---
 
@@ -855,23 +855,24 @@ In this example: PC1 + PC2 together retain `{python} f"{(pve_3d[0]+pve_3d[1])*10
 
 <hr>
 
-So far, PCA has been applied to the **predictors only** — the response variable $Y$ plays no role.
+So far, PCA has been applied to the **predictors only**: we have not used the response variable $Y$.
+
+<br>
 
 . . .
 
-**Principal Component Regression (PCR)** connects this structure to the response:
+**Principal Component Regression (PCR)** connects the predictors and their PCs to the response:
 
 ::: {.body-text-m .teal-text .center-text}
 Replace the original $p$ predictors with $M \leq p$ principal components, then fit OLS on the projected data.
 :::
 
-. . .
+<br>
 
 The guiding assumption: **the directions in which the predictors vary the most are often also the directions most strongly associated with the response.**
 
-. . .
 
-This is an assumption — but a reasonable one in many real settings.
+Reasonable one in many real settings.
 
 ---
 
@@ -881,15 +882,20 @@ This is an assumption — but a reasonable one in many real settings.
 
 <hr>
 
-Using our 3D $x/y/z$ data, suppose we observe a response $Y$:
+Using our 3D $x/y/z$ data, suppose we observe a response $Y$. We generate it with the following formula:
 
 $$Y = 2x + 2y + 2z + \varepsilon$$
 
-So the true coefficients are **2 for all three predictors**.
+So the **true coefficients** are 2 for all three predictors.
 
 . . .
 
-**Standard OLS** must estimate three separate coefficients:
+If we model $Y$ using three predictors $x$/$y$/$z$ and a standard MLR fit by OLS then, our model is:
+
+$$\hat{Y} = \hat{\beta}_0 + \hat{\beta}_x \cdot x + \hat{\beta}_y \cdot y + \hat{\beta}_z \cdot z$$
+
+and we get the coefficient estimates:
+
 
 ```{python}
 #| echo: false
@@ -902,9 +908,6 @@ print(coef_df.to_string(index=False))
 print(f'\nOLS intercept: {ols_3d.intercept_:.3f}   |   OLS R²: {r2_ols_3d:.3f}')
 ```
 
-. . .
-
-Since PC1 captures `{python} f"{pve_3d[0]*100:.1f}"` % of the variance in $x$, $y$, $z$, we can try replacing all three variables with just PC1.
 
 ---
 
@@ -914,9 +917,14 @@ Since PC1 captures `{python} f"{pve_3d[0]*100:.1f}"` % of the variance in $x$, $
 
 <hr>
 
+Since PC1 captures `{python} f"{pve_3d[0]*100:.1f}"` % of the variance in $x$, $y$, $z$, we can try replacing all three variables with just PC1.
+
+
 Instead of three predictors, we fit a **simple linear regression** on PC1:
 
-$$\hat{Y} = \hat{\alpha}_0 + \hat{\alpha}_1 \cdot \text{PC1}$$
+$$\hat{Y} = \hat{\alpha}_0 + \hat{\alpha}_1 \cdot \text{PC1}.$$
+
+. . .
 
 ```{python}
 #| echo: false
@@ -964,14 +972,23 @@ comp_3d = pd.DataFrame({
 print(comp_3d.to_string(index=False))
 ```
 
-. . .
 
 <br>
 
-::: {.body-text-s}
-- **Train R²**: OLS can slightly overfit by spreading coefficients across 3 correlated predictors
-- **Test MSE**: PCR with just 1 component achieves nearly the same test MSE as OLS — confirming that almost all predictive signal lives in PC1
+
+- **Train R²**: a measure of how well the model fits the data it was trained on
+- **Test MSE**: a measure of how well the model generalizes to predict values in previously unseen data 
+
+::: {.body-text-m .teal-text .center-text}
+What do these results tell you about where most of the predictive signal from this data is coming from?
 :::
+
+. . .
+
+Here PCR with just 1 component achieves nearly the same test MSE as OLS. This confirmis that almost all predictive signal lives in PC1!
+
+
+
 
 ---
 
@@ -989,7 +1006,7 @@ print(comp_3d.to_string(index=False))
 
 <hr>
 
-We apply PCR in the context of **multiple linear regression** with $p$ predictors $X_1, \ldots, X_p$ and response $Y$:
+We apply PCR in the context of **multiple linear regression** with $p$ predictors $X_1, \ldots, X_p$ and a response $Y$:
 
 $$Y = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \cdots + \hat{\beta}_p X_p.$$
 
@@ -999,8 +1016,9 @@ $$Y = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \cdots + \hat{\beta}_p X_p.$$
 
 1. **Standardize** the predictors (mean 0, SD 1)
 2. **Compute the principal components** of the standardized predictors
-3. **Project** each observation onto the first $M$ components (the PC scores)
-4. **Fit ordinary least squares** of $Y$ on these $M$ scores
+3. **Decide which PCs will be used** to reduce dimensions
+3. **Project** each observation onto the first $M$ components
+4. **Fit ordinary least squares** of $Y$ on this new data
 
 . . .
 
@@ -1008,7 +1026,12 @@ The key tuning parameter is $M$:
 
 ::: {.body-text-s}
 - When $M = p$, PCR is equivalent to OLS (all components retain all information)
-- When $M < p$, the model has fewer parameters — lower variance at the cost of some bias
+- When $M < p$, the model has fewer parameters: lower variance at the cost of some bias
+:::
+
+. . .
+
+::: {.body-text-s}
 - $M$ is chosen by **cross-validation**, just like $\lambda$ for ridge and lasso
 :::
 
@@ -1024,11 +1047,11 @@ The key tuning parameter is $M$:
 
 ## {#exercise-intro data-menu-title="EcoRich dataset"}
 
-[EcoRich dataset]{.slide-title}
+[Meadow plant diversity dataset]{.slide-title}
 
 <hr>
 
-We apply PCA and PCR to the **EcoRich dataset** from the previous lesson:
+We apply PCA and PCR to the dataset from the previous lesson:
 
 <br>
 
@@ -1036,14 +1059,108 @@ We apply PCA and PCR to the **EcoRich dataset** from the previous lesson:
 - **200** mountain meadow survey plots
 - **8 environmental predictors**: `precip`, `temp`, `forest_cover`, `soil_N`, `elevation`, `slope`, `aspect`, `canopy`
 - **Response**: `species_richness` (plant species per 25 m² plot)
-- **True model**: only `precip`, `temp`, `forest_cover`, `soil_N`, `elevation`, `slope` have non-zero effects; `aspect` and `canopy` are pure noise
 :::
 
-<br>
+---
 
-::: {.teal-text .center-text .body-text-m}
-Work through each check-in before moving to the answer.
+## {#data-overview data-menu-title="EcoRich: data overview"}
+
+[Data overview]{.slide-title}
+
+<hr>
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+specs = [
+    ('precip',       'steelblue',   'Annual precip. (mm)'),
+    ('temp',         'tomato',      'Summer temp. (°C)'),
+    ('forest_cover', 'seagreen',    'Forest cover (%)'),
+    ('soil_N',       'darkorange',  'Soil N (mg/kg)'),
+    ('elevation',    'mediumpurple','Elevation (m)'),
+    ('slope',        'saddlebrown', 'Slope (°)'),
+    ('aspect',       'gray',        'Aspect (°)'),
+    ('canopy',       'olivedrab',   'Canopy cover (%)'),
+]
+
+fig, axes = plt.subplots(2, 4, figsize=(fig_size_x * 1.6, fig_size_y * 1.3))
+for ax, (col, color, xlabel) in zip(axes.flat, specs):
+    ax.scatter(df[col], df['species_richness'], s=10, alpha=0.4, color=color)
+    ax.set_xlabel(xlabel, fontsize=9)
+    ax.set_ylabel('Species richness', fontsize=9)
+    ax.grid(True, alpha=0.3)
+    ax.tick_params(labelsize=8)
+fig.suptitle('Species richness vs. each environmental predictor', y=1.01)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.center-text .body-text-s}
+**True model**: only `precip`, `temp`, `forest_cover`, `soil_N`, `elevation`, `slope` have non-zero coefficients
+
+`aspect` and `canopy` are pure noise
 :::
+
+---
+
+## {#checkin-scree-1 data-menu-title="Check-in: Scree (question)"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="58%"}
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+comp_labels = [f'PC{i+1}' for i in range(p)]
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.0, fig_size_y))
+
+axes[0].bar(comp_labels, pve * 100, color='steelblue', edgecolor='white', linewidth=0.5)
+axes[0].set_xlabel('Principal component')
+axes[0].set_ylabel('Variance explained (%)')
+axes[0].set_title('Individual PVE')
+axes[0].grid(True, alpha=0.3, axis='y')
+
+axes[1].plot(comp_labels, cum_pve * 100, marker='o',
+             color='steelblue', linewidth=2, markersize=6)
+axes[1].axhline(90, color='tomato', linestyle='--', linewidth=1, label='90% threshold')
+axes[1].set_xlabel('Principal component')
+axes[1].set_ylabel('Cumulative variance explained (%)')
+axes[1].set_title('Cumulative PVE')
+axes[1].set_ylim(0, 105)
+axes[1].legend(fontsize=9)
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="42%"}
+
+::: {.teal-text .body-text-m}
+Explain to the person you are working with:
+
+(1) how each of the PCs is computed and 
+
+(2) what is being depicted on each of the plots.
+:::
+
+:::
+
+::::
 
 ---
 
@@ -1154,7 +1271,7 @@ How many components are needed to explain at least **90% of the total variance**
 **Seven** components are needed to reach 90% cumulative PVE.
 
 ::: {.body-text-s}
-Because the 8 predictors were generated independently, no single dominant direction captures most of the variance — the PVE is spread fairly evenly across components.
+*In this example the 8 predictors were generated independently, no single dominant direction captures most of the variance. The PVE is spread fairly evenly across components.*
 :::
 
 :::
@@ -1184,11 +1301,60 @@ fig, ax = plt.subplots(figsize=(fig_size_x * 1.0, fig_size_y))
 ax.plot(range(1, p + 1), cv_mse_pcr,
         marker='o', color='mediumpurple', linewidth=2, markersize=6,
         label='10-fold CV MSE')
-ax.axvline(best_m, color='tomato', linestyle='--', linewidth=1.5,
-           label=f'Optimal M = {best_m}')
 ax.set_xlabel('Number of principal components (M)')
 ax.set_ylabel('CV mean squared error')
-ax.set_title('PCR: selecting M via cross-validation')
+ax.set_xticks(range(1, p + 1))
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="42%"}
+
+::: {.teal-text .body-text-m}
+
+
+Explain to the person you are working with:
+
+(1) Why are we interested in selecting only a few of the principal components?
+
+(2) How is CV used to select the optimal number of components? 
+:::
+
+:::
+
+::::
+
+
+---
+
+## {#checkin-cv-q data-menu-title="Check-in: selecting M (question)"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="58%"}
+
+The figure below shows the 10-fold CV-MSE for each value of $M$ from 1 to `{python} p`.
+
+```{python}
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.0, fig_size_y))
+ax.plot(range(1, p + 1), cv_mse_pcr,
+        marker='o', color='mediumpurple', linewidth=2, markersize=6,
+        label='10-fold CV MSE')
+ax.set_xlabel('Number of principal components (M)')
+ax.set_ylabel('CV mean squared error')
 ax.set_xticks(range(1, p + 1))
 ax.legend(fontsize=9)
 ax.grid(True, alpha=0.3)
@@ -1204,7 +1370,7 @@ plt.close()
 ::: {.teal-text .body-text-m}
 1. What is the **optimal number of components** selected by cross-validation?
 
-2. At $M = $ `{python} p` (all components), what is the relationship between **PCR and OLS**? How are their CV-MSEs related?
+2. How does this number of components relate with the OLS regression? 
 :::
 
 :::
@@ -1260,7 +1426,7 @@ plt.close()
 ::: {.body-text-s}
 1. The optimal $M$ is `{python} best_m` — retaining `{python} best_m` component(s) gives the best out-of-sample prediction accuracy.
 
-2. When $M = p$, the $p$ PC scores span exactly the same space as the $p$ original predictors — PCA is a rotation, not a reduction. So PCR at $M = p$ is **identical to OLS**, and their CV-MSEs are equal.
+2. So PCR at $M = p$ (number of predictors) is **identical to OLS**, and their CV-MSEs are equal.
 :::
 
 :::
