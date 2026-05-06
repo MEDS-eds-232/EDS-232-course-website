@@ -4,6 +4,8 @@ These are notes and instructions about how I want to structure my lesson on tree
 
 All of the regression trees section uses a very small dataset with two numerical predictors X_1, X_2, and one numerical response variable that we can follow along. Maybe some 20 observations. 
 
+Start with a plot of the data in X_1, X_2 space with each point annotated with its Y  value.
+
 ## Regression trees
 
 This is a very brief section of an example of what a regression tree is with a diagram. It includes:
@@ -38,26 +40,57 @@ So a regression tree works by:
 
 To fit the regression tree so it makes the best possible predictions, we need to establish what the splitting rules are. Equivalently, we need to find a way to divide the predictor space into regions that give good enough approximations. 
 
-The process by which these splits are found is called *recursive binary splitting*. We will not go into how this process works, but just mention that at each split, it looks to minimize an error term capturing the difference between the average value for the observations in a given region, and the actual response values. 
+The process by which these splits are found is called *recursive binary splitting*. Essentially, after each split, this algorithm looks to minimize an error term capturing the difference between the average value for the observations in a given region, and the actual response values. 
 
-## Pruning
+## Dealing with overfitting
 
-Deep decision trees are prone to overfitting with decision boundaries taht are interpretable but not stable, and small changes in the training data leading to big difference in outcome (high variance).
+Deep decision trees are prone to overfitting with decision boundaries that are interpretable but not stable, and small changes in the training data leading to big difference in outcome (high variance).
 
-Instead of using the full tree, we can overcome overfitting by:
-- using the depth of the tree as a hyperparameter 
-- pruning: balance complexity and fit to training data
+The core idea is that, instead of using the full tree, we can overcome overfitting by using a subtree withing the tree instead.
 
-*Ask Annie about prunning for regression trees used in homework.*
+Some ways to get a subtree are:
 
-*We may not need to cover cost complexity pruning. Next time.*
+1. specifying the maximum depth of the tree 
+2. specifying the minimum number of observations to be at a leaf node
+3. cost complexity pruning: balance complexity and fit to training data
 
+In options 1 and 2 we use the maximum depth and the minimum number of observations at a leaf as hyperparameters for the model. Cost complexity pruning also uses a hyperparameter that controls the weight given to the tree's complexity.
+
+Example: Show examples of pruned trees coming from the full tree. 
+
+Include a check in exercise.
 
 ## Classification trees
 
-Decision trees can also be used for classification problems, in this case we call them **classification trees**. We get to the predicted class for a new observation in the same way. 
+All of the classification trees section uses a very small dataset with two numerical predictors X_1, X_2, and one categorical response variable with three classes that we can follow along. Maybe some 20 observations. 
 
-Check-in: another example of decision tree, this time for classification. The exercise is to have students follow the branches to obtain a prediction for a new observation. 
+Start with a plot of the data in X_1, X_2 space with each point colored by its class.
+
+Decision trees can also be used for classification problems, in this case we call them **classification trees**.
+
+Check-in: A small classification tree is given and the exercise asks them to find a classification for a new observation. 
+
+For a classification tree, we predict that each observation belongs to the most commonly occurring class of training observations in the region to which it belongs. 
+
+Check-in: A diagram with the decision boundaries on the data plot and students are asked to make a decision tree from it. 
+
+We are often interested not only in the class prediction corresponding to a particular terminal node region, but also in the class proportions among the training observations that fall into that region. 
+
+## Fitting a classification tree
+
+So a classification tree works by:
+
+1. Dividing predictor space (this is the set of all possible values for $X_1, X_2, \ldots, X_p$) into non-overlapping regions $R_1, \ldots, R_J$. 
+
+2. For every observation that falls into a region $R_j$, we assign the same prediction, which is the majority class for the training observations in $R_j$.
+
+As before, to fit the classification tree so it makes the best possible predictions, we need to establish what the splitting rules are. Equivalently, we need to find a way to divide the predictor space into regions that give good enough predictions.
+
+As before, we *recursive binary splitting* is used to search for the best split at each step. 
+
+[This is a very high-level explanation of what is intuitively the purity of a leaf, what Gini impurity index is and how it is used at each split to measure the purity and decide which is the best variable to keep splitting on.]
+
+Mention entropy as another metric used to calcualte the splits. 
 
 ## Comparing with linear models
 

@@ -1,0 +1,819 @@
+---
+title: Decision Trees
+jupyter: eds232-env
+echo: false
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.patches import FancyBboxPatch
+import pandas as pd
+from sklearn.tree import (DecisionTreeRegressor, DecisionTreeClassifier,
+                           plot_tree, export_text)
+from sklearn.linear_model import LinearRegression
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+# ── EcoSite regression dataset ─────────────────────────────────────────────────
+# 22 mountain meadow survey sites
+# Predictors: annual rainfall (mm), mean summer temperature (°C)
+# Response:   aboveground biomass (tonnes / ha)
+#
+# True data-generating structure (4 quadrants):
+#   rainfall > 600 & temperature < 18  →  biomass ~ 8.5
+#   rainfall > 600 & temperature ≥ 18  →  biomass ~ 5.5
+#   rainfall ≤ 600 & temperature < 15  →  biomass ~ 3.5
+#   rainfall ≤ 600 & temperature ≥ 15  →  biomass ~ 2.0
+# ──────────────────────────────────────────────────────────────────────────────
+np.random.seed(42)
+n = 22
+
+rainfall    = np.random.uniform(200, 1000, n)
+temperature = np.random.uniform(5,   25,   n)
+
+biomass_base = np.where(
+    rainfall > 600,
+    np.where(temperature < 18, 8.5, 5.5),
+    np.where(temperature < 15, 3.5, 2.0)
+)
+biomass = np.round(biomass_base + np.random.normal(0, 0.55, n), 1)
+biomass = np.clip(biomass, 0.5, 12.0)
+
+df = pd.DataFrame({'rainfall': rainfall, 'temperature': temperature, 'biomass': biomass})
+X  = df[['rainfall', 'temperature']].values
+y  = df['biomass'].values
+
+# ── Fit regression trees ───────────────────────────────────────────────────────
+tree_d1   = DecisionTreeRegressor(max_depth=1, random_state=42)
+tree_d2   = DecisionTreeRegressor(max_depth=2, random_state=42)
+tree_d3   = DecisionTreeRegressor(max_depth=3, random_state=42)
+tree_full = DecisionTreeRegressor(random_state=42)
+
+for t in [tree_d1, tree_d2, tree_d3, tree_full]:
+    t.fit(X, y)
+
+# Extract depth-1 split info
+feat_names_reg  = ['rainfall', 'temperature']
+split1_feat     = tree_d1.tree_.feature[0]       # 0 = rainfall
+split1_val      = tree_d1.tree_.threshold[0]      # split threshold
+left_leaf_val   = tree_d1.tree_.value[tree_d1.tree_.children_left[0]][0][0]
+right_leaf_val  = tree_d1.tree_.value[tree_d1.tree_.children_right[0]][0][0]
+
+# ── Grid for regression decision regions ───────────────────────────────────────
+r_grid  = np.linspace(150, 1050, 300)
+t_grid  = np.linspace(3, 27, 300)
+RR, TT  = np.meshgrid(r_grid, t_grid)
+grid_xy = np.c_[RR.ravel(), TT.ravel()]
+
+Z_d1   = tree_d1.predict(grid_xy).reshape(RR.shape)
+Z_d2   = tree_d2.predict(grid_xy).reshape(RR.shape)
+Z_d3   = tree_d3.predict(grid_xy).reshape(RR.shape)
+Z_full = tree_full.predict(grid_xy).reshape(RR.shape)
+
+# ── MSE as a function of split threshold on rainfall ──────────────────────────
+split_candidates = np.linspace(250, 950, 200)
+mse_splits       = []
+for sv in split_candidates:
+    left  = y[rainfall <= sv]
+    right = y[rainfall >  sv]
+    if len(left) < 2 or len(right) < 2:
+        mse_splits.append(np.nan)
+        continue
+    mse = (((left  - left.mean()) **2).sum()
+         + ((right - right.mean())**2).sum()) / len(y)
+    mse_splits.append(mse)
+mse_splits = np.array(mse_splits)
+
+# ── EcoSite classification dataset ────────────────────────────────────────────
+# 22 sites: rainfall, temperature  →  biome type (forest / grassland / desert)
+#
+# True structure:
+#   rainfall > 650             →  forest
+#   rainfall ≤ 650 & temp < 18 →  grassland
+#   rainfall ≤ 650 & temp ≥ 18 →  desert
+# ──────────────────────────────────────────────────────────────────────────────
+np.random.seed(7)
+n_c = 22
+
+rainfall_c    = np.random.uniform(100, 1000, n_c)
+temperature_c = np.random.uniform(5,   30,   n_c)
+
+biome = np.where(
+    rainfall_c > 650,
+    'forest',
+    np.where(temperature_c < 18, 'grassland', 'desert')
+)
+
+df_c = pd.DataFrame({'rainfall': rainfall_c, 'temperature': temperature_c, 'biome': biome})
+X_c  = df_c[['rainfall', 'temperature']].values
+y_c  = biome
+
+# ── Fit classification trees ───────────────────────────────────────────────────
+tree_c1   = DecisionTreeClassifier(max_depth=1, random_state=42)
+tree_c2   = DecisionTreeClassifier(max_depth=2, random_state=42)
+tree_cfull= DecisionTreeClassifier(random_state=42)
+
+for t in [tree_c1, tree_c2, tree_cfull]:
+    t.fit(X_c, y_c)
+
+cls_names  = tree_c2.classes_.tolist()          # alphabetical: desert, forest, grassland
+cls_colors = {'forest': '#2ecc71', 'grassland': '#f1c40f', 'desert': '#e67e22'}
+cls_color_arr = [cls_colors[c] for c in cls_names]   # for plot_tree filled
+
+# Grid for classification
+Z_c1   = tree_c1.predict(grid_xy).reshape(RR.shape)
+Z_c2   = tree_c2.predict(grid_xy).reshape(RR.shape)
+
+# Encode classes as integers for contourf
+cls_to_int = {c: i for i, c in enumerate(cls_names)}
+Zc1_int = np.vectorize(cls_to_int.get)(Z_c1)
+Zc2_int = np.vectorize(cls_to_int.get)(Z_c2)
+
+# ── Comparison: linear regression vs. tree on a nonlinear dataset ──────────────
+np.random.seed(99)
+n_nl    = 90
+temp_nl = np.random.uniform(0, 35, n_nl)
+
+# Step-function relationship: tree captures this perfectly, linear regression cannot
+npp_nl  = (np.where(temp_nl < 10, 1.5, np.where(temp_nl < 25, 7.0, 2.5))
+           + np.random.normal(0, 0.5, n_nl))
+
+X_nl    = temp_nl.reshape(-1, 1)
+lr_nl   = LinearRegression().fit(X_nl, npp_nl)
+tree_nl = DecisionTreeRegressor(max_depth=2, random_state=42).fit(X_nl, npp_nl)
+
+temp_range_nl = np.linspace(0, 35, 300)
+pred_lr   = lr_nl.predict(temp_range_nl.reshape(-1, 1))
+pred_tree = tree_nl.predict(temp_range_nl.reshape(-1, 1))
+```
+
+In this lesson we introduce:
+
+- **Decision trees** — flexible, interpretable prediction models that partition the predictor space into rectangular regions
+- **Regression trees**: predicting a numerical response variable
+- **Classification trees**: predicting a categorical class label
+- **Tree pruning**: approaches for controlling model complexity and reducing overfitting
+
+These notes are based on chapter 8.1 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example datasets are synthetic and were generated with the aid of Claude Code for the purpose of this lesson.
+
+## Regression trees
+
+### A guiding dataset
+
+We will use a small dataset of **22 ecological survey sites** throughout this section. Each site is characterized by:
+
+- **`rainfall`** — annual precipitation (mm)
+- **`temperature`** — mean summer temperature (°C)
+- **`biomass`** — aboveground plant biomass (tonnes per hectare), our response variable
+
+```{python}
+#| label: scatter-annotated
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
+
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85,
+           edgecolors='white', linewidths=1)
+
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}',
+                (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4),
+                fontsize=8.5, color='#222')
+
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('EcoSite dataset — aboveground biomass (tonnes/ha) labeled on each site')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+### What is a regression tree?
+
+A **regression tree** predicts a numerical response by partitioning the predictor space into rectangular regions and assigning a predicted value to each region. It is structured like an upside-down tree, with a root at the top and leaves at the bottom.
+
+The figure below shows a simple regression tree fitted to our EcoSite dataset, annotated with its key components:
+
+```{python}
+#| label: tree-terminology
+#| fig-align: center
+
+def draw_node(ax, cx, cy, text, color='#d6eaf8', w=2.5, h=0.72, fs=8.5, bold=False):
+    box = FancyBboxPatch((cx - w/2, cy - h/2), w, h,
+                          boxstyle='round,pad=0.07',
+                          facecolor=color, edgecolor='#2c3e50', linewidth=1.5, zorder=3)
+    ax.add_patch(box)
+    ax.text(cx, cy, text, ha='center', va='center', fontsize=fs,
+            fontweight='bold' if bold else 'normal', zorder=4)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.4, fig_size_y + 1.2))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
+
+# Node centres
+nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
+
+# Branches
+for parent, child, yes_lbl, lbl_side in [
+        ('root', 'left',  'Yes', 'left'),
+        ('root', 'right', 'No',  'right')]:
+    px, py = nodes[parent]; cx, cy = nodes[child]
+    ax.plot([px, cx], [py - 0.36, cy + 0.36],
+            color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, yes_lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+# Branch from left to its two leaf nodes
+for child_pos, yes_lbl, lbl_side in [
+        ((1.4, 1.0), 'Yes', 'left'), ((4.6, 1.0), 'No', 'right')]:
+    px, py = nodes['left']; cx, cy = child_pos
+    ax.plot([px, cx], [py - 0.36, cy + 0.36],
+            color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, yes_lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+# Draw the nodes
+draw_node(ax, *nodes['root'],
+          f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, *nodes['left'],
+          'temperature ≤ 15 °C?', color='#d6eaf8')
+draw_node(ax, 8, 2.8,
+          f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+draw_node(ax, 1.4, 1.0,
+          f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0,
+          f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+
+# ── Terminology annotations ────────────────────────────────────────────────────
+ann_kw = dict(fontsize=9, color='steelblue',
+              arrowprops=dict(arrowstyle='->', color='steelblue', lw=1.2))
+ax.annotate('Root node\n(first split)', xy=(5.5, 5.06),
+            xytext=(5.5, 5.35), ha='center', **ann_kw)
+ax.annotate('Internal node\n(split within a region)', xy=(2.3, 2.8),
+            xytext=(0.1, 3.5), ha='center', **ann_kw)
+
+ann_kw_g = dict(fontsize=9, color='seagreen',
+                arrowprops=dict(arrowstyle='->', color='seagreen', lw=1.2))
+ax.annotate('Leaf node\n(prediction = mean)', xy=(7.45, 2.8),
+            xytext=(9.8, 3.5), ha='center', **ann_kw_g)
+
+ann_kw_gr = dict(fontsize=9, color='gray',
+                 arrowprops=dict(arrowstyle='->', color='gray', lw=1.2))
+ax.annotate('Branch', xy=(4.45, 3.85),
+            xytext=(5.0, 4.35), ha='center', **ann_kw_gr)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+Each component of the tree plays a specific role:
+
+- **Root node** — the top of the tree; contains the first split that applies to the entire dataset
+- **Internal node** — a non-leaf node that applies an additional split to a subset of observations
+- **Leaf node** (also called a terminal node) — a node with no further splits; the predicted value here is the **mean of all training observations that reach this leaf**
+- **Branch** — the connection between a parent node and its child nodes, representing the path an observation takes based on the split condition
+
+**Making a prediction**: to predict for a new observation, start at the root and follow the branches based on the split conditions until you reach a leaf. The value at the leaf is the prediction.
+
+::: {.callout-tip}
+## Check-in
+Use the regression tree diagram above to predict the biomass for a new site with **`rainfall = 750 mm`** and **`temperature = 20°C`**. Trace your path from the root to the leaf.
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+1. **Root node**: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? → 750 > `{python} f"{split1_val:.0f}"`, so **No** → go right.
+2. The right branch leads directly to a leaf node (no further split in this region).
+3. **Prediction**: Ŷ ≈ `{python} f"{right_leaf_val:.1f}"` tonnes/ha.
+
+The observation follows the right branch of the tree because it falls in the high-rainfall region.
+:::
+
+### Fitting a regression tree
+
+How does the algorithm decide where to place the splits? We start with a simple **1-node tree** — a tree with only the root node and two leaf nodes. This tree makes a single split on one predictor.
+
+The figure below shows a 1-node tree fitted on the EcoSite data. On the left we see how the split divides the predictor space; on the right, the tree diagram.
+
+```{python}
+#| label: tree-1node
+#| fig-align: center
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.5, fig_size_y + 0.4))
+
+# ── Left: scatter with decision boundary ───────────────────────────────────────
+ax = axes[0]
+ax.axvspan(150, split1_val, alpha=0.18, color='steelblue')
+ax.axvspan(split1_val, 1050, alpha=0.18, color='seagreen')
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--',
+           label=f'Split: rainfall = {split1_val:.0f} mm')
+ax.scatter(df['rainfall'], df['temperature'],
+           s=50, color='steelblue', edgecolors='white', linewidths=0.8, zorder=5)
+
+# Region mean labels
+lm = y[rainfall <= split1_val].mean()
+rm = y[rainfall >  split1_val].mean()
+ax.text(split1_val * 0.52, 23.5, f'mean = {lm:.1f} t/ha',
+        ha='center', fontsize=9, color='steelblue', fontweight='bold')
+ax.text((split1_val + 1050) * 0.5, 23.5, f'mean = {rm:.1f} t/ha',
+        ha='center', fontsize=9, color='seagreen', fontweight='bold')
+
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('1-node tree: one split on rainfall')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+
+# ── Right: tree diagram ────────────────────────────────────────────────────────
+plot_tree(tree_d1,
+          feature_names=feat_names_reg,
+          filled=True, rounded=True, impurity=False,
+          fontsize=10, ax=axes[1], precision=1)
+axes[1].set_title('Fitted 1-node regression tree')
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The mean biomass of the `{python} int((rainfall <= split1_val).sum())` sites in the **left region** (rainfall ≤ `{python} f"{split1_val:.0f}"` mm) is **`{python} f"{y[rainfall <= split1_val].mean():.1f}"` t/ha**, and for the `{python} int((rainfall > split1_val).sum())` sites in the **right region** (rainfall > `{python} f"{split1_val:.0f}"` mm) it is **`{python} f"{y[rainfall > split1_val].mean():.1f}"` t/ha**.
+
+**Why this split point?** The algorithm evaluates every possible split threshold on every predictor and chooses the combination that minimizes the total residual sum of squares (RSS) across the two resulting regions. The figure below shows how the RSS changes as we move the split threshold along the rainfall axis:
+
+```{python}
+#| label: mse-split
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
+ax.plot(split_candidates, mse_splits, color='steelblue', lw=2)
+ax.axvline(split1_val, color='tomato', lw=1.8, linestyle='--',
+           label=f'Optimal split ≈ {split1_val:.0f} mm')
+ax.set_xlabel('Rainfall split threshold (mm)')
+ax.set_ylabel('Mean squared error (within-region)')
+ax.set_title('RSS as a function of the split threshold on rainfall')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+After finding the best first split, the algorithm then considers splitting **each of the two resulting regions** again. The best second split (evaluated independently within each region) adds a second node to the tree.
+
+The figure below shows the 2-node (depth-2) tree, which makes one additional split — this time on temperature within one of the rainfall regions:
+
+```{python}
+#| label: tree-2node
+#| fig-align: center
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.5, fig_size_y + 0.4))
+
+# ── Left: decision regions ─────────────────────────────────────────────────────
+ax = axes[0]
+im = ax.contourf(RR, TT, Z_d2, alpha=0.28, cmap='viridis', levels=20)
+ax.contour(RR, TT, Z_d2, colors='#333', linewidths=1.5, linestyles='--', levels=5)
+ax.scatter(df['rainfall'], df['temperature'],
+           s=50, color='steelblue', edgecolors='white', linewidths=0.8, zorder=5)
+
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Depth-2 tree: two splits, up to 4 regions')
+ax.grid(True, alpha=0.2)
+plt.colorbar(im, ax=ax, label='Predicted biomass (t/ha)', shrink=0.9)
+
+# ── Right: tree diagram ────────────────────────────────────────────────────────
+plot_tree(tree_d2,
+          feature_names=feat_names_reg,
+          filled=True, rounded=True, impurity=False,
+          fontsize=9, ax=axes[1], precision=1)
+axes[1].set_title('Fitted depth-2 regression tree')
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.callout-tip}
+## Check-in
+
+The text output below shows the decision rules of the depth-2 tree:
+
+```{python}
+#| label: tree-2node-text
+
+print(export_text(tree_d2, feature_names=feat_names_reg))
+```
+
+1. **Draw the decision boundaries**: on a sketch of the `rainfall` vs. `temperature` predictor space, draw the split lines corresponding to each split in the tree above.
+
+2. **Fill in the leaf values**: using the labeled scatter plot at the top of this section, identify which observations fall into each region and compute the mean biomass. Do these match the leaf values shown in the tree?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+
+```{python}
+#| label: tree-2node-regions
+#| fig-align: center
+
+# Compute per-region means to annotate the plot
+preds_d2 = tree_d2.predict(X)
+regions   = np.unique(preds_d2)
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.3))
+im = ax.contourf(RR, TT, Z_d2, alpha=0.28, cmap='viridis', levels=20)
+ax.contour(RR, TT, Z_d2, colors='#333', linewidths=1.8, linestyles='--', levels=5)
+ax.scatter(df['rainfall'], df['temperature'],
+           s=55, color='steelblue', edgecolors='white', linewidths=0.8, zorder=5)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}',
+                (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(5, 3), fontsize=8, color='#111')
+
+# Annotate each region with the leaf value
+for r in regions:
+    mask = preds_d2 == r
+    cx   = df.loc[mask, 'rainfall'].mean()
+    cy   = df.loc[mask, 'temperature'].mean()
+    ax.text(cx, cy, f'Ŷ = {r:.1f}', fontsize=10, ha='center', va='center',
+            color='white', fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='#333', alpha=0.6))
+
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Decision regions with leaf predictions')
+ax.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The colored regions correspond to the four leaves of the depth-2 tree. Each region's predicted value (white label) is the mean biomass of the training sites that fall in that region — exactly what the tree reports as its leaf values.
+:::
+
+### How the algorithm works
+
+So a regression tree is fitted by:
+
+1. **Dividing the predictor space** — the set of all possible values for $X_1, X_2, \ldots, X_p$ — into $J$ non-overlapping rectangular regions $R_1, R_2, \ldots, R_J$.
+
+2. **Assigning a prediction** to each region: for every observation that falls into region $R_j$, the prediction is the **mean of the response values** for the training observations in $R_j$:
+
+$$\hat{y}_{R_j} = \frac{1}{|R_j|} \sum_{i \in R_j} y_i$$
+
+The regions are found using **recursive binary splitting**: starting from the full dataset, at each step the algorithm searches over all predictors and all possible split thresholds to find the single split that most reduces the RSS. This process is repeated within each resulting region until a stopping criterion is met (e.g., a maximum depth is reached or a region contains too few observations to split further).
+
+::: {.callout-note}
+## Why "recursive binary splitting"?
+**Binary** because every split creates exactly two child regions. **Recursive** because the same procedure is applied again within each region. This is also called a **greedy** algorithm: at each step, the locally best split is chosen without considering whether a different split now might lead to a better tree in future steps.
+:::
+
+## Dealing with overfitting
+
+A fully-grown decision tree — one where every region contains only a single training observation — will perfectly fit the training data but will generalize very poorly to new observations. This is the classic overfitting problem: high variance, low bias.
+
+The figure below shows decision regions for trees of increasing depth. Notice how the boundaries become increasingly jagged and specific to the training data as depth grows.
+
+```{python}
+#| label: depth-comparison
+#| fig-align: center
+
+trees   = [tree_d1, tree_d2, tree_d3, tree_full]
+Zs      = [Z_d1,   Z_d2,   Z_d3,   Z_full]
+titles  = ['max_depth = 1', 'max_depth = 2', 'max_depth = 3', 'Full tree (no limit)']
+train_mse = [np.mean((t.predict(X) - y)**2) for t in trees]
+
+fig, axes = plt.subplots(2, 2, figsize=(fig_size_x * 1.4, fig_size_y * 2 + 0.5))
+axes = axes.flat
+
+for ax, Z, title, tr_mse in zip(axes, Zs, titles, train_mse):
+    im = ax.contourf(RR, TT, Z, alpha=0.28, cmap='viridis', levels=20)
+    ax.contour(RR, TT, Z, colors='#333', linewidths=1.2, linestyles='--', levels=8)
+    ax.scatter(df['rainfall'], df['temperature'],
+               s=35, color='steelblue', edgecolors='white', linewidths=0.6, zorder=5)
+    ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+    ax.set_xlabel('Rainfall (mm)', fontsize=9)
+    ax.set_ylabel('Temperature (°C)', fontsize=9)
+    ax.set_title(f'{title}\nTrain MSE = {tr_mse:.2f}', fontsize=9)
+    ax.grid(True, alpha=0.2)
+    ax.tick_params(labelsize=8)
+
+plt.suptitle('Decision regions for trees of increasing depth', y=1.01)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.callout-tip}
+## Check-in
+
+Looking at the four trees above:
+
+1. The full tree has a training MSE of `{python} f"{train_mse[-1]:.2f}"`. What does this suggest about how well it fits the training data?
+2. Would you expect the full tree to perform better or worse than the depth-2 tree on new, unseen data? Why?
+3. What are two approaches you could use to control the complexity of a decision tree?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+
+1. A training MSE of `{python} f"{train_mse[-1]:.2f}"` is very low (near zero), meaning the full tree essentially memorizes the training data. Every training observation falls in its own leaf.
+
+2. The full tree would likely perform **worse** on new data. It has memorized the noise in the training set (high variance) rather than learning the underlying pattern. The depth-2 tree, with simpler boundaries, captures the main ecological structure without overfitting to noise.
+
+3. Three common approaches:
+   - **Maximum depth** (`max_depth`): limit how many levels the tree can grow
+   - **Minimum samples per leaf** (`min_samples_leaf`): stop splitting when a region has too few observations
+   - **Cost-complexity pruning** (`ccp_alpha`): grow a full tree then prune it back by penalizing the number of leaves — the penalty weight is a hyperparameter tuned by cross-validation
+:::
+
+All three approaches introduce a hyperparameter (maximum depth, minimum samples, or the pruning penalty) that controls the complexity vs. fit tradeoff. These are selected using cross-validation in the same way as $\lambda$ in ridge and lasso regression.
+
+## Classification trees
+
+Decision trees can also be applied to **classification** problems, where the response variable is a class label rather than a numerical value. In this case we call them **classification trees**.
+
+### A guiding dataset
+
+We will use a second small dataset of **22 ecological sites**. The predictors are the same (`rainfall` and `temperature`), but the response is now the site's **biome type**: *forest*, *grassland*, or *desert*.
+
+```{python}
+#| label: cls-scatter
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.3))
+
+for biome_type in ['forest', 'grassland', 'desert']:
+    mask = df_c['biome'] == biome_type
+    ax.scatter(df_c.loc[mask, 'rainfall'], df_c.loc[mask, 'temperature'],
+               s=70, color=cls_colors[biome_type], edgecolors='black',
+               linewidths=0.6, label=biome_type.capitalize(), zorder=5)
+
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('EcoSite classification dataset — biome type')
+ax.legend(title='Biome', fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+### What is a classification tree?
+
+A classification tree has the same structure as a regression tree — root, internal nodes, branches, and leaf nodes — but makes categorical predictions instead of numerical ones.
+
+For a classification tree, each leaf node predicts the **most commonly occurring class** (the majority class) among the training observations that reach that leaf. This is called a **majority vote**.
+
+The depth-2 classification tree fitted on the EcoSite data looks like this:
+
+```{python}
+#| label: cls-tree
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.3, fig_size_y + 0.8))
+plot_tree(tree_c2,
+          feature_names=['rainfall', 'temperature'],
+          class_names=cls_names,
+          filled=True, rounded=True, impurity=False,
+          fontsize=9, ax=ax, precision=1)
+ax.set_title('Depth-2 classification tree — biome prediction')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.callout-tip}
+## Check-in
+Use the classification tree above to predict the biome type for a new site with **`rainfall = 500 mm`** and **`temperature = 15°C`**. Trace your path from the root to the leaf.
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+1. **Root**: Is rainfall ≤ some threshold? → 500 mm falls in the left branch (low rainfall).
+2. **Internal node**: Is temperature ≤ some threshold? → 15°C falls in the "yes" branch.
+3. **Leaf**: The majority class in this leaf is **grassland**.
+
+The prediction is **grassland** because low rainfall and cool temperatures are characteristic of grassland biomes in this dataset.
+:::
+
+We are often interested not only in the predicted class but also in the **class proportions** at each leaf — the fraction of training observations belonging to each class. These proportions give a sense of the confidence of the prediction. A leaf where 95% of observations share the same class is more reliable than one with a 60/40 split.
+
+### From decision boundaries to decision trees
+
+Just like regression trees, classification trees divide the predictor space into rectangular regions. The figure below shows the decision regions for the depth-2 classification tree:
+
+```{python}
+#| label: cls-boundaries
+#| fig-align: center
+
+biome_cmap = plt.matplotlib.colors.ListedColormap(
+    [cls_colors[c] for c in cls_names])
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.3))
+ax.contourf(RR, TT, Zc2_int, alpha=0.3, cmap=biome_cmap, levels=[-0.5, 0.5, 1.5, 2.5])
+ax.contour(RR,  TT, Zc2_int, colors='#333', linewidths=1.8, linestyles='--',
+           levels=[-0.5, 0.5, 1.5, 2.5])
+
+for biome_type in ['forest', 'grassland', 'desert']:
+    mask = df_c['biome'] == biome_type
+    ax.scatter(df_c.loc[mask, 'rainfall'], df_c.loc[mask, 'temperature'],
+               s=65, color=cls_colors[biome_type], edgecolors='black',
+               linewidths=0.6, label=biome_type.capitalize(), zorder=5)
+
+legend_patches = [mpatches.Patch(color=cls_colors[c], alpha=0.5,
+                                  label=c.capitalize()) for c in cls_names]
+ax.legend(handles=legend_patches, title='Predicted biome', fontsize=9)
+ax.set_xlim(100, 1000); ax.set_ylim(4, 31)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Depth-2 classification tree — decision regions')
+ax.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.callout-tip}
+## Check-in
+
+The figure below shows a set of decision boundaries in the rainfall–temperature predictor space.
+
+```{python}
+#| label: checkin-boundaries
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
+ax.axvline(650, color='#333', lw=2, linestyle='--')
+ax.axhline(18, color='#333', lw=2, linestyle='--',
+           xmin=0, xmax=(650 - 100) / (1000 - 100))
+
+# Region labels
+ax.text(350, 10, 'Region A', fontsize=12, ha='center', va='center', color='#333')
+ax.text(350, 25, 'Region B', fontsize=12, ha='center', va='center', color='#333')
+ax.text(830, 17, 'Region C', fontsize=12, ha='center', va='center', color='#333')
+
+ax.text(655, 27, 'rainfall = 650', fontsize=9, color='#333')
+ax.text(105, 18.5, 'temperature = 18\n(only within left region)', fontsize=8.5, color='#333')
+
+ax.set_xlim(100, 1000); ax.set_ylim(4, 31)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Decision boundaries for a classification tree')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+1. How many leaf nodes does the corresponding decision tree have?
+2. Sketch the corresponding decision tree, including the split conditions at each internal node.
+3. Using the scatter plot from the beginning of this section, which biome type (forest, grassland, or desert) is the majority class in each of the three regions?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+1. There are **3 leaf nodes** (one for each labeled region).
+
+2. The decision tree has the following structure:
+   - **Root**: `rainfall ≤ 650?`
+     - **Yes** (left branch): `temperature ≤ 18?`
+       - **Yes** → Region A (leaf)
+       - **No** → Region B (leaf)
+     - **No** (right branch) → Region C (leaf)
+
+3. Based on the scatter plot:
+   - **Region A** (low rainfall, cool): mostly **grassland**
+   - **Region B** (low rainfall, warm): mostly **desert**
+   - **Region C** (high rainfall): mostly **forest**
+
+The decision tree faithfully reconstructs the two-split classification rule that generated the data.
+:::
+
+### Fitting a classification tree
+
+So a classification tree is fitted by:
+
+1. **Dividing the predictor space** into $J$ non-overlapping regions $R_1, \ldots, R_J$.
+
+2. **Predicting** the majority class among training observations in each region $R_j$:
+
+$$\hat{y}_{R_j} = \text{argmax}_{k} \; \hat{p}_{jk}, \quad \text{where } \hat{p}_{jk} = \frac{1}{|R_j|}\sum_{i \in R_j} \mathbf{1}(y_i = k)$$
+
+is the proportion of training observations in region $R_j$ belonging to class $k$.
+
+As with regression trees, recursive binary splitting is used to find the regions — but the criterion for measuring split quality is different. We cannot use RSS for classification; instead we measure the **impurity** of the resulting regions.
+
+#### Gini impurity
+
+The most common splitting criterion is the **Gini impurity index**:
+
+$$G_j = \sum_{k=1}^{K} \hat{p}_{jk}(1 - \hat{p}_{jk}) = 1 - \sum_{k=1}^{K} \hat{p}_{jk}^2$$
+
+where $K$ is the number of classes and $\hat{p}_{jk}$ is the proportion of observations in region $R_j$ belonging to class $k$.
+
+- $G_j = 0$: the region is **perfectly pure** — all observations belong to the same class.
+- $G_j$ is larger when the class proportions are more equal (high impurity, mixed classes).
+
+At each step, the algorithm finds the split that minimizes the **weighted** Gini impurity across the two resulting child regions:
+
+$$\text{Weighted Gini} = \frac{n_L}{n} G_L + \frac{n_R}{n} G_R$$
+
+where $n_L$ and $n_R$ are the number of observations in the left and right regions.
+
+::: {.callout-note}
+## Example: computing the Gini impurity
+
+Suppose a region contains 12 training sites: 8 forest, 3 grassland, 1 desert.
+
+$$G = 1 - \left(\frac{8}{12}\right)^2 - \left(\frac{3}{12}\right)^2 - \left(\frac{1}{12}\right)^2 = 1 - 0.444 - 0.063 - 0.007 = 0.487$$
+
+Now consider splitting this region into:
+
+- **Left child**: 8 forest, 0 grassland, 0 desert → $G_L = 1 - (8/8)^2 = 0$ (pure)
+- **Right child**: 0 forest, 3 grassland, 1 desert → $G_R = 1 - 0 - (3/4)^2 - (1/4)^2 = 0.375$
+
+Weighted Gini of the split: $\frac{8}{12} \cdot 0 + \frac{4}{12} \cdot 0.375 = 0.125$
+
+This is much lower than the original 0.487, so this split is a big improvement in purity.
+:::
+
+#### Entropy
+
+An alternative impurity measure is **entropy**, also called the **cross-entropy**:
+
+$$H_j = -\sum_{k=1}^{K} \hat{p}_{jk} \log(\hat{p}_{jk})$$
+
+Entropy is 0 for a perfectly pure node and increases as the class proportions become more equal. In practice, Gini impurity and entropy tend to produce very similar trees.
+
+## Comparing trees with linear models
+
+Decision trees and linear models capture fundamentally different types of relationships between predictors and response:
+
+- **Linear models** (regression, ridge, lasso) assume that the response changes smoothly and approximately linearly with the predictors.
+- **Decision trees** make no such assumption — they partition the predictor space into rectangular regions and assign a constant prediction within each region.
+
+As a result, **trees naturally capture nonlinear, step-like relationships** that linear models cannot fit well, while linear models perform better when the true relationship is approximately linear and smooth.
+
+The example below shows a dataset where NPP (net primary productivity) depends on temperature in a **step-function** pattern — low below 10°C, high between 10°C and 25°C, and low again above 25°C. A linear model fits a single straight line that is a poor approximation everywhere; a depth-2 tree captures the three-step structure almost perfectly.
+
+```{python}
+#| label: linear-vs-tree
+#| fig-align: center
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.4, fig_size_y))
+
+sort_idx = np.argsort(temp_nl)
+for ax, model, label, col in zip(
+        axes,
+        [lr_nl,   tree_nl],
+        ['Linear regression', 'Decision tree (depth 2)'],
+        ['tomato', 'steelblue']):
+    ax.scatter(temp_nl, npp_nl, s=18, color='gray', alpha=0.5, zorder=2)
+    ax.plot(temp_range_nl, model.predict(temp_range_nl.reshape(-1, 1)),
+            color=col, lw=2.5, zorder=3, label=label)
+    ax.set_xlabel('Temperature (°C)')
+    ax.set_ylabel('NPP (tonnes C/ha/yr)')
+    ax.set_title(label)
+    ax.legend(fontsize=9)
+    ax.grid(True, alpha=0.3)
+    ax.set_xlim(-1, 36)
+
+plt.suptitle('Linear regression vs. decision tree on a nonlinear step-function dataset')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The table below summarizes the key advantages and disadvantages of decision trees compared to linear models, following the summary in ISLP:
+
+| | Decision Trees | Linear Models |
+|---|---|---|
+| **Interpretability** | Very high — easy to visualize and explain | Moderate — coefficients can be interpreted |
+| **Nonlinear relationships** | Handles them naturally | Requires feature engineering (e.g., polynomial terms) |
+| **Interactions** | Captured automatically | Must be specified explicitly |
+| **Prediction accuracy** | Often lower than other methods | Competitive when the true relationship is linear |
+| **Variance** | High — sensitive to small changes in training data | Generally lower |
+| **Variable selection** | Implicit (splits only on useful variables) | Requires explicit methods (e.g., lasso) |
+
+::: {.callout-note}
+## Looking ahead
+The high variance of individual decision trees is their main weakness. In future lessons we will see how this limitation is addressed by **ensemble methods** — combining many trees to produce a much more stable and accurate predictor. Two important ensemble methods are **random forests** (which average many independently-grown trees) and **gradient boosting** (which builds trees sequentially to correct the errors of earlier trees).
+:::
