@@ -1,0 +1,66 @@
+These are notes and instructions about how I want to structure my lesson on tree-based methods.
+
+# Decision trees and random forests
+
+All of the regression trees section uses a very small dataset with two numerical predictors X_1, X_2, and one numerical response variable that we can follow along. Maybe some 20 observations. 
+
+## Regression trees
+
+This is a very brief section of an example of what a regression tree is with a diagram. It includes:
+
+- a diagram of a **regression tree**. 
+- description of what nodes, leaves, branches, and root are. 
+- an example of how an observation gets assigned a prediction. 
+
+The goal is to have students understand how to follow along the branches of a decision tree to for a regression problem.
+
+We also explain that the value in the leaf is the average of the values for all the observations in the training set that satisfy all the conditions in the nodes that were taken to get to the leaf. 
+
+Check-in: use the regression tree to obtain predictions for a given observation. 
+
+## Fitting regression trees
+
+This is a short section where we build one decision tree with only one root. It includes showing the decision boundary for that one node as a boundary on X_1.
+
+Then we move the decision boundary by one unit and recalculate the one-node regression tree. 
+
+Then we add one node by doing another subset of the predictor space now on the second variable X_2. 
+
+
+Check-in: Have students draw the splits in predictor space for a given three-node decision tree and fill in the values for the leaves.
+
+
+So a regression tree works by:
+
+1. Dividing predictor space (this is the set of all possible values for $X_1, X_2, \ldots, X_p$) into non-overlapping regions $R_1, \ldots, R_J$. 
+
+2. For every observation that falls into a region $R_j$, we assign the same prediction, which is the mean of the response values for the training observations in $R_j$.
+
+To fit the regression tree so it makes the best possible predictions, we need to establish what the splitting rules are. Equivalently, we need to find a way to divide the predictor space into regions that give good enough approximations. 
+
+The process by which these splits are found is called *recursive binary splitting*. We will not go into how this process works, but just mention that at each split, it looks to minimize an error term capturing the difference between the average value for the observations in a given region, and the actual response values. 
+
+## Pruning
+
+Deep decision trees are prone to overfitting with decision boundaries taht are interpretable but not stable, and small changes in the training data leading to big difference in outcome (high variance).
+
+Instead of using the full tree, we can overcome overfitting by:
+- using the depth of the tree as a hyperparameter 
+- pruning: balance complexity and fit to training data
+
+*Ask Annie about prunning for regression trees used in homework.*
+
+*We may not need to cover cost complexity pruning. Next time.*
+
+
+## Classification trees
+
+Decision trees can also be used for classification problems, in this case we call them **classification trees**. We get to the predicted class for a new observation in the same way. 
+
+Check-in: another example of decision tree, this time for classification. The exercise is to have students follow the branches to obtain a prediction for a new observation. 
+
+## Comparing with linear models
+
+A small example of a dataset with a plot where there is a non-linear relationship and how linear regression would do a poor job there. 
+
+The a summary of ISLP advantages and disadvantages of trees
