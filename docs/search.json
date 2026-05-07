@@ -97,7 +97,7 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-NOTES.html",
     "title": "Decision Trees",
     "section": "",
-    "text": "In this lesson we introduce:\nThese notes are based on chapter 8.1 of An Introduction to Statistical Learning with Applications in Python (James et al. 2023). The example datasets are synthetic and were generated with the aid of Claude Code for the purpose of this lesson.",
+    "text": "📊 Slides\nIn this lesson we introduce:\nThese notes are based on chapter 8.1 of An Introduction to Statistical Learning with Applications in Python (James et al. 2023). The example datasets are synthetic and were generated with the aid of Claude Code for the purpose of this lesson.",
     "crumbs": [
       "notes",
       "Tree-Based Methods",
@@ -6055,7 +6055,7 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#reg-tree-structure",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Regression tree structure\n\nA regression tree predicts a numerical response by partitioning the predictor space into rectangular regions and assigning a predicted value to each region."
+    "text": "Regression tree structure\n\nA regression tree predicts a numerical response by partitioning the predictor space into rectangular regions and assigning a predicted value to each region.\n\n\n\n\n\n\n\n\n\n\n✏️"
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#tree-terminology",
@@ -6069,21 +6069,21 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#predictions-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Making predictions\n\nTo predict for a new observation: start at the root and follow the branches based on the split conditions until reaching a leaf. The value at the leaf is the prediction.\n\nFor example, a new site with rainfall = 750 mm and temperature = 20°C:\n\nRoot: Is rainfall ≤ 583 mm? No → go right\nThe right (No) branch leads directly to a leaf\nPredicted biomass: 7.4 t/ha\n\n\n\n\nThe “Yes” branch always leads to the left in our diagrams — matching sklearn’s convention."
+    "text": "Making predictions\n\nTo predict for a new observation: start at the root and follow the branches based on the split conditions until reaching a leaf. The value at the leaf is the prediction.\nFor example, a new site with rainfall = 430 mm and temperature = 10°C is predicted to have a biomass of 3.2 t/ha."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-predict-q",
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-predict-q",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nUse the regression tree to predict the biomass for a new site with rainfall = 750 mm and temperature = 20°C.\nTrace your path from the root to the leaf."
+    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nUse the regression tree to predict the biomass for a new site with rainfall = 750 mm and temperature = 20°C."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-predict-a",
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-predict-a",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTrace your path from the root to the leaf.\n\n\n\nRoot: Is rainfall ≤ 583 mm? No → go right\nThe right (No) branch leads directly to a leaf — no further split in this region\nPredicted biomass: 7.4 t/ha"
+    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nUse the regression tree to predict the biomass for a new site with rainfall = 750 mm and temperature = 20°C.\n\n\nRoot: Is rainfall ≤ 583 mm? No → go right\nThe right (No) branch leads directly to a leaf — no further split in this region\nPredicted biomass: 7.4 t/ha"
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#section-node-splits",
@@ -6093,32 +6093,39 @@
     "text": "Node splits and prediction regions"
   },
   {
+    "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#root-split-2",
+    "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#root-split-2",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "The root node split\n\nIn regression trees, the predicted value at the leaf is the mean of all training observations that reach this leaf.\nWe begin with our full training dataset:"
+  },
+  {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#root-split",
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#root-split",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "The root node split\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe root node asks whether rainfall ≤ {python} f\"{split1_val:.0f}\" mm. This creates a vertical division in the predictor space — every observation goes left or right based on this condition."
+    "text": "The root node split\n\n\nThe root node asks whether rainfall ≤ 583mm\" mm. This creates a vertical division in the predictor space."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#second-split",
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#second-split",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "The second split\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe second node looks at observations in the left region (rainfall ≤ 583 mm) and asks whether temperature ≤ {python} f\"{split2_val:.1f}\" °C — adding a horizontal split within that region only."
+    "text": "The second split\n\n\nThe second node looks at observations in the left region (rainfall ≤ 583 mm) and asks whether temperature ≤ 15.1 °C. This adds a horizontal split within that region only."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#leaf-regions",
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#leaf-regions",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Leaf regions and predictions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe predicted value at each leaf is the mean response of the training observations that fall in that region."
+    "text": "Leaf regions and predictions\n\n\nLeaves correspond to the final regions in the predictor space.\nEach observation is assigned the mean response of the training observations that fall in the same region:"
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-4regions-q",
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-4regions-q",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe plot shows a new split added to the right region.\nModify the tree diagram to include a node and leaves that represent this additional split.\nWhat are the predicted values in each of the four leaves?"
+    "text": "Check-in\n\n\nThe plot shows a new split added to the right region.\nModify the tree diagram to include a node and leaves that represent this additional split."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-4regions-a",
@@ -6132,7 +6139,7 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#reg-tree-definition",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Regression tree: summary\n\nA regression tree works by:\n1. Dividing the predictor space — the set of all possible values for \\(X_1, X_2, \\ldots, X_p\\) — into \\(J\\) non-overlapping rectangular regions \\(R_1, R_2, \\ldots, R_J\\).\n2. Assigning a prediction to each region: for every observation that falls into region \\(R_j\\), the prediction is the mean response of the training observations in \\(R_j\\):\n\\[\\hat{y}_{R_j} = \\frac{1}{|R_j|} \\sum_{i \\in R_j} y_i.\\]"
+    "text": "Regression tree: summary\n\nA regression tree works by:\n1. Dividing the predictor space — the set of all possible values for \\(X_1, X_2, \\ldots, X_p\\) — into \\(J\\) non-overlapping rectangular regions \\(R_1, R_2, \\ldots, R_J\\).\n2. Assigning a prediction to each region: for every observation that falls into region \\(R_j\\), the prediction is the mean response of the training observations in \\(R_j\\)."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#section-fitting",
@@ -6146,7 +6153,7 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#rss-definition",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "How are the splits found?\n\nFor a set of regions \\(R_1, \\ldots, R_J\\), the quality of the tree is measured by the residual sum of squares (RSS):\n\\[RSS = \\sum_{j=1}^J \\sum_{i \\in R_j} (y_i - \\hat{y}_{R_j})^2\\]\n\nThe regions are found using recursive binary splitting:\n\nStarting from the full dataset, search over all predictors and all possible thresholds to find the single split that most reduces the RSS\nRepeat this process within each resulting region\nStop when a stopping criterion is met (e.g., maximum depth, or too few observations to split)\n\n\n\n\nBinary — every split creates exactly two child regions. Recursive — the same procedure is applied again within each region. Greedy — at each step the locally best split is chosen without considering future steps."
+    "text": "How are the splits found?\n\nFor a set of regions \\(R_1, \\ldots, R_J\\), the quality of the tree is measured by the residual sum of squares (RSS):\n\\[RSS = \\sum_{j=1}^J \\sum_{i \\in R_j} (y_i - \\hat{y}_{R_j})^2\\]\n\nThe regions are found using recursive binary splitting:\n\nStarting from the full dataset, search over all predictors and all possible thresholds to find the single split that most reduces the RSS\nRepeat this process within each resulting region\nStop when a stopping criterion is met (e.g., maximum depth, or too few observations to split)"
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#first-split-examples",
@@ -6160,7 +6167,7 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#rss-vs-split",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "RSS as a function of the split threshold\n\n\n\n\n\n\n\n\n\n\n\nThe algorithm picks the threshold that minimizes RSS — this becomes the first node of the tree."
+    "text": "RSS as a function of the split threshold\n\n\n\n\n\n\n\n\n\n\n\nThe algorithm picks the threshold that minimizes RSS, this becomes the first node of the tree."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#first-split-result",
@@ -6181,7 +6188,7 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#rss-temp-split-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "RSS within the left region\n\n\n\n\n\n\n\n\n\n\n\nThe algorithm repeats the same search — now within each existing region — and picks the threshold that most reduces RSS."
+    "text": "RSS within the left region\n\n\nThe algorithm repeats the same search, now within each existing region, and picks the threshold that most reduces RSS.\n\n\n\n\n\n\n\n\n\n\n\n\nWhere would this algorithm end if we kept adding nodes and subdividing the regions without any stopping criterion?"
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#section-overfitting",
@@ -6195,21 +6202,21 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#overfitting-concept",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Overfitting in decision trees\n\nA fully-grown decision tree will perfectly fit the training data but generalize poorly to new observations — high variance, low bias.\n\nAs the tree grows deeper, the decision boundaries become increasingly specific to the training data:"
+    "text": "Overfitting in decision trees\n\nA fully-grown decision tree will perfectly fit the training data but generalize poorly to new observations.\n\nAs the tree grows deeper, the decision boundaries become increasingly specific to the training data:\nGo to website for images"
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-overfitting",
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-overfitting",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\nThe full tree has a training MSE of 0.00. What does this tell us about how well it fits the training data?\nWould you expect the full tree to perform better or worse than the depth-3 tree on new, unseen data? Why?\nWhat are two approaches you could use to control the complexity of a decision tree?\n\n\n\n\n\nA training MSE near zero means the full tree essentially memorizes the training data — every observation is in its own leaf.\nThe full tree would likely perform worse on new data. It has memorized noise in the training set (high variance) rather than learning the underlying pattern.\nTwo common approaches:\n\nMaximum depth: limit how many levels the tree can grow\nMinimum samples per leaf: stop splitting when a region has too few observations"
+    "text": "Check-in\n\n\n\nThe full tree has a training MSE of 0. What does this tell us about how well it fits the training data?\nWould you expect the full tree to perform better or worse than the depth-3 tree on new, unseen data? Why?\nWhat are two approaches you could use to control the complexity of a decision tree?\n\n\n\n\n\nA training MSE near zero means the full tree essentially memorizes the training data — every observation is in its own leaf.\nThe full tree would likely perform worse on new data. It has memorized noise in the training set (high variance) rather than learning the underlying pattern.\nTwo common approaches:\n\nMaximum depth: limit how many levels the tree can grow\nMinimum samples per leaf: stop splitting when a region has too few observations"
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#hyperparameter-tuning",
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#hyperparameter-tuning",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Controlling tree complexity\n\nMaximum depth and minimum samples per leaf are both hyperparameters that control the complexity vs. fit tradeoff:\n\nA shallower tree has fewer, larger regions — lower variance, higher bias\nA deeper tree has more, smaller regions — higher variance, lower bias\n\n\n\nHow would cross-validation be applied to find the best values for these hyperparameters?\n\n\n\nCompute the CV-MSE for a grid of depth and samples-per-leaf values. Select the combination that gives the lowest cross-validation error as the hyperparameters for the final tree."
+    "text": "Controlling tree complexity\n\nMaximum depth and minimum samples per leaf are both hyperparameters that control the complexity vs. fit tradeoff:\n\nA shallower tree has fewer, larger regions\nA deeper tree has more, smaller regions\n\n\n\nHow would cross-validation be applied to find the best values for these hyperparameters?\n\n\n\nCompute the CV-MSE for a grid of depth and samples-per-leaf values. Select the combination that gives the lowest cross-validation error as the hyperparameters for the final tree."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#section-classification",
@@ -6223,28 +6230,28 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#cls-dataset",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "A classification dataset\n\nThe same 22 sites, same predictors (rainfall, temperature), but a categorical response — the site’s biome type:"
+    "text": "A classification dataset\n\nThe same 22 sites, same predictors (rainfall, temperature), but a categorical response: the site’s biome type:"
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#what-is-cls-tree",
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#what-is-cls-tree",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "What is a classification tree?\n\nA classification tree has the same structure as a regression tree — root, internal nodes, branches, and leaves — but makes categorical predictions instead of numerical ones.\n\nFor each leaf node, the prediction is the majority class (most common class) among the training observations that reach that leaf — a majority vote.\n\n\nThe depth-2 classification tree fitted on the biome dataset:"
+    "text": "What is a classification tree?\n\nA classification tree has the same structure as a regression tree (root, internal nodes, branches, and leaves) but makes categorical predictions instead of numerical ones.\n\nFor each leaf node, the prediction is the majority class (most common class) among the training observations that reach that leaf."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-cls-predict-q",
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-cls-predict-q",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nUse the classification tree to predict the biome type for a new site with rainfall = 500 mm and temperature = 15°C.\nTrace your path from the root to the leaf."
+    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nUse the classification tree to predict the biome type for a new site with rainfall = 500 mm and temperature = 15°C."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-cls-predict-a",
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-cls-predict-a",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTrace your path from the root to the leaf.\n\n\n\nRoot: Is rainfall 500 mm ≤ 675.9 mm? Yes → left branch (low rainfall)\nInternal node: Is temperature 15°C ≤ 18.3°C? Yes → left branch (low temperature)\nLeaf: The majority class in this leaf is grassland"
+    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nUse the classification tree to predict the biome type for a new site with rainfall = 500 mm and temperature = 15°C.\n\n\nRoot: Is rainfall 500 mm ≤ 675.9 mm? Yes → left branch (low rainfall)\nInternal node: Is temperature 15°C ≤ 18.3°C? Yes → left branch (low temperature)\nLeaf: The majority class in this leaf is grassland"
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#cls-boundaries-slide",
@@ -6265,7 +6272,7 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#cls-tree-definition",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Fitting a classification tree\n\nA classification tree is fitted by:\n1. Dividing the predictor space into \\(J\\) non-overlapping regions \\(R_1, \\ldots, R_J\\).\n2. Predicting the majority class among training observations in each region \\(R_j\\):\n\\[\\hat{y}_{R_j} = \\text{argmax}_{k} \\; \\hat{p}_{jk}, \\quad \\text{where } \\hat{p}_{jk} = \\frac{1}{|R_j|}\\sum_{i \\in R_j} \\mathbf{1}(y_i = k)\\]\n\nAs with regression trees, recursive binary splitting is used — but we cannot use RSS for classification. Instead, we measure the impurity of the resulting regions.\nWe are often interested in the class proportions at each leaf, not just the predicted class. These give a sense of prediction confidence: a leaf where 95% of observations share one class is more reliable than a 60/40 split."
+    "text": "Fitting a classification tree\n\nA classification tree is fitted by:\n1. Dividing the predictor space into \\(J\\) non-overlapping regions \\(R_1, \\ldots, R_J\\).\n2. Predicting the majority class among training observations in each region \\(R_j\\). . . .\nAs with regression trees, recursive binary splitting is used, but we cannot use RSS for classification. Instead, we measure the impurity of the resulting regions.\nWe are often interested in the class proportions at each leaf, not just the predicted class. These give a sense of prediction confidence or purity: a leaf where 95% of observations share one class is more reliable than a 60/40 split."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#checkin-pure-leaf-q",
@@ -6286,7 +6293,7 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#gini-impurity",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Gini impurity\n\nThe most common splitting criterion for classification trees is the Gini impurity index: a measure of how mixed the classes are in a given region.\n\n\nA region where all observations belong to the same class → Gini impurity = 0 (perfectly pure)\nThe more evenly observations are spread across classes → higher impurity\n\n\n\nAt each step, recursive binary splitting searches for the variable and threshold that produce the purest child regions — that is, the split that most reduces impurity.\nEntropy is another common impurity measure that behaves similarly and tends to produce very similar trees in practice."
+    "text": "Gini impurity\n\nThe most common splitting criterion for classification trees is the Gini impurity index: a measure of how mixed the classes are in a given region.\n\n\nA region where all observations belong to the same class → Gini impurity = 0 (perfectly pure)\nThe more evenly observations are spread across classes → higher impurity\n\n\n\nAt each step, recursive binary splitting searches for the variable and threshold that produce the purest child regions.\nEntropy is another common impurity measure that behaves similarly and tends to produce very similar trees in practice."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#section-vs-linear",
@@ -6300,7 +6307,7 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#trees-vs-linear-concept",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Trees vs. linear models\n\nDecision trees and linear models capture fundamentally different types of relationships:\n\nLinear models (regression, ridge, lasso): assume the response changes smoothly and approximately linearly with the predictors\nDecision trees: make no such assumption — they partition the predictor space into rectangular regions with constant predictions\n\n\n\n\nTrees naturally capture nonlinear, step-like relationships that linear models cannot fit well.\nLinear models perform better when the true relationship is approximately linear and smooth."
+    "text": "Trees vs. linear models\n\nDecision trees and linear models capture fundamentally different types of relationships:\n\nLinear models (regression, ridge, lasso): assume the response changes smoothly and approximately linearly with the predictors\nDecision trees: make no such assumption, they partition the predictor space into rectangular regions with constant predictions\n\n\n\n\nTrees naturally capture nonlinear, step-like relationships that linear models cannot fit well.\nLinear models perform better when the true relationship is approximately linear and smooth."
   },
   {
     "objectID": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#linear-vs-tree-slide",
@@ -6314,7 +6321,7 @@
     "href": "notes/8_tree_based_methods/8_tree_based_methods-SLIDES.html#summary-table",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Trees vs. linear models: summary\n\n\n\n\n\n\n\n\n\n\nDecision Trees\nLinear Models\n\n\n\n\nInterpretability\nVery high — easy to visualize\nModerate — coefficients interpretable\n\n\nNonlinear relationships\nHandles them naturally\nRequires feature engineering\n\n\nPrediction accuracy\nOften lower\nCompetitive when relationship is linear\n\n\nVariance\nHigh — sensitive to small changes\nGenerally lower\n\n\nVariable selection\nImplicit (splits on useful variables)\nRequires explicit methods (e.g., lasso)"
+    "text": "Trees vs. linear models: summary\n\n\n\n\n\n\n\n\n\n\nDecision Trees\nLinear Models\n\n\n\n\nInterpretability\nHigh, easy to visualize\nOk, coefficients interpretable\n\n\nNonlinear relationships\nHandles them naturally\nRequires feature engineering\n\n\nPrediction accuracy\nOften lower\nCompetitive when relationship is linear\n\n\nVariance\nHigh, sensitive to small changes\nGenerally lower\n\n\nVariable selection\nImplicit (splits on useful variables)\nRequires explicit methods (e.g., lasso)"
   },
   {
     "objectID": "notes/setup/setup.html",
