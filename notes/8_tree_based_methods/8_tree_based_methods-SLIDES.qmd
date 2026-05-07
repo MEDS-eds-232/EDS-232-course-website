@@ -175,10 +175,10 @@ temp_range_nl = np.linspace(0, 35, 300)
 
 22 ecological survey sites, each characterized by:
 
-::: {.body-text-m}
+::: {.body-text-s}
 - **`rainfall`** — annual precipitation (mm)
 - **`temperature`** — mean summer temperature (°C)
-- **`biomass`** — aboveground plant biomass (tonnes/ha) — the **response**
+- **`biomass`** — aboveground plant biomass (tonnes/ha) (**response**)
 :::
 
 ```{python}
@@ -254,12 +254,16 @@ for child_pos, lbl, lbl_side in [
 draw_node(ax, *nodes['root'], f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
 draw_node(ax, *nodes['left'], 'temperature ≤ 15 °C?', color='#d6eaf8')
 draw_node(ax, 8, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
-draw_node(ax, 1.4, 1.0, f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
-draw_node(ax, 4.6, 1.0, f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 1.4, 1.0, f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.2)
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
+
+<div style="position: absolute; bottom: 450px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
 
 ---
 
@@ -306,8 +310,8 @@ for child_pos, lbl, lbl_side in [
 draw_node(ax, *nodes['root'], f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
 draw_node(ax, *nodes['left'], 'temperature ≤ 15 °C?', color='#d6eaf8')
 draw_node(ax, 8, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
-draw_node(ax, 1.4, 1.0, f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
-draw_node(ax, 4.6, 1.0, f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 1.4, 1.0, f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.2)
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -317,17 +321,13 @@ plt.close()
 
 ::: {.column width="40%"}
 
-::: {.body-text-s}
 - **Root node**: first split, applied to the entire dataset
 - **Internal node**: a non-leaf node that applies an additional split to a subset
 - **Leaf node**: a terminal node — no further splits
 - **Branch**: the path an observation takes at each split
 - **Depth**: number of nodes along the longest root-to-leaf path
 
-<br>
-
 The **predicted value** at a leaf is the **mean response** of all training observations that reach that leaf.
-:::
 
 :::
 
@@ -343,19 +343,49 @@ The **predicted value** at a leaf is the **mean response** of all training obser
 
 To predict for a new observation: start at the **root** and follow the branches based on the split conditions until reaching a **leaf**. The value at the leaf is the prediction.
 
-. . .
+For example, a new site with **`rainfall = 430 mm`** and **`temperature = 10°C`** is predicted to have a biomass of 3.2 t/ha.
 
-For example, a new site with **`rainfall = 750 mm`** and **`temperature = 20°C`**:
+```{python}
+#| label: tree-terminology-slide-2
+#| echo: false
+#| fig-align: center
+#| out-width: "65%"
 
-1. Root: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? **No** → go right
-2. The right (No) branch leads directly to a leaf
-3. Predicted biomass: `{python} f"{right_leaf_val:.1f}"` t/ha
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
 
-. . .
+nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
+for parent, child, lbl, lbl_side in [
+        ('root', 'left',  'Yes', 'left'),
+        ('root', 'right', 'No',  'right')]:
+    px, py = nodes[parent]; cx, cy = nodes[child]
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+for child_pos, lbl, lbl_side in [
+        ((1.4, 1.0), 'Yes', 'left'),
+        ((4.6, 1.0), 'No',  'right')]:
+    px, py = nodes['left']; cx, cy = child_pos
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
 
-::: {.teal-text .body-text-m}
-The "Yes" branch always leads to the **left** in our diagrams — matching sklearn's convention.
-:::
+draw_node(ax, *nodes['root'], f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, *nodes['left'], 'temperature ≤ 15 °C?', color='#d6eaf8')
+draw_node(ax, 8, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+draw_node(ax, 1.4, 1.0, f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.2)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
 
 ---
 
@@ -400,8 +430,8 @@ for child_pos, lbl, lbl_side in [
 draw_node(ax, *nodes['root'], f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
 draw_node(ax, *nodes['left'], 'temperature ≤ 15 °C?', color='#d6eaf8')
 draw_node(ax, 8, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
-draw_node(ax, 1.4, 1.0, f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
-draw_node(ax, 4.6, 1.0, f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 1.4, 1.0, f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.2)
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -413,8 +443,6 @@ plt.close()
 
 ::: {.teal-text .body-text-m}
 Use the regression tree to predict the biomass for a new site with **`rainfall = 750 mm`** and **`temperature = 20°C`**.
-
-Trace your path from the root to the leaf.
 :::
 
 :::
@@ -464,8 +492,8 @@ for child_pos, lbl, lbl_side in [
 draw_node(ax, *nodes['root'], f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
 draw_node(ax, *nodes['left'], 'temperature ≤ 15 °C?', color='#d6eaf8')
 draw_node(ax, 8, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
-draw_node(ax, 1.4, 1.0, f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
-draw_node(ax, 4.6, 1.0, f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 1.4, 1.0, f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.2)
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -476,14 +504,12 @@ plt.close()
 ::: {.column width="43%"}
 
 ::: {.teal-text .body-text-m}
-Trace your path from the root to the leaf.
+Use the regression tree to predict the biomass for a new site with **`rainfall = 750 mm`** and **`temperature = 20°C`**.
 :::
 
-::: {.body-text-s}
 1. **Root**: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? No → go right
 2. The right (No) branch leads directly to a leaf — no further split in this region
 3. Predicted biomass: **`{python} f"{right_leaf_val:.1f}"` t/ha**
-:::
 
 :::
 
@@ -504,6 +530,49 @@ Trace your path from the root to the leaf.
 [The root node split]{.slide-title}
 
 <hr>
+
+In regression trees, the predicted value at the leaf is the mean of all training observations that reach this leaf. 
+
+We begin with our full training dataset:
+
+```{python}
+#| label: scatter-annotated-3
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85,
+           edgecolors='white', linewidths=1)
+
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}',
+                (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4),
+                fontsize=8.5, color='#222')
+
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Example dataset — aboveground biomass (tonnes/ha) labeled on each site')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
+---
+
+## {#root-split data-menu-title="Root split"}
+
+[The root node split]{.slide-title}
+
+<hr>
+
+::: {.body-text-s}
+The root node asks whether `rainfall ≤ 583mm"` mm. This creates a vertical division in the predictor space.
+:::
+
 
 :::: {.columns}
 
@@ -555,10 +624,6 @@ plt.show()
 plt.close()
 ```
 
-::: {.body-text-s}
-The root node asks whether `rainfall ≤ {python} f"{split1_val:.0f}"` mm. This creates a vertical division in the predictor space — every observation goes left or right based on this condition.
-:::
-
 :::
 
 ::::
@@ -570,6 +635,10 @@ The root node asks whether `rainfall ≤ {python} f"{split1_val:.0f}"` mm. This 
 [The second split]{.slide-title}
 
 <hr>
+
+::: {.body-text-s}
+The second node looks at observations in the **left region** (rainfall ≤ 583 mm) and asks whether `temperature ≤ 15.1` °C. This adds a horizontal split within that region only.
+:::
 
 :::: {.columns}
 
@@ -635,9 +704,6 @@ plt.show()
 plt.close()
 ```
 
-::: {.body-text-s}
-The second node looks at observations in the **left region** (rainfall ≤ `{python} f"{split1_val:.0f}"` mm) and asks whether `temperature ≤ {python} f"{split2_val:.1f}"` °C — adding a horizontal split within that region only.
-:::
 
 :::
 
@@ -650,6 +716,13 @@ The second node looks at observations in the **left region** (rainfall ≤ `{pyt
 [Leaf regions and predictions]{.slide-title}
 
 <hr>
+
+::: {.body-text-s}
+Leaves correspond to the final regions in the predictor space. 
+
+Each observation is assigned the **mean response** of the training observations that fall in the same region:
+:::
+
 
 :::: {.columns}
 
@@ -734,8 +807,8 @@ for cx, cy, lbl, lbl_side in [
 draw_node(ax, 5.5, 4.7, f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
 draw_node(ax, 3.0, 2.8, f'temperature ≤ {split2_val:.1f} °C?', color='#d6eaf8')
 draw_node(ax, 8.0, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
-draw_node(ax, 1.4, 1.0, f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
-draw_node(ax, 4.6, 1.0, f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 1.4, 1.0, f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.2)
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -745,10 +818,6 @@ plt.close()
 
 ::::
 
-::: {.body-text-s .center-text}
-The predicted value at each leaf is the **mean response** of the training observations that fall in that region.
-:::
-
 ---
 
 ## {#checkin-4regions-q data-menu-title="Check-in: draw the tree"}
@@ -756,6 +825,12 @@ The predicted value at each leaf is the **mean response** of the training observ
 [Check-in]{.slide-title}
 
 <hr>
+
+::: {.teal-text .body-text-s}
+The plot shows a new split added to the **right region**.
+
+Modify the tree diagram to include a node and leaves that represent this additional split.
+:::
 
 :::: {.columns}
 
@@ -802,13 +877,42 @@ plt.close()
 
 ::: {.column width="43%"}
 
-::: {.teal-text .body-text-m}
-The plot shows a new split added to the **right region**.
+```{python}
+#| label: tree-full-repeat-slide-8
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
 
-Modify the tree diagram to include a node and leaves that represent this additional split.
-
-What are the predicted values in each of the four leaves?
-:::
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
+nodes_f = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
+for px, py, cx, cy, lbl, lbl_side in [
+        (5.5, 4.7, 3.0, 2.8, 'Yes', 'left'),
+        (5.5, 4.7, 8.0, 2.8, 'No',  'right')]:
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+for cx, cy, lbl, lbl_side in [
+        (1.4, 1.0, 'Yes', 'left'),
+        (4.6, 1.0, 'No',  'right')]:
+    px, py = nodes_f['left']
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+draw_node(ax, 5.5, 4.7, f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, 3.0, 2.8, f'temperature ≤ {split2_val:.1f} °C?', color='#d6eaf8')
+draw_node(ax, 8.0, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+draw_node(ax, 1.4, 1.0, f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.2)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
 :::
 
@@ -869,22 +973,24 @@ plt.close()
 
 ```{python}
 #| label: tree-depth2-full-slide
-#| echo: false
 #| fig-align: center
-#| out-width: "100%"
 
 t = tree_d2.tree_
 right_child_idx_d  = t.children_right[0]
 left_child_idx_d   = t.children_left[0]
 right_split2_val_d = t.threshold[right_child_idx_d]
-ll_leaf = t.value[t.children_left[left_child_idx_d]][0][0]
-lr_leaf = t.value[t.children_right[left_child_idx_d]][0][0]
-rl_leaf = t.value[t.children_left[right_child_idx_d]][0][0]
-rr_leaf = t.value[t.children_right[right_child_idx_d]][0][0]
+
+# Leaf values (sklearn: left child = True = ≤ threshold)
+ll_leaf = t.value[t.children_left[left_child_idx_d]][0][0]    # temp ≤ split2_val   → Yes (right) in diagram
+lr_leaf = t.value[t.children_right[left_child_idx_d]][0][0]   # temp >  split2_val  → No  (left)  in diagram
+rl_leaf = t.value[t.children_left[right_child_idx_d]][0][0]   # temp ≤ right_split2 → Yes (right) in diagram
+rr_leaf = t.value[t.children_right[right_child_idx_d]][0][0]  # temp >  right_split2 → No (left)  in diagram
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
 ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
 ax.axis('off')
+
+# Branches from root
 for px, py, cx, cy, lbl, lbl_side in [
         (5.5, 4.7, 2.75, 2.8, 'Yes', 'left'),
         (5.5, 4.7, 8.25, 2.8, 'No',  'right')]:
@@ -893,6 +999,8 @@ for px, py, cx, cy, lbl, lbl_side in [
     offset = -0.35 if lbl_side == 'left' else 0.35
     ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
+
+# Branches from left internal node
 for cx, cy, lbl, lbl_side in [
         (1.25, 1.0, 'Yes', 'left'),
         (4.25, 1.0, 'No',  'right')]:
@@ -901,6 +1009,8 @@ for cx, cy, lbl, lbl_side in [
     offset = -0.35 if lbl_side == 'left' else 0.35
     ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
+
+# Branches from right internal node
 for cx, cy, lbl, lbl_side in [
         (6.75, 1.0, 'Yes', 'left'),
         (9.75, 1.0, 'No',  'right')]:
@@ -909,17 +1019,21 @@ for cx, cy, lbl, lbl_side in [
     offset = -0.35 if lbl_side == 'left' else 0.35
     ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
-draw_node(ax, 5.5,  4.7, f'rainfall ≤ {split1_val:.0f} mm?',           color='#d6eaf8', bold=True)
-draw_node(ax, 2.75, 2.8, f'temperature ≤ {split2_val:.1f} °C?',         color='#d6eaf8')
-draw_node(ax, 8.25, 2.8, f'temperature ≤ {right_split2_val_d:.1f} °C?', color='#d6eaf8')
-draw_node(ax, 1.25, 1.0, f'Ŷ = {lr_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
-draw_node(ax, 4.25, 1.0, f'Ŷ = {ll_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
-draw_node(ax, 6.75, 1.0, f'Ŷ = {rr_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
-draw_node(ax, 9.75, 1.0, f'Ŷ = {rl_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
+
+# Draw nodes
+draw_node(ax, 5.5,  4.7, f'rainfall ≤ {split1_val:.0f} mm?',            color='#d6eaf8', bold=True)
+draw_node(ax, 2.75, 2.8, f'temperature ≤ {split2_val:.1f} °C?',          color='#d6eaf8')
+draw_node(ax, 8.25, 2.8, f'temperature ≤ {right_split2_val_d:.1f} °C?',  color='#d6eaf8')
+draw_node(ax, 1.25, 1.0, f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 4.25, 1.0, f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 6.75, 1.0, f'Ŷ = 8.4 t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 9.75, 1.0, f'Ŷ = 4.9 t/ha', color='#d5f5e3', w=2.0)
+
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
+
 
 :::
 
@@ -937,9 +1051,7 @@ A regression tree works by:
 
 **1. Dividing the predictor space** — the set of all possible values for $X_1, X_2, \ldots, X_p$ — into $J$ non-overlapping rectangular regions $R_1, R_2, \ldots, R_J$.
 
-**2. Assigning a prediction** to each region: for every observation that falls into region $R_j$, the prediction is the **mean response** of the training observations in $R_j$:
-
-$$\hat{y}_{R_j} = \frac{1}{|R_j|} \sum_{i \in R_j} y_i.$$
+**2. Assigning a prediction** to each region: for every observation that falls into region $R_j$, the prediction is the **mean response** of the training observations in $R_j$.
 
 ---
 
