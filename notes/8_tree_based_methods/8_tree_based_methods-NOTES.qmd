@@ -165,13 +165,45 @@ pred_tree = tree_nl.predict(temp_range_nl.reshape(-1, 1))
 In this lesson we introduce:
 
 - **Decision trees**: flexible, interpretable prediction models that partition the predictor space into rectangular regions
-- **Regression trees**: predicting a numerical response variable
-- **Classification trees**: predicting a categorical class label
+- **Regression trees**: decision trees for predicting a numerical response variable
+- **Classification trees**: decision trees for predicting a categorical class label
 - **Tree pruning**: approaches for controlling model complexity and reducing overfitting
 
 These notes are based on chapter 8.1 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example datasets are synthetic and were generated with the aid of Claude Code for the purpose of this lesson.
 
 ## Regression trees
+
+```{python}
+#| label: tree-2node-8
+#| fig-align: center
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.5, fig_size_y + 0.4))
+
+# ── Left: decision regions ─────────────────────────────────────────────────────
+ax = axes[0]
+im = ax.contourf(RR, TT, Z_d2, alpha=0.28, cmap='viridis', levels=20)
+ax.contour(RR, TT, Z_d2, colors='#333', linewidths=1.5, linestyles='--', levels=5)
+ax.scatter(df['rainfall'], df['temperature'],
+           s=50, color='steelblue', edgecolors='white', linewidths=0.8, zorder=5)
+
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Depth-2 tree: two splits, up to 4 regions')
+ax.grid(True, alpha=0.2)
+plt.colorbar(im, ax=ax, label='Predicted biomass (t/ha)', shrink=0.9)
+
+# ── Right: tree diagram ────────────────────────────────────────────────────────
+plot_tree(tree_d2,
+          feature_names=feat_names_reg,
+          filled=True, rounded=True, impurity=False,
+          fontsize=9, ax=axes[1], precision=1)
+axes[1].set_title('Fitted depth-2 regression tree')
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
 ### A guiding dataset
 
@@ -212,7 +244,7 @@ plt.close()
 
 A **regression tree** predicts a numerical response by partitioning the predictor space into rectangular regions and assigning a predicted value to each region. It is structured like an upside-down tree, with a root at the top and leaves at the bottom.
 
-The figure below shows a simple regression tree fitted on our example dataset, annotated with its key components:
+The figure below shows a simple regression tree fitted on our example dataset:
 
 ```{python}
 #| label: tree-terminology
@@ -265,9 +297,9 @@ draw_node(ax, *nodes['left'],
 draw_node(ax, 8, 2.8,
           f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
 draw_node(ax, 1.4, 1.0,
-          f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
+          f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.2)
 draw_node(ax, 4.6, 1.0,
-          f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+          f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.2)
 
 plt.tight_layout()
 plt.show()
@@ -276,10 +308,10 @@ plt.close()
 
 Each component of the tree plays a specific role:
 
-- **Root node**: the top of the tree; contains the first split that applies to the entire dataset
-- **Leaf node**: a node with no further splits
-- **Internal node**: a non-leaf node that applies an additional split to a subset of observations
-- **Branch**: the connection between twp nodes, representing the path an observation takes based on the split condition.
+- **Root node**: the top of the tree; contains the first split that applies to the entire dataset.
+- **Leaf node**: a node with no further splits.
+- **Internal node**: a non-leaf node that applies an additional split to a subset of observations.
+- **Branch**: the connection between two nodes, representing the path an observation takes based on the split condition.
 
 The **depth** of the tree is the number of nodes along the longest path from the root node down to the farthest leaf node. 
 
@@ -287,18 +319,23 @@ The predicted value at the leaf is the **mean of all training observations that 
 
 ### Predictions
 
-To predict for a new observation, start at the root and follow the branches based on the split conditions until you reach a leaf. The value at the leaf is the prediction. For example, if we have a new site with  `rainfall = 430 mm` and `temperature = 10°C`, then the we would predict the biomass is 2.7 t/ha. 
+To predict for a new observation, start at the root and follow the branches based on the split conditions until you reach a leaf. The value at the leaf is the prediction. For example, if we have a new site with  `rainfall = 430 mm` and `temperature = 10°C`, then:
+
+1. Start at the root node: Is rainfall of 430 mm ≤ `{python} f"{split1_val:.0f}"` mm? Yes, so go left.
+2. On the left node: is temperature of 10°C ≤ 15°C? Yes, so go left. 
+3. We get to a leaf node, no further splits. 
+4. The new site is predicted to have biomass of 3.2 t/ha. 
 
 ::: {.callout-tip}
 ## Check-in
-Use the regression tree diagram above to predict the biomass for a new site with `rainfall = 750 mm` and `temperature = 20°C`. Trace your path from the root to the leaf.
+Use the regression tree above to predict the biomass for a new site with `rainfall = 750 mm` and `temperature = 20°C`. Trace your path from the root to the leaf.
 :::
 
 ::: {.callout-tip collapse="true"}
 ## Discussion
 We trace the path by checking:
 
-1. Start at the root node: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? No, so go right.
+1. Start at the root node: Is rainfall of 750 mm ≤ `{python} f"{split1_val:.0f}"` mm? No, so go right.
 2. The right branch leads directly to a leaf node (no further split in this region).
 3. The new site is predicted to have `{python} f"{right_leaf_val:.1f}"` tonnes/ha.
 
@@ -306,7 +343,7 @@ The observation follows the right (No) branch of the tree because it has high ra
 :::
 
 ### Node splits and prediction regions
-We mentioned previously that in regression trees, the predicted value at the leaf is the mean of all training observations that reach this leaf. It can be useful to visualize this by seeing how each node in the tree splits generates a split the training data.
+We mentioned previously that in regression trees, the predicted value at the leaf is the mean of all training observations that reach this leaf. It can be useful to visualize this by seeing how each node in the tree generates a split in the training data.
 
 We begin with our full training dataset:
 
@@ -336,7 +373,7 @@ plt.show()
 plt.close()
 ```
 
-The root node asks whether `rainfall ≤ 583` mm. This creates a vertical division in the predictor space:
+The root node asks whether `rainfall ≤ 583` mm. 
 
 ```{python}
 #| label: tree-root-only
@@ -355,6 +392,8 @@ plt.tight_layout()
 plt.show()
 plt.close()
 ```
+
+This creates a vertical division in the predictor space:
 
 ```{python}
 #| label: split-1
@@ -386,7 +425,7 @@ plt.show()
 plt.close()
 ```
 
-The second node then looks at the observations in the left region (rainfall ≤ `{python} f"{split1_val:.0f}"` mm) and asks whether `temperature ≤ 15°C`. This adds a horizontal split, but only within the left region:
+The second node then looks at the observations in the left region (rainfall ≤ `{python} f"{split1_val:.0f}"` mm) and asks whether `temperature ≤ 15°C`.
 
 ```{python}
 #| label: tree-two-nodes
@@ -420,6 +459,8 @@ plt.tight_layout()
 plt.show()
 plt.close()
 ```
+
+This adds a horizontal split, but only within the left region:
 
 ```{python}
 #| label: split-2
@@ -465,7 +506,7 @@ plt.show()
 plt.close()
 ```
 
-The leaves correspond to the final regions in the predictor space. Each observation is assigned the **mean biomass** of the training observations that fall in the same region:
+The leaves correspond to the final regions in the predictor space. Each observation is assigned the **mean response** of the training observations that fall in the same region:
 
 ```{python}
 #| label: tree-full-repeat
@@ -576,7 +617,7 @@ plt.close()
 ::: {.callout-tip}
 ## Check-in
 
-The plot below shows another split in the training data. Modify the diagram for decision tree to include a node and leaves that represent this new region. 
+The plot below shows another split in the training data. Modify the decision tree diagram to include a node and leaves that represent this new region. 
 
 ```{python}
 #| label: tree-2node-checkin
@@ -684,10 +725,10 @@ for cx, cy, lbl, lbl_side in [
 draw_node(ax, 5.5,  4.7, f'rainfall ≤ {split1_val:.0f} mm?',            color='#d6eaf8', bold=True)
 draw_node(ax, 2.75, 2.8, f'temperature ≤ {split2_val:.1f} °C?',          color='#d6eaf8')
 draw_node(ax, 8.25, 2.8, f'temperature ≤ {right_split2_val_d:.1f} °C?',  color='#d6eaf8')
-draw_node(ax, 1.25, 1.0, f'Ŷ = {lr_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
-draw_node(ax, 4.25, 1.0, f'Ŷ = {ll_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
-draw_node(ax, 6.75, 1.0, f'Ŷ = {rr_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
-draw_node(ax, 9.75, 1.0, f'Ŷ = {rl_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 1.25, 1.0, f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 4.25, 1.0, f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 6.75, 1.0, f'Ŷ = 8.4 t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 9.75, 1.0, f'Ŷ = 4.9 t/ha', color='#d5f5e3', w=2.0)
 
 plt.tight_layout()
 plt.show()
@@ -697,7 +738,7 @@ plt.close()
 :::
 
 
-So a regression tree is defined by:
+In summary and more abstractly, a regression tree is defined by:
 
 1. **Dividing the predictor space**: the set of all possible values for $X_1, X_2, \ldots, X_p$ — into $J$ non-overlapping rectangular regions $R_1, R_2, \ldots, R_J$.
 
@@ -713,22 +754,22 @@ Start with a region $R_1$ defined by your regression tree and let
 
 $$\hat{y}_{R_1} = \text{mean response of the observations in } R_1.$$
 
-Then every other point that falls in $R_1$ will be assigned $\hat{y}_{R_1}$ as its prediction.
+Every other point that falls in $R_1$ will be assigned $\hat{y}_{R_1}$ as its prediction.
 
- We can measure how well $\hat{y}_{R_1}$ estimates the values for the observations in $R_1$ by calculating
+We can measure how well $\hat{y}_{R_1}$ estimates the values for the observations in $R_1$ by calculating
 
-$$\sum_{i\in R_j}(y_i - \hat{y}_{R_j})^2.$$
+$$\sum_{y_i \in R_j}(y_i - \hat{y}_{R_j})^2.$$
 
 If we calculate this error term for each region $R_1, \ldots, R_J$ defined by the tree we will get the RSS for the decision tree:
 
-$$RSS = \sum_{j=1}^J\sum_{i\in R_j}(y_i - \hat{y}_{R_j})^2.$$
+$$RSS = \sum_{j=1}^J\sum_{y_i\in R_j}(y_i - \hat{y}_{R_j})^2.$$
 
-So, for a given configuration of regions, we have a way of assigning an error term. 
+So, for a given tree, we can look at the regions it defines and calculate the RSS as a measure of error. 
 
 The regions are then found using **recursive binary splitting**: 
 
 1. Starting from the full dataset, at each step the algorithm searches over all predictors and all possible split thresholds to find the single split that most reduces the RSS. 
-2. Repeat this process within each resulting region and...
+2. This process is repeated within each resulting region and...
 3. Stop once you meet a stopping criterion, e.g.: a maximum depth is reached or a region contains too few observations to split further.
 
 
@@ -738,10 +779,11 @@ The regions are then found using **recursive binary splitting**:
 ::: 
 
 For example, to create the first node in the tree, the algorithm:
+
 1. evaluates every possible split threshold on every predictor and 
 2. chooses the combination that minimizes the total residual sum of squares (RSS) across the two resulting regions. 
 
-The figure below shows how a grid with the training data with multiple rainfall split thresholds and how the RSS changes as we move the split threshold along the rainfall axis:
+The figure below shows how multiple rainfall splits would look like and how the RSS changes as we move the split threshold along the rainfall axis:
 
 ```{python}
 #| label: split-threshold-examples
@@ -808,7 +850,7 @@ plt.show()
 plt.close()
 ```
 
-This is how we get  a 1-node tree fitted on the example data. On the left we see how the split divides the predictor space; on the right, the tree diagram.
+This is how we get  a 1-node tree fitted on the example data. On the top we see how the split divides the predictor space; on the bottom, the tree diagram.
 
 
 ```{python}
@@ -845,7 +887,6 @@ ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
 ax.set_xlabel('Annual rainfall (mm)')
 ax.set_ylabel('Mean temperature (°C)')
 ax.set_title(f'1-node tree: optimal split at rainfall = {split1_val:.0f} mm')
-ax.legend(fontsize=9, loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=1)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
@@ -877,16 +918,16 @@ for px, py, cx, cy, lbl, lbl_side in [
 draw_node(ax, 5.5, 4.7,
           f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
 draw_node(ax, 3.0, 2.8,
-          f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')   # No: rainfall >
+          f'Ŷ = 2.9 t/ha', color='#d5f5e3')   # No: rainfall >
 draw_node(ax, 8.0, 2.8,
-          f'Ŷ = {left_leaf_val:.1f} t/ha',  color='#d5f5e3')   # Yes: rainfall ≤
+          f'Ŷ = 7.4 t/ha',  color='#d5f5e3')   # Yes: rainfall ≤
 
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
-After finding the best first split, the algorithm then considers splitting **each of the two resulting regions** again. The best second split (evaluated independently within each region) adds a second node to the tree.
+After finding the best first split, the algorithm then considers **splitting each of the two resulting regions again**. The best second split (evaluated independently within each region) adds a second node to the tree.
 
 ```{python}
 #| label: temp-threshold-examples
@@ -944,7 +985,7 @@ for ax, tv in zip(axes, example_temps):
     ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
     ax.set_xlabel('Annual rainfall (mm)')
     ax.set_ylabel('Mean temperature (°C)')
-    ax.set_title(f'Temperature split = {tv:.1f} °C  |  Total RSS = {rss_total:.2f}')
+    ax.set_title(f'Temperature split = {tv:.1f} °C  |  RSS = {rss_total:.2f}')
     ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
@@ -1079,11 +1120,11 @@ draw_node(ax, 5.5, 4.7,
 draw_node(ax, 3.0, 2.8,
           f'temperature ≤ {split2_val:.1f} °C?', color='#d6eaf8')
 draw_node(ax, 8.0, 2.8,
-          f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+          f'Ŷ = 7.4 t/ha', color='#d5f5e3')
 draw_node(ax, 1.4, 1.0,
-          f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
+          f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.2)
 draw_node(ax, 4.6, 1.0,
-          f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+          f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.2)
 
 plt.tight_layout()
 plt.show()
@@ -1099,7 +1140,7 @@ Where would this algorithm end if we kept adding nodes and subdividing the regio
 :::                                                                                                               
 ::: {.callout-tip collapse="true"}
 ## Discussion
-Eventually, the algorithm would subdivide the regions until most observations are in their own individual region. The tree would then perfectly predict every training observation — but it would be memorizing the data rather than learning the underlying pattern. This means predictions on new observations would be poor: a classic case of **overfitting**!
+Eventually, the algorithm would subdivide the regions until most observations are in their own individual region. The tree would then perfectly predict every training observation, but it would be memorizing the data rather than learning the underlying pattern. This means predictions on new observations would be poor: a classic case of **overfitting**!
 :::  
 
 ## Dealing with overfitting
@@ -1194,9 +1235,9 @@ Looking at the four trees above:
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
-1. A training MSE of `{python} f"{train_mse[-1]:.2f}"` is very low (near zero), meaning the full tree essentially memorizes the training data. Every training observation falls in its own leaf.
+1. A training MSE of 0 means the full tree essentially memorizes the training data. Every training observation falls in its own leaf and we have a perfect predictor *for this specific training data*.
 
-2. The full tree would likely perform **worse** on new data. It has memorized the noise in the training set (high variance) rather than learning the underlying pattern. The depth-2 tree, with simpler boundaries, captures the main ecological structure without overfitting to noise.
+2. The full tree would likely perform **worse** on new data. It has memorized the noise in the training set (high variance) rather than learning the underlying pattern. The depth-2 tree, with simpler boundaries, captures the main data structure without overfitting to noise.
 
 3. Two common intuitive approaches are:
    - **Maximum depth**: limit how many levels the tree can grow
@@ -1204,7 +1245,7 @@ Looking at the four trees above:
    <!-- - **Cost-complexity pruning** (`ccp_alpha`): grow a full tree then prune it back by penalizing the number of leaves — the penalty weight is a hyperparameter tuned by cross-validation -->
 :::
 
-Adjusting the **maximum depth** a tree can have or a **minimum number of observations per leaf** at which to stop subdividing are both ways to avoid overfitting our decision tree. These two approaches introduce a hyperparemeter (maximum depth, minimum samples) that controls the complexity vs. fit tradeoff.
+Adjusting the **maximum depth** a tree can have or a **minimum number of observations per leaf** at which to stop subdividing are both ways to avoid overfitting our decision tree. These two approaches introduce a **hyperparemeter (maximum depth, minimum samples)** that controls the complexity vs. fit tradeoff.
 
 ::: {.callout-tip}
 ## Check-in
@@ -1248,11 +1289,11 @@ plt.close()
 
 ### What is a classification tree?
 
-A classification tree has the same structure as a regression tree — root, internal nodes, branches, and leaf nodes — but makes categorical predictions instead of numerical ones.
+A classification tree has the same structure as a regression tree (root, internal nodes, branches, and leaf nodes) but makes categorical predictions instead of numerical ones.
 
-For a classification tree, each leaf node predicts the **most commonly occurring class** (the majority class) among the training observations that reach that leaf. This is called a **majority vote**.
+For a classification tree, **each leaf node predicts the majority class** among the training observations that reach that leaf. This is called a **majority vote**.
 
-The depth-2 classification tree fitted on the EcoSite data looks like this:
+The depth-2 classification tree fitted on the example data looks like this:
 
 ```{python}
 #| label: cls-tree
@@ -1383,34 +1424,30 @@ The decision tree faithfully reconstructs the two-split classification rule that
 
 ### Fitting a classification tree
 
-So a classification tree is fitted by:
+A classification tree is fitted by:
 
 1. **Dividing the predictor space** into $J$ non-overlapping regions $R_1, \ldots, R_J$.
 
-2. **Predicting** the majority class among training observations in each region $R_j$:
-
-$$\hat{y}_{R_j} = \text{argmax}_{k} \; \hat{p}_{jk}, \quad \text{where } \hat{p}_{jk} = \frac{1}{|R_j|}\sum_{i \in R_j} \mathbf{1}(y_i = k)$$
-
-is the proportion of training observations in region $R_j$ belonging to class $k$.
+2. **Predicting** the majority class among training observations in each region $R_j$.
 
 As with regression trees, recursive binary splitting is used to find the regions, but the criterion for measuring split quality is different since we cannot use RSS for classification. Instead, we measure the **impurity** of the resulting regions. Intuitively, this is because we are often interested not only in the predicted class but also in the **class proportions** at each leaf (the fraction of training observations belonging to each class). These proportions give a sense of the confidence of the prediction. A leaf where 95% of observations share the same class is more reliable than one with a 60/40 split.
 
 ::: {.callout-tip}
 ## Check-in
-Looking at the classification tree, which leaf has the most confident predictions? Which would you say is the most "pure" and why?
+Looking at the classification tree, which leaf has the most confident predictions? Which leaf would you say is the most "pure" and why?
 :::
 
 ::: {.callout-tip collapse="true"}
 ## Discussion
-The forest leaf (leftmost, green). All training observations that fall into that region belong to the same class — forest — so the predicted class proportion is 1.0 for forest and 0.0 for all other classes. This means the tree is maximally confident there: there is no ambiguity in the prediction. In contrast, the other leaves contain a mix of classes, making their predictions less reliable. 
+The forest leaf (rightmost, green). All training observations that fall into that region belong to the same class — forest — so the predicted class proportion is 1.0 for forest and 0.0 for all other classes. This means the tree is maximally confident there: there is no ambiguity in the prediction. In contrast, the other leaves contain a mix of classes, making their predictions less reliable. 
 :::
 
 
-#### Gini impurity
+At each step, recursive binary splitting searches for the variable and threshold that produce the purest regions. 
 
-The most common splitting criterion for classification trees is the **Gini impurity index**, a measure of how mixed the classes are in a given region. A region where all observations belong to the same class has a Gini impurity of 0 (perfectly pure). The more evenly the observations are spread across classes, the higher the impurity.
+A common splitting criterion for classification trees is the **Gini impurity index**, a measure of how mixed the classes are in a given region. A region where all observations belong to the same class has a Gini impurity of 0 (perfectly pure). The more evenly the observations are spread across classes, the higher the impurity.
 
-At each step, recursive binary splitting searches for the variable and threshold that produce the purest regions. **Entropy** is another common impurity measure that behaves similarly and tends to produce very similar trees in practice.
+**Entropy** is another common impurity measure that behaves similarly and tends to produce very similar trees in practice.
 
 <!--NOTE: I want to go into Gini impurity index next year, no time to prepare it this year. -->
 
@@ -1423,7 +1460,7 @@ Decision trees and linear models capture fundamentally different types of relati
 
 As a result, **trees naturally capture nonlinear, step-like relationships** that linear models cannot fit well, while linear models perform better when the true relationship is approximately linear and smooth.
 
-The example below shows a synthetic dataset where the response Y depends on temperature in a **step-function** pattern: low below 10°C, high between 10°C and 25°C, and low again above 25°C. A linear model fits a single straight line that is a poor approximation everywhere; a depth-2 tree captures the three-step structure almost perfectly.
+The example below shows a dataset where the response Y depends on temperature in a **step-function** pattern: low below 10°C, high between 10°C and 25°C, and low again above 25°C. A linear model fits a single straight line that is a poor approximation everywhere; a depth-2 tree captures the three-step structure almost perfectly.
 
 ```{python}
 #| label: linear-vs-tree
@@ -1453,12 +1490,14 @@ plt.show()
 plt.close()
 ```
 
-The table below summarizes the key advantages and disadvantages of decision trees compared to linear models, following the summary in ISLP:
+The table below summarizes the key advantages and disadvantages of decision trees compared to linear models:
 
 | | Decision Trees | Linear Models |
 |---|---|---|
-| **Interpretability** | Very high — easy to visualize and explain | Moderate — coefficients can be interpreted |
+| **Interpretability** | Very high, easy to visualize and explain | Moderate, coefficients can be interpreted |
 | **Nonlinear relationships** | Handles them naturally | Requires feature engineering (e.g., polynomial terms) |
 | **Prediction accuracy** | Often lower than other methods | Competitive when the true relationship is linear |
 | **Variance** | High — sensitive to small changes in training data | Generally lower |
 | **Variable selection** | Implicit (splits only on useful variables) | Requires explicit methods (e.g., lasso) |
+
+<!-- TO DO: Need to include something about variable interpretation as well. -->
