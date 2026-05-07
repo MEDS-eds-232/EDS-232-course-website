@@ -294,7 +294,7 @@ We trace the path by checking:
 The observation follows the right branch of the tree because it falls in the high-rainfall region.
 :::
 
-### Visualizing node splits
+### Node spllits and prediction regions
 We mentioned previously that in regression trees, the predicted value at the leaf is the mean of all training observations that reach this leaf. It can be useful to visualize this by seeing how each node in the tree splits generates a split the training data.
 
 We begin with our full training dataset:
@@ -561,11 +561,140 @@ plt.show()
 plt.close()
 ```
 
+The figure below shows the 2-node (depth-2) tree, which makes one additional split — this time on temperature within one of the rainfall regions:
+
+
+
+::: {.callout-tip}
+## Check-in
+
+The plot below shows another split in the training data. Modify the diagram for decision tree to include a node and leaves that represent this new region. 
+
+```{python}
+#| label: tree-2node-checkin
+#| fig-align: center
+
+right_child_idx  = tree_d2.tree_.children_right[0]
+right_split2_val = tree_d2.tree_.threshold[right_child_idx]
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+
+# Four colored regions
+ax.fill_between([150, split1_val], [3, 3], [split2_val, split2_val],
+                alpha=0.3, color='steelblue')
+ax.fill_between([150, split1_val], [split2_val, split2_val], [26, 26],
+                alpha=0.3, color='#e07b39')
+ax.fill_between([split1_val, 1050], [3, 3], [right_split2_val, right_split2_val],
+                alpha=0.3, color='seagreen')
+ax.fill_between([split1_val, 1050], [right_split2_val, right_split2_val], [26, 26],
+                alpha=0.3, color='#9b59b6')
+
+# Split lines
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--',
+           label=f'Split 1: rainfall = {split1_val:.0f} mm')
+ax.plot([150, split1_val], [split2_val, split2_val],
+        color='darkorange', lw=2, linestyle='--',
+        label=f'Split 2: temperature = {split2_val:.1f} °C (left region)')
+ax.plot([split1_val, 1050], [right_split2_val, right_split2_val],
+        color='purple', lw=2, linestyle='--',
+        label=f'Split 3: temperature = {right_split2_val:.1f} °C (right region)')
+
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85,
+           edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}',
+                (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4),
+                fontsize=8.5, color='#222')
+
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Depth-2 tree: four prediction regions')
+ax.legend(fontsize=8.5, loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+:::
+::: {.callout-tip collapse="true"}
+## Discussion
+
+```{python}
+#| label: tree-depth2-full
+#| fig-align: center
+
+t = tree_d2.tree_
+right_child_idx_d  = t.children_right[0]
+left_child_idx_d   = t.children_left[0]
+right_split2_val_d = t.threshold[right_child_idx_d]
+
+# Leaf values (sklearn: left child = True = ≤ threshold)
+ll_leaf = t.value[t.children_left[left_child_idx_d]][0][0]    # temp ≤ split2_val   → Yes (right) in diagram
+lr_leaf = t.value[t.children_right[left_child_idx_d]][0][0]   # temp >  split2_val  → No  (left)  in diagram
+rl_leaf = t.value[t.children_left[right_child_idx_d]][0][0]   # temp ≤ right_split2 → Yes (right) in diagram
+rr_leaf = t.value[t.children_right[right_child_idx_d]][0][0]  # temp >  right_split2 → No (left)  in diagram
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
+
+# Branches from root
+for px, py, cx, cy, lbl, lbl_side in [
+        (5.5, 4.7, 2.75, 2.8, 'No',  'left'),
+        (5.5, 4.7, 8.25, 2.8, 'Yes', 'right')]:
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+# Branches from left internal node
+for cx, cy, lbl, lbl_side in [
+        (1.25, 1.0, 'No',  'left'),
+        (4.25, 1.0, 'Yes', 'right')]:
+    ax.plot([2.75, cx], [2.8 - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (2.75 + cx) / 2, (2.8 - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+# Branches from right internal node
+for cx, cy, lbl, lbl_side in [
+        (6.75, 1.0, 'No',  'left'),
+        (9.75, 1.0, 'Yes', 'right')]:
+    ax.plot([8.25, cx], [2.8 - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (8.25 + cx) / 2, (2.8 - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+# Draw nodes
+draw_node(ax, 5.5,  4.7, f'rainfall ≤ {split1_val:.0f} mm?',            color='#d6eaf8', bold=True)
+draw_node(ax, 2.75, 2.8, f'temperature ≤ {split2_val:.1f} °C?',          color='#d6eaf8')
+draw_node(ax, 8.25, 2.8, f'temperature ≤ {right_split2_val_d:.1f} °C?',  color='#d6eaf8')
+draw_node(ax, 1.25, 1.0, f'Ŷ = {lr_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 4.25, 1.0, f'Ŷ = {ll_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 6.75, 1.0, f'Ŷ = {rr_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 9.75, 1.0, f'Ŷ = {rl_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+
 ### Fitting a regression tree
 
-How does the algorithm decide where to place the splits at each node? We start with a simple **1-node tree** — a tree with only the root node and two leaf nodes. This tree makes a single split on one predictor.
+Fitting the regression tree then means using the training data to find the splits that do a  good job at approximating the real values of the data. We will give an general understanding of how the algorithm finds these splits. 
 
-The figure below shows a 1-node tree fitted on the EcoSite data. On the left we see how the split divides the predictor space; on the right, the tree diagram.
+We start with a simple 1-node tree, a tree with only the root node and two leaf nodes. This tree makes a single split on one predictor.
+
+The figure below shows a 1-node tree fitted on the example data. On the left we see how the split divides the predictor space; on the right, the tree diagram.
 
 ```{python}
 #| label: tree-1node
