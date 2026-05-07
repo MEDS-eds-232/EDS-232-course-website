@@ -1294,9 +1294,11 @@ A classification tree has the same structure as a regression tree (root, interna
 
 For a classification tree, **each leaf node predicts the majority class** among the training observations that reach that leaf. This is called a **majority vote**.
 
-The depth-2 classification tree fitted on the example data looks like this:
+A depth-2 classification tree fitted on the example data looks like this:
 
-```{python}
+
+<!-- TODO: this diagram is good, but it has that leaf that is further split to mininimze the purity. -->
+<!-- ```{python}
 #| label: cls-tree
 #| fig-align: center
 
@@ -1310,7 +1312,9 @@ ax.set_title('Depth-2 classification tree — biome prediction')
 plt.tight_layout()
 plt.show()
 plt.close()
-```
+``` -->
+
+![](cls-tree-output-1.png){width=120%}
 
 ::: {.callout-tip}
 ## Check-in
@@ -1323,8 +1327,6 @@ Use the classification tree above to predict the biome type for a new site with 
 2. **Internal node**: Is temperature of 15°C ≤ 18.3 °C? Yes.  So this observation goes into in the "yes" left branch (low temperature).
 3. **Leaf**: The majority class in this leaf is grassland.
 :::
-
-### From decision boundaries to decision trees
 
 Just like regression trees, classification trees divide the predictor space into rectangular regions. The figure below shows the decision regions for the depth-2 classification tree:
 
