@@ -217,34 +217,35 @@ def draw_node(ax, cx, cy, text, color='#d6eaf8', w=2.5, h=0.72, fs=8.5, bold=Fal
     ax.text(cx, cy, text, ha='center', va='center', fontsize=fs,
             fontweight='bold' if bold else 'normal', zorder=4)
 
-fig, ax = plt.subplots(figsize=(fig_size_x * 1.4, fig_size_y + 1.2))
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
 ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
 ax.axis('off')
 
 # Node centres
 nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
 
-# Branches
-for parent, child, yes_lbl, lbl_side in [
-        ('root', 'left',  'Yes', 'left'),
-        ('root', 'right', 'No',  'right')]:
+# Branches from root — Yes on the right, No on the left
+for parent, child, lbl, lbl_side in [
+        ('root', 'left',  'No',  'left'),
+        ('root', 'right', 'Yes', 'right')]:
     px, py = nodes[parent]; cx, cy = nodes[child]
     ax.plot([px, cx], [py - 0.36, cy + 0.36],
             color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35
-    ax.text(mx + offset, my, yes_lbl, fontsize=9, color='#555',
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
 
-# Branch from left to its two leaf nodes
-for child_pos, yes_lbl, lbl_side in [
-        ((1.4, 1.0), 'Yes', 'left'), ((4.6, 1.0), 'No', 'right')]:
+# Branches from left internal node — Yes on the right, No on the left
+for child_pos, lbl, lbl_side in [
+        ((1.4, 1.0), 'No',  'left'),
+        ((4.6, 1.0), 'Yes', 'right')]:
     px, py = nodes['left']; cx, cy = child_pos
     ax.plot([px, cx], [py - 0.36, cy + 0.36],
             color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35
-    ax.text(mx + offset, my, yes_lbl, fontsize=9, color='#555',
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
 
 # Draw the nodes
@@ -259,24 +260,6 @@ draw_node(ax, 1.4, 1.0,
 draw_node(ax, 4.6, 1.0,
           f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
 
-# ── Terminology annotations ────────────────────────────────────────────────────
-ann_kw = dict(fontsize=9, color='steelblue',
-              arrowprops=dict(arrowstyle='->', color='steelblue', lw=1.2))
-ax.annotate('Root node\n(first split)', xy=(5.5, 5.06),
-            xytext=(5.5, 5.35), ha='center', **ann_kw)
-ax.annotate('Internal node\n(split within a region)', xy=(2.3, 2.8),
-            xytext=(0.1, 3.5), ha='center', **ann_kw)
-
-ann_kw_g = dict(fontsize=9, color='seagreen',
-                arrowprops=dict(arrowstyle='->', color='seagreen', lw=1.2))
-ax.annotate('Leaf node\n(prediction = mean)', xy=(7.45, 2.8),
-            xytext=(9.8, 3.5), ha='center', **ann_kw_g)
-
-ann_kw_gr = dict(fontsize=9, color='gray',
-                 arrowprops=dict(arrowstyle='->', color='gray', lw=1.2))
-ax.annotate('Branch', xy=(4.45, 3.85),
-            xytext=(5.0, 4.35), ha='center', **ann_kw_gr)
-
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -289,9 +272,11 @@ Each component of the tree plays a specific role:
 - **Internal node**: a non-leaf node that applies an additional split to a subset of observations
 - **Branch**: the connection between twp nodes, representing the path an observation takes based on the split condition.
 
-To predict for a new observation, start at the root and follow the branches based on the split conditions until you reach a leaf. The value at the leaf is the prediction. 
+The predicted value at the leaf is the **mean of all training observations that reach this leaf**.
 
-For example, if we have a new site with  `rainfall = 430 mm` and `temperature = 10°C`, then the we would predict the biomass is 2.7 t/ha. 
+### Predictions
+
+To predict for a new observation, start at the root and follow the branches based on the split conditions until you reach a leaf. The value at the leaf is the prediction. For example, if we have a new site with  `rainfall = 430 mm` and `temperature = 10°C`, then the we would predict the biomass is 2.7 t/ha. 
 
 ::: {.callout-tip}
 ## Check-in
@@ -301,23 +286,25 @@ Use the regression tree diagram above to predict the biomass for a new site with
 ::: {.callout-tip collapse="true"}
 ## Discussion
 We trace the path by checking:
-1. Root node: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? → 750 > `{python} f"{split1_val:.0f}"`, so **No** → go right.
+
+1. Start at the root node: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? Yes, so go right.
 2. The right branch leads directly to a leaf node (no further split in this region).
-3. **Prediction**: Ŷ ≈ `{python} f"{right_leaf_val:.1f}"` tonnes/ha.
+3. The new site is predicted to have `{python} f"{right_leaf_val:.1f}"` tonnes/ha.
 
 The observation follows the right branch of the tree because it falls in the high-rainfall region.
 :::
 
-In regression trees, the predicted value at the leaf is the **mean of all training observations that reach this leaf**. It can be easier to visualize this by seeing how each node splits in the tree splits the training data.
+### Visualizing node splits
+We mentioned previously that in regression trees, the predicted value at the leaf is the mean of all training observations that reach this leaf. It can be useful to visualize this by seeing how each node in the tree splits generates a split the training data.
 
-We begin with our full training data:
+We begin with our full training dataset:
 
 
 ```{python}
 #| label: scatter-annotated-2
 #| fig-align: center
 
-fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
 
 ax.scatter(df['rainfall'], df['temperature'],
            s=70, color='steelblue', zorder=5, alpha=0.85,
@@ -338,17 +325,241 @@ plt.show()
 plt.close()
 ```
 
-The first note asks us to distinghuish whether rainfall is greater equal to 583 mm, this  creates a division on the predictor space at rainfall=583 mm that we visualize as
+The root node asks whether `rainfall ≤ 583` mm. This creates a vertical division in the predictor space:
 
-[THIS IS THE PLOT FOR THE PREDICTOR SPACE IN THE tree-1node code chunk, only with the mean labels removed]
+```{python}
+#| label: tree-root-only
+#| fig-align: center
 
-Then the second node asks us to look whether observations with rainfall less than 583 mm have temperature greater or equal to 15 C. This creates a second division on the predictor space at rainfall=15C, on the rgion in which rainfaull is greater than 583 mm. 
+# Same width and x-scale as tree-terminology; height proportional to ylim range
+# tree-terminology: ylim range=5.8, height=(fig_size_y+1.2)*0.88 → same scale here
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88 * (1.5 / 5.8)))
+ax.set_xlim(0, 11); ax.set_ylim(4.0, 5.5)
+ax.axis('off')
 
-[THIS IS A PLOT FOR THE PREDICTOR SPACE WITH THE SECOND SPLIT CREATED BY THE SECOND NODE]
+draw_node(ax, 5.5, 4.7,
+          f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
 
-The leaves correpspond to the final regions we get in the predictor space and we assign to every value in the region the average of the training observations within the region. 
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
-[THIS IS A PLOT FOR THE PREDICTOR SPACE WITH THE TWO SPLITS AND THE MEAN OF THE TRAINING SAMPLES IN THE REGION OVERLAYED AS IN THE PLOT IN tree-2node-regions ]
+```{python}
+#| label: split-1
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+
+ax.axvspan(150, split1_val, alpha=0.18, color='steelblue')
+ax.axvspan(split1_val, 1050, alpha=0.18, color='seagreen')
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--',
+           label=f'Split: rainfall = {split1_val:.0f} mm')
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85,
+           edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}',
+                (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4),
+                fontsize=8.5, color='#222')
+
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title(f'Root node split: rainfall = {split1_val:.0f} mm')
+ax.legend(fontsize=9, loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=1)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The second node then looks at the observations in the left region (rainfall ≤ `{python} f"{split1_val:.0f}"` mm) and asks whether `temperature ≤ 15°C`. This adds a horizontal split, but only within the left region:
+
+```{python}
+#| label: tree-two-nodes
+#| fig-align: center
+
+left_child_idx = tree_d2.tree_.children_left[0]
+split2_val = tree_d2.tree_.threshold[left_child_idx]
+
+# Same width and x-scale as tree-terminology; height proportional to ylim range
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88 * (3.4 / 5.8)))
+ax.set_xlim(0, 11); ax.set_ylim(2.1, 5.5)
+ax.axis('off')
+
+# Branches from root (right branch endpoint at (8, 2.8) but no node drawn there)
+for px, py, cx, cy, lbl, lbl_side in [
+        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
+        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+    ax.plot([px, cx], [py - 0.36, cy + 0.36],
+            color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+draw_node(ax, 5.5, 4.7,
+          f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, 3.0, 2.8,
+          f'temperature ≤ {split2_val:.1f} °C?', color='#d6eaf8')
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+```{python}
+#| label: split-2
+#| fig-align: center
+
+# Extract temperature threshold from left child of depth-2 tree
+left_child_idx = tree_d2.tree_.children_left[0]
+split2_val = tree_d2.tree_.threshold[left_child_idx]
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+
+# Three colored regions
+ax.fill_between([150, split1_val], [3, 3], [split2_val, split2_val],
+                alpha=0.25, color='steelblue')           # left-lower
+ax.fill_between([150, split1_val], [split2_val, split2_val], [26, 26],
+                alpha=0.25, color='#e07b39')             # left-upper
+ax.axvspan(split1_val, 1050, alpha=0.25, color='seagreen')  # right
+
+# Split lines
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--',
+           label=f'Split 1: rainfall = {split1_val:.0f} mm')
+ax.plot([150, split1_val], [split2_val, split2_val],
+        color='darkorange', lw=2, linestyle='--',
+        label=f'Split 2: temperature = {split2_val:.1f} °C (left region only)')
+
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85,
+           edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}',
+                (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4),
+                fontsize=8.5, color='#222')
+
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Second node split: temperature (within left region)')
+ax.legend(fontsize=9, loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The leaves correspond to the final regions in the predictor space. Each observation is assigned the **mean biomass** of the training observations that fall in the same region:
+
+```{python}
+#| label: tree-full-repeat
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
+
+nodes_f = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
+
+# Branches from root
+for px, py, cx, cy, lbl, lbl_side in [
+        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
+        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+    ax.plot([px, cx], [py - 0.36, cy + 0.36],
+            color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+# Branches from left internal node
+for cx, cy, lbl, lbl_side in [
+        (1.4, 1.0, 'No',  'left'),
+        (4.6, 1.0, 'Yes', 'right')]:
+    px, py = nodes_f['left']
+    ax.plot([px, cx], [py - 0.36, cy + 0.36],
+            color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+draw_node(ax, 5.5, 4.7,
+          f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, 3.0, 2.8,
+          f'temperature ≤ {split2_val:.1f} °C?', color='#d6eaf8')
+draw_node(ax, 8.0, 2.8,
+          f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+draw_node(ax, 1.4, 1.0,
+          f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0,
+          f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
+```{python}
+#| label: split-regions
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+
+# Same three colored regions as split-2
+ax.fill_between([150, split1_val], [3, 3], [split2_val, split2_val],
+                alpha=0.25, color='steelblue')
+ax.fill_between([150, split1_val], [split2_val, split2_val], [26, 26],
+                alpha=0.25, color='#e07b39')
+ax.axvspan(split1_val, 1050, alpha=0.25, color='seagreen')
+
+# Same split boundary lines
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--')
+ax.plot([150, split1_val], [split2_val, split2_val],
+        color='darkorange', lw=2, linestyle='--')
+
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85,
+           edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}',
+                (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4),
+                fontsize=8.5, color='#222')
+
+# Annotate the three visual regions with their mean biomass
+visual_regions = {
+    'left-lower': (rainfall <= split1_val) & (temperature <= split2_val),
+    'left-upper': (rainfall <= split1_val) & (temperature >  split2_val),
+    'right':       rainfall >  split1_val,
+}
+region_centers = {
+    'left-lower': ((150 + split1_val) / 2, (3 + split2_val) / 2),
+    'left-upper': ((150 + split1_val) / 2, (split2_val + 26) / 2),
+    'right':      ((split1_val + 1050) / 2, (3 + 26) / 2),
+}
+for name, mask in visual_regions.items():
+    mean_val = y[mask].mean()
+    cx, cy   = region_centers[name]
+    ax.text(cx, cy, f'mean = {mean_val:.1f}', fontsize=10, ha='center', va='center',
+            color='white', fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='#333', alpha=0.65))
+
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Leaf regions with mean biomass predictions')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
 ### Fitting a regression tree
 
