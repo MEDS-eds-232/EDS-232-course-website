@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.33">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Decision Trees – EDS 232 - Machine Learning for Environmental Science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../notes/week-by-week/week-by-week.html"> 
+<span class="menu-text">notes</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">assignments</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-1.html">
+ <span class="dropdown-text">Assignment 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-2.html">
+ <span class="dropdown-text">Assignment 2</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">weekly labs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
+        <li>
+    <a class="dropdown-item" href="../../lab/lab1.html">
+ <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab2.html">
+ <span class="dropdown-text">Lab 2: No lab this week!</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab3.html">
+ <span class="dropdown-text">Lab 3: Classification</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab4.html">
+ <span class="dropdown-text">Lab 4: Polynomial Regression and Cross-Validation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab5.html">
+ <span class="dropdown-text">Lab 5: Regularized Regression</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-study-guides" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">study guides</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-study-guides">    
+        <li>
+    <a class="dropdown-item" href="../../exams/exam1_study_guide.html">
+ <span class="dropdown-text">Midterm Exam Study Guide</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website">
+ <span class="dropdown-text">Source code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website/issues">
+ <span class="dropdown-text">Report a bug</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/8_tree_based_methods/8_tree_based_methods-NOTES.html">Tree-Based Methods</a></li><li class="breadcrumb-item"><a href="../../notes/8_tree_based_methods/8_tree_based_methods-NOTES.html">Decision Trees</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+  <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p>This wesbite is under construction.</p>
+</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/setup/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What is machine learning?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Learning from data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Training and test errors, and model flexibility</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Linear regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simple linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/3_2_multiple_linear_regression/3_2_multiple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple linear regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Classification</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">KNN and accuracy metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/4_3_logistic_regression/4_3_logistic_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Logistic regression and ROC curves</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Resampling Methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Cross-validation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Linear Model Selection &amp; Regularization</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linear model selection and regularization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/7_pca/7_pca-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Principal Component Analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Tree-Based Methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/8_tree_based_methods/8_tree_based_methods-NOTES.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Decision Trees</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#regression-trees" id="toc-regression-trees" class="nav-link active" data-scroll-target="#regression-trees">Regression trees</a>
+  <ul class="collapse">
+  <li><a href="#a-guiding-dataset" id="toc-a-guiding-dataset" class="nav-link" data-scroll-target="#a-guiding-dataset">A guiding dataset</a></li>
+  <li><a href="#what-is-a-regression-tree" id="toc-what-is-a-regression-tree" class="nav-link" data-scroll-target="#what-is-a-regression-tree">What is a regression tree?</a></li>
+  <li><a href="#predictions" id="toc-predictions" class="nav-link" data-scroll-target="#predictions">Predictions</a></li>
+  <li><a href="#node-splits-and-prediction-regions" id="toc-node-splits-and-prediction-regions" class="nav-link" data-scroll-target="#node-splits-and-prediction-regions">Node splits and prediction regions</a></li>
+  <li><a href="#fitting-a-regression-tree" id="toc-fitting-a-regression-tree" class="nav-link" data-scroll-target="#fitting-a-regression-tree">Fitting a regression tree</a></li>
+  </ul></li>
+  <li><a href="#dealing-with-overfitting" id="toc-dealing-with-overfitting" class="nav-link" data-scroll-target="#dealing-with-overfitting">Dealing with overfitting</a></li>
+  <li><a href="#classification-trees" id="toc-classification-trees" class="nav-link" data-scroll-target="#classification-trees">Classification trees</a>
+  <ul class="collapse">
+  <li><a href="#a-guiding-dataset-1" id="toc-a-guiding-dataset-1" class="nav-link" data-scroll-target="#a-guiding-dataset-1">A guiding dataset</a></li>
+  <li><a href="#what-is-a-classification-tree" id="toc-what-is-a-classification-tree" class="nav-link" data-scroll-target="#what-is-a-classification-tree">What is a classification tree?</a></li>
+  <li><a href="#from-decision-boundaries-to-decision-trees" id="toc-from-decision-boundaries-to-decision-trees" class="nav-link" data-scroll-target="#from-decision-boundaries-to-decision-trees">From decision boundaries to decision trees</a></li>
+  <li><a href="#fitting-a-classification-tree" id="toc-fitting-a-classification-tree" class="nav-link" data-scroll-target="#fitting-a-classification-tree">Fitting a classification tree</a></li>
+  </ul></li>
+  <li><a href="#comparing-trees-with-linear-models" id="toc-comparing-trees-with-linear-models" class="nav-link" data-scroll-target="#comparing-trees-with-linear-models">Comparing trees with linear models</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/8_tree_based_methods/8_tree_based_methods-NOTES.html">Tree-Based Methods</a></li><li class="breadcrumb-item"><a href="../../notes/8_tree_based_methods/8_tree_based_methods-NOTES.html">Decision Trees</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Decision Trees</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In this lesson we introduce:</p>
+<ul>
+<li><strong>Decision trees</strong>: flexible, interpretable prediction models that partition the predictor space into rectangular regions</li>
+<li><strong>Regression trees</strong>: decision trees for predicting a numerical response variable</li>
+<li><strong>Classification trees</strong>: decision trees for predicting a categorical class label</li>
+<li><strong>Dealing with overfitting</strong>: approaches for controlling model complexity</li>
+</ul>
+<p>These notes are based on chapter 8.1 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. The example datasets are synthetic and were generated with the aid of Claude Code for the purpose of this lesson.</p>
+<section id="regression-trees" class="level2">
+<h2 class="anchored" data-anchor-id="regression-trees">Regression trees</h2>
+<section id="a-guiding-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="a-guiding-dataset">A guiding dataset</h3>
+<p>We will use a small dataset of 22 ecological survey sites throughout this section. Each site is characterized by:</p>
+<ul>
+<li><strong><code>rainfall</code></strong> — annual precipitation (mm)</li>
+<li><strong><code>temperature</code></strong> — mean summer temperature (°C)</li>
+<li><strong><code>biomass</code></strong> — aboveground plant biomass (tonnes per hectare), our response variable</li>
+</ul>
+<p>The plot below shows the 22 points in the dataset with the biomass measurement annotated for each point.</p>
+<div id="cell-scatter-annotated" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/scatter-annotated-output-1.png" id="scatter-annotated" class="quarto-figure quarto-figure-center anchored figure-img" width="788" height="441"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="what-is-a-regression-tree" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-a-regression-tree">What is a regression tree?</h3>
+<p>A <strong>regression tree</strong> predicts a numerical response by partitioning the predictor space into rectangular regions and assigning a predicted value to each region. It is structured like an upside-down tree, with a root at the top and leaves at the bottom.</p>
+<p>The figure below shows a simple regression tree fitted on our example dataset:</p>
+<div id="cell-tree-terminology" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/tree-terminology-output-1.png" id="tree-terminology" class="quarto-figure quarto-figure-center anchored figure-img" width="975" height="447"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Each component of the tree plays a specific role:</p>
+<ul>
+<li><strong>Root node</strong>: the top of the tree; contains the first split that applies to the entire dataset.</li>
+<li><strong>Leaf node</strong>: a node with no further splits.</li>
+<li><strong>Internal node</strong>: a non-leaf node that applies an additional split to a subset of observations.</li>
+<li><strong>Branch</strong>: the connection between two nodes, representing the path an observation takes based on the split condition.</li>
+</ul>
+<p>The <strong>depth</strong> of the tree is the number of nodes along the longest path from the root node down to the farthest leaf node.</p>
+<p>The predicted value at the leaf is the <strong>mean of all training observations that reach this leaf</strong>.</p>
+</section>
+<section id="predictions" class="level3">
+<h3 class="anchored" data-anchor-id="predictions">Predictions</h3>
+<p>To predict for a new observation, start at the root and follow the branches based on the split conditions until you reach a leaf. The value at the leaf is the prediction. For example, if we have a new site with <code>rainfall = 430 mm</code> and <code>temperature = 10°C</code>, then:</p>
+<ol type="1">
+<li>Start at the root node: Is rainfall of 430 mm ≤ 583 mm? Yes, so go left.</li>
+<li>On the left node: is temperature of 10°C ≤ 15°C? Yes, so go left.</li>
+<li>We get to a leaf node, no further splits.</li>
+<li>The new site is predicted to have biomass of 3.2 t/ha.</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use the regression tree above to predict the biomass for a new site with <code>rainfall = 750 mm</code> and <code>temperature = 20°C</code>. Trace your path from the root to the leaf.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We trace the path by checking:</p>
+<ol type="1">
+<li>Start at the root node: Is rainfall of 750 mm ≤ 583 mm? No, so go right.</li>
+<li>The right branch leads directly to a leaf node (no further split in this region).</li>
+<li>The new site is predicted to have 7.4 tonnes/ha.</li>
+</ol>
+<p>The observation follows the right (No) branch of the tree because it has high rainfall and does not satisfy the split condition.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="node-splits-and-prediction-regions" class="level3">
+<h3 class="anchored" data-anchor-id="node-splits-and-prediction-regions">Node splits and prediction regions</h3>
+<p>We mentioned previously that in regression trees, the predicted value at the leaf is the mean of all training observations that reach this leaf. It can be useful to visualize this by seeing how each node in the tree generates a split in the training data.</p>
+<p>We begin with our full training dataset:</p>
+<div id="cell-scatter-annotated-2" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/scatter-annotated-2-output-1.png" id="scatter-annotated-2" class="quarto-figure quarto-figure-center anchored figure-img" width="696" height="387"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The root node asks whether <code>rainfall ≤ 583</code> mm.</p>
+<div id="cell-tree-root-only" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/tree-root-only-output-1.png" id="tree-root-only" class="quarto-figure quarto-figure-center anchored figure-img" width="975" height="108"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This creates a vertical division in the predictor space:</p>
+<div id="cell-split-1" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/split-1-output-1.png" id="split-1" class="quarto-figure quarto-figure-center anchored figure-img" width="693" height="378"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The second node then looks at the observations in the left region (rainfall ≤ 583 mm) and asks whether <code>temperature ≤ 15°C</code>.</p>
+<div id="cell-tree-two-nodes" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/tree-two-nodes-output-1.png" id="tree-two-nodes" class="quarto-figure quarto-figure-center anchored figure-img" width="975" height="258"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This adds a horizontal split, but only within the left region:</p>
+<div id="cell-split-2" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/split-2-output-1.png" id="split-2" class="quarto-figure quarto-figure-center anchored figure-img" width="682" height="378"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The leaves correspond to the final regions in the predictor space. Each observation is assigned the <strong>mean response</strong> of the training observations that fall in the same region:</p>
+<div id="cell-tree-full-repeat" class="cell" data-execution_count="9">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/tree-full-repeat-output-1.png" id="tree-full-repeat" class="quarto-figure quarto-figure-center anchored figure-img" width="975" height="447"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-split-regions" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/split-regions-output-1.png" id="split-regions" class="quarto-figure quarto-figure-center anchored figure-img" width="693" height="387"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The plot below shows another split in the training data. Modify the decision tree diagram to include a node and leaves that represent this new region.</p>
+<div id="cell-tree-2node-checkin" class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/tree-2node-checkin-output-1.png" id="tree-2node-checkin" class="quarto-figure quarto-figure-center anchored figure-img" width="669" height="372"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="cell-tree-depth2-full" class="cell" data-execution_count="12">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/tree-depth2-full-output-1.png" id="tree-depth2-full" class="quarto-figure quarto-figure-center anchored figure-img" width="975" height="447"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>In summary and more abstractly, a regression tree is defined by:</p>
+<ol type="1">
+<li><p><strong>Dividing the predictor space</strong>: the set of all possible values for <span class="math inline">\(X_1, X_2, \ldots, X_p\)</span> — into <span class="math inline">\(J\)</span> non-overlapping rectangular regions <span class="math inline">\(R_1, R_2, \ldots, R_J\)</span>.</p></li>
+<li><p><strong>Assigning a prediction</strong> to each region: for every observation that falls into region <span class="math inline">\(R_j\)</span>, the prediction is the <strong>mean of the response values</strong> for the training observations in <span class="math inline">\(R_j\)</span>:</p></li>
+</ol>
+<p><span class="math display">\[\hat{y}_{R_j} = \frac{1}{|R_j|} \sum_{i \in R_j} y_i.\]</span></p>
+</section>
+<section id="fitting-a-regression-tree" class="level3">
+<h3 class="anchored" data-anchor-id="fitting-a-regression-tree">Fitting a regression tree</h3>
+<p>Fitting a regression tree means using the training data to find the splits or regions that do a good job at approximating the response variable. We will give an general understanding of how the algorithm finds these splits.</p>
+<p>Start with a region <span class="math inline">\(R_1\)</span> defined by your regression tree and let</p>
+<p><span class="math display">\[\hat{y}_{R_1} = \text{mean response of the observations in } R_1.\]</span></p>
+<p>Every other point that falls in <span class="math inline">\(R_1\)</span> will be assigned <span class="math inline">\(\hat{y}_{R_1}\)</span> as its prediction.</p>
+<p>We can measure how well <span class="math inline">\(\hat{y}_{R_1}\)</span> estimates the values for the observations in <span class="math inline">\(R_1\)</span> by calculating</p>
+<p><span class="math display">\[\sum_{y_i \in R_j}(y_i - \hat{y}_{R_j})^2.\]</span></p>
+<p>If we calculate this error term for each region <span class="math inline">\(R_1, \ldots, R_J\)</span> defined by the tree we will get the RSS for the decision tree:</p>
+<p><span class="math display">\[RSS = \sum_{j=1}^J\sum_{y_i\in R_j}(y_i - \hat{y}_{R_j})^2.\]</span></p>
+<p>So, for a given tree, we can look at the regions it defines and calculate the RSS as a measure of error.</p>
+<p>The regions are then found using <strong>recursive binary splitting</strong>:</p>
+<ol type="1">
+<li>Starting from the full dataset, at each step the algorithm searches over all predictors and all possible split thresholds to find the single split that most reduces the RSS.</li>
+<li>This process is repeated within each resulting region and…</li>
+<li>Stop once you meet a stopping criterion, e.g.: a maximum depth is reached or a region contains too few observations to split further.</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Why “recursive binary splitting”?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Binary</strong> because every split creates exactly two child regions. <strong>Recursive</strong> because the same procedure is applied again within each region. This is also called a <strong>greedy</strong> algorithm: at each step, the locally best split is chosen without considering whether a different split now might lead to a better tree in future steps.</p>
+</div>
+</div>
+<p>For example, to create the first node in the tree, the algorithm:</p>
+<ol type="1">
+<li>evaluates every possible split threshold on every predictor and</li>
+<li>chooses the combination that minimizes the total residual sum of squares (RSS) across the two resulting regions.</li>
+</ol>
+<p>The figure below shows how multiple rainfall splits would look like and how the RSS changes as we move the split threshold along the rainfall axis:</p>
+<div id="cell-split-threshold-examples" class="cell" data-execution_count="13">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/split-threshold-examples-output-1.png" id="split-threshold-examples" class="quarto-figure quarto-figure-center anchored figure-img" width="553" height="941"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-mse-split" class="cell" data-execution_count="14">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/mse-split-output-1.png" id="mse-split" class="quarto-figure quarto-figure-center anchored figure-img" width="669" height="390"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This is how we get a 1-node tree fitted on the example data. On the top we see how the split divides the predictor space; on the bottom, the tree diagram.</p>
+<div id="cell-tree-1node" class="cell" data-execution_count="15">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/tree-1node-output-1.png" id="tree-1node" class="quarto-figure quarto-figure-center anchored figure-img" width="693" height="387"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-tree-1node-diagram" class="cell" data-execution_count="16">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/tree-1node-diagram-output-1.png" id="tree-1node-diagram" class="quarto-figure quarto-figure-center anchored figure-img" width="975" height="258"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>After finding the best first split, the algorithm then considers <strong>splitting each of the two resulting regions again</strong>. The best second split (evaluated independently within each region) adds a second node to the tree.</p>
+<div id="cell-temp-threshold-examples" class="cell" data-execution_count="17">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/temp-threshold-examples-output-1.png" id="temp-threshold-examples" class="quarto-figure quarto-figure-center anchored figure-img" width="553" height="941"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-rss-temp-split" class="cell" data-execution_count="18">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/rss-temp-split-output-1.png" id="rss-temp-split" class="quarto-figure quarto-figure-center anchored figure-img" width="669" height="390"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The figure below shows a depth 2 tree, which makes one additional split this time on temperature within one of the rainfall regions:</p>
+<div id="cell-split-regions-2" class="cell" data-execution_count="19">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/split-regions-2-output-1.png" id="split-regions-2" class="quarto-figure quarto-figure-center anchored figure-img" width="693" height="387"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-tree-full-repeat-2" class="cell" data-execution_count="20">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/tree-full-repeat-2-output-1.png" id="tree-full-repeat-2" class="quarto-figure quarto-figure-center anchored figure-img" width="975" height="447"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can continue adding nodes to our tree in this manner until a stopping criterion is reached. For example, maximu depth, or a minimum number of observations within each region.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Where would this algorithm end if we kept adding nodes and subdividing the regions without any stopping criterion?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Eventually, the algorithm would subdivide the regions until most observations are in their own individual region. The tree would then perfectly predict every training observation, but it would be memorizing the data rather than learning the underlying pattern. This means predictions on new observations would be poor: a classic case of <strong>overfitting</strong>!</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="dealing-with-overfitting" class="level2">
+<h2 class="anchored" data-anchor-id="dealing-with-overfitting">Dealing with overfitting</h2>
+<p>A fully-grown decision tree will perfectly fit the training data but will generalize very poorly to new observations. This is the classic overfitting problem: high variance, low bias.</p>
+<p>The figure below shows decision regions for trees of increasing depth. Notice how the boundaries become increasingly specific to the training data as depth grows.</p>
+<div id="cell-depth-comparison" class="cell" data-execution_count="21">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/depth-comparison-output-1.png" id="depth-comparison" class="quarto-figure quarto-figure-center anchored figure-img" width="692" height="1205"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Looking at the four trees above:</p>
+<ol type="1">
+<li>The full tree has a training MSE of 0.00. What does this tell us about how well it fits the training data?</li>
+<li>Would you expect the full tree to perform better or worse than the depth-3 tree on new, unseen data? Why?</li>
+<li>What are two approaches you could use to control the complexity of a decision tree?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>A training MSE of 0 means the full tree essentially memorizes the training data. Every training observation falls in its own leaf and we have a perfect predictor <em>for this specific training data</em>.</p></li>
+<li><p>The full tree would likely perform <strong>worse</strong> on new data. It has memorized the noise in the training set (high variance) rather than learning the underlying pattern. The depth-2 tree, with simpler boundaries, captures the main data structure without overfitting to noise.</p></li>
+<li><p>Two common intuitive approaches are:</p>
+<ul>
+<li><strong>Maximum depth</strong>: limit how many levels the tree can grow</li>
+<li><strong>Minimum samples per leaf</strong>: stop splitting when a region has too few observations <!-- - **Cost-complexity pruning** (`ccp_alpha`): grow a full tree then prune it back by penalizing the number of leaves — the penalty weight is a hyperparameter tuned by cross-validation --></li>
+</ul></li>
+</ol>
+</div>
+</div>
+</div>
+<p>Adjusting the <strong>maximum depth</strong> a tree can have or a <strong>minimum number of observations per leaf</strong> at which to stop subdividing are both ways to avoid overfitting our decision tree. These two approaches introduce a <strong>hyperparemeter (maximum depth, minimum samples)</strong> that controls the complexity vs.&nbsp;fit tradeoff.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>How would cross-validation be applied to find the best depth and samples per leaf values?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Compute the CV-MSE for a grid of depth and samples per leaf values, compare which combination of parameters give the lowest error and choose this as the parameters for the tree.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="classification-trees" class="level2">
+<h2 class="anchored" data-anchor-id="classification-trees">Classification trees</h2>
+<p>Decision trees can also be applied to <strong>classification</strong> problems, where the response variable is a class label rather than a numerical value. In this case we call them <strong>classification trees</strong>.</p>
+<section id="a-guiding-dataset-1" class="level3">
+<h3 class="anchored" data-anchor-id="a-guiding-dataset-1">A guiding dataset</h3>
+<p>We will use a second small dataset of <strong>22 ecological sites</strong>. The predictors are the same (<code>rainfall</code> and <code>temperature</code>), but the response is now the site’s <strong>biome type</strong>: <em>forest</em>, <em>grassland</em>, or <em>desert</em>.</p>
+<div id="cell-cls-scatter" class="cell" data-execution_count="22">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/cls-scatter-output-1.png" id="cls-scatter" class="quarto-figure quarto-figure-center anchored figure-img" width="787" height="421"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="what-is-a-classification-tree" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-a-classification-tree">What is a classification tree?</h3>
+<p>A classification tree has the same structure as a regression tree (root, internal nodes, branches, and leaf nodes) but makes categorical predictions instead of numerical ones.</p>
+<p>For a classification tree, <strong>each leaf node predicts the majority class</strong> among the training observations that reach that leaf. This is called a <strong>majority vote</strong>.</p>
+<p>The depth-2 classification tree fitted on the example data looks like this:</p>
+<div id="cell-cls-tree" class="cell" data-execution_count="23">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/cls-tree-output-1.png" id="cls-tree" class="quarto-figure quarto-figure-center anchored figure-img" width="1030" height="471"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use the classification tree above to predict the biome type for a new site with <strong><code>rainfall = 500 mm</code></strong> and <strong><code>temperature = 15°C</code></strong>. Trace your path from the root to the leaf.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Root</strong>: Is rainfall 500 mm ≤ 675.9 mm? Yes. So this observation goes into in the “yes” left branch (low rainfall).</li>
+<li><strong>Internal node</strong>: Is temperature of 15°C ≤ 18.3 °C? Yes. So this observation goes into in the “yes” left branch (low temperature).</li>
+<li><strong>Leaf</strong>: The majority class in this leaf is grassland.</li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+<section id="from-decision-boundaries-to-decision-trees" class="level3">
+<h3 class="anchored" data-anchor-id="from-decision-boundaries-to-decision-trees">From decision boundaries to decision trees</h3>
+<p>Just like regression trees, classification trees divide the predictor space into rectangular regions. The figure below shows the decision regions for the depth-2 classification tree:</p>
+<div id="cell-cls-boundaries" class="cell" data-execution_count="24">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/cls-boundaries-output-1.png" id="cls-boundaries" class="quarto-figure quarto-figure-center anchored figure-img" width="789" height="421"></p>
+</figure>
+</div>
+</div>
+</div>
+<!-- ::: {.callout-tip}
+## Check-in
+
+The figure below shows a set of decision boundaries in the rainfall–temperature predictor space.
+
+::: {#cell-checkin-boundaries .cell execution_count=25}
+
+::: {.cell-output .cell-output-display}
+![](8_tree_based_methods-NOTES_files/figure-html/checkin-boundaries-output-1.png){#checkin-boundaries width=669 height=390 fig-align='center'}
+:::
+:::
+
+
+1. How many leaf nodes does the corresponding decision tree have?
+2. Sketch the corresponding decision tree, including the split conditions at each internal node.
+3. Using the scatter plot from the beginning of this section, which biome type (forest, grassland, or desert) is the majority class in each of the three regions?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+1. There are **3 leaf nodes** (one for each labeled region).
+
+2. The decision tree has the following structure:
+   - **Root**: `rainfall ≤ 650?`
+     - **Yes** (left branch): `temperature ≤ 18?`
+       - **Yes** → Region A (leaf)
+       - **No** → Region B (leaf)
+     - **No** (right branch) → Region C (leaf)
+
+3. Based on the scatter plot:
+   - **Region A** (low rainfall, cool): mostly **grassland**
+   - **Region B** (low rainfall, warm): mostly **desert**
+   - **Region C** (high rainfall): mostly **forest**
+
+The decision tree faithfully reconstructs the two-split classification rule that generated the data.
+::: -->
+</section>
+<section id="fitting-a-classification-tree" class="level3">
+<h3 class="anchored" data-anchor-id="fitting-a-classification-tree">Fitting a classification tree</h3>
+<p>A classification tree is fitted by:</p>
+<ol type="1">
+<li><p><strong>Dividing the predictor space</strong> into <span class="math inline">\(J\)</span> non-overlapping regions <span class="math inline">\(R_1, \ldots, R_J\)</span>.</p></li>
+<li><p><strong>Predicting</strong> the majority class among training observations in each region <span class="math inline">\(R_j\)</span>.</p></li>
+</ol>
+<p>As with regression trees, recursive binary splitting is used to find the regions, but the criterion for measuring split quality is different since we cannot use RSS for classification. Instead, we measure the <strong>impurity</strong> of the resulting regions. Intuitively, this is because we are often interested not only in the predicted class but also in the <strong>class proportions</strong> at each leaf (the fraction of training observations belonging to each class). These proportions give a sense of the confidence of the prediction. A leaf where 95% of observations share the same class is more reliable than one with a 60/40 split.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Looking at the classification tree, which leaf has the most confident predictions? Which leaf would you say is the most “pure” and why?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The forest leaf (rightmost, green). All training observations that fall into that region belong to the same class — forest — so the predicted class proportion is 1.0 for forest and 0.0 for all other classes. This means the tree is maximally confident there: there is no ambiguity in the prediction. In contrast, the other leaves contain a mix of classes, making their predictions less reliable.</p>
+</div>
+</div>
+</div>
+<p>At each step, recursive binary splitting searches for the variable and threshold that produce the purest regions.</p>
+<p>A common splitting criterion for classification trees is the <strong>Gini impurity index</strong>, a measure of how mixed the classes are in a given region. A region where all observations belong to the same class has a Gini impurity of 0 (perfectly pure). The more evenly the observations are spread across classes, the higher the impurity.</p>
+<p><strong>Entropy</strong> is another common impurity measure that behaves similarly and tends to produce very similar trees in practice.</p>
+<!--NOTE: I want to go into Gini impurity index next year, no time to prepare it this year. -->
+</section>
+</section>
+<section id="comparing-trees-with-linear-models" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-trees-with-linear-models">Comparing trees with linear models</h2>
+<p>Decision trees and linear models capture fundamentally different types of relationships between predictors and response:</p>
+<ul>
+<li><strong>Linear models</strong> (regression, ridge, lasso): assume that the response changes smoothly and approximately linearly with the predictors.</li>
+<li><strong>Decision trees</strong> make no such assumption: they partition the predictor space into rectangular regions and assign a constant prediction within each region.</li>
+</ul>
+<p>As a result, <strong>trees naturally capture nonlinear, step-like relationships</strong> that linear models cannot fit well, while linear models perform better when the true relationship is approximately linear and smooth.</p>
+<p>The example below shows a dataset where the response Y depends on temperature in a <strong>step-function</strong> pattern: low below 10°C, high between 10°C and 25°C, and low again above 25°C. A linear model fits a single straight line that is a poor approximation everywhere; a depth-2 tree captures the three-step structure almost perfectly.</p>
+<div id="cell-linear-vs-tree" class="cell" data-execution_count="26">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_tree_based_methods-NOTES_files/figure-html/linear-vs-tree-output-1.png" id="linear-vs-tree" class="quarto-figure quarto-figure-center anchored figure-img" width="1109" height="396"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The table below summarizes the key advantages and disadvantages of decision trees compared to linear models:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Decision Trees</th>
+<th>Linear Models</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Interpretability</strong></td>
+<td>Very high, easy to visualize and explain</td>
+<td>Moderate, coefficients can be interpreted</td>
+</tr>
+<tr class="even">
+<td><strong>Nonlinear relationships</strong></td>
+<td>Handles them naturally</td>
+<td>Requires feature engineering (e.g., polynomial terms)</td>
+</tr>
+<tr class="odd">
+<td><strong>Prediction accuracy</strong></td>
+<td>Often lower than other methods</td>
+<td>Competitive when the true relationship is linear</td>
+</tr>
+<tr class="even">
+<td><strong>Variance</strong></td>
+<td>High — sensitive to small changes in training data</td>
+<td>Generally lower</td>
+</tr>
+<tr class="odd">
+<td><strong>Variable selection</strong></td>
+<td>Implicit (splits only on useful variables)</td>
+<td>Requires explicit methods (e.g., lasso)</td>
+</tr>
+</tbody>
+</table>
+<!-- TO DO: Need to include something about variable interpretation as well. -->
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-islp_2023" class="csl-entry" role="listitem">
+James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E. Taylor. 2023. <em>An Introduction to Statistical Learning: With Applications in <span>Python</span></em>. Springer Texts in Statistics. Cham: Springer.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>This work is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License</a></p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This website is built with <a href="https://quarto.org/">Quarto</a> and <a href="https://github.com/MEDS-eds-220/MEDS-eds-220-course">GitHub pages</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
