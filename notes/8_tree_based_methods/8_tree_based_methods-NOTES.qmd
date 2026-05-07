@@ -1124,12 +1124,37 @@ The figure below shows decision regions for trees of increasing depth. Notice ho
 #| label: depth-comparison
 #| fig-align: center
 
-# Fit all viz trees on y_viz (unique y) so splits are identical across panels.
-# The tiny perturbation (max ~2e-6) is invisible in plots but prevents RSS=0 ties.
-y_viz      = y + np.arange(len(y)) * 1e-7
-tree_v1    = DecisionTreeRegressor(max_depth=1, random_state=42).fit(X, y_viz)
-tree_v3    = DecisionTreeRegressor(max_depth=3, random_state=42).fit(X, y_viz)
-tree_vfull = DecisionTreeRegressor(random_state=42).fit(X, y_viz)
+from sklearn.tree import _tree
+
+tree_v1    = DecisionTreeRegressor(max_depth=1, random_state=42).fit(X, y)
+tree_vfull = DecisionTreeRegressor(random_state=42).fit(X, y)
+
+# Derive depth-3 predictions directly from the full tree (guarantees subtree consistency)
+def predict_at_depth(model, X_in, max_depth):
+    """Predict using a fitted tree but stopping traversal at max_depth."""
+    t = model.tree_
+    # Compute depth of every node
+    node_depth = np.zeros(t.node_count, dtype=int)
+    parent      = np.full(t.node_count, -1, dtype=int)
+    stack = [0]
+    while stack:
+        node = stack.pop()
+        for child in (t.children_left[node], t.children_right[node]):
+            if child != _tree.TREE_LEAF:
+                node_depth[child] = node_depth[node] + 1
+                parent[child]     = node
+                stack.append(child)
+    # For each node, find its ancestor at max_depth (or itself if shallower)
+    ancestor = np.arange(t.node_count)
+    for node in range(t.node_count):
+        curr = node
+        while node_depth[curr] > max_depth:
+            curr = parent[curr]
+        ancestor[node] = curr
+    # apply() returns the leaf index for each sample — vectorized via sklearn C code
+    leaves       = model.apply(X_in.astype(np.float32))
+    target_nodes = ancestor[leaves]
+    return t.value[target_nodes, 0, 0]
 
 # High-res grid — fine enough to resolve even the thinnest leaf regions
 r_hr = np.linspace(150, 1050, 1200)
@@ -1138,12 +1163,14 @@ RR_hr, TT_hr = np.meshgrid(r_hr, t_hr)
 grid_hr = np.c_[RR_hr.ravel(), TT_hr.ravel()]
 
 Zv1    = tree_v1.predict(grid_hr).reshape(RR_hr.shape)
-Zv3    = tree_v3.predict(grid_hr).reshape(RR_hr.shape)
+Zv3    = predict_at_depth(tree_vfull, grid_hr, 3).reshape(RR_hr.shape)
 Zvfull = tree_vfull.predict(grid_hr).reshape(RR_hr.shape)
 
 titles    = ['max_depth = 1', 'max_depth = 3', 'Full tree (no limit)']
 Zs_hr     = [Zv1, Zv3, Zvfull]
-train_mse = [np.mean((t.predict(X) - y)**2) for t in [tree_v1, tree_v3, tree_vfull]]
+train_mse = [np.mean((tree_v1.predict(X) - y)**2),
+             np.mean((predict_at_depth(tree_vfull, X, 3) - y)**2),
+             np.mean((tree_vfull.predict(X) - y)**2)]
 
 vmin = min(Z.min() for Z in Zs_hr)
 vmax = max(Z.max() for Z in Zs_hr)
@@ -1196,46 +1223,10 @@ plt.show()
 plt.close()
 ```
 
-```{python}
-#| label: full-tree-diagram
-#| fig-align: center
-
-from sklearn.tree import export_text
-
-# Visual diagram of the full tree
-fig, ax = plt.subplots(figsize=(fig_size_x * 2.5, fig_size_y * 2))
-plot_tree(tree_vfull, feature_names=['rainfall', 'temperature'],
-          filled=True, rounded=True, fontsize=7, ax=ax)
-ax.set_title('Full regression tree (no depth limit)', fontsize=10)
-plt.tight_layout()
-plt.show()
-plt.close()
-
-# Plain-text representation
-print(export_text(tree_vfull, feature_names=['rainfall', 'temperature']))
-```
-
-```{python}
-#| label: depth3-tree-diagram
-#| fig-align: center
-
-# Visual diagram of the depth-3 tree
-fig, ax = plt.subplots(figsize=(fig_size_x * 2, fig_size_y * 1.5))
-plot_tree(tree_v3, feature_names=['rainfall', 'temperature'],
-          filled=True, rounded=True, fontsize=8, ax=ax)
-ax.set_title('Regression tree with max_depth = 3', fontsize=10)
-plt.tight_layout()
-plt.show()
-plt.close()
-
-# Plain-text representation
-print(export_text(tree_v3, feature_names=['rainfall', 'temperature']))
-```
-
 ::: {.callout-tip}
 ## Check-in
 
-Looking at the four trees above:
+Looking at the three trees above:
 
 1. The full tree has a training MSE of `{python} f"{train_mse[-1]:.2f}"`. What does this tell us about how well it fits the training data?
 2. Would you expect the full tree to perform better or worse than the depth-3 tree on new, unseen data? Why?
