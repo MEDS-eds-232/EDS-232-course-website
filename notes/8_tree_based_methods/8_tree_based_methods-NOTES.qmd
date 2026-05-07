@@ -618,6 +618,7 @@ plt.show()
 plt.close()
 ```
 :::
+
 ::: {.callout-tip collapse="true"}
 ## Discussion
 
@@ -709,7 +710,7 @@ Then every other point that falls in $R_1$ will be assigned $\hat{y}_{R_1}$ as i
 
 $$\sum_{i\in R_j}(y_i - \hat{y}_{R_j})^2.$$
 
-If we calculate this error term for each region $R_1, \ldots, R_J$ defined by the tree we will get an RSS measuring how well the tree fits the data:
+If we calculate this error term for each region $R_1, \ldots, R_J$ defined by the tree we will get the RSS for the decision tree:
 
 $$RSS = \sum_{j=1}^J\sum_{i\in R_j}(y_i - \hat{y}_{R_j})^2.$$
 
@@ -722,10 +723,10 @@ The regions are then found using **recursive binary splitting**:
 3. Stop once you meet a stopping criterion, e.g.: a maximum depth is reached or a region contains too few observations to split further.
 
 
-<!-- ::: {.callout-note}
+::: {.callout-note}
 ## Why "recursive binary splitting"?
 **Binary** because every split creates exactly two child regions. **Recursive** because the same procedure is applied again within each region. This is also called a **greedy** algorithm: at each step, the locally best split is chosen without considering whether a different split now might lead to a better tree in future steps.
-::: -->
+::: 
 
 For example, to create the first node in the tree, the algorithm:
 1. evaluates every possible split threshold on every predictor and 
@@ -1083,34 +1084,86 @@ plt.close()
 
 We can continue adding nodes to our tree in this manner until a stopping criterion is reached. For example, maximu depth, or a minimum number of observations within each region. 
 
+::: {.callout-tip}
+##Check-in                                                                                                                                   
+Where would this algorithm end if we kept adding nodes and subdividing the regions without any stopping criterion?
+:::                                                                                                               
+::: {.callout-tip collapse="true"}
+## Discussion
+Eventually, the algorithm would subdivide the regions until most observations are in their own individual region. The tree would then perfectly predict every training observation — but it would be memorizing the data rather than learning the underlying pattern. This means predictions on new observations would be poor: a classic case of **overfitting**!
+:::  
+
 ## Dealing with overfitting
 
-A fully-grown decision tree — one where every region contains only a single training observation — will perfectly fit the training data but will generalize very poorly to new observations. This is the classic overfitting problem: high variance, low bias.
+A fully-grown decision tree will perfectly fit the training data but will generalize very poorly to new observations. This is the classic overfitting problem: high variance, low bias.
 
-The figure below shows decision regions for trees of increasing depth. Notice how the boundaries become increasingly jagged and specific to the training data as depth grows.
+The figure below shows decision regions for trees of increasing depth. Notice how the boundaries become increasingly specific to the training data as depth grows.
 
 ```{python}
 #| label: depth-comparison
 #| fig-align: center
 
-trees   = [tree_d1, tree_d2, tree_d3, tree_full]
-Zs      = [Z_d1,   Z_d2,   Z_d3,   Z_full]
-titles  = ['max_depth = 1', 'max_depth = 2', 'max_depth = 3', 'Full tree (no limit)']
-train_mse = [np.mean((t.predict(X) - y)**2) for t in trees]
+# Fit all viz trees on y_viz (unique y) so splits are identical across panels.
+# The tiny perturbation (max ~2e-6) is invisible in plots but prevents RSS=0 ties.
+y_viz      = y + np.arange(len(y)) * 1e-7
+tree_v1    = DecisionTreeRegressor(max_depth=1, random_state=42).fit(X, y_viz)
+tree_v3    = DecisionTreeRegressor(max_depth=3, random_state=42).fit(X, y_viz)
+tree_vfull = DecisionTreeRegressor(random_state=42).fit(X, y_viz)
 
-fig, axes = plt.subplots(2, 2, figsize=(fig_size_x * 1.4, fig_size_y * 2 + 0.5))
+# High-res grid — fine enough to resolve even the thinnest leaf regions
+r_hr = np.linspace(150, 1050, 1200)
+t_hr = np.linspace(3, 26, 1200)
+RR_hr, TT_hr = np.meshgrid(r_hr, t_hr)
+grid_hr = np.c_[RR_hr.ravel(), TT_hr.ravel()]
+
+Zv1    = tree_v1.predict(grid_hr).reshape(RR_hr.shape)
+Zv3    = tree_v3.predict(grid_hr).reshape(RR_hr.shape)
+Zvfull = tree_vfull.predict(grid_hr).reshape(RR_hr.shape)
+
+titles    = ['max_depth = 1', 'max_depth = 3', 'Full tree (no limit)']
+Zs_hr     = [Zv1, Zv3, Zvfull]
+train_mse = [np.mean((t.predict(X) - y)**2) for t in [tree_v1, tree_v3, tree_vfull]]
+
+vmin = min(Z.min() for Z in Zs_hr)
+vmax = max(Z.max() for Z in Zs_hr)
+norm = plt.Normalize(vmin=vmin, vmax=vmax)
+cmap = plt.cm.viridis
+
+fig, axes = plt.subplots(3, 1, figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88 * 3))
 axes = axes.flat
 
-for ax, Z, title, tr_mse in zip(axes, Zs, titles, train_mse):
-    im = ax.contourf(RR, TT, Z, alpha=0.28, cmap='viridis', levels=20)
-    ax.contour(RR, TT, Z, colors='#333', linewidths=1.2, linestyles='--', levels=8)
+# Pre-compute depth-3 boundary mask (used to distinguish shallow vs deep splits)
+def boundary_mask(Z):
+    b = np.zeros_like(Z)
+    b[:-1, :] += (Z[1:, :] != Z[:-1, :]).astype(float)
+    b[:, :-1] += (Z[:, 1:] != Z[:, :-1]).astype(float)
+    return b
+
+bnd_v3   = boundary_mask(Zv3)
+bnd_full = boundary_mask(Zvfull)
+bnd_deep = np.where(bnd_v3 > 0, 0, bnd_full)   # boundaries only in full tree (depth 4+)
+
+for ax, Z, title, tr_mse in zip(axes, Zs_hr, titles, train_mse):
+    ax.pcolormesh(RR_hr, TT_hr, Z, cmap=cmap, norm=norm, alpha=0.35, shading='auto')
+
+    is_full = (title == 'Full tree (no limit)')
+
+    # Depth ≤ 3 boundaries: thick dashed (same in all panels)
+    ax.contour(RR_hr, TT_hr, bnd_v3, levels=[0.5],
+               colors='#333', linewidths=1.4, linestyles='--')
+
+    # Depth 4+ boundaries: thin dotted, only on the full tree panel
+    if is_full:
+        ax.contour(RR_hr, TT_hr, bnd_deep, levels=[0.5],
+                   colors='#555', linewidths=0.5, linestyles=':')
+
     ax.scatter(df['rainfall'], df['temperature'],
                s=35, color='steelblue', edgecolors='white', linewidths=0.6, zorder=5)
     ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
     ax.set_xlabel('Rainfall (mm)', fontsize=9)
     ax.set_ylabel('Temperature (°C)', fontsize=9)
     ax.set_title(f'{title}\nTrain MSE = {tr_mse:.2f}', fontsize=9)
-    ax.grid(True, alpha=0.2)
+    ax.grid(False)
     ax.tick_params(labelsize=8)
 
 plt.suptitle('Decision regions for trees of increasing depth', y=1.01)
@@ -1124,8 +1177,8 @@ plt.close()
 
 Looking at the four trees above:
 
-1. The full tree has a training MSE of `{python} f"{train_mse[-1]:.2f}"`. What does this suggest about how well it fits the training data?
-2. Would you expect the full tree to perform better or worse than the depth-2 tree on new, unseen data? Why?
+1. The full tree has a training MSE of `{python} f"{train_mse[-1]:.2f}"`. What does this tell us about how well it fits the training data?
+2. Would you expect the full tree to perform better or worse than the depth-3 tree on new, unseen data? Why?
 3. What are two approaches you could use to control the complexity of a decision tree?
 :::
 
@@ -1136,13 +1189,23 @@ Looking at the four trees above:
 
 2. The full tree would likely perform **worse** on new data. It has memorized the noise in the training set (high variance) rather than learning the underlying pattern. The depth-2 tree, with simpler boundaries, captures the main ecological structure without overfitting to noise.
 
-3. Three common approaches:
-   - **Maximum depth** (`max_depth`): limit how many levels the tree can grow
-   - **Minimum samples per leaf** (`min_samples_leaf`): stop splitting when a region has too few observations
-   - **Cost-complexity pruning** (`ccp_alpha`): grow a full tree then prune it back by penalizing the number of leaves — the penalty weight is a hyperparameter tuned by cross-validation
+3. Two common intuitive approaches are:
+   - **Maximum depth**: limit how many levels the tree can grow
+   - **Minimum samples per leaf**: stop splitting when a region has too few observations
+   <!-- - **Cost-complexity pruning** (`ccp_alpha`): grow a full tree then prune it back by penalizing the number of leaves — the penalty weight is a hyperparameter tuned by cross-validation -->
 :::
 
-All three approaches introduce a hyperparameter (maximum depth, minimum samples, or the pruning penalty) that controls the complexity vs. fit tradeoff. These are selected using cross-validation in the same way as $\lambda$ in ridge and lasso regression.
+Adjusting the **maximum depth** a tree can have or a **minimum number of observations per leaf** at which to stop subdividing are both ways to avoid overfitting our decision tree. These two approaches introduce a hyperparemeter (maximum depth, minimum samples) that controls the complexity vs. fit tradeoff.
+
+::: {.callout-tip}
+## Check-in
+How would cross-validation be applied to find the best depth and samples per leaf values?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+Compute the CV-MSE for a grid of depth and samples per leaf values, compare which combination of parameters give the lowest error and choose this as the parameters for the tree. 
+:::
 
 ## Classification trees
 
