@@ -525,7 +525,7 @@ Use the regression tree to predict the biomass for a new site with **`rainfall =
 
 ---
 
-## {#root-split data-menu-title="Root split"}
+## {#root-split-2 data-menu-title="Root split"}
 
 [The root node split]{.slide-title}
 
@@ -1081,11 +1081,7 @@ The regions are found using **recursive binary splitting**:
 2. Repeat this process within each resulting region
 3. Stop when a stopping criterion is met (e.g., maximum depth, or too few observations to split)
 
-. . .
 
-::: {.body-text-s}
-**Binary** — every split creates exactly two child regions. **Recursive** — the same procedure is applied again within each region. **Greedy** — at each step the locally best split is chosen without considering future steps.
-:::
 
 ---
 
@@ -1101,16 +1097,17 @@ The algorithm evaluates every possible threshold on every predictor. Here are th
 #| label: split-threshold-examples-slide
 #| echo: false
 #| fig-align: center
-#| out-width: "48%"
+#| out-width: "100%"
 
 example_splits = [350, split1_val, 820]
 titles = [
-    f'rainfall = 350 mm  |  RSS = {((y[rainfall<=350]-y[rainfall<=350].mean())**2).sum() + ((y[rainfall>350]-y[rainfall>350].mean())**2).sum():.2f}',
-    f'rainfall = {split1_val:.0f} mm  |  optimal split',
-    f'rainfall = 820 mm  |  RSS = {((y[rainfall<=820]-y[rainfall<=820].mean())**2).sum() + ((y[rainfall>820]-y[rainfall>820].mean())**2).sum():.2f}',
+    f'Split at rainfall = 350 mm  (RSS = {((y[rainfall<=350]-y[rainfall<=350].mean())**2).sum() + ((y[rainfall>350]-y[rainfall>350].mean())**2).sum():.2f})',
+    f'Split at rainfall = {split1_val:.0f} mm  (RSS = {((y[rainfall<=split1_val]-y[rainfall<=split1_val].mean())**2).sum() + ((y[rainfall>split1_val]-y[rainfall>split1_val].mean())**2).sum():.2f})',
+    f'Split at rainfall = 820 mm  (RSS = {((y[rainfall<=820]-y[rainfall<=820].mean())**2).sum() + ((y[rainfall>820]-y[rainfall>820].mean())**2).sum():.2f})',
 ]
 
-fig, axes = plt.subplots(3, 1, figsize=(fig_size_x * 0.7, (fig_size_y - 0.2) * 1.8))
+
+fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.9, fig_size_y + 0.3))
 for ax, sv, title in zip(axes, example_splits, titles):
     lm = y[rainfall <= sv].mean()
     rm = y[rainfall >  sv].mean()
@@ -1165,7 +1162,7 @@ plt.close()
 ```
 
 ::: {.body-text-s .center-text}
-The algorithm picks the threshold that minimizes RSS — this becomes the first node of the tree.
+The algorithm picks the threshold that minimizes RSS, this becomes the first node of the tree.
 :::
 
 ---
@@ -1220,14 +1217,18 @@ plt.close()
 ::: {.column width="43%"}
 
 ```{python}
-#| label: tree-1node-diagram-slide
-#| echo: false
+#| label: tree-1node-diagram-sllide
 #| fig-align: center
-#| out-width: "100%"
+
+# 1-node tree: root + 2 leaves (Yes=right convention)
+# left_leaf_val  = mean for rainfall ≤ split1_val (Yes branch, visual right)
+# right_leaf_val = mean for rainfall >  split1_val (No branch,  visual left)
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88 * (3.4 / 5.8)))
 ax.set_xlim(0, 11); ax.set_ylim(2.1, 5.5)
 ax.axis('off')
+
+# Branches from root
 for px, py, cx, cy, lbl, lbl_side in [
         (5.5, 4.7, 3.0, 2.8, 'Yes', 'left'),
         (5.5, 4.7, 8.0, 2.8, 'No',  'right')]:
@@ -1236,14 +1237,18 @@ for px, py, cx, cy, lbl, lbl_side in [
     offset = -0.35 if lbl_side == 'left' else 0.35
     ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
-draw_node(ax, 5.5, 4.7, f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
-draw_node(ax, 3.0, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
-draw_node(ax, 8.0, 2.8, f'Ŷ = {left_leaf_val:.1f} t/ha',  color='#d5f5e3')
+
+draw_node(ax, 5.5, 4.7,
+          f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, 3.0, 2.8,
+          f'Ŷ = 2.9 t/ha', color='#d5f5e3')   # No: rainfall >
+draw_node(ax, 8.0, 2.8,
+          f'Ŷ = 7.4 t/ha',  color='#d5f5e3')   # Yes: rainfall ≤
+
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
-
 :::
 
 ::::
@@ -1262,7 +1267,7 @@ After the first split, the algorithm considers splitting **each** resulting regi
 #| label: temp-threshold-examples-slide
 #| echo: false
 #| fig-align: center
-#| out-width: "48%"
+#| out-width: "100%"
 
 left_mask  = rainfall <= split1_val
 y_left     = y[left_mask]
@@ -1271,7 +1276,7 @@ y_right    = y[~left_mask]
 rss_right  = ((y_right - y_right.mean())**2).sum()
 example_temps = [10.0, split2_val, 22.0]
 
-fig, axes = plt.subplots(3, 1, figsize=(fig_size_x * 0.7, (fig_size_y - 0.2) * 1.8))
+fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.9, fig_size_y + 0.3))
 for ax, tv in zip(axes, example_temps):
     lower_y  = y_left[temp_left <= tv]
     upper_y  = y_left[temp_left >  tv]
@@ -1312,11 +1317,16 @@ plt.close()
 
 <hr>
 
+::: {.body-text-s}
+The algorithm repeats the same search, now within each existing region, and picks the threshold that most reduces RSS.
+:::
+
+
 ```{python}
 #| label: rss-temp-split-slide
 #| echo: false
 #| fig-align: center
-#| out-width: "80%"
+#| out-width: "60%"
 
 temp_candidates_left = np.linspace(temp_left.min() + 0.5, temp_left.max() - 0.5, 200)
 rss_temp = []
@@ -1344,8 +1354,10 @@ plt.show()
 plt.close()
 ```
 
-::: {.body-text-s .center-text}
-The algorithm repeats the same search — now within each existing region — and picks the threshold that most reduces RSS.
+. . .
+
+::: {.body-text-s .teal-text}
+Where would this algorithm end if we kept adding nodes and subdividing the regions without any stopping criterion?
 :::
 
 ---
@@ -1364,73 +1376,13 @@ The algorithm repeats the same search — now within each existing region — an
 
 <hr>
 
-A **fully-grown** decision tree will perfectly fit the training data but generalize poorly to new observations — **high variance, low bias**.
+A **fully-grown** decision tree will perfectly fit the training data but generalize poorly to new observations.
 
 . . .
 
 As the tree grows deeper, the decision boundaries become increasingly specific to the training data:
 
-```{python}
-#| label: depth-comparison-slide
-#| echo: false
-#| fig-align: center
-#| out-width: "52%"
-
-y_viz      = y + np.arange(len(y)) * 1e-7
-tree_v1    = DecisionTreeRegressor(max_depth=1, random_state=42).fit(X, y_viz)
-tree_v3    = DecisionTreeRegressor(max_depth=3, random_state=42).fit(X, y_viz)
-tree_vfull = DecisionTreeRegressor(random_state=42).fit(X, y_viz)
-
-r_hr = np.linspace(150, 1050, 1200)
-t_hr = np.linspace(3, 26, 1200)
-RR_hr, TT_hr = np.meshgrid(r_hr, t_hr)
-grid_hr = np.c_[RR_hr.ravel(), TT_hr.ravel()]
-Zv1    = tree_v1.predict(grid_hr).reshape(RR_hr.shape)
-Zv3    = tree_v3.predict(grid_hr).reshape(RR_hr.shape)
-Zvfull = tree_vfull.predict(grid_hr).reshape(RR_hr.shape)
-
-titles    = ['max_depth = 1', 'max_depth = 3', 'Full tree (no limit)']
-Zs_hr     = [Zv1, Zv3, Zvfull]
-train_mse = [np.mean((t.predict(X) - y)**2) for t in [tree_v1, tree_v3, tree_vfull]]
-
-vmin = min(Z.min() for Z in Zs_hr)
-vmax = max(Z.max() for Z in Zs_hr)
-norm = plt.Normalize(vmin=vmin, vmax=vmax)
-cmap = plt.cm.viridis
-
-def boundary_mask(Z):
-    b = np.zeros_like(Z)
-    b[:-1, :] += (Z[1:, :] != Z[:-1, :]).astype(float)
-    b[:, :-1] += (Z[:, 1:] != Z[:, :-1]).astype(float)
-    return b
-
-bnd_v3   = boundary_mask(Zv3)
-bnd_full = boundary_mask(Zvfull)
-bnd_deep = np.where(bnd_v3 > 0, 0, bnd_full)
-
-fig, axes = plt.subplots(3, 1, figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88 * 3))
-axes = axes.flat
-for ax, Z, title, tr_mse in zip(axes, Zs_hr, titles, train_mse):
-    ax.pcolormesh(RR_hr, TT_hr, Z, cmap=cmap, norm=norm, alpha=0.35, shading='auto')
-    is_full = (title == 'Full tree (no limit)')
-    ax.contour(RR_hr, TT_hr, bnd_v3, levels=[0.5],
-               colors='#333', linewidths=1.4, linestyles='--')
-    if is_full:
-        ax.contour(RR_hr, TT_hr, bnd_deep, levels=[0.5],
-                   colors='#555', linewidths=0.5, linestyles=':')
-    ax.scatter(df['rainfall'], df['temperature'],
-               s=35, color='steelblue', edgecolors='white', linewidths=0.6, zorder=5)
-    ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
-    ax.set_xlabel('Rainfall (mm)', fontsize=9)
-    ax.set_ylabel('Temperature (°C)', fontsize=9)
-    ax.set_title(f'{title}\nTrain MSE = {tr_mse:.2f}', fontsize=9)
-    ax.grid(False)
-    ax.tick_params(labelsize=8)
-plt.suptitle('Decision regions for trees of increasing depth', y=1.01)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
+*Go to website for images*
 
 ---
 
@@ -1441,7 +1393,7 @@ plt.close()
 <hr>
 
 ::: {.teal-text .body-text-m}
-1. The full tree has a training MSE of `{python} f"{train_mse[-1]:.2f}"`. What does this tell us about how well it fits the training data?
+1. The full tree has a training MSE of 0. What does this tell us about how well it fits the training data?
 
 2. Would you expect the full tree to perform better or worse than the depth-3 tree on new, unseen data? Why?
 
@@ -1470,8 +1422,8 @@ plt.close()
 
 **Maximum depth** and **minimum samples per leaf** are both hyperparameters that control the complexity vs. fit tradeoff:
 
-- A **shallower tree** has fewer, larger regions — lower variance, higher bias
-- A **deeper tree** has more, smaller regions — higher variance, lower bias
+- A **shallower tree** has fewer, larger regions
+- A **deeper tree** has more, smaller regions
 
 . . .
 
@@ -1499,7 +1451,7 @@ Compute the CV-MSE for a grid of depth and samples-per-leaf values. Select the c
 
 <hr>
 
-The same 22 sites, same predictors (`rainfall`, `temperature`), but a **categorical** response — the site's **biome type**:
+The same 22 sites, same predictors (`rainfall`, `temperature`), but a **categorical** response: the site's **biome type**:
 
 ```{python}
 #| label: cls-scatter-slide
@@ -1531,15 +1483,13 @@ plt.close()
 
 <hr>
 
-A **classification tree** has the same structure as a regression tree — root, internal nodes, branches, and leaves — but makes **categorical predictions** instead of numerical ones.
+A **classification tree** has the same structure as a regression tree (root, internal nodes, branches, and leaves) but makes **categorical predictions** instead of numerical ones.
 
 . . .
 
-For each leaf node, the prediction is the **majority class** (most common class) among the training observations that reach that leaf — a **majority vote**.
+For each leaf node, the prediction is the **majority class** (most common class) among the training observations that reach that leaf.
 
 . . .
-
-The depth-2 classification tree fitted on the biome dataset:
 
 ```{python}
 #| label: cls-tree-slide
@@ -1591,8 +1541,6 @@ plt.close()
 
 ::: {.teal-text .body-text-m}
 Use the classification tree to predict the biome type for a new site with **`rainfall = 500 mm`** and **`temperature = 15°C`**.
-
-Trace your path from the root to the leaf.
 :::
 
 :::
@@ -1632,14 +1580,12 @@ plt.close()
 ::: {.column width="43%"}
 
 ::: {.teal-text .body-text-m}
-Trace your path from the root to the leaf.
+Use the classification tree to predict the biome type for a new site with **`rainfall = 500 mm`** and **`temperature = 15°C`**.
 :::
 
-::: {.body-text-s}
 1. **Root**: Is rainfall 500 mm ≤ 675.9 mm? **Yes** → left branch (low rainfall)
 2. **Internal node**: Is temperature 15°C ≤ 18.3°C? **Yes** → left branch (low temperature)
 3. **Leaf**: The majority class in this leaf is **grassland**
-:::
 
 :::
 
@@ -1712,15 +1658,12 @@ A classification tree is fitted by:
 
 **1. Dividing the predictor space** into $J$ non-overlapping regions $R_1, \ldots, R_J$.
 
-**2. Predicting** the majority class among training observations in each region $R_j$:
-
-$$\hat{y}_{R_j} = \text{argmax}_{k} \; \hat{p}_{jk}, \quad \text{where } \hat{p}_{jk} = \frac{1}{|R_j|}\sum_{i \in R_j} \mathbf{1}(y_i = k)$$
-
+**2. Predicting** the majority class among training observations in each region $R_j$.
 . . .
 
-As with regression trees, **recursive binary splitting** is used — but we cannot use RSS for classification. Instead, we measure the **impurity** of the resulting regions.
+As with regression trees, **recursive binary splitting** is used, but we cannot use RSS for classification. Instead, we measure the **impurity** of the resulting regions.
 
-We are often interested in the **class proportions** at each leaf, not just the predicted class. These give a sense of prediction confidence: a leaf where 95% of observations share one class is more reliable than a 60/40 split.
+We are often interested in the **class proportions** at each leaf, not just the predicted class. These give a sense of prediction confidence or **purity**: a leaf where 95% of observations share one class is more reliable than a 60/40 split. 
 
 ---
 
@@ -1829,7 +1772,7 @@ The most common splitting criterion for classification trees is the **Gini impur
 
 <br>
 
-At each step, recursive binary splitting searches for the variable and threshold that produce the **purest child regions** — that is, the split that most reduces impurity.
+At each step, recursive binary splitting searches for the variable and threshold that produce the **purest child regions**.
 
 **Entropy** is another common impurity measure that behaves similarly and tends to produce very similar trees in practice.
 
@@ -1852,7 +1795,7 @@ At each step, recursive binary splitting searches for the variable and threshold
 Decision trees and linear models capture fundamentally different types of relationships:
 
 - **Linear models** (regression, ridge, lasso): assume the response changes **smoothly and approximately linearly** with the predictors
-- **Decision trees**: make no such assumption — they partition the predictor space into **rectangular regions** with constant predictions
+- **Decision trees**: make no such assumption, they partition the predictor space into **rectangular regions** with constant predictions
 
 . . .
 
@@ -1911,8 +1854,8 @@ plt.close()
 
 | | Decision Trees | Linear Models |
 |---|---|---|
-| **Interpretability** | Very high — easy to visualize | Moderate — coefficients interpretable |
+| **Interpretability** | High, easy to visualize | Ok, coefficients interpretable |
 | **Nonlinear relationships** | Handles them naturally | Requires feature engineering |
 | **Prediction accuracy** | Often lower | Competitive when relationship is linear |
-| **Variance** | High — sensitive to small changes | Generally lower |
+| **Variance** | High, sensitive to small changes | Generally lower |
 | **Variable selection** | Implicit (splits on useful variables) | Requires explicit methods (e.g., lasso) |
