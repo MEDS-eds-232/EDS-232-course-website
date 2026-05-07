@@ -56,7 +56,7 @@ y = df_sample['Cover_Type']
 ```
 
 ```{python}
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,stratify=y, random_state=42)
 print(f"Training samples: {len(X_train):,}  |  Test samples: {len(X_test):,}")
 ```
 
@@ -143,11 +143,11 @@ plt.show()
 
 ## Step 6: Joint Tuning with `GridSearchCV`
 
-Tuning hyperparameters one at a time ignores their interactions. `GridSearchCV` evaluates every combination in a parameter grid using cross-validation, finding the jointly optimal settings. Use the `max_depth` values of 5, 10, 15,17 and 20, the `min_samples_leaf` values of 1, 5, 10, and 25, and the `criterion` options of gini and entropy to find the best combination of parameters.
+Tuning hyperparameters one at a time ignores their interactions. `GridSearchCV` evaluates every combination in a parameter grid using cross-validation, finding the jointly optimal settings. Use the `max_depth` values of 5, 10, 15, 16, 17,18, 19 20, the `min_samples_leaf` values of 1, 5, 10, and 25, and the `criterion` options of gini and entropy to find the best combination of parameters.
 
 ```{python}
 param_grid = {
-    'max_depth':        [5, 10, 15, 17, 20],
+    'max_depth':        [5, 10, 15, 16, 17,18, 19, 20],
     'min_samples_leaf': [1, 5, 10, 25],
     'criterion':        ['gini', 'entropy']
 }
@@ -212,7 +212,7 @@ Discussion Questions:
 
 ```{python}
 #| echo: false
-df.iloc[2067][['Elevation', 'Aspect', 'Slope', 'Horizontal_Distance_To_Hydrology', 'Vertical_Distance_To_Hydrology','Horizontal_Distance_To_Roadways', 'Horizontal_Distance_To_Roadways', 'Hillshade_9am', 'Hillshade_Noon', 'Hillshade_3pm', 'Horizontal_Distance_To_Fire_Points' ]]
+df.iloc[2067][['Elevation', 'Aspect', 'Slope', 'Horizontal_Distance_To_Hydrology', 'Vertical_Distance_To_Hydrology','Horizontal_Distance_To_Roadways', 'Horizontal_Distance_To_Roadways', 'Hillshade_9am', 'Hillshade_Noon', 'Hillshade_3pm', 'Horizontal_Distance_To_Fire_Points', 'Wilderness_Area1', 'Cover_Type']]
 
 ```
 
