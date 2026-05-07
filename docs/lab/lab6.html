@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.33">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -67,14 +67,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -116,6 +117,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
     </a>
@@ -267,7 +270,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Download the Lab Template
+<span class="screen-reader-only">Tip</span>Download the Lab Template
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -281,22 +284,22 @@ Download the Lab Template
 </section>
 <section id="step-1-load-and-explore-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="step-1-load-and-explore-the-data">Step 1: Load and Explore the Data</h2>
-<div id="c30124dd" class="cell" data-execution_count="1">
+<div id="865fdcd2" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ucimlrepo <span class="im">import</span> fetch_ucirepo</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split, cross_val_score, GridSearchCV</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeClassifier, plot_tree</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="ca211387" class="cell" data-execution_count="2">
+<div id="2dc3befe" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>forest <span class="op">=</span> fetch_ucirepo(<span class="bu">id</span><span class="op">=</span><span class="dv">31</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>forest <span class="op">=</span> fetch_ucirepo(<span class="bu">id</span><span class="op">=</span><span class="dv">31</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.concat([forest.data.features, forest.data.targets], axis<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -304,7 +307,7 @@ Download the Lab Template
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Cover type distribution (full dataset):"</span>)</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[<span class="st">'Cover_Type'</span>].value_counts().sort_index())</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Full dataset shape: (581012, 55)
@@ -324,7 +327,7 @@ Name: count, dtype: int64</code></pre>
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -353,7 +356,7 @@ Name: count, dtype: int64</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
+<th data-quarto-table-cell-role="th">0</th>
 <td>2596</td>
 <td>51</td>
 <td>3</td>
@@ -377,7 +380,7 @@ Name: count, dtype: int64</code></pre>
 <td>5</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
+<th data-quarto-table-cell-role="th">1</th>
 <td>2590</td>
 <td>56</td>
 <td>2</td>
@@ -401,7 +404,7 @@ Name: count, dtype: int64</code></pre>
 <td>5</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
+<th data-quarto-table-cell-role="th">2</th>
 <td>2804</td>
 <td>139</td>
 <td>9</td>
@@ -425,7 +428,7 @@ Name: count, dtype: int64</code></pre>
 <td>2</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
+<th data-quarto-table-cell-role="th">3</th>
 <td>2785</td>
 <td>155</td>
 <td>18</td>
@@ -449,7 +452,7 @@ Name: count, dtype: int64</code></pre>
 <td>2</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">4</td>
+<th data-quarto-table-cell-role="th">4</th>
 <td>2595</td>
 <td>45</td>
 <td>2</td>
@@ -488,21 +491,21 @@ Name: count, dtype: int64</code></pre>
 <li><strong>44 binary:</strong> 4 wilderness area indicators and 40 soil type indicators</li>
 </ul>
 <p>No encoding or scaling is needed. We will sample 30,000 rows to keep lab runtimes manageable.</p>
-<div id="bcd8d4a8" class="cell" data-execution_count="3">
+<div id="d3918d9e" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df_sample <span class="op">=</span> df.sample(n<span class="op">=</span><span class="dv">30_000</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df_sample <span class="op">=</span> df.sample(n<span class="op">=</span><span class="dv">30_000</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> df_sample.columns <span class="cf">if</span> c <span class="op">!=</span> <span class="st">'Cover_Type'</span>]</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df_sample[features]</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df_sample[<span class="st">'Cover_Type'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df_sample[<span class="st">'Cover_Type'</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="88b3d503" class="cell" data-execution_count="4">
+<div id="535a18c6" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.3</span>,stratify<span class="op">=</span>y, random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training samples: </span><span class="sc">{</span><span class="bu">len</span>(X_train)<span class="sc">:,}</span><span class="ss">  |  Test samples: </span><span class="sc">{</span><span class="bu">len</span>(X_test)<span class="sc">:,}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.3</span>,stratify<span class="op">=</span>y, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training samples: </span><span class="sc">{</span><span class="bu">len</span>(X_train)<span class="sc">:,}</span><span class="ss">  |  Test samples: </span><span class="sc">{</span><span class="bu">len</span>(X_test)<span class="sc">:,}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Training samples: 21,000  |  Test samples: 9,000</code></pre>
@@ -512,10 +515,10 @@ Name: count, dtype: int64</code></pre>
 <section id="step-3-fit-a-decision-tree" class="level2">
 <h2 class="anchored" data-anchor-id="step-3-fit-a-decision-tree">Step 3: Fit a Decision Tree</h2>
 <p>To start, we will fit a decision tree without specifying any hyperparameters.</p>
-<div id="61ff02e9" class="cell" data-execution_count="5">
+<div id="9049a74e" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dt_full <span class="op">=</span> DecisionTreeClassifier(random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dt_full <span class="op">=</span> DecisionTreeClassifier(random_state<span class="op">=</span><span class="dv">42</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>dt_full.fit(X_train, y_train)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>train_acc <span class="op">=</span> accuracy_score(y_train, dt_full.predict(X_train))</span>
@@ -523,7 +526,7 @@ Name: count, dtype: int64</code></pre>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Untuned tree depth:  </span><span class="sc">{</span>dt_full<span class="sc">.</span>get_depth()<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training accuracy:         </span><span class="sc">{</span>train_acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test accuracy:             </span><span class="sc">{</span>test_acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test accuracy:             </span><span class="sc">{</span>test_acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Untuned tree depth:  35
@@ -538,10 +541,10 @@ Test accuracy:             0.780</code></pre>
 <section id="step-4-tune-max_depth-with-cross-validation" class="level2">
 <h2 class="anchored" data-anchor-id="step-4-tune-max_depth-with-cross-validation">Step 4: Tune <code>max_depth</code> with Cross-Validation</h2>
 <p>Rather than evaluating each depth on the held-out test set (which leaks information), we use <strong>5-fold cross-validation</strong> on the training data. We will first tune <code>max_depth</code>, a hyperparameter which limits how many levels a tree can grow. Perform cross fold validation, iterating over a max depth from 1 to 20.</p>
-<div id="96ae246b" class="cell" data-execution_count="6">
+<div id="46f8df24" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>depths <span class="op">=</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">21</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>depths <span class="op">=</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">21</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>cv_means <span class="op">=</span>  []</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> depth <span class="kw">in</span> depths:</span>
@@ -562,7 +565,7 @@ Test accuracy:             0.780</code></pre>
 <span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Decision Tree: 5-Fold CV Accuracy vs. Tree Depth'</span>)</span>
 <span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
 <span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Best max_depth (5-fold CV): 18  (CV accuracy: 0.771)</code></pre>
@@ -579,10 +582,10 @@ Test accuracy:             0.780</code></pre>
 <section id="step-5-tune-min_samples_leaf-with-cross-validation" class="level2">
 <h2 class="anchored" data-anchor-id="step-5-tune-min_samples_leaf-with-cross-validation">Step 5: Tune <code>min_samples_leaf</code> with Cross-Validation</h2>
 <p><code>min_samples_leaf</code> sets the minimum number of training samples required at any leaf node. Perform cross fold validation, iterating over the following numbers of minimum samples: <code>1, 5, 10, 25, 50, and 100</code>.</p>
-<div id="1c5ecb9f" class="cell" data-execution_count="7">
+<div id="1a89a1a9" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>leaf_sizes <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">100</span>]</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>leaf_sizes <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">100</span>]</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>leaf_cv_means <span class="op">=</span> []</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> leaf_sizes:</span>
@@ -604,7 +607,7 @@ Test accuracy:             0.780</code></pre>
 <span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f'Decision Tree: 5-Fold CV Accuracy vs. min_samples_leaf (max_depth=</span><span class="sc">{</span>best_depth<span class="sc">}</span><span class="ss">)'</span>)</span>
 <span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
 <span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Best min_samples_leaf (5-fold CV): 1  (CV accuracy: 0.771)</code></pre>
@@ -624,10 +627,10 @@ Test accuracy:             0.780</code></pre>
 <section id="step-6-joint-tuning-with-gridsearchcv" class="level2">
 <h2 class="anchored" data-anchor-id="step-6-joint-tuning-with-gridsearchcv">Step 6: Joint Tuning with <code>GridSearchCV</code></h2>
 <p>Tuning hyperparameters one at a time ignores their interactions. <code>GridSearchCV</code> evaluates every combination in a parameter grid using cross-validation, finding the jointly optimal settings. Use the <code>max_depth</code> values of 5, 10, 15, 16, 17,18, 19 20, the <code>min_samples_leaf</code> values of 1, 5, 10, and 25, and the <code>criterion</code> options of gini and entropy to find the best combination of parameters.</p>
-<div id="ee36db37" class="cell" data-execution_count="8">
+<div id="894459b3" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'max_depth'</span>:        [<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">17</span>,<span class="dv">18</span>, <span class="dv">19</span>, <span class="dv">20</span>],</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'min_samples_leaf'</span>: [<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">25</span>],</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'criterion'</span>:        [<span class="st">'gini'</span>, <span class="st">'entropy'</span>]</span>
@@ -646,7 +649,7 @@ Test accuracy:             0.780</code></pre>
 <span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>dt_best <span class="op">=</span> grid_search.best_estimator_</span>
 <span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>dt_acc  <span class="op">=</span> accuracy_score(y_test, dt_best.predict(X_test))</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test accuracy:    </span><span class="sc">{</span>dt_acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test accuracy:    </span><span class="sc">{</span>dt_acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Best parameters:  {'criterion': 'gini', 'max_depth': 18, 'min_samples_leaf': 1}
@@ -661,22 +664,22 @@ Test accuracy:    0.776</code></pre>
 <h2 class="anchored" data-anchor-id="step-7-visualize-the-best-tree">Step 7: Visualize the Best Tree</h2>
 <p>Create a visualization of your decision tree with a <code>max_depth</code> of 3 (for plotting purposes), and the values that your grid search found to be best for <code>min_samples_leaf</code> and <code>criterion</code>.</p>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Review the value counts of our y_train here
+<span class="screen-reader-only">Note</span>Review the value counts of our y_train here
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div id="d0096983" class="cell" data-execution_count="9">
+<div id="76f7053c" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Cover type distribution (training set):"</span>)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(y_train.value_counts().sort_index())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Cover type distribution (training set):"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(y_train.value_counts().sort_index())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Cover type distribution (training set):
@@ -694,10 +697,10 @@ Name: count, dtype: int64</code></pre>
 </div>
 </div>
 </div>
-<div id="59c0adec" class="cell" data-execution_count="10">
+<div id="c67c70ec" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dt_viz <span class="op">=</span> DecisionTreeClassifier(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dt_viz <span class="op">=</span> DecisionTreeClassifier(</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    max_depth<span class="op">=</span><span class="dv">3</span>,</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    min_samples_leaf<span class="op">=</span>grid_search.best_params_[<span class="st">'min_samples_leaf'</span>],</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    criterion<span class="op">=</span>grid_search.best_params_[<span class="st">'criterion'</span>],</span>
@@ -714,7 +717,7 @@ Name: count, dtype: int64</code></pre>
 <span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Decision Tree — Forest Cover Type (depth=3 for display)'</span>)</span>
 <span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -732,7 +735,7 @@ Name: count, dtype: int64</code></pre>
 <li>Look at the observation below. What Forest Cover type would this observation be classified as with our tree above?</li>
 </ol>
 </blockquote>
-<div id="6dc17d24" class="cell" data-execution_count="11">
+<div id="626bf537" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>Elevation                             2006
 Aspect                                  53
@@ -750,21 +753,59 @@ Cover_Type                               4
 Name: 2067, dtype: int64</code></pre>
 </div>
 </div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Cover Type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Spruce/Fir</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Lodgepole Pine</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Ponderosa Pine</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Cottonwood/Willow</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Aspen</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Douglas-fir</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Krummholz</td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="step-8-feature-importance" class="level2">
 <h2 class="anchored" data-anchor-id="step-8-feature-importance">Step 8: Feature Importance</h2>
 <p>With 54 features, many soil type indicators will have very little importance. Create a plot showing the top 15 most important features.</p>
-<div id="fb703212" class="cell" data-execution_count="12">
+<div id="45846035" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>feat_imp <span class="op">=</span> pd.Series(dt_best.feature_importances_, index<span class="op">=</span>features).sort_values(ascending<span class="op">=</span><span class="va">False</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>feat_imp <span class="op">=</span> pd.Series(dt_best.feature_importances_, index<span class="op">=</span>features).sort_values(ascending<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">5</span>))</span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>feat_imp.head(<span class="dv">15</span>).sort_values().plot(kind<span class="op">=</span><span class="st">'barh'</span>, color<span class="op">=</span><span class="st">'blue'</span>)</span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Importance'</span>)</span>
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Top 15 Feature Importances'</span>)</span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -833,13 +874,14 @@ Name: 2067, dtype: int64</code></pre>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
