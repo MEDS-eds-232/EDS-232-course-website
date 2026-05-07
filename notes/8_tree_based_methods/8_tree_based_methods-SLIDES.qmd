@@ -233,8 +233,8 @@ ax.axis('off')
 
 nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
 for parent, child, lbl, lbl_side in [
-        ('root', 'left',  'No',  'left'),
-        ('root', 'right', 'Yes', 'right')]:
+        ('root', 'left',  'Yes', 'left'),
+        ('root', 'right', 'No',  'right')]:
     px, py = nodes[parent]; cx, cy = nodes[child]
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -242,8 +242,8 @@ for parent, child, lbl, lbl_side in [
     ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
 for child_pos, lbl, lbl_side in [
-        ((1.4, 1.0), 'No',  'left'),
-        ((4.6, 1.0), 'Yes', 'right')]:
+        ((1.4, 1.0), 'Yes', 'left'),
+        ((4.6, 1.0), 'No',  'right')]:
     px, py = nodes['left']; cx, cy = child_pos
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -285,8 +285,8 @@ ax.axis('off')
 
 nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
 for parent, child, lbl, lbl_side in [
-        ('root', 'left',  'No',  'left'),
-        ('root', 'right', 'Yes', 'right')]:
+        ('root', 'left',  'Yes', 'left'),
+        ('root', 'right', 'No',  'right')]:
     px, py = nodes[parent]; cx, cy = nodes[child]
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -294,8 +294,8 @@ for parent, child, lbl, lbl_side in [
     ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
 for child_pos, lbl, lbl_side in [
-        ((1.4, 1.0), 'No',  'left'),
-        ((4.6, 1.0), 'Yes', 'right')]:
+        ((1.4, 1.0), 'Yes', 'left'),
+        ((4.6, 1.0), 'No',  'right')]:
     px, py = nodes['left']; cx, cy = child_pos
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -345,16 +345,16 @@ To predict for a new observation: start at the **root** and follow the branches 
 
 . . .
 
-For example, a new site with **`rainfall = 430 mm`** and **`temperature = 10°C`**:
+For example, a new site with **`rainfall = 750 mm`** and **`temperature = 20°C`**:
 
-1. Root: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? **Yes** → go right
-2. The right branch leads directly to a leaf
+1. Root: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? **No** → go right
+2. The right (No) branch leads directly to a leaf
 3. Predicted biomass: `{python} f"{right_leaf_val:.1f}"` t/ha
 
 . . .
 
 ::: {.teal-text .body-text-m}
-The "Yes" branch always leads to the **right** in our diagrams.
+The "Yes" branch always leads to the **left** in our diagrams — matching sklearn's convention.
 :::
 
 ---
@@ -380,8 +380,8 @@ ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
 ax.axis('off')
 nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
 for parent, child, lbl, lbl_side in [
-        ('root', 'left',  'No',  'left'),
-        ('root', 'right', 'Yes', 'right')]:
+        ('root', 'left',  'Yes', 'left'),
+        ('root', 'right', 'No',  'right')]:
     px, py = nodes[parent]; cx, cy = nodes[child]
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -389,8 +389,8 @@ for parent, child, lbl, lbl_side in [
     ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
 for child_pos, lbl, lbl_side in [
-        ((1.4, 1.0), 'No',  'left'),
-        ((4.6, 1.0), 'Yes', 'right')]:
+        ((1.4, 1.0), 'Yes', 'left'),
+        ((4.6, 1.0), 'No',  'right')]:
     px, py = nodes['left']; cx, cy = child_pos
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -444,8 +444,8 @@ ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
 ax.axis('off')
 nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
 for parent, child, lbl, lbl_side in [
-        ('root', 'left',  'No',  'left'),
-        ('root', 'right', 'Yes', 'right')]:
+        ('root', 'left',  'Yes', 'left'),
+        ('root', 'right', 'No',  'right')]:
     px, py = nodes[parent]; cx, cy = nodes[child]
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -453,8 +453,8 @@ for parent, child, lbl, lbl_side in [
     ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
 for child_pos, lbl, lbl_side in [
-        ((1.4, 1.0), 'No',  'left'),
-        ((4.6, 1.0), 'Yes', 'right')]:
+        ((1.4, 1.0), 'Yes', 'left'),
+        ((4.6, 1.0), 'No',  'right')]:
     px, py = nodes['left']; cx, cy = child_pos
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -480,8 +480,8 @@ Trace your path from the root to the leaf.
 :::
 
 ::: {.body-text-s}
-1. **Root**: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? Yes → go right
-2. The right branch leads directly to a leaf — no further split in this region
+1. **Root**: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? No → go right
+2. The right (No) branch leads directly to a leaf — no further split in this region
 3. Predicted biomass: **`{python} f"{right_leaf_val:.1f}"` t/ha**
 :::
 
@@ -621,8 +621,8 @@ fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88 * 
 ax.set_xlim(0, 11); ax.set_ylim(2.1, 5.5)
 ax.axis('off')
 for px, py, cx, cy, lbl, lbl_side in [
-        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
-        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+        (5.5, 4.7, 3.0, 2.8, 'Yes', 'left'),
+        (5.5, 4.7, 8.0, 2.8, 'No',  'right')]:
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35
@@ -715,16 +715,16 @@ ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
 ax.axis('off')
 nodes_f = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
 for px, py, cx, cy, lbl, lbl_side in [
-        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
-        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+        (5.5, 4.7, 3.0, 2.8, 'Yes', 'left'),
+        (5.5, 4.7, 8.0, 2.8, 'No',  'right')]:
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35
     ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
 for cx, cy, lbl, lbl_side in [
-        (1.4, 1.0, 'No',  'left'),
-        (4.6, 1.0, 'Yes', 'right')]:
+        (1.4, 1.0, 'Yes', 'left'),
+        (4.6, 1.0, 'No',  'right')]:
     px, py = nodes_f['left']
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -886,24 +886,24 @@ fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
 ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
 ax.axis('off')
 for px, py, cx, cy, lbl, lbl_side in [
-        (5.5, 4.7, 2.75, 2.8, 'No',  'left'),
-        (5.5, 4.7, 8.25, 2.8, 'Yes', 'right')]:
+        (5.5, 4.7, 2.75, 2.8, 'Yes', 'left'),
+        (5.5, 4.7, 8.25, 2.8, 'No',  'right')]:
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35
     ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
 for cx, cy, lbl, lbl_side in [
-        (1.25, 1.0, 'No',  'left'),
-        (4.25, 1.0, 'Yes', 'right')]:
+        (1.25, 1.0, 'Yes', 'left'),
+        (4.25, 1.0, 'No',  'right')]:
     ax.plot([2.75, cx], [2.8 - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (2.75 + cx) / 2, (2.8 - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35
     ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
             ha='center', va='center', style='italic')
 for cx, cy, lbl, lbl_side in [
-        (6.75, 1.0, 'No',  'left'),
-        (9.75, 1.0, 'Yes', 'right')]:
+        (6.75, 1.0, 'Yes', 'left'),
+        (9.75, 1.0, 'No',  'right')]:
     ax.plot([8.25, cx], [2.8 - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (8.25 + cx) / 2, (2.8 - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35
@@ -1117,8 +1117,8 @@ fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88 * 
 ax.set_xlim(0, 11); ax.set_ylim(2.1, 5.5)
 ax.axis('off')
 for px, py, cx, cy, lbl, lbl_side in [
-        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
-        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+        (5.5, 4.7, 3.0, 2.8, 'Yes', 'left'),
+        (5.5, 4.7, 8.0, 2.8, 'No',  'right')]:
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35

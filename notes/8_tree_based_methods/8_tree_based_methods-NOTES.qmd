@@ -235,8 +235,8 @@ nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
 
 # Branches from root — Yes on the right, No on the left
 for parent, child, lbl, lbl_side in [
-        ('root', 'left',  'No',  'left'),
-        ('root', 'right', 'Yes', 'right')]:
+        ('root', 'left',  'Yes', 'left'),
+        ('root', 'right', 'No',  'right')]:
     px, py = nodes[parent]; cx, cy = nodes[child]
     ax.plot([px, cx], [py - 0.36, cy + 0.36],
             color='#555', lw=1.8, zorder=2)
@@ -247,8 +247,8 @@ for parent, child, lbl, lbl_side in [
 
 # Branches from left internal node — Yes on the right, No on the left
 for child_pos, lbl, lbl_side in [
-        ((1.4, 1.0), 'No',  'left'),
-        ((4.6, 1.0), 'Yes', 'right')]:
+        ((1.4, 1.0), 'Yes', 'left'),
+        ((4.6, 1.0), 'No',  'right')]:
     px, py = nodes['left']; cx, cy = child_pos
     ax.plot([px, cx], [py - 0.36, cy + 0.36],
             color='#555', lw=1.8, zorder=2)
@@ -298,11 +298,11 @@ Use the regression tree diagram above to predict the biomass for a new site with
 ## Discussion
 We trace the path by checking:
 
-1. Start at the root node: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? Yes, so go right.
+1. Start at the root node: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? No, so go right.
 2. The right branch leads directly to a leaf node (no further split in this region).
 3. The new site is predicted to have `{python} f"{right_leaf_val:.1f}"` tonnes/ha.
 
-The observation follows the right branch of the tree because it falls in the high-rainfall region.
+The observation follows the right (No) branch of the tree because it has high rainfall and does not satisfy the split condition.
 :::
 
 ### Node splits and prediction regions
@@ -400,10 +400,10 @@ fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88 * 
 ax.set_xlim(0, 11); ax.set_ylim(2.1, 5.5)
 ax.axis('off')
 
-# Branches from root (right branch endpoint at (8, 2.8) but no node drawn there)
+# Branches from root (right branch endpoint at (8, 2.8) = No branch, no node drawn there)
 for px, py, cx, cy, lbl, lbl_side in [
-        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
-        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+        (5.5, 4.7, 3.0, 2.8, 'Yes', 'left'),
+        (5.5, 4.7, 8.0, 2.8, 'No',  'right')]:
     ax.plot([px, cx], [py - 0.36, cy + 0.36],
             color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -479,8 +479,8 @@ nodes_f = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
 
 # Branches from root
 for px, py, cx, cy, lbl, lbl_side in [
-        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
-        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+        (5.5, 4.7, 3.0, 2.8, 'Yes', 'left'),
+        (5.5, 4.7, 8.0, 2.8, 'No',  'right')]:
     ax.plot([px, cx], [py - 0.36, cy + 0.36],
             color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -490,8 +490,8 @@ for px, py, cx, cy, lbl, lbl_side in [
 
 # Branches from left internal node
 for cx, cy, lbl, lbl_side in [
-        (1.4, 1.0, 'No',  'left'),
-        (4.6, 1.0, 'Yes', 'right')]:
+        (1.4, 1.0, 'Yes', 'left'),
+        (4.6, 1.0, 'No',  'right')]:
     px, py = nodes_f['left']
     ax.plot([px, cx], [py - 0.36, cy + 0.36],
             color='#555', lw=1.8, zorder=2)
@@ -652,8 +652,8 @@ ax.axis('off')
 
 # Branches from root
 for px, py, cx, cy, lbl, lbl_side in [
-        (5.5, 4.7, 2.75, 2.8, 'No',  'left'),
-        (5.5, 4.7, 8.25, 2.8, 'Yes', 'right')]:
+        (5.5, 4.7, 2.75, 2.8, 'Yes', 'left'),
+        (5.5, 4.7, 8.25, 2.8, 'No',  'right')]:
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35
@@ -662,8 +662,8 @@ for px, py, cx, cy, lbl, lbl_side in [
 
 # Branches from left internal node
 for cx, cy, lbl, lbl_side in [
-        (1.25, 1.0, 'No',  'left'),
-        (4.25, 1.0, 'Yes', 'right')]:
+        (1.25, 1.0, 'Yes', 'left'),
+        (4.25, 1.0, 'No',  'right')]:
     ax.plot([2.75, cx], [2.8 - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (2.75 + cx) / 2, (2.8 - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35
@@ -672,8 +672,8 @@ for cx, cy, lbl, lbl_side in [
 
 # Branches from right internal node
 for cx, cy, lbl, lbl_side in [
-        (6.75, 1.0, 'No',  'left'),
-        (9.75, 1.0, 'Yes', 'right')]:
+        (6.75, 1.0, 'Yes', 'left'),
+        (9.75, 1.0, 'No',  'right')]:
     ax.plot([8.25, cx], [2.8 - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (8.25 + cx) / 2, (2.8 - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35
@@ -866,8 +866,8 @@ ax.axis('off')
 
 # Branches from root
 for px, py, cx, cy, lbl, lbl_side in [
-        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
-        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+        (5.5, 4.7, 3.0, 2.8, 'Yes', 'left'),
+        (5.5, 4.7, 8.0, 2.8, 'No',  'right')]:
     ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
     offset = -0.35 if lbl_side == 'left' else 0.35
@@ -1053,8 +1053,8 @@ nodes_f = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
 
 # Branches from root
 for px, py, cx, cy, lbl, lbl_side in [
-        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
-        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+        (5.5, 4.7, 3.0, 2.8, 'Yes', 'left'),
+        (5.5, 4.7, 8.0, 2.8, 'No',  'right')]:
     ax.plot([px, cx], [py - 0.36, cy + 0.36],
             color='#555', lw=1.8, zorder=2)
     mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
@@ -1064,8 +1064,8 @@ for px, py, cx, cy, lbl, lbl_side in [
 
 # Branches from left internal node
 for cx, cy, lbl, lbl_side in [
-        (1.4, 1.0, 'No',  'left'),
-        (4.6, 1.0, 'Yes', 'right')]:
+        (1.4, 1.0, 'Yes', 'left'),
+        (4.6, 1.0, 'No',  'right')]:
     px, py = nodes_f['left']
     ax.plot([px, cx], [py - 0.36, cy + 0.36],
             color='#555', lw=1.8, zorder=2)
