@@ -110,6 +110,15 @@ biome = np.where(
     np.where(temperature_c < 18, 'grassland', 'desert')
 )
 
+# Add label noise: flip 4 observations to create impure leaves in the depth-2 tree
+biome = np.array(biome, dtype=object)
+_noise_rng   = np.random.default_rng(seed=15)
+_flip_idx    = _noise_rng.choice(n_c, size=4, replace=False)
+_cls_list    = ['forest', 'grassland', 'desert']
+for _i in _flip_idx:
+    _alts    = [c for c in _cls_list if c != biome[_i]]
+    biome[_i] = _noise_rng.choice(_alts)
+
 df_c = pd.DataFrame({'rainfall': rainfall_c, 'temperature': temperature_c, 'biome': biome})
 X_c  = df_c[['rainfall', 'temperature']].values
 y_c  = biome
@@ -141,12 +150,12 @@ n_nl    = 90
 temp_nl = np.random.uniform(0, 35, n_nl)
 
 # Step-function relationship: tree captures this perfectly, linear regression cannot
-npp_nl  = (np.where(temp_nl < 10, 1.5, np.where(temp_nl < 25, 7.0, 2.5))
-           + np.random.normal(0, 0.5, n_nl))
+y_nl  = (np.where(temp_nl < 10, 1.5, np.where(temp_nl < 25, 7.0, 2.5))
+         + np.random.normal(0, 0.5, n_nl))
 
 X_nl    = temp_nl.reshape(-1, 1)
-lr_nl   = LinearRegression().fit(X_nl, npp_nl)
-tree_nl = DecisionTreeRegressor(max_depth=2, random_state=42).fit(X_nl, npp_nl)
+lr_nl   = LinearRegression().fit(X_nl, y_nl)
+tree_nl = DecisionTreeRegressor(max_depth=2, random_state=42).fit(X_nl, y_nl)
 
 temp_range_nl = np.linspace(0, 35, 300)
 pred_lr   = lr_nl.predict(temp_range_nl.reshape(-1, 1))
@@ -1085,7 +1094,7 @@ plt.close()
 We can continue adding nodes to our tree in this manner until a stopping criterion is reached. For example, maximu depth, or a minimum number of observations within each region. 
 
 ::: {.callout-tip}
-##Check-in                                                                                                                                   
+## Check-in                                                                                                                              
 Where would this algorithm end if we kept adding nodes and subdividing the regions without any stopping criterion?
 :::                                                                                                               
 ::: {.callout-tip collapse="true"}
@@ -1229,7 +1238,7 @@ for biome_type in ['forest', 'grassland', 'desert']:
 
 ax.set_xlabel('Annual rainfall (mm)')
 ax.set_ylabel('Mean temperature (°C)')
-ax.set_title('EcoSite classification dataset — biome type')
+ax.set_title('Example classification dataset — biome type')
 ax.legend(title='Biome', fontsize=9)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -1268,14 +1277,10 @@ Use the classification tree above to predict the biome type for a new site with 
 
 ::: {.callout-tip collapse="true"}
 ## Discussion
-1. **Root**: Is rainfall ≤ some threshold? → 500 mm falls in the left branch (low rainfall).
-2. **Internal node**: Is temperature ≤ some threshold? → 15°C falls in the "yes" branch.
-3. **Leaf**: The majority class in this leaf is **grassland**.
-
-The prediction is **grassland** because low rainfall and cool temperatures are characteristic of grassland biomes in this dataset.
+1. **Root**: Is rainfall 500 mm ≤ 675.9 mm? Yes. So this observation goes into in the "yes" left branch (low rainfall).
+2. **Internal node**: Is temperature of 15°C ≤ 18.3 °C? Yes.  So this observation goes into in the "yes" left branch (low temperature).
+3. **Leaf**: The majority class in this leaf is grassland.
 :::
-
-We are often interested not only in the predicted class but also in the **class proportions** at each leaf — the fraction of training observations belonging to each class. These proportions give a sense of the confidence of the prediction. A leaf where 95% of observations share the same class is more reliable than one with a 60/40 split.
 
 ### From decision boundaries to decision trees
 
@@ -1288,9 +1293,16 @@ Just like regression trees, classification trees divide the predictor space into
 biome_cmap = plt.matplotlib.colors.ListedColormap(
     [cls_colors[c] for c in cls_names])
 
+# Local grid covering the full plot extent
+r_cls = np.linspace(80, 1020, 600)
+t_cls = np.linspace(3, 32, 600)
+RR_cls, TT_cls = np.meshgrid(r_cls, t_cls)
+Z_c2_cls   = tree_c2.predict(np.c_[RR_cls.ravel(), TT_cls.ravel()])
+Zc2_int_cls = np.vectorize(cls_to_int.get)(Z_c2_cls).reshape(RR_cls.shape)
+
 fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.3))
-ax.contourf(RR, TT, Zc2_int, alpha=0.3, cmap=biome_cmap, levels=[-0.5, 0.5, 1.5, 2.5])
-ax.contour(RR,  TT, Zc2_int, colors='#333', linewidths=1.8, linestyles='--',
+ax.contourf(RR_cls, TT_cls, Zc2_int_cls, alpha=0.3, cmap=biome_cmap, levels=[-0.5, 0.5, 1.5, 2.5])
+ax.contour(RR_cls,  TT_cls, Zc2_int_cls, colors='#333', linewidths=1.8, linestyles='--',
            levels=[-0.5, 0.5, 1.5, 2.5])
 
 for biome_type in ['forest', 'grassland', 'desert']:
@@ -1312,7 +1324,8 @@ plt.show()
 plt.close()
 ```
 
-::: {.callout-tip}
+
+<!-- ::: {.callout-tip}
 ## Check-in
 
 The figure below shows a set of decision boundaries in the rainfall–temperature predictor space.
@@ -1366,7 +1379,7 @@ plt.close()
    - **Region C** (high rainfall): mostly **forest**
 
 The decision tree faithfully reconstructs the two-split classification rule that generated the data.
-:::
+::: -->
 
 ### Fitting a classification tree
 
@@ -1380,60 +1393,37 @@ $$\hat{y}_{R_j} = \text{argmax}_{k} \; \hat{p}_{jk}, \quad \text{where } \hat{p}
 
 is the proportion of training observations in region $R_j$ belonging to class $k$.
 
-As with regression trees, recursive binary splitting is used to find the regions — but the criterion for measuring split quality is different. We cannot use RSS for classification; instead we measure the **impurity** of the resulting regions.
+As with regression trees, recursive binary splitting is used to find the regions, but the criterion for measuring split quality is different since we cannot use RSS for classification. Instead, we measure the **impurity** of the resulting regions. Intuitively, this is because we are often interested not only in the predicted class but also in the **class proportions** at each leaf (the fraction of training observations belonging to each class). These proportions give a sense of the confidence of the prediction. A leaf where 95% of observations share the same class is more reliable than one with a 60/40 split.
+
+::: {.callout-tip}
+## Check-in
+Looking at the classification tree, which leaf has the most confident predictions? Which would you say is the most "pure" and why?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+The forest leaf (leftmost, green). All training observations that fall into that region belong to the same class — forest — so the predicted class proportion is 1.0 for forest and 0.0 for all other classes. This means the tree is maximally confident there: there is no ambiguity in the prediction. In contrast, the other leaves contain a mix of classes, making their predictions less reliable. 
+:::
+
 
 #### Gini impurity
 
-The most common splitting criterion is the **Gini impurity index**:
+The most common splitting criterion for classification trees is the **Gini impurity index**, a measure of how mixed the classes are in a given region. A region where all observations belong to the same class has a Gini impurity of 0 (perfectly pure). The more evenly the observations are spread across classes, the higher the impurity.
 
-$$G_j = \sum_{k=1}^{K} \hat{p}_{jk}(1 - \hat{p}_{jk}) = 1 - \sum_{k=1}^{K} \hat{p}_{jk}^2$$
+At each step, recursive binary splitting searches for the variable and threshold that produce the purest regions. **Entropy** is another common impurity measure that behaves similarly and tends to produce very similar trees in practice.
 
-where $K$ is the number of classes and $\hat{p}_{jk}$ is the proportion of observations in region $R_j$ belonging to class $k$.
-
-- $G_j = 0$: the region is **perfectly pure** — all observations belong to the same class.
-- $G_j$ is larger when the class proportions are more equal (high impurity, mixed classes).
-
-At each step, the algorithm finds the split that minimizes the **weighted** Gini impurity across the two resulting child regions:
-
-$$\text{Weighted Gini} = \frac{n_L}{n} G_L + \frac{n_R}{n} G_R$$
-
-where $n_L$ and $n_R$ are the number of observations in the left and right regions.
-
-::: {.callout-note}
-## Example: computing the Gini impurity
-
-Suppose a region contains 12 training sites: 8 forest, 3 grassland, 1 desert.
-
-$$G = 1 - \left(\frac{8}{12}\right)^2 - \left(\frac{3}{12}\right)^2 - \left(\frac{1}{12}\right)^2 = 1 - 0.444 - 0.063 - 0.007 = 0.487$$
-
-Now consider splitting this region into:
-
-- **Left child**: 8 forest, 0 grassland, 0 desert → $G_L = 1 - (8/8)^2 = 0$ (pure)
-- **Right child**: 0 forest, 3 grassland, 1 desert → $G_R = 1 - 0 - (3/4)^2 - (1/4)^2 = 0.375$
-
-Weighted Gini of the split: $\frac{8}{12} \cdot 0 + \frac{4}{12} \cdot 0.375 = 0.125$
-
-This is much lower than the original 0.487, so this split is a big improvement in purity.
-:::
-
-#### Entropy
-
-An alternative impurity measure is **entropy**, also called the **cross-entropy**:
-
-$$H_j = -\sum_{k=1}^{K} \hat{p}_{jk} \log(\hat{p}_{jk})$$
-
-Entropy is 0 for a perfectly pure node and increases as the class proportions become more equal. In practice, Gini impurity and entropy tend to produce very similar trees.
+<!--NOTE: I want to go into Gini impurity index next year, no time to prepare it this year. -->
 
 ## Comparing trees with linear models
 
 Decision trees and linear models capture fundamentally different types of relationships between predictors and response:
 
-- **Linear models** (regression, ridge, lasso) assume that the response changes smoothly and approximately linearly with the predictors.
-- **Decision trees** make no such assumption — they partition the predictor space into rectangular regions and assign a constant prediction within each region.
+- **Linear models** (regression, ridge, lasso): assume that the response changes smoothly and approximately linearly with the predictors.
+- **Decision trees** make no such assumption: they partition the predictor space into rectangular regions and assign a constant prediction within each region.
 
 As a result, **trees naturally capture nonlinear, step-like relationships** that linear models cannot fit well, while linear models perform better when the true relationship is approximately linear and smooth.
 
-The example below shows a dataset where NPP (net primary productivity) depends on temperature in a **step-function** pattern — low below 10°C, high between 10°C and 25°C, and low again above 25°C. A linear model fits a single straight line that is a poor approximation everywhere; a depth-2 tree captures the three-step structure almost perfectly.
+The example below shows a synthetic dataset where the response Y depends on temperature in a **step-function** pattern: low below 10°C, high between 10°C and 25°C, and low again above 25°C. A linear model fits a single straight line that is a poor approximation everywhere; a depth-2 tree captures the three-step structure almost perfectly.
 
 ```{python}
 #| label: linear-vs-tree
@@ -1447,17 +1437,17 @@ for ax, model, label, col in zip(
         [lr_nl,   tree_nl],
         ['Linear regression', 'Decision tree (depth 2)'],
         ['tomato', 'steelblue']):
-    ax.scatter(temp_nl, npp_nl, s=18, color='gray', alpha=0.5, zorder=2)
+    ax.scatter(temp_nl, y_nl, s=18, color='gray', alpha=0.5, zorder=2)
     ax.plot(temp_range_nl, model.predict(temp_range_nl.reshape(-1, 1)),
             color=col, lw=2.5, zorder=3, label=label)
     ax.set_xlabel('Temperature (°C)')
-    ax.set_ylabel('NPP (tonnes C/ha/yr)')
+    ax.set_ylabel('Y')
     ax.set_title(label)
     ax.legend(fontsize=9)
     ax.grid(True, alpha=0.3)
     ax.set_xlim(-1, 36)
 
-plt.suptitle('Linear regression vs. decision tree on a nonlinear step-function dataset')
+plt.suptitle('Linear regression vs. decision tree on a nonlinear dataset')
 plt.tight_layout()
 plt.show()
 plt.close()

@@ -1,0 +1,1806 @@
+---
+format:
+    revealjs:
+        theme: ../../styles/meds-slides-styles.scss
+        slide-number: true
+        chalkboard: true
+        title-slide: false
+jupyter: eds232-env
+---
+
+```{python}
+#| label: setup
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.patches import FancyBboxPatch
+import pandas as pd
+from sklearn.tree import (DecisionTreeRegressor, DecisionTreeClassifier,
+                           plot_tree, export_text)
+from sklearn.linear_model import LinearRegression
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+# ── draw_node helper ──────────────────────────────────────────────────────────
+def draw_node(ax, cx, cy, text, color='#d6eaf8', w=2.5, h=0.72, fs=8.5, bold=False):
+    box = FancyBboxPatch((cx - w/2, cy - h/2), w, h,
+                          boxstyle='round,pad=0.07',
+                          facecolor=color, edgecolor='#2c3e50', linewidth=1.5, zorder=3)
+    ax.add_patch(box)
+    ax.text(cx, cy, text, ha='center', va='center', fontsize=fs,
+            fontweight='bold' if bold else 'normal', zorder=4)
+
+# ── EcoSite regression dataset ─────────────────────────────────────────────────
+np.random.seed(42)
+n = 22
+rainfall    = np.random.uniform(200, 1000, n)
+temperature = np.random.uniform(5,   25,   n)
+biomass_base = np.where(
+    rainfall > 600,
+    np.where(temperature < 18, 8.5, 5.5),
+    np.where(temperature < 15, 3.5, 2.0)
+)
+biomass = np.round(biomass_base + np.random.normal(0, 0.55, n), 1)
+biomass = np.clip(biomass, 0.5, 12.0)
+
+df = pd.DataFrame({'rainfall': rainfall, 'temperature': temperature, 'biomass': biomass})
+X  = df[['rainfall', 'temperature']].values
+y  = df['biomass'].values
+
+# ── Fit regression trees ───────────────────────────────────────────────────────
+tree_d1   = DecisionTreeRegressor(max_depth=1, random_state=42)
+tree_d2   = DecisionTreeRegressor(max_depth=2, random_state=42)
+tree_d3   = DecisionTreeRegressor(max_depth=3, random_state=42)
+tree_full = DecisionTreeRegressor(random_state=42)
+for t in [tree_d1, tree_d2, tree_d3, tree_full]:
+    t.fit(X, y)
+
+split1_val     = tree_d1.tree_.threshold[0]
+left_leaf_val  = tree_d1.tree_.value[tree_d1.tree_.children_left[0]][0][0]
+right_leaf_val = tree_d1.tree_.value[tree_d1.tree_.children_right[0]][0][0]
+
+left_child_idx = tree_d2.tree_.children_left[0]
+split2_val     = tree_d2.tree_.threshold[left_child_idx]
+
+right_child_idx  = tree_d2.tree_.children_right[0]
+right_split2_val = tree_d2.tree_.threshold[right_child_idx]
+
+# ── Grid ───────────────────────────────────────────────────────────────────────
+r_grid  = np.linspace(150, 1050, 300)
+t_grid  = np.linspace(3, 27, 300)
+RR, TT  = np.meshgrid(r_grid, t_grid)
+grid_xy = np.c_[RR.ravel(), TT.ravel()]
+
+# ── RSS splits ─────────────────────────────────────────────────────────────────
+split_candidates = np.linspace(250, 950, 200)
+mse_splits = []
+for sv in split_candidates:
+    left  = y[rainfall <= sv]
+    right = y[rainfall >  sv]
+    if len(left) < 2 or len(right) < 2:
+        mse_splits.append(np.nan)
+        continue
+    rss = (((left  - left.mean()) **2).sum()
+         + ((right - right.mean())**2).sum())
+    mse_splits.append(rss)
+mse_splits = np.array(mse_splits)
+
+# ── EcoSite classification dataset ────────────────────────────────────────────
+np.random.seed(7)
+n_c = 22
+rainfall_c    = np.random.uniform(100, 1000, n_c)
+temperature_c = np.random.uniform(5,   30,   n_c)
+biome = np.where(
+    rainfall_c > 650, 'forest',
+    np.where(temperature_c < 18, 'grassland', 'desert')
+)
+biome = np.array(biome, dtype=object)
+_noise_rng = np.random.default_rng(seed=15)
+_flip_idx  = _noise_rng.choice(n_c, size=4, replace=False)
+_cls_list  = ['forest', 'grassland', 'desert']
+for _i in _flip_idx:
+    _alts    = [c for c in _cls_list if c != biome[_i]]
+    biome[_i] = _noise_rng.choice(_alts)
+
+df_c = pd.DataFrame({'rainfall': rainfall_c, 'temperature': temperature_c, 'biome': biome})
+X_c  = df_c[['rainfall', 'temperature']].values
+y_c  = biome
+
+tree_c1    = DecisionTreeClassifier(max_depth=1, random_state=42)
+tree_c2    = DecisionTreeClassifier(max_depth=2, random_state=42)
+tree_cfull = DecisionTreeClassifier(random_state=42)
+for t in [tree_c1, tree_c2, tree_cfull]:
+    t.fit(X_c, y_c)
+
+cls_names     = tree_c2.classes_.tolist()
+cls_colors    = {'forest': '#2ecc71', 'grassland': '#f1c40f', 'desert': '#e67e22'}
+cls_to_int    = {c: i for i, c in enumerate(cls_names)}
+
+# ── Linear vs tree dataset ─────────────────────────────────────────────────────
+np.random.seed(99)
+n_nl    = 90
+temp_nl = np.random.uniform(0, 35, n_nl)
+y_nl    = (np.where(temp_nl < 10, 1.5, np.where(temp_nl < 25, 7.0, 2.5))
+           + np.random.normal(0, 0.5, n_nl))
+X_nl          = temp_nl.reshape(-1, 1)
+lr_nl         = LinearRegression().fit(X_nl, y_nl)
+tree_nl       = DecisionTreeRegressor(max_depth=2, random_state=42).fit(X_nl, y_nl)
+temp_range_nl = np.linspace(0, 35, 300)
+```
+
+## {#title-slide data-menu-title="Title Slide" background="#053660"}
+
+[EDS 232]{.custom-title}
+
+<hr class="hr-teal">
+
+[Lesson 9]{.custom-subtitle}
+
+[*Decision Trees*]{.custom-subtitle}
+
+---
+
+## {#in-this-lesson data-menu-title="In this lesson"}
+
+[In this lesson]{.slide-title}
+
+<hr>
+
+<br>
+
+- **Decision trees**: flexible, interpretable models that partition the predictor space into rectangular regions
+- **Regression trees**: predicting a numerical response
+- **Classification trees**: predicting a categorical class label
+- **Dealing with overfitting**: controlling model complexity through tree depth and pruning
+
+---
+
+## {#section-reg-trees data-menu-title="# Regression trees #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Regression trees</p>
+</div>
+
+---
+
+## {#guiding-dataset data-menu-title="A guiding dataset"}
+
+[A guiding dataset]{.slide-title}
+
+<hr>
+
+22 ecological survey sites, each characterized by:
+
+::: {.body-text-m}
+- **`rainfall`** — annual precipitation (mm)
+- **`temperature`** — mean summer temperature (°C)
+- **`biomass`** — aboveground plant biomass (tonnes/ha) — the **response**
+:::
+
+```{python}
+#| label: scatter-annotated-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "75%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85,
+           edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}', (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4), fontsize=8.5, color='#222')
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Example dataset — aboveground biomass (tonnes/ha) labeled on each site')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#section-what-is-reg-tree data-menu-title="# What is a regression tree? #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">What is a regression tree?</p>
+</div>
+
+---
+
+## {#reg-tree-structure data-menu-title="Regression tree structure"}
+
+[Regression tree structure]{.slide-title}
+
+<hr>
+
+A **regression tree** predicts a numerical response by partitioning the predictor space into rectangular regions and assigning a predicted value to each region.
+
+```{python}
+#| label: tree-terminology-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "65%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
+
+nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
+for parent, child, lbl, lbl_side in [
+        ('root', 'left',  'No',  'left'),
+        ('root', 'right', 'Yes', 'right')]:
+    px, py = nodes[parent]; cx, cy = nodes[child]
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+for child_pos, lbl, lbl_side in [
+        ((1.4, 1.0), 'No',  'left'),
+        ((4.6, 1.0), 'Yes', 'right')]:
+    px, py = nodes['left']; cx, cy = child_pos
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+draw_node(ax, *nodes['root'], f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, *nodes['left'], 'temperature ≤ 15 °C?', color='#d6eaf8')
+draw_node(ax, 8, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+draw_node(ax, 1.4, 1.0, f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#tree-terminology data-menu-title="Tree terminology"}
+
+[Tree terminology]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="60%"}
+
+```{python}
+#| label: tree-terminology-terms
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
+
+nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
+for parent, child, lbl, lbl_side in [
+        ('root', 'left',  'No',  'left'),
+        ('root', 'right', 'Yes', 'right')]:
+    px, py = nodes[parent]; cx, cy = nodes[child]
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+for child_pos, lbl, lbl_side in [
+        ((1.4, 1.0), 'No',  'left'),
+        ((4.6, 1.0), 'Yes', 'right')]:
+    px, py = nodes['left']; cx, cy = child_pos
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+draw_node(ax, *nodes['root'], f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, *nodes['left'], 'temperature ≤ 15 °C?', color='#d6eaf8')
+draw_node(ax, 8, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+draw_node(ax, 1.4, 1.0, f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="40%"}
+
+::: {.body-text-s}
+- **Root node**: first split, applied to the entire dataset
+- **Internal node**: a non-leaf node that applies an additional split to a subset
+- **Leaf node**: a terminal node — no further splits
+- **Branch**: the path an observation takes at each split
+- **Depth**: number of nodes along the longest root-to-leaf path
+
+<br>
+
+The **predicted value** at a leaf is the **mean response** of all training observations that reach that leaf.
+:::
+
+:::
+
+::::
+
+---
+
+## {#predictions-slide data-menu-title="Making predictions"}
+
+[Making predictions]{.slide-title}
+
+<hr>
+
+To predict for a new observation: start at the **root** and follow the branches based on the split conditions until reaching a **leaf**. The value at the leaf is the prediction.
+
+. . .
+
+For example, a new site with **`rainfall = 430 mm`** and **`temperature = 10°C`**:
+
+1. Root: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? **Yes** → go right
+2. The right branch leads directly to a leaf
+3. Predicted biomass: `{python} f"{right_leaf_val:.1f}"` t/ha
+
+. . .
+
+::: {.teal-text .body-text-m}
+The "Yes" branch always leads to the **right** in our diagrams.
+:::
+
+---
+
+## {#checkin-predict-q data-menu-title="Check-in: predict biomass"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: tree-predict-q
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
+nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
+for parent, child, lbl, lbl_side in [
+        ('root', 'left',  'No',  'left'),
+        ('root', 'right', 'Yes', 'right')]:
+    px, py = nodes[parent]; cx, cy = nodes[child]
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+for child_pos, lbl, lbl_side in [
+        ((1.4, 1.0), 'No',  'left'),
+        ((4.6, 1.0), 'Yes', 'right')]:
+    px, py = nodes['left']; cx, cy = child_pos
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+draw_node(ax, *nodes['root'], f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, *nodes['left'], 'temperature ≤ 15 °C?', color='#d6eaf8')
+draw_node(ax, 8, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+draw_node(ax, 1.4, 1.0, f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="43%"}
+
+::: {.teal-text .body-text-m}
+Use the regression tree to predict the biomass for a new site with **`rainfall = 750 mm`** and **`temperature = 20°C`**.
+
+Trace your path from the root to the leaf.
+:::
+
+:::
+
+::::
+
+---
+
+## {#checkin-predict-a data-menu-title="Check-in: predict biomass (answer)"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: tree-predict-a
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
+nodes = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
+for parent, child, lbl, lbl_side in [
+        ('root', 'left',  'No',  'left'),
+        ('root', 'right', 'Yes', 'right')]:
+    px, py = nodes[parent]; cx, cy = nodes[child]
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+for child_pos, lbl, lbl_side in [
+        ((1.4, 1.0), 'No',  'left'),
+        ((4.6, 1.0), 'Yes', 'right')]:
+    px, py = nodes['left']; cx, cy = child_pos
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+draw_node(ax, *nodes['root'], f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, *nodes['left'], 'temperature ≤ 15 °C?', color='#d6eaf8')
+draw_node(ax, 8, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+draw_node(ax, 1.4, 1.0, f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="43%"}
+
+::: {.teal-text .body-text-m}
+Trace your path from the root to the leaf.
+:::
+
+::: {.body-text-s}
+1. **Root**: Is rainfall ≤ `{python} f"{split1_val:.0f}"` mm? Yes → go right
+2. The right branch leads directly to a leaf — no further split in this region
+3. Predicted biomass: **`{python} f"{right_leaf_val:.1f}"` t/ha**
+:::
+
+:::
+
+::::
+
+---
+
+## {#section-node-splits data-menu-title="# Node splits and prediction regions #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Node splits and prediction regions</p>
+</div>
+
+---
+
+## {#root-split data-menu-title="Root split"}
+
+[The root node split]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: split-1-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+ax.axvspan(150, split1_val, alpha=0.18, color='steelblue')
+ax.axvspan(split1_val, 1050, alpha=0.18, color='seagreen')
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--',
+           label=f'Split: rainfall = {split1_val:.0f} mm')
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85, edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}', (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4), fontsize=8.5, color='#222')
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title(f'Root node split: rainfall = {split1_val:.0f} mm')
+ax.legend(fontsize=9, loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=1)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="43%"}
+
+```{python}
+#| label: tree-root-only-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88 * (1.5 / 5.8)))
+ax.set_xlim(0, 11); ax.set_ylim(4.0, 5.5)
+ax.axis('off')
+draw_node(ax, 5.5, 4.7, f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s}
+The root node asks whether `rainfall ≤ {python} f"{split1_val:.0f}"` mm. This creates a vertical division in the predictor space — every observation goes left or right based on this condition.
+:::
+
+:::
+
+::::
+
+---
+
+## {#second-split data-menu-title="Second split"}
+
+[The second split]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: split-2-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+ax.fill_between([150, split1_val], [3, 3], [split2_val, split2_val],
+                alpha=0.25, color='steelblue')
+ax.fill_between([150, split1_val], [split2_val, split2_val], [26, 26],
+                alpha=0.25, color='#e07b39')
+ax.axvspan(split1_val, 1050, alpha=0.25, color='seagreen')
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--',
+           label=f'Split 1: rainfall = {split1_val:.0f} mm')
+ax.plot([150, split1_val], [split2_val, split2_val], color='darkorange', lw=2, linestyle='--',
+        label=f'Split 2: temperature = {split2_val:.1f} °C (left region only)')
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85, edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}', (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4), fontsize=8.5, color='#222')
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Second node split: temperature (within left region)')
+ax.legend(fontsize=9, loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="43%"}
+
+```{python}
+#| label: tree-two-nodes-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88 * (3.4 / 5.8)))
+ax.set_xlim(0, 11); ax.set_ylim(2.1, 5.5)
+ax.axis('off')
+for px, py, cx, cy, lbl, lbl_side in [
+        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
+        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+draw_node(ax, 5.5, 4.7, f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, 3.0, 2.8, f'temperature ≤ {split2_val:.1f} °C?', color='#d6eaf8')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s}
+The second node looks at observations in the **left region** (rainfall ≤ `{python} f"{split1_val:.0f}"` mm) and asks whether `temperature ≤ {python} f"{split2_val:.1f}"` °C — adding a horizontal split within that region only.
+:::
+
+:::
+
+::::
+
+---
+
+## {#leaf-regions data-menu-title="Leaf regions"}
+
+[Leaf regions and predictions]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: split-regions-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+ax.fill_between([150, split1_val], [3, 3], [split2_val, split2_val],
+                alpha=0.25, color='steelblue')
+ax.fill_between([150, split1_val], [split2_val, split2_val], [26, 26],
+                alpha=0.25, color='#e07b39')
+ax.axvspan(split1_val, 1050, alpha=0.25, color='seagreen')
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--')
+ax.plot([150, split1_val], [split2_val, split2_val], color='darkorange', lw=2, linestyle='--')
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85, edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}', (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4), fontsize=8.5, color='#222')
+visual_regions = {
+    'left-lower': (rainfall <= split1_val) & (temperature <= split2_val),
+    'left-upper': (rainfall <= split1_val) & (temperature >  split2_val),
+    'right':       rainfall >  split1_val,
+}
+region_centers = {
+    'left-lower': ((150 + split1_val) / 2, (3 + split2_val) / 2),
+    'left-upper': ((150 + split1_val) / 2, (split2_val + 26) / 2),
+    'right':      ((split1_val + 1050) / 2, (3 + 26) / 2),
+}
+for name, mask in visual_regions.items():
+    mean_val = y[mask].mean()
+    cx, cy   = region_centers[name]
+    ax.text(cx, cy, f'mean = {mean_val:.1f}', fontsize=10, ha='center', va='center',
+            color='white', fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='#333', alpha=0.65))
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Leaf regions with mean biomass predictions')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="43%"}
+
+```{python}
+#| label: tree-full-repeat-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
+nodes_f = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
+for px, py, cx, cy, lbl, lbl_side in [
+        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
+        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+for cx, cy, lbl, lbl_side in [
+        (1.4, 1.0, 'No',  'left'),
+        (4.6, 1.0, 'Yes', 'right')]:
+    px, py = nodes_f['left']
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+draw_node(ax, 5.5, 4.7, f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, 3.0, 2.8, f'temperature ≤ {split2_val:.1f} °C?', color='#d6eaf8')
+draw_node(ax, 8.0, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+draw_node(ax, 1.4, 1.0, f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0, f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::::
+
+::: {.body-text-s .center-text}
+The predicted value at each leaf is the **mean response** of the training observations that fall in that region.
+:::
+
+---
+
+## {#checkin-4regions-q data-menu-title="Check-in: draw the tree"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: tree-2node-checkin-q
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+ax.fill_between([150, split1_val], [3, 3], [split2_val, split2_val],
+                alpha=0.3, color='steelblue')
+ax.fill_between([150, split1_val], [split2_val, split2_val], [26, 26],
+                alpha=0.3, color='#e07b39')
+ax.fill_between([split1_val, 1050], [3, 3], [right_split2_val, right_split2_val],
+                alpha=0.3, color='seagreen')
+ax.fill_between([split1_val, 1050], [right_split2_val, right_split2_val], [26, 26],
+                alpha=0.3, color='#9b59b6')
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--',
+           label=f'Split 1: rainfall = {split1_val:.0f} mm')
+ax.plot([150, split1_val], [split2_val, split2_val], color='darkorange', lw=2, linestyle='--',
+        label=f'Split 2: temp = {split2_val:.1f} °C (left)')
+ax.plot([split1_val, 1050], [right_split2_val, right_split2_val], color='purple', lw=2, linestyle='--',
+        label=f'Split 3: temp = {right_split2_val:.1f} °C (right)')
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85, edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}', (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4), fontsize=8.5, color='#222')
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Depth-2 tree: four prediction regions')
+ax.legend(fontsize=8, loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="43%"}
+
+::: {.teal-text .body-text-m}
+The plot shows a new split added to the **right region**.
+
+Modify the tree diagram to include a node and leaves that represent this additional split.
+
+What are the predicted values in each of the four leaves?
+:::
+
+:::
+
+::::
+
+---
+
+## {#checkin-4regions-a data-menu-title="Check-in: draw the tree (answer)"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{python}
+#| label: tree-2node-checkin-a
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+ax.fill_between([150, split1_val], [3, 3], [split2_val, split2_val],
+                alpha=0.3, color='steelblue')
+ax.fill_between([150, split1_val], [split2_val, split2_val], [26, 26],
+                alpha=0.3, color='#e07b39')
+ax.fill_between([split1_val, 1050], [3, 3], [right_split2_val, right_split2_val],
+                alpha=0.3, color='seagreen')
+ax.fill_between([split1_val, 1050], [right_split2_val, right_split2_val], [26, 26],
+                alpha=0.3, color='#9b59b6')
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--',
+           label=f'Split 1: rainfall = {split1_val:.0f} mm')
+ax.plot([150, split1_val], [split2_val, split2_val], color='darkorange', lw=2, linestyle='--',
+        label=f'Split 2: temp = {split2_val:.1f} °C (left)')
+ax.plot([split1_val, 1050], [right_split2_val, right_split2_val], color='purple', lw=2, linestyle='--',
+        label=f'Split 3: temp = {right_split2_val:.1f} °C (right)')
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85, edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}', (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4), fontsize=8.5, color='#222')
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Depth-2 tree: four prediction regions')
+ax.legend(fontsize=8, loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{python}
+#| label: tree-depth2-full-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+t = tree_d2.tree_
+right_child_idx_d  = t.children_right[0]
+left_child_idx_d   = t.children_left[0]
+right_split2_val_d = t.threshold[right_child_idx_d]
+ll_leaf = t.value[t.children_left[left_child_idx_d]][0][0]
+lr_leaf = t.value[t.children_right[left_child_idx_d]][0][0]
+rl_leaf = t.value[t.children_left[right_child_idx_d]][0][0]
+rr_leaf = t.value[t.children_right[right_child_idx_d]][0][0]
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
+for px, py, cx, cy, lbl, lbl_side in [
+        (5.5, 4.7, 2.75, 2.8, 'No',  'left'),
+        (5.5, 4.7, 8.25, 2.8, 'Yes', 'right')]:
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+for cx, cy, lbl, lbl_side in [
+        (1.25, 1.0, 'No',  'left'),
+        (4.25, 1.0, 'Yes', 'right')]:
+    ax.plot([2.75, cx], [2.8 - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (2.75 + cx) / 2, (2.8 - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+for cx, cy, lbl, lbl_side in [
+        (6.75, 1.0, 'No',  'left'),
+        (9.75, 1.0, 'Yes', 'right')]:
+    ax.plot([8.25, cx], [2.8 - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (8.25 + cx) / 2, (2.8 - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+draw_node(ax, 5.5,  4.7, f'rainfall ≤ {split1_val:.0f} mm?',           color='#d6eaf8', bold=True)
+draw_node(ax, 2.75, 2.8, f'temperature ≤ {split2_val:.1f} °C?',         color='#d6eaf8')
+draw_node(ax, 8.25, 2.8, f'temperature ≤ {right_split2_val_d:.1f} °C?', color='#d6eaf8')
+draw_node(ax, 1.25, 1.0, f'Ŷ = {lr_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 4.25, 1.0, f'Ŷ = {ll_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 6.75, 1.0, f'Ŷ = {rr_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
+draw_node(ax, 9.75, 1.0, f'Ŷ = {rl_leaf:.1f} t/ha', color='#d5f5e3', w=2.0)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::::
+
+---
+
+## {#reg-tree-definition data-menu-title="Regression tree definition"}
+
+[Regression tree: summary]{.slide-title}
+
+<hr>
+
+A regression tree works by:
+
+**1. Dividing the predictor space** — the set of all possible values for $X_1, X_2, \ldots, X_p$ — into $J$ non-overlapping rectangular regions $R_1, R_2, \ldots, R_J$.
+
+**2. Assigning a prediction** to each region: for every observation that falls into region $R_j$, the prediction is the **mean response** of the training observations in $R_j$:
+
+$$\hat{y}_{R_j} = \frac{1}{|R_j|} \sum_{i \in R_j} y_i.$$
+
+---
+
+## {#section-fitting data-menu-title="# Fitting a regression tree #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Fitting a regression tree</p>
+</div>
+
+---
+
+## {#rss-definition data-menu-title="RSS and recursive binary splitting"}
+
+[How are the splits found?]{.slide-title}
+
+<hr>
+
+For a set of regions $R_1, \ldots, R_J$, the quality of the tree is measured by the **residual sum of squares (RSS)**:
+
+$$RSS = \sum_{j=1}^J \sum_{i \in R_j} (y_i - \hat{y}_{R_j})^2$$
+
+. . .
+
+The regions are found using **recursive binary splitting**:
+
+1. Starting from the full dataset, search over all predictors and all possible thresholds to find the single split that most **reduces the RSS**
+2. Repeat this process within each resulting region
+3. Stop when a stopping criterion is met (e.g., maximum depth, or too few observations to split)
+
+. . .
+
+::: {.body-text-s}
+**Binary** — every split creates exactly two child regions. **Recursive** — the same procedure is applied again within each region. **Greedy** — at each step the locally best split is chosen without considering future steps.
+:::
+
+---
+
+## {#first-split-examples data-menu-title="Finding the first split"}
+
+[Finding the first split]{.slide-title}
+
+<hr>
+
+The algorithm evaluates every possible threshold on every predictor. Here are three candidate splits on rainfall:
+
+```{python}
+#| label: split-threshold-examples-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "48%"
+
+example_splits = [350, split1_val, 820]
+titles = [
+    f'rainfall = 350 mm  |  RSS = {((y[rainfall<=350]-y[rainfall<=350].mean())**2).sum() + ((y[rainfall>350]-y[rainfall>350].mean())**2).sum():.2f}',
+    f'rainfall = {split1_val:.0f} mm  |  optimal split',
+    f'rainfall = 820 mm  |  RSS = {((y[rainfall<=820]-y[rainfall<=820].mean())**2).sum() + ((y[rainfall>820]-y[rainfall>820].mean())**2).sum():.2f}',
+]
+
+fig, axes = plt.subplots(3, 1, figsize=(fig_size_x * 0.7, (fig_size_y - 0.2) * 1.8))
+for ax, sv, title in zip(axes, example_splits, titles):
+    lm = y[rainfall <= sv].mean()
+    rm = y[rainfall >  sv].mean()
+    ax.axvspan(150, sv,   alpha=0.22, color='steelblue')
+    ax.axvspan(sv,  1050, alpha=0.22, color='seagreen')
+    ax.axvline(sv, color='tomato', lw=2, linestyle='--')
+    ax.scatter(df['rainfall'], df['temperature'],
+               s=55, color='steelblue', zorder=5, alpha=0.85, edgecolors='white', linewidths=0.8)
+    for _, row in df.iterrows():
+        ax.annotate(f'{row.biomass:.1f}', (row.rainfall, row.temperature),
+                    textcoords='offset points', xytext=(5, 3), fontsize=7.5, color='#222')
+    ax.text((150 + sv) / 2,  24.5, f'mean = {lm:.1f}', ha='center', fontsize=8.5,
+            color='steelblue', fontweight='bold')
+    ax.text((sv + 1050) / 2, 24.5, f'mean = {rm:.1f}', ha='center', fontsize=8.5,
+            color='seagreen', fontweight='bold')
+    ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+    ax.set_xlabel('Annual rainfall (mm)', fontsize=8)
+    ax.set_ylabel('Temp (°C)', fontsize=8)
+    ax.set_title(title, fontsize=8.5)
+    ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#rss-vs-split data-menu-title="RSS vs split threshold"}
+
+[RSS as a function of the split threshold]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: mse-split-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "80%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
+ax.plot(split_candidates, mse_splits, color='steelblue', lw=2)
+ax.axvline(split1_val, color='tomato', lw=1.8, linestyle='--',
+           label=f'Optimal split ≈ {split1_val:.0f} mm')
+ax.set_xlabel('Rainfall split threshold (mm)')
+ax.set_ylabel('RSS (within-region)')
+ax.set_title('RSS as a function of the split threshold on rainfall')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s .center-text}
+The algorithm picks the threshold that minimizes RSS — this becomes the first node of the tree.
+:::
+
+---
+
+## {#first-split-result data-menu-title="1-node tree result"}
+
+[1-node tree: the result]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: tree-1node-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+lm = y[rainfall <= split1_val].mean()
+rm = y[rainfall >  split1_val].mean()
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+ax.axvspan(150, split1_val,  alpha=0.22, color='steelblue')
+ax.axvspan(split1_val, 1050, alpha=0.22, color='seagreen')
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--',
+           label=f'Split: rainfall = {split1_val:.0f} mm')
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85, edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}', (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4), fontsize=8.5, color='#222')
+ax.text((150 + split1_val) / 2, 14.5, f'mean = {lm:.1f} t/ha',
+        ha='center', fontsize=10, color='white', fontweight='bold',
+        bbox=dict(boxstyle='round,pad=0.3', facecolor='steelblue', alpha=0.7))
+ax.text((split1_val + 1050) / 2, 14.5, f'mean = {rm:.1f} t/ha',
+        ha='center', fontsize=10, color='white', fontweight='bold',
+        bbox=dict(boxstyle='round,pad=0.3', facecolor='seagreen', alpha=0.7))
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title(f'1-node tree: optimal split at rainfall = {split1_val:.0f} mm')
+ax.legend(fontsize=9, loc='upper center', bbox_to_anchor=(0.5, -0.18))
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="43%"}
+
+```{python}
+#| label: tree-1node-diagram-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88 * (3.4 / 5.8)))
+ax.set_xlim(0, 11); ax.set_ylim(2.1, 5.5)
+ax.axis('off')
+for px, py, cx, cy, lbl, lbl_side in [
+        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
+        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+draw_node(ax, 5.5, 4.7, f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, 3.0, 2.8, f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+draw_node(ax, 8.0, 2.8, f'Ŷ = {left_leaf_val:.1f} t/ha',  color='#d5f5e3')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::::
+
+---
+
+## {#second-split-examples data-menu-title="Finding the second split"}
+
+[Finding the second split]{.slide-title}
+
+<hr>
+
+After the first split, the algorithm considers splitting **each** resulting region. Here are three candidate temperature splits within the left (low-rainfall) region:
+
+```{python}
+#| label: temp-threshold-examples-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "48%"
+
+left_mask  = rainfall <= split1_val
+y_left     = y[left_mask]
+temp_left  = temperature[left_mask]
+y_right    = y[~left_mask]
+rss_right  = ((y_right - y_right.mean())**2).sum()
+example_temps = [10.0, split2_val, 22.0]
+
+fig, axes = plt.subplots(3, 1, figsize=(fig_size_x * 0.7, (fig_size_y - 0.2) * 1.8))
+for ax, tv in zip(axes, example_temps):
+    lower_y  = y_left[temp_left <= tv]
+    upper_y  = y_left[temp_left >  tv]
+    rss_total = (((lower_y - lower_y.mean())**2).sum()
+               + ((upper_y - upper_y.mean())**2).sum()
+               + rss_right)
+    ax.fill_between([150, split1_val], [3, 3],  [tv, tv],  alpha=0.25, color='steelblue')
+    ax.fill_between([150, split1_val], [tv, tv], [26, 26], alpha=0.25, color='#e07b39')
+    ax.axvspan(split1_val, 1050, alpha=0.22, color='seagreen')
+    ax.axvline(split1_val, color='tomato',  lw=1.5, linestyle='--')
+    ax.plot([150, split1_val], [tv, tv], color='darkorange', lw=2, linestyle='--')
+    ax.scatter(df['rainfall'], df['temperature'],
+               s=55, color='steelblue', zorder=5, alpha=0.85, edgecolors='white', linewidths=0.8)
+    for _, row in df.iterrows():
+        ax.annotate(f'{row.biomass:.1f}', (row.rainfall, row.temperature),
+                    textcoords='offset points', xytext=(5, 3), fontsize=7.5, color='#222')
+    if len(lower_y) > 0:
+        ax.text((150 + split1_val) / 2, (3 + tv) / 2, f'mean = {lower_y.mean():.1f}',
+                ha='center', fontsize=8.5, color='steelblue', fontweight='bold')
+    if len(upper_y) > 0:
+        ax.text((150 + split1_val) / 2, (tv + 26) / 2, f'mean = {upper_y.mean():.1f}',
+                ha='center', fontsize=8.5, color='#e07b39', fontweight='bold')
+    ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+    ax.set_xlabel('Annual rainfall (mm)', fontsize=8)
+    ax.set_ylabel('Temp (°C)', fontsize=8)
+    ax.set_title(f'Temperature split = {tv:.1f} °C  |  Total RSS = {rss_total:.2f}', fontsize=8.5)
+    ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#rss-temp-split-slide data-menu-title="RSS vs temperature split"}
+
+[RSS within the left region]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: rss-temp-split-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "80%"
+
+temp_candidates_left = np.linspace(temp_left.min() + 0.5, temp_left.max() - 0.5, 200)
+rss_temp = []
+for tv in temp_candidates_left:
+    lower = y_left[temp_left <= tv]
+    upper = y_left[temp_left >  tv]
+    if len(lower) < 2 or len(upper) < 2:
+        rss_temp.append(np.nan)
+        continue
+    rss_temp.append(((lower - lower.mean())**2).sum()
+                  + ((upper - upper.mean())**2).sum())
+rss_temp = np.array(rss_temp)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
+ax.plot(temp_candidates_left, rss_temp, color='steelblue', lw=2)
+ax.axvline(split2_val, color='tomato', lw=1.8, linestyle='--',
+           label=f'Optimal split ≈ {split2_val:.1f} °C')
+ax.set_xlabel('Temperature split threshold (°C)')
+ax.set_ylabel('RSS (within left region)')
+ax.set_title('RSS as a function of the temperature split threshold (left region)')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s .center-text}
+The algorithm repeats the same search — now within each existing region — and picks the threshold that most reduces RSS.
+:::
+
+---
+
+## {#section-overfitting data-menu-title="# Dealing with overfitting #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Dealing with overfitting</p>
+</div>
+
+---
+
+## {#overfitting-concept data-menu-title="Overfitting in decision trees"}
+
+[Overfitting in decision trees]{.slide-title}
+
+<hr>
+
+A **fully-grown** decision tree will perfectly fit the training data but generalize poorly to new observations — **high variance, low bias**.
+
+. . .
+
+As the tree grows deeper, the decision boundaries become increasingly specific to the training data:
+
+```{python}
+#| label: depth-comparison-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "52%"
+
+y_viz      = y + np.arange(len(y)) * 1e-7
+tree_v1    = DecisionTreeRegressor(max_depth=1, random_state=42).fit(X, y_viz)
+tree_v3    = DecisionTreeRegressor(max_depth=3, random_state=42).fit(X, y_viz)
+tree_vfull = DecisionTreeRegressor(random_state=42).fit(X, y_viz)
+
+r_hr = np.linspace(150, 1050, 1200)
+t_hr = np.linspace(3, 26, 1200)
+RR_hr, TT_hr = np.meshgrid(r_hr, t_hr)
+grid_hr = np.c_[RR_hr.ravel(), TT_hr.ravel()]
+Zv1    = tree_v1.predict(grid_hr).reshape(RR_hr.shape)
+Zv3    = tree_v3.predict(grid_hr).reshape(RR_hr.shape)
+Zvfull = tree_vfull.predict(grid_hr).reshape(RR_hr.shape)
+
+titles    = ['max_depth = 1', 'max_depth = 3', 'Full tree (no limit)']
+Zs_hr     = [Zv1, Zv3, Zvfull]
+train_mse = [np.mean((t.predict(X) - y)**2) for t in [tree_v1, tree_v3, tree_vfull]]
+
+vmin = min(Z.min() for Z in Zs_hr)
+vmax = max(Z.max() for Z in Zs_hr)
+norm = plt.Normalize(vmin=vmin, vmax=vmax)
+cmap = plt.cm.viridis
+
+def boundary_mask(Z):
+    b = np.zeros_like(Z)
+    b[:-1, :] += (Z[1:, :] != Z[:-1, :]).astype(float)
+    b[:, :-1] += (Z[:, 1:] != Z[:, :-1]).astype(float)
+    return b
+
+bnd_v3   = boundary_mask(Zv3)
+bnd_full = boundary_mask(Zvfull)
+bnd_deep = np.where(bnd_v3 > 0, 0, bnd_full)
+
+fig, axes = plt.subplots(3, 1, figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88 * 3))
+axes = axes.flat
+for ax, Z, title, tr_mse in zip(axes, Zs_hr, titles, train_mse):
+    ax.pcolormesh(RR_hr, TT_hr, Z, cmap=cmap, norm=norm, alpha=0.35, shading='auto')
+    is_full = (title == 'Full tree (no limit)')
+    ax.contour(RR_hr, TT_hr, bnd_v3, levels=[0.5],
+               colors='#333', linewidths=1.4, linestyles='--')
+    if is_full:
+        ax.contour(RR_hr, TT_hr, bnd_deep, levels=[0.5],
+                   colors='#555', linewidths=0.5, linestyles=':')
+    ax.scatter(df['rainfall'], df['temperature'],
+               s=35, color='steelblue', edgecolors='white', linewidths=0.6, zorder=5)
+    ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+    ax.set_xlabel('Rainfall (mm)', fontsize=9)
+    ax.set_ylabel('Temperature (°C)', fontsize=9)
+    ax.set_title(f'{title}\nTrain MSE = {tr_mse:.2f}', fontsize=9)
+    ax.grid(False)
+    ax.tick_params(labelsize=8)
+plt.suptitle('Decision regions for trees of increasing depth', y=1.01)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#checkin-overfitting data-menu-title="Check-in: overfitting"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+::: {.teal-text .body-text-m}
+1. The full tree has a training MSE of `{python} f"{train_mse[-1]:.2f}"`. What does this tell us about how well it fits the training data?
+
+2. Would you expect the full tree to perform better or worse than the depth-3 tree on new, unseen data? Why?
+
+3. What are two approaches you could use to control the complexity of a decision tree?
+:::
+
+. . .
+
+::: {.body-text-s}
+1. A training MSE near zero means the full tree essentially **memorizes** the training data — every observation is in its own leaf.
+
+2. The full tree would likely perform **worse** on new data. It has memorized noise in the training set (high variance) rather than learning the underlying pattern.
+
+3. Two common approaches:
+   - **Maximum depth**: limit how many levels the tree can grow
+   - **Minimum samples per leaf**: stop splitting when a region has too few observations
+:::
+
+---
+
+## {#hyperparameter-tuning data-menu-title="Hyperparameter tuning"}
+
+[Controlling tree complexity]{.slide-title}
+
+<hr>
+
+**Maximum depth** and **minimum samples per leaf** are both hyperparameters that control the complexity vs. fit tradeoff:
+
+- A **shallower tree** has fewer, larger regions — lower variance, higher bias
+- A **deeper tree** has more, smaller regions — higher variance, lower bias
+
+. . .
+
+::: {.teal-text .body-text-m}
+How would cross-validation be applied to find the best values for these hyperparameters?
+:::
+
+. . .
+
+Compute the CV-MSE for a grid of depth and samples-per-leaf values. Select the combination that gives the lowest cross-validation error as the hyperparameters for the final tree.
+
+---
+
+## {#section-classification data-menu-title="# Classification trees #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Classification trees</p>
+</div>
+
+---
+
+## {#cls-dataset data-menu-title="Classification dataset"}
+
+[A classification dataset]{.slide-title}
+
+<hr>
+
+The same 22 sites, same predictors (`rainfall`, `temperature`), but a **categorical** response — the site's **biome type**:
+
+```{python}
+#| label: cls-scatter-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "72%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.3))
+for biome_type in ['forest', 'grassland', 'desert']:
+    mask = df_c['biome'] == biome_type
+    ax.scatter(df_c.loc[mask, 'rainfall'], df_c.loc[mask, 'temperature'],
+               s=70, color=cls_colors[biome_type], edgecolors='black',
+               linewidths=0.6, label=biome_type.capitalize(), zorder=5)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Example classification dataset — biome type')
+ax.legend(title='Biome', fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#what-is-cls-tree data-menu-title="What is a classification tree?"}
+
+[What is a classification tree?]{.slide-title}
+
+<hr>
+
+A **classification tree** has the same structure as a regression tree — root, internal nodes, branches, and leaves — but makes **categorical predictions** instead of numerical ones.
+
+. . .
+
+For each leaf node, the prediction is the **majority class** (most common class) among the training observations that reach that leaf — a **majority vote**.
+
+. . .
+
+The depth-2 classification tree fitted on the biome dataset:
+
+```{python}
+#| label: cls-tree-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "80%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.3, fig_size_y + 0.8))
+plot_tree(tree_c2, feature_names=['rainfall', 'temperature'],
+          class_names=cls_names, filled=True, rounded=True,
+          impurity=False, fontsize=9, ax=ax, precision=1)
+ax.set_title('Depth-2 classification tree — biome prediction')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#checkin-cls-predict-q data-menu-title="Check-in: predict biome"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: cls-tree-q
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.3, fig_size_y + 0.8))
+plot_tree(tree_c2, feature_names=['rainfall', 'temperature'],
+          class_names=cls_names, filled=True, rounded=True,
+          impurity=False, fontsize=9, ax=ax, precision=1)
+ax.set_title('Depth-2 classification tree — biome prediction')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="43%"}
+
+::: {.teal-text .body-text-m}
+Use the classification tree to predict the biome type for a new site with **`rainfall = 500 mm`** and **`temperature = 15°C`**.
+
+Trace your path from the root to the leaf.
+:::
+
+:::
+
+::::
+
+---
+
+## {#checkin-cls-predict-a data-menu-title="Check-in: predict biome (answer)"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: cls-tree-a
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.3, fig_size_y + 0.8))
+plot_tree(tree_c2, feature_names=['rainfall', 'temperature'],
+          class_names=cls_names, filled=True, rounded=True,
+          impurity=False, fontsize=9, ax=ax, precision=1)
+ax.set_title('Depth-2 classification tree — biome prediction')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="43%"}
+
+::: {.teal-text .body-text-m}
+Trace your path from the root to the leaf.
+:::
+
+::: {.body-text-s}
+1. **Root**: Is rainfall 500 mm ≤ 675.9 mm? **Yes** → left branch (low rainfall)
+2. **Internal node**: Is temperature 15°C ≤ 18.3°C? **Yes** → left branch (low temperature)
+3. **Leaf**: The majority class in this leaf is **grassland**
+:::
+
+:::
+
+::::
+
+---
+
+## {#cls-boundaries-slide data-menu-title="Decision regions"}
+
+[Decision regions]{.slide-title}
+
+<hr>
+
+Just like regression trees, classification trees divide the predictor space into rectangular regions:
+
+```{python}
+#| label: cls-boundaries-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "72%"
+
+biome_cmap = plt.matplotlib.colors.ListedColormap(
+    [cls_colors[c] for c in cls_names])
+r_cls = np.linspace(80, 1020, 600)
+t_cls = np.linspace(3, 32, 600)
+RR_cls, TT_cls = np.meshgrid(r_cls, t_cls)
+Z_c2_cls    = tree_c2.predict(np.c_[RR_cls.ravel(), TT_cls.ravel()])
+Zc2_int_cls = np.vectorize(cls_to_int.get)(Z_c2_cls).reshape(RR_cls.shape)
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.3))
+ax.contourf(RR_cls, TT_cls, Zc2_int_cls, alpha=0.3, cmap=biome_cmap,
+            levels=[-0.5, 0.5, 1.5, 2.5])
+ax.contour(RR_cls, TT_cls, Zc2_int_cls, colors='#333', linewidths=1.8,
+           linestyles='--', levels=[-0.5, 0.5, 1.5, 2.5])
+for biome_type in ['forest', 'grassland', 'desert']:
+    mask = df_c['biome'] == biome_type
+    ax.scatter(df_c.loc[mask, 'rainfall'], df_c.loc[mask, 'temperature'],
+               s=65, color=cls_colors[biome_type], edgecolors='black',
+               linewidths=0.6, label=biome_type.capitalize(), zorder=5)
+legend_patches = [mpatches.Patch(color=cls_colors[c], alpha=0.5,
+                                  label=c.capitalize()) for c in cls_names]
+ax.legend(handles=legend_patches, title='Predicted biome', fontsize=9)
+ax.set_xlim(100, 1000); ax.set_ylim(4, 31)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Depth-2 classification tree — decision regions')
+ax.grid(True, alpha=0.2)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#section-fitting-cls data-menu-title="# Fitting a classification tree #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Fitting a classification tree</p>
+</div>
+
+---
+
+## {#cls-tree-definition data-menu-title="Fitting a classification tree"}
+
+[Fitting a classification tree]{.slide-title}
+
+<hr>
+
+A classification tree is fitted by:
+
+**1. Dividing the predictor space** into $J$ non-overlapping regions $R_1, \ldots, R_J$.
+
+**2. Predicting** the majority class among training observations in each region $R_j$:
+
+$$\hat{y}_{R_j} = \text{argmax}_{k} \; \hat{p}_{jk}, \quad \text{where } \hat{p}_{jk} = \frac{1}{|R_j|}\sum_{i \in R_j} \mathbf{1}(y_i = k)$$
+
+. . .
+
+As with regression trees, **recursive binary splitting** is used — but we cannot use RSS for classification. Instead, we measure the **impurity** of the resulting regions.
+
+We are often interested in the **class proportions** at each leaf, not just the predicted class. These give a sense of prediction confidence: a leaf where 95% of observations share one class is more reliable than a 60/40 split.
+
+---
+
+## {#checkin-pure-leaf-q data-menu-title="Check-in: most pure leaf"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: cls-tree-pure-q
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.3, fig_size_y + 0.8))
+plot_tree(tree_c2, feature_names=['rainfall', 'temperature'],
+          class_names=cls_names, filled=True, rounded=True,
+          impurity=False, fontsize=9, ax=ax, precision=1)
+ax.set_title('Depth-2 classification tree — biome prediction')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="43%"}
+
+::: {.teal-text .body-text-m}
+Looking at the classification tree, which leaf has the most confident predictions? Which would you say is the most "pure" and why?
+:::
+
+:::
+
+::::
+
+---
+
+## {#checkin-pure-leaf-a data-menu-title="Check-in: most pure leaf (answer)"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: cls-tree-pure-a
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.3, fig_size_y + 0.8))
+plot_tree(tree_c2, feature_names=['rainfall', 'temperature'],
+          class_names=cls_names, filled=True, rounded=True,
+          impurity=False, fontsize=9, ax=ax, precision=1)
+ax.set_title('Depth-2 classification tree — biome prediction')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::
+
+::: {.column width="43%"}
+
+::: {.teal-text .body-text-m}
+Which leaf is most pure?
+:::
+
+::: {.body-text-s}
+The **forest leaf** (leftmost, green). All training observations in that region belong to the same class — forest — so the predicted class proportion is 1.0 for forest and 0.0 for all others.
+
+The tree is maximally confident there: no ambiguity in the prediction.
+
+In contrast, the other leaves contain a mix of classes, making their predictions less reliable.
+:::
+
+:::
+
+::::
+
+---
+
+## {#gini-impurity data-menu-title="Gini impurity"}
+
+[Gini impurity]{.slide-title}
+
+<hr>
+
+The most common splitting criterion for classification trees is the **Gini impurity index**: a measure of how mixed the classes are in a given region.
+
+<br>
+
+- A region where **all observations belong to the same class** → Gini impurity = 0 (perfectly pure)
+- The **more evenly** observations are spread across classes → higher impurity
+
+. . .
+
+<br>
+
+At each step, recursive binary splitting searches for the variable and threshold that produce the **purest child regions** — that is, the split that most reduces impurity.
+
+**Entropy** is another common impurity measure that behaves similarly and tends to produce very similar trees in practice.
+
+---
+
+## {#section-vs-linear data-menu-title="# Trees vs linear models #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Trees vs. linear models</p>
+</div>
+
+---
+
+## {#trees-vs-linear-concept data-menu-title="Trees vs linear models"}
+
+[Trees vs. linear models]{.slide-title}
+
+<hr>
+
+Decision trees and linear models capture fundamentally different types of relationships:
+
+- **Linear models** (regression, ridge, lasso): assume the response changes **smoothly and approximately linearly** with the predictors
+- **Decision trees**: make no such assumption — they partition the predictor space into **rectangular regions** with constant predictions
+
+. . .
+
+<br>
+
+::: {.teal-text .body-text-m}
+Trees naturally capture **nonlinear, step-like relationships** that linear models cannot fit well.
+
+Linear models perform better when the true relationship is approximately **linear and smooth**.
+:::
+
+---
+
+## {#linear-vs-tree-slide data-menu-title="Trees vs linear models: example"}
+
+[Trees vs. linear models: example]{.slide-title}
+
+<hr>
+
+Synthetic data where Y depends on temperature in a **step-function** pattern:
+
+```{python}
+#| label: linear-vs-tree-slide
+#| echo: false
+#| fig-align: center
+#| out-width: "88%"
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.4, fig_size_y))
+for ax, model, label, col in zip(
+        axes,
+        [lr_nl,   tree_nl],
+        ['Linear regression', 'Decision tree (depth 2)'],
+        ['tomato', 'steelblue']):
+    ax.scatter(temp_nl, y_nl, s=18, color='gray', alpha=0.5, zorder=2)
+    ax.plot(temp_range_nl, model.predict(temp_range_nl.reshape(-1, 1)),
+            color=col, lw=2.5, zorder=3, label=label)
+    ax.set_xlabel('Temperature (°C)')
+    ax.set_ylabel('Y')
+    ax.set_title(label)
+    ax.legend(fontsize=9)
+    ax.grid(True, alpha=0.3)
+    ax.set_xlim(-1, 36)
+plt.suptitle('Linear regression vs. decision tree on a nonlinear dataset')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#summary-table data-menu-title="Summary: trees vs linear models"}
+
+[Trees vs. linear models: summary]{.slide-title}
+
+<hr>
+
+| | Decision Trees | Linear Models |
+|---|---|---|
+| **Interpretability** | Very high — easy to visualize | Moderate — coefficients interpretable |
+| **Nonlinear relationships** | Handles them naturally | Requires feature engineering |
+| **Prediction accuracy** | Often lower | Competitive when relationship is linear |
+| **Variance** | High — sensitive to small changes | Generally lower |
+| **Variable selection** | Implicit (splits on useful variables) | Requires explicit methods (e.g., lasso) |
