@@ -173,38 +173,6 @@ These notes are based on chapter 8.1 of *An Introduction to Statistical Learning
 
 ## Regression trees
 
-```{python}
-#| label: tree-2node-8
-#| fig-align: center
-
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.5, fig_size_y + 0.4))
-
-# ── Left: decision regions ─────────────────────────────────────────────────────
-ax = axes[0]
-im = ax.contourf(RR, TT, Z_d2, alpha=0.28, cmap='viridis', levels=20)
-ax.contour(RR, TT, Z_d2, colors='#333', linewidths=1.5, linestyles='--', levels=5)
-ax.scatter(df['rainfall'], df['temperature'],
-           s=50, color='steelblue', edgecolors='white', linewidths=0.8, zorder=5)
-
-ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
-ax.set_xlabel('Annual rainfall (mm)')
-ax.set_ylabel('Mean temperature (°C)')
-ax.set_title('Depth-2 tree: two splits, up to 4 regions')
-ax.grid(True, alpha=0.2)
-plt.colorbar(im, ax=ax, label='Predicted biomass (t/ha)', shrink=0.9)
-
-# ── Right: tree diagram ────────────────────────────────────────────────────────
-plot_tree(tree_d2,
-          feature_names=feat_names_reg,
-          filled=True, rounded=True, impurity=False,
-          fontsize=9, ax=axes[1], precision=1)
-axes[1].set_title('Fitted depth-2 regression tree')
-
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
 ### A guiding dataset
 
 We will use a small dataset of 22 ecological survey sites throughout this section. Each site is characterized by:
@@ -792,7 +760,7 @@ The figure below shows how multiple rainfall splits would look like and how the 
 example_splits = [350, split1_val, 820]
 titles = [
     f'Split at rainfall = 350 mm  (RSS = {((y[rainfall<=350]-y[rainfall<=350].mean())**2).sum() + ((y[rainfall>350]-y[rainfall>350].mean())**2).sum():.2f})',
-    f'Split at rainfall = {split1_val:.0f} mm  (optimal)',
+    f'Split at rainfall = {split1_val:.0f} mm  (RSS = {((y[rainfall<=split1_val]-y[rainfall<=split1_val].mean())**2).sum() + ((y[rainfall>split1_val]-y[rainfall>split1_val].mean())**2).sum():.2f}, optimal)',
     f'Split at rainfall = 820 mm  (RSS = {((y[rainfall<=820]-y[rainfall<=820].mean())**2).sum() + ((y[rainfall>820]-y[rainfall>820].mean())**2).sum():.2f})',
 ]
 
@@ -1006,7 +974,8 @@ for tv in temp_candidates_left:
         rss_temp.append(np.nan)
         continue
     rss_temp.append(((lower - lower.mean())**2).sum()
-                  + ((upper - upper.mean())**2).sum())
+                  + ((upper - upper.mean())**2).sum()
+                  + rss_right)
 rss_temp = np.array(rss_temp)
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
@@ -1014,7 +983,7 @@ ax.plot(temp_candidates_left, rss_temp, color='steelblue', lw=2)
 ax.axvline(split2_val, color='tomato', lw=1.8, linestyle='--',
            label=f'Optimal split ≈ {split2_val:.1f} °C')
 ax.set_xlabel('Temperature split threshold (°C)')
-ax.set_ylabel('RSS (within left region)')
+ax.set_ylabel('Total RSS')
 ax.set_title('RSS as a function of the temperature split threshold (left region)')
 ax.legend(fontsize=9)
 ax.grid(True, alpha=0.3)
