@@ -76,7 +76,7 @@ Z_d2   = tree_d2.predict(grid_xy).reshape(RR.shape)
 Z_d3   = tree_d3.predict(grid_xy).reshape(RR.shape)
 Z_full = tree_full.predict(grid_xy).reshape(RR.shape)
 
-# ── MSE as a function of split threshold on rainfall ──────────────────────────
+# ── RSS as a function of split threshold on rainfall ──────────────────────────
 split_candidates = np.linspace(250, 950, 200)
 mse_splits       = []
 for sv in split_candidates:
@@ -85,9 +85,9 @@ for sv in split_candidates:
     if len(left) < 2 or len(right) < 2:
         mse_splits.append(np.nan)
         continue
-    mse = (((left  - left.mean()) **2).sum()
-         + ((right - right.mean())**2).sum()) / len(y)
-    mse_splits.append(mse)
+    rss = (((left  - left.mean()) **2).sum()
+         + ((right - right.mean())**2).sum())
+    mse_splits.append(rss)
 mse_splits = np.array(mse_splits)
 
 # ── EcoSite classification dataset ────────────────────────────────────────────
@@ -272,6 +272,8 @@ Each component of the tree plays a specific role:
 - **Internal node**: a non-leaf node that applies an additional split to a subset of observations
 - **Branch**: the connection between twp nodes, representing the path an observation takes based on the split condition.
 
+The **depth** of the tree is the number of nodes along the longest path from the root node down to the farthest leaf node. 
+
 The predicted value at the leaf is the **mean of all training observations that reach this leaf**.
 
 ### Predictions
@@ -294,7 +296,7 @@ We trace the path by checking:
 The observation follows the right branch of the tree because it falls in the high-rainfall region.
 :::
 
-### Node spllits and prediction regions
+### Node splits and prediction regions
 We mentioned previously that in regression trees, the predicted value at the leaf is the mean of all training observations that reach this leaf. It can be useful to visualize this by seeing how each node in the tree splits generates a split the training data.
 
 We begin with our full training dataset:
@@ -561,9 +563,6 @@ plt.show()
 plt.close()
 ```
 
-The figure below shows the 2-node (depth-2) tree, which makes one additional split — this time on temperature within one of the rainfall regions:
-
-
 
 ::: {.callout-tip}
 ## Check-in
@@ -688,59 +687,98 @@ plt.close()
 :::
 
 
+So a regression tree is defined by:
+
+1. **Dividing the predictor space**: the set of all possible values for $X_1, X_2, \ldots, X_p$ — into $J$ non-overlapping rectangular regions $R_1, R_2, \ldots, R_J$.
+
+2. **Assigning a prediction** to each region: for every observation that falls into region $R_j$, the prediction is the **mean of the response values** for the training observations in $R_j$:
+
+$$\hat{y}_{R_j} = \frac{1}{|R_j|} \sum_{i \in R_j} y_i.$$
+
 ### Fitting a regression tree
 
-Fitting the regression tree then means using the training data to find the splits that do a  good job at approximating the real values of the data. We will give an general understanding of how the algorithm finds these splits. 
+Fitting a regression tree means using the training data to find the splits or regions that do a good job at approximating the response variable. We will give an general understanding of how the algorithm finds these splits. 
 
-We start with a simple 1-node tree, a tree with only the root node and two leaf nodes. This tree makes a single split on one predictor.
+Start with a region $R_1$ defined by your regression tree and let
 
-The figure below shows a 1-node tree fitted on the example data. On the left we see how the split divides the predictor space; on the right, the tree diagram.
+$$\hat{y}_{R_1} = \text{mean response of the observations in } R_1.$$
+
+Then every other point that falls in $R_1$ will be assigned $\hat{y}_{R_1}$ as its prediction.
+
+ We can measure how well $\hat{y}_{R_1}$ estimates the values for the observations in $R_1$ by calculating
+
+$$\sum_{i\in R_j}(y_i - \hat{y}_{R_j})^2.$$
+
+If we calculate this error term for each region $R_1, \ldots, R_J$ defined by the tree we will get an RSS measuring how well the tree fits the data:
+
+$$RSS = \sum_{j=1}^J\sum_{i\in R_j}(y_i - \hat{y}_{R_j})^2.$$
+
+So, for a given configuration of regions, we have a way of assigning an error term. 
+
+The regions are then found using **recursive binary splitting**: 
+
+1. Starting from the full dataset, at each step the algorithm searches over all predictors and all possible split thresholds to find the single split that most reduces the RSS. 
+2. Repeat this process within each resulting region and...
+3. Stop once you meet a stopping criterion, e.g.: a maximum depth is reached or a region contains too few observations to split further.
+
+
+<!-- ::: {.callout-note}
+## Why "recursive binary splitting"?
+**Binary** because every split creates exactly two child regions. **Recursive** because the same procedure is applied again within each region. This is also called a **greedy** algorithm: at each step, the locally best split is chosen without considering whether a different split now might lead to a better tree in future steps.
+::: -->
+
+For example, to create the first node in the tree, the algorithm:
+1. evaluates every possible split threshold on every predictor and 
+2. chooses the combination that minimizes the total residual sum of squares (RSS) across the two resulting regions. 
+
+The figure below shows how a grid with the training data with multiple rainfall split thresholds and how the RSS changes as we move the split threshold along the rainfall axis:
 
 ```{python}
-#| label: tree-1node
+#| label: split-threshold-examples
 #| fig-align: center
 
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.5, fig_size_y + 0.4))
+example_splits = [350, split1_val, 820]
+titles = [
+    f'Split at rainfall = 350 mm  (RSS = {((y[rainfall<=350]-y[rainfall<=350].mean())**2).sum() + ((y[rainfall>350]-y[rainfall>350].mean())**2).sum():.2f})',
+    f'Split at rainfall = {split1_val:.0f} mm  (optimal)',
+    f'Split at rainfall = 820 mm  (RSS = {((y[rainfall<=820]-y[rainfall<=820].mean())**2).sum() + ((y[rainfall>820]-y[rainfall>820].mean())**2).sum():.2f})',
+]
 
-# ── Left: scatter with decision boundary ───────────────────────────────────────
-ax = axes[0]
-ax.axvspan(150, split1_val, alpha=0.18, color='steelblue')
-ax.axvspan(split1_val, 1050, alpha=0.18, color='seagreen')
-ax.axvline(split1_val, color='tomato', lw=2, linestyle='--',
-           label=f'Split: rainfall = {split1_val:.0f} mm')
-ax.scatter(df['rainfall'], df['temperature'],
-           s=50, color='steelblue', edgecolors='white', linewidths=0.8, zorder=5)
+fig, axes = plt.subplots(3, 1, figsize=(fig_size_x * 0.704, (fig_size_y + 0.5) * 2.112))
 
-# Region mean labels
-lm = y[rainfall <= split1_val].mean()
-rm = y[rainfall >  split1_val].mean()
-ax.text(split1_val * 0.52, 23.5, f'mean = {lm:.1f} t/ha',
-        ha='center', fontsize=9, color='steelblue', fontweight='bold')
-ax.text((split1_val + 1050) * 0.5, 23.5, f'mean = {rm:.1f} t/ha',
-        ha='center', fontsize=9, color='seagreen', fontweight='bold')
+for ax, sv, title in zip(axes, example_splits, titles):
+    lm = y[rainfall <= sv].mean()
+    rm = y[rainfall >  sv].mean()
+    rss = (((y[rainfall<=sv] - lm)**2).sum() + ((y[rainfall>sv] - rm)**2).sum())
 
-ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
-ax.set_xlabel('Annual rainfall (mm)')
-ax.set_ylabel('Mean temperature (°C)')
-ax.set_title('1-node tree: one split on rainfall')
-ax.legend(fontsize=9)
-ax.grid(True, alpha=0.3)
+    ax.axvspan(150, sv,   alpha=0.22, color='steelblue')
+    ax.axvspan(sv,  1050, alpha=0.22, color='seagreen')
+    ax.axvline(sv, color='tomato', lw=2, linestyle='--',
+               label=f'Split = {sv:.0f} mm   RSS = {rss:.2f}')
+    ax.scatter(df['rainfall'], df['temperature'],
+               s=60, color='steelblue', zorder=5, alpha=0.85,
+               edgecolors='white', linewidths=0.8)
+    for _, row in df.iterrows():
+        ax.annotate(f'{row.biomass:.1f}',
+                    (row.rainfall, row.temperature),
+                    textcoords='offset points', xytext=(5, 3),
+                    fontsize=8, color='#222')
 
-# ── Right: tree diagram ────────────────────────────────────────────────────────
-plot_tree(tree_d1,
-          feature_names=feat_names_reg,
-          filled=True, rounded=True, impurity=False,
-          fontsize=10, ax=axes[1], precision=1)
-axes[1].set_title('Fitted 1-node regression tree')
+    ax.text((150 + sv) / 2,  24.5, f'mean = {lm:.1f}',
+            ha='center', fontsize=9, color='steelblue', fontweight='bold')
+    ax.text((sv + 1050) / 2, 24.5, f'mean = {rm:.1f}',
+            ha='center', fontsize=9, color='seagreen',   fontweight='bold')
+
+    ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+    ax.set_xlabel('Annual rainfall (mm)')
+    ax.set_ylabel('Mean temperature (°C)')
+    ax.set_title(title)
+    ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
-
-The mean biomass of the `{python} int((rainfall <= split1_val).sum())` sites in the **left region** (rainfall ≤ `{python} f"{split1_val:.0f}"` mm) is **`{python} f"{y[rainfall <= split1_val].mean():.1f}"` t/ha**, and for the `{python} int((rainfall > split1_val).sum())` sites in the **right region** (rainfall > `{python} f"{split1_val:.0f}"` mm) it is **`{python} f"{y[rainfall > split1_val].mean():.1f}"` t/ha**.
-
-**Why this split point?** The algorithm evaluates every possible split threshold on every predictor and chooses the combination that minimizes the total residual sum of squares (RSS) across the two resulting regions. The figure below shows how the RSS changes as we move the split threshold along the rainfall axis:
 
 ```{python}
 #| label: mse-split
@@ -751,7 +789,7 @@ ax.plot(split_candidates, mse_splits, color='steelblue', lw=2)
 ax.axvline(split1_val, color='tomato', lw=1.8, linestyle='--',
            label=f'Optimal split ≈ {split1_val:.0f} mm')
 ax.set_xlabel('Rainfall split threshold (mm)')
-ax.set_ylabel('Mean squared error (within-region)')
+ax.set_ylabel('RSS (within-region)')
 ax.set_title('RSS as a function of the split threshold on rainfall')
 ax.legend(fontsize=9)
 ax.grid(True, alpha=0.3)
@@ -760,117 +798,290 @@ plt.show()
 plt.close()
 ```
 
-After finding the best first split, the algorithm then considers splitting **each of the two resulting regions** again. The best second split (evaluated independently within each region) adds a second node to the tree.
+This is how we get  a 1-node tree fitted on the example data. On the left we see how the split divides the predictor space; on the right, the tree diagram.
 
-The figure below shows the 2-node (depth-2) tree, which makes one additional split — this time on temperature within one of the rainfall regions:
 
 ```{python}
-#| label: tree-2node
+#| label: tree-1node
 #| fig-align: center
 
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.5, fig_size_y + 0.4))
+lm = y[rainfall <= split1_val].mean()
+rm = y[rainfall >  split1_val].mean()
 
-# ── Left: decision regions ─────────────────────────────────────────────────────
-ax = axes[0]
-im = ax.contourf(RR, TT, Z_d2, alpha=0.28, cmap='viridis', levels=20)
-ax.contour(RR, TT, Z_d2, colors='#333', linewidths=1.5, linestyles='--', levels=5)
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+
+ax.axvspan(150, split1_val, alpha=0.22, color='steelblue')
+ax.axvspan(split1_val, 1050, alpha=0.22, color='seagreen')
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--',
+           label=f'Split: rainfall = {split1_val:.0f} mm')
 ax.scatter(df['rainfall'], df['temperature'],
-           s=50, color='steelblue', edgecolors='white', linewidths=0.8, zorder=5)
-
-ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
-ax.set_xlabel('Annual rainfall (mm)')
-ax.set_ylabel('Mean temperature (°C)')
-ax.set_title('Depth-2 tree: two splits, up to 4 regions')
-ax.grid(True, alpha=0.2)
-plt.colorbar(im, ax=ax, label='Predicted biomass (t/ha)', shrink=0.9)
-
-# ── Right: tree diagram ────────────────────────────────────────────────────────
-plot_tree(tree_d2,
-          feature_names=feat_names_reg,
-          filled=True, rounded=True, impurity=False,
-          fontsize=9, ax=axes[1], precision=1)
-axes[1].set_title('Fitted depth-2 regression tree')
-
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-::: {.callout-tip}
-## Check-in
-
-The text output below shows the decision rules of the depth-2 tree:
-
-```{python}
-#| label: tree-2node-text
-
-print(export_text(tree_d2, feature_names=feat_names_reg))
-```
-
-1. **Draw the decision boundaries**: on a sketch of the `rainfall` vs. `temperature` predictor space, draw the split lines corresponding to each split in the tree above.
-
-2. **Fill in the leaf values**: using the labeled scatter plot at the top of this section, identify which observations fall into each region and compute the mean biomass. Do these match the leaf values shown in the tree?
-:::
-
-::: {.callout-tip collapse="true"}
-## Discussion
-
-```{python}
-#| label: tree-2node-regions
-#| fig-align: center
-
-# Compute per-region means to annotate the plot
-preds_d2 = tree_d2.predict(X)
-regions   = np.unique(preds_d2)
-
-fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.3))
-im = ax.contourf(RR, TT, Z_d2, alpha=0.28, cmap='viridis', levels=20)
-ax.contour(RR, TT, Z_d2, colors='#333', linewidths=1.8, linestyles='--', levels=5)
-ax.scatter(df['rainfall'], df['temperature'],
-           s=55, color='steelblue', edgecolors='white', linewidths=0.8, zorder=5)
+           s=70, color='steelblue', zorder=5, alpha=0.85,
+           edgecolors='white', linewidths=1)
 for _, row in df.iterrows():
     ax.annotate(f'{row.biomass:.1f}',
                 (row.rainfall, row.temperature),
-                textcoords='offset points', xytext=(5, 3), fontsize=8, color='#111')
+                textcoords='offset points', xytext=(6, 4),
+                fontsize=8.5, color='#222')
 
-# Annotate each region with the leaf value
-for r in regions:
-    mask = preds_d2 == r
-    cx   = df.loc[mask, 'rainfall'].mean()
-    cy   = df.loc[mask, 'temperature'].mean()
-    ax.text(cx, cy, f'Ŷ = {r:.1f}', fontsize=10, ha='center', va='center',
-            color='white', fontweight='bold',
-            bbox=dict(boxstyle='round,pad=0.3', facecolor='#333', alpha=0.6))
+# Region mean labels as overlaid boxes
+ax.text((150 + split1_val) / 2, 14.5, f'mean = {lm:.1f} t/ha',
+        ha='center', fontsize=10, color='white', fontweight='bold',
+        bbox=dict(boxstyle='round,pad=0.3', facecolor='steelblue', alpha=0.7))
+ax.text((split1_val + 1050) / 2, 14.5, f'mean = {rm:.1f} t/ha',
+        ha='center', fontsize=10, color='white', fontweight='bold',
+        bbox=dict(boxstyle='round,pad=0.3', facecolor='seagreen', alpha=0.7))
 
 ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
 ax.set_xlabel('Annual rainfall (mm)')
 ax.set_ylabel('Mean temperature (°C)')
-ax.set_title('Decision regions with leaf predictions')
-ax.grid(True, alpha=0.2)
+ax.set_title(f'1-node tree: optimal split at rainfall = {split1_val:.0f} mm')
+ax.legend(fontsize=9, loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=1)
+ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
-The colored regions correspond to the four leaves of the depth-2 tree. Each region's predicted value (white label) is the mean biomass of the training sites that fall in that region — exactly what the tree reports as its leaf values.
-:::
+```{python}
+#| label: tree-1node-diagram
+#| fig-align: center
 
-### How the algorithm works
+# 1-node tree: root + 2 leaves (Yes=right convention)
+# left_leaf_val  = mean for rainfall ≤ split1_val (Yes branch, visual right)
+# right_leaf_val = mean for rainfall >  split1_val (No branch,  visual left)
 
-So a regression tree is fitted by:
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88 * (3.4 / 5.8)))
+ax.set_xlim(0, 11); ax.set_ylim(2.1, 5.5)
+ax.axis('off')
 
-1. **Dividing the predictor space** — the set of all possible values for $X_1, X_2, \ldots, X_p$ — into $J$ non-overlapping rectangular regions $R_1, R_2, \ldots, R_J$.
+# Branches from root
+for px, py, cx, cy, lbl, lbl_side in [
+        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
+        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+    ax.plot([px, cx], [py - 0.36, cy + 0.36], color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
 
-2. **Assigning a prediction** to each region: for every observation that falls into region $R_j$, the prediction is the **mean of the response values** for the training observations in $R_j$:
+draw_node(ax, 5.5, 4.7,
+          f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, 3.0, 2.8,
+          f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')   # No: rainfall >
+draw_node(ax, 8.0, 2.8,
+          f'Ŷ = {left_leaf_val:.1f} t/ha',  color='#d5f5e3')   # Yes: rainfall ≤
 
-$$\hat{y}_{R_j} = \frac{1}{|R_j|} \sum_{i \in R_j} y_i$$
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
-The regions are found using **recursive binary splitting**: starting from the full dataset, at each step the algorithm searches over all predictors and all possible split thresholds to find the single split that most reduces the RSS. This process is repeated within each resulting region until a stopping criterion is met (e.g., a maximum depth is reached or a region contains too few observations to split further).
+After finding the best first split, the algorithm then considers splitting **each of the two resulting regions** again. The best second split (evaluated independently within each region) adds a second node to the tree.
 
-::: {.callout-note}
-## Why "recursive binary splitting"?
-**Binary** because every split creates exactly two child regions. **Recursive** because the same procedure is applied again within each region. This is also called a **greedy** algorithm: at each step, the locally best split is chosen without considering whether a different split now might lead to a better tree in future steps.
-:::
+```{python}
+#| label: temp-threshold-examples
+#| fig-align: center
+
+left_mask  = rainfall <= split1_val
+y_left     = y[left_mask]
+temp_left  = temperature[left_mask]
+y_right    = y[~left_mask]
+rss_right  = ((y_right - y_right.mean())**2).sum()   # fixed across all temp splits
+
+example_temps = [10.0, split2_val, 22.0]
+
+fig, axes = plt.subplots(3, 1, figsize=(fig_size_x * 0.704, (fig_size_y + 0.5) * 2.112))
+
+for ax, tv in zip(axes, example_temps):
+    lower_y  = y_left[temp_left <= tv]
+    upper_y  = y_left[temp_left >  tv]
+    rss_total = (((lower_y - lower_y.mean())**2).sum()
+               + ((upper_y - upper_y.mean())**2).sum()
+               + rss_right)
+
+    # Three colored regions
+    ax.fill_between([150, split1_val], [3, 3],  [tv, tv],
+                    alpha=0.25, color='steelblue')
+    ax.fill_between([150, split1_val], [tv, tv], [26, 26],
+                    alpha=0.25, color='#e07b39')
+    ax.axvspan(split1_val, 1050, alpha=0.22, color='seagreen')
+
+    # Split boundary lines
+    ax.axvline(split1_val, color='tomato',  lw=1.5, linestyle='--')
+    ax.plot([150, split1_val], [tv, tv],
+            color='darkorange', lw=2, linestyle='--',
+            label=f'Temp split = {tv:.1f} °C')
+
+    ax.scatter(df['rainfall'], df['temperature'],
+               s=60, color='steelblue', zorder=5, alpha=0.85,
+               edgecolors='white', linewidths=0.8)
+    for _, row in df.iterrows():
+        ax.annotate(f'{row.biomass:.1f}',
+                    (row.rainfall, row.temperature),
+                    textcoords='offset points', xytext=(5, 3),
+                    fontsize=8, color='#222')
+
+    # Mean labels for the two left sub-regions
+    if len(lower_y) > 0:
+        ax.text((150 + split1_val) / 2, (3 + tv) / 2,
+                f'mean = {lower_y.mean():.1f}',
+                ha='center', fontsize=9, color='steelblue', fontweight='bold')
+    if len(upper_y) > 0:
+        ax.text((150 + split1_val) / 2, (tv + 26) / 2,
+                f'mean = {upper_y.mean():.1f}',
+                ha='center', fontsize=9, color='#e07b39', fontweight='bold')
+
+    ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+    ax.set_xlabel('Annual rainfall (mm)')
+    ax.set_ylabel('Mean temperature (°C)')
+    ax.set_title(f'Temperature split = {tv:.1f} °C  |  Total RSS = {rss_total:.2f}')
+    ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+```{python}
+#| label: rss-temp-split
+#| fig-align: center
+
+temp_candidates_left = np.linspace(temp_left.min() + 0.5, temp_left.max() - 0.5, 200)
+rss_temp = []
+for tv in temp_candidates_left:
+    lower = y_left[temp_left <= tv]
+    upper = y_left[temp_left >  tv]
+    if len(lower) < 2 or len(upper) < 2:
+        rss_temp.append(np.nan)
+        continue
+    rss_temp.append(((lower - lower.mean())**2).sum()
+                  + ((upper - upper.mean())**2).sum())
+rss_temp = np.array(rss_temp)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
+ax.plot(temp_candidates_left, rss_temp, color='steelblue', lw=2)
+ax.axvline(split2_val, color='tomato', lw=1.8, linestyle='--',
+           label=f'Optimal split ≈ {split2_val:.1f} °C')
+ax.set_xlabel('Temperature split threshold (°C)')
+ax.set_ylabel('RSS (within left region)')
+ax.set_title('RSS as a function of the temperature split threshold (left region)')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The figure below shows a depth 2 tree, which makes one additional split this time on temperature within one of the rainfall regions:
+
+
+```{python}
+#| label: split-regions-2
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.88, (fig_size_y + 0.5) * 0.88))
+
+# Same three colored regions as split-2
+ax.fill_between([150, split1_val], [3, 3], [split2_val, split2_val],
+                alpha=0.25, color='steelblue')
+ax.fill_between([150, split1_val], [split2_val, split2_val], [26, 26],
+                alpha=0.25, color='#e07b39')
+ax.axvspan(split1_val, 1050, alpha=0.25, color='seagreen')
+
+# Same split boundary lines
+ax.axvline(split1_val, color='tomato', lw=2, linestyle='--')
+ax.plot([150, split1_val], [split2_val, split2_val],
+        color='darkorange', lw=2, linestyle='--')
+
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85,
+           edgecolors='white', linewidths=1)
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}',
+                (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4),
+                fontsize=8.5, color='#222')
+
+# Annotate the three visual regions with their mean biomass
+visual_regions = {
+    'left-lower': (rainfall <= split1_val) & (temperature <= split2_val),
+    'left-upper': (rainfall <= split1_val) & (temperature >  split2_val),
+    'right':       rainfall >  split1_val,
+}
+region_centers = {
+    'left-lower': ((150 + split1_val) / 2, (3 + split2_val) / 2),
+    'left-upper': ((150 + split1_val) / 2, (split2_val + 26) / 2),
+    'right':      ((split1_val + 1050) / 2, (3 + 26) / 2),
+}
+for name, mask in visual_regions.items():
+    mean_val = y[mask].mean()
+    cx, cy   = region_centers[name]
+    ax.text(cx, cy, f'mean = {mean_val:.1f}', fontsize=10, ha='center', va='center',
+            color='white', fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='#333', alpha=0.65))
+
+ax.set_xlim(150, 1050); ax.set_ylim(3, 26)
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Leaf regions with mean biomass predictions')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
+```{python}
+#| label: tree-full-repeat-2
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.232, (fig_size_y + 1.2) * 0.88))
+ax.set_xlim(0, 11); ax.set_ylim(-0.3, 5.5)
+ax.axis('off')
+
+nodes_f = dict(root=(5.5, 4.7), left=(3, 2.8), right=(8, 2.8))
+
+# Branches from root
+for px, py, cx, cy, lbl, lbl_side in [
+        (5.5, 4.7, 3.0, 2.8, 'No',  'left'),
+        (5.5, 4.7, 8.0, 2.8, 'Yes', 'right')]:
+    ax.plot([px, cx], [py - 0.36, cy + 0.36],
+            color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+# Branches from left internal node
+for cx, cy, lbl, lbl_side in [
+        (1.4, 1.0, 'No',  'left'),
+        (4.6, 1.0, 'Yes', 'right')]:
+    px, py = nodes_f['left']
+    ax.plot([px, cx], [py - 0.36, cy + 0.36],
+            color='#555', lw=1.8, zorder=2)
+    mx, my = (px + cx) / 2, (py - 0.36 + cy + 0.36) / 2
+    offset = -0.35 if lbl_side == 'left' else 0.35
+    ax.text(mx + offset, my, lbl, fontsize=9, color='#555',
+            ha='center', va='center', style='italic')
+
+draw_node(ax, 5.5, 4.7,
+          f'rainfall ≤ {split1_val:.0f} mm?', color='#d6eaf8', bold=True)
+draw_node(ax, 3.0, 2.8,
+          f'temperature ≤ {split2_val:.1f} °C?', color='#d6eaf8')
+draw_node(ax, 8.0, 2.8,
+          f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
+draw_node(ax, 1.4, 1.0,
+          f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
+draw_node(ax, 4.6, 1.0,
+          f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
+We can continue adding nodes to our tree in this manner until a stopping criterion is reached. For example, maximu depth, or a minimum number of observations within each region. 
 
 ## Dealing with overfitting
 
@@ -1195,12 +1406,6 @@ The table below summarizes the key advantages and disadvantages of decision tree
 |---|---|---|
 | **Interpretability** | Very high — easy to visualize and explain | Moderate — coefficients can be interpreted |
 | **Nonlinear relationships** | Handles them naturally | Requires feature engineering (e.g., polynomial terms) |
-| **Interactions** | Captured automatically | Must be specified explicitly |
 | **Prediction accuracy** | Often lower than other methods | Competitive when the true relationship is linear |
 | **Variance** | High — sensitive to small changes in training data | Generally lower |
 | **Variable selection** | Implicit (splits only on useful variables) | Requires explicit methods (e.g., lasso) |
-
-::: {.callout-note}
-## Looking ahead
-The high variance of individual decision trees is their main weakness. In future lessons we will see how this limitation is addressed by **ensemble methods** — combining many trees to produce a much more stable and accurate predictor. Two important ensemble methods are **random forests** (which average many independently-grown trees) and **gradient boosting** (which builds trees sequentially to correct the errors of earlier trees).
-:::
