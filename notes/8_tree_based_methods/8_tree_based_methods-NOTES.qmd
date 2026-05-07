@@ -518,9 +518,9 @@ draw_node(ax, 3.0, 2.8,
 draw_node(ax, 8.0, 2.8,
           f'Ŷ = {right_leaf_val:.1f} t/ha', color='#d5f5e3')
 draw_node(ax, 1.4, 1.0,
-          f'Ŷ = {left_leaf_val * 0.93:.1f} t/ha', color='#d5f5e3', w=2.2)
+          f'Ŷ = 3.2 t/ha', color='#d5f5e3', w=2.2)
 draw_node(ax, 4.6, 1.0,
-          f'Ŷ = {left_leaf_val * 1.12:.1f} t/ha', color='#d5f5e3', w=2.2)
+          f'Ŷ = 2.4 t/ha', color='#d5f5e3', w=2.2)
 
 plt.tight_layout()
 plt.show()
@@ -1160,17 +1160,20 @@ def boundary_mask(Z):
     b[:, :-1] += (Z[:, 1:] != Z[:, :-1]).astype(float)
     return b
 
+bnd_v1   = boundary_mask(Zv1)
 bnd_v3   = boundary_mask(Zv3)
 bnd_full = boundary_mask(Zvfull)
 bnd_deep = np.where(bnd_v3 > 0, 0, bnd_full)   # boundaries only in full tree (depth 4+)
 
-for ax, Z, title, tr_mse in zip(axes, Zs_hr, titles, train_mse):
+panel_bnds = [bnd_v1, bnd_v3, bnd_v3]   # per-panel primary boundary mask
+
+for ax, Z, bnd, title, tr_mse in zip(axes, Zs_hr, panel_bnds, titles, train_mse):
     ax.pcolormesh(RR_hr, TT_hr, Z, cmap=cmap, norm=norm, alpha=0.35, shading='auto')
 
     is_full = (title == 'Full tree (no limit)')
 
-    # Depth ≤ 3 boundaries: thick dashed (same in all panels)
-    ax.contour(RR_hr, TT_hr, bnd_v3, levels=[0.5],
+    # Primary boundaries for this panel
+    ax.contour(RR_hr, TT_hr, bnd, levels=[0.5],
                colors='#333', linewidths=1.4, linestyles='--')
 
     # Depth 4+ boundaries: thin dotted, only on the full tree panel
@@ -1191,6 +1194,42 @@ plt.suptitle('Decision regions for trees of increasing depth', y=1.01)
 plt.tight_layout()
 plt.show()
 plt.close()
+```
+
+```{python}
+#| label: full-tree-diagram
+#| fig-align: center
+
+from sklearn.tree import export_text
+
+# Visual diagram of the full tree
+fig, ax = plt.subplots(figsize=(fig_size_x * 2.5, fig_size_y * 2))
+plot_tree(tree_vfull, feature_names=['rainfall', 'temperature'],
+          filled=True, rounded=True, fontsize=7, ax=ax)
+ax.set_title('Full regression tree (no depth limit)', fontsize=10)
+plt.tight_layout()
+plt.show()
+plt.close()
+
+# Plain-text representation
+print(export_text(tree_vfull, feature_names=['rainfall', 'temperature']))
+```
+
+```{python}
+#| label: depth3-tree-diagram
+#| fig-align: center
+
+# Visual diagram of the depth-3 tree
+fig, ax = plt.subplots(figsize=(fig_size_x * 2, fig_size_y * 1.5))
+plot_tree(tree_v3, feature_names=['rainfall', 'temperature'],
+          filled=True, rounded=True, fontsize=8, ax=ax)
+ax.set_title('Regression tree with max_depth = 3', fontsize=10)
+plt.tight_layout()
+plt.show()
+plt.close()
+
+# Plain-text representation
+print(export_text(tree_v3, feature_names=['rainfall', 'temperature']))
 ```
 
 ::: {.callout-tip}
