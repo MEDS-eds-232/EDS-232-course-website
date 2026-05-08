@@ -8,7 +8,7 @@
 
 <meta name="dcterms.date" content="2026-05-08">
 
-<title>Assignment 2 – EDS 232 - Machine Learning for Environmental Science</title>
+<title>Assignment 3 – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -236,13 +236,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#how-to-submit-via-github-to-gradescope" id="toc-how-to-submit-via-github-to-gradescope" class="nav-link" data-scroll-target="#how-to-submit-via-github-to-gradescope">How to Submit via GitHub to Gradescope</a></li>
   <li><a href="#how-the-otter-grader-works" id="toc-how-the-otter-grader-works" class="nav-link" data-scroll-target="#how-the-otter-grader-works">How the Otter Grader Works</a></li>
   <li><a href="#ai-policy" id="toc-ai-policy" class="nav-link" data-scroll-target="#ai-policy">AI Policy</a></li>
-  <li><a href="#task-1-potential-problems-in-linear-regression" id="toc-task-1-potential-problems-in-linear-regression" class="nav-link" data-scroll-target="#task-1-potential-problems-in-linear-regression">Task 1: Potential problems in linear regression</a>
+  <li><a href="#task-1-regularization" id="toc-task-1-regularization" class="nav-link" data-scroll-target="#task-1-regularization">Task 1: Regularization</a>
+  <ul class="collapse">
+  <li><a href="#predicting-building-heat-load-with-ridge-lasso-and-pca." id="toc-predicting-building-heat-load-with-ridge-lasso-and-pca." class="nav-link" data-scroll-target="#predicting-building-heat-load-with-ridge-lasso-and-pca.">Predicting Building Heat Load with Ridge, Lasso, and PCA.</a></li>
+  </ul></li>
+  <li><a href="#task-2-decision-trees-and-random-forests" id="toc-task-2-decision-trees-and-random-forests" class="nav-link" data-scroll-target="#task-2-decision-trees-and-random-forests">Task 2: Decision Trees and Random Forests</a>
+  <ul class="collapse">
+  <li><a href="#classifying-potable-non-potable-water" id="toc-classifying-potable-non-potable-water" class="nav-link" data-scroll-target="#classifying-potable-non-potable-water">Classifying Potable/ Non Potable Water</a></li>
+  </ul></li>
+  <li><a href="#task-3-considerations-in-high-dimensions" id="toc-task-3-considerations-in-high-dimensions" class="nav-link" data-scroll-target="#task-3-considerations-in-high-dimensions">Task 3: Considerations in High Dimensions</a>
   <ul class="collapse">
   <li><a href="#rubric" id="toc-rubric" class="nav-link" data-scroll-target="#rubric">Rubric</a></li>
-  </ul></li>
-  <li><a href="#task-2-classification" id="toc-task-2-classification" class="nav-link" data-scroll-target="#task-2-classification">Task 2: Classification</a>
-  <ul class="collapse">
-  <li><a href="#do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk" id="toc-do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk" class="nav-link" data-scroll-target="#do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk">Do Social and Economic Conditions Predict Whether a Community Has Elevated Asthma Risk?</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -252,8 +256,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Assignment 2</h1>
-<p class="subtitle lead">Classification and Potential Problems in Linear Regression</p>
+<h1 class="title">Assignment 3</h1>
+<p class="subtitle lead">Regularization and Decision Trees</p>
 </div>
 
 
@@ -276,7 +280,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This assignment covers topics from the course on classification, specifically KNN and Logistic Regression. Task 1 will contribute 35% to the total grade and Task 2 will contribute 65%. Review the rubric for this assignment <a href="https://docs.google.com/document/d/1a5_Eu_RZ24BMorTcvYepYpxLLjZdb79rRsCvU7LMaFQ/edit?tab=t.0#heading=h.kx0dpavp3fk4">here</a>.</p>
+<p>This assignment covers topics from the course on regularization,PCA, decision trees, random forest,and high dimensional data. Task 1 and Task 2 will each contribute 45% to the total grade and Task 3 will contribute 10%. Review the rubric for this assignment <a href="https://docs.google.com/document/d/1a5_Eu_RZ24BMorTcvYepYpxLLjZdb79rRsCvU7LMaFQ/edit?tab=t.0#heading=h.kx0dpavp3fk4">here</a>.</p>
 <hr>
 <section id="submission-instructions" class="level2">
 <h2 class="anchored" data-anchor-id="submission-instructions">Submission Instructions</h2>
@@ -310,7 +314,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="callout-body-container">
 <ol type="1">
-<li><strong>Fork</strong> <a href="https://github.com/MEDS-eds-232/assignment-2">this repository</a> from the course GitHub organization.</li>
+<li><strong>Fork</strong> <a href="https://github.com/MEDS-eds-232/assignment-3">this repository</a> from the course GitHub organization.</li>
 <li><strong>Clone</strong> your forked repository to your local machine or the workbench server.</li>
 <li>Complete the tasks inside your cloned repository. Do not move files out of the repo.</li>
 <li>As you work, <strong>commit and push</strong> your changes regularly.</li>
@@ -421,36 +425,59 @@ q6  ❌ failed
 </div>
 <hr>
 </section>
-<section id="task-1-potential-problems-in-linear-regression" class="level1">
-<h1>Task 1: Potential problems in linear regression</h1>
-<p>In this task you will explore common problems that may arise when fitting a linear regression model and use generative AI to create examples that illustrate these issues.</p>
+<section id="task-1-regularization" class="level1">
+<h1>Task 1: Regularization</h1>
+<section id="predicting-building-heat-load-with-ridge-lasso-and-pca." class="level2">
+<h2 class="anchored" data-anchor-id="predicting-building-heat-load-with-ridge-lasso-and-pca.">Predicting Building Heat Load with Ridge, Lasso, and PCA.</h2>
+<p><strong>Follow the instructions in <code>hw3-task1.ipynb</code> to complete this task.</strong> You will practice:</p>
+<ul>
+<li>Preprocessing data with train/test splits and predictor standardization using <code>StandardScaler</code></li>
+<li>Fitting and evaluating an OLS regression model</li>
+<li>Applying <strong>Ridge regression</strong> with cross-validated hyperparameter tuning (<code>RidgeCV</code>) and visualizing the coefficient shrinkage path across lambda values</li>
+<li>Applying <strong>Lasso regression</strong> with cross-validated tuning (<code>LassoCV</code>) and comparing its coefficient-zeroing behavior to Ridge</li>
+<li>Comparing OLS, Ridge, and Lasso using test MSE and coefficient bar plots</li>
+<li>Performing <strong>Principal Components Regression (PCR)</strong> by fitting PCA on scaled features, selecting the number of components via explained variance (≥90% threshold), and fitting OLS on the projected scores</li>
+<li>Synthesizing all four models in a final summary table and interpreting which approach best fits the building energy efficiency dataset</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="task-2-decision-trees-and-random-forests" class="level1">
+<h1>Task 2: Decision Trees and Random Forests</h1>
+<section id="classifying-potable-non-potable-water" class="level2">
+<h2 class="anchored" data-anchor-id="classifying-potable-non-potable-water">Classifying Potable/ Non Potable Water</h2>
+<p><strong>Follow the instructions in <code>hw3-task2.ipynb</code> to complete this task.</strong> You will practice:</p>
+<ul>
+<li>Exploring a dataset with class imbalance and missing values, and applying <strong>median imputation</strong> with stratified train/test splitting</li>
+<li>Fitting an <strong>unpruned decision tree</strong> as a baseline</li>
+<li>Tuning <strong>tree depth</strong> using 5-fold cross-validation and selecting the optimal depth from a CV accuracy plot</li>
+<li>Refitting and evaluating the <strong>pruned (tuned) decision tree</strong> and visualizing its structure, including interpreting root-node splits, feature thresholds, and Gini impurity</li>
+<li>Fitting a <strong>Random Forest</strong> (200 trees) and comparing its test accuracy to the single-tree models</li>
+<li>Visualizing and comparing <strong>feature importances</strong> (Gini-based) from both the decision tree and random forest</li>
+<li>Interpreting a <strong>confusion matrix</strong> for the random forest</li>
+<li>Building a final <strong>model comparison table/bar chart</strong> across all three models (unpruned tree, tuned tree, random forest)</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="task-3-considerations-in-high-dimensions" class="level1">
+<h1>Task 3: Considerations in High Dimensions</h1>
+<p>In this task you will explore common problems that may arise in <em>high-dimensional</em> datasets, in which the number of features is larger than the number of observations and use generative AI to aid in your understanding on this setting.</p>
+<p>Your final submission will include: a concept from the reading you wanted clarification on, the initial prompt you used to get clarification from a genAI chatbot, and a short reflection on how you used genAI.</p>
 <ol type="1">
-<li><p>Read section 3.3.3 <em>Potential problems</em> in the course textbook: <a href="https://www.statlearning.com">An Introduction to Statistical Learning with applications in Python</a>. The section covers six common issues when fitting a linear model:</p>
+<li><p>Read section 6.4 <em>Considerations in High Dimensions</em> in the course textbook: <a href="https://www.statlearning.com">An Introduction to Statistical Learning with applications in Python</a>. The section covers challenges to fitting regression models and interpreting results on high-dimensional data.</p></li>
+<li><p>While reading, identify <strong>one concept or claim from the section that you did not fully understand</strong>.</p></li>
+<li><p><em>This step is designeed to help you write more detailed prompts.</em> Use a generative AI tool (such as ChatGPT or Claude) to help clarify the concept you did not fully understand. Save your prompt so you can report it in this task. Your prompt should go beyond <em>“explain X to me.”</em> and should include at least two of the following elements:</p>
 <ul>
-<li>Non-linearity of the response-predictor relationships</li>
-<li>Correlation of error terms</li>
-<li>Non-constant variance of error terms</li>
-<li>Outliers</li>
-<li>High-leverage points</li>
-<li>Collinearity</li>
+<li>Your background (For example: <em>“I am X who knows Y and is learning about Z</em>, <em>I am reading X for my course on Y</em>, etc)</li>
+<li>The specific source of confusion</li>
+<li>A requested format or approach (e.g.: <em>“use a concrete numerical example”</em> or <em>create an analogy</em>)</li>
+<li>A constraint or comparison (<em>“explain how Z method differs from Y method”</em> or <em>“avoid matrix notation”</em>)</li>
 </ul></li>
-<li><p>Select 3 of the issues above and, for each one, write:</p>
-<ul>
-<li>a short paragraph explaining what the problem is, why it matters, and how to detect it (and how to address it, if applicable)</li>
-<li>a question that came up while reading that you couldn’t answer from the text alone, and the answer you investigated</li>
-</ul></li>
-<li><p>For each of the three issues, use a generative AI tool (such as ChatGPT, Claude, or Claude code) to write Python code that:</p>
-<ul>
-<li>generates synthetic data that clearly illustrates the issue</li>
-<li>produces plots making the issue visually clear</li>
-<li>where applicable, produces additional plots showing how the issue can be addressed</li>
-</ul></li>
+<li><p>If the response didn’t fully resolve your confusion, iterate: refine your next prompt and try again.</p></li>
+<li><p>In a short paragraph (4–6 sentences), reflect on your use of generative AI in this task: which tool did you use, what prompts did you give it, and how many iterations did it take to get it to clarify your question? Did the response match the information given in the textbook? <em>This short reflection should be independently written by you, with no AI assistance.</em></p></li>
 </ol>
-<p>Add a brief caption (2-3 sentences) describiing what the plots show, or integrate this explanation into your paragraph from step 2.</p>
-<ol start="4" type="1">
-<li>In a short paragraph (4–6 sentences), reflect on your use of generative AI in this task: which tool did you use, what prompts did you give it, and how many iterations did it take to get working code? Note any mistakes the AI made and how you identified and fixed them. <em>This short reflection should be independently written by you, with no AI assistance.</em></li>
-</ol>
-<p>Your submission should be a Jupyter notebook (inside your forked repo) with the following structure:</p>
+<p>Your submission should be a Quarto document, named <code>hwk3-task3.qmd</code>, (inside your forked repo) with the following structure:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -468,53 +495,24 @@ q6  ❌ failed
 <td>Title + one sentence explaining the content of the document</td>
 </tr>
 <tr class="even">
-<td><strong>Issue 1</strong></td>
-<td>Explanation + plots + question</td>
+<td><strong>Concept to clarify</strong></td>
+<td>The concept or claim that you looked clarification for</td>
 </tr>
 <tr class="odd">
-<td><strong>Issue 2</strong></td>
-<td>Explanation + plots + question</td>
+<td><strong>Prompt</strong></td>
+<td>The initial prompt you wrote to gain understanding</td>
 </tr>
 <tr class="even">
-<td><strong>Issue 3</strong></td>
-<td>Explanation + plots + question</td>
-</tr>
-<tr class="odd">
 <td><strong>Generative AI reflection</strong></td>
-<td>Answer to step 4</td>
+<td>Answer to step 5</td>
 </tr>
 </tbody>
 </table>
-<p>Before submitting, restart your kernel and run all cells from top to bottom. Make sure all code has been executed and all plots are visible in the notebook.</p>
 <section id="rubric" class="level2">
 <h2 class="anchored" data-anchor-id="rubric">Rubric</h2>
 <ul>
-<li><p>For each issue you explore, you will be graded on the plots and graphs and conceptual accuracy of your explanations using the <a href="https://docs.google.com/document/d/1a5_Eu_RZ24BMorTcvYepYpxLLjZdb79rRsCvU7LMaFQ/edit?usp=sharing">course rubric</a>.</p></li>
-<li><p>The answer to step 4 will be graded as 1: complete, 0: incomplete.</p></li>
+<li>Steps 2, 3, 5 and the Title/ Intro will be graded as 1: complete, 0: incomplete.</li>
 </ul>
-<hr>
-</section>
-</section>
-<section id="task-2-classification" class="level1">
-<h1>Task 2: Classification</h1>
-<section id="do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk" class="level2">
-<h2 class="anchored" data-anchor-id="do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk">Do Social and Economic Conditions Predict Whether a Community Has Elevated Asthma Risk?</h2>
-<p><strong>Follow the instructions in <code>hw2-task2.ipynb</code> to complete this task.</strong> You will practice:</p>
-<ul>
-<li>Visualizing class imbalance</li>
-<li>Preparing features for classification: selecting predictors, dropping missing values, and performing a stratified train/test split</li>
-<li>Fitting a K-Nearest Neighbors (KNN) classifier and evaluating test-set accuracy</li>
-<li>Selecting the optimal value of k using 5-fold cross-validation with<code>cross_val_score</code><br>
-</li>
-<li>Fitting a Logistic Regression model with built-in cross-validation using <code>LogisticRegressionCV</code><br>
-</li>
-<li>Computing and interpretting a confusion matrix</li>
-<li>Calculating accuracy, precision, recall and F1 score using <code>sklearn.metrics</code><br>
-</li>
-<li>Comparring KNN and Logistic Regression model performance</li>
-<li>Evaluating a classifier with an ROC Curve and AUC score</li>
-</ul>
-<hr>
 
 
 </section>
