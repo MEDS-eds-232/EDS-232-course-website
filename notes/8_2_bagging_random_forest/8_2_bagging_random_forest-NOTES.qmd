@@ -13,6 +13,9 @@ from matplotlib.patches import FancyBboxPatch
 import pandas as pd
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import BaggingRegressor, RandomForestRegressor
+import warnings
+
+warnings.filterwarnings("ignore")
 
 plt.style.use('default')
 fig_size_x = 8
@@ -192,15 +195,18 @@ plt.close()
 
 Bagging uses bootstrapped training sets to fit a forest of decision trees. There are two implementations depending if we are in a regression or classification scenario. 
 
-For regression:
+In the regression case, we use bagging to create an ensemble of regression trees by:
 
-1. Generate $B$ bootstrapped training sets from the original training set
-2. Fit a decision tree on each bootstrapped training set
-3. To get a prediction on a new observation $x$, obtaining $B$ estimates, one from each tree: 
+1. Generating $B$ bootstrapped training sets from the original training set.
+2. Fitting a decision tree on each bootstrapped training set.
 
-$$\hat{f}^{*1}(x), \hat{f}^{*2}(x), \ldots, \hat{f}^{*B}(x)$$
+![](images/regression-tree-diagram-fitting.png){width=60% fig-align="center"}
 
-3. **Average** the $B$ predictions to produce the final bagged prediction:
+To get a prediction on a new observation $x$, obtaining $B$ estimates, one from each tree: 
+
+$$\hat{f}^{*1}(x), \hat{f}^{*2}(x), \ldots, \hat{f}^{*B}(x),$$
+
+and then **average** the $B$ predictions to produce the final bagged prediction:
 
 $$\hat{f}_{\text{bag}}(x) = \frac{1}{B} \sum_{b=1}^{B} \hat{f}^{*b}(x).$$
 
@@ -241,30 +247,37 @@ $$\hat{f}_{\text{bag}}(x) = \text{mode}\left\{\hat{f}^{*1}(x), \hat{f}^{*2}(x), 
 
 When we fit each bootstrapped tree, **not every observation ends up in that bootstrap sample**. The observations left out are called the **out-of-bag (OOB) observations** for that tree. On average, about $\frac{1}{3}$ of the training observations are OOB for any given tree.
 
-This gives us a free way to estimate test error:
+This gives us a way to estimate test error without using cross-validation:
 
-1. For each observation $(X_i, y_i)$ in the training set, identify all trees for which it was **OOB** (i.e., not used during training of that tree). On average this is about $B/3$ trees.
-2. Use only those trees to predict $(X_i, y_i)$: average their predictions (regression) or take a majority vote (classification).
-3. Repeat for all $n$ training observations. We now have one OOB prediction per observation.
+1. For each observation $(x_i, y_i)$ in the training set, identify all trees for which it was **OOB** (i.e., not used during training of that tree). On average this is about $B/3$ trees.
+2. Use only those trees to make a prediction for $x_i$: average their predictions (regression) or take a majority vote (classification) to get a an OOB prediction for $\hat{y}_i$ for $x_i$. 
+3. Repeat for all $n$ training observations. We now have one OOB prediction per training observation.
 4. Compute MSE (regression) or classification error (classification) from these OOB predictions. This is the **OOB error**.
 
-The OOB error is a valid estimate of test error because each observation is predicted **only by trees that were not trained on it** — analogous to leave-one-out cross-validation, but at no extra computational cost.
+<!-- Eventually, I would like to get diagrams in here. -->
+
+The OOB error is a valid estimate of test error because each observation is predicted **only by trees that were not trained on it**. It is analogous to leave-one-out cross-validation, but at no extra computational cost.
 
 ::: {.callout-tip}
 ## Check-in
-1. Why is the OOB error a valid estimate of the test error and not the training error?
-2. If we use a very small $B$ (say $B = 5$), would you trust the OOB error estimate? Why or why not?
+1. Suppose your model has three trees fit on the bootstrap samples 1,2 and 3 below. For which trees would observation 4 be an OOB observation? 
+
+![](images/bootstrap-diagram.png)
+
+2. Why is the OOB error a valid estimate of the test error and not the training error?
+3. If we use a very small $B$, would you expect every training sample to be OOB for some tree? Would you then trust the OOB error estimate? Why or why not?
 :::
 
 ::: {.callout-tip collapse="true"}
 ## Discussion
-1. Because each observation's OOB prediction is made only by trees that **did not use that observation during training**. There is no data leakage — the prediction is made on "unseen" data from those trees' perspective.
-2. No. With $B = 5$ trees, some observations may never be OOB (i.e., they were included in every bootstrap sample). For those observations we would have no OOB prediction at all. With small $B$ the estimate is noisy and potentially biased.
+1. Observation 4 would be an OOB observation for the trees trained using boostrap samples 2 and 3. 
+2. Because each observation's OOB prediction is made only by trees that **did not use that observation during training**. The prediction is made on "unseen" data from those trees' perspective.
+3. No. With $B = 5$ trees, some observations may never be OOB (i.e., they were included in every bootstrap sample). For those observations we would have no OOB prediction at all! With small $B$ the estimate is noisy and potentially inaccurate.
 :::
 
 ### Choosing the number of trees B
 
-Unlike tree depth, $B$ is **not a tuning parameter in the usual sense** — using a very large $B$ does not cause overfitting. In practice we pick a value large enough that the OOB error stabilizes and stops decreasing. The plot below shows OOB MSE for our EcoSite dataset as a function of $B$:
+Unlike tree depth, $B$ is **not a tuning parameter in the usual sense** because  using a very large $B$ does not cause overfitting. In practice we pick a value large enough that the OOB error stabilizes and stops decreasing. The plot below shows OOB MSE for our example dataset as a function of $B$:
 
 ```{python}
 #| label: oob-error-vs-b
@@ -296,27 +309,32 @@ ax.plot(B_range, oob_mse_bag, color='steelblue', linewidth=1.5, label='Bagging O
 ax.set_xlabel('Number of trees B')
 ax.set_ylabel('OOB MSE')
 ax.set_title('OOB error as a function of the number of trees B')
-ax.legend(fontsize=9)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
 
-The error decreases quickly and levels off. Adding more trees beyond that plateau does not hurt, but it also does not help — so we pick a B where the curve is already flat.
+The error decreases quickly and levels off. Adding more trees beyond that plateau does not hurt, but it also does not help. Pick a B where the curve is already flat.
 
 
 
 ## Variable importance
 
-One of the advantages of a single decision tree is its interpretability: we can look at the tree diagram and understand which variables drive the splits. With bagging we lose this interpretability — we now have $B$ different trees.
+One of the advantages of a single decision tree is its interpretability: we can look at the tree diagram and understand which variables drive the splits. With bagging we lose this direct interpretability since we now have $B$ different trees.
 
 However, we can still extract a useful **overall summary of variable importance** across all $B$ trees:
 
-- **Regression**: for each predictor, record the total reduction in RSS achieved by splits on that predictor, summed across all trees and all splits. Average this total reduction over all $B$ trees.
+- **Regression**: every time for each predictor, record the total reduction in RSS achieved by splits on that predictor, summed across all trees and all splits. Average this total reduction over all $B$ trees.
 - **Classification**: the same, but using the Gini impurity reduction instead of RSS reduction.
 
 Predictors with large average reductions are the most important for the model's predictions.
+
+::: {.callout-tip}
+## Check-in
+
+
+Consider the following variable importance plot:
 
 ```{python}
 #| label: variable-importance-bagging
@@ -346,25 +364,21 @@ plt.show()
 plt.close()
 ```
 
-::: {.callout-tip}
-## Check-in
-Looking at the variable importance plot:
-
 1. Which predictor is most important for predicting biomass in this dataset?
-2. Does this match your intuition from the decision tree splits we saw in the previous lesson?
+2. When creating the trees for the ensenmble model, what predictor would you expect to be used in the first split for most of them?
 :::
 
 ::: {.callout-tip collapse="true"}
 ## Discussion
 1. Rainfall has higher importance in this dataset, meaning splits on rainfall reduce RSS more on average across all trees.
-2. Yes — in the decision tree lesson, the root node always split on rainfall first. Variable importance confirms that rainfall is the stronger predictor of biomass in this synthetic dataset.
+2. The root node will for most trees will be split on rainfall first.
 :::
 
 ## Random forests
 
 **Random forests** build on bagging with one additional twist designed to **decorrelate the trees** in the ensemble.
 
-Recall the bagging procedure: we fit $B$ trees on $B$ bootstrapped samples and average their predictions. If one predictor is very strongly associated with the response, **almost every tree will use that predictor as the top split**. As a result, the $B$ trees will look very similar to each other — they will be correlated — and averaging correlated predictions does not reduce variance as much as averaging uncorrelated ones.
+Recall the bagging procedure: we fit $B$ trees on $B$ bootstrapped samples and average their predictions. If one predictor is very strongly associated with the response, **almost every tree will use that predictor as the top split**. The relative importance of the predictors will continue as the tree gorw. As a result, the $B$ trees will look similar to each other, i.e. they will be correlated. Averaging correlated predictions does not reduce variance as much as averaging uncorrelated ones.
 
 Random forests break this correlation by introducing **randomness at each split**:
 
@@ -374,9 +388,12 @@ Random forests break this correlation by introducing **randomness at each split*
 
 By restricting which predictors can be used at each split, no single strong predictor can dominate every tree. Weaker predictors get a chance to contribute, and the resulting trees are less correlated with each other. Averaging less-correlated predictions produces a larger reduction in variance.
 
+Random forests outperform bagging most when the dataset has **one or a few dominant predictors**: bagged trees become too similar to each other, while random forests force diversity. When all predictors are equally weak or the dataset is very small, the benefit of decorrelation is smaller.
+
 ```{python}
 #| label: rf-vs-bagging
 #| fig-align: center
+#| eval: false
 
 B_range  = list(range(1, 201))
 oob_rf   = []
@@ -418,25 +435,16 @@ plt.show()
 plt.close()
 ```
 
-### Choosing m
-
-The number of predictors considered at each split, $m$, is a hyperparameter that controls the degree of decorrelation:
-
-- **Small $m$**: more randomness, more decorrelated trees, lower variance but potentially higher bias
-- **Large $m$ (= $p$)**: equivalent to bagging — all predictors considered at every split
+The number of predictors considered at each split, $m$, is a hyperparameter that controls the degree of decorrelation. Choosing a **small $m$** means more randomness, more decorrelated trees, lower variance but potentially higher bias
 
 A small value of $m$ is especially helpful when there are many uncorrelated predictors, as it gives each one a fair chance to contribute. Cross-validation can be used to select $m$ when performance is sensitive to its choice.
 
 ::: {.callout-tip}
 ## Check-in
-1. Why does using a random subset of predictors at each split help reduce the correlation between trees?
-2. If $m = p$ (we use all predictors at every split), how does random forest relate to bagging?
-3. In which situation would you expect random forests to outperform bagging the most?
+If $m = p$, how does random forest relate to bagging?
 :::
 
 ::: {.callout-tip collapse="true"}
 ## Discussion
-1. If one predictor is very strongly associated with the response, bagging trees will all tend to split on that predictor first, making the trees similar (correlated). By excluding it from consideration at random splits, other predictors get used, producing more diverse trees.
-2. When $m = p$, random forests reduce to bagging exactly — there is no restriction on which predictors can be used, so every tree uses the full set at every split.
-3. Random forests outperform bagging most when the dataset has **one or a few dominant predictors**: bagged trees become too similar to each other, while random forests force diversity. When all predictors are equally weak or the dataset is very small, the benefit of decorrelation is smaller.
+When $m = p$, random forests reduce to bagging exactly — there is no restriction on which predictors can be used, so every tree uses the full set at every split.
 :::
