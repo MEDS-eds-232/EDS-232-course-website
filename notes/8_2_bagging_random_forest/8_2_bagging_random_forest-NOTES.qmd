@@ -356,7 +356,7 @@ ax.barh([feat_names[i] for i in order],
         color=[colors_vi[i] for i in order],
         edgecolor='white', height=0.5)
 ax.set_xlabel('Mean decrease in RSS (normalized)')
-ax.set_title('Variable importance — bagged regression trees\n(EcoSite dataset)')
+ax.set_title('Variable importance — bagged regression trees')
 ax.set_xlim(0, 1)
 ax.grid(True, axis='x', alpha=0.3)
 plt.tight_layout()
@@ -388,46 +388,60 @@ Random forests break this correlation by introducing **randomness at each split*
 
 By restricting which predictors can be used at each split, no single strong predictor can dominate every tree. Weaker predictors get a chance to contribute, and the resulting trees are less correlated with each other. Averaging less-correlated predictions produces a larger reduction in variance.
 
+::: {.callout-tip}
+## Check-in
+Suppose you are building one tree in a random forest with predictors {`rainfall`, `temperature`, `elevation`, `soil moisture`} ($p = 4$, $m = 2$). At the root node the algorithm randomly selects {`rainfall`, `elevation`} and splits on rainfall. At the next node, which predictors are available to split on? 
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+A new random sample of 2 predictors is drawn: it could be any pair, including ones used before. The previous split does not restrict future splits.
+:::
+
 Random forests outperform bagging most when the dataset has **one or a few dominant predictors**: bagged trees become too similar to each other, while random forests force diversity. When all predictors are equally weak or the dataset is very small, the benefit of decorrelation is smaller.
 
 ```{python}
 #| label: rf-vs-bagging
 #| fig-align: center
-#| eval: false
 
-B_range  = list(range(1, 201))
-oob_rf   = []
-oob_bag2 = []
+from sklearn.model_selection import train_test_split
+
+# Train/test split — all models trained on the same data, evaluated on the same held-out set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+
+# Single decision tree test MSE (horizontal reference line)
+single_tree = DecisionTreeRegressor(random_state=42).fit(X_train, y_train)
+single_tree_mse = np.mean((y_test - single_tree.predict(X_test))**2)
+
+B_range   = list(range(1, 201))
+mse_bag   = []
+mse_rf    = []
 
 for B in B_range:
-    # Bagging (all predictors at each split, i.e. max_features = p)
+    # Bagging
     bag = BaggingRegressor(
         estimator=DecisionTreeRegressor(random_state=42),
-        n_estimators=B, oob_score=True, bootstrap=True, random_state=42
+        n_estimators=B, bootstrap=True, random_state=42
     )
-    bag.fit(X, y)
-    preds_b = bag.oob_prediction_
-    mask_b  = ~np.isnan(preds_b)
-    oob_bag2.append(np.mean((y[mask_b] - preds_b[mask_b])**2) if mask_b.sum() >= 2 else np.nan)
+    bag.fit(X_train, y_train)
+    mse_bag.append(np.mean((y_test - bag.predict(X_test))**2))
 
-    # Random forest (random subset of predictors at each split)
-    rf = RandomForestRegressor(
-        n_estimators=B, oob_score=True, random_state=42
-    )
-    rf.fit(X, y)
-    preds_r = rf.oob_prediction_
-    mask_r  = ~np.isnan(preds_r)
-    oob_rf.append(np.mean((y[mask_r] - preds_r[mask_r])**2) if mask_r.sum() >= 2 else np.nan)
+    # Random forest
+    rf = RandomForestRegressor(n_estimators=B, random_state=42)
+    rf.fit(X_train, y_train)
+    mse_rf.append(np.mean((y_test - rf.predict(X_test))**2))
 
-oob_bag2 = np.array(oob_bag2)
-oob_rf   = np.array(oob_rf)
+mse_bag = np.array(mse_bag)
+mse_rf  = np.array(mse_rf)
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
-ax.plot(B_range, oob_bag2, color='steelblue', linewidth=1.5, label='Bagging')
-ax.plot(B_range, oob_rf,   color='#e07b39',  linewidth=1.5, label='Random forest')
+ax.axhline(single_tree_mse, color='#888', linewidth=1.4, linestyle='--',
+           label=f'Single decision tree (test MSE = {single_tree_mse:.2f})')
+ax.plot(B_range, mse_bag, color='steelblue', linewidth=1.5, label='Bagging')
+ax.plot(B_range, mse_rf,  color='#e07b39',  linewidth=1.5, label='Random forest')
 ax.set_xlabel('Number of trees B')
-ax.set_ylabel('OOB MSE')
-ax.set_title('OOB error: bagging vs. random forest (EcoSite dataset)')
+ax.set_ylabel('Test MSE')
+ax.set_title('Test MSE: single tree vs. bagging vs. random forest')
 ax.legend(fontsize=9)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()

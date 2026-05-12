@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Cross-validation – EDS 232 - Machine Learning for Environmental Science</title>
+<title>Bagging and Random Forests – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -230,7 +230,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html">Resampling Methods</a></li><li class="breadcrumb-item"><a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html">Cross-validation</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/8_tree_based_methods/8_tree_based_methods-NOTES.html">Tree-Based Methods</a></li><li class="breadcrumb-item"><a href="../../notes/8_2_bagging_random_forest/8_2_bagging_random_forest-NOTES.html">Bagging and Random Forests</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -343,7 +343,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html" class="sidebar-item-text sidebar-link active">
+  <a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Cross-validation</span></a>
   </div>
 </li>
@@ -389,7 +389,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../notes/8_2_bagging_random_forest/8_2_bagging_random_forest-NOTES.html" class="sidebar-item-text sidebar-link">
+  <a href="../../notes/8_2_bagging_random_forest/8_2_bagging_random_forest-NOTES.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Bagging and Random Forests</span></a>
   </div>
 </li>
@@ -405,24 +405,30 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#a-guiding-example-kelp-forest-monitoring" id="toc-a-guiding-example-kelp-forest-monitoring" class="nav-link active" data-scroll-target="#a-guiding-example-kelp-forest-monitoring">A guiding example: kelp forest monitoring</a></li>
-  <li><a href="#why-cross-validation" id="toc-why-cross-validation" class="nav-link" data-scroll-target="#why-cross-validation">Why cross-validation?</a></li>
-  <li><a href="#the-validation-set-approach" id="toc-the-validation-set-approach" class="nav-link" data-scroll-target="#the-validation-set-approach">The validation set approach</a></li>
-  <li><a href="#k-fold-cross-validation" id="toc-k-fold-cross-validation" class="nav-link" data-scroll-target="#k-fold-cross-validation"><span class="math inline">\(k\)</span>-fold cross-validation</a>
+  <li><a href="#a-guiding-dataset" id="toc-a-guiding-dataset" class="nav-link active" data-scroll-target="#a-guiding-dataset">A guiding dataset</a></li>
+  <li><a href="#ensemble-methods" id="toc-ensemble-methods" class="nav-link" data-scroll-target="#ensemble-methods">Ensemble methods</a></li>
+  <li><a href="#the-variance-problem-in-decision-trees" id="toc-the-variance-problem-in-decision-trees" class="nav-link" data-scroll-target="#the-variance-problem-in-decision-trees">The variance problem in decision trees</a></li>
+  <li><a href="#bagging" id="toc-bagging" class="nav-link" data-scroll-target="#bagging">Bagging</a>
   <ul class="collapse">
-  <li><a href="#computing-the-fold-error" id="toc-computing-the-fold-error" class="nav-link" data-scroll-target="#computing-the-fold-error">Computing the fold error</a></li>
+  <li><a href="#the-bootstrap" id="toc-the-bootstrap" class="nav-link" data-scroll-target="#the-bootstrap">The bootstrap</a></li>
+  <li><a href="#bagging-for-regression" id="toc-bagging-for-regression" class="nav-link" data-scroll-target="#bagging-for-regression">Bagging for regression</a></li>
+  <li><a href="#bagging-for-classification" id="toc-bagging-for-classification" class="nav-link" data-scroll-target="#bagging-for-classification">Bagging for classification</a></li>
   </ul></li>
-  <li><a href="#using-cv-to-select-a-hyperparameter" id="toc-using-cv-to-select-a-hyperparameter" class="nav-link" data-scroll-target="#using-cv-to-select-a-hyperparameter">Using CV to select a hyperparameter</a></li>
-  <li><a href="#comparing-models-with-cv" id="toc-comparing-models-with-cv" class="nav-link" data-scroll-target="#comparing-models-with-cv">Comparing models with CV</a></li>
+  <li><a href="#out-of-bag-error-estimation" id="toc-out-of-bag-error-estimation" class="nav-link" data-scroll-target="#out-of-bag-error-estimation">Out-of-bag error estimation</a>
+  <ul class="collapse">
+  <li><a href="#choosing-the-number-of-trees-b" id="toc-choosing-the-number-of-trees-b" class="nav-link" data-scroll-target="#choosing-the-number-of-trees-b">Choosing the number of trees B</a></li>
+  </ul></li>
+  <li><a href="#variable-importance" id="toc-variable-importance" class="nav-link" data-scroll-target="#variable-importance">Variable importance</a></li>
+  <li><a href="#random-forests" id="toc-random-forests" class="nav-link" data-scroll-target="#random-forests">Random forests</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html">Resampling Methods</a></li><li class="breadcrumb-item"><a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html">Cross-validation</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/8_tree_based_methods/8_tree_based_methods-NOTES.html">Tree-Based Methods</a></li><li class="breadcrumb-item"><a href="../../notes/8_2_bagging_random_forest/8_2_bagging_random_forest-NOTES.html">Bagging and Random Forests</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Cross-validation</h1>
+<h1 class="title">Bagging and Random Forests</h1>
 </div>
 
 
@@ -439,91 +445,77 @@ window.Quarto = {
 </header>
 
 
-<p><a href="../../notes/5_1_cross_validation/5_1_cross_validation-SLIDES.html">📊 Slides</a> / <a href="../../notes/5_1_cross_validation/5_1_cross_validation-SLIDES-BLANK.html">📊 Blank slides</a></p>
 <p>In this lesson we introduce:</p>
 <ul>
-<li>Using a <strong>validation set</strong> to estimate the test set error</li>
-<li>The <strong>validation set approach</strong> and why it produces variable error estimates</li>
-<li><strong>K-fold cross-validation</strong> as a better alternative</li>
-<li>Using cross-validation to <strong>select hyperparameters</strong> (e.g., <span class="math inline">\(K\)</span> in KNN)</li>
-<li>Using cross-validation to <strong>compare models</strong></li>
+<li><strong>Ensemble methods</strong> and why they improve on single decision trees</li>
+<li><strong>Bagging</strong> (Bootstrap Aggregation): fitting many trees on bootstrap samples and averaging their predictions</li>
+<li><strong>Out-of-bag error estimation</strong>: an alternative to cross-validation that comes for free with bagging</li>
+<li><strong>Random forests</strong>: an extension of bagging that decorrelates trees by using a random subset of predictors at each split</li>
 </ul>
-<p>These notes are based on chapter 5 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.</p>
-<section id="a-guiding-example-kelp-forest-monitoring" class="level2">
-<h2 class="anchored" data-anchor-id="a-guiding-example-kelp-forest-monitoring">A guiding example: kelp forest monitoring</h2>
-<p>In this lesson we use the same example dataset as in our KNN lesson: a synthetic dataset that “tracks” 300 coastal monitoring stations. For each station we record:</p>
+<p>These notes are based on chapter 8 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. The example data is the same synthetic dataset used in the decision tree notes. Data and code were generated with the aid of Claude Code for the purpose of this lesson.</p>
+<section id="a-guiding-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="a-guiding-dataset">A guiding dataset</h2>
+<p>We will use a small dataset of 22 ecological survey sites throughout this section. Each site is characterized by:</p>
 <ul>
-<li><strong><code>temp_anomaly</code></strong> — sea surface temperature anomaly (°C); positive values indicate warmer-than-average conditions</li>
-<li><strong><code>nitrate</code></strong> — nitrate concentration (μmol/L); higher values generally support kelp growth</li>
-<li><strong><code>status</code></strong> — observed kelp forest condition: <em>healthy</em> or <em>degraded</em></li>
+<li><strong><code>rainfall</code></strong> — annual precipitation (mm)</li>
+<li><strong><code>temperature</code></strong> — mean summer temperature (°C)</li>
+<li><strong><code>biomass</code></strong> — aboveground plant biomass (tonnes per hectare), our response variable</li>
 </ul>
-<p>The central question is: <em>can we predict whether a kelp forest site is healthy or degraded from its oceanographic conditions?</em></p>
-<div id="cell-initial-data-plotting" class="cell" data-execution_count="2">
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="5_1_cross_validation-NOTES_files/figure-html/initial-data-plotting-output-1.png" id="initial-data-plotting" width="589" height="442" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>In the previous lessons we introduced <a href="../../notes/4_3_logistic_regression/4_3_logistic_regression-NOTES.html">logistic regression</a> and <a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics-NOTES.html"><span class="math inline">\(K\)</span>-nearest neighbors</a> to predict kelp forest status in this dataset. In this lesson we study how we can use cross-validation to choose amongst different models and select hyperparameters.</p>
-</section>
-<section id="why-cross-validation" class="level2">
-<h2 class="anchored" data-anchor-id="why-cross-validation">Why cross-validation?</h2>
-<p>Recall from the logistic regression lesson that once we fit a model, we classify observations by comparing the predicted probability <span class="math inline">\(p(X)\)</span> to a <strong>classification threshold</strong> <span class="math inline">\(\alpha\)</span>. In our example data this means we</p>
-<p><span class="math display">\[\text{predict healthy if } p(X) \geq \alpha \text{, degraded otherwise.}\]</span></p>
-<p>The default is <span class="math inline">\(\alpha = 0.5\)</span>, but different thresholds shift the tradeoff between accuracy metrics, so the default may not always be the threshold we want to use to maximize our prefered accuracy metric. How should we choose <span class="math inline">\(\alpha\)</span>?</p>
-<p>Suppose we want to maximze overall accuracy. A natural approach is: try many threshold values, measure accuracy on the test set for each, and pick the best. We obtain the following information:</p>
-<div id="threshold-naive-selection" class="cell" data-execution_count="3">
-<div class="cell-output cell-output-stdout">
-<pre><code>Accuracy at default threshold α = 0.50:       0.711
-Best threshold found on test set: α = 0.59
-Accuracy at that threshold (on test set):     0.722</code></pre>
-</div>
-</div>
-<p>We found a threshold that beats the default, but we might be making a mistake if using this value of <span class="math inline">\(\alpha\)</span> beacuse <strong>we used the test set to make a modeling decision.</strong> We examined the test set outcomes to figure out which threshold works best, and then reported the accuracy for that threshold on the very same observations we used to select it.</p>
-<p>This is called <strong>data leakage</strong>: information from the test set leaked into our modeling process. The reported accuracy is no longer an honest estimate of how the model performs on new, truly unseen data. We selected <span class="math inline">\(\alpha\)</span> <em>because</em> it happened to work well on these test observations, not because it generalizes well.</p>
-<p>This workflow is summarized as follows:</p>
-<ol type="1">
-<li>Split our available data into a <strong>training set</strong> and a <strong>test set</strong>.</li>
-<li>Fit the model on the training set.</li>
-<li>Evaluate performance on the test set.</li>
-</ol>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="training-test.png" class="img-fluid figure-img"></p>
-<figcaption>Diagram from <a href="https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets">Google’s ML Concepts Crash Course.</a></figcaption>
-</figure>
-</div>
-<p>This works well when we have already committed to a single fully specified model and want to report its accuracy. But as soon as we need to make any modeling decision, consulting the test set to do so can interfere. The test set serves as an honest final evaluation if it plays no role in any decision made along the way.</p>
-<p>The fix is: <strong>make modeling decisions using only the training data</strong>, and keep the test set sealed until the very final evaluation. Cross-validation is a standard tool for doing this.</p>
-</section>
-<section id="the-validation-set-approach" class="level2">
-<h2 class="anchored" data-anchor-id="the-validation-set-approach">The validation set approach</h2>
-<p>Before going into cross-validation, let’s talk about the <strong>validation set approach</strong>. This is the simplest resampling method and consists of the following steps:</p>
-<ol type="1">
-<li>Randomly divide the training observations into a <strong>training set</strong> and a <strong>validation set</strong> (also called <strong>hold-out set</strong>).</li>
-<li>Fit the model on the (smaller) training set.</li>
-<li>Compute the error using the fitted model on the validation set.</li>
-</ol>
-<p>The validation error obtained in step 3 is the <strong>estimate for the test error</strong>.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="training-validation-test.png" class="img-fluid figure-img"></p>
-<figcaption>Diagram from <a href="https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets">Google’s ML Concepts Crash Course.</a></figcaption>
-</figure>
-</div>
-<p>Notice that when we divide our data into training and validation sets in step 1, the test error estimate depends on the particular randomly selected validation set. This is a drawback of the validation set approach since different validation sets can greatly vary the test error estimate (high variance). We can see this variation in our example kelp classification data when we use different random splits to create the validation set:</p>
-<div id="cell-validation-set-example" class="cell" data-execution_count="4">
+<p>The plot below shows the 22 points in the dataset with the biomass measurement annotated for each point.</p>
+<div id="cell-scatter-annotated" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="5_1_cross_validation-NOTES_files/figure-html/validation-set-example-output-1.png" id="validation-set-example" class="quarto-figure quarto-figure-center anchored figure-img" width="709" height="392"></p>
+<p><img src="8_2_bagging_random_forest-NOTES_files/figure-html/scatter-annotated-output-1.png" id="scatter-annotated" class="quarto-figure quarto-figure-center anchored figure-img" width="788" height="441"></p>
 </figure>
 </div>
 </div>
 </div>
+</section>
+<section id="ensemble-methods" class="level2">
+<h2 class="anchored" data-anchor-id="ensemble-methods">Ensemble methods</h2>
+<p>An <strong>ensemble method</strong> combines many simple “building block” models to obtain a single, more powerful model. Instead of relying on one model’s prediction, we aggregate many models’ predictions. The combination is usually more accurate and more stable than any individual model.</p>
+<p>In this lesson we focus on two ensemble methods built on top of decision trees: <strong>bagging</strong> and <strong>random forests</strong>.</p>
+</section>
+<section id="the-variance-problem-in-decision-trees" class="level2">
+<h2 class="anchored" data-anchor-id="the-variance-problem-in-decision-trees">The variance problem in decision trees</h2>
+<p>Recall that a single decision tree suffers from <strong>high variance</strong>: small changes in the training data can lead to very different trees and very different predictions. Deep trees are especially prone to overfitting.</p>
+<p>One general strategy for reducing variance is:</p>
+<ol type="1">
+<li>Take many training sets from the same population</li>
+<li>Fit a separate model on each training set</li>
+<li><strong>Average</strong> the resulting predictions</li>
+</ol>
+<p>Averaging many models reduces variance without increasing bias. The averaging step is the key: the more uncorrelated the individual predictions are, the more variance reduction we get.</p>
+<p>The challenge with this approach is that, in practice, we almost never have access to multiple independent training sets, we only have a single one. <strong>Bagging</strong> is a way around this.</p>
+</section>
+<section id="bagging" class="level2">
+<h2 class="anchored" data-anchor-id="bagging">Bagging</h2>
+<p><strong>Bagging</strong> stands for Bootstrap AGGregatING. The idea is to generate many training sets from the single one we have by <strong>bootstrapping</strong>, and then average the predictions from models fit on each of those bootstrapped sets.</p>
+<section id="the-bootstrap" class="level3">
+<h3 class="anchored" data-anchor-id="the-bootstrap">The bootstrap</h3>
+<p><strong>Bootstrapping</strong> generates a new training set by sampling <strong>with replacement</strong> from the original training set. Each bootstrapped sample is the same size as the original, but some observations will appear more than once and others will be left out entirely.</p>
+<p>The figure below is a toy example of a training set with 6 observations, and three bootstrapped versions of it. Each bootstrapped dataset was created by sampling 6 observations with replacement from the original 6. Notice how some rows are repeated and others are missing.</p>
+<p><img src="images/bootstrap-diagram.png" class="img-fluid"></p>
+</section>
+<section id="bagging-for-regression" class="level3">
+<h3 class="anchored" data-anchor-id="bagging-for-regression">Bagging for regression</h3>
+<p>Bagging uses bootstrapped training sets to fit a forest of decision trees. There are two implementations depending if we are in a regression or classification scenario.</p>
+<p>In the regression case, we use bagging to create an ensemble of regression trees by:</p>
+<ol type="1">
+<li>Generating <span class="math inline">\(B\)</span> bootstrapped training sets from the original training set.</li>
+<li>Fitting a decision tree on each bootstrapped training set.</li>
+</ol>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/regression-tree-diagram-fitting.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%"></p>
+</figure>
+</div>
+<p>To get a prediction on a new observation <span class="math inline">\(x\)</span>, obtaining <span class="math inline">\(B\)</span> estimates, one from each tree:</p>
+<p><span class="math display">\[\hat{f}^{*1}(x), \hat{f}^{*2}(x), \ldots, \hat{f}^{*B}(x),\]</span></p>
+<p>and then <strong>average</strong> the <span class="math inline">\(B\)</span> predictions to produce the final bagged prediction:</p>
+<p><span class="math display">\[\hat{f}_{\text{bag}}(x) = \frac{1}{B} \sum_{b=1}^{B} \hat{f}^{*b}(x).\]</span></p>
+<p>The diagram below illustrates this workflow: <img src="images/regression-tree-diagram.png" class="img-fluid"></p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -534,7 +526,7 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The training set for the kelp data has 210 points and 90 test points. The plot above shows the results using validation sets with 63 points. If you decided to use a 50/50 validation split (105 poits for training/105 points for validation), what would be a bigger concern: the validation error being much higher or much lower than the test error?</p>
+<p>How would you modify this workflow to use bagging for a <strong>classification</strong> problem? Draw a similar diagram and describe what changes.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -549,41 +541,41 @@ Discussion
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The bigger concern is the validation error being much higher than the test error.</p>
-<p>The validation error estimates how well a model trained on 105 observations performs. But the model you will ultimately deploy is trained on all 210 observations. More training data almost always produces a better-fitting model, so the final model will perform better than the one evaluated during validation.</p>
-</div>
-</div>
-</div>
-<p>A second drawback is that setting aside part of the training data for validation means the model is fit on fewer observations than we will ultimately use. Models fit on less data tend to perform worse, so the validation error will tend to <em>overestimate</em> the true test error of the final model (which will be trained on more data).</p>
-<!-- 
-Steps 1-4 let us obtain an estimate of test error for a given model. We would then compare models by following these steps:
-
-5. Use the validation set approach to have an estimate of the test error for each model.
-6. Select the model with the lowest error. 
-7. Train the model with the lowest error on the full training set.
-8. Obtain final accuracy metric by applying fully-trained model to the test set. 
-
-This is a very flexible approach and can be applied to both classification and regression, the only chage would be how we measure the error on the validation set in step 4. 
- -->
-</section>
-<section id="k-fold-cross-validation" class="level2">
-<h2 class="anchored" data-anchor-id="k-fold-cross-validation"><span class="math inline">\(k\)</span>-fold cross-validation</h2>
-<p><strong>Resampling methods</strong> repeatedly draw samples from the training set and refit a model of interst in each sample to obtain additional information about the model. A standard resampling method is <strong><span class="math inline">\(k\)</span>-fold cross-validation</strong>. It overcomes both drawbacks of the validation set approach (high variance from a single split and the issue of training on fewer observations) by systematically rotating through all the data. We use the following steps to do the <span class="math inline">\(k\)</span>-fold cross-validation:</p>
+<p>The workflow is the same, but the final step changes:</p>
 <ol type="1">
-<li>Randomly divide the training set into <span class="math inline">\(k\)</span> roughly equal-sized <strong>folds</strong>.</li>
-<li>Hold out the first fold as the validation set; fit the model on the remaining <span class="math inline">\(k - 1\)</span> folds.</li>
-<li>Compute the error <span class="math inline">\(\text{Err}_1\)</span> on the held-out fold.</li>
-<li>Repeat steps 2–3 for each of the <span class="math inline">\(k\)</span> folds, each time holding out a different fold. We obtain one error rate for each fold: <span class="math inline">\(\text{Err}_1, \ldots, \text{Err}_k\)</span></li>
-<li>Average the <span class="math inline">\(k\)</span> fold errors <span class="math inline">\(\text{Err}_1, \ldots, \text{Err}_k\)</span> to obtain an estimate of the test error:</li>
+<li>Generate <span class="math inline">\(B\)</span> bootstrapped training sets</li>
+<li>Fit a decision tree <strong>classifier</strong> on each, obtaining <span class="math inline">\(B\)</span> class predictions</li>
+<li>Take a <strong>majority vote</strong> across all <span class="math inline">\(B\)</span> predictions: the final predicted class is the one that appears most often.</li>
 </ol>
-<p><span class="math display">\[\text{CV}_{(k)} = \frac{1}{k} \sum_{i=1}^{k} \text{Err}_i.\]</span></p>
-<p>In practice we <strong>use <span class="math inline">\(k=5\)</span> or <span class="math inline">\(k=10\)</span> for the number of folds</strong>. These values strike a good balance since each fold uses 80–90% of the training data per fit and fitting only 5 or 10 models is also not as computationally intensive.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="grid_search_cross_validation.png" class="img-fluid figure-img"></p>
-<figcaption>Diagram adapted from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></figcaption>
-</figure>
+<p>The diagram is identical except that the bottom box says “Majority vote” instead of “Average predictions.”</p>
 </div>
+</div>
+</div>
+</section>
+<section id="bagging-for-classification" class="level3">
+<h3 class="anchored" data-anchor-id="bagging-for-classification">Bagging for classification</h3>
+<p>For classification problems, bagging works the same way but instead of averaging numerical predictions we take a <strong>majority vote</strong>:</p>
+<ol type="1">
+<li><p>Generate <span class="math inline">\(B\)</span> bootstrapped training sets</p></li>
+<li><p>Fit a classification tree on each bootstrapped training set</p></li>
+<li><p>To get a prediction on a new observation <span class="math inline">\(x\)</span>, get a class prediction from each tree <span class="math display">\[\hat{f}^{*1}(x), \hat{f}^{*2}(x), \ldots, \hat{f}^{*B}(x)\]</span></p></li>
+<li><p>The final bagged prediction is the <strong>most commonly occurring class</strong> across all <span class="math inline">\(B\)</span> trees.</p></li>
+</ol>
+<p><span class="math display">\[\hat{f}_{\text{bag}}(x) = \text{mode}\left\{\hat{f}^{*1}(x), \hat{f}^{*2}(x), \ldots, \hat{f}^{*B}(x)\right\}.\]</span></p>
+</section>
+</section>
+<section id="out-of-bag-error-estimation" class="level2">
+<h2 class="anchored" data-anchor-id="out-of-bag-error-estimation">Out-of-bag error estimation</h2>
+<p>When we fit each bootstrapped tree, <strong>not every observation ends up in that bootstrap sample</strong>. The observations left out are called the <strong>out-of-bag (OOB) observations</strong> for that tree. On average, about <span class="math inline">\(\frac{1}{3}\)</span> of the training observations are OOB for any given tree.</p>
+<p>This gives us a way to estimate test error without using cross-validation:</p>
+<ol type="1">
+<li>For each observation <span class="math inline">\((x_i, y_i)\)</span> in the training set, identify all trees for which it was <strong>OOB</strong> (i.e., not used during training of that tree). On average this is about <span class="math inline">\(B/3\)</span> trees.</li>
+<li>Use only those trees to make a prediction for <span class="math inline">\(x_i\)</span>: average their predictions (regression) or take a majority vote (classification) to get a an OOB prediction for <span class="math inline">\(\hat{y}_i\)</span> for <span class="math inline">\(x_i\)</span>.</li>
+<li>Repeat for all <span class="math inline">\(n\)</span> training observations. We now have one OOB prediction per training observation.</li>
+<li>Compute MSE (regression) or classification error (classification) from these OOB predictions. This is the <strong>OOB error</strong>.</li>
+</ol>
+<!-- Eventually, I would like to get diagrams in here. -->
+<p>The OOB error is a valid estimate of test error because each observation is predicted <strong>only by trees that were not trained on it</strong>. It is analogous to leave-one-out cross-validation, but at no extra computational cost.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -594,11 +586,13 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Our dataset has 210 observations in the training set and 90 in the test set. By using 5-fold CV on our workflow:</p>
 <ol type="1">
-<li>Approximately how many observations are in each fold?</li>
-<li>How many observations are used to train the model in each iteration?</li>
-<li>What happens if you set <span class="math inline">\(k = n\)</span> (i.e., one observation per fold)? Will running this procedure twice on the same data give the same result or a different one? Why?</li>
+<li>Suppose your model has three trees fit on the bootstrap samples 1,2 and 3 below. For which trees would observation 4 be an OOB observation?</li>
+</ol>
+<p><img src="images/bootstrap-diagram.png" class="img-fluid"></p>
+<ol start="2" type="1">
+<li>Why is the OOB error a valid estimate of the test error and not the training error?</li>
+<li>If we use a very small <span class="math inline">\(B\)</span>, would you expect every training sample to be OOB for some tree? Would you then trust the OOB error estimate? Why or why not?</li>
 </ol>
 </div>
 </div>
@@ -615,128 +609,37 @@ Discussion
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><span class="math inline">\(210 / 5 = 42\)</span> observations per fold.</li>
-<li><span class="math inline">\(210 - 42 = 168\)</span> observations for training in each fold.</li>
-<li>Setting <span class="math inline">\(k = n\)</span> means each fold contains exactly one observation — this is <strong>leave-one-out cross-validation (LOOCV)</strong>. Because there is only one way to hold out each single observation, there is no randomness in how the folds are formed. Running LOOCV twice on the same data always produces exactly the same result. (Contrast this with <span class="math inline">\(k = 5\)</span> or <span class="math inline">\(k = 10\)</span>, where the random fold assignment can vary unless a random seed is fixed.)</li>
+<li>Observation 4 would be an OOB observation for the trees trained using boostrap samples 2 and 3.</li>
+<li>Because each observation’s OOB prediction is made only by trees that <strong>did not use that observation during training</strong>. The prediction is made on “unseen” data from those trees’ perspective.</li>
+<li>No.&nbsp;With <span class="math inline">\(B = 5\)</span> trees, some observations may never be OOB (i.e., they were included in every bootstrap sample). For those observations we would have no OOB prediction at all! With small <span class="math inline">\(B\)</span> the estimate is noisy and potentially inaccurate.</li>
 </ol>
 </div>
 </div>
 </div>
-<section id="computing-the-fold-error" class="level3">
-<h3 class="anchored" data-anchor-id="computing-the-fold-error">Computing the fold error</h3>
-<p>How we measure <span class="math inline">\(\text{Err}_i\)</span> in step 3 depends on the type of problem.</p>
-<p><strong>Regression</strong>: Use the Mean Squared Error (MSE) on the held-out fold:</p>
-<p><span class="math display">\[\text{Err}_i = \text{MSE in fold $i$} = \frac{1}{n_i} \sum_{j \in \text{fold } i} (y_j - \hat{y}_j)^2,\]</span></p>
-<p>where <span class="math inline">\(n_i\)</span> is the number of observations in fold <span class="math inline">\(i\)</span>, <span class="math inline">\(y_j\)</span> is the true response, and <span class="math inline">\(\hat{y}_j\)</span> is the model’s prediction.</p>
-<p><strong>Classification</strong>: Use the misclassification rate on the held-out fold:</p>
-<p><span class="math display">\[\text{Err}_i = \text{error rate in fold $i$} =  \frac{1}{n_i} \sum_{j \in \text{fold } i} \mathbf{1}(\hat{y}_j \neq y_j)\]</span></p>
-<p>where <span class="math inline">\(\mathbf{1}(\hat{y}_i \neq y_i)\)</span> equals 1 if observation <span class="math inline">\(i\)</span> was assigned the wrong class and 0 otherwise. This is simply the fraction of observations within the fold that were misclassified.</p>
-<p>The error rate or MSE are not the only metrics that can be estimated with cross-validation. Other performance metrics can be substituted.</p>
-<!-- 
-
-TO DO: in the future, work on rewriting this section to explain how to compute those other metrics usinc CV, will leave out for now. 
-
-### Other metrics
-
-The error rate or MSE are not the only metrics that can be estimated with cross-validation. Any performance metric that gives us a number can be substituted. In classification, this includes precision, recall, $F_1$, and AUC; in regression, you could use $R^2$. The procedure is identical: compute the chosen metric on each held-out fold, then average across folds. For example, in our kelp data we can estimate the test accuracy, precision, and recall in for our classifier using 5-fold CV as shown in the results below:
-
-In `scikit-learn`, the `scoring` parameter of `cross_val_score` controls which metric is used (e.g., `scoring='roc_auc'`, `scoring='f1'`). 
-
-::: {#kfold-example .cell execution_count=5}
-
-::: {.cell-output .cell-output-stdout}
-```
- Fold  Accuracy  Precision  Recall
-    1    0.6905     0.6763  0.6905
-    2    0.7857     0.7910  0.7857
-    3    0.8095     0.8056  0.8095
-    4    0.8095     0.8009  0.8095
-    5    0.7619     0.7711  0.7619
-
-Mean CV accuracy:   0.7714
-Mean CV precision:  0.7690
-Mean CV recall:     0.7714
-```
-:::
-:::
-
-
--->
-<!-- 
-### Leave-one-out cross-validation (LOOCV)
-
-**Leave-one-out cross-validation (LOOCV)** is a special case of K-fold CV where $K = n$: each fold contains exactly one observation, so the model is fit $n$ times, each time on $n - 1$ observations.
-
-$$\text{CV}_{(n)} = \frac{1}{n} \sum_{i=1}^{n} \text{Err}_i$$
-
-**Advantages over the validation set approach:**
-
-- Each model is trained on $n - 1$ observations — almost the full training set — so there is very little bias in the error estimate.
-- There is **no randomness**: there is only one way to hold out each single observation, so LOOCV always produces the same result.
-
-**Drawback:**
-
-- The model must be fit $n$ times. For large datasets or computationally expensive models this is prohibitively slow. K-fold CV with $K = 5$ or $10$ achieves comparable accuracy at a fraction of the cost, and is preferred in practice.
-
--->
-<!-- ```{python}
-#| label: loocv-example
-
-loocv    = LeaveOneOut()
-lr_loocv = LogisticRegression(max_iter=1000)
-scores   = cross_val_score(lr_loocv, X_train, y_train, cv=loocv, scoring='accuracy')
-
-print(f"Number of models fitted:         {len(scores)}")
-print(f"LOOCV error rate (2 predictors): {1 - scores.mean():.4f}")
-``` -->
-<p>Two caveats for implementation:</p>
-<ol type="1">
-<li>Feature scaling must happen inside the CV loop</li>
-</ol>
-<p>Models that rely on distances (like KNN) are sensitive to feature scale. In practice you would standardize features before fitting these models. The critical constraint is that <strong>the scaler must be fit on the training folds only</strong> and then applied to the validation fold.</p>
-<ol start="2" type="1">
-<li>Use stratified folds for classification if classes are imbalanced</li>
-</ol>
-<p>Plain <span class="math inline">\(k\)</span>-fold CV shuffles observations without regard to class labels. For classification problems (especially with class imbalance) this can produce folds where one class is barely represented, making fold error estimates noisy. <strong>Stratified K-fold</strong> preserves the class proportion of the full training set in each fold and is the standard practice for classification tasks.</p>
-</section>
-</section>
-<section id="using-cv-to-select-a-hyperparameter" class="level2">
-<h2 class="anchored" data-anchor-id="using-cv-to-select-a-hyperparameter">Using CV to select a hyperparameter</h2>
-<p>A <strong>hyperparameter</strong> is any setting of a model that is <strong>chosen by the analyst</strong> and <strong>cannot be learned from the training data during model fitting</strong>. Unlike model parameters (such as regression coefficients, which the algorithm estimates from data), hyperparameters must be set before fitting and control <em>how</em> the model learns. The integer <span class="math inline">\(K\)</span> that controls the number of neighbors used in the the KNN algorithm is an example of a hyperparameter.</p>
-<p>One important use case of cross-validation is <strong>hyperparameter selection</strong>. This helps us select hyperparameters for our models without risking information from our test set leaking into our model development. Generally, we follow these steps to do so:</p>
-<ol start="0" type="1">
-<li>Identify the hyperparameter you want to examine.</li>
-<li>For each candidate value of the hyperparameter, compute the <span class="math inline">\(k\)</span>-fold CV error on the training set.</li>
-<li>Select the hyperparameter that resulted in the lowest CV error. If there are several candidates, opt for the one that gives the simpler model.</li>
-<li>Refit the model using the selected hyperaparameter on the full training set.</li>
-<li>Evaluate the final model once on the test set.</li>
-</ol>
-<p>In our kelp classification task, KNN requires choosing <span class="math inline">\(K\)</span>, the number of neighbors. Recall a small <span class="math inline">\(K\)</span> produces a flexible model that may overfit; a large <span class="math inline">\(K\)</span> produces a smooth model that may underfit. Cross-validation gives us a way to select <span class="math inline">\(K\)</span> without touching the test set:</p>
-<ol type="1">
-<li>For each candidate value of <span class="math inline">\(K\)</span>, compute the <span class="math inline">\(k\)</span>-fold CV error on the training set.</li>
-<li>Select the <span class="math inline">\(K\)</span> with the lowest CV error.</li>
-<li>Refit the final KNN model using that <span class="math inline">\(K\)</span> on the full training set.</li>
-<li>Evaluate once on the test set.</li>
-</ol>
-<p>The graph below shows us what this procedure looks like for our kelp data looking at <span class="math inline">\(K\)</span> from 0 to 50.</p>
-<div id="cell-cv-knn-selection" class="cell" data-execution_count="6">
+<section id="choosing-the-number-of-trees-b" class="level3">
+<h3 class="anchored" data-anchor-id="choosing-the-number-of-trees-b">Choosing the number of trees B</h3>
+<p>Unlike tree depth, <span class="math inline">\(B\)</span> is <strong>not a tuning parameter in the usual sense</strong> because using a very large <span class="math inline">\(B\)</span> does not cause overfitting. In practice we pick a value large enough that the OOB error stabilizes and stops decreasing. The plot below shows OOB MSE for our example dataset as a function of <span class="math inline">\(B\)</span>:</p>
+<div id="cell-oob-error-vs-b" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="5_1_cross_validation-NOTES_files/figure-html/cv-knn-selection-output-1.png" id="cv-knn-selection" class="quarto-figure quarto-figure-center anchored figure-img" width="709" height="392"></p>
+<p><img src="8_2_bagging_random_forest-NOTES_files/figure-html/oob-error-vs-b-output-1.png" id="oob-error-vs-b" class="quarto-figure quarto-figure-center anchored figure-img" width="669" height="390"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Once we have selected <span class="math inline">\(K\)</span> using CV, we refit the model on the full training set and evaluate it once on the test set:</p>
-<div id="knn-test-evaluation" class="cell" data-execution_count="7">
-<div class="cell-output cell-output-stdout">
-<pre><code>Selected K (via CV):      20
-CV error estimate:        0.2429
-Actual test error:        0.3333</code></pre>
-</div>
-</div>
-<p>The CV error and the test error should be in a similar range. If they are, it means cross-validation gave us a reliable estimate of how the model generalizes before we ever touched the test set.</p>
+<p>The error decreases quickly and levels off. Adding more trees beyond that plateau does not hurt, but it also does not help. Pick a B where the curve is already flat.</p>
+</section>
+</section>
+<section id="variable-importance" class="level2">
+<h2 class="anchored" data-anchor-id="variable-importance">Variable importance</h2>
+<p>One of the advantages of a single decision tree is its interpretability: we can look at the tree diagram and understand which variables drive the splits. With bagging we lose this direct interpretability since we now have <span class="math inline">\(B\)</span> different trees.</p>
+<p>However, we can still extract a useful <strong>overall summary of variable importance</strong> across all <span class="math inline">\(B\)</span> trees:</p>
+<ul>
+<li><strong>Regression</strong>: every time for each predictor, record the total reduction in RSS achieved by splits on that predictor, summed across all trees and all splits. Average this total reduction over all <span class="math inline">\(B\)</span> trees.</li>
+<li><strong>Classification</strong>: the same, but using the Gini impurity reduction instead of RSS reduction.</li>
+</ul>
+<p>Predictors with large average reductions are the most important for the model’s predictions.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -747,10 +650,19 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
+<p>Consider the following variable importance plot:</p>
+<div id="cell-variable-importance-bagging" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_2_bagging_random_forest-NOTES_files/figure-html/variable-importance-bagging-output-1.png" id="variable-importance-bagging" class="quarto-figure quarto-figure-center anchored figure-img" width="523" height="271"></p>
+</figure>
+</div>
+</div>
+</div>
 <ol type="1">
-<li>Describe what happens to the decision boundary as <span class="math inline">\(K\)</span> increases from 1 to 50. How does this relate to bias and variance?</li>
-<li>Once <span class="math inline">\(K\)</span> is selected using CV, on what data should the final KNN model be fit before evaluating on the test set?</li>
-<li>Why would it be incorrect to use the test set to select <span class="math inline">\(K\)</span> and then report performance on that same test set?</li>
+<li>Which predictor is most important for predicting biomass in this dataset?</li>
+<li>When creating the trees for the ensenmble model, what predictor would you expect to be used in the first split for most of them?</li>
 </ol>
 </div>
 </div>
@@ -767,24 +679,24 @@ Discussion
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li>As <span class="math inline">\(K\)</span> increases, the decision boundary becomes more connected and less sensitive to individual training points. Bias increases (the model cannot capture fine-grained patterns) but variance decreases (predictions are more stable across datasets). At <span class="math inline">\(K = 1\)</span> the boundary traces every training point perfectly — very low bias, very high variance. At <span class="math inline">\(K = n\)</span> the model always predicts the majority class — maximum bias, near-zero variance.</li>
-<li>The final model should be refit <strong>on the full training set</strong> (all 210 observations) using the selected <span class="math inline">\(K\)</span>. Cross-validation only informs the choice of <span class="math inline">\(K\)</span>; the final fit uses all available training data.</li>
-<li>Selecting <span class="math inline">\(K\)</span> based on test set performance means the test set has influenced our modeling decisions. The reported accuracy would reflect how well we optimized for that particular test set, not how well the model generalizes to new data. The test set must remain unseen until the very final evaluation.</li>
+<li>Rainfall has higher importance in this dataset, meaning splits on rainfall reduce RSS more on average across all trees.</li>
+<li>The root node will for most trees will be split on rainfall first.</li>
 </ol>
 </div>
 </div>
 </div>
-<p>Overall, we follow the following workflow when using our data to find the best (hyper)parameters:</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="parameters_workflow.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>Diagram from <a href="https://scikit-learn.org/stable/modules/cross_validation.html"><code>scikit-learn</code>’s documentation on cross-validation</a></figcaption>
-</figure>
-</div>
 </section>
-<section id="comparing-models-with-cv" class="level2">
-<h2 class="anchored" data-anchor-id="comparing-models-with-cv">Comparing models with CV</h2>
-<p>Cross-validation is also used to compare different model types on the same training data before ever touching the test set. We use the same folds for all models so that differences in CV error reflect the model, not randomness in how the data was split. Once you have selected a model using CV, refit it on the full training set and report its performance on the test set once, as the final evaluation.</p>
+<section id="random-forests" class="level2">
+<h2 class="anchored" data-anchor-id="random-forests">Random forests</h2>
+<p><strong>Random forests</strong> build on bagging with one additional twist designed to <strong>decorrelate the trees</strong> in the ensemble.</p>
+<p>Recall the bagging procedure: we fit <span class="math inline">\(B\)</span> trees on <span class="math inline">\(B\)</span> bootstrapped samples and average their predictions. If one predictor is very strongly associated with the response, <strong>almost every tree will use that predictor as the top split</strong>. The relative importance of the predictors will continue as the tree gorw. As a result, the <span class="math inline">\(B\)</span> trees will look similar to each other, i.e.&nbsp;they will be correlated. Averaging correlated predictions does not reduce variance as much as averaging uncorrelated ones.</p>
+<p>Random forests break this correlation by introducing <strong>randomness at each split</strong>:</p>
+<ul>
+<li>At each candidate split in each tree, instead of considering all <span class="math inline">\(p\)</span> available predictors, we randomly select a subset of <span class="math inline">\(m &lt; p\)</span> predictors and only consider those <span class="math inline">\(m\)</span> as candidates for that split.</li>
+<li>A <strong>fresh random subset</strong> of <span class="math inline">\(m\)</span> predictors is drawn at every split.</li>
+<li>A typical default is <span class="math inline">\(m = \sqrt{p}\)</span> for classification and <span class="math inline">\(m = p/3\)</span> for regression.</li>
+</ul>
+<p>By restricting which predictors can be used at each split, no single strong predictor can dominate every tree. Weaker predictors get a chance to contribute, and the resulting trees are less correlated with each other. Averaging less-correlated predictions produces a larger reduction in variance.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -795,19 +707,7 @@ Check-in
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Examnining the error rate coming from a 10-fold CV on three different models we obtain:</p>
-<div id="cv-model-comparison" class="cell" data-execution_count="8">
-<div class="cell-output cell-output-stdout">
-<pre><code>                    Model CV error (mean)
-               KNN (K=20)           0.243
-     Logistic (temp only)           0.295
-Logistic (temp + nitrate)           0.243</code></pre>
-</div>
-</div>
-<ol type="1">
-<li>Which model would you select based on this CV comparison?</li>
-<li>Earlier in this lesson we saw that selecting the classification threshold using the test set leads to data leakage. How is using CV to compare these three models solving the same underlying problem?</li>
-</ol>
+<p>Suppose you are building one tree in a random forest with predictors {<code>rainfall</code>, <code>temperature</code>, <code>elevation</code>, <code>soil moisture</code>} (<span class="math inline">\(p = 4\)</span>, <span class="math inline">\(m = 2\)</span>). At the root node the algorithm randomly selects {<code>rainfall</code>, <code>elevation</code>} and splits on rainfall. At the next node, which predictors are available to split on?</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -822,11 +722,48 @@ Discussion
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ol type="1">
-<li>Select the model with the lowest mean CV error.</li>
-<li>Any time we use the test set to inform a decision — whether choosing a threshold, tuning <span class="math inline">\(K\)</span>, or picking between model types — we are optimizing for those specific observations and the test error is no longer an honest estimate of generalization. CV solves this in all three cases the same way: it estimates how each candidate will perform on new data using only the training set, so the test set stays untouched until the very final evaluation.<br>
-</li>
-</ol>
+<p>A new random sample of 2 predictors is drawn: it could be any pair, including ones used before. The previous split does not restrict future splits.</p>
+</div>
+</div>
+</div>
+<p>Random forests outperform bagging most when the dataset has <strong>one or a few dominant predictors</strong>: bagged trees become too similar to each other, while random forests force diversity. When all predictors are equally weak or the dataset is very small, the benefit of decorrelation is smaller.</p>
+<div id="cell-rf-vs-bagging" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="8_2_bagging_random_forest-NOTES_files/figure-html/rf-vs-bagging-output-1.png" id="rf-vs-bagging" class="quarto-figure quarto-figure-center anchored figure-img" width="669" height="390"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The number of predictors considered at each split, <span class="math inline">\(m\)</span>, is a hyperparameter that controls the degree of decorrelation. Choosing a <strong>small <span class="math inline">\(m\)</span></strong> means more randomness, more decorrelated trees, lower variance but potentially higher bias</p>
+<p>A small value of <span class="math inline">\(m\)</span> is especially helpful when there are many uncorrelated predictors, as it gives each one a fair chance to contribute. Cross-validation can be used to select <span class="math inline">\(m\)</span> when performance is sensitive to its choice.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If <span class="math inline">\(m = p\)</span>, how does random forest relate to bagging?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>When <span class="math inline">\(m = p\)</span>, random forests reduce to bagging exactly — there is no restriction on which predictors can be used, so every tree uses the full set at every split.</p>
 </div>
 </div>
 </div>
