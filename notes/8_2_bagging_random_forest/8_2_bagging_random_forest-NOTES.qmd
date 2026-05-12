@@ -1,0 +1,464 @@
+---
+title: Bagging and Random Forests
+jupyter: eds232-env
+echo: false
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.patches import FancyBboxPatch
+import pandas as pd
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import BaggingRegressor, RandomForestRegressor
+import warnings
+
+warnings.filterwarnings("ignore")
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+# ── EcoSite regression dataset (same as decision tree notes) ───────────────────
+# 22 mountain meadow survey sites
+# Predictors: annual rainfall (mm), mean summer temperature (°C)
+# Response:   aboveground biomass (tonnes / ha)
+# ──────────────────────────────────────────────────────────────────────────────
+np.random.seed(42)
+n = 22
+
+rainfall    = np.random.uniform(200, 1000, n)
+temperature = np.random.uniform(5,   25,   n)
+
+biomass_base = np.where(
+    rainfall > 600,
+    np.where(temperature < 18, 8.5, 5.5),
+    np.where(temperature < 15, 3.5, 2.0)
+)
+biomass = np.round(biomass_base + np.random.normal(0, 0.55, n), 1)
+biomass = np.clip(biomass, 0.5, 12.0)
+
+df = pd.DataFrame({'rainfall': rainfall, 'temperature': temperature, 'biomass': biomass})
+X  = df[['rainfall', 'temperature']].values
+y  = df['biomass'].values
+```
+
+In this lesson we introduce:
+
+- **Ensemble methods** and why they improve on single decision trees
+- **Bagging** (Bootstrap Aggregation): fitting many trees on bootstrap samples and averaging their predictions
+- **Out-of-bag error estimation**: an alternative to cross-validation that comes for free with bagging
+- **Random forests**: an extension of bagging that decorrelates trees by using a random subset of predictors at each split
+
+These notes are based on chapter 8 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example data is the same synthetic dataset used in the decision tree notes. Data and code were generated with the aid of Claude Code for the purpose of this lesson.
+
+## A guiding dataset
+
+We will use a small dataset of 22 ecological survey sites throughout this section. Each site is characterized by:
+
+- **`rainfall`** — annual precipitation (mm)
+- **`temperature`** — mean summer temperature (°C)
+- **`biomass`** — aboveground plant biomass (tonnes per hectare), our response variable
+
+The plot below shows the 22 points in the dataset with the biomass measurement annotated for each point. 
+
+```{python}
+#| label: scatter-annotated
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
+
+ax.scatter(df['rainfall'], df['temperature'],
+           s=70, color='steelblue', zorder=5, alpha=0.85,
+           edgecolors='white', linewidths=1)
+
+for _, row in df.iterrows():
+    ax.annotate(f'{row.biomass:.1f}',
+                (row.rainfall, row.temperature),
+                textcoords='offset points', xytext=(6, 4),
+                fontsize=8.5, color='#222')
+
+ax.set_xlabel('Annual rainfall (mm)')
+ax.set_ylabel('Mean temperature (°C)')
+ax.set_title('Example dataset — aboveground biomass (tonnes/ha) labeled on each site')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+## Ensemble methods
+
+An **ensemble method** combines many simple "building block" models to obtain a single, more powerful model. Instead of relying on one model's prediction, we aggregate many models' predictions. The combination is usually more accurate and more stable than any individual model.
+
+In this lesson we focus on two ensemble methods built on top of decision trees: **bagging** and **random forests**.
+
+## The variance problem in decision trees
+
+Recall that a single decision tree suffers from **high variance**: small changes in the training data can lead to very different trees and very different predictions. Deep trees are especially prone to overfitting.
+
+One general strategy for reducing variance is:
+
+1. Take many training sets from the same population
+2. Fit a separate model on each training set
+3. **Average** the resulting predictions
+
+Averaging many models reduces variance without increasing bias. The averaging step is the key: the more uncorrelated the individual predictions are, the more variance reduction we get.
+
+The challenge with this approach is that, in practice, we almost never have access to multiple independent training sets, we only have a single one. **Bagging** is a way around this.
+
+## Bagging
+
+**Bagging** stands for Bootstrap AGGregatING. The idea is to generate many training sets from the single one we have by **bootstrapping**, and then average the predictions from models fit on each of those bootstrapped sets.
+
+### The bootstrap
+
+**Bootstrapping** generates a new training set by sampling **with replacement** from the original training set. Each bootstrapped sample is the same size as the original, but some observations will appear more than once and others will be left out entirely.
+
+The figure below is a toy example of a training set with 6 observations, and three bootstrapped versions of it. Each bootstrapped dataset was created by sampling 6 observations with replacement from the original 6. Notice how some rows are repeated and others are missing.
+
+```{python}
+#| label: bootstrap-example
+#| fig-align: center
+#| eval: false
+
+np.random.seed(0)
+n_show = 6
+df_show = df.iloc[:n_show].reset_index(drop=True)
+df_show.index = df_show.index + 1  # 1-indexed observation numbers
+
+# Generate 3 bootstrap samples (with replacement)
+boots = []
+for seed in [1, 2, 3]:
+    rng  = np.random.default_rng(seed)
+    idx  = rng.choice(n_show, size=n_show, replace=True)
+    boot = df.iloc[idx].reset_index(drop=True)
+    boot.index = boot.index + 1
+    boots.append((idx + 1, boot))  # store 1-indexed obs numbers
+
+col_colors = ['#d0e8f1', '#d6ecd2', '#fce5cd', '#ede0f7']  # orig + 3 boots
+titles = ['Original Training Set', 'Bootstrap 1', 'Bootstrap 2', 'Bootstrap 3']
+
+fig, axes = plt.subplots(4, 1, figsize=(fig_size_x * 0.55, fig_size_y * 3.2))
+
+for ax_i, (ax, title, color) in enumerate(zip(axes, titles, col_colors)):
+    if ax_i == 0:
+        data = df_show
+        obs_col = [str(i) for i in df_show.index]
+    else:
+        idx_list, boot_df = boots[ax_i - 1]
+        data = boot_df
+        obs_col = [str(i) for i in idx_list]
+
+    rows = [[o, f'{r:.0f}', f'{t:.1f}', f'{b:.1f}']
+            for o, (_, r), (_, t), (_, b)
+            in zip(obs_col,
+                   data['rainfall'].items(),
+                   data['temperature'].items(),
+                   data['biomass'].items())]
+
+    col_labels = ['Obs', 'Rain\n(mm)', 'Temp\n(°C)', 'Bio\n(t/ha)']
+    tbl = ax.table(cellText=rows, colLabels=col_labels,
+                   loc='center', cellLoc='center')
+    tbl.auto_set_font_size(False)
+    tbl.set_fontsize(8.5)
+    tbl.scale(1, 1.55)
+
+    # Header row color
+    for j in range(4):
+        tbl[(0, j)].set_facecolor('#444')
+        tbl[(0, j)].set_text_props(color='white', fontweight='bold')
+    # Body rows
+    for i in range(1, n_show + 1):
+        for j in range(4):
+            tbl[(i, j)].set_facecolor(color)
+
+    ax.set_title(title, fontsize=10, fontweight='bold', pad=4)
+    ax.axis('off')
+
+plt.suptitle('Original dataset and three bootstrapped samples\n'
+             '(same size, sampling with replacement)',
+             fontsize=10, y=1.02)
+plt.tight_layout()
+plt.savefig('bootstrap-example.png', dpi=150, bbox_inches='tight')
+plt.show()
+plt.close()
+```
+
+![](images/bootstrap-diagram.png)
+
+
+### Bagging for regression
+
+Bagging uses bootstrapped training sets to fit a forest of decision trees. There are two implementations depending if we are in a regression or classification scenario. 
+
+In the regression case, we use bagging to create an ensemble of regression trees by:
+
+1. Generating $B$ bootstrapped training sets from the original training set.
+2. Fitting a decision tree on each bootstrapped training set.
+
+![](images/regression-tree-diagram-fitting.png){width=60% fig-align="center"}
+
+To get a prediction on a new observation $x$, obtaining $B$ estimates, one from each tree: 
+
+$$\hat{f}^{*1}(x), \hat{f}^{*2}(x), \ldots, \hat{f}^{*B}(x),$$
+
+and then **average** the $B$ predictions to produce the final bagged prediction:
+
+$$\hat{f}_{\text{bag}}(x) = \frac{1}{B} \sum_{b=1}^{B} \hat{f}^{*b}(x).$$
+
+The diagram below illustrates this workflow:
+![](images/regression-tree-diagram.png)
+
+::: {.callout-tip}
+## Check-in
+How would you modify this workflow to use bagging for a **classification** problem? Draw a similar diagram and describe what changes.
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+The workflow is the same, but the final step changes:
+
+1. Generate $B$ bootstrapped training sets
+2. Fit a decision tree **classifier** on each, obtaining $B$ class predictions
+3. Take a **majority vote** across all $B$ predictions: the final predicted class is the one that appears most often.
+
+The diagram is identical except that the bottom box says "Majority vote" instead of "Average predictions."
+:::
+
+### Bagging for classification
+
+For classification problems, bagging works the same way but instead of averaging numerical predictions we take a **majority vote**:
+
+
+1. Generate $B$ bootstrapped training sets
+2. Fit a classification tree on each bootstrapped training set
+3. To get a prediction on a new observation $x$, get a class prediction from each tree
+$$\hat{f}^{*1}(x), \hat{f}^{*2}(x), \ldots, \hat{f}^{*B}(x)$$
+
+3. The final bagged prediction is the **most commonly occurring class** across all $B$ trees.
+
+$$\hat{f}_{\text{bag}}(x) = \text{mode}\left\{\hat{f}^{*1}(x), \hat{f}^{*2}(x), \ldots, \hat{f}^{*B}(x)\right\}.$$
+
+## Out-of-bag error estimation
+
+When we fit each bootstrapped tree, **not every observation ends up in that bootstrap sample**. The observations left out are called the **out-of-bag (OOB) observations** for that tree. On average, about $\frac{1}{3}$ of the training observations are OOB for any given tree.
+
+This gives us a way to estimate test error without using cross-validation:
+
+1. For each observation $(x_i, y_i)$ in the training set, identify all trees for which it was **OOB** (i.e., not used during training of that tree). On average this is about $B/3$ trees.
+2. Use only those trees to make a prediction for $x_i$: average their predictions (regression) or take a majority vote (classification) to get a an OOB prediction for $\hat{y}_i$ for $x_i$. 
+3. Repeat for all $n$ training observations. We now have one OOB prediction per training observation.
+4. Compute MSE (regression) or classification error (classification) from these OOB predictions. This is the **OOB error**.
+
+<!-- Eventually, I would like to get diagrams in here. -->
+
+The OOB error is a valid estimate of test error because each observation is predicted **only by trees that were not trained on it**. It is analogous to leave-one-out cross-validation, but at no extra computational cost.
+
+::: {.callout-tip}
+## Check-in
+1. Suppose your model has three trees fit on the bootstrap samples 1,2 and 3 below. For which trees would observation 4 be an OOB observation? 
+
+![](images/bootstrap-diagram.png)
+
+2. Why is the OOB error a valid estimate of the test error and not the training error?
+3. If we use a very small $B$, would you expect every training sample to be OOB for some tree? Would you then trust the OOB error estimate? Why or why not?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+1. Observation 4 would be an OOB observation for the trees trained using boostrap samples 2 and 3. 
+2. Because each observation's OOB prediction is made only by trees that **did not use that observation during training**. The prediction is made on "unseen" data from those trees' perspective.
+3. No. With $B = 5$ trees, some observations may never be OOB (i.e., they were included in every bootstrap sample). For those observations we would have no OOB prediction at all! With small $B$ the estimate is noisy and potentially inaccurate.
+:::
+
+### Choosing the number of trees B
+
+Unlike tree depth, $B$ is **not a tuning parameter in the usual sense** because  using a very large $B$ does not cause overfitting. In practice we pick a value large enough that the OOB error stabilizes and stops decreasing. The plot below shows OOB MSE for our example dataset as a function of $B$:
+
+```{python}
+#| label: oob-error-vs-b
+#| fig-align: center
+
+B_range = list(range(1, 201))
+oob_mse_bag = []
+
+for B in B_range:
+    bag = BaggingRegressor(
+        estimator=DecisionTreeRegressor(random_state=42),
+        n_estimators=B,
+        oob_score=True,
+        bootstrap=True,
+        random_state=42
+    )
+    bag.fit(X, y)
+    preds = bag.oob_prediction_
+    mask  = ~np.isnan(preds)
+    if mask.sum() < 2:
+        oob_mse_bag.append(np.nan)
+    else:
+        oob_mse_bag.append(np.mean((y[mask] - preds[mask])**2))
+
+oob_mse_bag = np.array(oob_mse_bag)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
+ax.plot(B_range, oob_mse_bag, color='steelblue', linewidth=1.5, label='Bagging OOB MSE')
+ax.set_xlabel('Number of trees B')
+ax.set_ylabel('OOB MSE')
+ax.set_title('OOB error as a function of the number of trees B')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The error decreases quickly and levels off. Adding more trees beyond that plateau does not hurt, but it also does not help. Pick a B where the curve is already flat.
+
+
+
+## Variable importance
+
+One of the advantages of a single decision tree is its interpretability: we can look at the tree diagram and understand which variables drive the splits. With bagging we lose this direct interpretability since we now have $B$ different trees.
+
+However, we can still extract a useful **overall summary of variable importance** across all $B$ trees:
+
+- **Regression**: every time for each predictor, record the total reduction in RSS achieved by splits on that predictor, summed across all trees and all splits. Average this total reduction over all $B$ trees.
+- **Classification**: the same, but using the Gini impurity reduction instead of RSS reduction.
+
+Predictors with large average reductions are the most important for the model's predictions.
+
+::: {.callout-tip}
+## Check-in
+
+
+Consider the following variable importance plot:
+
+```{python}
+#| label: variable-importance-bagging
+#| fig-align: center
+
+# Fit a random forest (which provides feature_importances_ directly)
+# Use a large B so importances are stable
+rf_vi = RandomForestRegressor(n_estimators=200, oob_score=True, random_state=42)
+rf_vi.fit(X, y)
+
+importances = rf_vi.feature_importances_
+feat_names  = ['Rainfall (mm)', 'Temperature (°C)']
+order       = np.argsort(importances)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.65, fig_size_y * 0.7))
+colors_vi = ['steelblue', '#e07b39']
+ax.barh([feat_names[i] for i in order],
+        importances[order],
+        color=[colors_vi[i] for i in order],
+        edgecolor='white', height=0.5)
+ax.set_xlabel('Mean decrease in RSS (normalized)')
+ax.set_title('Variable importance — bagged regression trees')
+ax.set_xlim(0, 1)
+ax.grid(True, axis='x', alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+1. Which predictor is most important for predicting biomass in this dataset?
+2. When creating the trees for the ensenmble model, what predictor would you expect to be used in the first split for most of them?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+1. Rainfall has higher importance in this dataset, meaning splits on rainfall reduce RSS more on average across all trees.
+2. The root node will for most trees will be split on rainfall first.
+:::
+
+## Random forests
+
+**Random forests** build on bagging with one additional twist designed to **decorrelate the trees** in the ensemble.
+
+Recall the bagging procedure: we fit $B$ trees on $B$ bootstrapped samples and average their predictions. If one predictor is very strongly associated with the response, **almost every tree will use that predictor as the top split**. The relative importance of the predictors will continue as the tree gorw. As a result, the $B$ trees will look similar to each other, i.e. they will be correlated. Averaging correlated predictions does not reduce variance as much as averaging uncorrelated ones.
+
+Random forests break this correlation by introducing **randomness at each split**:
+
+- At each candidate split in each tree, instead of considering all $p$ available predictors, we randomly select a subset of $m < p$ predictors and only consider those $m$ as candidates for that split.
+- A **fresh random subset** of $m$ predictors is drawn at every split.
+- A typical default is $m = \sqrt{p}$ for classification and $m = p/3$ for regression.
+
+By restricting which predictors can be used at each split, no single strong predictor can dominate every tree. Weaker predictors get a chance to contribute, and the resulting trees are less correlated with each other. Averaging less-correlated predictions produces a larger reduction in variance.
+
+::: {.callout-tip}
+## Check-in
+Suppose you are building one tree in a random forest with predictors {`rainfall`, `temperature`, `elevation`, `soil moisture`} ($p = 4$, $m = 2$). At the root node the algorithm randomly selects {`rainfall`, `elevation`} and splits on rainfall. At the next node, which predictors are available to split on? 
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+A new random sample of 2 predictors is drawn: it could be any pair, including ones used before. The previous split does not restrict future splits.
+:::
+
+Random forests outperform bagging most when the dataset has **one or a few dominant predictors**: bagged trees become too similar to each other, while random forests force diversity. When all predictors are equally weak or the dataset is very small, the benefit of decorrelation is smaller.
+
+```{python}
+#| label: rf-vs-bagging
+#| fig-align: center
+
+from sklearn.model_selection import train_test_split
+
+# Train/test split — all models trained on the same data, evaluated on the same held-out set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+
+# Single decision tree test MSE (horizontal reference line)
+single_tree = DecisionTreeRegressor(random_state=42).fit(X_train, y_train)
+single_tree_mse = np.mean((y_test - single_tree.predict(X_test))**2)
+
+B_range   = list(range(1, 201))
+mse_bag   = []
+mse_rf    = []
+
+for B in B_range:
+    # Bagging
+    bag = BaggingRegressor(
+        estimator=DecisionTreeRegressor(random_state=42),
+        n_estimators=B, bootstrap=True, random_state=42
+    )
+    bag.fit(X_train, y_train)
+    mse_bag.append(np.mean((y_test - bag.predict(X_test))**2))
+
+    # Random forest
+    rf = RandomForestRegressor(n_estimators=B, random_state=42)
+    rf.fit(X_train, y_train)
+    mse_rf.append(np.mean((y_test - rf.predict(X_test))**2))
+
+mse_bag = np.array(mse_bag)
+mse_rf  = np.array(mse_rf)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y))
+ax.axhline(single_tree_mse, color='#888', linewidth=1.4, linestyle='--',
+           label=f'Single decision tree (test MSE = {single_tree_mse:.2f})')
+ax.plot(B_range, mse_bag, color='steelblue', linewidth=1.5, label='Bagging')
+ax.plot(B_range, mse_rf,  color='#e07b39',  linewidth=1.5, label='Random forest')
+ax.set_xlabel('Number of trees B')
+ax.set_ylabel('Test MSE')
+ax.set_title('Test MSE: single tree vs. bagging vs. random forest')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The number of predictors considered at each split, $m$, is a hyperparameter that controls the degree of decorrelation. Choosing a **small $m$** means more randomness, more decorrelated trees, lower variance but potentially higher bias
+
+A small value of $m$ is especially helpful when there are many uncorrelated predictors, as it gives each one a fair chance to contribute. Cross-validation can be used to select $m$ when performance is sensitive to its choice.
+
+::: {.callout-tip}
+## Check-in
+If $m = p$, how does random forest relate to bagging?
+:::
+
+::: {.callout-tip collapse="true"}
+## Discussion
+When $m = p$, random forests reduce to bagging exactly — there is no restriction on which predictors can be used, so every tree uses the full set at every split.
+:::
