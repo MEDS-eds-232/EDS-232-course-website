@@ -91,10 +91,9 @@ def arrow(ax, x0, y0, x1, y1):
 <br>
 
 ::: {.body-text-m}
-- **Ensemble methods** and why they improve on single decision trees
+- **Ensemble methods** 
 - **Bagging**: fitting many trees on bootstrap samples and averaging predictions
-- **Out-of-bag error estimation**: a free alternative to cross-validation
-- **Variable importance**: which predictors matter most across all trees
+- **Out-of-bag error estimation**: an alternative to cross-validation
 - **Random forests**: decorrelating trees by using a random subset of predictors at each split
 :::
 
@@ -115,7 +114,7 @@ def arrow(ax, x0, y0, x1, y1):
 <hr>
 
 ::: {.body-text-m}
-A single decision tree suffers from **high variance**: small changes in the training data can lead to very different trees and very different predictions.
+A single decision tree suffers from **high variance**: small changes in the training data can lead to very different trees and very different predictions. Deep trees are prone to overfitting.
 :::
 
 . . .
@@ -123,60 +122,45 @@ A single decision tree suffers from **high variance**: small changes in the trai
 One general strategy for reducing variance:
 
 ::: {.body-text-m}
-1. Take many training sets from the same population
+1. Take **many training sets** from the same population
 2. Fit a separate model on each training set
-3. **Average** the resulting predictions
+3. Average the resulting predictions
 :::
 
 . . .
 
-::: {.teal-text .body-text-m}
-The more **uncorrelated** the individual predictions are, the more variance reduction we get from averaging.
+::: {.teal-text }
+Core idea: The more uncorrelated the individual predictions are, the more variance reduction we get from averaging.
 :::
 
 . . .
 
-**The challenge:** in practice we only have a single training set. **Bagging** is a way around this.
+**The challenge:** in practice we only have a single training set. **Bootstrapping** is a way around this.
 
 ---
 
 ## {#section-bagging data-menu-title="# Bagging #" background="#047C90"}
 
 <div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Bagging</p>
+<p class="custom-subtitle bottombr">Bootsrapping & bagging</p>
 </div>
 
 ---
 
-## {#bagging-intro data-menu-title="What is bagging?"}
+## {#bootstrap-intro data-menu-title="What is bagging?"}
 
-[Bagging — Bootstrap AGGregatING]{.slide-title}
+[Bootsrap]{.slide-title}
 
 <hr>
 
-::: {.body-text-m}
-The idea: generate many training sets from the single one we have by **bootstrapping**, fit a model on each, then aggregate predictions.
-:::
+**Bootstrapping:** generate a new training set by **sampling with replacement** from the original training set
+
+- Each bootstrapped sample is the **same size** as the original
+- Some observations appear **more than once**
+- Some observations are **left out entirely**
 
 . . .
 
-<br>
-
-**The bootstrap:** generate a new training set by sampling **with replacement** from the original.
-
-::: {.body-text-m}
-- Each bootstrapped sample is the **same size** as the original
-- Some observations appear **more than once**
-- Some observations are **left out entirely** (~1/3 on average)
-:::
-
----
-
-## {#bootstrap-example-slide data-menu-title="Bootstrap example"}
-
-[A bootstrap example]{.slide-title}
-
-<hr>
 
 ```{python}
 #| label: bootstrap-example-slide
@@ -240,68 +224,106 @@ plt.close()
 
 ---
 
-## {#bagging-regression data-menu-title="Bagging for regression"}
+## {#bagging-intro data-menu-title="What is bagging?"}
+
+[Bagging — Bootstrap AGGregatING]{.slide-title}
+
+<hr>
+
+::: {.body-text-m}
+**Bagging** is a method to generate an ensemble model by:
+
+1. Generating many training sets from the single one we have by bootstrapping
+2. Fitting a model on each bootstrapped sample
+3. Then aggregate predictions to get a final prediction from the ensemble
+:::
+---
+
+## {#bagging-regression-1 data-menu-title="Bagging for regression"}
+
+[Bagging for regression]{.slide-title}
+
+<hr>
+
+![](images/regression-tree-diagram-1.jpg)
+
+---
+
+## {#bagging-regression-2 data-menu-title="Bagging for regression"}
+
+[Bagging for regression]{.slide-title}
+
+<hr>
+
+![](images/regression-tree-diagram-2.jpg)
+
+---
+
+## {#bagging-regression-3 data-menu-title="Bagging for regression"}
+
+[Bagging for regression]{.slide-title}
+
+<hr>
+
+![](images/regression-tree-diagram-3.jpg)
+
+---
+
+## {#bagging-regression-4 data-menu-title="Bagging for regression"}
+
+[Bagging for regression]{.slide-title}
+
+<hr>
+
+![](images/regression-tree-diagram-4.jpg)
+
+---
+
+## {#bagging-regression-5 data-menu-title="Bagging for regression"}
+
+[Bagging for regression]{.slide-title}
+
+<hr>
+
+![](images/regression-tree-diagram-5.PNG)
+
+
+---
+
+## {#bagging-regression-6 data-menu-title="Bagging for regression"}
 
 [Bagging for regression]{.slide-title}
 
 <hr>
 
 1. Generate $B$ bootstrapped training sets
-2. Fit a decision tree on each → $B$ estimates $\hat{f}^{*1}(x), \ldots, \hat{f}^{*B}(x)$
-3. **Average** the predictions:
+2. Fit a decision tree on each bootstrapped training set
+3. Obtain $B$ estimates $\hat{f}^{*1}(x), \ldots, \hat{f}^{*B}(x)$, one for each tree
+4. Average the predictions:
 
 $$\hat{f}_{\text{bag}}(x) = \frac{1}{B} \sum_{b=1}^{B} \hat{f}^{*b}(x)$$
 
-```{python}
-#| label: bagging-workflow-slide
-#| echo: false
-#| fig-align: center
-#| out-width: "80%"
 
-fig, ax = plt.subplots(figsize=(fig_size_x * 1.4, fig_size_y * 1.05))
-ax.set_xlim(0, 10); ax.set_ylim(0, 7); ax.axis('off')
+::: {.teal-text .body-text-m}
+**Check-in**
 
-draw_box(ax, 5, 6.2, 2.2, 0.8, 'Training set', facecolor='#e8e8e8')
-boot_xs = [1.5, 5, 8.5]
-boot_labels = ['Bootstrap 1', 'Bootstrap 2', '... Bootstrap B']
-for bx, bl in zip(boot_xs, boot_labels):
-    draw_box(ax, bx, 4.4, 2.0, 0.75, bl, facecolor='#d6ecd2')
-    arrow(ax, 5, 5.8, bx, 4.78)
-tree_labels = ['Tree 1\n$\\hat{f}^{*1}(x)$', 'Tree 2\n$\\hat{f}^{*2}(x)$',
-               '...\n$\\hat{f}^{*B}(x)$']
-for bx, tl in zip(boot_xs, tree_labels):
-    draw_box(ax, bx, 2.7, 2.0, 0.9, tl, facecolor='#fce5cd')
-    arrow(ax, bx, 4.03, bx, 3.15)
-draw_box(ax, 5, 1.2, 2.6, 0.75,
-         'Average predictions\n$\\hat{f}_{\\mathrm{bag}}(x)$',
-         facecolor='#ede0f7', fontsize=9)
-for bx in boot_xs:
-    arrow(ax, bx, 2.25, 5, 1.58)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
+How would you modify the bagging workflow for a **classification** problem? What changes? Create the corresponding diagram.
+:::
 
 ---
 
-## {#checkin-cls-bagging data-menu-title="Check-in: classification bagging"}
+## {#bagging-classification data-menu-title="Bagging for regression"}
 
-[Check-in]{.slide-title}
+[Bagging for classification]{.slide-title}
 
 <hr>
 
-::: {.teal-text .body-text-m}
-How would you modify the bagging workflow for a **classification** problem? What changes?
-:::
-
-. . .
-
-The workflow is identical, but the final aggregation step changes:
+In the case of classification, the workflow is the same as the regression case, but the final aggregation step changes:
 
 - Instead of **averaging** numerical predictions, take a **majority vote** across all $B$ trees
 - The final prediction is the most commonly occurring class:
 
-$$\hat{f}_{\text{bag}}(x) = \text{mode}\left\{\hat{f}^{*1}(x), \ldots, \hat{f}^{*B}(x)\right\}$$
+![](images/classification-bagging-diagram.png)
 
 ---
 
@@ -319,34 +341,9 @@ $$\hat{f}_{\text{bag}}(x) = \text{mode}\left\{\hat{f}^{*1}(x), \ldots, \hat{f}^{
 
 <hr>
 
-::: {.body-text-m}
-When fitting each bootstrapped tree, about **1/3 of the training observations are left out** of that bootstrap sample. These are called the **out-of-bag (OOB) observations** for that tree.
-:::
+When fitting each bootstrapped tree, some of the training observations are left out of that bootstrap sample. These are called the **out-of-bag (OOB) observations** for that tree.
 
 . . .
-
-This gives us a way to estimate test error **without a held-out set**:
-
-::: {.body-text-m}
-1. For each observation $(x_i, y_i)$, identify all trees for which it was OOB (~$B/3$ trees)
-2. Use only those trees to predict $x_i$ (average for regression, majority vote for classification)
-3. Repeat for all $n$ training observations → one OOB prediction per observation
-4. Compute **MSE** (regression) or **classification error** from these OOB predictions
-:::
-
-. . .
-
-::: {.teal-text .body-text-m}
-The OOB error is valid because each observation is predicted **only by trees that were not trained on it** — analogous to leave-one-out cross-validation, at no extra cost.
-:::
-
----
-
-## {#checkin-oob-q data-menu-title="Check-in: OOB (question)"}
-
-[Check-in]{.slide-title}
-
-<hr>
 
 :::: {.columns}
 
@@ -368,11 +365,15 @@ Suppose your model has three trees fit on Bootstrap samples 1, 2, and 3 shown he
 
 ---
 
-## {#checkin-oob-a data-menu-title="Check-in: OOB (answer)"}
+## {#oob-concept-2 data-menu-title="OOB observations"}
 
-[Check-in]{.slide-title}
+[Out-of-bag observations]{.slide-title}
 
 <hr>
+
+When fitting each bootstrapped tree, some of the training observations are left out of that bootstrap sample. These are called the **out-of-bag (OOB) observations** for that tree.
+
+. . .
 
 :::: {.columns}
 
@@ -393,6 +394,26 @@ Observation 4 does **not appear** in Bootstrap samples 2 and 3, so it is an OOB 
 :::
 
 ::::
+
+
+---
+
+## {#oob-error data-menu-title="OOB observations"}
+
+[Out-of-bag error]{.slide-title}
+
+<hr>
+
+This gives us a way to estimate test error without cross-validation:
+
+1. For each observation $(x_i, y_i)$, identify all trees for which it was OOB
+2. Use only those trees to predict $x_i$ (average for regression, majority vote for classification)
+3. Repeat for all $n$ training observations: get one OOB prediction per observation
+4. Compute **MSE** (regression) or **classification error** from these OOB predictions
+
+. . .
+
+The OOB error is valid because each observation is predicted **only by trees that were not trained on it** — analogous to leave-one-out cross-validation, at no extra cost.
 
 ---
 
