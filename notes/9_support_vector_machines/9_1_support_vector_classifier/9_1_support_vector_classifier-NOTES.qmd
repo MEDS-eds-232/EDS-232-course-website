@@ -81,7 +81,7 @@ def plot_svc_boundary(ax, svc, X, show_margin=True, show_sv=True, x_pad=0.8):
 
 In this lesson we introduce:
 
-- Separating lines (hyperplanes) as linear decision boundaries for binary classification
+- Separating hyperplanes as linear decision boundaries for binary classification
 - The maximal margin classifier and the concept of the margin
 - Support vectors and why they uniquely determine the classifier
 - The support vector classifier as a soft-margin generalization
@@ -91,11 +91,13 @@ These notes are based on chapter 9 of *An Introduction to Statistical Learning w
 
 ## Maximal margin classifier
 
-We begin in a binary classification setting where the two classes can be **perfectly separated** by a linear boundary. In two dimensions this boundary is a line; the general term across any number of dimensions is a **hyperplane**.
+We begin in a binary classification setting where the two classes can be **perfectly separated** by a linear boundary. 
+
+<!-- In two dimensions this boundary is a line; the general term across any number of dimensions is a **hyperplane**. -->
 
 ### Separating lines
 
-Consider a dataset with two predictors $X_1$ and $X_2$ and a binary response with classes $+1$ and $-1$. If the two classes lie on opposite sides of some line in the $(X_1, X_2)$ plane, we say the classes are **linearly separable** and that line is called a **separating line**.
+Consider a dataset with two predictors $X_1$ and $X_2$ and a binary response with classes $+1$ and $-1$. 
 
 ```{python}
 #| label: separable-scatter
@@ -116,7 +118,8 @@ plt.show()
 plt.close()
 ```
 
-Whenever the classes are perfectly separable, there are **infinitely many** valid separating lines. The plot below shows three examples, all of which place every Class 1 observation on one side and every Class −1 observation on the other.
+
+Assume for now that we can perfectly separate the two classes by line in the $(X_1, X_2)$ plane. Any such line is called a **separating line**. Whenever the classes are perfectly separable, there are **infinitely many** valid separating lines. The plot below shows three examples, all of which place every Class 1 observation on one side of the line and every Class −1 observation on the other.
 
 ```{python}
 #| label: multiple-lines
@@ -158,13 +161,17 @@ plt.show()
 plt.close()
 ```
 
-**Challenge:** How do we select the best separating line among all infinitely many options?
+The challenge is then: *How do we select the "best" separating line among all infinitely many options?*
 
 ### The margin
 
-The **maximal margin classifier** answers this question: among all separating lines, it selects the one that is **furthest away from the training observations**.
+The **maximal margin classifier** answers this question: among all separating lines, it selects the separating line that is **furthest away from the training observations**.
 
-We measure this distance using the **margin**: the smallest perpendicular distance from the separating line to *any* training observation. The maximal margin classifier selects the line that **maximizes the margin**.
+We measure the distance from a separating line to the data using the **margin**: the smallest perpendicular distance from the separating line to *any* training observation. 
+
+[GENERATE CODE: Here I want another plot with three panels showing the same data on each and each panel having a different line with the corresponding margin. The goal is to exemplify how the margin is measured.]
+
+The maximal margin classifier selects the line that **maximizes the margin**. This line is found by solving the optimization problem covered in the ISLP book section 9.1.4.
 
 ```{python}
 #| label: maximal-margin
@@ -190,13 +197,41 @@ plt.show()
 plt.close()
 ```
 
-Intuitively, a wider margin signals greater confidence in the classification: observations deep within a class region are far from the boundary and are classified with high certainty, while observations close to the boundary are more ambiguous.
+Intuitively, a wider margin signals greater confidence in the classification since it means there's a lot of space between the classes. 
+
+Once we have established our maximal margin line as our classification boundary, we obtain two classification regions: every new observation that falls on one side of the line will be in one of the classes, and every observation to the other side of the line will belong to the other class. Observations far from the margin and are classified with high certainty, while observations close to the boundary are more ambiguous.
+
+[GENERATE CODE: Create a plot that includes test data and shows the classificatin regions similarly defined by the maximal margin classifier used in the previous plot, similar to the plot you made in the multi-logistic-test-data code chunk for the logistic regression notes]
 
 ### Support vectors
 
-The margin is determined by only a handful of training observations — those that lie **exactly on the margin boundary** (the dashed lines in the plot above). These observations are called **support vectors**.
+Interestingly, the margin is determined by only the training observations that lie exactly on the margin boundary (the dashed lines in the plot above). These observations are called **support vectors**.
 
-A key property of the maximal margin classifier is that it depends **only on the support vectors**, and not on any other training observation. Moving a non-support-vector point — even by a large amount — has no effect on the classifier, as long as it stays on the same side of the margin.
+A key property of the maximal margin classifier is that it **depends only on the support vectors**, and not on any other training observation. Moving a non-support-vector point, even by a large amount, has no effect on the classifier, as long as it stays on the same side of the margin.
+
+```{python}
+#| label: support-vectors
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
+for cls in [1, -1]:
+    mask = y_sep == cls
+    ax.scatter(X_sep[mask, 0], X_sep[mask, 1],
+               c=col_map[cls], s=40, alpha=0.8, edgecolors='none',
+               label=label_map[cls])
+
+_, line_fn = plot_svc_boundary(ax, svc_hard, X_sep,
+                                show_margin=True, show_sv=True)
+
+ax.set_xlabel('$X_1$')
+ax.set_ylabel('$X_2$')
+ax.set_title('Maximal margin classifier\n'
+             'Dashed lines mark the margin; circled points are support vectors')
+ax.legend(fontsize=9, loc='upper left')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
 :::{.callout-tip}
 ## Check-in
