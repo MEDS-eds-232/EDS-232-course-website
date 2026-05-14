@@ -271,9 +271,10 @@ The grid search selected max_features=0.3 (~16 features per split) over the stan
 
 ---
 
+---
 ## Background: Gradient Boosting
 
-Bagging and random forests build trees **in parallel** where each tree is independent and the predictions are averaged. **Gradient boosting** takes the opposite approach: trees are built **sequentially**, with each new tree trained to correct the errors of all the trees that came before it. Boosting  does **not** use bootstrap sampling; instead, each tree is fit on a modified version of the original training data.
+Bagging and random forests build trees **in parallel** where each tree is independent and the predictions are averaged. **Gradient boosting** takes the opposite approach: trees are built **sequentially**, with each new tree trained to correct the errors of all the trees that came before it. Boosting does **not** use bootstrap sampling; instead, each tree is fit on a modified version of the original training data.
 
 ### The core idea: fitting residuals
 
@@ -297,13 +298,23 @@ Each tree is deliberately kept **small** (often just a single split, otherwise k
 
 ### Tuning parameters
 
-Boosting has three tuning parameters that interact with each other:
+Boosting has two key tuning parameters that interact with each other:
 
 | Hyperparameter | What it does | Typical values |
 |---|---|---|
-| `n_estimators` ($B$) | Total number of trees to build. Unlike bagging, **too many trees can overfit.** Set this high and let early stopping find the right number. | 500–5000 |
+| `n_estimators` ($B$) | Total number of trees to build. Unlike bagging, **too many trees can overfit.**  | 500–5000 |
 | `learning_rate` ($\lambda$) | How much each tree contributes to the final model. Smaller values require more trees but often produce better results. | 0.001–0.3 |
-| `early_stopping_rounds` | Stops training when validation loss hasn't improved for $N$ consecutive rounds. This automatically prevents overfitting without manually tuning `n_estimators`. | 10–50 |
+
+**Learning rate** controls how cautiously the model updates after each tree. A high learning rate (e.g. 0.3) means each tree has a large influence where the model learns quickly but can overshoot and overfit. A low learning rate (e.g. 0.01) means each tree contributes only a small correction, so the model improves slowly and needs more trees (`n_estimators`) to reach good performance, but it tends to generalize better.
+
+
+### XGBoost for Classification
+
+**XGBoost** (Extreme Gradient Boosting) is a popular, optimized implementation of gradient boosting. The same sequential tree-building idea applies, but instead of correcting residuals, the model corrects **classification errors** — at each round, a new tree focuses on the observations the current model is getting wrong.
+
+For multi-class problems like forest cover type, XGBoost produces a probability for each class and predicts the one with the highest score. It also includes built-in regularization to reduce overfitting.
+
+> **Note:** XGBoost requires **0-indexed integer labels**. Cover_Type is labeled 1–7, so you need to subtract 1 before fitting.
 
 ## Step 8: Tune XGBoost with GridSearchCV
 
@@ -350,8 +361,7 @@ print(f"XGBoost test accuracy: {xgb_test_acc:.3f}")
 
 ## Step 9: Model Comparison
 
-Collect the test accuracy for all four models and plot them together. Then visualize the top 15 most important features from the tuned random forest and XGBoost side by side.
-
+Collect the test accuracy for all four models and plot them together. 
 ```{python}
 model_names = ['Decision Tree\n(untuned)', 'Decision Tree\n(tuned)', 'Bagging\n(tuned)', 'Random Forest\n(tuned)', 'XGBoost\n(tuned)']
 test_accs   = [dt_test_acc, dt_tuned_test_acc, bag_test_acc, rf_best_acc, xgb_test_acc]
@@ -371,31 +381,10 @@ plt.tight_layout()
 plt.show()
 ```
 
-```{python}
-rf_imp  = pd.Series(rf_best.feature_importances_,  index=features)
-xgb_imp = pd.Series(xgb_model.feature_importances_, index=features)
 
-fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
-rf_imp.nlargest(15).sort_values().plot(
-    kind='barh', ax=axes[0], color='#08519c'
-)
-axes[0].set_title('Random Forest — Top 15 Features')
-axes[0].set_xlabel('Importance')
-
-xgb_imp.nlargest(15).sort_values().plot(
-    kind='barh', ax=axes[1], color='#2ca25f'
-)
-axes[1].set_title('XGBoost — Top 15 Features')
-axes[1].set_xlabel('Importance')
-
-plt.tight_layout()
-plt.show()
-```
-
-> **Discussion Questions**
->
+> **Discussion Question**
 > 1. Which ensemble method performed best on this dataset? Does the ranking surprise you?
-> 2. Do the random forest and XGBoost feature importance rankings agree on the top features? If they differ, why might two models trained on the same data weight feature importance differently?
+
 
 
