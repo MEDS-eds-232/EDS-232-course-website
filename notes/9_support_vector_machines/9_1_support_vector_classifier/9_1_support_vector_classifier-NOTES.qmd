@@ -1,0 +1,743 @@
+---
+title: Support vector classifier
+jupyter: eds232-env
+echo: false
+---
+
+<!-- Good links to revisit:
+https://stats.stackexchange.com/questions/31066/what-is-the-influence-of-c-in-svms-with-linear-kernel
+
+
+ -->
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.svm import SVC
+from sklearn.datasets import make_blobs
+from mpl_toolkits.mplot3d import Axes3D
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+col_map   = {1: 'tomato', -1: 'steelblue'}
+label_map = {1: 'Class 1',   -1: 'Class −1'}
+
+# ── Linearly separable dataset (maximal margin classifier) ────────────────────
+np.random.seed(42)
+X_sep, y_raw = make_blobs(n_samples=30,
+                           centers=[[2, 1], [-2, -1]],
+                           cluster_std=0.75, random_state=42)
+y_sep = np.where(y_raw == 0, 1, -1)
+
+# Hard-margin SVM (large C ≈ maximal margin classifier)
+svc_hard = SVC(kernel='linear', C=1e6)
+svc_hard.fit(X_sep, y_sep)
+
+# ── Simple 4-point dataset for the check-in ──────────────────────────────────
+X_4pt = np.array([[2, 1], [3, 4], [-2, -1], [-3, -4]], dtype=float)
+y_4pt = np.array([1, 1, -1, -1])
+svc_4pt = SVC(kernel='linear', C=1e6)
+svc_4pt.fit(X_4pt, y_4pt)
+
+# ── Overlapping dataset (support vector classifier) ───────────────────────────
+np.random.seed(7)
+X_soft, y_raw2 = make_blobs(n_samples=60,
+                              centers=[[1.5, 0.5], [-1.5, -0.5]],
+                              cluster_std=1.2, random_state=7)
+y_soft = np.where(y_raw2 == 0, 1, -1)
+
+# ── Shared helper: draw linear SVC boundary ───────────────────────────────────
+def plot_svc_boundary(ax, svc, X, show_margin=True, show_sv=True, x_pad=0.8):
+    w = svc.coef_[0]
+    b = svc.intercept_[0]
+    x_min = X[:, 0].min() - x_pad
+    x_max = X[:, 0].max() + x_pad
+    xx = np.linspace(x_min, x_max, 300)
+
+    def line(offset=0):
+        return -(w[0] * xx + b - offset) / w[1]
+
+    ax.plot(xx, line(0), 'k-', lw=2, label='Decision boundary')
+    if show_margin:
+        ax.plot(xx, line(1),  'k--', lw=1.2, alpha=0.5)
+        ax.plot(xx, line(-1), 'k--', lw=1.2, alpha=0.5, label='Margin boundary')
+        ax.fill_between(xx, line(1), line(-1),
+                        alpha=0.08, color='gray', label='Margin')
+    if show_sv:
+        sv = svc.support_vectors_
+        ax.scatter(sv[:, 0], sv[:, 1], s=150,
+                   facecolors='none', edgecolors='black',
+                   linewidths=1.8, zorder=5, label='Support vectors')
+    ax.set_xlim(x_min, x_max)
+    return xx, line
+```
+
+In this lesson we introduce:
+
+- **Separating hyperplanes** as linear decision boundaries for binary classification
+- The **maximal margin classifier** and the concept of the **margin**
+- **Support vectors** and why they uniquely determine the classifier
+- The support **vector classifier** as a soft-margin generalization
+- The budget parameter $C$ and the resulting bias–variance tradeoff
+
+These notes are based on chapter 9 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. All example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
+
+## Maximal margin classifier
+
+We begin in a binary classification setting where the two classes can be **perfectly separated** by a linear boundary. 
+
+<!-- In two dimensions this boundary is a line; the general term across any number of dimensions is a **hyperplane**. -->
+
+### Separating lines
+
+Consider a dataset with two predictors $X_1$ and $X_2$ and a binary response with classes $+1$ and $-1$. 
+
+```{python}
+#| label: separable-scatter
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
+for cls in [1, -1]:
+    mask = y_sep == cls
+    ax.scatter(X_sep[mask, 0], X_sep[mask, 1],
+               c=col_map[cls], s=40, alpha=0.8,
+               edgecolors='none', label=label_map[cls])
+ax.set_xlabel('$X_1$')
+ax.set_ylabel('$X_2$')
+ax.set_title('Two linearly separable classes')
+ax.set_xlim(-4, 4)
+ax.set_ylim(-4, 4)
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=2, fontsize=9)
+plt.tight_layout(rect=[0, 0.18, 1, 1])
+plt.show()
+plt.close()
+```
+
+
+Assume for now that we can perfectly separate the two classes with a line in the $(X_1, X_2)$ plane. Any such line is called a **separating line**. Whenever the classes are perfectly separable, there are **infinitely many** valid separating lines. The plot below shows three examples, all of which place every Class 1 observation on one side of the line and every Class −1 observation on the other.
+
+```{python}
+#| label: multiple-lines
+
+w = svc_hard.coef_[0]
+b = svc_hard.intercept_[0]
+
+x_plt = np.linspace(-4, 4, 300)
+
+# Three manually constructed lines that correctly separate the data.
+# They differ in slope and/or intercept but all separate perfectly.
+def line_from_ab(a, c):
+    """Return y values for y = a*x + c."""
+    return a * x_plt + c
+
+lines = [
+    (line_from_ab(-2.0,  0.0),  'solid',   'steelblue', 'Line A'),
+    (line_from_ab(-2.0,  1.8),  'dashed',  'seagreen',  'Line B'),
+    (line_from_ab(-0.5,  0.0),  'dotted',  'darkorange','Line C'),
+]
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
+for cls in [1, -1]:
+    mask = y_sep == cls
+    ax.scatter(X_sep[mask, 0], X_sep[mask, 1],
+               c=col_map[cls], s=40, alpha=0.8, edgecolors='none',
+               label=label_map[cls])
+for y_line, ls, color, lbl in lines:
+    ax.plot(x_plt, y_line, color=color, linestyle=ls, lw=1.8, label=lbl)
+ax.set_xlim(-4, 4)
+ax.set_ylim(-4, 4)
+ax.set_xlabel('$X_1$')
+ax.set_ylabel('$X_2$')
+ax.set_title('Three valid separating lines — which is best?')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=3, fontsize=9)
+plt.tight_layout(rect=[0, 0.18, 1, 1])
+plt.show()
+plt.close()
+```
+
+The challenge is then: *How do we select the "best" separating line among all infinitely many options?*
+
+### The margin
+
+The **maximal margin classifier** answers this question: among all separating lines, it selects the separating line that is **furthest away from the training observations**.
+
+We measure the distance from a separating line to the data using the **margin**: the smallest perpendicular distance from the separating line to *any* training observation. 
+
+```{python}
+#| label: margin-comparison
+
+def draw_margin_panel(ax, slope, intercept, title, show_legend=False):
+    """Draw one panel: data + separating line + margin band."""
+    norm = np.sqrt(slope**2 + 1)
+    # Signed perpendicular distance from each point to the line
+    sd = (slope * X_sep[:, 0] - X_sep[:, 1] + intercept) / norm
+
+    # Determine which class sits on the positive vs. negative side
+    pos_cls, neg_cls = (1, -1) if sd[y_sep == 1].mean() > 0 else (-1, 1)
+
+    d_pos  = sd[y_sep == pos_cls].min()   # nearest positive-side point
+    d_neg  = sd[y_sep == neg_cls].max()   # nearest negative-side point
+    margin = min(d_pos, -d_neg)           # SVM margin = min one-sided distance
+
+    # y-intercepts of the two margin lines (parallel to separating line)
+    yint_pos = intercept - d_pos * norm
+    yint_neg = intercept - d_neg * norm
+
+    xx = np.linspace(-4, 4, 300)
+
+    for cls in [1, -1]:
+        mask = y_sep == cls
+        ax.scatter(X_sep[mask, 0], X_sep[mask, 1],
+                   c=col_map[cls], s=30, alpha=0.8, edgecolors='none',
+                   label=label_map[cls] if show_legend else '_nolegend_')
+
+    ax.plot(xx, slope * xx + intercept, 'k-', lw=1.8,
+            label='Separating line' if show_legend else '_nolegend_')
+    ax.plot(xx, slope * xx + yint_pos, 'k--', lw=1.0, alpha=0.5,
+            label='Margin boundary' if show_legend else '_nolegend_')
+    ax.plot(xx, slope * xx + yint_neg, 'k--', lw=1.0, alpha=0.5)
+    ax.fill_between(xx, slope * xx + yint_pos, slope * xx + yint_neg,
+                    alpha=0.12, color='gray',
+                    label='Margin region' if show_legend else '_nolegend_')
+    ax.set_xlim(-4, 4)
+    ax.set_ylim(-4, 4)
+    ax.set_xlabel('$X_1$')
+    ax.set_title(f'{title}\nMargin = {margin:.2f}', fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+
+fig, axes = plt.subplots(1, 3,
+                          figsize=(fig_size_x * 1.3, fig_size_y + 1.3),
+                          sharey=True)
+fig.subplots_adjust(wspace=0.06)
+
+draw_margin_panel(axes[0], -2.0,  0.0, 'Line A', show_legend=True)
+draw_margin_panel(axes[1], -2.0,  1.8, 'Line B')
+draw_margin_panel(axes[2], -0.5,  0.0, 'Line C')
+
+axes[0].set_ylabel('$X_2$')
+handles, labels_leg = axes[0].get_legend_handles_labels()
+fig.legend(handles, labels_leg, loc='lower center', ncol=4, fontsize=9,
+           bbox_to_anchor=(0.5, -0.03))
+plt.tight_layout(rect=[0, 0.15, 1, 1])
+plt.show()
+plt.close()
+```
+
+The maximal margin classifier selects the line that **maximizes the margin**. This line is found by solving the optimization problem covered in the ISLP book section 9.1.4.
+
+```{python}
+#| label: maximal-margin
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
+for cls in [1, -1]:
+    mask = y_sep == cls
+    ax.scatter(X_sep[mask, 0], X_sep[mask, 1],
+               c=col_map[cls], s=40, alpha=0.8, edgecolors='none',
+               label=label_map[cls])
+
+_, line_fn = plot_svc_boundary(ax, svc_hard, X_sep,
+                                show_margin=True, show_sv=False)
+
+ax.set_xlabel('$X_1$')
+ax.set_ylabel('$X_2$')
+ax.set_xlim(-4, 4)
+ax.set_ylim(-4, 4)
+ax.set_title('Maximal margin classifier')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=3, fontsize=9)
+plt.tight_layout(rect=[0, 0.18, 1, 1])
+plt.show()
+plt.close()
+```
+
+Intuitively, a wider margin signals greater confidence in the classification since it means the space between the classes is as wide as can be. 
+
+Once we have established our **maximal margin line as our classification boundary**, we obtain two classification regions: 
+
+- every new observation that falls on one side of the line will be in one of the classes, 
+- and every observation to the other side of the line will belong to the other class. 
+
+Observations far from the margin and are classified with high certainty, while observations close to the boundary are more ambiguous.
+
+```{python}
+#| label: classification-regions
+
+# Generate test data with higher variance so some observations are misclassified
+np.random.seed(13)
+X_test_cls, y_test_raw_cls = make_blobs(n_samples=30,
+                                          centers=[[2, 1], [-2, -1]],
+                                          cluster_std=1.8, random_state=13)
+y_test_cls = np.where(y_test_raw_cls == 0, 1, -1)
+
+# Build a prediction grid to show the two classification regions
+xx_cr, yy_cr = np.meshgrid(np.linspace(-4, 4, 300), np.linspace(-4, 4, 300))
+Z_cr = svc_hard.predict(np.c_[xx_cr.ravel(), yy_cr.ravel()]).reshape(xx_cr.shape)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
+ax.contourf(xx_cr, yy_cr, Z_cr, levels=[-1.5, 0, 1.5],
+            colors=['steelblue', 'tomato'], alpha=0.2)
+ax.contour(xx_cr, yy_cr, Z_cr, levels=[0], colors='gray', linewidths=1.5)
+
+for cls in [1, -1]:
+    mask = y_test_cls == cls
+    ax.scatter(X_test_cls[mask, 0], X_test_cls[mask, 1],
+               c=col_map[cls], s=30, alpha=0.8, edgecolors='none',
+               label=label_map[cls])
+
+ax.set_xlim(-4, 4)
+ax.set_ylim(-4, 4)
+ax.set_xlabel('$X_1$')
+ax.set_ylabel('$X_2$')
+ax.set_title('Test data (30 pts) — classification regions\n'
+             'Observations in the wrong-colored region are misclassified')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=2, fontsize=9)
+plt.tight_layout(rect=[0, 0.18, 1, 1])
+plt.show()
+plt.close()
+```
+
+### Support vectors
+
+The margin is determined only by the training observations that lie exactly on the margin boundary (the dashed lines in the plot above). These observations are called **support vectors**.
+
+```{python}
+#| label: support-vectors
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
+for cls in [1, -1]:
+    mask = y_sep == cls
+    ax.scatter(X_sep[mask, 0], X_sep[mask, 1],
+               c=col_map[cls], s=40, alpha=0.8, edgecolors='none',
+               label=label_map[cls])
+
+_, line_fn = plot_svc_boundary(ax, svc_hard, X_sep,
+                                show_margin=True, show_sv=True)
+
+ax.set_xlim(-4, 4)
+ax.set_ylim(-4, 4)
+ax.set_xlabel('$X_1$')
+ax.set_ylabel('$X_2$')
+ax.set_title('Maximal margin classifier')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=3, fontsize=9)
+plt.tight_layout(rect=[0, 0.18, 1, 1])
+plt.show()
+plt.close()
+```
+
+The maximal margin classifier **depends only on the support vectors**, and not on any other training observation. Moving a non-support-vector point, even by a large amount, has no effect on the classifier, as long as it stays on the same side of the margin.
+
+
+:::{.callout-tip}
+## Check-in
+
+We have a training set consisting of two observations:
+
+| Observation | $X_1$ | $X_2$ | Class | 
+|--- |---------|-----|------|
+| 1  |  0   | 1  | +1  |
+| 2  |  1   | 0  | -1  |
+
+
+1. Draw a diagram identifying the training set, the maximal margin line, and the support vectors.
+2. Now suppose our training set is the following. How would the maximal margin line change? What are the support vectors?
+
+| Observation | $X_1$ | $X_2$ | Class | 
+|--- |---------|-----|------|
+| 1  |  0   |  1  |  +1  |
+| 2  |  1   |  0  |  -1  |
+| 3  |  2   |  -1 |  -1  |
+| 4  |  -1  |  -3 |  -1  |
+| 5  |  -1  |  2  |  +1  |
+
+3. Find the equation of the maximal margin line for this dataset.
+
+A point $(x_1,x_2)$ will be on the line you found if and only if $x_1 - x_2 = 0$. 
+
+4. Will $x_1 - x_2$ be positive or negative for a point in the region above the maximal margin line? What about for a point below the maximal margin line? 
+
+5. How would you describe the relationship between the sign of $x_1 - x_2$ and the classification regions?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+**Q1.** 
+
+```{python}
+#| label: checkin-margin-plot
+#| echo: false
+
+X_2pt = np.array([[0.0, 1.0], [1.0, 0.0]])
+y_2pt = np.array([1, -1])
+svc_2pt = SVC(kernel='linear', C=1e6)
+svc_2pt.fit(X_2pt, y_2pt)
+
+# New Q2 points: obs 1–5 from the check-in table
+X_5pt = np.array([[0.0, 1.0], [1.0, 0.0], [2.0, -1.0], [-1.0, -3.0], [-1.0, 2.0]])
+y_5pt = np.array([1, -1, -1, -1, 1])   # obs 3 is Class −1
+svc_5pt = SVC(kernel='linear', C=1e6)
+svc_5pt.fit(X_5pt, y_5pt)
+
+# Per-observation label offsets (dx, dy)
+ann_2pt = [(-0.22, 0.22), ( 0.22, -0.22)]
+ann_5pt = [(-0.30, 0.22), ( 0.22, -0.22), ( 0.22, -0.24),
+           (-0.28, -0.30), (-0.34,  0.22)]
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.1, fig_size_y + 0.5))
+fig.subplots_adjust(wspace=0.30)
+
+datasets_ci = [
+    (axes[0], X_2pt, y_2pt, svc_2pt, ann_2pt,
+     (-2.5, 2.5), (-2.5, 2.5),
+     '2-observation training set\nBoth are support vectors'),
+    (axes[1], X_5pt, y_5pt, svc_5pt, ann_5pt,
+     (-2.5, 3.5), (-4.5, 3.5),
+     '5-observation training set\nLine unchanged; only obs 1 and 2 are SVs'),
+]
+
+for i, (ax, X_d, y_d, svc_d, offsets, xlim, ylim, title) in enumerate(datasets_ci):
+    for cls in [1, -1]:
+        mask = y_d == cls
+        ax.scatter(X_d[mask, 0], X_d[mask, 1],
+                   c=col_map[cls], s=80, alpha=0.9, edgecolors='none',
+                   label=label_map[cls])
+    for j, (dx, dy) in enumerate(offsets):
+        ax.text(X_d[j, 0] + dx, X_d[j, 1] + dy, str(j + 1),
+                fontsize=9, ha='center', va='center', fontweight='bold')
+    w_d = svc_d.coef_[0]; b_d = svc_d.intercept_[0]
+    xx_d = np.linspace(xlim[0], xlim[1], 300)
+    ax.plot(xx_d, -(w_d[0]*xx_d + b_d) / w_d[1],
+            'k-', lw=2, label='Decision boundary')
+    ax.plot(xx_d, -(w_d[0]*xx_d + b_d - 1) / w_d[1],
+            'k--', lw=1.2, alpha=0.5)
+    ax.plot(xx_d, -(w_d[0]*xx_d + b_d + 1) / w_d[1],
+            'k--', lw=1.2, alpha=0.5, label='Margin boundary')
+    ax.fill_between(xx_d,
+                    -(w_d[0]*xx_d + b_d - 1) / w_d[1],
+                    -(w_d[0]*xx_d + b_d + 1) / w_d[1],
+                    alpha=0.08, color='gray', label='Margin')
+    sv = svc_d.support_vectors_
+    ax.scatter(sv[:, 0], sv[:, 1], s=220, facecolors='none',
+               edgecolors='black', linewidths=1.8, zorder=5, label='Support vectors')
+    ax.set_xlim(xlim); ax.set_ylim(ylim)
+    ax.set_xlabel('$X_1$')
+    ax.set_title(title, fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+axes[0].set_ylabel('$X_2$')
+handles_ci, labels_ci = axes[0].get_legend_handles_labels()
+fig.legend(handles_ci, labels_ci, loc='lower center', ncol=5, fontsize=9,
+           bbox_to_anchor=(0.5, -0.03))
+plt.tight_layout(rect=[0, 0.15, 1, 1])
+plt.show()
+plt.close()
+```
+
+
+**Q2** The maximal margin line does not change. The key insight is that the maximal margin classifier depends only on the support vectors; observations that lie farther from the boundary are irrelevant to defining it.
+
+**Q3** $x_1 - x_2 = 0$.
+
+**Q4** For a point *above* the line 
+
+$$
+x_1 < x_2 \Rightarrow x_1 - x_2 <0.
+$$
+
+For a point *below* the line
+
+$$
+x_1 > x_2 \Rightarrow x_1 - x_2 > 0.
+$$
+
+Check: obs 1 gives $0 - 1 = -1 < 0$ (above); obs 2 gives $1 - 0 = 1 > 0$ (below).
+
+**Q5** The sign of $x_1 - x_2$ determines the predicted class:
+
+- $x_1 - x_2 < 0$ $\Rightarrow$ Class $+1$ (above the line).
+- $x_1 - x_2 > 0$ $\Rightarrow$ Class $-1$ (below the line).
+
+In general, the support vector classifier assigns class to a new point $(x_1^*, x_2^*)$ based on the sign of $\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*$, where  
+$$ $\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*$$
+is the equation of the maximal margin line. 
+
+In our example $\beta_0 = 0$, $\beta_1 = 1$, $\beta_2 = -1$.
+
+:::
+
+### Zooming out
+
+In the case of two linearly separable classes, the maximal margin classifier finds the line that leaves the widest margin between the classes. This maximal margin line can be defined by all points $(x_1, x_2)$ for which 
+$$\beta_0 + \beta_1x_1 + \beta_2x_2 = 0.$$
+
+We get the coefficients $\beta_0, \beta_1, \beta_2$ from solving the maximal margin optimization problem. For example, in our check-in, our line had the coefficients $\beta_0=0$, $\beta_1=1$ and $\beta_2 = -1$. 
+
+The region on one side of the line is made of all the points  $(x_1, x_2)$ for which 
+
+$$\beta_0 + \beta_1x_1 + \beta_2x_2 > 0,$$
+
+and the region on the other side of the line consists of all the points $(x_1, x_2)$ for which
+
+$$\beta_0 + \beta_1x_1 + \beta_2x_2 <0.$$
+
+Each of these sides corresponds to a classification region. 
+
+So, the maximal margin classifier classifies a new observation $x^* = (x_1^*, x_2^*)$  by checking whether $\beta_0 + \beta_1x_1^* + \beta_2x_2^*$ is positive or negative, and assigning the corresponding class. 
+
+The magnitude 
+
+$$|\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*|$$
+
+reflects how far the new point is from the boundary: larger values indicate greater distance and thus greater classification confidence.
+
+## Higher dimensions: hyperplanes
+
+What happens when we have observations with more than 2 predictors? In other words, what happens when our data has more than 2 dimensions?
+
+In three dimensions, we can still visualize how two classes can be separated by a flat plane as in the figure below. 
+
+
+
+```{python}
+#| label: hyperplane-3d
+#| eval: false
+
+np.random.seed(0)
+n3 = 60
+
+# Class 1 (red circles) — above the separating plane at z = 0.5
+X3_pos = np.column_stack([
+    np.random.uniform(-1, 1, n3),
+    np.random.uniform(-1, 1, n3),
+    np.random.uniform(0.7, 1.5, n3),
+])
+# Class -1 (blue triangles) — below the separating plane
+X3_neg = np.column_stack([
+    np.random.uniform(-1, 1, n3),
+    np.random.uniform(-1, 1, n3),
+    np.random.uniform(0.0, 0.3, n3),
+])
+
+fig = plt.figure(figsize=(fig_size_x * 0.8, fig_size_y + 1.2))
+ax3 = fig.add_subplot(111, projection='3d')
+
+ax3.scatter(X3_pos[:, 0], X3_pos[:, 1], X3_pos[:, 2],
+            c='tomato', marker='o', s=20, alpha=0.7, label='Class 1')
+ax3.scatter(X3_neg[:, 0], X3_neg[:, 1], X3_neg[:, 2],
+            c='steelblue', marker='^', s=20, alpha=0.7, label='Class −1')
+
+# Green separating plane at z = 0.5
+xx3, yy3 = np.meshgrid(np.linspace(-1, 1, 10), np.linspace(-1, 1, 10))
+zz3 = np.full_like(xx3, 0.5)
+ax3.plot_surface(xx3, yy3, zz3, alpha=0.5, color='green')
+
+ax3.set_xlabel('$X_1$', labelpad=5)
+ax3.set_ylabel('$X_2$', labelpad=5)
+ax3.set_zlabel('$X_3$', labelpad=5)
+ax3.set_title('Separating hyperplane in 3 dimensions')
+ax3.legend(fontsize=8, loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+![Image Source: [Analytics Vidhya](https://www.analyticsvidhya.com/blog/2021/05/support-vector-machines/)](hyperplane.png)
+
+
+In $p$ dimensions, the separating boundary is no longer a line or a plane, but a **hyperplane**: a $(p-1)$-dimensional flat subspace. 
+
+- In $p = 2$ dimensions, a hyperplane is a **line**.
+- In $p = 3$ dimensions, a hyperplane is a **plane**.
+- For $p > 3$, we cannot visualize it! So we describe it algebraically:
+
+the hyperplane consists of all points $(x_1, \ldots, x_p)$ for which 
+$$\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0,$$
+
+The coefficients $\beta_0, \beta_1, \ldots, \beta_p$ define the hyperplane. Just as in two dimensions, we find the **maximal margin hyperplane** by solving the same optimization problem, and it still depends only on the **support vectors**.
+
+This hyperplane divides the space into two half-spaces. For a new point $(x_1, \ldots, x_p)$, the sign of $\beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p$ determines which side a point falls on — and therefore which class it is assigned to:
+
+- **= 0**: the point is on the hyperplane,
+- **< 0**: the point is on one side → assigned to one class,
+- **> 0**: the point is on the other side → assigned to the other class.
+
+
+## Support vector classifier
+
+The maximal margin classifier has a serious limitation: it requires the classes to be **perfectly linearly separable**. In practice this is rarely satisfied, like the data shown below.
+
+
+```{python}
+#| label: soft-data-scatter
+
+np.random.seed(10)
+X_illus, y_illus_raw = make_blobs(n_samples=12,
+                                   centers=[[1.2, 0.4], [-1.2, -0.4]],
+                                   cluster_std=1.3, random_state=3)
+y_illus = np.where(y_illus_raw == 0, 1, -1)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
+for cls in [1, -1]:
+    mask = y_illus == cls
+    ax.scatter(X_illus[mask, 0], X_illus[mask, 1],
+               c=col_map[cls], s=90, alpha=0.85, edgecolors='none',
+               label=label_map[cls])
+ax.set_xlabel('$X_1$')
+ax.set_ylabel('$X_2$')
+ax.set_title('Overlapping classes — not linearly separable')
+ax.legend(fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
+The **support vector classifier** (also called the *soft-margin classifier*) relaxes perfect separability. It allows some observations to become "violations to the margin" by being:
+
+- **within the margin** (on the correct side of the hyperplane but inside the margin), or
+- **on the wrong side of the hyperplane** (misclassified).
+
+
+```{python}
+#| label: svc-regions
+
+svc_demo = SVC(kernel='linear', C=1.0)
+svc_demo.fit(X_illus, y_illus)
+
+x_pad_d = 0.8
+x_min_d = X_illus[:, 0].min() - x_pad_d
+x_max_d = X_illus[:, 0].max() + x_pad_d
+y_min_d = X_illus[:, 1].min() - x_pad_d
+y_max_d = X_illus[:, 1].max() + x_pad_d
+
+xx_cr, yy_cr = np.meshgrid(np.linspace(x_min_d, x_max_d, 300),
+                             np.linspace(y_min_d, y_max_d, 300))
+Z_cr = svc_demo.predict(np.c_[xx_cr.ravel(), yy_cr.ravel()]).reshape(xx_cr.shape)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y + 1.5))
+ax.contourf(xx_cr, yy_cr, Z_cr, levels=[-1.5, 0, 1.5],
+            colors=['steelblue', 'tomato'], alpha=0.12)
+
+for cls in [1, -1]:
+    mask = y_illus == cls
+    ax.scatter(X_illus[mask, 0], X_illus[mask, 1],
+               c=col_map[cls], s=90, alpha=0.85, edgecolors='none',
+               label=label_map[cls])
+
+plot_svc_boundary(ax, svc_demo, X_illus, show_margin=True, show_sv=True)
+
+ax.set_ylim(y_min_d, y_max_d)
+ax.set_xlabel('$X_1$')
+ax.set_ylabel('$X_2$')
+ax.set_title('Support vector classifier\nDecision boundary, margin, and classification regions')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=3, fontsize=9)
+plt.tight_layout(rect=[0, 0.18, 1, 1])
+plt.show()
+plt.close()
+```
+
+Fitting the support vector classifier involves solving an optimization problem (ISLP section 9.2.2) to find coefficients $\beta_0, \ldots, \beta_p$ to define the hyperplane $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0$ that we will use as the decision boundary.
+
+As before, observations that lie on the margin boundary or on the wrong side of the margin are the **support vectors** and are the only observations that affect the fitted classifier. 
+
+### The hyperparameter C
+
+The support vector classifier is controlled by a hyperparameter $C > 0$ that sets the **penalty for each margin violation**. This is the `C` parameter you will set directly in scikit-learn's `SVC`.
+
+- **Large $C$**: each violation is heavily penalized, so the classifier tries hard to keep observations on the correct side of the margin. This produces a **narrow margin** with fewer support vectors and a boundary that fits the training data tightly.
+- **Small $C$**: violations are tolerated more easily, so the classifier is willing to misclassify some training observations in exchange for a **wider margin** with more support vectors and a smoother, more stable boundary.
+
+In practice, $C$ is selected using cross-validation.
+
+:::{.callout-note}
+The ISLP book defines $C$ as a **budget** for violations — a larger budget means more violations are allowed. This is the **inverse** of the sklearn convention: a large ISLP budget corresponds to a small sklearn `C`, and vice versa. When reading the book alongside sklearn code, keep this in mind.
+:::
+
+The two plots below show the same overlapping dataset fitted with a small $C$ (wide margin, many violations tolerated) and a large $C$ (narrow margin, violations heavily penalized).
+
+```{python}
+#| label: c-comparison
+#| fig-align: center
+
+
+# Small ISLP budget C  → few violations → narrow margin  (high sklearn C)
+# Large ISLP budget C  → many violations  → wide margin  (small sklearn C)
+# (sklearn C is the inverse of the ISLP budget C)
+
+svc_illus_wide   = SVC(kernel='linear', C=0.05).fit(X_illus, y_illus)
+svc_illus_narrow = SVC(kernel='linear', C=10**6.0).fit(X_illus, y_illus)
+
+fig, axes = plt.subplots(2, 1, figsize=(fig_size_x * 0.9, (fig_size_y + 1.5) * 2),
+                          sharex=True)
+fig.subplots_adjust(hspace=0.25)
+
+configs = [
+    (svc_illus_wide,   'Small $C$ — low penalty\nWide margin, violations tolerated'),
+    (svc_illus_narrow, 'Large $C$ — high penalty\nNarrow margin, few violations'),
+]
+
+for ax, (svc_c, title) in zip(axes, configs):
+    for cls in [1, -1]:
+        mask = y_illus == cls
+        ax.scatter(X_illus[mask, 0], X_illus[mask, 1],
+                   c=col_map[cls], s=90, alpha=0.85,
+                   edgecolors='none', label=label_map[cls])
+    plot_svc_boundary(ax, svc_c, X_illus,
+                      show_margin=True, show_sv=True, x_pad=0.8)
+    ax.set_xlim(x_min_d, x_max_d)
+    ax.set_ylim(y_min_d, y_max_d)
+    ax.set_xlabel('$X_1$')
+    ax.set_ylabel('$X_2$')
+    ax.set_title(title, fontsize=10)
+    ax.grid(True, alpha=0.3)
+    n_sv = svc_c.support_vectors_.shape[0]
+    ax.text(0.97, 0.03, f'{n_sv} support vectors',
+            transform=ax.transAxes, ha='right', va='bottom', fontsize=8,
+            bbox=dict(boxstyle='round,pad=0.3', fc='white', ec='gray', alpha=0.8))
+
+handles_c, labels_c = axes[0].get_legend_handles_labels()
+fig.legend(handles_c, labels_c, loc='lower center', ncol=4, fontsize=9,
+           bbox_to_anchor=(0.5, -0.03))
+plt.tight_layout(rect=[0, 0.08, 1, 1])
+plt.show()
+plt.close()
+```
+
+Changing $C$ creates a classic bias–variance tradeoff:
+
+| | Small $C$ | Large $C$ |
+|---|---|---|
+| Penalty for violations | Low | High |
+| Margin width | Wide | Narrow |
+| Number of support vectors | More | Fewer |
+| Bias | Higher | Lower |
+| Variance | Lower | Higher |
+
+:::{.callout-tip}
+## Check-in
+1. Explain why a small margin corresponds to higher bias and lower viarance, and why a large margin corresponds to lower bias and higher variance. 
+
+2. Suppose you train with a very large $C$ and find that the model performs well on the training set but poorly on a held-out test set. What does this suggest, and how would you adjust $C$?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+
+1. 
+
+- A **small $C$** tolerates violations, producing a wide margin and a boundary that is less sensitive to individual training points (lower variance) but may misclassify more observations (higher bias).
+- A **large $C$** penalizes violations heavily, producing a narrow margin that fits the training data tightly (lower bias) but is sensitive to small changes in the training set and may overfit (higher variance).
+
+
+2. Good training performance with poor test performance is a classic sign of overfitting — the large $C$ is penalizing violations so heavily that the boundary memorizes the training data. Decreasing $C$ would widen the margin, reduce variance, and likely improve generalization.
+:::
+

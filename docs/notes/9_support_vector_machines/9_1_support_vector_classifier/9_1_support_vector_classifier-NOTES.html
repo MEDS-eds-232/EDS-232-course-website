@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.33">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Support vector classifier – EDS 232 - Machine Learning for Environmental Science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../../../notes/week-by-week/week-by-week.html" aria-current="page"> 
+<span class="menu-text">notes</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">assignments</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
+        <li>
+    <a class="dropdown-item" href="../../../assignments/assignment-1.html">
+ <span class="dropdown-text">Assignment 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../assignments/assignment-2.html">
+ <span class="dropdown-text">Assignment 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../assignments/assignment-3.html">
+ <span class="dropdown-text">Assignment 3</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">weekly labs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab1.html">
+ <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab2.html">
+ <span class="dropdown-text">Lab 2: No lab this week!</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab3.html">
+ <span class="dropdown-text">Lab 3: Classification</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab4.html">
+ <span class="dropdown-text">Lab 4: Polynomial Regression and Cross-Validation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab5.html">
+ <span class="dropdown-text">Lab 5: Regularized Regression</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab6.html">
+ <span class="dropdown-text">Lab 6: Decision Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab7.html">
+ <span class="dropdown-text">Lab 7: Ensemble Methods</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-study-guides" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">study guides</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-study-guides">    
+        <li>
+    <a class="dropdown-item" href="../../../exams/exam1_study_guide.html">
+ <span class="dropdown-text">Midterm Exam Study Guide</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website">
+ <span class="dropdown-text">Source code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website/issues">
+ <span class="dropdown-text">Report a bug</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notes/9_support_vector_machines/9_1_support_vector_classifier/9_1_support_vector_classifier-NOTES.html">Support Vector Machines</a></li><li class="breadcrumb-item"><a href="../../../notes/9_support_vector_machines/9_1_support_vector_classifier/9_1_support_vector_classifier-NOTES.html">Support vector classifier</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+  <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p>This wesbite is under construction.</p>
+</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/week-by-week/week-by-week.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week by week</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/setup/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What is machine learning?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Learning from data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Training and test errors, and model flexibility</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Linear regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simple linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/3_2_multiple_linear_regression/3_2_multiple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple linear regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Classification</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/4_1_classification/4_1_knn_accuracy_metrics-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">KNN and accuracy metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/4_3_logistic_regression/4_3_logistic_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Logistic regression and ROC curves</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Resampling Methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Cross-validation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Linear Model Selection &amp; Regularization</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linear model selection and regularization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/7_pca/7_pca-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Principal Component Analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Tree-Based Methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/8_tree_based_methods/8_tree_based_methods-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Decision Trees</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/8_2_bagging_random_forest/8_2_bagging_random_forest-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bagging and Random Forests</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Support Vector Machines</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notes/9_support_vector_machines/9_1_support_vector_classifier/9_1_support_vector_classifier-NOTES.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Support vector classifier</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#maximal-margin-classifier" id="toc-maximal-margin-classifier" class="nav-link active" data-scroll-target="#maximal-margin-classifier">Maximal margin classifier</a>
+  <ul class="collapse">
+  <li><a href="#separating-lines" id="toc-separating-lines" class="nav-link" data-scroll-target="#separating-lines">Separating lines</a></li>
+  <li><a href="#the-margin" id="toc-the-margin" class="nav-link" data-scroll-target="#the-margin">The margin</a></li>
+  <li><a href="#support-vectors" id="toc-support-vectors" class="nav-link" data-scroll-target="#support-vectors">Support vectors</a></li>
+  <li><a href="#zooming-out" id="toc-zooming-out" class="nav-link" data-scroll-target="#zooming-out">Zooming out</a></li>
+  </ul></li>
+  <li><a href="#higher-dimensions-hyperplanes" id="toc-higher-dimensions-hyperplanes" class="nav-link" data-scroll-target="#higher-dimensions-hyperplanes">Higher dimensions: hyperplanes</a></li>
+  <li><a href="#support-vector-classifier" id="toc-support-vector-classifier" class="nav-link" data-scroll-target="#support-vector-classifier">Support vector classifier</a>
+  <ul class="collapse">
+  <li><a href="#the-hyperparameter-c" id="toc-the-hyperparameter-c" class="nav-link" data-scroll-target="#the-hyperparameter-c">The hyperparameter C</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notes/9_support_vector_machines/9_1_support_vector_classifier/9_1_support_vector_classifier-NOTES.html">Support Vector Machines</a></li><li class="breadcrumb-item"><a href="../../../notes/9_support_vector_machines/9_1_support_vector_classifier/9_1_support_vector_classifier-NOTES.html">Support vector classifier</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Support vector classifier</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- Good links to revisit:
+https://stats.stackexchange.com/questions/31066/what-is-the-influence-of-c-in-svms-with-linear-kernel
+
+
+ -->
+<p>In this lesson we introduce:</p>
+<ul>
+<li><strong>Separating hyperplanes</strong> as linear decision boundaries for binary classification</li>
+<li>The <strong>maximal margin classifier</strong> and the concept of the <strong>margin</strong></li>
+<li><strong>Support vectors</strong> and why they uniquely determine the classifier</li>
+<li>The support <strong>vector classifier</strong> as a soft-margin generalization</li>
+<li>The budget parameter <span class="math inline">\(C\)</span> and the resulting bias–variance tradeoff</li>
+</ul>
+<p>These notes are based on chapter 9 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. All example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.</p>
+<section id="maximal-margin-classifier" class="level2">
+<h2 class="anchored" data-anchor-id="maximal-margin-classifier">Maximal margin classifier</h2>
+<p>We begin in a binary classification setting where the two classes can be <strong>perfectly separated</strong> by a linear boundary.</p>
+<!-- In two dimensions this boundary is a line; the general term across any number of dimensions is a **hyperplane**. -->
+<section id="separating-lines" class="level3">
+<h3 class="anchored" data-anchor-id="separating-lines">Separating lines</h3>
+<p>Consider a dataset with two predictors <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> and a binary response with classes <span class="math inline">\(+1\)</span> and <span class="math inline">\(-1\)</span>.</p>
+<div id="cell-separable-scatter" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_1_support_vector_classifier-NOTES_files/figure-html/separable-scatter-output-1.png" id="separable-scatter" width="548" height="333" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Assume for now that we can perfectly separate the two classes with a line in the <span class="math inline">\((X_1, X_2)\)</span> plane. Any such line is called a <strong>separating line</strong>. Whenever the classes are perfectly separable, there are <strong>infinitely many</strong> valid separating lines. The plot below shows three examples, all of which place every Class 1 observation on one side of the line and every Class −1 observation on the other.</p>
+<div id="cell-multiple-lines" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_1_support_vector_classifier-NOTES_files/figure-html/multiple-lines-output-1.png" id="multiple-lines" width="548" height="328" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The challenge is then: <em>How do we select the “best” separating line among all infinitely many options?</em></p>
+</section>
+<section id="the-margin" class="level3">
+<h3 class="anchored" data-anchor-id="the-margin">The margin</h3>
+<p>The <strong>maximal margin classifier</strong> answers this question: among all separating lines, it selects the separating line that is <strong>furthest away from the training observations</strong>.</p>
+<p>We measure the distance from a separating line to the data using the <strong>margin</strong>: the smallest perpendicular distance from the separating line to <em>any</em> training observation.</p>
+<div id="cell-margin-comparison" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_1_support_vector_classifier-NOTES_files/figure-html/margin-comparison-output-1.png" id="margin-comparison" width="1028" height="543" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The maximal margin classifier selects the line that <strong>maximizes the margin</strong>. This line is found by solving the optimization problem covered in the ISLP book section 9.1.4.</p>
+<div id="cell-maximal-margin" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_1_support_vector_classifier-NOTES_files/figure-html/maximal-margin-output-1.png" id="maximal-margin" width="548" height="328" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Intuitively, a wider margin signals greater confidence in the classification since it means the space between the classes is as wide as can be.</p>
+<p>Once we have established our <strong>maximal margin line as our classification boundary</strong>, we obtain two classification regions:</p>
+<ul>
+<li>every new observation that falls on one side of the line will be in one of the classes,</li>
+<li>and every observation to the other side of the line will belong to the other class.</li>
+</ul>
+<p>Observations far from the margin and are classified with high certainty, while observations close to the boundary are more ambiguous.</p>
+<div id="cell-classification-regions" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_1_support_vector_classifier-NOTES_files/figure-html/classification-regions-output-1.png" id="classification-regions" width="552" height="331" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="support-vectors" class="level3">
+<h3 class="anchored" data-anchor-id="support-vectors">Support vectors</h3>
+<p>The margin is determined only by the training observations that lie exactly on the margin boundary (the dashed lines in the plot above). These observations are called <strong>support vectors</strong>.</p>
+<div id="cell-support-vectors" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_1_support_vector_classifier-NOTES_files/figure-html/support-vectors-output-1.png" id="support-vectors" width="548" height="328" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The maximal margin classifier <strong>depends only on the support vectors</strong>, and not on any other training observation. Moving a non-support-vector point, even by a large amount, has no effect on the classifier, as long as it stays on the same side of the margin.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We have a training set consisting of two observations:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Observation</th>
+<th><span class="math inline">\(X_1\)</span></th>
+<th><span class="math inline">\(X_2\)</span></th>
+<th>Class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>+1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>-1</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Draw a diagram identifying the training set, the maximal margin line, and the support vectors.</li>
+<li>Now suppose our training set is the following. How would the maximal margin line change? What are the support vectors?</li>
+</ol>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Observation</th>
+<th><span class="math inline">\(X_1\)</span></th>
+<th><span class="math inline">\(X_2\)</span></th>
+<th>Class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>+1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>-1</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>2</td>
+<td>-1</td>
+<td>-1</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>-1</td>
+<td>-3</td>
+<td>-1</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>-1</td>
+<td>2</td>
+<td>+1</td>
+</tr>
+</tbody>
+</table>
+<ol start="3" type="1">
+<li>Find the equation of the maximal margin line for this dataset.</li>
+</ol>
+<p>A point <span class="math inline">\((x_1,x_2)\)</span> will be on the line you found if and only if <span class="math inline">\(x_1 - x_2 = 0\)</span>.</p>
+<ol start="4" type="1">
+<li><p>Will <span class="math inline">\(x_1 - x_2\)</span> be positive or negative for a point in the region above the maximal margin line? What about for a point below the maximal margin line?</p></li>
+<li><p>How would you describe the relationship between the sign of <span class="math inline">\(x_1 - x_2\)</span> and the classification regions?</p></li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Q1.</strong></p>
+<div id="cell-checkin-margin-plot" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_1_support_vector_classifier-NOTES_files/figure-html/checkin-margin-plot-output-1.png" id="checkin-margin-plot" width="868" height="460" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Q2</strong> The maximal margin line does not change. The key insight is that the maximal margin classifier depends only on the support vectors; observations that lie farther from the boundary are irrelevant to defining it.</p>
+<p><strong>Q3</strong> <span class="math inline">\(x_1 - x_2 = 0\)</span>.</p>
+<p><strong>Q4</strong> For a point <em>above</em> the line</p>
+<p><span class="math display">\[
+x_1 &lt; x_2 \Rightarrow x_1 - x_2 &lt;0.
+\]</span></p>
+<p>For a point <em>below</em> the line</p>
+<p><span class="math display">\[
+x_1 &gt; x_2 \Rightarrow x_1 - x_2 &gt; 0.
+\]</span></p>
+<p>Check: obs 1 gives <span class="math inline">\(0 - 1 = -1 &lt; 0\)</span> (above); obs 2 gives <span class="math inline">\(1 - 0 = 1 &gt; 0\)</span> (below).</p>
+<p><strong>Q5</strong> The sign of <span class="math inline">\(x_1 - x_2\)</span> determines the predicted class:</p>
+<ul>
+<li><span class="math inline">\(x_1 - x_2 &lt; 0\)</span> <span class="math inline">\(\Rightarrow\)</span> Class <span class="math inline">\(+1\)</span> (above the line).</li>
+<li><span class="math inline">\(x_1 - x_2 &gt; 0\)</span> <span class="math inline">\(\Rightarrow\)</span> Class <span class="math inline">\(-1\)</span> (below the line).</li>
+</ul>
+<p>In general, the support vector classifier assigns class to a new point <span class="math inline">\((x_1^*, x_2^*)\)</span> based on the sign of <span class="math inline">\(\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*\)</span>, where<br>
+<span class="math display">\[ $\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*\]</span> is the equation of the maximal margin line.</p>
+<p>In our example <span class="math inline">\(\beta_0 = 0\)</span>, <span class="math inline">\(\beta_1 = 1\)</span>, <span class="math inline">\(\beta_2 = -1\)</span>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="zooming-out" class="level3">
+<h3 class="anchored" data-anchor-id="zooming-out">Zooming out</h3>
+<p>In the case of two linearly separable classes, the maximal margin classifier finds the line that leaves the widest margin between the classes. This maximal margin line can be defined by all points <span class="math inline">\((x_1, x_2)\)</span> for which <span class="math display">\[\beta_0 + \beta_1x_1 + \beta_2x_2 = 0.\]</span></p>
+<p>We get the coefficients <span class="math inline">\(\beta_0, \beta_1, \beta_2\)</span> from solving the maximal margin optimization problem. For example, in our check-in, our line had the coefficients <span class="math inline">\(\beta_0=0\)</span>, <span class="math inline">\(\beta_1=1\)</span> and <span class="math inline">\(\beta_2 = -1\)</span>.</p>
+<p>The region on one side of the line is made of all the points <span class="math inline">\((x_1, x_2)\)</span> for which</p>
+<p><span class="math display">\[\beta_0 + \beta_1x_1 + \beta_2x_2 &gt; 0,\]</span></p>
+<p>and the region on the other side of the line consists of all the points <span class="math inline">\((x_1, x_2)\)</span> for which</p>
+<p><span class="math display">\[\beta_0 + \beta_1x_1 + \beta_2x_2 &lt;0.\]</span></p>
+<p>Each of these sides corresponds to a classification region.</p>
+<p>So, the maximal margin classifier classifies a new observation <span class="math inline">\(x^* = (x_1^*, x_2^*)\)</span> by checking whether <span class="math inline">\(\beta_0 + \beta_1x_1^* + \beta_2x_2^*\)</span> is positive or negative, and assigning the corresponding class.</p>
+<p>The magnitude</p>
+<p><span class="math display">\[|\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*|\]</span></p>
+<p>reflects how far the new point is from the boundary: larger values indicate greater distance and thus greater classification confidence.</p>
+</section>
+</section>
+<section id="higher-dimensions-hyperplanes" class="level2">
+<h2 class="anchored" data-anchor-id="higher-dimensions-hyperplanes">Higher dimensions: hyperplanes</h2>
+<p>What happens when we have observations with more than 2 predictors? In other words, what happens when our data has more than 2 dimensions?</p>
+<p>In three dimensions, we can still visualize how two classes can be separated by a flat plane as in the figure below.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="hyperplane.png" class="img-fluid figure-img"></p>
+<figcaption>Image Source: <a href="https://www.analyticsvidhya.com/blog/2021/05/support-vector-machines/">Analytics Vidhya</a></figcaption>
+</figure>
+</div>
+<p>In <span class="math inline">\(p\)</span> dimensions, the separating boundary is no longer a line or a plane, but a <strong>hyperplane</strong>: a <span class="math inline">\((p-1)\)</span>-dimensional flat subspace.</p>
+<ul>
+<li>In <span class="math inline">\(p = 2\)</span> dimensions, a hyperplane is a <strong>line</strong>.</li>
+<li>In <span class="math inline">\(p = 3\)</span> dimensions, a hyperplane is a <strong>plane</strong>.</li>
+<li>For <span class="math inline">\(p &gt; 3\)</span>, we cannot visualize it! So we describe it algebraically:</li>
+</ul>
+<p>the hyperplane consists of all points <span class="math inline">\((x_1, \ldots, x_p)\)</span> for which <span class="math display">\[\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0,\]</span></p>
+<p>The coefficients <span class="math inline">\(\beta_0, \beta_1, \ldots, \beta_p\)</span> define the hyperplane. Just as in two dimensions, we find the <strong>maximal margin hyperplane</strong> by solving the same optimization problem, and it still depends only on the <strong>support vectors</strong>.</p>
+<p>This hyperplane divides the space into two half-spaces. For a new point <span class="math inline">\((x_1, \ldots, x_p)\)</span>, the sign of <span class="math inline">\(\beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p\)</span> determines which side a point falls on — and therefore which class it is assigned to:</p>
+<ul>
+<li><strong>= 0</strong>: the point is on the hyperplane,</li>
+<li><strong>&lt; 0</strong>: the point is on one side → assigned to one class,</li>
+<li><strong>&gt; 0</strong>: the point is on the other side → assigned to the other class.</li>
+</ul>
+</section>
+<section id="support-vector-classifier" class="level2">
+<h2 class="anchored" data-anchor-id="support-vector-classifier">Support vector classifier</h2>
+<p>The maximal margin classifier has a serious limitation: it requires the classes to be <strong>perfectly linearly separable</strong>. In practice this is rarely satisfied, like the data shown below.</p>
+<div id="cell-soft-data-scatter" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_1_support_vector_classifier-NOTES_files/figure-html/soft-data-scatter-output-1.png" id="soft-data-scatter" width="548" height="439" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The <strong>support vector classifier</strong> (also called the <em>soft-margin classifier</em>) relaxes perfect separability. It allows some observations to become “violations to the margin” by being:</p>
+<ul>
+<li><strong>within the margin</strong> (on the correct side of the hyperplane but inside the margin), or</li>
+<li><strong>on the wrong side of the hyperplane</strong> (misclassified).</li>
+</ul>
+<div id="cell-svc-regions" class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_1_support_vector_classifier-NOTES_files/figure-html/svc-regions-output-1.png" id="svc-regions" width="708" height="407" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Fitting the support vector classifier involves solving an optimization problem (ISLP section 9.2.2) to find coefficients <span class="math inline">\(\beta_0, \ldots, \beta_p\)</span> to define the hyperplane <span class="math inline">\(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0\)</span> that we will use as the decision boundary.</p>
+<p>As before, observations that lie on the margin boundary or on the wrong side of the margin are the <strong>support vectors</strong> and are the only observations that affect the fitted classifier.</p>
+<section id="the-hyperparameter-c" class="level3">
+<h3 class="anchored" data-anchor-id="the-hyperparameter-c">The hyperparameter C</h3>
+<p>The support vector classifier is controlled by a hyperparameter <span class="math inline">\(C &gt; 0\)</span> that sets the <strong>penalty for each margin violation</strong>. This is the <code>C</code> parameter you will set directly in scikit-learn’s <code>SVC</code>.</p>
+<ul>
+<li><strong>Large <span class="math inline">\(C\)</span></strong>: each violation is heavily penalized, so the classifier tries hard to keep observations on the correct side of the margin. This produces a <strong>narrow margin</strong> with fewer support vectors and a boundary that fits the training data tightly.</li>
+<li><strong>Small <span class="math inline">\(C\)</span></strong>: violations are tolerated more easily, so the classifier is willing to misclassify some training observations in exchange for a <strong>wider margin</strong> with more support vectors and a smoother, more stable boundary.</li>
+</ul>
+<p>In practice, <span class="math inline">\(C\)</span> is selected using cross-validation.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The ISLP book defines <span class="math inline">\(C\)</span> as a <strong>budget</strong> for violations — a larger budget means more violations are allowed. This is the <strong>inverse</strong> of the sklearn convention: a large ISLP budget corresponds to a small sklearn <code>C</code>, and vice versa. When reading the book alongside sklearn code, keep this in mind.</p>
+</div>
+</div>
+<p>The two plots below show the same overlapping dataset fitted with a small <span class="math inline">\(C\)</span> (wide margin, many violations tolerated) and a large <span class="math inline">\(C\)</span> (narrow margin, violations heavily penalized).</p>
+<div id="cell-c-comparison" class="cell" data-execution_count="12">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="9_1_support_vector_classifier-NOTES_files/figure-html/c-comparison-output-1.png" id="c-comparison" class="quarto-figure quarto-figure-center anchored figure-img" width="708" height="1129"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Changing <span class="math inline">\(C\)</span> creates a classic bias–variance tradeoff:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Small <span class="math inline">\(C\)</span></th>
+<th>Large <span class="math inline">\(C\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Penalty for violations</td>
+<td>Low</td>
+<td>High</td>
+</tr>
+<tr class="even">
+<td>Margin width</td>
+<td>Wide</td>
+<td>Narrow</td>
+</tr>
+<tr class="odd">
+<td>Number of support vectors</td>
+<td>More</td>
+<td>Fewer</td>
+</tr>
+<tr class="even">
+<td>Bias</td>
+<td>Higher</td>
+<td>Lower</td>
+</tr>
+<tr class="odd">
+<td>Variance</td>
+<td>Lower</td>
+<td>Higher</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>Explain why a small margin corresponds to higher bias and lower viarance, and why a large margin corresponds to lower bias and higher variance.</p></li>
+<li><p>Suppose you train with a very large <span class="math inline">\(C\)</span> and find that the model performs well on the training set but poorly on a held-out test set. What does this suggest, and how would you adjust <span class="math inline">\(C\)</span>?</p></li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li></li>
+</ol>
+<ul>
+<li>A <strong>small <span class="math inline">\(C\)</span></strong> tolerates violations, producing a wide margin and a boundary that is less sensitive to individual training points (lower variance) but may misclassify more observations (higher bias).</li>
+<li>A <strong>large <span class="math inline">\(C\)</span></strong> penalizes violations heavily, producing a narrow margin that fits the training data tightly (lower bias) but is sensitive to small changes in the training set and may overfit (higher variance).</li>
+</ul>
+<ol start="2" type="1">
+<li>Good training performance with poor test performance is a classic sign of overfitting — the large <span class="math inline">\(C\)</span> is penalizing violations so heavily that the boundary memorizes the training data. Decreasing <span class="math inline">\(C\)</span> would widen the margin, reduce variance, and likely improve generalization.</li>
+</ol>
+</div>
+</div>
+</div>
+
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-islp_2023" class="csl-entry" role="listitem">
+James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E. Taylor. 2023. <em>An Introduction to Statistical Learning: With Applications in <span>Python</span></em>. Springer Texts in Statistics. Cham: Springer.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>This work is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License</a></p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This website is built with <a href="https://quarto.org/">Quarto</a> and <a href="https://github.com/MEDS-eds-220/MEDS-eds-220-course">GitHub pages</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
