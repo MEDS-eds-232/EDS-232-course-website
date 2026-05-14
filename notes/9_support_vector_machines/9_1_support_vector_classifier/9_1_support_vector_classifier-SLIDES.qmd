@@ -189,6 +189,7 @@ ax.set_ylim(-4, 4)
 ax.set_xlabel('$X_1$')
 ax.set_ylabel('$X_2$')
 ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=3, fontsize=9)
 plt.tight_layout(rect=[0, 0.18, 1, 1])
 plt.show()
 plt.close()
@@ -210,7 +211,9 @@ All three lines correctly separate every Class 1 observation from every Class �
 
 <hr>
 
-The **margin** is the smallest perpendicular distance from the separating line to *any* training observation.
+The **margin** is the smallest perpendicular distance from the separating line to *any* training observation. The margin is like a buffer between the two classes. 
+
+<!-- A wider buffer means new observations have to be more ambiguous before they are at risk of being misclassified.  -->
 
 ```{python}
 #| label: margin-comparison
@@ -263,9 +266,6 @@ plt.show()
 plt.close()
 ```
 
-::: {.body-text-s .center-text}
-The **maximal margin classifier** selects the separating line that **maximizes the margin**.
-:::
 
 ---
 
@@ -275,9 +275,10 @@ The **maximal margin classifier** selects the separating line that **maximizes t
 
 <hr>
 
-:::: {.columns}
+::: {.center-text}
+The **maximal margin classifier** selects the separating line that **maximizes the margin**.
+:::
 
-::: {.column width="50%"}
 
 ```{python}
 #| label: maximal-margin
@@ -305,21 +306,10 @@ plt.show()
 plt.close()
 ```
 
-:::
 
-::: {.column width="50%"}
+The **maximal margin line** selected by the classifier is the line furthest away from all training observations.
 
-::: {.body-text-m}
-The **maximal margin classifier** selects the line **furthest away from all training observations**.
 
-<br>
-
-A wider margin signals greater classification confidence: the space between the two classes is as wide as possible.
-:::
-
-:::
-
-::::
 
 ---
 
@@ -367,10 +357,10 @@ plt.show()
 plt.close()
 ```
 
-::: {.body-text-s .center-text}
+::: {.center-text}
 Observations far from the boundary are classified with high certainty. Points near the boundary are more ambiguous.
 
-Observations in the **wrong-colored region** are misclassified.
+Observations in the wrong-colored region are misclassified.
 :::
 
 ---
@@ -381,9 +371,10 @@ Observations in the **wrong-colored region** are misclassified.
 
 <hr>
 
-:::: {.columns}
+**Support vectors** are the training observations that lie exactly on the margin boundary (circled).
 
-::: {.column width="50%"}
+The maximal margin classifier **depends only on the support vectors** — moving any other observation (while keeping it on the same side of the margin) has no effect on the classifier.
+
 
 ```{python}
 #| label: support-vectors
@@ -411,21 +402,113 @@ plt.show()
 plt.close()
 ```
 
+
+---
+
+## {#checkin-svc-q1 data-menu-title="Check-in: margin & support vectors"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+
+:::: {.columns}
+
+::: {.column width="50%"}
+::: {.teal-text .body-text-m}
+We have a training set consisting of two observations:
+
+| Obs | $X_1$ | $X_2$ | Class |
+|:---:|:---:|:---:|:---:|
+| 1 | 0 | 1 | +1 |
+| 2 | 1 | 0 | −1 |
+
+1. Draw a diagram identifying the training set, the maximal margin line, and the support vectors.
+
 :::
+
+:::
+
 
 ::: {.column width="50%"}
 
-::: {.body-text-m}
-**Support vectors** are the training observations that lie exactly on the margin boundary (circled).
-
-<br>
-
-The maximal margin classifier **depends only on the support vectors** — moving any other observation (while keeping it on the same side of the margin) has no effect on the classifier.
 :::
 
 :::
 
-::::
+---
+
+## {#checkin-svc-q1-answer data-menu-title="Check-in: margin & support vectors"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+::: {.teal-text .body-text-m}
+We have a training set consisting of two observations:
+
+| Obs | $X_1$ | $X_2$ | Class |
+|:---:|:---:|:---:|:---:|
+| 1 | 0 | 1 | +1 |
+| 2 | 1 | 0 | −1 |
+
+1. Draw a diagram identifying the training set, the maximal margin line, and the support vectors.
+
+:::
+
+:::
+
+
+::: {.column width="50%"}
+```{python}
+#| label: checkin-2pt-plot
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+_X_2pt = np.array([[0.0, 1.0], [1.0, 0.0]])
+_y_2pt = np.array([1, -1])
+_svc_2pt = SVC(kernel='linear', C=1e6)
+_svc_2pt.fit(_X_2pt, _y_2pt)
+_ann_2pt = [(-0.22, 0.22), (0.22, -0.22)]
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.85, fig_size_y + 1.5))
+for cls in [1, -1]:
+    mask = _y_2pt == cls
+    ax.scatter(_X_2pt[mask, 0], _X_2pt[mask, 1],
+               c=col_map[cls], s=80, alpha=0.9, edgecolors='none',
+               label=label_map[cls])
+for j, (dx, dy) in enumerate(_ann_2pt):
+    ax.text(_X_2pt[j, 0] + dx, _X_2pt[j, 1] + dy, str(j + 1),
+            fontsize=9, ha='center', va='center', fontweight='bold')
+w_d = _svc_2pt.coef_[0]; b_d = _svc_2pt.intercept_[0]
+xlim_2 = (-2.5, 2.5); ylim_2 = (-2.5, 2.5)
+xx_d = np.linspace(xlim_2[0], xlim_2[1], 300)
+ax.plot(xx_d, -(w_d[0]*xx_d + b_d) / w_d[1], 'k-', lw=2, label='Decision boundary')
+ax.plot(xx_d, -(w_d[0]*xx_d + b_d - 1) / w_d[1], 'k--', lw=1.2, alpha=0.5)
+ax.plot(xx_d, -(w_d[0]*xx_d + b_d + 1) / w_d[1], 'k--', lw=1.2, alpha=0.5, label='Margin boundary')
+ax.fill_between(xx_d,
+                -(w_d[0]*xx_d + b_d - 1) / w_d[1],
+                -(w_d[0]*xx_d + b_d + 1) / w_d[1],
+                alpha=0.08, color='gray', label='Margin')
+sv = _svc_2pt.support_vectors_
+ax.scatter(sv[:, 0], sv[:, 1], s=220, facecolors='none',
+           edgecolors='black', linewidths=1.8, zorder=5, label='Support vectors')
+ax.set_xlim(xlim_2); ax.set_ylim(ylim_2)
+ax.set_xlabel('$X_1$'); ax.set_ylabel('$X_2$')
+ax.set_title('2-observation set\nBoth are support vectors', fontsize=9)
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.22), ncol=2, fontsize=8)
+plt.tight_layout(rect=[0, 0.20, 1, 1])
+plt.show()
+plt.close()
+```
+:::
+
+:::
 
 ---
 
@@ -435,20 +518,12 @@ The maximal margin classifier **depends only on the support vectors** — moving
 
 <hr>
 
-We have two training datasets. For each one:
+:::: {.columns}
 
-::: {.teal-text .body-text-m}
-1. Draw the maximal margin line and identify the support vectors.
-2. How does the line change when we go from the 2-point to the 5-point dataset?
-3. Find the equation of the maximal margin line for the 2-point dataset.
-4. For a point above the maximal margin line, is $x_1 - x_2$ positive or negative? What about below?
-5. How does the sign of $x_1 - x_2$ relate to the classification regions?
-:::
+::: {.column width="50%"}
 
-| Obs | $X_1$ | $X_2$ | Class |
-|:---:|:---:|:---:|:---:|
-| 1 | 0 | 1 | +1 |
-| 2 | 1 | 0 | −1 |
+::: {.teal-text}
+Now suppose the training set is the following:
 
 | Obs | $X_1$ | $X_2$ | Class |
 |:---:|:---:|:---:|:---:|
@@ -457,6 +532,157 @@ We have two training datasets. For each one:
 | 3 | 2 | −1 | −1 |
 | 4 | −1 | −3 | −1 |
 | 5 | −1 | 2 | +1 |
+
+2. How does the maximal margin line change? What are the support vectors?
+
+3. Find the equation of the maximal margin line for this dataset.
+
+:::
+
+:::
+
+
+::: {.column width="50%"}
+
+:::
+
+
+:::
+
+---
+
+## {#checkin-svc-q-answer data-menu-title="Check-in: margin & support vectors"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text}
+Now suppose the training set is the following:
+
+| Obs | $X_1$ | $X_2$ | Class |
+|:---:|:---:|:---:|:---:|
+| 1 | 0 | 1 | +1 |
+| 2 | 1 | 0 | −1 |
+| 3 | 2 | −1 | −1 |
+| 4 | −1 | −3 | −1 |
+| 5 | −1 | 2 | +1 |
+
+2. How does the maximal margin line change? What are the support vectors?
+
+3. Find the equation of the maximal margin line for this dataset.
+
+
+:::
+
+:::
+
+
+::: {.column width="50%"}
+
+```{python}
+#| label: checkin-5pt-plot
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+_X_5pt = np.array([[0.0, 1.0], [1.0, 0.0], [2.0, -1.0], [-1.0, -3.0], [-1.0, 2.0]])
+_y_5pt = np.array([1, -1, -1, -1, 1])
+_svc_5pt = SVC(kernel='linear', C=1e6)
+_svc_5pt.fit(_X_5pt, _y_5pt)
+_ann_5pt = [(-0.30, 0.22), (0.22, -0.22), (0.22, -0.24),
+            (-0.28, -0.30), (-0.34, 0.22)]
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.55, fig_size_y + 1.5))
+for cls in [1, -1]:
+    mask = _y_5pt == cls
+    ax.scatter(_X_5pt[mask, 0], _X_5pt[mask, 1],
+               c=col_map[cls], s=80, alpha=0.9, edgecolors='none',
+               label=label_map[cls])
+for j, (dx, dy) in enumerate(_ann_5pt):
+    ax.text(_X_5pt[j, 0] + dx, _X_5pt[j, 1] + dy, str(j + 1),
+            fontsize=9, ha='center', va='center', fontweight='bold')
+w_d = _svc_5pt.coef_[0]; b_d = _svc_5pt.intercept_[0]
+xlim_5 = (-2.5, 3.5); ylim_5 = (-4.5, 3.5)
+xx_d = np.linspace(xlim_5[0], xlim_5[1], 300)
+ax.plot(xx_d, -(w_d[0]*xx_d + b_d) / w_d[1], 'k-', lw=2, label='Decision boundary')
+ax.plot(xx_d, -(w_d[0]*xx_d + b_d - 1) / w_d[1], 'k--', lw=1.2, alpha=0.5)
+ax.plot(xx_d, -(w_d[0]*xx_d + b_d + 1) / w_d[1], 'k--', lw=1.2, alpha=0.5, label='Margin boundary')
+ax.fill_between(xx_d,
+                -(w_d[0]*xx_d + b_d - 1) / w_d[1],
+                -(w_d[0]*xx_d + b_d + 1) / w_d[1],
+                alpha=0.08, color='gray', label='Margin')
+sv = _svc_5pt.support_vectors_
+ax.scatter(sv[:, 0], sv[:, 1], s=220, facecolors='none',
+           edgecolors='black', linewidths=1.8, zorder=5, label='Support vectors')
+ax.set_xlim(xlim_5); ax.set_ylim(ylim_5)
+ax.set_xlabel('$X_1$'); ax.set_ylabel('$X_2$')
+ax.set_title('5-observation set\nOnly obs 1 and 2 are SVs', fontsize=9)
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=2, fontsize=8)
+plt.tight_layout(rect=[0, 0.15, 1, 1])
+plt.show()
+plt.close()
+```
+
+
+**Q2.** The boundary does **not** change — it depends only on the support vectors. Obs 1 and 2 remain the only SVs.
+
+**Q3.** $x_1 - x_2 = 0$
+:::
+
+
+:::
+
+
+---
+
+## {#checkin-svc-q3 data-menu-title="Check-in: margin & support vectors"}
+
+[Check-in]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.teal-text}
+Now suppose the training set is the following:
+
+| Obs | $X_1$ | $X_2$ | Class |
+|:---:|:---:|:---:|:---:|
+| 1 | 0 | 1 | +1 |
+| 2 | 1 | 0 | −1 |
+| 3 | 2 | −1 | −1 |
+| 4 | −1 | −3 | −1 |
+| 5 | −1 | 2 | +1 |
+
+2. How does the maximal margin line change? What are the support vectors?
+
+3. Find the equation of the maximal margin line for this dataset.
+
+4. For a point above the maximal margin line, is $x_1 - x_2$ positive or negative? What about below?
+
+5. How does the sign of $x_1 - x_2$ relate to the classification regions?
+
+:::
+
+:::
+
+
+::: {.column width="50%"}
+
+:::
+
+
+:::
+
+
 
 ---
 
