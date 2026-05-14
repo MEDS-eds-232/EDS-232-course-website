@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.33">
+
+  <title>EDS 232 - Machine Learning for Environmental Science – support_vector_classifier-slides</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+  </style>
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/theme/quarto-aa079427e74470e351a8ef456b814408.css">
+  <link href="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+
+<section id="title-slide" class="slide level2 center" data-menu-title="Title Slide" data-background="#053660">
+<h2></h2>
+<p><span class="custom-title">EDS 232</span></p>
+<hr class="hr-teal">
+<p><span class="custom-subtitle">Lesson 9</span></p>
+<p><span class="custom-subtitle"><em>Support vector classifier</em></span></p>
+</section>
+<section id="in-this-lesson" class="slide level2" data-menu-title="In this lesson">
+<h2></h2>
+<p><span class="slide-title">In this lesson</span></p>
+<hr>
+<p><br></p>
+<ul>
+<li><strong>Separating hyperplanes</strong> as linear decision boundaries for binary classification</li>
+<li>The <strong>maximal margin classifier</strong> and the concept of the <strong>margin</strong></li>
+<li><strong>Support vectors</strong> and why they uniquely determine the classifier</li>
+<li>The <strong>support vector classifier</strong> as a soft-margin generalization</li>
+<li>The hyperparameter <span class="math inline">\(C\)</span> and the resulting bias–variance tradeoff</li>
+</ul>
+</section>
+<section id="section-mmc" class="slide level2" data-menu-title="# Maximal margin classifier #" data-background="#047C90">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Maximal margin classifier
+</p>
+</div>
+</section>
+<section id="separable-scatter-slide" class="slide level2" data-menu-title="Separating lines">
+<h2></h2>
+<p><span class="slide-title">Two linearly separable classes</span></p>
+<hr>
+<p>Consider a dataset with two predictors <span class="math inline">\(X_1\)</span>, <span class="math inline">\(X_2\)</span> and a binary response with classes <span class="math inline">\(+1\)</span> and <span class="math inline">\(-1\)</span>.</p>
+<div id="cell-separable-scatter" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/separable-scatter-output-1.png" id="separable-scatter" class="quarto-figure quarto-figure-center" width="548" height="335"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="body-text-s center-text">
+<p>Assume for now that the two classes can be <strong>perfectly separated</strong> by a line. Any such line is called a <strong>separating line</strong>.</p>
+</div>
+</section>
+<section id="multiple-lines-slide" class="slide level2" data-menu-title="Infinitely many separating lines">
+<h2></h2>
+<p><span class="slide-title">Infinitely many separating lines</span></p>
+<hr>
+<p>Whenever the classes are perfectly separable, there are <strong>infinitely many</strong> valid separating lines.</p>
+<div id="cell-multiple-lines" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/multiple-lines-output-1.png" id="multiple-lines" class="quarto-figure quarto-figure-center" width="548" height="330"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="body-text-s center-text">
+<p>All three lines correctly separate every Class 1 observation from every Class −1 observation.</p>
+</div>
+<div class="center-text">
+<p><strong>How do we select the “best” one?</strong></p>
+</div>
+</section>
+<section id="margin-slide" class="slide level2" data-menu-title="The margin">
+<h2></h2>
+<p><span class="slide-title">The margin</span></p>
+<hr>
+<p>The <strong>margin</strong> is the smallest perpendicular distance from the separating line to <em>any</em> training observation. The margin is like a buffer between the two classes.</p>
+<!-- A wider buffer means new observations have to be more ambiguous before they are at risk of being misclassified.  -->
+<div id="cell-margin-comparison" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/margin-comparison-output-1.png" id="margin-comparison" class="quarto-figure quarto-figure-center" width="1028" height="543"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="maximal-margin-slide" class="slide level2" data-menu-title="Maximal margin classifier">
+<h2></h2>
+<p><span class="slide-title">Maximal margin classifier</span></p>
+<hr>
+<div class="center-text">
+<p>The <strong>maximal margin classifier</strong> selects the separating line that <strong>maximizes the margin</strong>.</p>
+</div>
+<div id="cell-maximal-margin" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/maximal-margin-output-1.png" id="maximal-margin" class="quarto-figure quarto-figure-center" width="548" height="328"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The <strong>maximal margin line</strong> selected by the classifier is the line furthest away from all training observations.</p>
+</section>
+<section id="classification-regions-slide" class="slide level2" data-menu-title="Classification regions">
+<h2></h2>
+<p><span class="slide-title">Classification regions</span></p>
+<hr>
+<p>Once we have the maximal margin line, it defines two <strong>classification regions</strong>:</p>
+<div id="cell-classification-regions" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/classification-regions-output-1.png" id="classification-regions" class="quarto-figure quarto-figure-center" width="548" height="333"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="center-text">
+<p>Observations far from the boundary are classified with high certainty. Points near the boundary are more ambiguous.</p>
+<p>Observations in the wrong-colored region are misclassified.</p>
+</div>
+</section>
+<section id="support-vectors-slide" class="slide level2" data-menu-title="Support vectors">
+<h2></h2>
+<p><span class="slide-title">Support vectors</span></p>
+<hr>
+<p><strong>Support vectors</strong> are the training observations that lie exactly on the margin boundary (circled).</p>
+<p>The maximal margin classifier <strong>depends only on the support vectors</strong> — moving any other observation (while keeping it on the same side of the margin) has no effect on the classifier.</p>
+<div id="cell-support-vectors" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/support-vectors-output-1.png" id="support-vectors" class="quarto-figure quarto-figure-center" width="548" height="328"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="checkin-svc-q1" class="slide level2" data-menu-title="Check-in: margin &amp; support vectors">
+<h2></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="teal-text body-text-m">
+<p>We have a training set consisting of two observations:</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Obs</th>
+<th style="text-align: center;"><span class="math inline">\(X_1\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(X_2\)</span></th>
+<th style="text-align: center;">Class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">+1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">−1</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Draw a diagram identifying the training set, the maximal margin line, and the support vectors.</li>
+</ol>
+</div>
+</div><div class="column" style="width:50%;">
+
+</div></div>
+</section>
+<section id="checkin-svc-q1-answer" class="slide level2" data-menu-title="Check-in: margin &amp; support vectors">
+<h2></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="teal-text body-text-m">
+<p>We have a training set consisting of two observations:</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Obs</th>
+<th style="text-align: center;"><span class="math inline">\(X_1\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(X_2\)</span></th>
+<th style="text-align: center;">Class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">+1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">−1</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Draw a diagram identifying the training set, the maximal margin line, and the support vectors.</li>
+</ol>
+</div>
+</div><div class="column" style="width:50%;">
+<div id="cell-checkin-2pt-plot" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/checkin-2pt-plot-output-1.png" id="checkin-2pt-plot" class="quarto-figure quarto-figure-center" width="668" height="389"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="checkin-svc-q" class="slide level2" data-menu-title="Check-in: margin &amp; support vectors">
+<h2></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="teal-text">
+<p>Now suppose the training set is the following:</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Obs</th>
+<th style="text-align: center;"><span class="math inline">\(X_1\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(X_2\)</span></th>
+<th style="text-align: center;">Class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">+1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">−3</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">+1</td>
+</tr>
+</tbody>
+</table>
+<ol start="2" type="1">
+<li><p>How does the maximal margin line change? What are the support vectors?</p></li>
+<li><p>Find the equation of the maximal margin line for this dataset.</p></li>
+</ol>
+</div>
+</div><div class="column" style="width:50%;">
+
+</div></div>
+</section>
+<section id="checkin-svc-q-answer" class="slide level2" data-menu-title="Check-in: margin &amp; support vectors">
+<h2></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="teal-text">
+<p>Now suppose the training set is the following:</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Obs</th>
+<th style="text-align: center;"><span class="math inline">\(X_1\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(X_2\)</span></th>
+<th style="text-align: center;">Class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">+1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">−3</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">+1</td>
+</tr>
+</tbody>
+</table>
+<ol start="2" type="1">
+<li><p>How does the maximal margin line change? What are the support vectors?</p></li>
+<li><p>Find the equation of the maximal margin line for this dataset.</p></li>
+</ol>
+</div>
+</div><div class="column" style="width:50%;">
+<div id="cell-checkin-5pt-plot" class="cell" data-execution_count="9">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/checkin-5pt-plot-output-1.png" id="checkin-5pt-plot" class="quarto-figure quarto-figure-center" width="428" height="439"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Q2.</strong> The boundary does <strong>not</strong> change — it depends only on the support vectors. Obs 1 and 2 remain the only SVs.</p>
+<p><strong>Q3.</strong> <span class="math inline">\(x_1 - x_2 = 0\)</span></p>
+</div></div>
+</section>
+<section id="checkin-svc-q3" class="slide level2" data-menu-title="Check-in: margin &amp; support vectors">
+<h2></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="teal-text">
+<p>Now suppose the training set is the following:</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Obs</th>
+<th style="text-align: center;"><span class="math inline">\(X_1\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(X_2\)</span></th>
+<th style="text-align: center;">Class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">+1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">−3</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">+1</td>
+</tr>
+</tbody>
+</table>
+<ol start="2" type="1">
+<li><p>How does the maximal margin line change? What are the support vectors?</p></li>
+<li><p>Find the equation of the maximal margin line for this dataset.</p></li>
+<li><p>For a point above the maximal margin line, is <span class="math inline">\(x_1 - x_2\)</span> positive or negative? What about below?</p></li>
+<li><p>How does the sign of <span class="math inline">\(x_1 - x_2\)</span> relate to the classification regions?</p></li>
+</ol>
+</div>
+</div><div class="column" style="width:50%;">
+<div id="cell-checkin-5pt-plot-2" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/checkin-5pt-plot-2-output-1.png" id="checkin-5pt-plot-2" class="quarto-figure quarto-figure-center" width="428" height="439"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="checkin-svc-q3-answer" class="slide level2" data-menu-title="Check-in: margin &amp; support vectors">
+<h2></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="teal-text">
+<p>Now suppose the training set is the following:</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Obs</th>
+<th style="text-align: center;"><span class="math inline">\(X_1\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(X_2\)</span></th>
+<th style="text-align: center;">Class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">+1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">−3</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">+1</td>
+</tr>
+</tbody>
+</table>
+<ol start="2" type="1">
+<li><p>How does the maximal margin line change? What are the support vectors?</p></li>
+<li><p>Find the equation of the maximal margin line for this dataset.</p></li>
+<li><p>For a point above the maximal margin line, is <span class="math inline">\(x_1 - x_2\)</span> positive or negative? What about below?</p></li>
+<li><p>How does the sign of <span class="math inline">\(x_1 - x_2\)</span> relate to the classification regions?</p></li>
+</ol>
+</div>
+</div><div class="column" style="width:50%;">
+<div id="cell-checkin-5pt-plot-3" class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/checkin-5pt-plot-3-output-1.png" id="checkin-5pt-plot-3" class="quarto-figure quarto-figure-center" width="428" height="439"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Q4.</strong> Above the line: <span class="math inline">\(x_1 &lt; x_2 \Rightarrow x_1 - x_2 &lt; 0\)</span></p>
+<p>Below the line: <span class="math inline">\(x_1 &gt; x_2 \Rightarrow x_1 - x_2 &gt; 0\)</span></p>
+<p><strong>Q5.</strong> The sign of <span class="math inline">\(x_1 - x_2\)</span> determines the predicted class: <span class="math inline">\(x_1 - x_2 &lt; 0\)</span> → Class <span class="math inline">\(+1\)</span> and <span class="math inline">\(x_1 - x_2 &gt; 0\)</span> → Class <span class="math inline">\(-1\)</span></p>
+</div></div>
+</section>
+<section id="zooming-out-slide" class="slide level2" data-menu-title="Zooming out">
+<h2></h2>
+<p><span class="slide-title">Zooming out</span></p>
+<hr>
+<p>The maximal margin line is defined by all <span class="math inline">\((x_1, x_2)\)</span> such that</p>
+<p><span class="math display">\[\beta_0 + \beta_1 x_1 + \beta_2 x_2 = 0.\]</span></p>
+<div class="fragment">
+<p>It divides the plane into two classification regions:</p>
+<p><span class="math display">\[\beta_0 + \beta_1 x_1 + \beta_2 x_2 &gt; 0 \quad \text{and} \quad \beta_0 + \beta_1 x_1 + \beta_2 x_2 &lt; 0.\]</span></p>
+</div>
+<div class="fragment">
+<p>To classify a new observation <span class="math inline">\(x^* = (x_1^*, x_2^*)\)</span>, we plug in <span class="math inline">\(x^* = (x_1^*, x_2^*)\)</span> into the euqation and check the <strong>sign</strong> of <span class="math inline">\(\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*\)</span> and assign the corresponding class. <!-- 
+. . .
+
+The magnitude
+$$|\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*|$$ 
+reflects how far the point is from the boundary. 
+
+Larger values indicate greater classification confidence.* --></p>
+</div>
+</section>
+<section id="section-hyperplanes" class="slide level2" data-menu-title="# Hyperplanes #" data-background="#047C90">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Higher dimensions: hyperplanes
+</p>
+</div>
+</section>
+<section id="hyperplane-slide-1" class="slide level2" data-menu-title="Separating hyperplanes">
+<h2></h2>
+<p><span class="slide-title">Separating hyperplanes</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="hyperplane.png" style="width:95.0%"></p>
+<figcaption>Image Source: <a href="https://www.analyticsvidhya.com/blog/2021/05/support-vector-machines/">Analytics Vidhya</a></figcaption>
+</figure>
+</div>
+<div class="body-text-s center-text">
+<p>In 3D, classes can be separated by a <strong>flat plane</strong>.</p>
+</div>
+</div><div class="column" style="width:50%;">
+<p>In <span class="math inline">\(p\)</span> dimensions the separating boundary is a <strong>hyperplane</strong>: a <span class="math inline">\((p-1)\)</span>-dimensional flat subspace.</p>
+<p><br></p>
+<ul>
+<li><span class="math inline">\(p = 2\)</span>: hyperplane is a <strong>line</strong></li>
+<li><span class="math inline">\(p = 3\)</span>: hyperplane is a <strong>plane</strong></li>
+</ul>
+</div></div>
+</section>
+<section id="hyperplane-slide-2" class="slide level2" data-menu-title="Separating hyperplanes">
+<h2></h2>
+<p><span class="slide-title">Separating hyperplanes</span></p>
+<hr>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="hyperplane.png" style="width:95.0%"></p>
+<figcaption>Image Source: <a href="https://www.analyticsvidhya.com/blog/2021/05/support-vector-machines/">Analytics Vidhya</a></figcaption>
+</figure>
+</div>
+<div class="body-text-s center-text">
+<p>In 3D, classes can be separated by a <strong>flat plane</strong>.</p>
+</div>
+</div><div class="column" style="width:50%;">
+<p>In <span class="math inline">\(p\)</span> dimensions the separating boundary is a <strong>hyperplane</strong>: a <span class="math inline">\((p-1)\)</span>-dimensional flat subspace.</p>
+<p><br></p>
+<ul>
+<li><span class="math inline">\(p = 2\)</span>: hyperplane is a <strong>line</strong></li>
+<li><span class="math inline">\(p = 3\)</span>: hyperplane is a <strong>plane</strong></li>
+<li><span class="math inline">\(p &gt; 3\)</span>: we can’t visualize it — we describe it algebraically</li>
+</ul>
+<p><br></p>
+<p>The hyperplane consists of all <span class="math inline">\((x_1, \ldots, x_p)\)</span> for which</p>
+<p><span class="math display">\[\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p = 0.\]</span></p>
+</div></div>
+</section>
+<section id="hyperplane-sign-slide" class="slide level2" data-menu-title="Sign determines class">
+<h2></h2>
+<p><span class="slide-title">Classification in <span class="math inline">\(p\)</span> dimensions</span></p>
+<hr>
+<p>The <strong>maximal margin classifier</strong> finds coefficients <span class="math inline">\(\beta_0, \beta_1, \ldots, \beta_p\)</span> by solving the maximal margin optimization problem.</p>
+<p>The classifier still depends only on the <strong>support vectors</strong>.</p>
+<div class="fragment">
+<p><br></p>
+<p>The resulting decision boundary is a <strong>maximal margin hyperplane</strong> that divides the space into two half-spaces.</p>
+<p>For a new point <span class="math inline">\((x_1, \ldots, x_p)\)</span>, the <strong>sign</strong> of <span class="math inline">\(\beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p\)</span> determines which class it is assigned to:</p>
+<ul>
+<li><strong>= 0</strong>: the point is on the hyperplane</li>
+<li><strong>&lt; 0</strong>: the point is on one side → assigned to one class</li>
+<li><strong>&gt; 0</strong>: the point is on the other side → assigned to the other class</li>
+</ul>
+</div>
+</section>
+<section id="section-limitations" class="slide level2" data-menu-title="# Maximal margin classifier limitations #" data-background="#047C90">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Maximal Margin Classifier Limitations
+</p>
+</div>
+</section>
+<section id="soft-data-slide" class="slide level2" data-menu-title="Not linearly separable">
+<h2></h2>
+<p><span class="slide-title">Classes that are not linearly separable</span></p>
+<hr>
+<p>The maximal margin classifier requires <strong>perfectly linearly separable</strong> classes. In practice, this is rarely satisfied.</p>
+<div id="cell-soft-data-scatter" class="cell" data-execution_count="12">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/soft-data-scatter-output-1.png" id="soft-data-scatter" class="quarto-figure quarto-figure-center" width="548" height="439"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="mmc-overfitting" class="slide level2" data-menu-title="Support vector classifier">
+<h2></h2>
+<p><span class="slide-title">Overfitting</span></p>
+<hr>
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">
+<p>✏️</p>
+</div>
+</section>
+<section id="section-svc" class="slide level2" data-menu-title="# Support vector classifier #" data-background="#047C90">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+Support vector classifier
+</p>
+</div>
+</section>
+<section id="svc-slide" class="slide level2" data-menu-title="Support vector classifier">
+<h2></h2>
+<p><span class="slide-title">Support vector classifier</span></p>
+<hr>
+<p>The <strong>support vector classifier</strong> (soft-margin classifier) relaxes perfect separability. It allows some observations to violate the margin by being:</p>
+<ul>
+<li><strong>within the margin</strong> (correct side of the hyperplane, but inside the margin), or</li>
+<li><strong>on the wrong side of the hyperplane</strong> (misclassified).</li>
+</ul>
+<div id="cell-svc-regions" class="cell" data-execution_count="13">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/svc-regions-output-1.png" id="svc-regions" class="quarto-figure quarto-figure-center" width="708" height="408"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="body-text-s center-text">
+<p>Support vectors (circled) are the only observations that affect the fitted classifier.</p>
+</div>
+</section>
+<section id="c-parameter-slide" class="slide level2" data-menu-title="The hyperparameter C">
+<h2></h2>
+<p><span class="slide-title">The hyperparameter <span class="math inline">\(C\)</span></span></p>
+<hr>
+<p>The SVC is controlled by a hyperparameter <span class="math inline">\(C &gt; 0\)</span> that sets the <strong>penalty for each margin violation</strong>.</p>
+<div class="fragment">
+<ul>
+<li><strong>Large <span class="math inline">\(C\)</span></strong>: each violation is heavily penalized
+<ul>
+<li>the classifier tries hard to keep observations on the correct side of the margin</li>
+<li><strong>narrow margin</strong>, fewer support vectors, tighter fit to training data.</li>
+</ul></li>
+<li><strong>Small <span class="math inline">\(C\)</span></strong>: violations are tolerated
+<ul>
+<li>the classifier accepts some misclassifications in exchange for a <strong>wider margin</strong></li>
+<li>more support vectors and a more stable boundary.</li>
+</ul></li>
+</ul>
+<p><span class="math inline">\(C\)</span> is selected using…</p>
+</div>
+<div class="fragment">
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>The ISLP book defines <span class="math inline">\(C\)</span> as a <strong>budget</strong> for violations: a larger budget means more violations are allowed. This is the <strong>inverse</strong> of the <code>sklearn</code> convention: a large ISLP budget = a small <code>sklearn</code> <span class="math inline">\(C\)</span>, and vice versa.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="c-comparison-slide" class="slide level2" data-menu-title="Effect of C">
+<h2></h2>
+<p><span class="slide-title">Effect of <span class="math inline">\(C\)</span> on the decision boundary</span></p>
+<hr>
+<div id="cell-c-comparison" class="cell" data-execution_count="14">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="9_1_support_vector_classifier-SLIDES_files/figure-revealjs/c-comparison-output-1.png" id="c-comparison" class="quarto-figure quarto-figure-center" width="1188" height="568"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="checkin-bv-slide" class="slide level2" data-menu-title="Check-in: bias-variance">
+<h2></h2>
+<p><span class="slide-title">Check-in</span></p>
+<hr>
+<div class="teal-text body-text-m">
+<ol type="1">
+<li><p>Explain why a small <span class="math inline">\(C\)</span> corresponds to higher bias and lower variance, and why a large <span class="math inline">\(C\)</span> corresponds to lower bias and higher variance.</p></li>
+<li><p>Suppose you train with a very large <span class="math inline">\(C\)</span> and find that the model performs well on the training set but poorly on a held-out test set. What does this suggest, and how would you adjust <span class="math inline">\(C\)</span>?</p></li>
+</ol>
+</div>
+<div class="fragment">
+<p><br></p>
+<ol type="1">
+<li>A <strong>small <span class="math inline">\(C\)</span></strong> tolerates violations → wide margin → boundary is less sensitive to individual training points (lower variance) but may misclassify more observations (higher bias). A <strong>large <span class="math inline">\(C\)</span></strong> penalizes violations heavily → narrow margin that fits training data tightly (lower bias) but is sensitive to small changes in the training set and may overfit (higher variance).</li>
+</ol>
+</div>
+<div class="fragment">
+<ol start="2" type="1">
+<li>Good training performance with poor test performance suggests <strong>overfitting</strong>. The large <span class="math inline">\(C\)</span> is penalizing violations so heavily that the boundary memorizes the training data. <strong>Decreasing <span class="math inline">\(C\)</span></strong> would widen the margin, reduce variance, and likely improve generalization.</li>
+</ol>
+
+
+</div>
+</section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../../../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../../../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+            const codeEl = trigger.previousElementSibling.cloneNode(true);
+            for (const childEl of codeEl.children) {
+              if (isCodeAnnotation(childEl)) {
+                childEl.remove();
+              }
+            }
+            return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+                // target, if specified
+                link.setAttribute("target", "_blank");
+                if (link.getAttribute("rel") === null) {
+                  link.setAttribute("rel", "noopener");
+                }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>
