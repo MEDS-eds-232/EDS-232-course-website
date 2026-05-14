@@ -251,7 +251,7 @@ ax.set_xlabel('$X_1$')
 ax.set_ylabel('$X_2$')
 ax.set_xlim(-4, 4)
 ax.set_ylim(-4, 4)
-ax.set_title('Maximal margin classifier\nDashed lines mark the margin boundaries')
+ax.set_title('Maximal margin classifier')
 ax.grid(True, alpha=0.3)
 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=3, fontsize=9)
 plt.tight_layout(rect=[0, 0.18, 1, 1])
@@ -318,10 +318,11 @@ for cls in [1, -1]:
 _, line_fn = plot_svc_boundary(ax, svc_hard, X_sep,
                                 show_margin=True, show_sv=True)
 
+ax.set_xlim(-4, 4)
+ax.set_ylim(-4, 4)
 ax.set_xlabel('$X_1$')
 ax.set_ylabel('$X_2$')
-ax.set_title('Maximal margin classifier\n'
-             'Dashed lines mark the margin; circled points are support vectors')
+ax.set_title('Maximal margin classifier')
 ax.grid(True, alpha=0.3)
 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=3, fontsize=9)
 plt.tight_layout(rect=[0, 0.18, 1, 1])
@@ -536,21 +537,23 @@ This higher-dimensional maximal margin hyperplane will still divide the space in
 
 ## Support vector classifier
 
-The maximal margin classifier is elegant, but it has a serious limitation: it requires the classes to be **perfectly linearly separable**. In practice this is rarely satisfied, and even when it is, the resulting classifier may have a very narrow margin and **overfit** the training data.
+The maximal margin classifier has a serious limitation: it requires the classes to be **perfectly linearly separable**. In practice this is rarely satisfied, like the data shown below.
 
-The **support vector classifier** — also called the *soft-margin classifier* — relaxes perfect separability. It allows some observations to be:
-
-- **within the margin** (on the correct side of the hyperplane but inside the margin), or
-- **on the wrong side of the hyperplane** (misclassified).
 
 ```{python}
 #| label: soft-data-scatter
 
+np.random.seed(10)
+X_illus, y_illus_raw = make_blobs(n_samples=12,
+                                   centers=[[1.2, 0.4], [-1.2, -0.4]],
+                                   cluster_std=1.3, random_state=3)
+y_illus = np.where(y_illus_raw == 0, 1, -1)
+
 fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
 for cls in [1, -1]:
-    mask = y_soft == cls
-    ax.scatter(X_soft[mask, 0], X_soft[mask, 1],
-               c=col_map[cls], s=35, alpha=0.7, edgecolors='none',
+    mask = y_illus == cls
+    ax.scatter(X_illus[mask, 0], X_illus[mask, 1],
+               c=col_map[cls], s=90, alpha=0.85, edgecolors='none',
                label=label_map[cls])
 ax.set_xlabel('$X_1$')
 ax.set_ylabel('$X_2$')
@@ -562,21 +565,66 @@ plt.show()
 plt.close()
 ```
 
-As before, observations that lie on the margin boundary or on the wrong side of the margin are the **support vectors** and are the only observations that affect the fitted classifier.
+
+The **support vector classifier** (also called the *soft-margin classifier*) relaxes perfect separability. It allows some observations to become violations to the margin by being":
+
+- **within the margin** (on the correct side of the hyperplane but inside the margin), or
+- **on the wrong side of the hyperplane** (misclassified).
+
+
+```{python}
+#| label: svc-regions
+
+svc_demo = SVC(kernel='linear', C=1.0)
+svc_demo.fit(X_illus, y_illus)
+
+x_pad_d = 0.8
+x_min_d = X_illus[:, 0].min() - x_pad_d
+x_max_d = X_illus[:, 0].max() + x_pad_d
+y_min_d = X_illus[:, 1].min() - x_pad_d
+y_max_d = X_illus[:, 1].max() + x_pad_d
+
+xx_cr, yy_cr = np.meshgrid(np.linspace(x_min_d, x_max_d, 300),
+                             np.linspace(y_min_d, y_max_d, 300))
+Z_cr = svc_demo.predict(np.c_[xx_cr.ravel(), yy_cr.ravel()]).reshape(xx_cr.shape)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y + 1.5))
+ax.contourf(xx_cr, yy_cr, Z_cr, levels=[-1.5, 0, 1.5],
+            colors=['tomato', 'steelblue'], alpha=0.12)
+
+for cls in [1, -1]:
+    mask = y_illus == cls
+    ax.scatter(X_illus[mask, 0], X_illus[mask, 1],
+               c=col_map[cls], s=90, alpha=0.85, edgecolors='none',
+               label=label_map[cls])
+
+plot_svc_boundary(ax, svc_demo, X_illus, show_margin=True, show_sv=True)
+
+ax.set_ylim(y_min_d, y_max_d)
+ax.set_xlabel('$X_1$')
+ax.set_ylabel('$X_2$')
+ax.set_title('Support vector classifier\nDecision boundary, margin, and classification regions')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=3, fontsize=9)
+plt.tight_layout(rect=[0, 0.18, 1, 1])
+plt.show()
+plt.close()
+```
+
+Fitting the support vector classifier involves solving an optimization problem (ISLP section 9.2.2) to find coefficients $\beta_0, \ldots, \beta_1$ to define the hyperplane $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0,$ that we will use as the decision boundary.
+As before, observations that lie on the margin boundary or on the wrong side of the margin are the **support vectors** and are the only observations that affect the fitted classifier. 
 
 ### The budget parameter C
 
-The support vector classifier is controlled by a hyperparameter $C \geq 0$ that sets the **budget for margin violations** — how much total slack the training observations are collectively allowed to use by sitting inside or across the margin.
+The support vector classifier is controlled by a hyperparameter $C \geq 0$ that sets the **"budget" for margin violations**. We have that:
 
-- **$C = 0$**: No violations are permitted. This is exactly the maximal margin classifier (only applicable when the data are perfectly separable).
+- **$C = 0$**: No violations are permitted. This is exactly the maximal margin classifier (only applicable when the data are perfectly separable by a hyperplane).
 - **Larger $C$**: More violations are allowed. The margin is wider, more observations become support vectors, and the classifier tolerates errors more readily.
 - **Smaller $C$**: Fewer violations are allowed. The margin is narrower, only observations very close to the boundary are support vectors, and the classifier tries harder to separate the training data.
 
 :::{.callout-note}
 In scikit-learn's `SVC`, the hyperparameter `C` is defined as the **penalty for each margin violation**, which is the inverse of the budget interpretation above: a smaller sklearn `C` corresponds to a larger violation budget (wider margin), and a larger sklearn `C` corresponds to a smaller budget (narrower margin).
 :::
-
-### Effect of C on the decision boundary
 
 The two plots below show the same overlapping dataset fitted with two different budgets: a **large budget** (many violations allowed, wide margin) and a **small budget** (few violations, narrow margin).
 
