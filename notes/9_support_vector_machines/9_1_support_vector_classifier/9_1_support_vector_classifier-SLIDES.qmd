@@ -843,11 +843,15 @@ $$\beta_0 + \beta_1 x_1 + \beta_2 x_2 > 0 \quad \text{and} \quad \beta_0 + \beta
 
 . . .
 
-To classify a new observation $x^* = (x_1^*, x_2^*)$, we check the **sign** of $\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*$ and assign the corresponding class.
-
+To classify a new observation $x^* = (x_1^*, x_2^*)$, we plug in $x^* = (x_1^*, x_2^*)$ into the euqation and check the **sign** of $\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*$ and assign the corresponding class.
+<!-- 
 . . .
 
-The **magnitude** $|\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*|$ reflects how far the point is from the boundary — larger values indicate greater classification confidence.
+The magnitude
+$$|\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*|$$ 
+reflects how far the point is from the boundary. 
+
+Larger values indicate greater classification confidence.* -->
 
 ---
 
@@ -859,7 +863,7 @@ The **magnitude** $|\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*|$ reflects how far t
 
 ---
 
-## {#hyperplane-slide data-menu-title="Separating hyperplanes"}
+## {#hyperplane-slide-1 data-menu-title="Separating hyperplanes"}
 
 [Separating hyperplanes]{.slide-title}
 
@@ -869,7 +873,7 @@ The **magnitude** $|\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*|$ reflects how far t
 
 ::: {.column width="50%"}
 
-![](hyperplane.png){width=95%}
+![Image Source: [Analytics Vidhya](https://www.analyticsvidhya.com/blog/2021/05/support-vector-machines/)](hyperplane.png){width=95%}
 
 ::: {.body-text-s .center-text}
 In 3D, classes can be separated by a **flat plane**.
@@ -879,7 +883,40 @@ In 3D, classes can be separated by a **flat plane**.
 
 ::: {.column width="50%"}
 
-::: {.body-text-m}
+In $p$ dimensions the separating boundary is a **hyperplane**: a $(p-1)$-dimensional flat subspace.
+
+<br>
+
+- $p = 2$: hyperplane is a **line**
+- $p = 3$: hyperplane is a **plane**
+
+
+:::
+
+::::
+
+---
+
+## {#hyperplane-slide-2 data-menu-title="Separating hyperplanes"}
+
+[Separating hyperplanes]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+![Image Source: [Analytics Vidhya](https://www.analyticsvidhya.com/blog/2021/05/support-vector-machines/)](hyperplane.png){width=95%}
+
+::: {.body-text-s .center-text}
+In 3D, classes can be separated by a **flat plane**.
+:::
+
+:::
+
+::: {.column width="50%"}
+
 In $p$ dimensions the separating boundary is a **hyperplane**: a $(p-1)$-dimensional flat subspace.
 
 <br>
@@ -893,11 +930,11 @@ In $p$ dimensions the separating boundary is a **hyperplane**: a $(p-1)$-dimensi
 The hyperplane consists of all $(x_1, \ldots, x_p)$ for which
 
 $$\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p = 0.$$
-:::
 
 :::
 
 ::::
+
 
 ---
 
@@ -907,26 +944,30 @@ $$\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p = 0.$$
 
 <hr>
 
-The hyperplane divides the space into two half-spaces. For a new point $(x_1, \ldots, x_p)$, the **sign** of $\beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p$ determines which class it is assigned to:
+The **maximal margin classifier** finds coefficients $\beta_0, \beta_1, \ldots, \beta_p$ by solving the maximal margin optimization problem.
+
+The classifier still depends only on the **support vectors**.
+
+. . .
 
 <br>
+
+The resulting decision boundary is a **maximal margin hyperplane** that divides the space into two half-spaces. 
+
+
+For a new point $(x_1, \ldots, x_p)$, the **sign** of $\beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p$ determines which class it is assigned to:
+
 
 - **= 0**: the point is on the hyperplane
 - **< 0**: the point is on one side → assigned to one class
 - **> 0**: the point is on the other side → assigned to the other class
 
-<br>
-
-. . .
-
-The coefficients $\beta_0, \beta_1, \ldots, \beta_p$ are found by solving the **maximal margin optimization problem**, and the classifier still depends only on the **support vectors**.
-
 ---
 
-## {#section-svc data-menu-title="# Support vector classifier #" background="#047C90"}
+## {#section-limitations data-menu-title="# Maximal margin classifier limitations #" background="#047C90"}
 
 <div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Support vector classifier</p>
+<p class="custom-subtitle bottombr">Maximal Margin Classifier Limitations</p>
 </div>
 
 ---
@@ -967,9 +1008,28 @@ plt.show()
 plt.close()
 ```
 
-::: {.body-text-s .center-text}
-No line can perfectly separate these two classes.
-:::
+
+---
+
+## {#mmc-overfitting data-menu-title="Support vector classifier"}
+
+[Overfitting]{.slide-title}
+
+<hr>
+
+<div style="position: absolute; bottom: 550px; right: 1000px; font-size: 1em;">                                                                               
+  ✏️                    
+</div>  
+
+
+---
+
+## {#section-svc data-menu-title="# Support vector classifier #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Support vector classifier</p>
+</div>
+
 
 ---
 
@@ -1015,7 +1075,7 @@ plot_svc_boundary(ax, svc_demo, X_illus, show_margin=True, show_sv=True)
 ax.set_ylim(y_min_d, y_max_d)
 ax.set_xlabel('$X_1$')
 ax.set_ylabel('$X_2$')
-ax.set_title('Support vector classifier\nDecision boundary, margin, and classification regions')
+ax.set_title('Support vector classifier')
 ax.grid(True, alpha=0.3)
 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=3, fontsize=9)
 plt.tight_layout(rect=[0, 0.18, 1, 1])
@@ -1024,7 +1084,7 @@ plt.close()
 ```
 
 ::: {.body-text-s .center-text}
-Support vectors (circled) lie on the margin boundary or on the wrong side. They are the only observations that affect the fitted classifier.
+Support vectors (circled) are the only observations that affect the fitted classifier.
 :::
 
 ---
@@ -1035,22 +1095,24 @@ Support vectors (circled) lie on the margin boundary or on the wrong side. They 
 
 <hr>
 
-The SVC is controlled by a hyperparameter $C > 0$ that sets the **penalty for each margin violation** (the `C` parameter in scikit-learn's `SVC`).
+The SVC is controlled by a hyperparameter $C > 0$ that sets the **penalty for each margin violation**.
 
-<br>
+. . .
 
-- **Large $C$**: each violation is heavily penalized → the classifier tries hard to keep observations on the correct side → **narrow margin**, fewer support vectors, tighter fit to training data.
+- **Large $C$**: each violation is heavily penalized
+    - the classifier tries hard to keep observations on the correct side of the margin
+    - **narrow margin**, fewer support vectors, tighter fit to training data.
 
-- **Small $C$**: violations are tolerated → the classifier accepts some misclassifications in exchange for a **wider margin**, more support vectors, and a smoother, more stable boundary.
+- **Small $C$**: violations are tolerated
+    - the classifier accepts some misclassifications in exchange for a **wider margin**
+    - more support vectors and a more stable boundary.
 
-<br>
-
-$C$ is selected using **cross-validation**.
+$C$ is selected using... 
 
 . . .
 
 ::: {.callout-note}
-The ISLP book defines $C$ as a **budget** for violations — a larger budget means more violations are allowed. This is the **inverse** of the sklearn convention: a large ISLP budget = a small sklearn $C$, and vice versa.
+The ISLP book defines $C$ as a **budget** for violations: a larger budget means more violations are allowed. This is the **inverse** of the `sklearn` convention: a large ISLP budget = a small `sklearn` $C$, and vice versa.
 :::
 
 ---
@@ -1105,33 +1167,6 @@ plt.show()
 plt.close()
 ```
 
----
-
-## {#bv-tradeoff-slide data-menu-title="Bias-variance tradeoff"}
-
-[Bias–variance tradeoff]{.slide-title}
-
-<hr>
-
-Changing $C$ creates a classic bias–variance tradeoff:
-
-<br>
-
-| | Small $C$ | Large $C$ |
-|---|:---:|:---:|
-| Penalty for violations | Low | High |
-| Margin width | Wide | Narrow |
-| Number of support vectors | More | Fewer |
-| Bias | Higher | Lower |
-| Variance | Lower | Higher |
-
-<br>
-
-::: {.body-text-s .center-text}
-A **small $C$** produces a boundary that is less sensitive to individual training points (lower variance) but may misclassify more observations (higher bias).
-
-A **large $C$** fits the training data tightly (lower bias) but is sensitive to small changes in the training set and may overfit (higher variance).
-:::
 
 ---
 
@@ -1155,4 +1190,4 @@ A **large $C$** fits the training data tightly (lower bias) but is sensitive to 
 
 . . .
 
-2. Good training performance with poor test performance is a classic sign of **overfitting** — the large $C$ is penalizing violations so heavily that the boundary memorizes the training data. **Decreasing $C$** would widen the margin, reduce variance, and likely improve generalization.
+2. Good training performance with poor test performance suggests **overfitting**. The large $C$ is penalizing violations so heavily that the boundary memorizes the training data. **Decreasing $C$** would widen the margin, reduce variance, and likely improve generalization.
