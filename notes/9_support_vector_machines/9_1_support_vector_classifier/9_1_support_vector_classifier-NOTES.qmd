@@ -4,6 +4,12 @@ jupyter: eds232-env
 echo: false
 ---
 
+<!-- Good links to revisit:
+https://stats.stackexchange.com/questions/31066/what-is-the-influence-of-c-in-svms-with-linear-kernel
+
+
+ -->
+
 ```{python}
 #| echo: false
 import numpy as np
@@ -49,7 +55,7 @@ y_soft = np.where(y_raw2 == 0, 1, -1)
 # Large ISLP budget C  → few violations  → narrow margin (large sklearn C)
 # (sklearn C is the inverse of the ISLP budget C)
 svc_wide   = SVC(kernel='linear', C=0.05)   # wide margin
-svc_narrow = SVC(kernel='linear', C=100.0)  # narrow margin
+svc_narrow = SVC(kernel='linear', C=1000)  # narrow margin
 svc_wide.fit(X_soft, y_soft)
 svc_narrow.fit(X_soft, y_soft)
 
@@ -651,42 +657,49 @@ plt.close()
 Fitting the support vector classifier involves solving an optimization problem (ISLP section 9.2.2) to find coefficients $\beta_0, \ldots, \beta_1$ to define the hyperplane $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0$ that we will use as the decision boundary.
 As before, observations that lie on the margin boundary or on the wrong side of the margin are the **support vectors** and are the only observations that affect the fitted classifier. 
 
-### The budget parameter C
+### The hyperparameter C
 
-The support vector classifier is controlled by a hyperparameter $C \geq 0$ that sets the **"budget" for margin violations**. We have that:
+The support vector classifier is controlled by a hyperparameter $C > 0$ that sets the **penalty for each margin violation**. This is the `C` parameter you will set directly in scikit-learn's `SVC`.
 
-- **$C = 0$**: No violations are permitted. This is exactly the maximal margin classifier (only applicable when the data are perfectly separable by a hyperplane).
-- **Larger $C$**: More violations are allowed. The margin is wider, more observations become support vectors, and the classifier tolerates errors more readily.
-- **Smaller $C$**: Fewer violations are allowed. The margin is narrower, only observations very close to the boundary are support vectors, and the classifier tries harder to separate the training data.
+- **Large $C$**: each violation is heavily penalized, so the classifier tries hard to keep observations on the correct side of the margin. This produces a **narrow margin** with fewer support vectors and a boundary that fits the training data tightly.
+- **Small $C$**: violations are tolerated more easily, so the classifier is willing to misclassify some training observations in exchange for a **wider margin** with more support vectors and a smoother, more stable boundary.
+
+In practice, $C$ is selected using cross-validation.
 
 :::{.callout-note}
-In scikit-learn's `SVC`, the hyperparameter `C` is defined as the **penalty for each margin violation**, which is the inverse of the budget interpretation above: a smaller sklearn `C` corresponds to a larger violation budget (wider margin), and a larger sklearn `C` corresponds to a smaller budget (narrower margin).
+The ISLP book defines $C$ as a **budget** for violations — a larger budget means more violations are allowed. This is the **inverse** of the sklearn convention: a large ISLP budget corresponds to a small sklearn `C`, and vice versa. When reading the book alongside sklearn code, keep this in mind.
 :::
 
-The two plots below show the same overlapping dataset fitted with two different budgets: a **large budget** (many violations allowed, wide margin) and a **small budget** (few violations, narrow margin).
+The two plots below show the same overlapping dataset fitted with a small $C$ (wide margin, many violations tolerated) and a large $C$ (narrow margin, violations heavily penalized).
 
 ```{python}
 #| label: c-comparison
 #| fig-align: center
 
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.1, fig_size_y + 0.5),
-                          sharey=True)
-fig.subplots_adjust(wspace=0.05)
+svc_illus_wide   = SVC(kernel='linear', C=0.05).fit(X_illus, y_illus)
+svc_illus_narrow = SVC(kernel='linear', C=10**6.0).fit(X_illus, y_illus)
+
+fig, axes = plt.subplots(2, 1, figsize=(fig_size_x * 0.9, (fig_size_y + 1.5) * 2),
+                          sharex=True)
+fig.subplots_adjust(hspace=0.25)
 
 configs = [
-    (svc_wide,   'Large $C$ (wide margin)\nMore violations allowed'),
-    (svc_narrow, 'Small $C$ (narrow margin)\nFewer violations allowed'),
+    (svc_illus_wide,   'Small $C$ — low penalty\nWide margin, violations tolerated'),
+    (svc_illus_narrow, 'Large $C$ — high penalty\nNarrow margin, few violations'),
 ]
 
 for ax, (svc_c, title) in zip(axes, configs):
     for cls in [1, -1]:
-        mask = y_soft == cls
-        ax.scatter(X_soft[mask, 0], X_soft[mask, 1],
-                   c=col_map[cls], s=25, alpha=0.65,
+        mask = y_illus == cls
+        ax.scatter(X_illus[mask, 0], X_illus[mask, 1],
+                   c=col_map[cls], s=90, alpha=0.85,
                    edgecolors='none', label=label_map[cls])
-    plot_svc_boundary(ax, svc_c, X_soft,
-                      show_margin=True, show_sv=True, x_pad=0.7)
+    plot_svc_boundary(ax, svc_c, X_illus,
+                      show_margin=True, show_sv=True, x_pad=0.8)
+    ax.set_xlim(x_min_d, x_max_d)
+    ax.set_ylim(y_min_d, y_max_d)
     ax.set_xlabel('$X_1$')
+    ax.set_ylabel('$X_2$')
     ax.set_title(title, fontsize=10)
     ax.grid(True, alpha=0.3)
     n_sv = svc_c.support_vectors_.shape[0]
@@ -694,48 +707,39 @@ for ax, (svc_c, title) in zip(axes, configs):
             transform=ax.transAxes, ha='right', va='bottom', fontsize=8,
             bbox=dict(boxstyle='round,pad=0.3', fc='white', ec='gray', alpha=0.8))
 
-axes[0].set_ylabel('$X_2$')
-axes[0].legend(fontsize=8, loc='upper left')
-plt.tight_layout()
+handles_c, labels_c = axes[0].get_legend_handles_labels()
+fig.legend(handles_c, labels_c, loc='lower center', ncol=4, fontsize=9,
+           bbox_to_anchor=(0.5, -0.03))
+plt.tight_layout(rect=[0, 0.08, 1, 1])
 plt.show()
 plt.close()
 ```
 
-Notice that the large-$C$ classifier has more support vectors and a wider gray margin band, while the small-$C$ classifier has fewer support vectors and a narrower margin.
-
-### Bias–variance tradeoff
-
 Changing $C$ creates a classic bias–variance tradeoff:
 
-| | Larger $C$ | Smaller $C$ |
+| | Small $C$ | Large $C$ |
 |---|---|---|
+| Penalty for violations | Low | High |
 | Margin width | Wide | Narrow |
-| Violations allowed | More | Fewer |
 | Number of support vectors | More | Fewer |
 | Bias | Higher | Lower |
 | Variance | Lower | Higher |
 
-- A **larger $C$** produces a wider margin and a more flexible, tolerant boundary that is less sensitive to individual points (lower variance) but may misclassify more training observations (higher bias).
-- A **smaller $C$** produces a narrow margin that hugs the training data more tightly (lower bias) but can be sensitive to small changes in the training set and may overfit (higher variance).
-
-In practice, $C$ is selected using cross-validation.
-
 :::{.callout-tip}
 ## Check-in
+1. Explain why a small margin corresponds to higher bias and lower viarance, and why a large margin corresponds to higher bias and lower variance. 
 
-Refer to the two classifiers shown in the plot above.
-
-1. Which classifier has more support vectors? Why does a wider margin lead to more support vectors?
-2. If the training data contained a lot of noise and overlap between classes, which value of $C$ would you prefer? Why?
-3. Suppose you train with a very small $C$ and find that the model performs well on the training set but poorly on a held-out test set. What does this suggest, and how would you adjust $C$?
+2. Suppose you train with a very large $C$ and find that the model performs well on the training set but poorly on a held-out test set. What does this suggest, and how would you adjust $C$?
 :::
-
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. The large-$C$ classifier has more support vectors. A wider margin encompasses more of the training observations: any point that falls within the margin band — or across the boundary — becomes a support vector. A narrow margin admits fewer observations into that zone.
+1. 
 
-2. With noisy, overlapping data, a larger $C$ is preferable. It allows the classifier to absorb some misclassifications and builds a decision boundary that is more stable and less reactive to individual noisy observations.
+- A **small $C$** tolerates violations, producing a wide margin and a boundary that is less sensitive to individual training points (lower variance) but may misclassify more observations (higher bias).
+- A **large $C$** penalizes violations heavily, producing a narrow margin that fits the training data tightly (lower bias) but is sensitive to small changes in the training set and may overfit (higher variance).
 
-3. Good training performance with poor test performance is a classic sign of overfitting — in the SVC context, the narrow margin is memorizing noise in the training data. Increasing $C$ (allowing more violations) would widen the margin, reduce variance, and likely improve generalization.
+
+2. Good training performance with poor test performance is a classic sign of overfitting — the large $C$ is penalizing violations so heavily that the boundary memorizes the training data. Decreasing $C$ would widen the margin, reduce variance, and likely improve generalization.
 :::
+
