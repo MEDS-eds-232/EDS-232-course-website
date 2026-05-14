@@ -51,14 +51,6 @@ X_soft, y_raw2 = make_blobs(n_samples=60,
                               cluster_std=1.2, random_state=7)
 y_soft = np.where(y_raw2 == 0, 1, -1)
 
-# Small ISLP budget C  → many violations → wide margin  (small sklearn C)
-# Large ISLP budget C  → few violations  → narrow margin (large sklearn C)
-# (sklearn C is the inverse of the ISLP budget C)
-svc_wide   = SVC(kernel='linear', C=0.05)   # wide margin
-svc_narrow = SVC(kernel='linear', C=1000)  # narrow margin
-svc_wide.fit(X_soft, y_soft)
-svc_narrow.fit(X_soft, y_soft)
-
 # ── Shared helper: draw linear SVC boundary ───────────────────────────────────
 def plot_svc_boundary(ax, svc, X, show_margin=True, show_sv=True, x_pad=0.8):
     w = svc.coef_[0]
@@ -474,7 +466,7 @@ Check: obs 1 gives $0 - 1 = -1 < 0$ (above); obs 2 gives $1 - 0 = 1 > 0$ (below)
 - $x_1 - x_2 > 0$ $\Rightarrow$ Class $-1$ (below the line).
 
 In general, the support vector classifier assigns class to a new point $(x_1^*, x_2^*)$ based on the sign of $\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*$, where  
-$$ $\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*$$$
+$$ $\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*$$
 is the equation of the maximal margin line. 
 
 In our example $\beta_0 = 0$, $\beta_1 = 1$, $\beta_2 = -1$.
@@ -654,7 +646,8 @@ plt.show()
 plt.close()
 ```
 
-Fitting the support vector classifier involves solving an optimization problem (ISLP section 9.2.2) to find coefficients $\beta_0, \ldots, \beta_1$ to define the hyperplane $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0$ that we will use as the decision boundary.
+Fitting the support vector classifier involves solving an optimization problem (ISLP section 9.2.2) to find coefficients $\beta_0, \ldots, \beta_p$ to define the hyperplane $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0$ that we will use as the decision boundary.
+
 As before, observations that lie on the margin boundary or on the wrong side of the margin are the **support vectors** and are the only observations that affect the fitted classifier. 
 
 ### The hyperparameter C
@@ -675,6 +668,11 @@ The two plots below show the same overlapping dataset fitted with a small $C$ (w
 ```{python}
 #| label: c-comparison
 #| fig-align: center
+
+
+# Small ISLP budget C  → few violations → narrow margin  (high sklearn C)
+# Large ISLP budget C  → many violations  → wide margin  (small sklearn C)
+# (sklearn C is the inverse of the ISLP budget C)
 
 svc_illus_wide   = SVC(kernel='linear', C=0.05).fit(X_illus, y_illus)
 svc_illus_narrow = SVC(kernel='linear', C=10**6.0).fit(X_illus, y_illus)
@@ -727,7 +725,7 @@ Changing $C$ creates a classic bias–variance tradeoff:
 
 :::{.callout-tip}
 ## Check-in
-1. Explain why a small margin corresponds to higher bias and lower viarance, and why a large margin corresponds to higher bias and lower variance. 
+1. Explain why a small margin corresponds to higher bias and lower viarance, and why a large margin corresponds to lower bias and higher variance. 
 
 2. Suppose you train with a very large $C$ and find that the model performs well on the training set but poorly on a held-out test set. What does this suggest, and how would you adjust $C$?
 :::

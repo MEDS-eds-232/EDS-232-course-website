@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.33">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Support vector machines – EDS 232 - Machine Learning for Environmental Science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../notes/week-by-week/week-by-week.html"> 
+<span class="menu-text">notes</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">assignments</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
+        <li>
+    <a class="dropdown-item" href="../../../assignments/assignment-1.html">
+ <span class="dropdown-text">Assignment 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../assignments/assignment-2.html">
+ <span class="dropdown-text">Assignment 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../assignments/assignment-3.html">
+ <span class="dropdown-text">Assignment 3</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">weekly labs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab1.html">
+ <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab2.html">
+ <span class="dropdown-text">Lab 2: No lab this week!</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab3.html">
+ <span class="dropdown-text">Lab 3: Classification</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab4.html">
+ <span class="dropdown-text">Lab 4: Polynomial Regression and Cross-Validation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab5.html">
+ <span class="dropdown-text">Lab 5: Regularized Regression</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../lab/lab6.html">
+ <span class="dropdown-text">Lab 6: Decision Trees</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-study-guides" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">study guides</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-study-guides">    
+        <li>
+    <a class="dropdown-item" href="../../../exams/exam1_study_guide.html">
+ <span class="dropdown-text">Midterm Exam Study Guide</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website">
+ <span class="dropdown-text">Source code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website/issues">
+ <span class="dropdown-text">Report a bug</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p>This wesbite is under construction.</p>
+</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#inner-product" id="toc-inner-product" class="nav-link active" data-scroll-target="#inner-product">Inner product</a></li>
+  <li><a href="#augmenting-the-feature-space" id="toc-augmenting-the-feature-space" class="nav-link" data-scroll-target="#augmenting-the-feature-space">Augmenting the feature space</a>
+  <ul class="collapse">
+  <li><a href="#a-one-dimensional-example" id="toc-a-one-dimensional-example" class="nav-link" data-scroll-target="#a-one-dimensional-example">A one-dimensional example</a></li>
+  <li><a href="#projecting-the-boundary-back-to-the-original-space" id="toc-projecting-the-boundary-back-to-the-original-space" class="nav-link" data-scroll-target="#projecting-the-boundary-back-to-the-original-space">Projecting the boundary back to the original space</a></li>
+  <li><a href="#extending-to-two-dimensions" id="toc-extending-to-two-dimensions" class="nav-link" data-scroll-target="#extending-to-two-dimensions">Extending to two dimensions</a></li>
+  </ul></li>
+  <li><a href="#the-support-vector-machine" id="toc-the-support-vector-machine" class="nav-link" data-scroll-target="#the-support-vector-machine">The support vector machine</a>
+  <ul class="collapse">
+  <li><a href="#polynomial-kernel" id="toc-polynomial-kernel" class="nav-link" data-scroll-target="#polynomial-kernel">Polynomial kernel</a></li>
+  <li><a href="#radial-kernel" id="toc-radial-kernel" class="nav-link" data-scroll-target="#radial-kernel">Radial kernel</a></li>
+  </ul></li>
+  <li><a href="#sec-kernel-appendix" id="toc-sec-kernel-appendix" class="nav-link" data-scroll-target="#sec-kernel-appendix">Appendix: what is a kernel?</a>
+  <ul class="collapse">
+  <li><a href="#notation-recap" id="toc-notation-recap" class="nav-link" data-scroll-target="#notation-recap">Notation recap</a></li>
+  <li><a href="#the-linear-svc-as-an-inner-product-machine" id="toc-the-linear-svc-as-an-inner-product-machine" class="nav-link" data-scroll-target="#the-linear-svc-as-an-inner-product-machine">The linear SVC as an inner-product machine</a></li>
+  <li><a href="#the-kernel-trick" id="toc-the-kernel-trick" class="nav-link" data-scroll-target="#the-kernel-trick">The kernel trick</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Support vector machines</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In this lesson we introduce:</p>
+<ul>
+<li>The concept of the inner product and its role in the support vector classifier</li>
+<li>Feature-space augmentation as a strategy for non-linear classification</li>
+<li>The kernel trick as a computationally efficient way to enlarge the feature space</li>
+<li>The polynomial and radial kernels and the tuning parameters that control them</li>
+</ul>
+<p>These notes are based on chapter 9 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. All example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.</p>
+<section id="inner-product" class="level2">
+<h2 class="anchored" data-anchor-id="inner-product">Inner product</h2>
+<p>Throughout this lesson we use the <strong>inner product</strong> (also called the dot product) between two vectors. If <span class="math inline">\(\mathbf{a} = (a_1, a_2, \ldots, a_p)\)</span> and <span class="math inline">\(\mathbf{b} = (b_1, b_2, \ldots, b_p)\)</span> are two vectors of the same length, their inner product is</p>
+<p><span class="math display">\[\langle \mathbf{a},\, \mathbf{b} \rangle = \sum_{j=1}^{p} a_j b_j = a_1 b_1 + a_2 b_2 + \cdots + a_p b_p.\]</span></p>
+<p>For example, if <span class="math inline">\(\mathbf{a} = (1, 2)\)</span> and <span class="math inline">\(\mathbf{b} = (3, -1)\)</span>, then <span class="math inline">\(\langle \mathbf{a}, \mathbf{b} \rangle = 1 \cdot 3 + 2 \cdot (-1) = 1\)</span>.</p>
+<p>We will return to this notation when we explain how kernels work at the end of the lesson.</p>
+</section>
+<section id="augmenting-the-feature-space" class="level2">
+<h2 class="anchored" data-anchor-id="augmenting-the-feature-space">Augmenting the feature space</h2>
+<p>In the <a href="../../../notes/9_support_vector_machines/9_1_support_vector_classifier/9_1_support_vector_classifier-NOTES.html">previous lesson</a> we saw that the support vector classifier finds the best <strong>linear</strong> boundary between two classes. But what if no straight line (or flat hyperplane) can adequately separate the classes?</p>
+<div id="cell-non-sep-scatter" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_2_support_vector_machines-NOTES_files/figure-html/non-sep-scatter-output-1.png" id="non-sep-scatter" width="509" height="439" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>One way to address this is to <strong>enlarge the feature space</strong> with additional features constructed from the original predictors. For instance, instead of fitting a support vector classifier with <span class="math inline">\(p\)</span> features <span class="math inline">\(X_1, X_2, \ldots, X_p\)</span>, we could use <span class="math inline">\(2p\)</span> features that include squared terms:</p>
+<p><span class="math display">\[X_1,\; X_1^2,\; X_2,\; X_2^2,\; \ldots,\; X_p,\; X_p^2.\]</span></p>
+<p>Adding these higher-order terms can create a non-linear boundary in the <em>original</em> space — even though the support vector classifier itself still fits a linear hyperplane in the <em>enlarged</em> space.</p>
+<section id="a-one-dimensional-example" class="level3">
+<h3 class="anchored" data-anchor-id="a-one-dimensional-example">A one-dimensional example</h3>
+<p>Let us walk through the idea with a single predictor, <span class="math inline">\(X_1\)</span>. Suppose we have the following six training observations:</p>
+<div id="cell-numberline-before" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_2_support_vector_machines-NOTES_files/figure-html/numberline-before-output-1.png" id="numberline-before" width="669" height="149" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The two classes are <strong>interleaved</strong>: Class −1 occupies both extremes of the number line while Class 1 sits in the middle. No single cut point on <span class="math inline">\(X_1\)</span> can separate them.</p>
+<p>Now consider adding the feature <span class="math inline">\(X_1^2\)</span>. Each observation maps to a point <span class="math inline">\((X_1,\, X_1^2)\)</span> in a two-dimensional space.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Complete the table below by computing <span class="math inline">\(X_1^2\)</span> for each observation. Then, on a piece of paper or in your head, sketch the six points in a <span class="math inline">\((X_1, X_1^2)\)</span> coordinate system. Can you draw a straight line that separates the two classes in this 2D space?</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Observation</th>
+<th style="text-align: center;">Class</th>
+<th style="text-align: right;"><span class="math inline">\(X_1\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(X_1^2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: right;">−3.0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: right;">−1.5</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">+1</td>
+<td style="text-align: right;">−0.5</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">+1</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">−1</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="checkin-table" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-stdout">
+<pre><code> Observation  Class  $X_1$  $X_1^2$
+           1     -1   -3.0     9.00
+           2     -1   -1.5     2.25
+           3      1   -0.5     0.25
+           4      1    0.5     0.25
+           5     -1    1.5     2.25
+           6     -1    3.0     9.00</code></pre>
+</div>
+</div>
+<p>Once we add <span class="math inline">\(X_1^2\)</span>, the Class 1 observations (small <span class="math inline">\(|X_1|\)</span>, low <span class="math inline">\(X_1^2\)</span>) occupy the bottom of the 2D space, while the Class −1 observations (large <span class="math inline">\(|X_1|\)</span>, high <span class="math inline">\(X_1^2\)</span>) sit higher up. A <strong>horizontal line</strong> separates them perfectly.</p>
+<div id="cell-augmented-2d" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_2_support_vector_machines-NOTES_files/figure-html/augmented-2d-output-1.png" id="augmented-2d" width="577" height="437" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Yes — in the augmented 2D space the two classes are perfectly separable.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="projecting-the-boundary-back-to-the-original-space" class="level3">
+<h3 class="anchored" data-anchor-id="projecting-the-boundary-back-to-the-original-space">Projecting the boundary back to the original space</h3>
+<p>The support vector classifier found a linear boundary in the <span class="math inline">\((X_1, X_1^2)\)</span> space. What does that boundary look like when projected back onto the original number line?</p>
+<p>The linear boundary in the augmented space is approximately <span class="math inline">\(X_1^2 = 1.25\)</span>, which translates to <span class="math inline">\(|X_1| \approx \sqrt{1.25} \approx 1.12\)</span> in the original space. This gives us <strong>two boundary points</strong> on the number line, not one — a genuinely non-linear boundary.</p>
+<div id="cell-numberline-after" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_2_support_vector_machines-NOTES_files/figure-html/numberline-after-output-1.png" id="numberline-after" width="669" height="171" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>By augmenting the feature space we obtained a classifier that draws a <strong>non-linear boundary</strong> in the original space, even though it is entirely linear in the enlarged space.</p>
+</section>
+<section id="extending-to-two-dimensions" class="level3">
+<h3 class="anchored" data-anchor-id="extending-to-two-dimensions">Extending to two dimensions</h3>
+<p>The same idea applies when we have two or more predictors. Consider the dataset shown earlier with circular structure. We can augment the feature space with quadratic terms — <span class="math inline">\(X_1^2\)</span>, <span class="math inline">\(X_2^2\)</span>, and <span class="math inline">\(X_1 X_2\)</span> — which effectively gives the classifier the ability to draw ellipses and circles as boundaries. The plot on the right below shows a linear support vector classifier applied to this data; it fails precisely because no straight line can separate an inner cluster from an outer ring.</p>
+<div id="cell-linear-svc-fails" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="9_2_support_vector_machines-NOTES_files/figure-html/linear-svc-fails-output-1.png" id="linear-svc-fails" class="quarto-figure quarto-figure-center anchored figure-img" width="508" height="438"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>The big idea</strong>: we want to enlarge the feature space in a way that allows us to find non-linear boundaries in the original space. We can use not only polynomial terms but also interaction terms, logarithms, and many other functions of the predictors — anything that embeds the data into a space where the classes become (more) linearly separable.</p>
+<p><strong>The challenge</strong>: deciding <em>which</em> additional features to include quickly becomes intractable as <span class="math inline">\(p\)</span> grows. The <strong>kernel</strong> approach below solves this efficiently.</p>
+</section>
+</section>
+<section id="the-support-vector-machine" class="level2">
+<h2 class="anchored" data-anchor-id="the-support-vector-machine">The support vector machine</h2>
+<p>The <strong>support vector machine (SVM)</strong> is an extension of the support vector classifier that enlarges the feature space in a specific, computationally efficient way using <strong>kernels</strong>.</p>
+<p>A kernel <span class="math inline">\(K(x_i, x_j)\)</span> is a function that measures a generalized notion of similarity between two observations. The details of how kernels connect to the feature-space enlargement are given in the <a href="#sec-kernel-appendix">appendix</a> at the end of these notes. For our purposes, the key result is:</p>
+<blockquote class="blockquote">
+<p>Replacing the inner product <span class="math inline">\(\langle x_i, x_j \rangle\)</span> in the support vector classifier with a kernel function <span class="math inline">\(K(x_i, x_j)\)</span> is equivalent to fitting a support vector classifier in an enlarged feature space — but without ever having to explicitly compute the new features.</p>
+</blockquote>
+<p>We introduce two widely used kernels below.</p>
+<section id="polynomial-kernel" class="level3">
+<h3 class="anchored" data-anchor-id="polynomial-kernel">Polynomial kernel</h3>
+<p>The <strong>polynomial kernel of degree <span class="math inline">\(d\)</span></strong> is defined as</p>
+<p><span class="math display">\[K(x_i, x_j) = (1 + \langle x_i, x_j \rangle)^d, \quad d \geq 1.\]</span></p>
+<ul>
+<li>When <span class="math inline">\(d = 1\)</span>, this reduces to the linear kernel (the ordinary support vector classifier).</li>
+<li>For <span class="math inline">\(d \geq 2\)</span>, the resulting decision boundary is a polynomial curve of degree <span class="math inline">\(d\)</span> in the original feature space.</li>
+<li><strong><span class="math inline">\(d\)</span> is a tuning parameter</strong>: larger values produce more flexible, more curved boundaries.</li>
+</ul>
+<div id="cell-poly-svm" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_2_support_vector_machines-NOTES_files/figure-html/poly-svm-output-1.png" id="poly-svm" width="508" height="438" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>With a degree-3 polynomial kernel the SVM now draws a curved boundary that correctly separates the inner cluster from the outer ring — something the linear support vector classifier could not do.</p>
+</section>
+<section id="radial-kernel" class="level3">
+<h3 class="anchored" data-anchor-id="radial-kernel">Radial kernel</h3>
+<p>The <strong>radial kernel</strong> (also called the Gaussian or RBF kernel) is defined as</p>
+<p><span class="math display">\[K(x_i, x_j) = \exp\!\left(-\gamma \,\|x_i - x_j\|^2\right), \quad \gamma \geq 0.\]</span></p>
+<p>Here <span class="math inline">\(\|x_i - x_j\|^2\)</span> is the squared Euclidean distance between two observations. The kernel assigns high similarity to nearby observations and near-zero similarity to distant ones.</p>
+<p>Because of its local behavior, only nearby training observations have an appreciable influence on the predicted class of a new point. The parameter <span class="math inline">\(\gamma\)</span> controls how quickly the influence decays with distance:</p>
+<ul>
+<li><strong>Larger <span class="math inline">\(\gamma\)</span></strong>: influence decays rapidly → very local behavior → complex, highly flexible boundary.</li>
+<li><strong>Smaller <span class="math inline">\(\gamma\)</span></strong>: influence decays slowly → smoother, broader boundary.</li>
+</ul>
+<div id="cell-rbf-svm" class="cell" data-execution_count="9">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="9_2_support_vector_machines-NOTES_files/figure-html/rbf-svm-output-1.png" id="rbf-svm" width="508" height="438" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The radial kernel adapts tightly to the circular structure of the data, producing a smooth, nearly circular decision boundary.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Compare the three classifiers on the circular dataset.</p>
+<ol type="1">
+<li>What accuracy would you expect from the linear SVC? Why can’t it do better?</li>
+<li>Both the polynomial SVM and the radial SVM handle this data well. In general, what is one advantage of the radial kernel over the polynomial kernel when the data structure is unknown?</li>
+<li>Both kernels have tuning parameters (<span class="math inline">\(d\)</span> for polynomial, <span class="math inline">\(\gamma\)</span> for radial) in addition to the budget <span class="math inline">\(C\)</span>. What method should be used to choose these parameters? What risk do you take if you select them by evaluating on the test set?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p>The linear SVC is limited to a straight-line boundary. Because Class 1 is completely surrounded by Class −1, no line can separate them; the linear SVC is forced to misclassify roughly half of one class or the other, yielding accuracy near 50–60%.</p></li>
+<li><p>The radial kernel adapts to local structure without committing to a specific polynomial form. When the true boundary is unknown, the polynomial kernel requires guessing an appropriate degree <span class="math inline">\(d\)</span>, while the RBF kernel can approximate a wide range of smooth boundaries by tuning <span class="math inline">\(\gamma\)</span> alone. In practice, RBF is often the default first choice for non-linear SVMs.</p></li>
+<li><p>Tuning parameters should be chosen using <strong>cross-validation</strong> on the training data, not by evaluating on the test set. Selecting them on the test set effectively “peeks” at the test data and produces an overly optimistic estimate of generalization performance.</p></li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-kernel-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-kernel-appendix">Appendix: what is a kernel?</h2>
+<p>This section gives additional intuition for why kernels work. It can be skipped without loss of continuity.</p>
+<section id="notation-recap" class="level3">
+<h3 class="anchored" data-anchor-id="notation-recap">Notation recap</h3>
+<p>Our goal is to classify an observation <span class="math inline">\(x = (x_1, \ldots, x_p)\)</span> into one of two classes (<span class="math inline">\(+1\)</span> or <span class="math inline">\(-1\)</span>) using a training set of <span class="math inline">\(n\)</span> labeled observations <span class="math inline">\(X_1, \ldots, X_n\)</span>, where each <span class="math inline">\(X_i = (X_{i1}, X_{i2}, \ldots, X_{ip})\)</span> is a <span class="math inline">\(p\)</span>-dimensional vector.</p>
+</section>
+<section id="the-linear-svc-as-an-inner-product-machine" class="level3">
+<h3 class="anchored" data-anchor-id="the-linear-svc-as-an-inner-product-machine">The linear SVC as an inner-product machine</h3>
+<p>It turns out that the linear support vector classifier can be written in terms of inner products between observations:</p>
+<p><span class="math display">\[f(x) = \beta_0 + \sum_{i=1}^{n} \alpha_i \langle x,\, X_i \rangle,\]</span></p>
+<p>where <span class="math inline">\(\beta_0, \alpha_1, \ldots, \alpha_n\)</span> are parameters estimated during training. To classify a new observation <span class="math inline">\(x\)</span>, we compute <span class="math inline">\(f(x)\)</span> and assign it to Class <span class="math inline">\(+1\)</span> if <span class="math inline">\(f(x) &gt; 0\)</span> and Class <span class="math inline">\(-1\)</span> if <span class="math inline">\(f(x) &lt; 0\)</span>.</p>
+<p>A crucial insight is that the parameters <span class="math inline">\(\alpha_i\)</span> are <strong>non-zero only for the support vectors</strong> — all other training observations drop out of the sum.</p>
+</section>
+<section id="the-kernel-trick" class="level3">
+<h3 class="anchored" data-anchor-id="the-kernel-trick">The kernel trick</h3>
+<p>The parameters <span class="math inline">\(\alpha_1, \ldots, \alpha_n\)</span> depend only on the inner products <span class="math inline">\(\langle X_i, X_j \rangle\)</span> between <em>pairs</em> of training observations, not on the observations themselves.</p>
+<p>This means we can replace the inner product with any <strong>kernel function</strong></p>
+<p><span class="math display">\[K(X_i, X_j) \quad \text{instead of} \quad \langle X_i, X_j \rangle,\]</span></p>
+<p>and the same optimization procedure still works. The classifier becomes</p>
+<p><span class="math display">\[f(x) = \beta_0 + \sum_{i \in \mathcal{S}} \alpha_i\, K(x, X_i),\]</span></p>
+<p>where <span class="math inline">\(\mathcal{S}\)</span> is the set of support vector indices.</p>
+<p>The remarkable fact is that for certain kernel functions, this is <em>mathematically equivalent</em> to explicitly computing dot products in a very high-dimensional (possibly infinite-dimensional) feature space — without ever constructing those features. This is the <strong>kernel trick</strong>: we get the benefit of the enlarged feature space at the computational cost of evaluating <span class="math inline">\(K\)</span> on pairs of observations.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 19%">
+<col style="width: 21%">
+<col style="width: 58%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Kernel</th>
+<th>Formula</th>
+<th>Equivalent feature space</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Linear</td>
+<td><span class="math inline">\(\langle x_i, x_j \rangle\)</span></td>
+<td>Original <span class="math inline">\(p\)</span> features</td>
+</tr>
+<tr class="even">
+<td>Polynomial (degree <span class="math inline">\(d\)</span>)</td>
+<td><span class="math inline">\((1 + \langle x_i, x_j \rangle)^d\)</span></td>
+<td>All monomials up to degree <span class="math inline">\(d\)</span></td>
+</tr>
+<tr class="odd">
+<td>Radial (RBF)</td>
+<td><span class="math inline">\(\exp(-\gamma \|x_i - x_j\|^2)\)</span></td>
+<td>Infinite-dimensional</td>
+</tr>
+</tbody>
+</table>
+
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-islp_2023" class="csl-entry" role="listitem">
+James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E. Taylor. 2023. <em>An Introduction to Statistical Learning: With Applications in <span>Python</span></em>. Springer Texts in Statistics. Cham: Springer.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>This work is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License</a></p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This website is built with <a href="https://quarto.org/">Quarto</a> and <a href="https://github.com/MEDS-eds-220/MEDS-eds-220-course">GitHub pages</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
