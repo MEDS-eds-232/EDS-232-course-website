@@ -18,7 +18,7 @@ fig_size_x = 8
 fig_size_y = 4
 plt.rcParams['font.size'] = 10
 
-col_map   = {1: 'steelblue', -1: 'tomato'}
+col_map   = {1: 'tomato', -1: 'steelblue'}
 label_map = {1: 'Class 1',   -1: 'Class −1'}
 
 # ── Linearly separable dataset (maximal margin classifier) ────────────────────
@@ -81,10 +81,10 @@ def plot_svc_boundary(ax, svc, X, show_margin=True, show_sv=True, x_pad=0.8):
 
 In this lesson we introduce:
 
-- Separating hyperplanes as linear decision boundaries for binary classification
-- The maximal margin classifier and the concept of the margin
-- Support vectors and why they uniquely determine the classifier
-- The support vector classifier as a soft-margin generalization
+- **Separating hyperplanes** as linear decision boundaries for binary classification
+- The **maximal margin classifier** and the concept of the **margin**
+- **Support vectors** and why they uniquely determine the classifier
+- The support **vector classifier** as a soft-margin generalization
 - The budget parameter $C$ and the resulting bias–variance tradeoff
 
 These notes are based on chapter 9 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. All example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
@@ -121,7 +121,7 @@ plt.close()
 ```
 
 
-Assume for now that we can perfectly separate the two classes by line in the $(X_1, X_2)$ plane. Any such line is called a **separating line**. Whenever the classes are perfectly separable, there are **infinitely many** valid separating lines. The plot below shows three examples, all of which place every Class 1 observation on one side of the line and every Class −1 observation on the other.
+Assume for now that we can perfectly separate the two classes with a line in the $(X_1, X_2)$ plane. Any such line is called a **separating line**. Whenever the classes are perfectly separable, there are **infinitely many** valid separating lines. The plot below shows three examples, all of which place every Class 1 observation on one side of the line and every Class −1 observation on the other.
 
 ```{python}
 #| label: multiple-lines
@@ -259,9 +259,14 @@ plt.show()
 plt.close()
 ```
 
-Intuitively, a wider margin signals greater confidence in the classification since it means there's a lot of space between the classes. 
+Intuitively, a wider margin signals greater confidence in the classification since it means the space between the classes is as wide as can be. 
 
-Once we have established our maximal margin line as our classification boundary, we obtain two classification regions: every new observation that falls on one side of the line will be in one of the classes, and every observation to the other side of the line will belong to the other class. Observations far from the margin and are classified with high certainty, while observations close to the boundary are more ambiguous.
+Once we have established our **maximal margin line as our classification boundary**, we obtain two classification regions: 
+
+- every new observation that falls on one side of the line will be in one of the classes, 
+- and every observation to the other side of the line will belong to the other class. 
+
+Observations far from the margin and are classified with high certainty, while observations close to the boundary are more ambiguous.
 
 ```{python}
 #| label: classification-regions
@@ -279,7 +284,7 @@ Z_cr = svc_hard.predict(np.c_[xx_cr.ravel(), yy_cr.ravel()]).reshape(xx_cr.shape
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
 ax.contourf(xx_cr, yy_cr, Z_cr, levels=[-1.5, 0, 1.5],
-            colors=['tomato', 'steelblue'], alpha=0.2)
+            colors=['steelblue', 'tomato'], alpha=0.2)
 ax.contour(xx_cr, yy_cr, Z_cr, levels=[0], colors='gray', linewidths=1.5)
 
 for cls in [1, -1]:
@@ -303,7 +308,7 @@ plt.close()
 
 ### Support vectors
 
-Interestingly, the margin is determined by only the training observations that lie exactly on the margin boundary (the dashed lines in the plot above). These observations are called **support vectors**.
+The margin is determined only by the training observations that lie exactly on the margin boundary (the dashed lines in the plot above). These observations are called **support vectors**.
 
 ```{python}
 #| label: support-vectors
@@ -330,7 +335,7 @@ plt.show()
 plt.close()
 ```
 
-A key property of the maximal margin classifier is that it **depends only on the support vectors**, and not on any other training observation. Moving a non-support-vector point, even by a large amount, has no effect on the classifier, as long as it stays on the same side of the margin.
+The maximal margin classifier **depends only on the support vectors**, and not on any other training observation. Moving a non-support-vector point, even by a large amount, has no effect on the classifier, as long as it stays on the same side of the margin.
 
 
 :::{.callout-tip}
@@ -357,9 +362,9 @@ We have a training set consisting of two observations:
 
 3. Find the equation of the maximal margin line for this dataset.
 
-We can rewrite the equation to obtain that, a point $(x_1,x_2)$ will be on the line you found if and only if $x_1 - x_2 = 0$. 
+A point $(x_1,x_2)$ will be on the line you found if and only if $x_1 - x_2 = 0$. 
 
-4. Will $x_1 - x_2$ be positive or negative for a point in above the maximal margin line? What about for a point below it? 
+4. Will $x_1 - x_2$ be positive or negative for a point in the region above the maximal margin line? What about for a point below the maximal margin line? 
 
 5. How would you describe the relationship between the sign of $x_1 - x_2$ and the classification regions?
 :::
@@ -443,37 +448,57 @@ plt.close()
 
 **Q3** $x_1 - x_2 = 0$.
 
-**Q4** For a point *above* the line $x_2 = x_1$ (where $x_2 > x_1$), we have $x_1 - x_2 < 0$. For a point *below* ($x_2 < x_1$), we have $x_1 - x_2 > 0$. Check: obs 1 gives $0 - 1 = -1 < 0$ (above); obs 2 gives $1 - 0 = 1 > 0$ (below).
+**Q4** For a point *above* the line 
+
+$$
+x_1 < x_2 \Rightarrow x_1 - x_2 <0.
+$$
+
+For a point *below* the line
+
+$$
+x_1 > x_2 \Rightarrow x_1 - x_2 > 0.
+$$
+
+Check: obs 1 gives $0 - 1 = -1 < 0$ (above); obs 2 gives $1 - 0 = 1 > 0$ (below).
 
 **Q5** The sign of $x_1 - x_2$ determines the predicted class:
 
-- $x_1 - x_2 < 0$ $\Rightarrow$ **Class $+1$** (above the line).
-- $x_1 - x_2 > 0$ $\Rightarrow$ **Class $-1$** (below the line).
+- $x_1 - x_2 < 0$ $\Rightarrow$ Class $+1$ (above the line).
+- $x_1 - x_2 > 0$ $\Rightarrow$ Class $-1$ (below the line).
 
-In general, the support vector classifier assigns class based on the sign of $\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*$. Here $\beta_0 = 0$, $\beta_1 = 1$, $\beta_2 = -1$.
+In general, the support vector classifier assigns class to a new point $(x_1^*, x_2^*)$ based on the sign of $\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*$, where  
+$$ $\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*$$$
+is the equation of the maximal margin line. 
+
+In our example $\beta_0 = 0$, $\beta_1 = 1$, $\beta_2 = -1$.
 
 :::
 
 ### Zooming out
 
-In the case of two linearly separable classes, the maximal margin classifier finds the line that leaves the widest margin between the classes. This maximal margin line cna be defined by all points $(x_1, x_2)$ for which 
+In the case of two linearly separable classes, the maximal margin classifier finds the line that leaves the widest margin between the classes. This maximal margin line can be defined by all points $(x_1, x_2)$ for which 
 $$\beta_0 + \beta_1x_1 + \beta_2x_2 = 0.$$
 
-We get the coefficients $\beta_0, \beta_1, \beta_2$ that we get from solving the maximal margin optimization problem. For example, in our check-in, our line had the coefficients $\beta_0=0$, $\beta_1=1$ and $\beta_2 = -1$. 
+We get the coefficients $\beta_0, \beta_1, \beta_2$ from solving the maximal margin optimization problem. For example, in our check-in, our line had the coefficients $\beta_0=0$, $\beta_1=1$ and $\beta_2 = -1$. 
 
-One side of the line is made of all the points  $(x_1, x_2)$ for which 
+The region on one side of the line is made of all the points  $(x_1, x_2)$ for which 
 
 $$\beta_0 + \beta_1x_1 + \beta_2x_2 > 0,$$
 
-and the other side of the line are all the points $(x_1, x_2)$ for which
+and the region on the other side of the line consists of all the points $(x_1, x_2)$ for which
 
 $$\beta_0 + \beta_1x_1 + \beta_2x_2 <0.$$
 
-And each of these sides correpsonds to a classification region. 
+Each of these sides corresponds to a classification region. 
 
-So the maximal margin classifier classifies a new observation $x^* = (x_1^*, x_2^*)$  by checking whether $\beta_0 + \beta_1x_1 + \beta_2x_2$ is positive or negative and assigning the corresponding class. 
+So, the maximal margin classifier classifies a new observation $x^* = (x_1^*, x_2^*)$  by checking whether $\beta_0 + \beta_1x_1^* + \beta_2x_2^*$ is positive or negative, and assigning the corresponding class. 
 
-The magnitude $|\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*|$ reflects how far the new point is from the boundary: larger values indicate greater distance and thus greater classification confidence.
+The magnitude 
+
+$$|\beta_0 + \beta_1 x_1^* + \beta_2 x_2^*|$$
+
+reflects how far the new point is from the boundary: larger values indicate greater distance and thus greater classification confidence.
 
 ## Higher dimensions: hyperplanes
 
@@ -485,36 +510,48 @@ In three dimensions, we can still visualize how two classes can be separated by 
 
 ```{python}
 #| label: hyperplane-3d
+#| eval: false
 
 np.random.seed(0)
-n3 = 25
-X3_pos = np.random.multivariate_normal([2,  1,  2],
-                                        np.eye(3) * 0.3, n3)
-X3_neg = np.random.multivariate_normal([-2, -1, -2],
-                                        np.eye(3) * 0.3, n3)
+n3 = 60
 
-fig = plt.figure(figsize=(fig_size_x * 0.72, fig_size_y + 1))
+# Class 1 (red circles) — above the separating plane at z = 0.5
+X3_pos = np.column_stack([
+    np.random.uniform(-1, 1, n3),
+    np.random.uniform(-1, 1, n3),
+    np.random.uniform(0.7, 1.5, n3),
+])
+# Class -1 (blue triangles) — below the separating plane
+X3_neg = np.column_stack([
+    np.random.uniform(-1, 1, n3),
+    np.random.uniform(-1, 1, n3),
+    np.random.uniform(0.0, 0.3, n3),
+])
+
+fig = plt.figure(figsize=(fig_size_x * 0.8, fig_size_y + 1.2))
 ax3 = fig.add_subplot(111, projection='3d')
 
 ax3.scatter(X3_pos[:, 0], X3_pos[:, 1], X3_pos[:, 2],
-            c='steelblue', s=25, alpha=0.7, label='Class 1')
+            c='tomato', marker='o', s=20, alpha=0.7, label='Class 1')
 ax3.scatter(X3_neg[:, 0], X3_neg[:, 1], X3_neg[:, 2],
-            c='tomato',    s=25, alpha=0.7, label='Class −1')
+            c='steelblue', marker='^', s=20, alpha=0.7, label='Class −1')
 
-# Separating plane: x + 0.5*y + z = 0  →  z = -x - 0.5*y
-xx3, yy3 = np.meshgrid(np.linspace(-3, 3, 12), np.linspace(-2, 2, 12))
-zz3 = -xx3 - 0.5 * yy3
-ax3.plot_surface(xx3, yy3, zz3, alpha=0.18, color='gray')
+# Green separating plane at z = 0.5
+xx3, yy3 = np.meshgrid(np.linspace(-1, 1, 10), np.linspace(-1, 1, 10))
+zz3 = np.full_like(xx3, 0.5)
+ax3.plot_surface(xx3, yy3, zz3, alpha=0.5, color='green')
 
 ax3.set_xlabel('$X_1$', labelpad=5)
 ax3.set_ylabel('$X_2$', labelpad=5)
 ax3.set_zlabel('$X_3$', labelpad=5)
-ax3.set_title('Separating hyperplane in 3 dimensions\n(plane shown in gray)')
+ax3.set_title('Separating hyperplane in 3 dimensions')
 ax3.legend(fontsize=8, loc='upper left')
 plt.tight_layout()
 plt.show()
 plt.close()
 ```
+
+![Image Source: [Analytics Vidhya](https://www.analyticsvidhya.com/blog/2021/05/support-vector-machines/)](hyperplane.png)
 
 
 In $p$ dimensions, the separating boundary is no longer a line or a plane, but a **hyperplane**: a $(p-1)$-dimensional flat subspace. 
@@ -526,13 +563,13 @@ In $p$ dimensions, the separating boundary is no longer a line or a plane, but a
 the hyperplane consists of all points $(x_1, \ldots, x_p)$ for which 
 $$\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0,$$
 
-the coefficients $\beta_0, \beta_1, \ldots, \beta_p$ define the hyperplane. In $p$ dimensions the coefficients that define the **maximal margin hyperplane** separating the two classes can be found solving an optimization problem. As before, it will depend only on the support vectors (the training observations that lie directly on the margin boundary). 
+The coefficients $\beta_0, \beta_1, \ldots, \beta_p$ define the hyperplane. Just as in two dimensions, we find the **maximal margin hyperplane** by solving the same optimization problem, and it still depends only on the **support vectors**.
 
-This higher-dimensional maximal margin hyperplane will still divide the space into two half-spaces, so we have the same three options for a point $(x_1, \ldots, x_p)$:
+This hyperplane divides the space into two half-spaces. For a new point $(x_1, \ldots, x_p)$, the sign of $\beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p$ determines which side a point falls on — and therefore which class it is assigned to:
 
-- if $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0,$ then $(x_1, \ldots, x_p)$ is on the hyperplane (decision boundary)
-- if $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p < 0,$ then $(x_1, \ldots, x_p)$ is on one side of the hyperplane, gets assigned to one class
-- if $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p > 0,$ then $(x_1, \ldots, x_p)$ is on the other side of the hyperplane, gets assigned to the other class. 
+- **= 0**: the point is on the hyperplane,
+- **< 0**: the point is on one side → assigned to one class,
+- **> 0**: the point is on the other side → assigned to the other class.
 
 
 ## Support vector classifier
@@ -566,7 +603,7 @@ plt.close()
 ```
 
 
-The **support vector classifier** (also called the *soft-margin classifier*) relaxes perfect separability. It allows some observations to become violations to the margin by being":
+The **support vector classifier** (also called the *soft-margin classifier*) relaxes perfect separability. It allows some observations to become "violations to the margin" by being:
 
 - **within the margin** (on the correct side of the hyperplane but inside the margin), or
 - **on the wrong side of the hyperplane** (misclassified).
@@ -590,7 +627,7 @@ Z_cr = svc_demo.predict(np.c_[xx_cr.ravel(), yy_cr.ravel()]).reshape(xx_cr.shape
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y + 1.5))
 ax.contourf(xx_cr, yy_cr, Z_cr, levels=[-1.5, 0, 1.5],
-            colors=['tomato', 'steelblue'], alpha=0.12)
+            colors=['steelblue', 'tomato'], alpha=0.12)
 
 for cls in [1, -1]:
     mask = y_illus == cls
@@ -611,7 +648,7 @@ plt.show()
 plt.close()
 ```
 
-Fitting the support vector classifier involves solving an optimization problem (ISLP section 9.2.2) to find coefficients $\beta_0, \ldots, \beta_1$ to define the hyperplane $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0,$ that we will use as the decision boundary.
+Fitting the support vector classifier involves solving an optimization problem (ISLP section 9.2.2) to find coefficients $\beta_0, \ldots, \beta_1$ to define the hyperplane $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p = 0$ that we will use as the decision boundary.
 As before, observations that lie on the margin boundary or on the wrong side of the margin are the **support vectors** and are the only observations that affect the fitted classifier. 
 
 ### The budget parameter C
