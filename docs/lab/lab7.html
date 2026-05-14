@@ -290,6 +290,7 @@ window.Quarto = {
   <li><a href="#the-core-idea-fitting-residuals" id="toc-the-core-idea-fitting-residuals" class="nav-link" data-scroll-target="#the-core-idea-fitting-residuals">The core idea: fitting residuals</a></li>
   <li><a href="#variance-vs.-bias" id="toc-variance-vs.-bias" class="nav-link" data-scroll-target="#variance-vs.-bias">Variance vs.&nbsp;bias</a></li>
   <li><a href="#tuning-parameters" id="toc-tuning-parameters" class="nav-link" data-scroll-target="#tuning-parameters">Tuning parameters</a></li>
+  <li><a href="#xgboost-for-classification" id="toc-xgboost-for-classification" class="nav-link" data-scroll-target="#xgboost-for-classification">XGBoost for Classification</a></li>
   </ul></li>
   <li><a href="#step-8-tune-xgboost-with-gridsearchcv" id="toc-step-8-tune-xgboost-with-gridsearchcv" class="nav-link" data-scroll-target="#step-8-tune-xgboost-with-gridsearchcv">Step 8: Tune XGBoost with GridSearchCV</a></li>
   <li><a href="#step-9-model-comparison" id="toc-step-9-model-comparison" class="nav-link" data-scroll-target="#step-9-model-comparison">Step 9: Model Comparison</a></li>
@@ -364,7 +365,7 @@ window.Quarto = {
 </section>
 <section id="step-1-load-and-explore-data" class="level2">
 <h2 class="anchored" data-anchor-id="step-1-load-and-explore-data">Step 1: Load and Explore Data</h2>
-<div id="23dffc7c" class="cell" data-execution_count="1">
+<div id="fa1242d6" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -378,7 +379,7 @@ window.Quarto = {
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> xgboost <span class="im">import</span> XGBClassifier</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="92a0ec6b" class="cell" data-execution_count="2">
+<div id="3ebe1318" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>forest <span class="op">=</span> fetch_ucirepo(<span class="bu">id</span><span class="op">=</span><span class="dv">31</span>)</span>
@@ -567,7 +568,7 @@ Name: count, dtype: int64</code></pre>
 </section>
 <section id="step-2-repeat-preprocessing-steps-from-lab-6" class="level2">
 <h2 class="anchored" data-anchor-id="step-2-repeat-preprocessing-steps-from-lab-6">Step 2: Repeat Preprocessing Steps from Lab 6</h2>
-<div id="6bfec8c1" class="cell" data-execution_count="3">
+<div id="23d3ad11" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df_sample <span class="op">=</span> df.sample(n<span class="op">=</span><span class="dv">30_000</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
@@ -587,7 +588,7 @@ Name: count, dtype: int64</code></pre>
 <section id="step-3-decision-tree-baseline" class="level2">
 <h2 class="anchored" data-anchor-id="step-3-decision-tree-baseline">Step 3: Decision Tree Baseline</h2>
 <p>Re-run the both the untuned and tuned decision tree we fit in Lab 6.</p>
-<div id="82cb15ac" class="cell" data-execution_count="4">
+<div id="163f2bfd" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dt <span class="op">=</span> DecisionTreeClassifier(random_state<span class="op">=</span><span class="dv">42</span>)</span>
@@ -597,7 +598,7 @@ Name: count, dtype: int64</code></pre>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>dt_test_acc  <span class="op">=</span> accuracy_score(y_test,  dt.predict(X_test))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="922a306f" class="cell" data-execution_count="5">
+<div id="74d7dd7a" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dt_tuned <span class="op">=</span> DecisionTreeClassifier(criterion<span class="op">=</span><span class="st">'entropy'</span>, max_depth<span class="op">=</span><span class="dv">20</span>, min_samples_leaf<span class="op">=</span><span class="dv">1</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
@@ -653,7 +654,7 @@ Tuned Decision Tree test acc:     0.768</code></pre>
 <section id="step-4-fit-a-bagging-classifier" class="level2">
 <h2 class="anchored" data-anchor-id="step-4-fit-a-bagging-classifier">Step 4: Fit a Bagging Classifier</h2>
 <p>Fit a <code>BaggingClassifier</code> with <code>n_estimators=50</code> and <code>oob_score=True</code>. The out-of-bag (OOB) score is a free estimate of test accuracy computed from the bootstrap samples left out of each tree. Compare OOB score, training accuracy, and test accuracy to the single decision tree.</p>
-<div id="134602f5" class="cell" data-execution_count="6">
+<div id="03762ed5" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>bag <span class="op">=</span> BaggingClassifier(n_estimators<span class="op">=</span><span class="dv">50</span>, oob_score<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">42</span>, n_jobs<span class="op">=-</span><span class="dv">1</span>)</span>
@@ -717,7 +718,7 @@ Bagging test acc:             0.840</code></pre>
 </tr>
 </tbody>
 </table>
-<div id="9b375ab8" class="cell" data-execution_count="7">
+<div id="a323abde" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>n_estimators_range <span class="op">=</span> [<span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>]</span>
@@ -754,7 +755,7 @@ Bagging test acc:             0.840</code></pre>
 </div>
 <section id="fit-your-tuned-bagging-classifier-with-best_n_bag-and-calculate-test-accuracy" class="level5">
 <h5 class="anchored" data-anchor-id="fit-your-tuned-bagging-classifier-with-best_n_bag-and-calculate-test-accuracy">Fit your tuned bagging classifier with <code>best_n_bag</code> and calculate test accuracy</h5>
-<div id="b81bbb7d" class="cell" data-execution_count="8">
+<div id="4c3a9edc" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>bag_tuned     <span class="op">=</span> BaggingClassifier(n_estimators<span class="op">=</span>best_n_bag, oob_score<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">42</span>, n_jobs<span class="op">=-</span><span class="dv">1</span>)</span>
@@ -793,7 +794,7 @@ Bagging test acc:             0.840</code></pre>
 <section id="step-6-fit-a-random-forest" class="level2">
 <h2 class="anchored" data-anchor-id="step-6-fit-a-random-forest">Step 6: Fit a Random Forest</h2>
 <p>Fit a <code>RandomForestClassifier</code> using the best <code>n_estimators</code> found in Step 5 and the default <code>max_features='sqrt'</code>. Enable <code>oob_score=True</code>. Compare test accuracy and OOB score to bagging and the single tree.</p>
-<div id="fa765c04" class="cell" data-execution_count="9">
+<div id="95e1e26c" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>rf <span class="op">=</span> RandomForestClassifier(</span>
@@ -866,7 +867,7 @@ Random Forest test acc:   0.837</code></pre>
 </tr>
 </tbody>
 </table>
-<div id="9b7fb069" class="cell" data-execution_count="10">
+<div id="9f5773f4" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
@@ -900,7 +901,7 @@ Random Forest test acc:   0.837</code></pre>
 </div>
 <section id="calculate-the-test-accuracy-using-the-best_estimator_" class="level5">
 <h5 class="anchored" data-anchor-id="calculate-the-test-accuracy-using-the-best_estimator_">Calculate the test accuracy using the <code>best_estimator_</code></h5>
-<div id="715c6a09" class="cell" data-execution_count="11">
+<div id="4b4813ac" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>rf_best      <span class="op">=</span> rf_grid.best_estimator_</span>
@@ -917,6 +918,7 @@ Test accuracy:    0.844</code></pre>
 <blockquote class="blockquote">
 <p><strong>Discussion Questions</strong> The grid search selected max_features=0.3 (~16 features per split) over the standard defaults of ‘sqrt’ (~7) and ‘log2’ (~6). Given that 44 of 54 features are binary soil-type indicators where most are 0 for any given observation, explain why the default sqrt setting might underperform here. What does this suggest about when domain knowledge should override default hyperparameter choices?</p>
 </blockquote>
+<hr>
 <hr>
 </section>
 </section>
@@ -948,7 +950,7 @@ Test accuracy:    0.844</code></pre>
 </section>
 <section id="tuning-parameters" class="level3">
 <h3 class="anchored" data-anchor-id="tuning-parameters">Tuning parameters</h3>
-<p>Boosting has three tuning parameters that interact with each other:</p>
+<p>Boosting has two key tuning parameters that interact with each other:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -965,7 +967,7 @@ Test accuracy:    0.844</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>n_estimators</code> (<span class="math inline">\(B\)</span>)</td>
-<td>Total number of trees to build. Unlike bagging, <strong>too many trees can overfit.</strong> Set this high and let early stopping find the right number.</td>
+<td>Total number of trees to build. Unlike bagging, <strong>too many trees can overfit.</strong></td>
 <td>500–5000</td>
 </tr>
 <tr class="even">
@@ -973,13 +975,17 @@ Test accuracy:    0.844</code></pre>
 <td>How much each tree contributes to the final model. Smaller values require more trees but often produce better results.</td>
 <td>0.001–0.3</td>
 </tr>
-<tr class="odd">
-<td><code>early_stopping_rounds</code></td>
-<td>Stops training when validation loss hasn’t improved for <span class="math inline">\(N\)</span> consecutive rounds. This automatically prevents overfitting without manually tuning <code>n_estimators</code>.</td>
-<td>10–50</td>
-</tr>
 </tbody>
 </table>
+<p><strong>Learning rate</strong> controls how cautiously the model updates after each tree. A high learning rate (e.g.&nbsp;0.3) means each tree has a large influence where the model learns quickly but can overshoot and overfit. A low learning rate (e.g.&nbsp;0.01) means each tree contributes only a small correction, so the model improves slowly and needs more trees (<code>n_estimators</code>) to reach good performance, but it tends to generalize better.</p>
+</section>
+<section id="xgboost-for-classification" class="level3">
+<h3 class="anchored" data-anchor-id="xgboost-for-classification">XGBoost for Classification</h3>
+<p><strong>XGBoost</strong> (Extreme Gradient Boosting) is a popular, optimized implementation of gradient boosting. The same sequential tree-building idea applies, but instead of correcting residuals, the model corrects <strong>classification errors</strong> — at each round, a new tree focuses on the observations the current model is getting wrong.</p>
+<p>For multi-class problems like forest cover type, XGBoost produces a probability for each class and predicts the one with the highest score. It also includes built-in regularization to reduce overfitting.</p>
+<blockquote class="blockquote">
+<p><strong>Note:</strong> XGBoost requires <strong>0-indexed integer labels</strong>. Cover_Type is labeled 1–7, so you need to subtract 1 before fitting.</p>
+</blockquote>
 </section>
 </section>
 <section id="step-8-tune-xgboost-with-gridsearchcv" class="level2">
@@ -991,7 +997,7 @@ Test accuracy:    0.844</code></pre>
 </ul>
 <p>Use <code>cv=3</code> to keep runtimes manageable. Print the best parameters and evaluate the best estimator on the test set.</p>
 <p><strong>Note</strong>: XGBoost requires 0-indexed labels. Cover_Type is labeled as 1–7 so we need to shift to 0–6.</p>
-<div id="2013df44" class="cell" data-execution_count="12">
+<div id="4f3318f8" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make Cover_Type 0 indexed</span></span>
@@ -1084,7 +1090,7 @@ Test accuracy:    0.844</code></pre>
 </div>
 <section id="calculate-the-test-accuracy-using-the-best_estimator_-1" class="level5">
 <h5 class="anchored" data-anchor-id="calculate-the-test-accuracy-using-the-best_estimator_-1">Calculate the test accuracy using the <code>best_estimator_</code></h5>
-<div id="99624edd" class="cell" data-execution_count="13">
+<div id="53ce45b3" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>xgb_model    <span class="op">=</span> xgb_grid.best_estimator_</span>
@@ -1105,8 +1111,8 @@ XGBoost test accuracy: 0.847</code></pre>
 </section>
 <section id="step-9-model-comparison" class="level2">
 <h2 class="anchored" data-anchor-id="step-9-model-comparison">Step 9: Model Comparison</h2>
-<p>Collect the test accuracy for all four models and plot them together. Then visualize the top 15 most important features from the tuned random forest and XGBoost side by side.</p>
-<div id="d3a75195" class="cell" data-execution_count="14">
+<p>Collect the test accuracy for all four models and plot them together.</p>
+<div id="d4e11fb7" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>model_names <span class="op">=</span> [<span class="st">'Decision Tree</span><span class="ch">\n</span><span class="st">(untuned)'</span>, <span class="st">'Decision Tree</span><span class="ch">\n</span><span class="st">(tuned)'</span>, <span class="st">'Bagging</span><span class="ch">\n</span><span class="st">(tuned)'</span>, <span class="st">'Random Forest</span><span class="ch">\n</span><span class="st">(tuned)'</span>, <span class="st">'XGBoost</span><span class="ch">\n</span><span class="st">(tuned)'</span>]</span>
@@ -1134,43 +1140,8 @@ XGBoost test accuracy: 0.847</code></pre>
 </div>
 </div>
 </div>
-<div id="a2cd3722" class="cell" data-execution_count="15">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>rf_imp  <span class="op">=</span> pd.Series(rf_best.feature_importances_,  index<span class="op">=</span>features)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>xgb_imp <span class="op">=</span> pd.Series(xgb_model.feature_importances_, index<span class="op">=</span>features)</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>rf_imp.nlargest(<span class="dv">15</span>).sort_values().plot(</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    kind<span class="op">=</span><span class="st">'barh'</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>], color<span class="op">=</span><span class="st">'#08519c'</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'Random Forest — Top 15 Features'</span>)</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Importance'</span>)</span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>xgb_imp.nlargest(<span class="dv">15</span>).sort_values().plot(</span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    kind<span class="op">=</span><span class="st">'barh'</span>, ax<span class="op">=</span>axes[<span class="dv">1</span>], color<span class="op">=</span><span class="st">'#2ca25f'</span></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'XGBoost — Top 15 Features'</span>)</span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'Importance'</span>)</span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="lab7_files/figure-html/cell-16-output-1.png" width="1335" height="468" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
 <blockquote class="blockquote">
-<p><strong>Discussion Questions</strong></p>
-<ol type="1">
-<li>Which ensemble method performed best on this dataset? Does the ranking surprise you?</li>
-<li>Do the random forest and XGBoost feature importance rankings agree on the top features? If they differ, why might two models trained on the same data weight feature importance differently?</li>
-</ol>
+<p><strong>Discussion Question</strong> 1. Which ensemble method performed best on this dataset? Does the ranking surprise you?</p>
 </blockquote>
 
 
