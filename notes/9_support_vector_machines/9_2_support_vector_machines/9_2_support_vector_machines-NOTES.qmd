@@ -293,34 +293,89 @@ By augmenting the feature space we obtained a classifier that produces a **non-l
 
 ### Extending to two dimensions
 
-The same idea applies when we have two or more predictors. Consider the dataset shown earlier with circular structure. We can augment the feature space with quadratic terms — $X_1^2$, $X_2^2$, and $X_1 X_2$ — which effectively gives the classifier the ability to draw ellipses and circles as boundaries. The plot on the right below shows a linear support vector classifier applied to this data; it fails precisely because no straight line can separate an inner cluster from an outer ring.
+The same idea applies when we have two or more predictors. Consider the circular dataset from above: in the original $(X_1, X_2)$ space the two classes are mixed, with no straight line able to separate them. But if we add a third feature $X_3 = X_1^2 + X_2^2$ the inner cluster (small $X_3$) separates cleanly from the outer ring (large $X_3$) in the enlarged 3D space. A flat plane through that 3D space then produces a **circular** decision boundary when we evaluate the rule back in the original 2D space.
 
 ```{python}
-#| label: linear-svc-fails
-#| fig-align: center
+#| label: circ-original-2d
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 0.65, fig_size_y + 0.5))
-plot_decision_regions(ax, svc_lin, X_circ, y_circ,
-                      title='Linear SVC — cannot capture circular structure')
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=2, fontsize=8)
+for cls in [1, -1]:
+    mask = y_circ == cls
+    ax.scatter(X_circ[mask, 0], X_circ[mask, 1],
+               c=col_map[cls], s=22, alpha=0.75,
+               edgecolors='none', label=label_map[cls])
+ax.set_xlabel('$X_1$')
+ax.set_ylabel('$X_2$')
+ax.set_title('Original feature space')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=2, fontsize=9)
 plt.tight_layout(rect=[0, 0.18, 1, 1])
 plt.show()
 plt.close()
 ```
 
-**The big idea**: we want to enlarge the feature space in a way that allows us to find non-linear boundaries in the original space. We can use not only polynomial terms but also interaction terms, logarithms, and many other functions of the predictors — anything that embeds the data into a space where the classes become (more) linearly separable.
+```{python}
+#| label: circ-augmented-3d
 
-**The challenge**: deciding *which* additional features to include quickly becomes intractable as $p$ grows. The **kernel** approach below solves this efficiently.
+X3_circ = X_circ[:, 0] ** 2 + X_circ[:, 1] ** 2   # X₃ = X₁² + X₂²
+
+fig = plt.figure(figsize=(fig_size_x * 0.75, fig_size_y + 1.5))
+ax3 = fig.add_subplot(111, projection='3d')
+
+for cls in [1, -1]:
+    mask = y_circ == cls
+    ax3.scatter(X_circ[mask, 0], X_circ[mask, 1], X3_circ[mask],
+                c=col_map[cls], s=20, alpha=0.65, label=label_map[cls])
+
+ax3.set_xlabel('$X_1$', labelpad=6)
+ax3.set_ylabel('$X_2$', labelpad=6)
+ax3.set_zlabel('$X_3$', labelpad=6)
+ax3.set_title('Enlarged feature space\n$(X_1,\\ X_2,\\ X_3 = X_1^2 + X_2^2)$')
+ax3.view_init(elev=18, azim=-55)
+ax3.legend(fontsize=8, loc='upper left')
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+```{python}
+#| label: circ-boundary-2d
+
+pad = 0.3
+x0_min, x0_max = X_circ[:, 0].min() - pad, X_circ[:, 0].max() + pad
+x1_min, x1_max = X_circ[:, 1].min() - pad, X_circ[:, 1].max() + pad
+xx_b, yy_b = np.meshgrid(np.linspace(x0_min, x0_max, 350),
+                          np.linspace(x1_min, x1_max, 350))
+Z_b = svc_rbf.predict(np.c_[xx_b.ravel(), yy_b.ravel()]).reshape(xx_b.shape)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.65, fig_size_y + 0.5))
+for cls in [1, -1]:
+    mask = y_circ == cls
+    ax.scatter(X_circ[mask, 0], X_circ[mask, 1],
+               c=col_map[cls], s=22, alpha=0.75,
+               edgecolors='none', label=label_map[cls])
+ax.contour(xx_b, yy_b, Z_b, levels=[0], colors='black', linewidths=1.8)
+ax.set_xlabel('$X_1$')
+ax.set_ylabel('$X_2$')
+ax.set_title('Non-linear decision boundary')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=2, fontsize=9)
+plt.tight_layout(rect=[0, 0.18, 1, 1])
+plt.show()
+plt.close()
+```
+
+**The core idea**: we want to enlarge the feature space in a way that allows us to find non-linear boundaries in the original space. We can use not only polynomial terms but basicallly any other functions of the predictors! Anything that embeds the data into a space where the classes become (more) linearly separable.
+
+**The challenge**: deciding *which* additional features to include quickly becomes intractable as the number of predictors $p$ grows. Computing additional features for each observation also becomes computationally costly. The **kernel** approach below solves this efficiently.
 
 ## The support vector machine
 
-The **support vector machine (SVM)** is an extension of the support vector classifier that enlarges the feature space in a specific, computationally efficient way using **kernels**.
+The **support vector machine (SVM)** is an extension of the support vector classifier that uses a **kernel** function $K(x_i,x_j)$ to enlarges the feature space in a specific, computationally efficient way. 
 
-A kernel $K(x_i, x_j)$ is a function that measures a generalized notion of similarity between two observations. The details of how kernels connect to the feature-space enlargement are given in the [appendix](#sec-kernel-appendix) at the end of these notes. For our purposes, the key result is:
+An SVM with a linear kernle is exactly the SVC and using a different kernel is equivalent to fitting a support vector classifier in an enlarged feature space, but without ever having to explicitly compute the new features.  This lets us get the benefit of that enlargement without the computational cost of constructing it.
 
-> Replacing the inner product $\langle x_i, x_j \rangle$ in the support vector classifier with a kernel function $K(x_i, x_j)$ is equivalent to fitting a support vector classifier in an enlarged feature space — but without ever having to explicitly compute the new features.
-
-We introduce two widely used kernels below.
+We introduce three widely used kernels below.
 
 ### Polynomial kernel
 
@@ -393,7 +448,7 @@ Compare the three classifiers on the circular dataset.
 3. Tuning parameters should be chosen using **cross-validation** on the training data, not by evaluating on the test set. Selecting them on the test set effectively "peeks" at the test data and produces an overly optimistic estimate of generalization performance.
 :::
 
-## Appendix: what is a kernel? {#sec-kernel-appendix}
+<!-- ## Appendix: what is a kernel? {#sec-kernel-appendix}
 
 This section gives additional intuition for why kernels work. It can be skipped without loss of continuity.
 
@@ -431,4 +486,4 @@ The remarkable fact is that for certain kernel functions, this is *mathematicall
 |--------|---------|------------------------|
 | Linear | $\langle x_i, x_j \rangle$ | Original $p$ features |
 | Polynomial (degree $d$) | $(1 + \langle x_i, x_j \rangle)^d$ | All monomials up to degree $d$ |
-| Radial (RBF) | $\exp(-\gamma \|x_i - x_j\|^2)$ | Infinite-dimensional |
+| Radial (RBF) | $\exp(-\gamma \|x_i - x_j\|^2)$ | Infinite-dimensional | -->
