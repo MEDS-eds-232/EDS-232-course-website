@@ -377,15 +377,50 @@ An SVM with a linear kernle is exactly the SVC and using a different kernel is e
 
 We introduce three widely used kernels below.
 
+### Linear kernel
+
+$$K(x_i, x_j) = \langle x_i, x_j \rangle$$
+
+The linear kernel computes the plain dot product between two observations — it is equivalent to the support vector classifier with no feature augmentation.
+
+**Hyperparameters** (`SVC(kernel='linear', ...)`) :
+
+| Parameter | What it controls |
+|:----------|:----------------|
+| `C` | Penalty for margin violations — the only parameter to tune (see previous lesson) |
+
+The linear kernel is the simplest choice and a good baseline. Use it when the decision boundary is expected to be approximately linear in the original feature space.
+
+```{python}
+#| label: linear-svm
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.65, fig_size_y + 0.5))
+plot_decision_regions(ax, svc_lin, X_circ, y_circ,
+                      title='Linear kernel SVM')
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=2, fontsize=8)
+plt.tight_layout(rect=[0, 0.18, 1, 1])
+plt.show()
+plt.close()
+```
+
+The linear kernel cannot capture the circular structure of this data — no straight line can separate an inner cluster from an outer ring.
+
 ### Polynomial kernel
 
-The **polynomial kernel of degree $d$** is defined as
+$$K(x_i, x_j) = (\gamma \langle x_i, x_j \rangle + r)^d$$
 
-$$K(x_i, x_j) = (1 + \langle x_i, x_j \rangle)^d, \quad d \geq 1.$$
+The polynomial kernel captures interactions and powers of the original features — a higher degree allows the boundary to bend and curve more.
 
-- When $d = 1$, this reduces to the linear kernel (the ordinary support vector classifier).
-- For $d \geq 2$, the resulting decision boundary is a polynomial curve of degree $d$ in the original feature space.
-- **$d$ is a tuning parameter**: larger values produce more flexible, more curved boundaries.
+**Hyperparameters** (`SVC(kernel='poly', ...)`) :
+
+| Parameter | What it controls | Default |
+|:----------|:----------------|:-------:|
+| `degree` | Degree of the polynomial; higher values allow more curved boundaries and increase risk of overfitting | `3` |
+| `C` | Penalty for margin violations | `1.0` |
+| `coef0` | Controls the influence of lower- vs. higher-degree terms; set to `1` to match the standard textbook formula, `0` for a purely homogeneous polynomial | `0.0` |
+| `gamma` | Scaling factor for the dot product; typically left at the default | `'scale'` |
+
+`degree` is the main lever for controlling boundary flexibility. A degree-1 polynomial kernel is identical to the linear SVC; higher degrees produce increasingly complex boundaries.
 
 ```{python}
 #| label: poly-svm
@@ -399,20 +434,22 @@ plt.show()
 plt.close()
 ```
 
-With a degree-3 polynomial kernel the SVM now draws a curved boundary that correctly separates the inner cluster from the outer ring — something the linear support vector classifier could not do.
+With a degree-3 polynomial kernel the SVM draws a curved boundary that correctly separates the inner cluster from the outer ring.
 
-### Radial kernel
+### Radial (RBF) kernel
 
-The **radial kernel** (also called the Gaussian or RBF kernel) is defined as
+$$K(x_i, x_j) = \exp\!\left(-\gamma \,\|x_i - x_j\|^2\right)$$
 
-$$K(x_i, x_j) = \exp\!\left(-\gamma \,\|x_i - x_j\|^2\right), \quad \gamma \geq 0.$$
+The RBF kernel measures proximity: nearby observations are considered similar and each training point's influence drops off with distance, producing very local and flexible boundaries.
 
-Here $\|x_i - x_j\|^2$ is the squared Euclidean distance between two observations. The kernel assigns high similarity to nearby observations and near-zero similarity to distant ones.
+**Hyperparameters** (`SVC(kernel='rbf', ...)`) :
 
-Because of its local behavior, only nearby training observations have an appreciable influence on the predicted class of a new point. The parameter $\gamma$ controls how quickly the influence decays with distance:
+| Parameter | What it controls | Default |
+|:----------|:----------------|:-------:|
+| `gamma` | How quickly influence decays with distance; larger values → more local, more flexible boundary → higher risk of overfitting | `'scale'` |
+| `C` | Penalty for margin violations | `1.0` |
 
-- **Larger $\gamma$**: influence decays rapidly → very local behavior → complex, highly flexible boundary.
-- **Smaller $\gamma$**: influence decays slowly → smoother, broader boundary.
+The RBF kernel is the most flexible of the three and is often the best default choice when the boundary shape is unknown. Large `gamma` can lead to overfitting — `C` and `gamma` should always be tuned together via cross-validation.
 
 ```{python}
 #| label: rbf-svm
@@ -426,7 +463,7 @@ plt.show()
 plt.close()
 ```
 
-The radial kernel adapts tightly to the circular structure of the data, producing a smooth, nearly circular decision boundary.
+The RBF kernel adapts tightly to the circular structure of the data, producing a smooth, nearly circular decision boundary.
 
 :::{.callout-tip}
 ## Check-in
