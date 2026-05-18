@@ -78,13 +78,12 @@ def plot_decision_regions(ax, svc, X, y, title, pad=0.4, n_grid=350):
 
 In this lesson we introduce:
 
-- The concept of the inner product and its role in the support vector classifier
 - Feature-space augmentation as a strategy for non-linear classification
 - The kernel trick as a computationally efficient way to enlarge the feature space
 - The polynomial and radial kernels and the tuning parameters that control them
 
 These notes are based on chapter 9 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. All example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
-
+<!-- 
 ## Inner product
 
 Throughout this lesson we use the **inner product** (also called the dot product) between two vectors. If $\mathbf{a} = (a_1, a_2, \ldots, a_p)$ and $\mathbf{b} = (b_1, b_2, \ldots, b_p)$ are two vectors of the same length, their inner product is
@@ -93,7 +92,7 @@ $$\langle \mathbf{a},\, \mathbf{b} \rangle = \sum_{j=1}^{p} a_j b_j = a_1 b_1 + 
 
 For example, if $\mathbf{a} = (1, 2)$ and $\mathbf{b} = (3, -1)$, then $\langle \mathbf{a}, \mathbf{b} \rangle = 1 \cdot 3 + 2 \cdot (-1) = 1$.
 
-We will return to this notation when we explain how kernels work at the end of the lesson.
+We will return to this notation when we explain how kernels work at the end of the lesson. -->
 
 ## Augmenting the feature space
 
@@ -122,11 +121,22 @@ One way to address this is to **enlarge the feature space** with additional feat
 
 $$X_1,\; X_1^2,\; X_2,\; X_2^2,\; \ldots,\; X_p,\; X_p^2.$$
 
-Adding these higher-order terms can create a non-linear boundary in the *original* space — even though the support vector classifier itself still fits a linear hyperplane in the *enlarged* space.
+Adding these higher-order terms can create a non-linear boundary in the *original* space, even though the support vector classifier itself still fits a linear hyperplane in the *enlarged* space.
 
 ### A one-dimensional example
 
-Let us walk through the idea with a single predictor, $X_1$. Suppose we have the following six training observations:
+Let us walk through the idea with a single predictor, $X$. Suppose we have the following six training observations:
+
+| Observation | Class | $X$ |
+|:-----------:|:-----:|------:|
+| 1 | −1 | −3.0 | 
+| 2 | −1 | −1.5 | 
+| 3 | +1 | −0.5 | 
+| 4 | +1 | 0.5 | 
+| 5 | −1 | 1.5 | 
+| 6 | −1 | 3.0 | 
+
+When we plot them on the X axis they look like this:
 
 ```{python}
 #| label: numberline-before
@@ -142,7 +152,7 @@ for cls in [1, -1]:
 ax.axhline(0, color='black', linewidth=0.8, zorder=1)
 for v in x1_pts:
     ax.axvline(v, ymin=0.35, ymax=0.65, color='gray', lw=0.5)
-ax.set_xlabel('$X_1$')
+ax.set_xlabel('$X$')
 ax.set_yticks([])
 ax.set_xlim(-4, 4)
 ax.spines[['top', 'right', 'left']].set_visible(False)
@@ -153,42 +163,21 @@ plt.show()
 plt.close()
 ```
 
-The two classes are **interleaved**: Class −1 occupies both extremes of the number line while Class 1 sits in the middle. No single cut point on $X_1$ can separate them.
+We can see in the diagram there is no single cut point on $X$ that can separate the two classes. A single point in one dimension would be a linear boundary.
 
-Now consider adding the feature $X_1^2$. Each observation maps to a point $(X_1,\, X_1^2)$ in a two-dimensional space.
+Now consider adding the feature $X^2$:
 
-:::{.callout-tip}
-## Check-in
-
-Complete the table below by computing $X_1^2$ for each observation. Then, on a piece of paper or in your head, sketch the six points in a $(X_1, X_1^2)$ coordinate system. Can you draw a straight line that separates the two classes in this 2D space?
-
-| Observation | Class | $X_1$ | $X_1^2$ |
+| Observation | Class | $X$ | $X^2$ |
 |:-----------:|:-----:|------:|--------:|
-| 1 | −1 | −3.0 | |
-| 2 | −1 | −1.5 | |
-| 3 | +1 | −0.5 | |
-| 4 | +1 | 0.5 | |
-| 5 | −1 | 1.5 | |
-| 6 | −1 | 3.0 | |
+| 1 | −1 | −3.0 | 9 |
+| 2 | −1 | −1.5 | 2.25 |
+| 3 | +1 | −0.5 |0.25 |
+| 4 | +1 | 0.5 |0.25 |
+| 5 | −1 | 1.5 |2.25 |
+| 6 | −1 | 3.0 | 9 |
 
-:::
 
-:::{.callout-tip collapse="true"}
-## Discussion
-
-```{python}
-#| label: checkin-table
-
-tbl = pd.DataFrame({
-    'Observation': range(1, 7),
-    'Class':       y_pts,
-    '$X_1$':       x1_pts,
-    '$X_1^2$':     x1_pts ** 2,
-})
-print(tbl.to_string(index=False))
-```
-
-Once we add $X_1^2$, the Class 1 observations (small $|X_1|$, low $X_1^2$) occupy the bottom of the 2D space, while the Class −1 observations (large $|X_1|$, high $X_1^2$) sit higher up. A **horizontal line** separates them perfectly.
+This adds an extra dimension to our dataset and each observation now is a point $(X, X^2)$ in a two-dimensional space:
 
 ```{python}
 #| label: augmented-2d
@@ -221,9 +210,9 @@ ax.scatter(sv_aug[:, 0], sv_aug[:, 1], s=160,
            linewidths=1.8, zorder=6, label='Support vectors')
 ax.set_xlim(-3.8, 3.8)
 ax.set_ylim(-0.5, 10.5)
-ax.set_xlabel('$X_1$')
-ax.set_ylabel('$X_1^2$')
-ax.set_title('Augmented feature space $(X_1,\\ X_1^2)$ — classes are now separable')
+ax.set_xlabel('$X$')
+ax.set_ylabel('$X^2$')
+ax.set_title('Augmented feature space $(X,\\ X^2)$ — classes are now separable')
 ax.legend(fontsize=8, loc='upper center')
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -231,12 +220,51 @@ plt.show()
 plt.close()
 ```
 
-Yes — in the augmented 2D space the two classes are perfectly separable.
-:::
+Once we have our data in two dimensions, we can see it is perfectly separable by a line. We can find this line by fitting a support vector classifer in 2D:
 
-### Projecting the boundary back to the original space
+```{python}
+#| label: augmented-2d-svc
 
-The support vector classifier found a linear boundary in the $(X_1, X_1^2)$ space. What does that boundary look like when projected back onto the original number line?
+w_aug = svc_aug.coef_[0]
+b_aug = svc_aug.intercept_[0]
+x1_grid = np.linspace(-3.5, 3.5, 300)
+# Boundary: w[0]*X₁ + w[1]*X₁² + b = 0  ⟹  X₁² = (-w[0]*X₁ - b) / w[1]
+x2_boundary = (-w_aug[0] * x1_grid - b_aug) / w_aug[1]
+x2_margin_p = (-w_aug[0] * x1_grid - b_aug + 1) / w_aug[1]
+x2_margin_n = (-w_aug[0] * x1_grid - b_aug - 1) / w_aug[1]
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.7, fig_size_y + 0.5))
+for cls in [1, -1]:
+    mask = y_pts == cls
+    ax.scatter(x1_pts[mask], x1_pts[mask] ** 2,
+               c=col_map[cls], s=70,
+               marker='o' if cls == 1 else 'X',
+               edgecolors='black', linewidths=0.7,
+               zorder=5, label=label_map[cls])
+ax.plot(x1_grid, x2_boundary, 'k-',  lw=2,   label='Decision boundary')
+ax.plot(x1_grid, x2_margin_p, 'k--', lw=1.2, alpha=0.5, label='Margin boundary')
+ax.plot(x1_grid, x2_margin_n, 'k--', lw=1.2, alpha=0.5)
+ax.fill_between(x1_grid, x2_margin_p, x2_margin_n,
+                alpha=0.08, color='gray', label='Margin')
+# Highlight support vectors
+sv_aug = svc_aug.support_vectors_
+ax.scatter(sv_aug[:, 0], sv_aug[:, 1], s=160,
+           facecolors='none', edgecolors='black',
+           linewidths=1.8, zorder=6, label='Support vectors')
+ax.set_xlim(-3.8, 3.8)
+ax.set_ylim(-0.5, 10.5)
+ax.set_xlabel('$X$')
+ax.set_ylabel('$X^2$')
+ax.set_title('Augmented feature space $(X,\\ X^2)$ — classes are now separable')
+ax.legend(fontsize=8, loc='upper center')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+
+The support vector classifier found a linear boundary in the $(X, X^2)$ space. Whend we project that boundary  does that boundary look like when projected back onto the original number line?
 
 The linear boundary in the augmented space is approximately $X_1^2 = 1.25$, which translates to $|X_1| \approx \sqrt{1.25} \approx 1.12$ in the original space. This gives us **two boundary points** on the number line, not one — a genuinely non-linear boundary.
 
