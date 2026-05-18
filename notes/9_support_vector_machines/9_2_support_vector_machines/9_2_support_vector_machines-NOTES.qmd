@@ -46,7 +46,7 @@ X_circ = np.vstack([
 y_circ = np.array([1] * n_half + [-1] * n_half)
 
 svc_lin  = SVC(kernel='linear', C=1.0)
-svc_poly = SVC(kernel='poly',   degree=3, C=1.0, coef0=1.0)
+svc_poly = SVC(kernel='poly', degree=3, C=1.0, coef0=1.0)
 svc_rbf  = SVC(kernel='rbf',    C=1.0, gamma='scale')
 
 svc_lin.fit(X_circ, y_circ)
@@ -375,21 +375,29 @@ The **support vector machine (SVM)** is an extension of the support vector class
 
 An SVM with a linear kernle is exactly the SVC and using a different kernel is equivalent to fitting a support vector classifier in an enlarged feature space, but without ever having to explicitly compute the new features.  This lets us get the benefit of that enlargement without the computational cost of constructing it.
 
-We introduce three widely used kernels below.
+## Kernels
+
+We introduce three widely used kernels below. The mathematical definitions of the kernels use our usual notation, where we have a training set of $n$ labeled observations $x_1, \ldots, x_n$, where each $x_i = (x_{i1}, x_{i2}, \ldots, x_{ip})$ is a $p$-dimensional vector and $p$ is the number of features. All the hyperparemeters are based on the [`SVC` implementation in `sklearn`](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#svc).
 
 ### Linear kernel
+The linear kernel is given by
 
-$$K(x_i, x_j) = \langle x_i, x_j \rangle$$
+$$K(x_i, x_j) = \langle x_i, x_j \rangle,$$
 
-The linear kernel computes the plain dot product between two observations — it is equivalent to the support vector classifier with no feature augmentation.
+where $\langle x_i, x_j \rangle$ is the dot product between the observations $x_i$ and $x_j$. 
 
-**Hyperparameters** (`SVC(kernel='linear', ...)`) :
+Selecting the linear kernel for a support vector machine is equivalent to the support vector classifier with no feature augmentation: we are only fitting a linear boundary. 
 
-| Parameter | What it controls |
+**Hyperparameters**:
+
+| Parameter | What it controls |  Default |
 |:----------|:----------------|
-| `C` | Penalty for margin violations — the only parameter to tune (see previous lesson) |
+| `C` | Penalty for margin violations; the only parameter to tune (see previous lesson) | 1|
 
 The linear kernel is the simplest choice and a good baseline. Use it when the decision boundary is expected to be approximately linear in the original feature space.
+
+In our example data, though, the linear kernel cannot capture the circular structure of this data.
+
 
 ```{python}
 #| label: linear-svm
@@ -403,38 +411,55 @@ plt.show()
 plt.close()
 ```
 
-The linear kernel cannot capture the circular structure of this data — no straight line can separate an inner cluster from an outer ring.
 
 ### Polynomial kernel
+The polynomial kernel is given by:
 
-$$K(x_i, x_j) = (\gamma \langle x_i, x_j \rangle + r)^d$$
+$$K(x_i, x_j) = (\gamma \langle x_i, x_j \rangle + r)^d,$$
 
-The polynomial kernel captures interactions and powers of the original features — a higher degree allows the boundary to bend and curve more.
+where $\gamma$, $r$ and $d$ are hyperparameters.
 
-**Hyperparameters** (`SVC(kernel='poly', ...)`) :
+The polynomial kernel captures interactions and powers of the original features in a similar way as our two previous examples. A higher degree $d$ allows the boundary to bend and curve more.
+
+**Hyperparameters**  :
 
 | Parameter | What it controls | Default |
 |:----------|:----------------|:-------:|
+| `C` | Penalty for margin violations | `1` |
 | `degree` | Degree of the polynomial; higher values allow more curved boundaries and increase risk of overfitting | `3` |
-| `C` | Penalty for margin violations | `1.0` |
-| `coef0` | Controls the influence of lower- vs. higher-degree terms; set to `1` to match the standard textbook formula, `0` for a purely homogeneous polynomial | `0.0` |
-| `gamma` | Scaling factor for the dot product; typically left at the default | `'scale'` |
+| $\gamma$ | scales the inner product | `scale` |
+| `coef0` ($r$)| controls influence of high vs low-degree polynomial | `1` |
 
-`degree` is the main lever for controlling boundary flexibility. A degree-1 polynomial kernel is identical to the linear SVC; higher degrees produce increasingly complex boundaries.
+The parameters `degree` and `C` are usually the main parameters to tune. However, the next example shows how a single parameter can greatly change the decision boundary:
+
+
 
 ```{python}
 #| label: poly-svm
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 0.65, fig_size_y + 0.5))
 plot_decision_regions(ax, svc_poly, X_circ, y_circ,
-                      title='Polynomial kernel SVM (degree 3)')
+                      title='Polynomial kernel SVM (d=3, C=1, $\gamma$=scale, coef0=1)')
+plt.tight_layout(rect=[0, 0.18, 1, 1])
+plt.show()
+plt.close()
+```
+
+```{python}
+#| label: poly-svm-coef0
+
+_svc_poly_coef0 = SVC(kernel='poly', degree=3, C=1.0)
+_svc_poly_coef0.fit(X_circ, y_circ)
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.65, fig_size_y + 0.5))
+plot_decision_regions(ax, _svc_poly_coef0, X_circ, y_circ,
+                      title='Polynomial kernel SVM (d=3, C=1, $\gamma$=scale, coef0=0)')
 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=2, fontsize=8)
 plt.tight_layout(rect=[0, 0.18, 1, 1])
 plt.show()
 plt.close()
 ```
 
-With a degree-3 polynomial kernel the SVM draws a curved boundary that correctly separates the inner cluster from the outer ring.
 
 ### Radial (RBF) kernel
 
