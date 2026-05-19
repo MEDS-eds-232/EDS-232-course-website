@@ -1,0 +1,28 @@
+Generally, two things can go wrong when we implement an ML model: "bad algorithm" or "bad data". Let's see some of the challenges that you can encounter in these two categories:
+
+
+## Garbage in, garbage out
+
+Training dataset is...
+
+- **too small**: It is not always easy or cheap to get extra training data but always, but generally more high-quality training data will make your models perform better. Potential solution: collect more high-quality training data.
+- **nonrepresentative**: the training data must be representative of the cases you want to generalize to. If the sample is too small, you will have *sampling noise*, but even if it's large, if it's not representative you will have *sampling bias*. Potential solutions: if possible, collect more data with better sampling.
+- **poor quality**: has too many outliers, errors, and missing data, making it harder for the algorithm to detect the underlying pattern. Potential solutions: remove outliers or correct errors, for observations missing features, decide whether to remove these features, remove the observations, fill in the missing value, or compare multiple approaches.
+- **full of irrelevant features**: irrelevant features can add too much noise for the model to work well. Potential solutions: select the most useful features to train on among existing ones (feature selection); combine existing features to produce more useful ones (feature extraction); gather new data to add features
+
+## Problems with algorithms
+
+- **Overfitting**: when the model starts detecting patterns in the noise itself, fitting the trainiing data too closely and resulting in poor generalization. 
+
+Potential solutions:
+- choose a less flexible model (e.g. a linear model instead of a high-degree polynomial)
+- Collect more training data
+- Reduce the noise in the training data
+- Adjust the hyperparameters in the model to reduce variance
+
+- **Underfitting**: when the model is too rigid or simple to detect the structure of the data:
+
+Potential solutions:
+- choose a more flexible model
+- Add better features to you data
+- Adjust the hyperparameters in the model to allow more variance
