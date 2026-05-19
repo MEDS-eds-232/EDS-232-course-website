@@ -83,77 +83,70 @@
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#1d-example-data",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "A one-dimensional example\n\n\n\n\n\n\nObs\n\\(X\\)\nClass\n\n\n\n\n1\n−3.0\n−1\n\n\n2\n−1.5\n−1\n\n\n3\n−0.5\n+1\n\n\n4\n0.5\n+1\n\n\n5\n1.5\n−1\n\n\n6\n3.0\n−1"
-  },
-  {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-1d-q",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-1d-q",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan you find a single cut point on the \\(X\\) axis that separates the two classes?"
-  },
-  {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-1d-a",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-1d-a",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan you find a single cut point on the \\(X\\) axis that separates the two classes?\n\nNo — Class +1 sits in the middle (±0.5) and Class −1 at the extremes. Any single cut point will misclassify one group. We need to augment the feature space."
+    "text": "A one-dimensional example\n\n\n\n\n\n\nObs\n\\(X\\)\nClass\n\n\n\n\n1\n−3.0\n−1\n\n\n2\n−1.5\n−1\n\n\n3\n−0.5\n+1\n\n\n4\n0.5\n+1\n\n\n5\n1.5\n−1\n\n\n6\n3.0\n−1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nIs there a single cut point on the \\(X\\) axis that separates the two classes?"
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#augmented-table",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#augmented-table",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Adding \\(X^2\\) as a feature\n\n\n\n\n\n\n\nObs\n\\(X\\)\n\\(X^2\\)\nClass\n\n\n\n\n1\n−3.0\n9.00\n−1\n\n\n2\n−1.5\n2.25\n−1\n\n\n3\n−0.5\n0.25\n+1\n\n\n4\n0.5\n0.25\n+1\n\n\n5\n1.5\n2.25\n−1\n\n\n6\n3.0\n9.00\n−1\n\n\n\n\nEach observation is now a point \\((X, X^2)\\) in a two-dimensional space."
+    "text": "Add \\(X^2\\) as a feature\n\nAdding \\(X^2\\) as a feature makes this data 2-dimensional instead, of 1-dimensional.\nEach observation is now a point \\((x, x^2)\\) in a 2-dimensional space.\n\n\n\n\n\nObs\n\\(X\\)\n\\(X^2\\)\nClass\n\n\n\n\n1\n−3.0\n9.00\n−1\n\n\n2\n−1.5\n2.25\n−1\n\n\n3\n−0.5\n0.25\n+1\n\n\n4\n0.5\n0.25\n+1\n\n\n5\n1.5\n2.25\n−1\n\n\n6\n3.0\n9.00\n−1"
   },
   {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-aug-q",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-aug-q",
+    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#augmented-table-2",
+    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#augmented-table-2",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan the two classes now be separated by a line in the augmented space? Where would you draw it?"
+    "text": "Add \\(X^2\\) as a feature\n\nAdding \\(X^2\\) as a feature makes this data 2-dimensional instead, of 1-dimensional.\nEach observation is now a point \\((x, x^2)\\) in a 2-dimensional space.\n\n\n\n\n\nObs\n\\(X\\)\n\\(X^2\\)\nClass\n\n\n\n\n1\n−3.0\n9.00\n−1\n\n\n2\n−1.5\n2.25\n−1\n\n\n3\n−0.5\n0.25\n+1\n\n\n4\n0.5\n0.25\n+1\n\n\n5\n1.5\n2.25\n−1\n\n\n6\n3.0\n9.00\n−1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan the two classes now be separated by a line in the augmented space?\nWhere would you draw it?"
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-aug-a",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-aug-a",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan the two classes now be separated by a line in the augmented space? Where would you draw it?\n\nYes — a horizontal line at \\(X^2 \\approx 1.25\\) perfectly separates the classes. The SVC finds this boundary automatically."
+    "text": "SVC finds a linear boundary to separate the classes in augmented space\n\nWhen we embed our data into a higher dimensional space (from 1D to 2D), the SVC now has enough room to separate the classes with a linear boundary."
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#numberline-after-slide",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#numberline-after-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Back to the original space\n\n\n\n\n\n\n\n\n\n\n\nAugmenting the feature space produces a non-linear boundary in the original space — two cut points instead of one — even though the SVC is entirely linear in the enlarged space."
+    "text": "Classifications translate back to the original space"
   },
   {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#2d-extension",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#2d-extension",
+    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#numberline-after-slide-2",
+    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#numberline-after-slide-2",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Extending to two dimensions\n\nThe same idea applies with two or more predictors.\n\nAdd \\(X_3 = X_1^2 + X_2^2\\) to the circular data\nThe inner cluster (small \\(X_3\\)) separates from the outer ring (large \\(X_3\\)) in 3D\nA flat plane in 3D produces a circular boundary back in the original 2D space"
+    "text": "Classifications translate back to the original space\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAugmenting the feature space produces a non-linear boundary in the original space (two cut points instead of one) even though the SVC is entirely linear in the enlarged space."
   },
   {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#circ-3d-slide",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#circ-3d-slide",
+    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#2d-extension-1",
+    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#2d-extension-1",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Augmented feature space — 3D\n\nAdding \\(X_3 = X_1^2 + X_2^2\\): the two classes become linearly separable along the \\(X_3\\) axis."
+    "text": "Extending to higher dimensions\n\nThe same idea applies with two or more predictors: we can add new features to embed the data in an enlarged feature space.\nWith our initial data, for example:"
   },
   {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#circ-boundary-slide",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#circ-boundary-slide",
+    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#2d-extension-2",
+    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#2d-extension-2",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Non-linear boundary in the original space\n\nEvaluating the 3D decision rule in the original 2D space gives a circular boundary."
+    "text": "Extending to higher dimensions\n\nThe same idea applies with two or more predictors: we can add new features to embed the data in an enlarged feature space.\nWith our initial data, for example:"
+  },
+  {
+    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#2d-extension-3",
+    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#2d-extension-3",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Extending to higher dimensions\n\nThe same idea applies with two or more predictors: we can add new features to embed the data in an enlarged feature space.\nWith our initial data, for example:"
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#core-idea",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#core-idea",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Core idea — and the challenge\n\n\nCore idea: enlarge the feature space so that a linear SVC in the enlarged space produces a non-linear boundary in the original space. We can use any functions of the predictors — not just squared terms.\n\n\n\nThe challenge: as the number of predictors \\(p\\) grows, deciding which additional features to add becomes intractable, and computing them for every observation is expensive.\n\n\n\n\nThe solution: the kernel approach computes what we need without ever explicitly constructing the enlarged features."
+    "text": "Core idea — and the challenge\n\n\nCore idea: enlarge the feature space so that a linear SVC in the enlarged space produces a non-linear boundary in the original space. We can use any functions of the predictors, not just squared terms.\n\n\n\nThe challenge: as the number of predictors \\(p\\) grows, deciding which additional features to add becomes intractable, and computing them for every observation is expensive.\n\n\n\n\nThe solution: the kernel approach computes what we need without ever explicitly constructing the enlarged features."
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#section-svm",
@@ -167,126 +160,91 @@
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#svm-intro",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "The support vector machine\n\nThe support vector machine (SVM) extends the SVC by using a kernel function \\(K(x_i, x_j)\\) to enlarge the feature space in a computationally efficient way.\n\n\n\nAn SVM with a linear kernel is exactly the SVC — no feature augmentation\nUsing a non-linear kernel is equivalent to fitting an SVC in an enlarged feature space, but without ever explicitly computing the new features\nThis gives us the benefit of the enlarged space at a fraction of the computational cost\n\n\n\n\n\nChoosing a kernel = choosing how to augment the feature space"
+    "text": "The support vector machine\n\nThe support vector machine (SVM) extends the SVC by using a kernel function \\(K(x_i, x_j)\\) to enlarge the feature space in a computationally efficient way.\n\n\n\nAn SVM with a linear kernel is exactly the SVC: no feature augmentation\nUsing a non-linear kernel is equivalent to fitting an SVC in an enlarged feature space, but without ever explicitly computing the new features\nThis gives us the benefit of the enlarged space at a fraction of the computational cost\n\n\n\n\nChoosing a kernel = choosing how to augment the feature space, but without needing to compute new features"
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#section-kernels",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#section-kernels",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Kernels"
+    "text": "Popular kernels for the SVM"
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#linear-kernel",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#linear-kernel",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Linear kernel\n\n\\[K(x_i, x_j) = \\langle x_i, x_j \\rangle\\]\nThe linear kernel computes the plain dot product — equivalent to the SVC with no feature augmentation.\n\n\n\nParameter\nWhat it controls\nDefault\n\n\n\n\nC\nPenalty for margin violations\n1.0\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe linear kernel cannot capture the circular structure — no straight line can separate an inner cluster from an outer ring."
+    "text": "Linear kernel\n\nEquivalent to the SVC with no feature augmentation.\n\n\n\n\n\n\nParameter\nWhat it controls\nDefault\n\n\n\n\nC\nPenalty for margin violations\n1.0\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe linear kernel cannot capture the circular structure: no straight line can separate an inner cluster from an outer ring."
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#polynomial-kernel",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#polynomial-kernel",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Polynomial kernel\n\n\\[K(x_i, x_j) = (\\gamma \\langle x_i, x_j \\rangle + r)^d\\]\nCaptures interactions and powers of the original features. A higher degree \\(d\\) allows the boundary to bend and curve more.\n\n\n\n\n\n\n\n\nParameter\nWhat it controls\nDefault\n\n\n\n\ndegree (\\(d\\))\nPolynomial degree; higher → more curved boundary → higher overfitting risk\n3\n\n\nC\nPenalty for margin violations\n1.0\n\n\ncoef0 (\\(r\\))\nShifts the polynomial; 1.0 includes lower-degree terms, 0.0 gives a homogeneous polynomial\n0.0\n\n\n\ndegree and C are the main parameters to tune. coef0 should be set to 1.0 as a starting point — the default of 0.0 can produce poor boundaries."
-  },
-  {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#poly-svm-slide",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#poly-svm-slide",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Polynomial kernel — degree 3, coef0 = 1\n\n\n\n\n\n\n\n\n\n\n\nWith coef0=1 the polynomial kernel correctly captures the circular structure with a curved boundary."
-  },
-  {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-coef0-q",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-coef0-q",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe plot above uses coef0=1. What do you expect the decision boundary to look like if we use the default coef0=0 instead?"
-  },
-  {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-coef0-a",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-coef0-a",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Check-in\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe plot above uses coef0=1. What do you expect the decision boundary to look like if we use the default coef0=0 instead?\n\nVery different! With coef0=0 the polynomial is homogeneous — it only captures multiplicative interactions, not additive ones. The boundary fails to capture the circular structure."
+    "text": "Polynomial kernel\n\nCaptures interactions and powers of the original features. A higher degree \\(d\\) allows the boundary to bend and curve more.\n\n\n\n\n\n\n\n\n\n\nParameter\nWhat it controls\nDefault\n\n\n\n\ndegree\nPolynomial degree; higher → more curved boundary → higher overfitting risk\n3\n\n\nC\nPenalty for margin violations\n1.0\n\n\ncoef0\nShifts the polynomial; 1.0 includes lower-degree terms, 0.0 gives a homogeneous polynomial\n0.0\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ndegree and C are the main parameters to tune. coef0 can be set to 1.0 as a starting point."
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#rbf-kernel",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#rbf-kernel",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Radial (RBF) kernel\n\n\\[K(x_i, x_j) = \\exp\\!\\left(-\\gamma \\,\\|x_i - x_j\\|^2\\right)\\]\nMeasures proximity: nearby observations are considered similar and each training point’s influence drops off with distance, producing very local and flexible boundaries.\n\n\n\n\n\n\n\n\nParameter\nWhat it controls\nDefault\n\n\n\n\nC\nPenalty for margin violations\n1.0\n\n\ngamma\nHow quickly influence decays with distance; larger → more local fitting → higher overfitting risk\n'scale'\n\n\n\nThe RBF kernel is the most flexible of the three and often the best default choice when the boundary shape is unknown. C and gamma should be tuned together via cross-validation."
-  },
-  {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#rbf-svm-slide",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#rbf-svm-slide",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Radial (RBF) kernel\n\n\n\n\n\n\n\n\n\n\n\nThe RBF kernel adapts tightly to the circular structure, producing a smooth, nearly circular decision boundary."
-  },
-  {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-kernels",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#checkin-kernels",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Check-in\n\n\n\nWhat accuracy would you expect from the linear SVM on the circular data? Why can’t it do better?\nWhat is one advantage of the RBF kernel over the polynomial kernel when the data structure is unknown?\nHow should gamma and C be chosen in practice?\n\n\n\n\nNear 50–60% — no straight line can separate an inner cluster from an outer ring, so the linear SVM is forced to misclassify roughly half of one class.\n\n\n\n\nThe RBF kernel adapts to local structure without committing to a specific polynomial form. The polynomial kernel requires guessing an appropriate degree \\(d\\); RBF can approximate a wide range of boundaries by tuning gamma alone.\n\n\n\n\nBoth C and gamma should be chosen using cross-validation on the training data (e.g., GridSearchCV). Never select them by evaluating on the test set."
+    "text": "Radial (RBF) kernel\n\nMeasures proximity: nearby observations are considered similar and each training point’s influence drops off with distance, producing very local and flexible boundaries.\n\n\n\n\n\n\n\n\n\n\nParameter\nWhat it controls\nDefault\n\n\n\n\nC\nPenalty for margin violations\n1.0\n\n\ngamma\nHow quickly influence decays with distance; larger → more local fitting → higher overfitting risk\n'scale'\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe RBF kernel is the most flexible of the three and often the best default choice when the boundary shape is unknown. C and gamma should be tuned together via cross-validation."
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#section-exercise",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#section-exercise",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Exercise: fire re-occurrence in Southern California chaparral"
+    "text": "Exercise"
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-scenario",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-scenario",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Exercise: scenario\n\nA research team monitored 200 chaparral shrubland sites following a major wildfire. They recorded:\n\nStand age (\\(X_1\\), standardized): years since previous fire — proxy for accumulated fuel load\nMean annual precipitation (\\(X_2\\), standardized): proxy for moisture conditions\n\nResponse: did the site re-burn within a 10-year window? (re-burned = 1, did not re-burn = 0)\nGoal: build a classifier to predict re-burning risk at new, unmonitored sites to prioritize fuel treatments."
+    "text": "Scenario\n\nA research team monitored 200 chaparral shrubland sites following a major wildfire. They recorded:\n\nStand age (\\(X_1\\), standardized): years since previous fire, proxy for accumulated fuel load\nMean annual precipitation (\\(X_2\\), standardized): proxy for moisture conditions\n\nResponse: did the site re-burn within a 10-year window? (classes: re-burned / did not re-burn)\nGoal: build a classifier to predict re-burning risk at new, unmonitored sites to prioritize fuel treatments."
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-scatter-slide",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-scatter-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Exercise: fire re-occurrence data"
+    "text": "Fire re-occurrence data"
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-q1",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-q1",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Exercise 1\n\n\nLook at the scatter plot. Describe the pattern you see. Which combination of stand age and precipitation is most associated with re-burning? Which sites tend not to re-burn?\n\n\nRe-burning occurs at sites with intermediate stand age and intermediate precipitation — the cluster in the middle of the diagonal. Sites at both extremes (young/dry AND old/wet) tend not to re-burn.\nThis reflects a fire-conducive window: recently burned sites lack fuel, and chronically wet high-elevation sites are too moist to ignite even when fuel is abundant."
+    "text": "Exercise 1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLook at the scatter plot. Describe the pattern you see. Which combination of stand age and precipitation is most associated with re-burning? Which sites tend not to re-burn?"
+  },
+  {
+    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-q1-A",
+    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-q1-A",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Exercise 1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLook at the scatter plot. Describe the pattern you see. Which combination of stand age and precipitation is most associated with re-burning? Which sites tend not to re-burn?\n\nRe-burning occurs at sites with intermediate stand age and intermediate precipitation. Sites at both extremes (young/dry AND old/wet) tend not to re-burn."
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-table-slide",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-table-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Exercise 2: model comparison\n\nThe 200 sites were split 140/60 (train/test). 5-fold CV accuracy on the training set:\n\n\n\n\n\n\n\n\n\nModel\nCV accuracy (5-fold)\n\n\n\n\n0\nLogistic regression\n50%\n\n\n1\nKNN (k = 5)\n96%\n\n\n2\nLinear SVM\n53%\n\n\n3\nRBF SVM\n97%\n\n\n4\nRandom forest\n95%\n\n\n\n\n\n\n\n\n\nThe linear SVM achieves nearly the same accuracy as logistic regression. What do they have in common that prevents them from capturing this pattern?\n\n\n\nBoth fit a single linear boundary. Isolating the middle cluster requires two parallel cuts along the diagonal — something no single line can achieve."
+    "text": "Exercise 2: model comparison\n\nThe 200 sites were split 140/60 (train/test) and the following metrics were obtained:\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nModel\nCV accuracy (5-fold)\n\n\n\n\n0\nLogistic regression\n50%\n\n\n1\nLinear SVM\n53%\n\n\n2\nRBF SVM\n97%\n\n\n3\nRandom forest\n95%\n\n\n\n\n\n\n\n\n\nThe linear SVM achieves nearly the same accuracy as logistic regression. What do they have in common that prevents them from capturing this pattern?\n\n\n\nBoth fit a single linear boundary. Isolating the middle cluster requires two parallel cuts along the diagonal, a single line cannot achieve this."
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-q3",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-q3",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Exercise 3: random forest vs. RBF SVM\n\n\nThe random forest achieves similar accuracy to the RBF SVM. What is one practical advantage of the random forest for this application?\n\n\nThe random forest provides feature importances — a measure of how much each variable contributed to predictions. A manager can be told “stand age was the more important predictor,” which is actionable and easy to communicate.\nThe random forest also usually performs well with minimal hyperparameter tuning."
+    "text": "Exercise 3: random forest vs. RBF SVM\n\nThe 200 sites were split 140/60 (train/test) and the following metrics were obtained:\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nModel\nCV accuracy (5-fold)\n\n\n\n\n0\nLogistic regression\n50%\n\n\n1\nLinear SVM\n53%\n\n\n2\nRBF SVM\n97%\n\n\n3\nRandom forest\n95%\n\n\n\n\n\n\n\n\n\nThe random forest achieves similar accuracy to the RBF SVM. What is one practical advantage of the random forest for this application?\n\n\n\nThe random forest provides feature importances, a measure of how much each variable contributed to predictions. A manager can be told “stand age was the more important predictor,” which is actionable and easy to communicate.\nThe random forest also usually performs well with minimal hyperparameter tuning."
   },
   {
     "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-gamma-slide",
     "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-gamma-slide",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Exercise 4: effect of \\(\\gamma\\) on the RBF SVM\n\n\n\n\n\n\n\n\n\n\n\nAs \\(\\gamma\\) increases, does variance increase or decrease? How would you select the best \\(\\gamma\\)?\n\n\n\nVariance increases with \\(\\gamma\\). Small \\(\\gamma\\) → nearly linear (underfitting). Large \\(\\gamma\\) → jagged boundary wrapping individual points (overfitting). Best \\(\\gamma\\) chosen via cross-validation (GridSearchCV), jointly with C."
-  },
-  {
-    "objectID": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-q5",
-    "href": "notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-SLIDES.html#exercise-q5",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 5: interpretability\n\n\nA fire management agency wants to use the model not just to flag high-risk sites, but also to write a report for state legislators explaining which landscape characteristics drive re-burning risk. An explainable model means a ranger can understand why a site was flagged, not just that it was flagged:\n\nLogistic regression: “this site was flagged because stand age is high and precipitation is moderate, and the model assigns high weight to both”\nRandom forest: “stand age was the most important variable overall”\nRBF SVM: cannot offer a site-level explanation — prediction is based on similarity to support vectors in a transformed space\n\n\n\nDoes this new requirement change your model recommendation?\n\n\n\nYes. For a legislators’ report, logistic regression with an \\(X_1 \\times X_2\\) interaction term is the strongest choice — its coefficients have direct interpretation and adding the interaction recovers much of the accuracy lost by the plain logistic regression. In practice: a random forest for operational flagging + logistic regression with interaction for reporting."
+    "text": "Exercise 4: effect of \\(\\gamma\\) on the RBF SVM\n\nRBF SVM decision boundaries fitted with three values of \\(\\gamma\\) (C = 1 in all cases):\n\n\n\n\n\n\n\n\n\n\nAs \\(\\gamma\\) increases, does variance increase or decrease? How would you select the best \\(\\gamma\\)?\n\n\n\nVariance increases with \\(\\gamma\\). Small \\(\\gamma\\) → nearly linear (underfitting). Large \\(\\gamma\\) → jagged boundary wrapping individual points (overfitting). Best \\(\\gamma\\) chosen via cross-validation jointly with C."
   },
   {
     "objectID": "notes/9_support_vector_machines/9_1_support_vector_classifier/9_1_support_vector_classifier-SLIDES.html#title-slide",

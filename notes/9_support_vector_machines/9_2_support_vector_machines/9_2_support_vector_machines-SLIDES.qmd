@@ -602,112 +602,45 @@ Augmenting the feature space produces a **non-linear boundary** in the original 
 
 ---
 
-## {#2d-extension data-menu-title="Extending to 2D"}
+## {#2d-extension-1 data-menu-title="Extending to 2D"}
 
-[Extending to two dimensions]{.slide-title}
+[Extending to higher dimensions]{.slide-title}
 
 <hr>
 
-The same idea applies with two or more predictors.
+The same idea applies with two or more predictors: we can add new features to embed the data in an enlarged feature space.
 
-- Add $X_3 = X_1^2 + X_2^2$ to the circular data
-- The inner cluster (small $X_3$) separates from the outer ring (large $X_3$) in 3D
-- A flat plane in 3D produces a **circular** boundary back in the original 2D space
+With our initial data, for example: 
 
-```{python}
-#| label: slides-circ-original-2d
-#| echo: false
-#| fig-align: center
-#| out-width: "50%"
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.65, fig_size_y + 0.5))
-for cls in [1, -1]:
-    mask = y_circ == cls
-    ax.scatter(X_circ[mask, 0], X_circ[mask, 1],
-               c=col_map[cls], s=25, alpha=0.75,
-               edgecolors='none', label=label_map[cls])
-ax.set_xlabel('$X_1$'); ax.set_ylabel('$X_2$')
-ax.set_title('Original feature space')
-ax.grid(True, alpha=0.3)
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=2, fontsize=10)
-plt.tight_layout(rect=[0, 0.18, 1, 1])
-plt.show()
-plt.close()
-```
+![](svm-2d-example-1.png)
 
 ---
 
-## {#circ-3d-slide data-menu-title="Augmented 3D space"}
+## {#2d-extension-2 data-menu-title="Extending to 2D"}
 
-[Augmented feature space — 3D]{.slide-title}
+[Extending to higher dimensions]{.slide-title}
 
 <hr>
 
-Adding $X_3 = X_1^2 + X_2^2$: the two classes become linearly separable along the $X_3$ axis.
+The same idea applies with two or more predictors: we can add new features to embed the data in an enlarged feature space.
 
-```{python}
-#| label: slides-circ-augmented-3d
-#| echo: false
-#| fig-align: center
-#| out-width: "55%"
+With our initial data, for example: 
 
-X3_circ = X_circ[:, 0] ** 2 + X_circ[:, 1] ** 2
-
-fig = plt.figure(figsize=(fig_size_x * 0.85, fig_size_y + 1.5))
-ax3 = fig.add_subplot(111, projection='3d')
-for cls in [1, -1]:
-    mask = y_circ == cls
-    ax3.scatter(X_circ[mask, 0], X_circ[mask, 1], X3_circ[mask],
-                c=col_map[cls], s=22, alpha=0.65, label=label_map[cls])
-ax3.set_xlabel('$X_1$', labelpad=6)
-ax3.set_ylabel('$X_2$', labelpad=6)
-ax3.set_zlabel('$X_3$', labelpad=6)
-ax3.set_title('Enlarged feature space\n$(X_1,\\ X_2,\\ X_3 = X_1^2 + X_2^2)$')
-ax3.view_init(elev=18, azim=-55)
-ax3.legend(fontsize=9, loc='upper left')
-plt.tight_layout()
-plt.show()
-plt.close()
-```
+![](svm-2d-example-2.png)
 
 ---
 
-## {#circ-boundary-slide data-menu-title="Non-linear boundary in 2D"}
+## {#2d-extension-3 data-menu-title="Extending to 2D"}
 
-[Non-linear boundary in the original space]{.slide-title}
+[Extending to higher dimensions]{.slide-title}
 
 <hr>
 
-Evaluating the 3D decision rule in the original 2D space gives a **circular** boundary.
+The same idea applies with two or more predictors: we can add new features to embed the data in an enlarged feature space.
 
-```{python}
-#| label: slides-circ-boundary-2d
-#| echo: false
-#| fig-align: center
-#| out-width: "50%"
+With our initial data, for example: 
 
-pad = 0.3
-x0_min, x0_max = X_circ[:, 0].min()-pad, X_circ[:, 0].max()+pad
-x1_min, x1_max = X_circ[:, 1].min()-pad, X_circ[:, 1].max()+pad
-xx_b, yy_b = np.meshgrid(np.linspace(x0_min, x0_max, 350),
-                          np.linspace(x1_min, x1_max, 350))
-Z_b = svc_rbf.predict(np.c_[xx_b.ravel(), yy_b.ravel()]).reshape(xx_b.shape)
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.65, fig_size_y + 0.5))
-for cls in [1, -1]:
-    mask = y_circ == cls
-    ax.scatter(X_circ[mask, 0], X_circ[mask, 1],
-               c=col_map[cls], s=25, alpha=0.75,
-               edgecolors='none', label=label_map[cls])
-ax.contour(xx_b, yy_b, Z_b, levels=[0], colors='black', linewidths=1.8)
-ax.set_xlabel('$X_1$'); ax.set_ylabel('$X_2$')
-ax.set_title('Non-linear decision boundary')
-ax.grid(True, alpha=0.3)
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=2, fontsize=10)
-plt.tight_layout(rect=[0, 0.18, 1, 1])
-plt.show()
-plt.close()
-```
+![](svm-2d-example-4.png)
 
 ---
 
@@ -718,7 +651,7 @@ plt.close()
 <hr>
 
 ::: {.body-text-m}
-**Core idea:** enlarge the feature space so that a linear SVC in the enlarged space produces a non-linear boundary in the original space. We can use any functions of the predictors — not just squared terms.
+**Core idea:** enlarge the feature space so that a linear SVC in the enlarged space produces a non-linear boundary in the original space. We can use any functions of the predictors, not just squared terms.
 :::
 
 . . .
@@ -753,16 +686,16 @@ The **support vector machine (SVM)** extends the SVC by using a **kernel functio
 
 . . .
 
-::: {.body-text-m}
-- An SVM with a **linear kernel** is exactly the SVC — no feature augmentation
+<br>
+
+- An SVM with a **linear kernel** is exactly the SVC: no feature augmentation
 - Using a **non-linear kernel** is equivalent to fitting an SVC in an enlarged feature space, but **without ever explicitly computing the new features**
 - This gives us the benefit of the enlarged space at a fraction of the computational cost
-:::
 
 . . .
 
 ::: {.teal-text .body-text-m .center-text}
-*Choosing a kernel = choosing how to augment the feature space*
+*Choosing a kernel = choosing how to augment the feature space, but without needing to compute new features*
 :::
 
 ---
@@ -770,7 +703,7 @@ The **support vector machine (SVM)** extends the SVC by using a **kernel functio
 ## {#section-kernels data-menu-title="# Kernels #" background="#047C90"}
 
 <div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Kernels</p>
+<p class="custom-subtitle bottombr">Popular kernels for the SVM</p>
 </div>
 
 ---
@@ -781,15 +714,20 @@ The **support vector machine (SVM)** extends the SVC by using a **kernel functio
 
 <hr>
 
-$$K(x_i, x_j) = \langle x_i, x_j \rangle$$
+Equivalent to the SVC with no feature augmentation.
 
-The linear kernel computes the plain dot product — equivalent to the SVC with no feature augmentation.
+<br>
 
+:::: {.columns}
+
+::: {.column width="50%"}
 | Parameter | What it controls | Default |
 |:----------|:----------------|:-------:|
 | `C` | Penalty for margin violations | `1.0` |
 
-. . .
+:::
+
+::: {.column width="50%"}
 
 ```{python}
 #| label: slides-linear-svm
@@ -804,9 +742,13 @@ plt.tight_layout(rect=[0, 0.15, 1, 1])
 plt.show()
 plt.close()
 ```
+:::
+
+:::
+
 
 ::: {.body-text-s .center-text}
-The linear kernel cannot capture the circular structure — no straight line can separate an inner cluster from an outer ring.
+The linear kernel cannot capture the circular structure: no straight line can separate an inner cluster from an outer ring.
 :::
 
 ---
@@ -817,28 +759,22 @@ The linear kernel cannot capture the circular structure — no straight line can
 
 <hr>
 
-$$K(x_i, x_j) = (\gamma \langle x_i, x_j \rangle + r)^d$$
-
 Captures interactions and powers of the original features. A higher degree $d$ allows the boundary to bend and curve more.
 
+:::: {.columns}
+
+::: {.column width="55%"}
 | Parameter | What it controls | Default |
 |:----------|:----------------|:-------:|
-| `degree` ($d$) | Polynomial degree; higher → more curved boundary → higher overfitting risk | `3` |
+| `degree` | Polynomial degree; higher → more curved boundary → higher overfitting risk | `3` |
 | `C` | Penalty for margin violations | `1.0` |
-| `coef0` ($r$) | Shifts the polynomial; `1.0` includes lower-degree terms, `0.0` gives a homogeneous polynomial | `0.0` |
+| `coef0` | Shifts the polynomial; `1.0` includes lower-degree terms, `0.0` gives a homogeneous polynomial | `0.0` |
+:::
 
-`degree` and `C` are the main parameters to tune. `coef0` should be set to `1.0` as a starting point — the default of `0.0` can produce poor boundaries.
 
----
-
-## {#poly-svm-slide data-menu-title="Polynomial kernel: plot"}
-
-[Polynomial kernel — degree 3, coef0 = 1]{.slide-title}
-
-<hr>
-
+::: {.column width="45%"}
 ```{python}
-#| label: slides-poly-svm
+#| label: slides-poly-svm-1
 #| echo: false
 #| fig-align: center
 #| out-width: "55%"
@@ -852,89 +788,11 @@ plt.show()
 plt.close()
 ```
 
-::: {.body-text-s .center-text}
-With `coef0=1` the polynomial kernel correctly captures the circular structure with a curved boundary.
-:::
-
----
-
-## {#checkin-coef0-q data-menu-title="Check-in: coef0"}
-
-[Check-in]{.slide-title}
-
-<hr>
-
-:::: {.columns}
-
-::: {.column width="55%"}
-
-```{python}
-#| label: slides-poly-svm-checkin
-#| echo: false
-#| fig-align: center
-#| out-width: "100%"
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y + 0.3))
-plot_decision_regions(ax, svc_poly, X_circ, y_circ,
-                      title='Polynomial SVM (coef0=1)')
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=10)
-plt.tight_layout(rect=[0, 0.15, 1, 1])
-plt.show()
-plt.close()
-```
-
-:::
-
-::: {.column width="45%"}
-
-::: {.teal-text .body-text-m}
-The plot above uses `coef0=1`. What do you expect the decision boundary to look like if we use the default `coef0=0` instead?
 :::
 
 :::
 
-::::
-
----
-
-## {#checkin-coef0-a data-menu-title="Check-in: coef0 (answer)"}
-
-[Check-in]{.slide-title}
-
-<hr>
-
-:::: {.columns}
-
-::: {.column width="55%"}
-
-```{python}
-#| label: slides-poly-svm-coef0
-#| echo: false
-#| fig-align: center
-#| out-width: "100%"
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y + 0.3))
-plot_decision_regions(ax, _svc_poly_coef0, X_circ, y_circ,
-                      title='Polynomial SVM (coef0=0, default)')
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=10)
-plt.tight_layout(rect=[0, 0.15, 1, 1])
-plt.show()
-plt.close()
-```
-
-:::
-
-::: {.column width="45%"}
-
-::: {.teal-text .body-text-m}
-The plot above uses `coef0=1`. What do you expect the decision boundary to look like if we use the default `coef0=0` instead?
-:::
-
-Very different! With `coef0=0` the polynomial is *homogeneous* — it only captures multiplicative interactions, not additive ones. The boundary fails to capture the circular structure.
-
-:::
-
-::::
+`degree` and `C` are the main parameters to tune. `coef0` can be set to `1.0` as a starting point.
 
 ---
 
@@ -944,24 +802,19 @@ Very different! With `coef0=0` the polynomial is *homogeneous* — it only captu
 
 <hr>
 
-$$K(x_i, x_j) = \exp\!\left(-\gamma \,\|x_i - x_j\|^2\right)$$
-
 Measures proximity: nearby observations are considered similar and each training point's influence drops off with distance, producing very local and flexible boundaries.
 
+:::: {.columns}
+
+::: {.column width="55%"}
 | Parameter | What it controls | Default |
 |:----------|:----------------|:-------:|
 | `C` | Penalty for margin violations | `1.0` |
 | `gamma` | How quickly influence decays with distance; larger → more local fitting → higher overfitting risk | `'scale'` |
+:::
 
-The RBF kernel is the most flexible of the three and often the **best default choice** when the boundary shape is unknown. `C` and `gamma` should be tuned together via cross-validation.
 
----
-
-## {#rbf-svm-slide data-menu-title="RBF kernel: plot"}
-
-[Radial (RBF) kernel]{.slide-title}
-
-<hr>
+::: {.column width="45%"}
 
 ```{python}
 #| label: slides-rbf-svm
@@ -977,61 +830,36 @@ plt.tight_layout(rect=[0, 0.15, 1, 1])
 plt.show()
 plt.close()
 ```
-
-::: {.body-text-s .center-text}
-The RBF kernel adapts tightly to the circular structure, producing a smooth, nearly circular decision boundary.
 :::
 
----
 
-## {#checkin-kernels data-menu-title="Check-in: comparing kernels"}
-
-[Check-in]{.slide-title}
-
-<hr>
-
-::: {.teal-text .body-text-m}
-1. What accuracy would you expect from the linear SVM on the circular data? Why can't it do better?
-
-2. What is one advantage of the RBF kernel over the polynomial kernel when the data structure is unknown?
-
-3. How should `gamma` and `C` be chosen in practice?
 :::
 
-. . .
 
-1. Near 50–60% — no straight line can separate an inner cluster from an outer ring, so the linear SVM is forced to misclassify roughly half of one class.
-
-. . .
-
-2. The RBF kernel adapts to local structure without committing to a specific polynomial form. The polynomial kernel requires guessing an appropriate degree $d$; RBF can approximate a wide range of boundaries by tuning `gamma` alone.
-
-. . .
-
-3. Both `C` and `gamma` should be chosen using **cross-validation** on the training data (e.g., `GridSearchCV`). Never select them by evaluating on the test set.
+The RBF kernel is the most flexible of the three and often the **best default choice** when the boundary shape is unknown. `C` and `gamma` should be tuned together via cross-validation.
 
 ---
 
 ## {#section-exercise data-menu-title="# Exercise #" background="#047C90"}
 
 <div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Exercise: fire re-occurrence in Southern California chaparral</p>
+<p class="custom-subtitle bottombr">Exercise</p>
 </div>
 
 ---
 
 ## {#exercise-scenario data-menu-title="Exercise: scenario"}
 
-[Exercise: scenario]{.slide-title}
+[Scenario]{.slide-title}
 
 <hr>
 
 A research team monitored **200 chaparral shrubland sites** following a major wildfire. They recorded:
 
-- **Stand age** ($X_1$, standardized): years since previous fire — proxy for accumulated fuel load
+- **Stand age** ($X_1$, standardized): years since previous fire, proxy for accumulated fuel load
 - **Mean annual precipitation** ($X_2$, standardized): proxy for moisture conditions
 
-**Response**: did the site re-burn within a 10-year window? (re-burned = 1, did not re-burn = 0)
+**Response**: did the site re-burn within a 10-year window? (classes: re-burned / did not re-burn)
 
 **Goal**: build a classifier to predict re-burning risk at new, unmonitored sites to prioritize fuel treatments.
 
@@ -1039,7 +867,7 @@ A research team monitored **200 chaparral shrubland sites** following a major wi
 
 ## {#exercise-scatter-slide data-menu-title="Exercise: scatter plot"}
 
-[Exercise: fire re-occurrence data]{.slide-title}
+[Fire re-occurrence data]{.slide-title}
 
 <hr>
 
@@ -1047,7 +875,7 @@ A research team monitored **200 chaparral shrubland sites** following a major wi
 #| label: slides-ex-fire-scatter
 #| echo: false
 #| fig-align: center
-#| out-width: "60%"
+#| out-width: "100%"
 
 fig, ax = plt.subplots(figsize=(fig_size_x * 0.75, fig_size_y + 0.5))
 for cls in [1, 0]:
@@ -1073,15 +901,96 @@ plt.close()
 
 <hr>
 
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{python}
+#| label: slides-ex-fire-scatter-2
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.75, fig_size_y + 0.5))
+for cls in [1, 0]:
+    mask = _y_diag == cls
+    ax.scatter(_X_diag[mask, 0], _X_diag[mask, 1],
+               c=_col_ex[cls], s=28, alpha=0.75,
+               edgecolors='none', label=_lbl_ex[cls])
+ax.set_xlabel('Stand age ($X_1$)')
+ax.set_ylabel('Mean annual precipitation ($X_2$)')
+ax.set_title('Fire re-occurrence at 200 chaparral shrubland sites')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=10)
+plt.tight_layout(rect=[0, 0.15, 1, 1])
+plt.show()
+plt.close()
+```
+:::
+
+
+::: {.column width="50%"}
+::: {.teal-text .body-text-m}
+Look at the scatter plot. Describe the pattern you see. Which combination of stand age and precipitation is most associated with re-burning? Which sites tend not to re-burn?
+:::
+:::
+
+
+:::
+
+
+
+---
+
+## {#exercise-q1-A data-menu-title="Exercise 1"}
+
+[Exercise 1]{.slide-title}
+
+<hr>
+
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{python}
+#| label: slides-ex-fire-scatter-3
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.75, fig_size_y + 0.5))
+for cls in [1, 0]:
+    mask = _y_diag == cls
+    ax.scatter(_X_diag[mask, 0], _X_diag[mask, 1],
+               c=_col_ex[cls], s=28, alpha=0.75,
+               edgecolors='none', label=_lbl_ex[cls])
+ax.set_xlabel('Stand age ($X_1$)')
+ax.set_ylabel('Mean annual precipitation ($X_2$)')
+ax.set_title('Fire re-occurrence at 200 chaparral shrubland sites')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=10)
+plt.tight_layout(rect=[0, 0.15, 1, 1])
+plt.show()
+plt.close()
+```
+:::
+
+
+::: {.column width="50%"}
 ::: {.teal-text .body-text-m}
 Look at the scatter plot. Describe the pattern you see. Which combination of stand age and precipitation is most associated with re-burning? Which sites tend not to re-burn?
 :::
 
-. . .
+Re-burning occurs at sites with *intermediate stand age and intermediate precipitation*. Sites at both extremes (young/dry AND old/wet) tend not to re-burn.
 
-Re-burning occurs at sites with *intermediate stand age and intermediate precipitation* — the cluster in the middle of the diagonal. Sites at both extremes (young/dry AND old/wet) tend not to re-burn.
+:::
 
-This reflects a **fire-conducive window**: recently burned sites lack fuel, and chronically wet high-elevation sites are too moist to ignite even when fuel is abundant.
+
+:::
+
+
+
+
 
 ---
 
@@ -1091,29 +1000,64 @@ This reflects a **fire-conducive window**: recently burned sites lack fuel, and 
 
 <hr>
 
-The 200 sites were split 140/60 (train/test). 5-fold CV accuracy on the training set:
+The 200 sites were split 140/60 (train/test) and the following metrics were obtained:
 
+:::: {.columns}
+
+::: {.column width="50%"}
+```{python}
+#| label: slides-ex-fire-scatter-4
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.75, fig_size_y + 0.5))
+for cls in [1, 0]:
+    mask = _y_diag == cls
+    ax.scatter(_X_diag[mask, 0], _X_diag[mask, 1],
+               c=_col_ex[cls], s=28, alpha=0.75,
+               edgecolors='none', label=_lbl_ex[cls])
+ax.set_xlabel('Stand age ($X_1$)')
+ax.set_ylabel('Mean annual precipitation ($X_2$)')
+ax.set_title('Fire re-occurrence at 200 chaparral shrubland sites')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=10)
+plt.tight_layout(rect=[0, 0.15, 1, 1])
+plt.show()
+plt.close()
+```
+:::
+
+
+::: {.column width="50%"}
 ```{python}
 #| label: slides-ex-fire-table
 #| echo: false
 
 _results = pd.DataFrame({
-    'Model': ['Logistic regression', 'KNN (k = 5)', 'Linear SVM', 'RBF SVM', 'Random forest'],
-    'CV accuracy (5-fold)': [f'{_acc_lr:.0%}', f'{_acc_knn:.0%}',
-                             f'{_acc_lin:.0%}', f'{_acc_rbf:.0%}', f'{_acc_rf:.0%}']
+    'Model': ['Logistic regression', 'Linear SVM', 'RBF SVM', 'Random forest'],
+    'CV accuracy (5-fold)': [f'{_acc_lr:.0%}', f'{_acc_lin:.0%}',
+                             f'{_acc_rbf:.0%}', f'{_acc_rf:.0%}']
 })
 _results
 ```
 
-. . .
+:::
 
-::: {.teal-text .body-text-m}
+
+:::
+
+
+::: {.teal-text }
 The linear SVM achieves nearly the same accuracy as logistic regression. What do they have in common that prevents them from capturing this pattern?
 :::
 
 . . .
 
-Both fit a **single linear boundary**. Isolating the middle cluster requires *two* parallel cuts along the diagonal — something no single line can achieve.
+::: {.body-text-s }
+Both fit a **single linear boundary**. Isolating the middle cluster requires *two* parallel cuts along the diagonal, a single line cannot achieve this.
+
+:::
 
 ---
 
@@ -1123,15 +1067,67 @@ Both fit a **single linear boundary**. Isolating the middle cluster requires *tw
 
 <hr>
 
-::: {.teal-text .body-text-m}
+The 200 sites were split 140/60 (train/test) and the following metrics were obtained:
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{python}
+#| label: slides-ex-fire-scatter-5
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.75, fig_size_y + 0.5))
+for cls in [1, 0]:
+    mask = _y_diag == cls
+    ax.scatter(_X_diag[mask, 0], _X_diag[mask, 1],
+               c=_col_ex[cls], s=28, alpha=0.75,
+               edgecolors='none', label=_lbl_ex[cls])
+ax.set_xlabel('Stand age ($X_1$)')
+ax.set_ylabel('Mean annual precipitation ($X_2$)')
+ax.set_title('Fire re-occurrence at 200 chaparral shrubland sites')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=10)
+plt.tight_layout(rect=[0, 0.15, 1, 1])
+plt.show()
+plt.close()
+```
+:::
+
+
+::: {.column width="50%"}
+```{python}
+#| label: slides-ex-fire-table-2
+#| echo: false
+
+_results = pd.DataFrame({
+    'Model': ['Logistic regression', 'Linear SVM', 'RBF SVM', 'Random forest'],
+    'CV accuracy (5-fold)': [f'{_acc_lr:.0%}', f'{_acc_lin:.0%}',
+                             f'{_acc_rbf:.0%}', f'{_acc_rf:.0%}']
+})
+_results
+```
+
+:::
+
+
+:::
+
+
+::: {.teal-text }
 The random forest achieves similar accuracy to the RBF SVM. What is one practical advantage of the random forest for this application?
 :::
 
 . . .
 
-The random forest provides **feature importances** — a measure of how much each variable contributed to predictions. A manager can be told "stand age was the more important predictor," which is actionable and easy to communicate.
+::: {.body-text-s }
+The random forest provides **feature importances**, a measure of how much each variable contributed to predictions. A manager can be told "stand age was the more important predictor," which is actionable and easy to communicate.
 
 The random forest also usually performs well with minimal hyperparameter tuning.
+
+:::
+
 
 ---
 
@@ -1140,6 +1136,9 @@ The random forest also usually performs well with minimal hyperparameter tuning.
 [Exercise 4: effect of $\gamma$ on the RBF SVM]{.slide-title}
 
 <hr>
+
+RBF SVM decision boundaries fitted with three values of $\gamma$ (`C` = 1 in all cases):
+
 
 ```{python}
 #| label: slides-ex-fire-gamma
@@ -1152,45 +1151,17 @@ _plot_diag_regions(axes[0], _svc_g_low,  'RBF SVM ($\\gamma$ = 0.1)')
 _plot_diag_regions(axes[1], _svc_g_mid,  'RBF SVM ($\\gamma$ = 1.5)')
 _plot_diag_regions(axes[2], _svc_g_high, 'RBF SVM ($\\gamma$ = 20)')
 handles, labels = axes[0].get_legend_handles_labels()
-fig.legend(handles, labels, loc='lower center', ncol=2, fontsize=10,
-           bbox_to_anchor=(0.5, -0.05))
 plt.tight_layout(rect=[0, 0.10, 1, 1])
 plt.show()
 plt.close()
 ```
 
-::: {.teal-text .body-text-s .center-text}
+::: {.teal-text .center-text}
 As $\gamma$ increases, does variance increase or decrease? How would you select the best $\gamma$?
 :::
 
 . . .
 
 ::: {.body-text-s}
-Variance **increases** with $\gamma$. Small $\gamma$ → nearly linear (underfitting). Large $\gamma$ → jagged boundary wrapping individual points (overfitting). Best $\gamma$ chosen via **cross-validation** (`GridSearchCV`), jointly with `C`.
-:::
-
----
-
-## {#exercise-q5 data-menu-title="Exercise 5: interpretability"}
-
-[Exercise 5: interpretability]{.slide-title}
-
-<hr>
-
-::: {.body-text-s}
-A fire management agency wants to use the model not just to flag high-risk sites, but also to write a **report for state legislators** explaining which landscape characteristics drive re-burning risk. An explainable model means a ranger can understand *why* a site was flagged, not just *that* it was flagged:
-
-- **Logistic regression**: "this site was flagged because stand age is high and precipitation is moderate, and the model assigns high weight to both"
-- **Random forest**: "stand age was the most important variable overall"
-- **RBF SVM**: cannot offer a site-level explanation — prediction is based on similarity to support vectors in a transformed space
-:::
-
-::: {.teal-text .body-text-m}
-Does this new requirement change your model recommendation?
-:::
-
-. . .
-
-::: {.body-text-s}
-Yes. For a legislators' report, **logistic regression with an $X_1 \times X_2$ interaction term** is the strongest choice — its coefficients have direct interpretation and adding the interaction recovers much of the accuracy lost by the plain logistic regression. In practice: a random forest for operational flagging + logistic regression with interaction for reporting.
+Variance **increases** with $\gamma$. Small $\gamma$ → nearly linear (underfitting). Large $\gamma$ → jagged boundary wrapping individual points (overfitting). Best $\gamma$ chosen via **cross-validation jointly with `C`**.
 :::
