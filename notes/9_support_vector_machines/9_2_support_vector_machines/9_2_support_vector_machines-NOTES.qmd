@@ -2,6 +2,7 @@
 title: Support vector machines
 jupyter: eds232-env
 echo: false
+fig-align: center
 ---
 
 ```{python}
@@ -492,25 +493,203 @@ plt.close()
 
 The RBF kernel adapts tightly to the circular structure of the data, producing a smooth, nearly circular decision boundary. It is the default SVM kernel unless we have some domain knowledge suggesting this is the right approach. 
 
+
+## Exercise: Fire re-occurrence in Southern California chaparral
+
+A research team monitored 200 chaparral shrubland sites in Southern California following a major wildfire event. At each site they recorded:
+
+- **Stand age** ($X_1$, standardized): years since the previous fire — a proxy for how much fuel has accumulated.
+- **Mean annual precipitation** ($X_2$, standardized): average annual rainfall — a proxy for moisture conditions.
+
+The response variable is whether the site burned again within a 10-year observation window. The goal is to build a classifier that can predict re-burning risk at new, unmonitored sites so that managers can prioritize fuel treatments before the next fire season. The scatter plot below shows all 200 sites.
+
+```{python}
+#| label: ex-fire-setup
+#| echo: false
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.metrics import accuracy_score
+
+# ── Generate three-cluster diagonal data ─────────────────────────────────────
+# Class 0 (did not re-burn): outer clusters at (-1.6, -1.6) and (1.6, 1.6)
+# Class 1 (re-burned):        middle cluster at (0, 0)
+_cluster_specs = [
+    (-1.6, -1.6, 0, 55,  20),
+    ( 0.0,  0.0, 1, 90,  21),
+    ( 1.6,  1.6, 0, 55,  22),
+]
+_X_parts, _y_parts = [], []
+for _cx, _cy, _cls, _n, _seed in _cluster_specs:
+    _rng = np.random.RandomState(_seed)
+    _X_parts.append(_rng.randn(_n, 2) * 0.55 + np.array([_cx, _cy]))
+    _y_parts.append(np.full(_n, _cls))
+
+_X_diag = np.vstack(_X_parts)
+_y_diag = np.concatenate(_y_parts)
+
+_col_ex = {1: 'tomato', 0: 'steelblue'}
+_lbl_ex = {1: 'Re-burned', 0: 'Did not re-burn'}
+
+# ── Train/test split (for Q4 gamma plots) ─────────────────────────────────────
+_X_tr, _X_te, _y_tr, _y_te = train_test_split(
+    _X_diag, _y_diag, test_size=0.3, random_state=42, stratify=_y_diag)
+
+# ── Cross-validated accuracy on the training set (5-fold) ────────────────────
+_cv_kw = dict(cv=5, scoring='accuracy')
+_acc_lr  = cross_val_score(LogisticRegression(),                     _X_tr, _y_tr, **_cv_kw).mean()
+_acc_knn = cross_val_score(KNeighborsClassifier(n_neighbors=5),      _X_tr, _y_tr, **_cv_kw).mean()
+_acc_lin = cross_val_score(SVC(kernel='linear', C=1.0),              _X_tr, _y_tr, **_cv_kw).mean()
+_acc_rbf = cross_val_score(SVC(kernel='rbf', C=1.0, gamma='scale'),  _X_tr, _y_tr, **_cv_kw).mean()
+_acc_rf  = cross_val_score(RandomForestClassifier(n_estimators=500, random_state=0), _X_tr, _y_tr, **_cv_kw).mean()
+
+# ── Fit full-training-set models (for Q4 gamma plots) ────────────────────────
+_svc_g_low  = SVC(kernel='rbf', C=1.0, gamma=0.1).fit(_X_tr, _y_tr)
+_svc_g_mid  = SVC(kernel='rbf', C=1.0, gamma=1.5).fit(_X_tr, _y_tr)
+_svc_g_high = SVC(kernel='rbf', C=1.0, gamma=20.0).fit(_X_tr, _y_tr)
+
+# ── Helper: plot decision regions for the exercise data ──────────────────────
+def _plot_diag_regions(ax, svc, title):
+    pad = 0.4
+    x0min, x0max = _X_tr[:, 0].min()-pad, _X_tr[:, 0].max()+pad
+    x1min, x1max = _X_tr[:, 1].min()-pad, _X_tr[:, 1].max()+pad
+    xx, yy = np.meshgrid(np.linspace(x0min, x0max, 300),
+                          np.linspace(x1min, x1max, 300))
+    Z = svc.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+    ax.contourf(xx, yy, Z, levels=[-0.5, 0.5, 1.5],
+                colors=['steelblue', 'tomato'], alpha=0.18)
+    ax.contour(xx, yy, Z, levels=[0.5], colors='black', linewidths=1.5)
+    for cls in [1, 0]:
+        mask = _y_tr == cls
+        ax.scatter(_X_tr[mask, 0], _X_tr[mask, 1],
+                   c=_col_ex[cls], s=18, alpha=0.7, edgecolors='none',
+                   label=_lbl_ex[cls])
+    ax.set_xlabel('$X_1$')
+    ax.set_ylabel('$X_2$')
+    ax.set_title(title, fontsize=9)
+    ax.grid(True, alpha=0.3)
+```
+
+```{python}
+#| label: ex-fire-scatter
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.65, fig_size_y + 0.5))
+for cls in [1, 0]:
+    mask = _y_diag == cls
+    ax.scatter(_X_diag[mask, 0], _X_diag[mask, 1],
+               c=_col_ex[cls], s=25, alpha=0.75,
+               edgecolors='none', label=_lbl_ex[cls])
+ax.set_xlabel('Stand age ($X_1$)')
+ax.set_ylabel('Mean annual precipitation ($X_2$)')
+ax.set_title('Fire re-occurrence at 200 chaparral shrubland sites')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20), ncol=2, fontsize=9)
+plt.tight_layout(rect=[0, 0.18, 1, 1])
+plt.show()
+plt.close()
+```
+
+
 :::{.callout-tip}
-## Check-in
+## Exercise 1
 
-Compare the three classifiers on the circular dataset.
-
-1. What accuracy would you expect from the linear SVC? Why can't it do better?
-2. Both the polynomial SVM and the radial SVM handle this data well. In general, what is one advantage of the radial kernel over the polynomial kernel when the data structure is unknown?
-3. Both kernels have tuning parameters ($d$ for polynomial, $\gamma$ for radial) in addition to the budget $C$. What method should be used to choose these parameters? What risk do you take if you select them by evaluating on the test set?
+Look at the scatter plot above. Describe the pattern you see. Which combination of stand age and precipitation is most associated with re-burning? Which sites tend not to re-burn?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Discussion
 
-1. The linear SVC is limited to a straight-line boundary. Because Class 1 is completely surrounded by Class −1, no line can separate them; the linear SVC is forced to misclassify roughly half of one class or the other, yielding accuracy near 50–60%.
-
-2. The radial kernel adapts to local structure without committing to a specific polynomial form. When the true boundary is unknown, the polynomial kernel requires guessing an appropriate degree $d$, while the RBF kernel can approximate a wide range of smooth boundaries by tuning $\gamma$ alone. In practice, RBF is often the default first choice for non-linear SVMs.
-
-3. Tuning parameters should be chosen using **cross-validation** on the training data, not by evaluating on the test set. Selecting them on the test set effectively "peeks" at the test data and produces an overly optimistic estimate of generalization performance.
+Re-burning occurs most frequently at sites with *intermediate stand age and intermediate precipitation*, the cluster in the middle of the plot. Sites at both extremes of the diagonal (young stands in dry, low-elevation sites AND old stands in wet, high-elevation sites) tend not to re-burn.
 :::
+
+The 200 sites were split into a training set (140 sites) and a test set (60 sites). The table below shows the 5-fold cross-validated accuracy of four classifiers, estimated on the training set:
+
+```{python}
+#| label: ex-fire-table
+
+_results = pd.DataFrame({
+    'Model': ['Logistic regression', 'KNN (k = 5)', 'Linear SVM', 'RBF SVM', 'Random forest'],
+    'CV accuracy (5-fold)': [f'{_acc_lr:.0%}', f'{_acc_knn:.0%}',
+                             f'{_acc_lin:.0%}', f'{_acc_rbf:.0%}', f'{_acc_rf:.0%}']
+})
+_results
+```
+
+
+:::{.callout-tip}
+## Exercise 2
+
+The linear SVM achieves nearly the same accuracy as logistic regression. What do these two models have in common that prevents them from capturing the pattern in this data? Based on this, what kind of model would you turn to next?
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+Both logistic regression and the linear SVM can only produce a single straight-line (linear) decision boundary. Isolating the middle cluster requires *two* roughly parallel cuts along the diagonal. something no single line can achieve. Both models are fundamentally limited to linear boundaries and will fail on any data where the classes are arranged in a "sandwich" along a gradient. The natural next step is a model that can fit non-linear boundaries.
+:::
+
+:::{.callout-tip}
+## Exercise 3
+
+The random forest achieves similar accuracy to the RBF SVM on this dataset. 
+What is one practical advantage of the random forest over the RBF SVM for this application? 
+:::
+
+:::{.callout-tip collapse="true"}
+## Discussion
+The random forest provides **feature importances**: a straightforward measure of how much each variable contributed to the predictions. For this application, a manager can be told "stand age was the more important predictor," which is actionable and easy to communicate. The random forest also usually perfomrs well "out of the box", with not much hyperparameter tuning.  
+:::
+
+
+The plots below show RBF SVM decision boundaries fitted with three different values of `gamma` (C = 1 in all cases):
+
+```{python}
+#| label: ex-fire-gamma
+
+fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.2, fig_size_y + 0.5))
+_plot_diag_regions(axes[0], _svc_g_low,  'RBF SVM ($\\gamma$ = 0.1)')
+_plot_diag_regions(axes[1], _svc_g_mid,  'RBF SVM ($\\gamma$ = 1.5)')
+_plot_diag_regions(axes[2], _svc_g_high, 'RBF SVM ($\\gamma$ = 20)')
+handles, labels = axes[0].get_legend_handles_labels()
+fig.legend(handles, labels, loc='lower center', ncol=2, fontsize=9,
+           bbox_to_anchor=(0.5, -0.05))
+plt.tight_layout(rect=[0, 0.12, 1, 1])
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Exercise 4
+
+a) Looking at the three RBF SVM plots above. As $\gamma$ increases, does variance increase or decrease? What about potential overfitting? What evidence do you see in the plot? 
+
+b) How would you select the best value of $\gamma$ in practice taking into account the additional hyperparameter $C$?
+:::
+
+:::{.callout-tip collapse="true"}
+## Answers
+a) We can see that as $\gamma$ increases, the variance of the model also does. This means that as $\gamma$ increases potential overfitting increases. We can see this because the decision boundary for higher $\gamma$ wraps tightly around individual training points rather than capturing the smooth band structure of the data. The model has essentially memorized the training set and might generalize poorly to new sites. 
+
+b) The best $\gamma$ should be chosen using **cross-validation** on the training data (e.g., `GridSearchCV`) while simultaneously comparing with different values of $C$.
+
+:::
+
+<!-- 
+A fire management agency tells you that predictions must be **explainable to non-technical field staff** — meaning a ranger in the field should be able to understand *why* a site was flagged as high risk, not just *that* it was flagged. For example, a logistic regression could say "this site was flagged because its stand age is high and its precipitation is moderate, and the model assigns high weight to both." A random forest could say "stand age was the most important variable overall." An RBF SVM cannot offer this kind of explanation — the prediction is based on similarity to support vectors in a transformed space that has no intuitive meaning.
+
+
+:::{.callout-tip}
+## Exercise 4
+The agency now tells you they want to use the model not just to flag high-risk sites for fuel treatment, but also to write a report for state legislators explaining *which landscape characteristics drive re-burning risk*. Does this change your recommendation? Which model is best suited for this purpose?
+:::
+
+:::{.callout-tip collapse="true"}
+## Answers
+
+Yes, this changes the recommendation. Flagging sites for fuel treatment only requires accurate predictions; explaining *why* sites are at risk requires a model whose structure is directly interpretable. For the legislators' report, **logistic regression with an interaction term** ($X_1 \times X_2$) becomes the strongest choice: adding this term gives the model enough flexibility to capture the non-linear pattern (recovering much of the accuracy lost by the plain logistic regression), while its coefficients still have a direct interpretation ("sites with intermediate stand age and intermediate precipitation have the highest predicted re-burning risk"). The random forest can only report which variable was more important overall, without the kind of quantified, directional statement a legislative report typically requires. In practice, the agency might maintain two models: a random forest for operational site flagging and a logistic regression with interaction terms for reporting and policy communication.
+::: -->
+
 
 <!-- ## Appendix: what is a kernel? {#sec-kernel-appendix}
 
