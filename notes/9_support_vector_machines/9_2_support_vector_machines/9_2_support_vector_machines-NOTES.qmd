@@ -421,7 +421,7 @@ where $\gamma$, $r$ and $d$ are hyperparameters.
 
 The polynomial kernel captures interactions and powers of the original features in a similar way as our two previous examples. A higher degree $d$ allows the boundary to bend and curve more.
 
-**Hyperparameters**  :
+**Hyperparameters**:
 
 | Parameter | What it controls | Default |
 |:----------|:----------------|:-------:|
@@ -431,7 +431,6 @@ The polynomial kernel captures interactions and powers of the original features 
 | `coef0` ($r$)| controls influence of high vs low-degree polynomial | `1` |
 
 The parameters `degree` and `C` are usually the main parameters to tune. However, the next example shows how a single parameter can greatly change the decision boundary:
-
 
 
 ```{python}
@@ -463,18 +462,21 @@ plt.close()
 
 ### Radial (RBF) kernel
 
-$$K(x_i, x_j) = \exp\!\left(-\gamma \,\|x_i - x_j\|^2\right)$$
+The radial basis function (RBF)  kernel is given by:
+
+$$K(x_i, x_j) = \exp\!\left(-\gamma \,\|x_i - x_j\|^2\right).$$
 
 The RBF kernel measures proximity: nearby observations are considered similar and each training point's influence drops off with distance, producing very local and flexible boundaries.
 
-**Hyperparameters** (`SVC(kernel='rbf', ...)`) :
+**Hyperparameters**:
 
 | Parameter | What it controls | Default |
 |:----------|:----------------|:-------:|
-| `gamma` | How quickly influence decays with distance; larger values → more local, more flexible boundary → higher risk of overfitting | `'scale'` |
 | `C` | Penalty for margin violations | `1.0` |
+| `gamma` | How quickly influence decays with distance; larger values associated with more local fitting | `'scale'` |
 
-The RBF kernel is the most flexible of the three and is often the best default choice when the boundary shape is unknown. Large `gamma` can lead to overfitting — `C` and `gamma` should always be tuned together via cross-validation.
+
+The RBF kernel is the most flexible of the three and is often the best default choice when the boundary shape is unknown. It also has less hyperparamters so it is easier to tune. Large `gamma` can lead to overfitting, and `C` and `gamma` should always be tuned together via cross-validation.
 
 ```{python}
 #| label: rbf-svm
@@ -488,7 +490,7 @@ plt.show()
 plt.close()
 ```
 
-The RBF kernel adapts tightly to the circular structure of the data, producing a smooth, nearly circular decision boundary.
+The RBF kernel adapts tightly to the circular structure of the data, producing a smooth, nearly circular decision boundary. It is the default SVM kernel unless we have some domain knowledge suggesting this is the right approach. 
 
 :::{.callout-tip}
 ## Check-in
