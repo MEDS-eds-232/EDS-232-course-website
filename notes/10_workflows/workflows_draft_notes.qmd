@@ -1,4 +1,9 @@
-I want this lesson to be mostly about data exploration and preparation for ML. It follows chapter 2 from Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow by Aurélien Géron.
+
+This lesson is based on *Chapter 2: End-to-End Machine Learning Project*  from the Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow book.
+
+
+This lesson builds on, adapts and includes excerpts from the ML Project Checklist by Aurélien Géron publicly avaiblable through their [`handson-ml3` GitHub repository](https://github.com/ageron/handson-ml3/blob/main/ml-project-checklist.md).
+
 
 
 ## End-to-end workflows
@@ -9,11 +14,13 @@ The main steps we shouold go through when implementing a ML project are:
 2. Get the data and do a preliminary exploration
 3. Create a representative test set and lock it away
 3. Explore the train data to gain insights
-4. Prepare train data for ML algorithms
-5. Try out different candidate models and estimate accuracy metrics with CV
-6. Select a model and fine-tune it
-7. Evaluate it on test set
-8. Present solutions
+4. Experiment with attirbute combinations
+5. Prepare train data for ML algorithms
+6. Try out different candidate models and estimate accuracy metrics with CV
+7. Go back to the drawing board if needed
+8. Select a model and fine-tune it
+9. Evaluate model on test set
+10. Present your results!
 
 
 We'll dive deeper into some of these steps.
@@ -21,8 +28,6 @@ We'll dive deeper into some of these steps.
 ## Understand the big picture
 
 This step is all about understanding the framing of your project, you should ask your team questions such as:
-
-*This list has been adapted from Appendix B: Machine Learning Project Checklist*
 
 - Clearly define the objective 
 - How will the results be used?
@@ -36,6 +41,8 @@ This step is all about understanding the framing of your project, you should ask
 - What assumptions have been made so far?
 - Verify the assumptions if possible.
 
+For simplicity, for the rest of the section we will assume we are in the supervised scenario. But most steps also apply for unsupervised problems.
+
 [IDEA: maybe I want this to be a scenario where people have to extract some of this information.]
 
 [CLAUDE: add some examples of objectives for ML workflows in env science and management]
@@ -46,12 +53,51 @@ After you get the data, we can open it and do some superficial exploration. If y
 - What is the data type of each variable? 
 - Which are categorical and which numerical?
 - If this is a supervised problem, which is the target variable?
+- If there are target classes, are any of them rare?
 - Are there any variables with a lot of missing values? 
 - Do the data distributions make sense? 
 - Do you understand how each variable was computed?
 
 ## Create a representative test set and lock it away
 
+We have previously discussed the importance of keeping the test set unseen and locked away to prevent data leakage (inadvertently tuning our model to the test set). The test set should only be used to assess the final performance of our model and not to influence any modeling decisions. This way, the test set it is truly representative of how our model will perform on new, unseen data. 
+
+Typically, we set aside 20% or 30% of the data for testing, but if your dataset is massive a smaller percentage will probably be ok. 
+
+For the implementation, we usually use the function `train_test_split` from `sklearn`. Setting a `random_state` in this function ensures that we can always reproduce the same train-test split. If there are rare target classes or you want certain features to be proportionally represented in the test set, you can indicate so through the `stratify` parameter. 
+
+[CLAUDE: we need here an example of the distribution of the target class in the test set with and without the stratified parameter]
+
+## Explore the train data to gain insights
+
+The main goals for this step are to (1) identify any transformations or cleaning that may be needed for the data and (2) identify any promising predictors, and (3) brainstorm if there are additional features we may want to compute. 
+
+For each variable, we should start by studying its characteristics:
+
+- Name
+- Type (categorical, int/float, bounded/unbounded, text, structured, etc.)
+- % of missing values
+- Noisiness and type of noise (stochastic, outliers, rounding errors, etc.)
+- Possibly useful for the task?
+- Type of distribution (Gaussian, uniform, logarithmic, etc.)
+
+If there are not too many predictors, it can be useful to plot each one (or at least the most promising ones) against the target variable. This may uncover noise or errors in the data and iluminate whether data cleaning or transformation is needed. Plots may also show strong correlations that can give us an idea of which predictors might be best to keep. 
+
+In addition, we may also want to study the correlations between the predictors and target variables using the `corr()` method. The correlation coefficient ranges from -1 to 1 and
+
+- when it is close to 1, there is a strong positive linear correlation,
+- when it is close to -1, there is a strong negative linear correlation.
+- when it is close to 0, there is no linear correlation.
+
+Remember the correlation here is linear! There may be other kinds of correlations that may not be captured. 
+
+[CLAUDE: we need here an exercise with results from plots and correlations where we have students look at them and come up with takeaways]
+
+## Experiment with attirbute combinations
+
+In this step we consider 
+
+[CLAUDE: we also need here ]
 
 Generally, two things can go wrong when we implement an ML model: "bad algorithm" or "bad data". Let's see some of the challenges that you can encounter in these two categories:
 
