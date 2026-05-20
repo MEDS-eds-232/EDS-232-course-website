@@ -710,7 +710,7 @@ Check-in
 </div>
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p>Which predictors appear to be the most important (largest absolute coefficient at low <span class="math inline">\(\lambda\)</span>) in the coefficient profile above?</p></li>
+<li><p>Which predictors appear most important (coefficient’s magnitude remains large as <span class="math inline">\(\lambda\)</span> increases, i.e.&nbsp;are most resistant to shrinkage)?</p></li>
 <li><p>Suppose you have fit ridge regression at a grid of <span class="math inline">\(\lambda\)</span> values and obtained a different set of coefficient estimates for each. What method could you use to select a good value of <span class="math inline">\(\lambda\)</span>?</p></li>
 </ol>
 </div>
@@ -728,13 +728,9 @@ Discussion
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><p><code>precip</code>, <code>temp</code>, <code>forest_cover</code>, and <code>soil_N</code> have the largest magnitudes at low <span class="math inline">\(\lambda\)</span>, so they appear to be the most important predictors. <code>aspect</code> and <code>canopy</code> seem to be irrelevant as they stay near zero across the entire range.</p></li>
-<li><p>Use <span class="math inline">\(k\)</span>-fold cross-validation:</p></li>
-<li><p>For each candidate <span class="math inline">\(\lambda\)</span> in a grid (e.g., <span class="math inline">\(10^{-3}\)</span> to <span class="math inline">\(10^6\)</span> on a log scale), fit ridge regression on the training folds and compute the mean squared error (MSE) on the held-out fold.</p></li>
-<li><p>Average the MSE across all <span class="math inline">\(k\)</span> folds to get the CV-MSE for that <span class="math inline">\(\lambda\)</span>.</p></li>
-<li><p>Select the <span class="math inline">\(\lambda\)</span> that minimizes the CV-MSE. This is the value that produces the best out-of-sample prediction accuracy.</p></li>
+<li><p><code>precip</code>, and <code>temp</code> retain the largest coefficients as <span class="math inline">\(\lambda\)</span> increases, so they appear to be the most important predictors. <code>aspect</code> and <code>canopy</code> seem to be irrelevant as they stay near zero across the entire range.</p></li>
+<li><p>Use <span class="math inline">\(k\)</span>-fold cross-validation!</p></li>
 </ol>
-<p>Importantly, the test set should not be used to select <span class="math inline">\(\lambda\)</span> — it should only be used for final evaluation after <span class="math inline">\(\lambda\)</span> has been chosen via cross-validation on the training data.</p>
 </div>
 </div>
 </div>

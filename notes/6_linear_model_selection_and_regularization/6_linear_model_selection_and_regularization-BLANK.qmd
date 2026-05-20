@@ -526,7 +526,7 @@ plt.close()
 ::: {.column width="45%"}
 
 ::: {.teal-text .body-text-m}
-1. Which predictors appear most important (largest absolute coefficient at low $\lambda$)?
+1. Which predictors appear most important (retain the largest coefficients as $\lambda$ increases, i.e. are most resistant to shrinkage)?
 
 2. You have fit ridge at a grid of $\lambda$ values and obtained a different set of coefficient estimates for each. What method would you use to select a good $\lambda$?
 :::
@@ -571,20 +571,22 @@ plt.close()
 
 ::: {.column width="45%"}
 
-::: {.teal-text .body-text-m}
-1. Most important predictors?
-2. How to select $\lambda$?
+::: {.teal-text}
+1. Which predictors appear most important (coefficient's magnitude remains large as $\lambda$ increases, i.e. are most resistant to shrinkage)?
+
+2. You have fit ridge at a grid of $\lambda$ values and obtained a different set of coefficient estimates for each. What method would you use to select a good $\lambda$?
+:::
 :::
 
 ::: {.body-text-s}
-1. `precip`, `temp`, `forest_cover`, and `soil_N` have the largest magnitudes at low $\lambda$. `aspect` and `canopy` stay near zero across the entire range, likely irrelevant.
+1. `precip`, and `temp` retain the largest coefficients as $\lambda$ increases, so they appear to be the most important predictors. `aspect` and `canopy` seem to be irrelevant as they stay near zero across the entire range.
 
 2. Use $k$-fold cross-validation!
 :::
 
 :::
 
-::::
+:::
 
 ---
 
