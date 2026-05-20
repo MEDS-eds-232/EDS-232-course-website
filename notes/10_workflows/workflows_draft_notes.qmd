@@ -1,3 +1,58 @@
+I want this lesson to be mostly about data exploration and preparation for ML. It follows chapter 2 from Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow by Aurélien Géron.
+
+
+## End-to-end workflows
+
+The main steps we shouold go through when implementing a ML project are:
+
+1. Understand the big picture
+2. Get the data and do a preliminary exploration
+3. Create a representative test set and lock it away
+3. Explore the train data to gain insights
+4. Prepare train data for ML algorithms
+5. Try out different candidate models and estimate accuracy metrics with CV
+6. Select a model and fine-tune it
+7. Evaluate it on test set
+8. Present solutions
+
+
+We'll dive deeper into some of these steps.
+
+## Understand the big picture
+
+This step is all about understanding the framing of your project, you should ask your team questions such as:
+
+*This list has been adapted from Appendix B: Machine Learning Project Checklist*
+
+- Clearly define the objective 
+- How will the results be used?
+- What are the current solutions or workarounds (if any)?
+- How should you frame this problem? Classification/regression, supervised/unsupervised.
+- How will performance be measured in the context of the problem? 
+- What would be the minimum performance needed to reach the objective?
+- What ML performance metric will be used to measure performance?
+- What are comparable problems? Can you reuse experience or tools?
+- Is human expertise available?
+- What assumptions have been made so far?
+- Verify the assumptions if possible.
+
+[IDEA: maybe I want this to be a scenario where people have to extract some of this information.]
+
+[CLAUDE: add some examples of objectives for ML workflows in env science and management]
+
+## Get the data and do a preliminary exploration
+
+After you get the data, we can open it and do some superficial exploration. If you are wroking with tabular data, this can be done using `pandas.DataFrame` methods such as `head()`, `info()`, `value_counts()`, `describe()`, and `hist()`. The goal here is to get a high-level understanding of the variables in your dataset and answer questions such as:
+- What is the data type of each variable? 
+- Which are categorical and which numerical?
+- If this is a supervised problem, which is the target variable?
+- Are there any variables with a lot of missing values? 
+- Do the data distributions make sense? 
+- Do you understand how each variable was computed?
+
+## Create a representative test set and lock it away
+
+
 Generally, two things can go wrong when we implement an ML model: "bad algorithm" or "bad data". Let's see some of the challenges that you can encounter in these two categories:
 
 
