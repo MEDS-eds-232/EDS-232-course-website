@@ -420,7 +420,7 @@ The polynomial kernel is given by:
 
 $$K(x_i, x_j) = (\gamma \langle x_i, x_j \rangle + r)^d,$$
 
-where $\gamma$, $r$ and $d$ are hyperparameters.
+where $\gamma$, $r$ (`coef0`) and $d$ (`degree`) are hyperparameters.
 
 The polynomial kernel captures interactions and powers of the original features in a similar way as our two previous examples. A higher degree $d$ allows the boundary to bend and curve more.
 
@@ -430,8 +430,8 @@ The polynomial kernel captures interactions and powers of the original features 
 |:----------|:----------------|:-------:|
 | `C` | Penalty for margin violations | `1` |
 | `degree` | Degree of the polynomial; higher values allow more curved boundaries and increase risk of overfitting | `3` |
-| $\gamma$ | scales the inner product | `scale` |
-| `coef0` ($r$)| controls influence of high vs low-degree polynomial | `1` |
+| `gamma` | scales the inner product | `scale` |
+| `coef0`| controls influence of high vs low-degree polynomial | `1` |
 
 The parameters `degree` and `C` are usually the main parameters to tune. However, the next example shows how a single parameter can greatly change the decision boundary:
 
