@@ -21,14 +21,19 @@ np.random.seed(42)
 n = 500
 
 # ── Predictors ───────────────────────────────────────────────────────────────
-salinity_ppt      = np.random.uniform(1, 35, n)
-water_depth_cm    = np.random.uniform(5, 150, n)
+# Mildly right-skewed: mode ~12 ppt, mean ~18 ppt — gives coverage on both sides
+# of the sequestration optimum so the arch is visible in scatter plots
+salinity_ppt      = np.clip(np.random.gamma(3, 6, n), 0.5, 35)
+# Right-skewed: most plots are shallow, tail of deeper sites
+water_depth_cm    = np.clip(np.random.lognormal(2.8, 0.6, n), 5, 150)
+# Right-skewed: large tidal ranges are uncommon
 tidal_range_cm    = np.clip(np.random.lognormal(3.5, 0.8, n), 5, 300)
 bulk_density_gcm3 = np.random.uniform(0.1, 1.5, n)   # pure noise — no true effect
 vegetation_type   = np.random.choice(
     ['cordgrass', 'bulrush', 'pickleweed', 'sedges'],
     size=n, p=[0.35, 0.30, 0.25, 0.10])
 
+# Uniform: clearest linear signal in scatter plots — kept flat to show the trend
 soil_organic_raw = np.random.uniform(2, 40, n)
 soil_organic_pct = soil_organic_raw.copy().astype(float)
 soil_organic_pct[np.random.choice(n, int(0.20 * n), replace=False)] = np.nan
@@ -77,9 +82,8 @@ df_train = X_train.copy()
 df_train['carbon_seq_tco2'] = y_train
 ```
 
-This lesson is based on *Chapter 2: End-to-End Machine Learning Project* from the Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow book.
 
-This lesson builds on, adapts and includes excerpts from the ML Project Checklist by Aurélien Géron publicly available through their [`handson-ml3` GitHub repository](https://github.com/ageron/handson-ml3/blob/main/ml-project-checklist.md).
+This lesson builds on, adapts and includes excerpts from the ML Project Checklist by Aurélien Géron publicly available through their [`handson-ml3` GitHub repository](https://github.com/ageron/handson-ml3/blob/main/ml-project-checklist.md) and on topics covered in *Chapter 2: End-to-End Machine Learning Project* from the Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow book.  All example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
 
 <!--
 RESOURCES:
@@ -291,6 +295,8 @@ Report both the metric value and its practical meaning in context: what does a M
 
 ## Exercise: Wetland carbon credit modeling
 
+*Note: the dataset and scenario below are synthetic and designed for pedagogical purposes. The variable relationships do not necessarily reflect real ecological dynamics.*
+
 A state environmental agency in Oregon is developing a **wetland carbon credit program** to incentivize private landowners to restore degraded coastal marshes. Under the program, landowners receive financial credits proportional to the carbon their restored wetlands sequester. Predictions of sequestered carbon directly affect how much money flows to each participant. The agency wants to build a model that predicts annual carbon sequestration from measurable site characteristics.
 
 The agency's field teams spent three seasons surveying 500 coastal wetland plots. For each plot they recorded:
@@ -326,13 +332,14 @@ Another question worth considering:
 - **Is over- or under-prediction more costly?** Over-predicting sequestration could mean issuing invalid credits (financial and reputational risk to the agency); under-predicting means landowners are under-compensated. This asymmetry may inform how we communicate and interpret model errors.
 :::
 
-After consulting with the agency, your team receives the following answers to the open questions:
+After consulting with the agency, your team decides that the MSE will be used to evaluate model performance and an MSE of at less than 9 (tCO₂-eq/ha/yr)² will be considered an improvement on the reviewer estimates. 
 
+<!-- 
 - **Performance metric**: MSE will be used to evaluate model performance.
 - **Minimum acceptable performance**: The current manual assignment process has an estimated inter-reviewer MSE of approximately 9 (tCO₂-eq/ha/yr)² across previously monitored plots. The model should improve on this to be useful.
 - **Error asymmetry**: The agency considers over- and under-prediction roughly equally costly — both cause financial harm, in opposite directions.
 
-With these answers in hand, we proceed to load and explore the data.
+With these answers in hand, we proceed to load and explore the data. -->
 
 We initiate data exploration. After loading the data, the table below shows the output for `df.info()`.
 
@@ -414,17 +421,15 @@ Looking at the distributions of the numerical predictors above, should you plan 
 
 Yes, scaling is needed. The predictors operate on very different numeric scales:
 
-- `salinity_ppt`: roughly 1–35
-- `water_depth_cm`: roughly 5–150
-- `tidal_range_cm`: roughly 5–300, and right-skewed
+- `salinity_ppt`: roughly 0.5–35, 
+- `water_depth_cm`: roughly 5–150,
+- `tidal_range_cm`: roughly 5–300,
 - `soil_organic_pct`: roughly 2–40
 - `bulk_density_gcm3`: roughly 0.1–1.5
 
-Without scaling, models that rely on distances or that assign implicit weights based on coefficient magnitude (e.g., linear regression, SVMs, KNN) would give disproportionate influence to variables with larger numeric ranges like `tidal_range_cm` and `water_depth_cm`, regardless of their actual predictive value.
+Without scaling, models sensitive to feature magnitude (e.g., SVMs, KNN) would give disproportionate weight to variables with larger numeric ranges like `tidal_range_cm` and `water_depth_cm`, regardless of their actual predictive value. Three of the five predictors are also right-skewed, meaning a handful of extreme observations could have an outsized influence. Standardization (zero mean, unit variance) addresses both issues.
 
-`tidal_range_cm` also has a right-skewed distribution, meaning a small number of plots with very large tidal ranges could have an outsized effect. Standardization (zero mean, unit variance) addresses both the scale differences and reduces the pull of those extreme values.
-
-The target variable `carbon_seq_tco2` does not need to be scaled.
+Remember: the target variable `carbon_seq_tco2` does not need to be scaled.
 :::
 
 ```{python}
