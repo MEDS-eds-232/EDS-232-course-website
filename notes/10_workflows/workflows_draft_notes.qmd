@@ -4,23 +4,28 @@ This lesson is based on *Chapter 2: End-to-End Machine Learning Project*  from t
 
 This lesson builds on, adapts and includes excerpts from the ML Project Checklist by Aurélien Géron publicly avaiblable through their [`handson-ml3` GitHub repository](https://github.com/ageron/handson-ml3/blob/main/ml-project-checklist.md).
 
+<!-- 
+RESOURCES:
+- https://developers.google.com/machine-learning/crash-course/numerical-data/scrubbing
+- https://developers.google.com/machine-learning/crash-course/numerical-data/binning
+ -->
 
 
 ## End-to-end workflows
 
-The main steps we shouold go through when implementing a ML project are:
+Some core steps we should go through when implementing a ML project are:
 
 1. Understand the big picture
 2. Get the data and do a preliminary exploration
 3. Create a representative test set and lock it away
-3. Explore the train data to gain insights
-4. Experiment with attirbute combinations
-5. Prepare train data for ML algorithms
-6. Try out different candidate models and estimate accuracy metrics with CV
-7. Go back to the drawing board if needed
-8. Select a model and fine-tune it
-9. Evaluate model on test set
-10. Present your results!
+4. Explore the train data to gain insights. 
+5. Consider attribute combinations
+6. Prepare train data for ML algorithms
+7. Try out different candidate models and estimate accuracy metrics with CV
+8. Go back to the drawing board if needed
+9. Select a model and fine-tune it
+10. Evaluate model on test set
+🌟. Present your results!
 
 
 We'll dive deeper into some of these steps.
@@ -32,54 +37,54 @@ This step is all about understanding the framing of your project, you should ask
 - Clearly define the objective 
 - How will the results be used?
 - What are the current solutions or workarounds (if any)?
-- How should you frame this problem? Classification/regression, supervised/unsupervised.
+- How should you frame this problem? Classification/regression, supervised/unsupervised?
 - How will performance be measured in the context of the problem? 
-- What would be the minimum performance needed to reach the objective?
-- What ML performance metric will be used to measure performance?
+- What ML performance metric will be used?
+- What would be the minimum performance needed to reach the objective? Is it subject to some minimum performance on another metric?
 - What are comparable problems? Can you reuse experience or tools?
-- Is human expertise available?
+- Are experts in the domain subject available?
 - What assumptions have been made so far?
 - Verify the assumptions if possible.
 
 For simplicity, for the rest of the section we will assume we are in the supervised scenario. But most steps also apply for unsupervised problems.
 
-[IDEA: maybe I want this to be a scenario where people have to extract some of this information.]
+## Get the data and do preliminary exploration
 
-[CLAUDE: add some examples of objectives for ML workflows in env science and management]
+After you get the data, the next step is to open it and do some preliminary exploration. If you are wroking with tabular data, this can be done using `pandas.DataFrame` methods such as `head()`, `info()`, `value_counts()`, `describe()`, and `hist()`. The goal here is to get a high-level understanding of the variables in your dataset and answer questions such as:
 
-## Get the data and do a preliminary exploration
-
-After you get the data, we can open it and do some superficial exploration. If you are wroking with tabular data, this can be done using `pandas.DataFrame` methods such as `head()`, `info()`, `value_counts()`, `describe()`, and `hist()`. The goal here is to get a high-level understanding of the variables in your dataset and answer questions such as:
 - What is the data type of each variable? 
-- Which are categorical and which numerical?
-- If this is a supervised problem, which is the target variable?
-- If there are target classes, are any of them rare?
+- Which variables are categorical and which numerical?
+- Which is the target variable?
+- If the target variable is categorical, is there a class imbalance?
 - Are there any variables with a lot of missing values? 
-- Do the data distributions make sense? 
+- Do the distributions for each variable make sense? 
 - Do you understand how each variable was computed?
+
 
 ## Create a representative test set and lock it away
 
-We have previously discussed the importance of keeping the test set unseen and locked away to prevent data leakage (inadvertently tuning our model to the test set). The test set should only be used to assess the final performance of our model and not to influence any modeling decisions. This way, the test set it is truly representative of how our model will perform on new, unseen data. 
+We have previously discussed the importance of keeping the test set unseen and locked away to prevent data leakage (inadvertently tuning our model to the test set). The test set should only be used to assess the final performance of our model and not to influence any modeling decisions. This way, the test set it is truly representative of how the final model will perform on new, unseen data. 
 
-Typically, we set aside 20% or 30% of the data for testing, but if your dataset is massive a smaller percentage will probably be ok. 
+Typically, we set aside 20% or 30% of the data for testing. If your dataset is massive, a smaller percentage will probably be ok. 
 
-For the implementation, we usually use the function `train_test_split` from `sklearn`. Setting a `random_state` in this function ensures that we can always reproduce the same train-test split. If there are rare target classes or you want certain features to be proportionally represented in the test set, you can indicate so through the `stratify` parameter. 
-
-[CLAUDE: we need here an example of the distribution of the target class in the test set with and without the stratified parameter]
+For the implementation, we usually use the function `train_test_split` from `sklearn`. Setting a `random_state` in this function ensures that we can always reproduce the same train-test split. If there are rare target classes or you want certain categorical features to be proportionally represented in the test set, you can indicate so through the `stratify` parameter. 
 
 ## Explore the train data to gain insights
 
-The main goals for this step are to (1) identify any transformations or cleaning that may be needed for the data and (2) identify any promising predictors, and (3) brainstorm if there are additional features we may want to compute. 
+The main goals for this step are to 
+
+1. identify any transformations or cleaning that may be needed for the data, 
+2. identify any promising predictors, and 
+3. brainstorm if there are additional features we may want to compute. 
 
 For each variable, we should start by studying its characteristics:
 
 - Name
 - Type (categorical, int/float, bounded/unbounded, text, structured, etc.)
 - % of missing values
-- Noisiness and type of noise (stochastic, outliers, rounding errors, etc.)
+- Noisiness and type of noise (outliers, rounding errors, etc.)
 - Possibly useful for the task?
-- Type of distribution (Gaussian, uniform, logarithmic, etc.)
+- Type of distribution 
 
 If there are not too many predictors, it can be useful to plot each one (or at least the most promising ones) against the target variable. This may uncover noise or errors in the data and iluminate whether data cleaning or transformation is needed. Plots may also show strong correlations that can give us an idea of which predictors might be best to keep. 
 
@@ -91,27 +96,89 @@ In addition, we may also want to study the correlations between the predictors a
 
 Remember the correlation here is linear! There may be other kinds of correlations that may not be captured. 
 
-[CLAUDE: we need here an exercise with results from plots and correlations where we have students look at them and come up with takeaways]
 
-## Experiment with attirbute combinations
+## Consider attirbute combinations
 
-In this step we consider 
+In this step we consider if there are any combinations of our predictors that could produce a more informative feature. This is not a "one and done" process: as we are developing the model, we may come back and reassess whether there are new features that are worth including. Whenever possible, make sure your decisions are backed up by domain expertise. 
 
-[CLAUDE: we also need here ]
+## Prepare train data for ML algorithms
 
-Generally, two things can go wrong when we implement an ML model: "bad algorithm" or "bad data". Let's see some of the challenges that you can encounter in these two categories:
+Before doing any transformation, recall that you should always keep a backup of your raw data. 
+
+### Scrubbing
+
+Having high quality training data is crucial. A few common issues in your observations may be:
+
+- ommitted values,
+- duplicate observations,
+- outliers.
+
+Potential solutions include:
+
+- remove the individual observations;
+- replace the missing or outlier values to some value (Imputation: use zero, median, mean, KNN value, etc);
+- get rid of the predictor, instead of modifying or deleting observations. 
+
+### Scaling
+
+<!-- https://developers.google.com/machine-learning/crash-course/numerical-data/normalization -->
+
+Many ML models perform better when the features are on similar ranges. Since we are moving towards comparing performance from a few different models, it can be useful to scale the features. The target value does not need to be scaled.
+
+There are different methods for scaling, we have generally been using **standardization** (`StandardScaler` in `sklearn`), where values are transformed by subtracting the mean (so standardized values always have zero mean) and dividing by the standard deviation (so standardized values have unite variance). It does not bound values to a specific range.
+
+Linear scaling, clipping, and log-scaling are a few other ways you may want to scale your data. You can read a [brief overview about each here](https://developers.google.com/machine-learning/crash-course/numerical-data/normalization).
 
 
-## Garbage in, garbage out
+### One-hot-encoding
 
-Training dataset is...
+This is a transformation applied to categorical predictors. Suppose you have a variable called `season` with categories `savanna`, `rainforst`, `grassland`, and `desert`. Most ML algorithms prefer to work with numberical variables, so we can transfor this variable into numbers. 
+
+An easy way would be to assign each with a number:
+
+- `savanna` -> 0
+- `rainforest` -> 1
+- `grassland` -> 2
+- `desert` -> 3
+
+One issue with this approach is that a model would treat the consecutive numbers as a numerical variable that contains information about the relative order between them. Instead, we create a binary feature per class: the new feature equals 1 when the observation belongs to the class, and 0 if the observation does not belong to the class. This process is called **one-hot encoding**. 
+
+For example, the one-hot encoding for the biome classes would look like:
+
+[CLAUDE: create table with one-hot encoding of the classes]. 
+
+This kind of matrix is caller a **sparse matrix** since most if it is full of zeros (there is only one 1 per row). In the implementation this is saved as a special class that optimizes for memory, so the computer doesn't have to store all those zeros. 
+
+If a categorical variable has *many* possible values for its classes, then one-hot encoding wil lproduce a large number of features. In this case, you can consider whether replacing some of it with a numerical alternative is more convenient.
+
+## Try out different candidate models and estimate accuracy metrics with CV
+
+For real-world datasets, data pre-processing may take a long time! More so, when you are considering adding or removing features, you may need to go back to the previous steps and assess whether your dataset is robust, clean, and informative enough. But once you have a solid training set foundation, you can move on with the next steps: 
+
+1. select a few candidate models that make sense with the problem set-up
+2. train them without spending too much time tweaking the hyperparameters (you may even want to use it with the default parameters)
+3. estimate your accuracy metrics with CV or explore ROC curves
+
+## Go back to the drawing board if needed
+
+If, at this point, your results are bad, there are generally two things that could have gone wrong: "bad model" or "bad data". Let's see some of the challenges that you can encounter in these two categories.
+
+### Problems with the data
+
+Consider if the poor performance of the model may be coming froma training set that may have some of these problems. 
+
+[CLAUDE: please make this into a table]
 
 - **too small**: It is not always easy or cheap to get extra training data but always, but generally more high-quality training data will make your models perform better. Potential solution: collect more high-quality training data.
 - **nonrepresentative**: the training data must be representative of the cases you want to generalize to. If the sample is too small, you will have *sampling noise*, but even if it's large, if it's not representative you will have *sampling bias*. Potential solutions: if possible, collect more data with better sampling.
 - **poor quality**: has too many outliers, errors, and missing data, making it harder for the algorithm to detect the underlying pattern. Potential solutions: remove outliers or correct errors, for observations missing features, decide whether to remove these features, remove the observations, fill in the missing value, or compare multiple approaches.
-- **full of irrelevant features**: irrelevant features can add too much noise for the model to work well. Potential solutions: select the most useful features to train on among existing ones (feature selection); combine existing features to produce more useful ones (feature extraction); gather new data to add features
+- **full of irrelevant features**: irrelevant features can add too much noise for the model to work well. Potential solutions: select the most useful features to train on among existing ones (feature selection); combine existing features to produce more useful ones (feature extraction); or even gather new data to add features.
 
-## Problems with algorithms
+### Problems with models
+
+Consider if the poor performance of the model may be coming froma a model that may have some of these problems.
+
+[CLAUDE: please make this into a table]
 
 - **Overfitting**: when the model starts detecting patterns in the noise itself, fitting the trainiing data too closely and resulting in poor generalization. 
 
@@ -127,3 +194,39 @@ Potential solutions:
 - choose a more flexible model
 - Add better features to you data
 - Adjust the hyperparameters in the model to allow more variance
+
+Whatever the challenge is, you can go back and experiment with different feature combinations and models. 
+
+## After model selection 
+
+Finally, after you have selected one or a couple of target models the steps to the finish line are:
+
+9. Select a model and fine-tune it
+10. Evaluate model on test set
+🌟. Present your results!
+
+
+
+
+
+
+
+
+
+## Exercise
+
+DATA FOR EXERCISES: the exercises will run a scenario for a regression problem. The data is syntheic and should have 6 predictors (4 numerical, 1 categorical) and 1 numerical response target variable. One of the numerical predictors should have 20% of missing values. The predictors should come in different scales and at least one (not the one with the missing values) should be tail-heavy. We will end up standardizing all of them. One of the predictors (not the one with the missing values) should be pure noise, another one should have a very low correlation with the target, but actually have a non-linear relation with it. There should also be two variables that could be combined to make an additional feature that would make more sense. 
+
+EXERCISE 1: This is an exercise of an environmental scenario of a regression problem coming from business and sustainability or environmental politics and policy. It should include enough information (succicntly) to answer all the questions previously stated, except for the ones related to performance, but without immediately giving away the answer. The question for students would be: which other questions would you need to know before starting working on data analysis and model development? And the answers shouldk be the questions related to performance.
+
+EXERCISE 2: This is a follow up to the scenario where students are presented with a few different ouputs from the preliminary exploration: The outputs from `df.info()`, `df.hist()` and `df.describe()`. From these students have to identify which is the response variable, how many categorical and how many numerical fatures there are. Discussion about variables with a lot of missing values.
+
+EXERCISE 3: This is a quick question about someone suggesting to standardize all of the data. The answer is that you need to separate the test set before doing the data standardization. 
+
+EXERCISE 4: here students are presented with plots of the target variable agains each predictor. And also correlation coefficients. They need to identify variables they will keep an eye on to potentially keep or remove because they might just be adding noise to the dataset.
+
+EXERCISE 5: Here students are presented with an exercise to evaluate tradeoffs about how to handle missing data in one of the features. There might not be a right or wrong answer, instead, the answer should present pros and cons of each potential solution. 
+
+EXERCISE 6: Here students are presented with the same distribution plots and asked whether they need to do scaling.
+
+EXERCISE 7: Students are asked to manually write how three observations would like when they are one-hot encoded. 
