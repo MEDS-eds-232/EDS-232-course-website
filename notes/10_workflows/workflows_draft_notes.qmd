@@ -141,7 +141,7 @@ We have previously discussed the importance of keeping the test set unseen and l
 
 Typically, we set aside 20% or 30% of the data for testing. If your dataset is massive, a smaller percentage will probably be ok.
 
-For the implementation, we usually use the function `train_test_split` from `sklearn`. Setting a `random_state` in this function ensures that we can always reproduce the same train-test split. If there are rare target classes or you want certain categorical features to be proportionally represented in the test set, you can indicate so through the `stratify` parameter.
+For the implementation, we usually use the function `train_test_split` from `sklearn`. Setting a `random_state` in this function ensures that we can always reproduce the same train-test split. For classification problems with imbalanced classes, you can pass the target vector to the `stratify` parameter to ensure class proportions are preserved in both splits.
 
 ## Explore the train data to gain insights
 
@@ -162,13 +162,15 @@ For each variable, we should start by studying its characteristics:
 
 If there are not too many predictors, it can be useful to plot each one (or at least the most promising ones) against the target variable. This may uncover noise or errors in the data and illuminate whether data cleaning or transformation is needed. Plots may also show strong correlations that can give us an idea of which predictors might be best to keep.
 
-In addition, we may also want to study the correlations between the predictors and target variables using the `corr()` method. The correlation coefficient ranges from -1 to 1 and
+In addition, we may also want to study the correlations between the predictors and target variables using the `corr()` method. Note that `corr()` only works for numerical variables. The correlation coefficient ranges from -1 to 1 and
 
 - when it is close to 1, there is a strong positive linear correlation,
 - when it is close to -1, there is a strong negative linear correlation.
 - when it is close to 0, there is no linear correlation.
 
 Remember the correlation here is linear! There may be other kinds of correlations that may not be captured.
+
+<!-- — for categorical predictors, a quick alternative is to compare the mean (or distribution) of the target within each category using box plots or group means -->
 
 
 ## Consider attribute combinations
@@ -226,7 +228,7 @@ For example, the one-hot encoding for the biome classes would look like:
 | biome = grassland  | 0 | 0 | 1 | 0 |
 | biome = desert     | 0 | 0 | 0 | 1 |
 
-This kind of matrix is called a **sparse matrix** since most of it is full of zeros (there is only one 1 per row). In the implementation this is saved as a special class that optimizes for memory, so the computer doesn't have to store all those zeros.
+When a categorical variable has many categories, the resulting one-hot matrix can be very large and contain mostly zeros (only one 1 per row). In those cases, sklearn stores the result in a memory-efficient **sparse** format that records only the positions of the 1s rather than all the zeros.
 
 If a categorical variable has *many* possible values for its classes, then one-hot encoding will produce a large number of features. In this case, you can consider whether replacing some of it with a numerical alternative is more convenient.
 
@@ -268,36 +270,42 @@ Whatever the challenge is, you can go back and experiment with different feature
 
 Finally, after you have selected one or a couple of target models the steps to the finish line are:
 
-9. Select a model and fine-tune it
-10. Evaluate model on test set
-🌟. Present your results!
+9. **Select a model and fine-tune it.** 
+
+Use cross-validation on the training set to search over hyperparameter combinations (e.g., with `GridSearchCV` ). All tuning decisions must be made using the training data only — the test set stays locked away!
+
+10. **Evaluate on the test set.** 
+
+Once hyperparameters are finalized, evaluate the model on the test set exactly once. This single number is your honest estimate of generalization performance. If it is much worse than your CV estimate, the model likely overfit during tuning.
+
+🌟 **Present your results.**
+
+Report both the metric value and its practical meaning in context: what does a MSE of X actually imply in the context of the problem? Also document the full pipeline, the choices made at each step, and any caveats about where the model may not generalize.
 
 
-## Exercises
+## Exercise: Wetland carbon credit modeling
 
-### Scenario: Wetland carbon credit modeling
+A state environmental agency in Oregon is developing a **wetland carbon credit program** to incentivize private landowners to restore degraded coastal marshes. Under the program, landowners receive financial credits proportional to the carbon their restored wetlands sequester. Predictions of sequestered carbon directly affect how much money flows to each participant. The agency wants to build a model that predicts annual carbon sequestration from measurable site characteristics.
 
-A state environmental agency in Oregon is developing a **wetland carbon credit program** to incentivize private landowners to restore degraded coastal marshes. Under the program, landowners receive financial credits proportional to the carbon their restored wetlands sequester — so accurate predictions directly affect how much money flows to each participant. The agency wants to build a regression model that predicts annual carbon sequestration from measurable site characteristics.
-
-The agency's field teams spent three seasons surveying 500 coastal wetland plots throughout the Oregon Coast Range and Willamette Valley tidal reaches. For each plot they recorded:
+The agency's field teams spent three seasons surveying 500 coastal wetland plots. For each plot they recorded:
 
 - `salinity_ppt`: mean porewater salinity (parts per thousand, ppt)
 - `water_depth_cm`: mean water column depth (cm)
-- `tidal_range_cm`: mean tidal range at the nearest gauge station (cm)
-- `soil_organic_pct`: soil organic matter content (%) — 20% of plots were inaccessible during the sampling period and did not have soil cores collected
+- `tidal_range_cm`: mean tidal range at the nearest gauge station (cm) (average difference in water level between high tide and low tide)
+- `soil_organic_pct`: soil organic matter content (%)
 - `bulk_density_gcm3`: soil bulk density (g/cm³)
 - `vegetation_type`: dominant plant guild (`cordgrass`, `bulrush`, `pickleweed`, or `mangrove`)
 
 The response variable is `carbon_seq_tco2`, the measured annual carbon sequestration rate in metric tons of CO₂-equivalent per hectare per year (tCO₂-eq/ha/yr).
 
-No existing predictive model is in place — credit values are currently assigned manually by ecologists, a process that is slow and inconsistent across reviewers.
+No existing predictive model is in place: credit values are currently assigned manually by ecologists, a process that is slow and inconsistent across reviewers.
 
 ---
 
 :::{.callout-tip}
 ## Exercise 1
 
-Read the scenario above carefully. You are about to start working on this project. List the questions about model performance you would still need to answer before beginning data analysis and model development.
+Read the scenario above carefully. You are about to start working on this project. List any questions you would still need to answer before beginning data analysis and model development.
 :::
 
 :::{.callout-tip collapse="true"}
@@ -307,13 +315,20 @@ The scenario is missing several key pieces of information about performance:
 
 - **What metric should be used?** RMSE penalizes large errors much more than MAE — this matters here because a large overestimate of carbon sequestration could result in fraudulent credits with real financial consequences. The agency needs to decide which error profile is acceptable.
 - **What is the minimum acceptable performance?** A model must meet some accuracy threshold to be legally and scientifically defensible for assigning credits. Without a benchmark, we cannot know when the model is "good enough."
-- **Is over- or under-prediction more costly?** Over-predicting sequestration could mean issuing invalid credits (financial and reputational risk to the agency); under-predicting means landowners are under-compensated. This asymmetry should inform both the choice of metric and how we interpret model errors.
 - **What is the current baseline performance?** Manual assignment by ecologists is the current approach. We should know how consistent and accurate that process is, since it defines what "good enough" means in practice.
+
+Annother question you might consider is:
+
+- **Is over- or under-prediction more costly?** Over-predicting sequestration could mean issuing invalid credits (financial and reputational risk to the agency); under-predicting means landowners are under-compensated. This asymmetry should inform both the choice of metric and how we interpret model errors.
 :::
 
 ---
 
-The code below loads the dataset. The next few exercises use its outputs to walk through the preliminary exploration steps.
+[CLAUDE:After exercise 1, give further information in the scenario answering the questions. Also, we have only covered MSE as a metric for regression, so this is the one we’d be using. Please adjust the answer to the question from exercise 1 accordingly.  ]
+
+
+
+We initiate data exploration. After loading the data, the table below shows the output for `df.info()`.
 
 ```{python}
 #| label: ex-info
@@ -322,12 +337,49 @@ The code below loads the dataset. The next few exercises use its outputs to walk
 df.info()
 ```
 
-```{python}
-#| label: ex-describe
-#| echo: false
 
-df.describe()
-```
+:::{.callout-tip}
+## Exercise 2
+
+Based on the outputs:
+
+a) How many numerical and how many categorical features are there?
+b) Are there any variables with a concerning amount of missing data? Which one(s), and roughly what percentage of observations are missing?
+:::
+
+:::{.callout-tip collapse="true"}
+## Answer
+
+a) There are **5 numerical** features (`salinity_ppt`, `water_depth_cm`, `tidal_range_cm`, `soil_organic_pct`, `bulk_density_gcm3`) and **1 categorical** feature (`vegetation_type`, shown as `object` dtype in `df.info()`).
+
+b) `soil_organic_pct` has approximately 100 missing values out of 500 rows (~20%), as visible from both `df.info()` (which shows 400 non-null entries) and `df.describe()` (which reports a count of 400). This is a substantial proportion — it warrants a deliberate decision about how to handle it rather than a default fix.
+:::
+
+---
+
+:::{.callout-tip}
+## Exercise 3
+
+Before fitting any models, a teammate opens the shared notebook and suggests the next step is to standardize the entire dataset so that all numerical features have zero mean and unit variance. What is the problem with this approach?
+:::
+
+:::{.callout-tip collapse="true"}
+## Answer
+
+This causes **data leakage**. Standardization requires computing the mean and standard deviation from the data. If those statistics are computed on the full dataset (including those that will become the held-out test rows), information from the test set contaminates the training process. 
+
+The correct procedure is:
+
+1. Split the data into train and test sets first.
+2. Compute the mean and standard deviation **only on the training set**.
+3. Apply those same values to scale both the training and test sets.
+
+This ensures that the test set remains a clean simulation of data the model has never seen.
+:::
+
+---
+Your team creates a test set on the raw data and stores it away and decides the next step is to do further exploration for the training data.
+The plots below show the histograms for each of the predictors. 
 
 ```{python}
 #| label: ex-hist
@@ -349,46 +401,29 @@ plt.close()
 ```
 
 :::{.callout-tip}
-## Exercise 2
+## Exercise 6
 
-Based on the outputs of `df.info()`, `df.describe()`, and the histograms above:
-
-a) Which variable is the response target?
-b) How many numerical and how many categorical features are there?
-c) Are there any variables with a concerning amount of missing data? Which one(s), and roughly what percentage of observations are missing?
+Looking at the distributions of the numerical predictors above, should you plan on scaling the data before fitting your models? Which predictors would most benefit from scaling, and why?
 :::
 
 :::{.callout-tip collapse="true"}
 ## Answer
 
-a) `carbon_seq_tco2` is the response target — it represents the outcome we want to predict (annual carbon sequestration rate). It is the only variable described as a measured outcome rather than a site characteristic.
+Yes, scaling is needed. The predictors operate on very different numeric scales:
 
-b) There are **5 numerical** features (`salinity_ppt`, `water_depth_cm`, `tidal_range_cm`, `soil_organic_pct`, `bulk_density_gcm3`) and **1 categorical** feature (`vegetation_type`, shown as `object` dtype in `df.info()`).
+- `salinity_ppt`: roughly 0.5–35
+- `water_depth_cm`: roughly 5–150
+- `tidal_range_cm`: roughly 5–300, and right-skewed
+- `soil_organic_pct`: roughly 2–40
+- `bulk_density_gcm3`: roughly 0.1–1.5
 
-c) `soil_organic_pct` has approximately 100 missing values out of 500 rows (~20%), as visible from both `df.info()` (which shows 400 non-null entries) and `df.describe()` (which reports a count of 400). This is a substantial proportion — it warrants a deliberate decision about how to handle it rather than a default fix.
+Without scaling, models that rely on distances or that assign implicit weights based on coefficient magnitude (e.g., linear regression, SVMs, KNN) would give disproportionate influence to variables with larger numeric ranges like `tidal_range_cm` and `water_depth_cm`, regardless of their actual predictive value.
+
+`tidal_range_cm` also has a right-skewed distribution, meaning a small number of plots with very large tidal ranges could have an outsized effect. Standardization (zero mean, unit variance) addresses both the scale differences and reduces the pull of those extreme values.
+
+The target variable `carbon_seq_tco2` does not need to be scaled.
 :::
 
----
-
-:::{.callout-tip}
-## Exercise 3
-
-Before fitting any models, a teammate opens the shared notebook and standardizes the entire dataset — including both the training and test rows — so that all numerical features have zero mean and unit variance. What is the problem with this approach?
-:::
-
-:::{.callout-tip collapse="true"}
-## Answer
-
-This causes **data leakage**. Standardization requires computing the mean and standard deviation from the data. If those statistics are computed on the full dataset (including the held-out test rows), information from the test set contaminates the training process. The test set is supposed to simulate truly unseen future data — but if its values influenced the scaling parameters, it is no longer truly unseen.
-
-The correct procedure is:
-
-1. Split the data into train and test sets first.
-2. Compute the mean and standard deviation **only on the training set**.
-3. Apply those same values to scale both the training and test sets.
-
-This ensures that the test set remains a clean simulation of data the model has never seen.
-:::
 
 ---
 
@@ -410,6 +445,8 @@ plt.tight_layout()
 plt.show()
 plt.close()
 ```
+
+Next, the plots below show scatter plots of how the response changes with each predictor and a table of the correlation between each of these pairs. 
 
 ```{python}
 #| label: ex-corr
@@ -436,13 +473,12 @@ b) Is there a predictor that has a low linear correlation with `carbon_seq_tco2`
 :::{.callout-tip collapse="true"}
 ## Answer
 
-a) **`bulk_density_gcm3`** is the strongest candidate for removal. Its scatter plot shows no discernible pattern — the points form an undifferentiated cloud across all values of the predictor — and its correlation with the target is near zero. This is consistent with a variable that adds noise without contributing predictive information.
+a) **`bulk_density_gcm3`** is the strongest candidate for removal. Its scatter plot shows no discernible pattern and its correlation with the target is near zero. This is consistent with a variable that possibly adds noise without contributing predictive information.
 
-`salinity_ppt` also has a near-zero linear correlation and might initially look like a candidate for removal too, but see part (b) before deciding.
 
-b) **`salinity_ppt`** appears to have a non-linear (inverted-U or quadratic) relationship with `carbon_seq_tco2`: sequestration is highest at intermediate salinity values (~10–20 ppt) and drops off at both very low and very high salinity. This ecological pattern — optimal salinity for microbial carbon fixation — is real, but it is symmetric around the optimum, which causes the positive and negative deviations to cancel out in a linear correlation calculation, producing a near-zero coefficient. The scatter plot reveals what the correlation hides. This predictor should be kept, and a squared salinity term may be worth engineering as an additional feature.
+b) **`salinity_ppt`** appears to have a non-linear (inverted-U) relationship with `carbon_seq_tco2`: sequestration is highest at intermediate salinity values (~10–20 ppt) and drops off at both very low and very high salinity. 
 
-*Note on attribute combinations*: `water_depth_cm` and `tidal_range_cm` both have positive linear associations with the target when examined individually, but their **ratio** (`water_depth_cm / tidal_range_cm`) captures the flooding regime more directly — a plot where water depth greatly exceeds tidal range is permanently submerged, while a low ratio indicates regular tidal exposure. This kind of domain-knowledge-driven combination is worth exploring in the feature engineering step.
+<!-- *Note on attribute combinations*: `water_depth_cm` and `tidal_range_cm` both have positive linear associations with the target when examined individually, but their **ratio** (`water_depth_cm / tidal_range_cm`) captures the flooding regime more directly — a plot where water depth greatly exceeds tidal range is permanently submerged, while a low ratio indicates regular tidal exposure. This kind of domain-knowledge-driven combination is worth exploring in the feature engineering step. -->
 :::
 
 ---
@@ -450,11 +486,17 @@ b) **`salinity_ppt`** appears to have a non-linear (inverted-U or quadratic) rel
 :::{.callout-tip}
 ## Exercise 5
 
-`soil_organic_pct` has approximately 20% missing values. Consider the three approaches below for handling this. For each, briefly discuss at least one advantage and one disadvantage.
+`soil_organic_pct` has approximately 20% missing values. 
+
+1. What are some questions you could ask to the environmental agency to better inform how to work with this data?
+
+2. Consider the three approaches below for handling this. For each, briefly discuss at least one advantage and one disadvantage.
 
 a) Remove all observations where `soil_organic_pct` is missing.
-b) Impute missing values with the median of the non-missing observations.
+b) Impute missing values with the mean of the non-missing observations.
 c) Drop `soil_organic_pct` as a feature entirely.
+
+
 :::
 
 :::{.callout-tip collapse="true"}
@@ -464,60 +506,15 @@ a) **Remove observations with missing values.**
 *Advantage*: Simple to implement; keeps the feature in the model with no artificial values introduced.
 *Disadvantage*: Loses ~20% of training observations, reducing the effective sample size. If missingness is non-random (e.g., inaccessible plots may be in particularly remote or ecologically distinct areas), removing them could introduce sampling bias.
 
-b) **Impute with the median.**
+b) **Impute with the mean.**
 *Advantage*: Preserves all observations and keeps the feature available for modeling.
-*Disadvantage*: Replaces a meaningful measurement with an invented value, which can distort the distribution and reduce model accuracy — especially if the missing plots are systematically different from those with measurements. Median imputation also does not communicate uncertainty about those values.
+*Disadvantage*: Replaces a meaningful measurement with an invented value, which can distort the distribution and reduce model accuracy, especially if the missing plots are systematically different from those with measurements. 
 
 c) **Drop the feature entirely.**
 *Advantage*: Completely sidesteps the missing data problem and avoids introducing imputed values.
 *Disadvantage*: `soil_organic_pct` shows one of the stronger positive correlations with the target. Removing it discards real predictive signal and is likely to hurt model performance.
 
-There is no universally correct answer here. In practice, a reasonable strategy is to start with median imputation (option b) and compare model performance against the option of dropping the feature, using cross-validation to let the data inform the decision.
-:::
-
----
-
-```{python}
-#| label: ex-scaling-hist
-#| echo: false
-
-_pred_cols = ['salinity_ppt', 'water_depth_cm', 'tidal_range_cm',
-              'soil_organic_pct', 'bulk_density_gcm3']
-
-fig, axes = plt.subplots(1, 5, figsize=(14, 3))
-for ax, col in zip(axes, _pred_cols):
-    ax.hist(df_train[col].dropna(), bins=25, color='steelblue',
-            edgecolor='white', linewidth=0.4)
-    ax.set_title(col, fontsize=8)
-    ax.grid(True, alpha=0.3)
-plt.suptitle('Distributions of numerical predictors (training set)', fontsize=10)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
-
-:::{.callout-tip}
-## Exercise 6
-
-Looking at the distributions of the numerical predictors above, should you scale the data before fitting your models? Which predictors would most benefit from scaling, and why?
-:::
-
-:::{.callout-tip collapse="true"}
-## Answer
-
-Yes, scaling is needed. The predictors operate on very different numeric scales:
-
-- `salinity_ppt`: roughly 0.5–35
-- `water_depth_cm`: roughly 5–150
-- `tidal_range_cm`: roughly 5–300, and right-skewed
-- `soil_organic_pct`: roughly 2–40
-- `bulk_density_gcm3`: roughly 0.1–1.5
-
-Without scaling, models that rely on distances or that assign implicit weights based on coefficient magnitude (e.g., linear regression, SVMs, KNN) would give disproportionate influence to variables with larger numeric ranges like `tidal_range_cm` and `water_depth_cm`, regardless of their actual predictive value.
-
-`tidal_range_cm` also has a right-skewed distribution, meaning a small number of plots with very large tidal ranges could have an outsized effect. Standardization (zero mean, unit variance) addresses both the scale differences and reduces the pull of those extreme values.
-
-The target variable `carbon_seq_tco2` does not need to be scaled.
+There is no universally correct answer here. In practice, a reasonable strategy is to start with mean imputation (option b) and compare model performance against the two other options using cross-validation.
 :::
 
 ---
@@ -557,5 +554,5 @@ One-hot encoding `vegetation_type` creates one binary column per category. With 
 | 2 | mangrove    | 0 | 0 | 1 | 0 |
 | 3 | pickleweed  | 0 | 0 | 0 | 1 |
 
-Each row has exactly one 1 and three 0s. The original `vegetation_type` column is dropped and replaced by these four binary columns. Note that `bulrush` does not appear in this particular subset, but the column is still created — it would be 1 for any observation where `vegetation_type == 'bulrush'`.
+Each row has exactly one 1 and three 0s. The original `vegetation_type` column is dropped and replaced by these four binary columns. Note that `bulrush` does not appear in this particular subset, but the column is still created.
 :::
