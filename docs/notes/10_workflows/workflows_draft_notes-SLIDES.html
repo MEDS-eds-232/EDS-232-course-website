@@ -6,8 +6,8 @@
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.7.33">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.8.25">
 
   <title>EDS 232 - Machine Learning for Environmental Science – workflows_draft_notes-slides</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -28,7 +28,7 @@
       vertical-align: middle;
     }
   </style>
-  <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-aa079427e74470e351a8ef456b814408.css">
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-ddef79023df4518095ebbc81f33b49a9.css">
   <link href="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -623,7 +623,7 @@ memory usage: 27.5+ KB</code></pre>
     }
 </style>
 
-<table class="dataframe caption-top" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top" data-border="1">
 <thead>
 <tr class="header" style="text-align: right;">
 <th data-quarto-table-cell-role="th"></th>
@@ -632,23 +632,23 @@ memory usage: 27.5+ KB</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">salinity_ppt</td>
+<th data-quarto-table-cell-role="th">salinity_ppt</th>
 <td>-0.236</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">water_depth_cm</td>
+<th data-quarto-table-cell-role="th">water_depth_cm</th>
 <td>0.115</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">tidal_range_cm</td>
+<th data-quarto-table-cell-role="th">tidal_range_cm</th>
 <td>0.053</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">soil_organic_pct</td>
+<th data-quarto-table-cell-role="th">soil_organic_pct</th>
 <td>0.456</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">bulk_density_gcm3</td>
+<th data-quarto-table-cell-role="th">bulk_density_gcm3</th>
 <td>0.010</td>
 </tr>
 </tbody>
@@ -714,7 +714,7 @@ memory usage: 27.5+ KB</code></pre>
     }
 </style>
 
-<table class="dataframe caption-top" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top" data-border="1">
 <thead>
 <tr class="header" style="text-align: right;">
 <th data-quarto-table-cell-role="th"></th>
@@ -728,7 +728,7 @@ memory usage: 27.5+ KB</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">1</td>
+<th data-quarto-table-cell-role="th">1</th>
 <td>cordgrass</td>
 <td>10.06</td>
 <td>29.3</td>
@@ -737,7 +737,7 @@ memory usage: 27.5+ KB</code></pre>
 <td>0.645</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">2</td>
+<th data-quarto-table-cell-role="th">2</th>
 <td>sedges</td>
 <td>33.50</td>
 <td>16.1</td>
@@ -746,7 +746,7 @@ memory usage: 27.5+ KB</code></pre>
 <td>0.791</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">3</td>
+<th data-quarto-table-cell-role="th">3</th>
 <td>pickleweed</td>
 <td>21.34</td>
 <td>12.6</td>
@@ -1023,7 +1023,7 @@ memory usage: 27.5+ KB</code></pre>
         margin: 0.1,
 
         math: {
-          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
           config: 'TeX-AMS_HTML-full',
           tex2jax: {
             inlineMath: [['\\(','\\)']],
@@ -1097,13 +1097,14 @@ memory usage: 27.5+ KB</code></pre>
           e.clearSelection();
         }
         const getTextToCopy = function(trigger) {
-            const codeEl = trigger.previousElementSibling.cloneNode(true);
-            for (const childEl of codeEl.children) {
-              if (isCodeAnnotation(childEl)) {
-                childEl.remove();
-              }
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
             }
-            return codeEl.innerText;
+          }
+          return codeEl.innerText;
         }
         const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
           text: getTextToCopy
