@@ -21,12 +21,12 @@ np.random.seed(42)
 n = 500
 
 # ── Predictors ───────────────────────────────────────────────────────────────
-salinity_ppt      = np.random.uniform(0.5, 35, n)
+salinity_ppt      = np.random.uniform(1, 35, n)
 water_depth_cm    = np.random.uniform(5, 150, n)
 tidal_range_cm    = np.clip(np.random.lognormal(3.5, 0.8, n), 5, 300)
-bulk_density_gcm3 = np.random.uniform(0.1, 1.5, n)
+bulk_density_gcm3 = np.random.uniform(0.1, 1.5, n)   # pure noise — no true effect
 vegetation_type   = np.random.choice(
-    ['cordgrass', 'bulrush', 'pickleweed', 'mangrove'],
+    ['cordgrass', 'bulrush', 'pickleweed', 'sedges'],
     size=n, p=[0.35, 0.30, 0.25, 0.10])
 
 soil_organic_raw = np.random.uniform(2, 40, n)
@@ -36,21 +36,25 @@ soil_organic_filled = np.where(
     np.isnan(soil_organic_pct), np.nanmean(soil_organic_pct), soil_organic_pct)
 
 # ── Target ───────────────────────────────────────────────────────────────────
-_veg_map = {'cordgrass': 2.5, 'bulrush': 1.8, 'pickleweed': -0.3, 'mangrove': 3.5}
+# Vegetation effects reflect guild-level productivity differences:
+# cordgrass (highly productive C4 salt-marsh grass) > bulrush (brackish marsh) >
+# sedges (moderate freshwater-brackish productivity) > pickleweed (high-salinity stress)
+_veg_map = {'cordgrass': 1.5, 'bulrush': 0.5, 'pickleweed': -0.8, 'sedges': 0.3}
 veg_num  = np.array([_veg_map[v] for v in vegetation_type])
 
-# salinity: quadratic, optimal ~15 ppt — produces near-zero linear correlation
-salinity_curve = -0.012 * (salinity_ppt - 15) ** 2
+# salinity: strong quadratic peaking at ~18 ppt (brackish/mesohaline zone) —
+# too fresh → faster decomposition; too saline → plant stress limits productivity
+salinity_curve = -0.018 * (salinity_ppt - 18) ** 2
 
 carbon_seq_tco2 = (
-    2.0
-    + 0.022 * water_depth_cm
-    + 0.010 * tidal_range_cm
-    + 0.20  * soil_organic_filled
-    + salinity_curve
-    + veg_num
-    + np.random.normal(0, 0.8, n)   # residual noise
-    # bulk_density_gcm3 intentionally excluded — pure noise predictor
+    5.8                              # baseline at optimal conditions
+    + 0.010 * water_depth_cm         # deeper water → more anaerobic → more C burial
+    + 0.005 * tidal_range_cm         # tidal input → sediment deposition → more C burial
+    + 0.08  * soil_organic_filled    # organic-rich soils support continued C accumulation
+    + salinity_curve                  # non-linear salinity effect (peaks ~18 ppt)
+    + veg_num                         # vegetation guild effect
+    + np.random.normal(0, 0.4, n)    # residual noise
+    # bulk_density_gcm3 intentionally excluded — no true relationship with target
 )
 carbon_seq_tco2 = np.clip(carbon_seq_tco2, 0, None)
 
@@ -228,6 +232,8 @@ For example, the one-hot encoding for the biome classes would look like:
 | biome = grassland  | 0 | 0 | 1 | 0 |
 | biome = desert     | 0 | 0 | 0 | 1 |
 
+Note that for linear models, one of the encoded columns should be dropped to avoid perfect multicollinearity; `OneHotEncoder` handles this via the `drop` parameter.
+
 When a categorical variable has many categories, the resulting one-hot matrix can be very large and contain mostly zeros (only one 1 per row). In those cases, sklearn stores the result in a memory-efficient **sparse** format that records only the positions of the 1s rather than all the zeros.
 
 If a categorical variable has *many* possible values for its classes, then one-hot encoding will produce a large number of features. In this case, you can consider whether replacing some of it with a numerical alternative is more convenient.
@@ -294,13 +300,11 @@ The agency's field teams spent three seasons surveying 500 coastal wetland plots
 - `tidal_range_cm`: mean tidal range at the nearest gauge station (cm) (average difference in water level between high tide and low tide)
 - `soil_organic_pct`: soil organic matter content (%)
 - `bulk_density_gcm3`: soil bulk density (g/cm³)
-- `vegetation_type`: dominant plant guild (`cordgrass`, `bulrush`, `pickleweed`, or `mangrove`)
+- `vegetation_type`: dominant plant guild (`cordgrass`, `bulrush`, `pickleweed`, or `sedges`)
 
 The response variable is `carbon_seq_tco2`, the measured annual carbon sequestration rate in metric tons of CO₂-equivalent per hectare per year (tCO₂-eq/ha/yr).
 
 No existing predictive model is in place: credit values are currently assigned manually by ecologists, a process that is slow and inconsistent across reviewers.
-
----
 
 :::{.callout-tip}
 ## Exercise 1
@@ -313,20 +317,22 @@ Read the scenario above carefully. You are about to start working on this projec
 
 The scenario is missing several key pieces of information about performance:
 
-- **What metric should be used?** RMSE penalizes large errors much more than MAE — this matters here because a large overestimate of carbon sequestration could result in fraudulent credits with real financial consequences. The agency needs to decide which error profile is acceptable.
-- **What is the minimum acceptable performance?** A model must meet some accuracy threshold to be legally and scientifically defensible for assigning credits. Without a benchmark, we cannot know when the model is "good enough."
-- **What is the current baseline performance?** Manual assignment by ecologists is the current approach. We should know how consistent and accurate that process is, since it defines what "good enough" means in practice.
+- **What metric should be used?** We need to confirm which metric the agency wants to optimize. For this regression problem we will use **mean squared error (MSE)**, which penalizes larger prediction errors more heavily — an important property when errors have direct financial consequences.
+- **What is the minimum acceptable performance?** A model must meet some accuracy threshold to be scientifically and legally defensible for assigning credits. Without a benchmark, we cannot know when the model is "good enough."
+- **What is the current baseline performance?** Manual assignment by ecologists is the current approach. We should know how consistent and accurate that process is, since it sets the bar the model needs to beat.
 
-Annother question you might consider is:
+Another question worth considering:
 
-- **Is over- or under-prediction more costly?** Over-predicting sequestration could mean issuing invalid credits (financial and reputational risk to the agency); under-predicting means landowners are under-compensated. This asymmetry should inform both the choice of metric and how we interpret model errors.
+- **Is over- or under-prediction more costly?** Over-predicting sequestration could mean issuing invalid credits (financial and reputational risk to the agency); under-predicting means landowners are under-compensated. This asymmetry may inform how we communicate and interpret model errors.
 :::
 
----
+After consulting with the agency, your team receives the following answers to the open questions:
 
-[CLAUDE:After exercise 1, give further information in the scenario answering the questions. Also, we have only covered MSE as a metric for regression, so this is the one we’d be using. Please adjust the answer to the question from exercise 1 accordingly.  ]
+- **Performance metric**: MSE will be used to evaluate model performance.
+- **Minimum acceptable performance**: The current manual assignment process has an estimated inter-reviewer MSE of approximately 9 (tCO₂-eq/ha/yr)² across previously monitored plots. The model should improve on this to be useful.
+- **Error asymmetry**: The agency considers over- and under-prediction roughly equally costly — both cause financial harm, in opposite directions.
 
-
+With these answers in hand, we proceed to load and explore the data.
 
 We initiate data exploration. After loading the data, the table below shows the output for `df.info()`.
 
@@ -355,8 +361,6 @@ a) There are **5 numerical** features (`salinity_ppt`, `water_depth_cm`, `tidal_
 b) `soil_organic_pct` has approximately 100 missing values out of 500 rows (~20%), as visible from both `df.info()` (which shows 400 non-null entries) and `df.describe()` (which reports a count of 400). This is a substantial proportion — it warrants a deliberate decision about how to handle it rather than a default fix.
 :::
 
----
-
 :::{.callout-tip}
 ## Exercise 3
 
@@ -377,7 +381,6 @@ The correct procedure is:
 This ensures that the test set remains a clean simulation of data the model has never seen.
 :::
 
----
 Your team creates a test set on the raw data and stores it away and decides the next step is to do further exploration for the training data.
 The plots below show the histograms for each of the predictors. 
 
@@ -411,7 +414,7 @@ Looking at the distributions of the numerical predictors above, should you plan 
 
 Yes, scaling is needed. The predictors operate on very different numeric scales:
 
-- `salinity_ppt`: roughly 0.5–35
+- `salinity_ppt`: roughly 1–35
 - `water_depth_cm`: roughly 5–150
 - `tidal_range_cm`: roughly 5–300, and right-skewed
 - `soil_organic_pct`: roughly 2–40
@@ -423,9 +426,6 @@ Without scaling, models that rely on distances or that assign implicit weights b
 
 The target variable `carbon_seq_tco2` does not need to be scaled.
 :::
-
-
----
 
 ```{python}
 #| label: ex-scatter
@@ -476,12 +476,10 @@ b) Is there a predictor that has a low linear correlation with `carbon_seq_tco2`
 a) **`bulk_density_gcm3`** is the strongest candidate for removal. Its scatter plot shows no discernible pattern and its correlation with the target is near zero. This is consistent with a variable that possibly adds noise without contributing predictive information.
 
 
-b) **`salinity_ppt`** appears to have a non-linear (inverted-U) relationship with `carbon_seq_tco2`: sequestration is highest at intermediate salinity values (~10–20 ppt) and drops off at both very low and very high salinity. 
+b) **`salinity_ppt`** appears to have a non-linear (inverted-U) relationship with `carbon_seq_tco2`: sequestration is highest at intermediate, brackish salinity values (~15–20 ppt) and drops off at both very low and very high salinity. This reflects a well-known ecological pattern — freshwater conditions accelerate organic matter decomposition, while high salinity stresses plant productivity — but the symmetric shape means the positive and negative deviations cancel in a linear correlation, producing a near-zero coefficient. The scatter plot reveals what the correlation hides.
 
 <!-- *Note on attribute combinations*: `water_depth_cm` and `tidal_range_cm` both have positive linear associations with the target when examined individually, but their **ratio** (`water_depth_cm / tidal_range_cm`) captures the flooding regime more directly — a plot where water depth greatly exceeds tidal range is permanently submerged, while a low ratio indicates regular tidal exposure. This kind of domain-knowledge-driven combination is worth exploring in the feature engineering step. -->
 :::
-
----
 
 :::{.callout-tip}
 ## Exercise 5
@@ -517,8 +515,6 @@ c) **Drop the feature entirely.**
 There is no universally correct answer here. In practice, a reasonable strategy is to start with mean imputation (option b) and compare model performance against the two other options using cross-validation.
 :::
 
----
-
 The table below shows three observations from the training set, each from a different vegetation type:
 
 ```{python}
@@ -528,7 +524,7 @@ The table below shows three observations from the training set, each from a diff
 _ohe_examples = (
     df_train.groupby('vegetation_type', sort=True)
     .first()
-    .loc[['cordgrass', 'mangrove', 'pickleweed']]
+    .loc[['cordgrass', 'sedges', 'pickleweed']]
     .reset_index()
     [['vegetation_type', 'salinity_ppt', 'water_depth_cm',
       'tidal_range_cm', 'soil_organic_pct', 'bulk_density_gcm3']]
@@ -546,13 +542,32 @@ One-hot encode the `vegetation_type` column for the three observations shown abo
 :::{.callout-tip collapse="true"}
 ## Answer
 
-One-hot encoding `vegetation_type` creates one binary column per category. With four categories in the full dataset (`bulrush`, `cordgrass`, `mangrove`, `pickleweed`), the encoding produces four new columns, typically named in alphabetical order:
+One-hot encoding `vegetation_type` creates one binary column per category. With four categories in the full dataset (`bulrush`, `cordgrass`, `pickleweed`, `sedges`), the encoding produces four new columns, typically named in alphabetical order:
 
-| obs | `vegetation_type` | `veg_type_bulrush` | `veg_type_cordgrass` | `veg_type_mangrove` | `veg_type_pickleweed` |
-|:---:|:-----------------:|:------------------:|:--------------------:|:-------------------:|:---------------------:|
-| 1 | cordgrass   | 0 | 1 | 0 | 0 |
-| 2 | mangrove    | 0 | 0 | 1 | 0 |
-| 3 | pickleweed  | 0 | 0 | 0 | 1 |
+| obs | `vegetation_type` | `veg_type_bulrush` | `veg_type_cordgrass` | `veg_type_pickleweed` | `veg_type_sedges` |
+|:---:|:-----------------:|:------------------:|:--------------------:|:---------------------:|:-----------------:|
+| 1 | cordgrass  | 0 | 1 | 0 | 0 |
+| 2 | sedges     | 0 | 0 | 0 | 1 |
+| 3 | pickleweed | 0 | 0 | 1 | 0 |
 
 Each row has exactly one 1 and three 0s. The original `vegetation_type` column is dropped and replaced by these four binary columns. Note that `bulrush` does not appear in this particular subset, but the column is still created.
+:::
+
+:::{.callout-tip}
+## Exercise 8
+
+Your team has cleaned and prepared the training data and is ready to start fitting models. Looking back at the wetland carbon sequestration problem, brainstorm at least three candidate models you could try as a starting point. For each, briefly justify why it is a reasonable choice for this problem.
+:::
+
+:::{.callout-tip collapse="true"}
+## Answer
+
+Any of the following would be reasonable starting points:
+
+- **Linear regression**: a natural first baseline for any regression problem. It is fast to fit, easy to interpret, and its performance sets a floor. If more complex models cannot beat it, that is a signal to revisit the data rather than the model.
+- **K-nearest neighbors (KNN) regression**: makes no assumption about the functional form of the relationship between predictors and target, so it can capture non-linear patterns like the quadratic salinity effect without any feature engineering.
+- **Decision tree / random forest regression**: handles non-linearities and interactions automatically, works well with mixed numerical and categorical features, and provides feature importances — useful here because the agency may want to know which site characteristics drive sequestration.
+<!-- - **Support vector regression (SVR)**: with an RBF kernel, it can capture non-linear relationships and is robust to outliers, though it requires careful scaling (which we have already planned for). -->
+
+In practice, you would fit all candidates with default hyperparameters first and compare their cross-validated MSE on the training set before investing time in tuning any single model.
 :::
