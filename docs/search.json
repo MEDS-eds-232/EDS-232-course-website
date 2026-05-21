@@ -3100,32 +3100,18 @@
     "text": "The end-to-end workflow"
   },
   {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#steps-list",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#steps-list",
+    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#exercise-1",
+    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#exercise-1",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Core steps for an ML project\n\n\n\n\nUnderstand the big picture\nGet the data and do a preliminary exploration\nCreate a representative test set and lock it away\nExplore the train data to gain insights\nConsider attribute combinations\n\n\n\nPrepare train data for ML algorithms\nTry out different candidate models and estimate accuracy metrics with CV\nGo back to the drawing board if needed\nSelect a model and fine-tune it\nEvaluate model on test set\n\n🌟 Present your results!"
+    "text": "With your team, order the core steps for a ML workflow\n\n\n\n\n\nUnderstand the big picture\nGet the data and do a preliminary exploration\nCreate a representative test set and lock it away\nExplore the train data to gain insights\nConsider attribute combinations\n\n\n\nPrepare train data for ML algorithms\nTry out different candidate models and estimate accuracy metrics with CV\nGo back to the drawing board if needed\nSelect a model and fine-tune it\nEvaluate model on test set\n\n🌟 Present your results!"
   },
   {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#step1",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#step1",
+    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#exercise-2",
+    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#exercise-2",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Step 1 — Understand the big picture\n\nBefore opening any data file, align with your team on the fundamentals:\n\nWhat is the objective of this application? How will results be used?\nHow should we frame this problem? (classification / regression, supervised / unsupervised?)\nWhat metric will be used to measure performance?\nWhat is the minimum acceptable performance needed to meet the objective?\nWhat are the current solutions or baselines?\nAre domain experts available?\nWhat assumptions have been made — and which need to be verified?"
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#step2",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#step2",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Step 2 — Get the data and explore\n\nOpen the data and get a high-level understanding. Useful pandas methods for tabular data:\n.head() · .info() · .describe() · .value_counts() · .hist()\nKey questions to answer:\n\nWhat is the data type of each variable?\nWhich variables are categorical vs. numerical?\nWhich is the target variable?\nAre there missing values? In which columns, and how many?\nDo the distributions make sense? Are there obvious errors or outliers?\nDo you understand how each variable was computed or measured?"
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#step3",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#step3",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Step 3 — Create and lock away the test set\n\nThe test set must stay completely unseen until the very end. Any decision informed by it — scaling, feature selection, hyperparameter tuning — constitutes data leakage.\nTypically we set aside 20–30% of the data for testing.\nfrom sklearn.model_selection import train_test_split\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42\n)\n\nrandom_state ensures the same split every run\nFor classification with imbalanced classes, pass the target to stratify to preserve class proportions in both splits"
+    "text": "Discussion about initial steps"
   },
   {
     "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#step4",
@@ -3146,7 +3132,7 @@
     "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#step5",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Step 5 — Consider attribute combinations\n\nSometimes combining predictors produces a more informative feature than either one alone.\n\nWhenever possible, ground decisions in domain expertise\nThis is an iterative process — revisit as the model develops\nExample: water_depth_cm / tidal_range_cm captures flooding regime better than either variable independently"
+    "text": "Step 5 — Consider attribute combinations\n\nSometimes combining predictors produces a more informative feature than either one alone.\n\nWhenever possible, ground decisions in domain expertise\nThis is an iterative process — revisit as the model develops"
   },
   {
     "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#section-1",
@@ -3160,21 +3146,28 @@
     "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#scrubbing",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Step 6 — Scrubbing\n\nHigh-quality training data is critical. Common issues:\n\nOmitted values (missing data)\nDuplicate observations\nOutliers\n\nPotential fixes for each:\n\n\n\n\n\n\n\nApproach\nWhen to use\n\n\n\n\nRemove the observation\nMissingness is random and n is large\n\n\nImpute (mean, median, KNN…)\nLosing observations is costly\n\n\nDrop the entire feature\nVariable has too many missing values or is not useful\n\n\n\nAlways keep a backup of the raw data before transforming."
+    "text": "Step 6 — Scrubbing\n\nHigh-quality training data is critical. Common issues:\n\nOmitted values (missing data)\nDuplicate observations\nOutliers\n\nPotential fixes for each:\n\n\n\n\n\n\n\nApproach\nWhen to use\n\n\n\n\nRemove the observation\nMissingness is random and n is large\n\n\nImpute (mean, median, KNN…)\nLosing observations is costly\n\n\nDrop the entire feature\nVariable has too many missing values or is not useful\n\n\n\nAlways keep a backup of the raw data before transforming!"
   },
   {
     "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#scaling",
     "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#scaling",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Step 6 — Scaling\n\nMany ML models perform better when features are on similar scales.\nStandardization (StandardScaler): subtract the mean, divide by the standard deviation → zero mean, unit variance.\n\nCritical: compute scaling parameters only on the training set, then apply the same transformation to both train and test sets.\nfrom sklearn.preprocessing import StandardScaler\n\nscaler = StandardScaler()\nX_train_sc = scaler.fit_transform(X_train)   # learn + apply\nX_test_sc  = scaler.transform(X_test)        # apply only\nThe target variable does not need to be scaled."
+    "text": "Step 6 — Scaling\n\nMany ML models perform better when features are on similar scales.\nStandardization (StandardScaler): subtract the mean, divide by the standard deviation → zero mean, unit variance.\nThe target variable does not need to be scaled.\nLinear scaling, clipping, and log-scaling are a few other ways you may want to scale your data. You can read a brief overview about each here."
   },
   {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ohe",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ohe",
+    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ohe-1",
+    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ohe-1",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Step 6 — One-hot encoding\n\nMost ML algorithms require numerical inputs. For a categorical variable biome with four categories:\n\n\n\nObservation\nsavanna\nrainforest\ngrassland\ndesert\n\n\n\n\nbiome = savanna\n1\n0\n0\n0\n\n\nbiome = rainforest\n0\n1\n0\n0\n\n\nbiome = grassland\n0\n0\n1\n0\n\n\nbiome = desert\n0\n0\n0\n1\n\n\n\nEach row has exactly one 1 and all other values 0.\nFor linear models, drop one encoded column to avoid perfect multicollinearity (drop parameter in OneHotEncoder)."
+    "text": "Step 6 — One-hot encoding\n\nApplied to categorical predictors.\nSuppose you have a variable called biome with categories savanna, rainforest, grassland, and desert.\nMost ML algorithms prefer to work with numerical variables, so we can transform this variable into numbers.\n\nAn easy way would be to assign each with a number:\n\nsavanna -&gt; 0\nrainforest -&gt; 1\ngrassland -&gt; 2\ndesert -&gt; 3\n\n\n\nOne issue with this approach is that a model would treat the consecutive numbers as a numerical variable that contains information about the relative order between them."
+  },
+  {
+    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ohe-2",
+    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ohe-2",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Step 6 — One-hot encoding\n\nOne-hot encoding creates a binary feature per class:\n\nnew feature equals 1 when the observation belongs to the class,\nnew feature equals 0 if the observation does not belong to the class.\n\n\nFor example, the one-hot encoding for the biome classes would look like:\n\n\n\nObservation\nsavanna\nrainforest\ngrassland\ndesert\n\n\n\n\nbiome = savanna\n1\n0\n0\n0\n\n\nbiome = rainforest\n0\n1\n0\n0\n\n\nbiome = grassland\n0\n0\n1\n0\n\n\nbiome = desert\n0\n0\n0\n1\n\n\n\nEach row has exactly one 1 and all other values 0.\n\n\nFor linear models, drop one encoded column to avoid perfect multicollinearity (drop parameter in OneHotEncoder)."
   },
   {
     "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#candidate-models",
@@ -3195,14 +3188,14 @@
     "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#problems-data",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Step 8 — Problems with the data\n\n\n\n\n\n\n\n\n\nProblem\nDescription\nFix\n\n\n\n\nToo small\nMore high-quality data generally helps\nCollect more data\n\n\nNonrepresentative\nSampling noise or bias\nBetter sampling strategy\n\n\nPoor quality\nOutliers, errors, missing values obscure signal\nDrop, correct, or impute\n\n\nIrrelevant features\nNoise prevents the algorithm from finding signal\nFeature selection or extraction"
+    "text": "Step 8 — Problems with the data\n\nIf, at this point, your results are bad, there are generally two things that could have gone wrong: “bad model” or “bad data”.\n\n\n\n\n\n\n\n\nProblem\nDescription\nFix\n\n\n\n\nToo small\nMore high-quality data generally helps\nCollect more data\n\n\nNonrepresentative\nSampling noise or bias\nBetter sampling strategy\n\n\nPoor quality\nOutliers, errors, missing values obscure signal\nDrop, correct, or impute\n\n\nIrrelevant features\nNoise prevents the algorithm from finding signal\nFeature selection or extraction"
   },
   {
     "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#problems-model",
     "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#problems-model",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Step 8 — Problems with models\n\n\n\n\n\n\n\n\n\nProblem\nDescription\nFix\n\n\n\n\nOverfitting\nModel memorizes training noise; poor generalization\nSimpler model; more data; reduce variance via hyperparameters\n\n\nUnderfitting\nModel too simple to capture data structure\nMore flexible model; more informative features\n\n\n\n\nWhatever the challenge: go back and experiment with different feature combinations and models."
+    "text": "Step 8 — Problems with models\n\n\n\n\n\n\n\n\n\nProblem\nDescription\nFix\n\n\n\n\nOverfitting\nModel memorizes training noise; poor generalization\nSimpler model; more data; reduce variance via hyperparameters\n\n\nUnderfitting\nModel too simple to capture data structure\nMore flexible model; more informative features\n\n\n\n\nWhatever the challenge: it’s ok to go back and experiment with different feature combinations and models."
   },
   {
     "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#after-selection",
@@ -3223,14 +3216,14 @@
     "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#scenario",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Scenario\n\nA state environmental agency in Oregon is developing a wetland carbon credit program to incentivize private landowners to restore degraded coastal marshes.\nThe agency’s field teams surveyed 500 coastal wetland plots, measuring:\n\n\n\nsalinity_ppt — mean porewater salinity (ppt)\nwater_depth_cm — mean water column depth (cm)\ntidal_range_cm — mean tidal range (cm)\nsoil_organic_pct — soil organic matter (%)\n\n\n\nbulk_density_gcm3 — soil bulk density (g/cm³)\nvegetation_type — dominant plant guild (cordgrass / bulrush / pickleweed / sedges)\n\nTarget: carbon_seq_tco2 — annual carbon sequestration (tCO₂-eq/ha/yr)\n\nNo existing model in place. Credits currently assigned manually by ecologists."
+    "text": "Scenario\n\nA state environmental agency in Oregon is developing a wetland carbon credit program to incentivize private landowners to restore degraded coastal marshes.\nThe agency’s field teams surveyed 500 coastal wetland plots, measuring:\n\n\n\nsalinity_ppt — mean salinity (ppt)\nwater_depth_cm — mean water column depth (cm)\ntidal_range_cm — mean tidal range (cm)\nsoil_organic_pct — soil organic matter (%)\n\n\n\nbulk_density_gcm3 — soil bulk density (g/cm³)\nvegetation_type — dominant plant guild (cordgrass / bulrush / pickleweed / sedges)\n\nTarget: carbon_seq_tco2 — annual carbon sequestration (tCO₂-eq/ha/yr)\n\nNo existing model in place. Credits currently assigned manually by ecologists."
   },
   {
     "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex1",
     "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex1",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Exercise 1\n\nRead the scenario carefully. You are about to start working on this project.\nList the key questions you would still need to answer before beginning data analysis and model development.\n\n\n\nWhat metric will be used? → MSE penalizes large errors, appropriate here since errors have direct financial consequences.\nWhat is the minimum acceptable performance? → The model needs a defensible accuracy threshold to be legally used for assigning credits.\nWhat is the current baseline? → Manual assignment by ecologists sets the bar. How consistent and accurate is that process?\nIs over- or under-prediction more costly? → Over-prediction = invalid credits issued (agency risk); under-prediction = landowners under-compensated. This asymmetry matters for how errors are communicated."
+    "text": "Exercise 1\n\n\nRead the scenario carefully. You are about to start working on this project.\nList some key questions you would still need to answer before beginning data analysis and model development.\n\n\n\nWhat metric will be used? → MSE penalizes large errors, appropriate here since errors have direct financial consequences.\nWhat is the minimum acceptable performance? → The model needs a defensible accuracy threshold to be legally used for assigning credits.\nWhat is the current baseline? → Manual assignment by ecologists sets the bar. How consistent and accurate is that process?\nIs over- or under-prediction more costly? → Over-prediction = invalid credits issued (agency risk); under-prediction = landowners under-compensated. This asymmetry matters for how errors are communicated."
   },
   {
     "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex2-data",
@@ -3307,7 +3300,7 @@
     "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex8",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Exercise 8\n\nYour team has cleaned and prepared the training data and is ready to start fitting models.\nBrainstorm at least three candidate models you could try as a starting point for this regression problem. For each, briefly justify why it is a reasonable choice.\n\n\n\nLinear regression: natural first baseline for any regression problem. Fast, interpretable, and establishes a performance floor. If more complex models can’t beat it, revisit the data.\nKNN regression: makes no assumptions about the functional form — can capture non-linear patterns like the quadratic salinity effect without feature engineering.\nDecision tree / random forest regression: handles non-linearities and feature interactions automatically, works with mixed numerical and categorical features, and provides feature importances — useful when the agency wants to understand which site characteristics drive sequestration.\n\nIn practice: fit all candidates with default hyperparameters first, compare CV-based MSE, then invest in tuning the most promising model."
+    "text": "Exercise 8\n\nYour team has cleaned and prepared the training data and is ready to start fitting models.\nBrainstorm at least three candidate models you could try as a starting point for this regression problem. For each, briefly justify why it is a reasonable choice.\n\n\nLinear regression: natural first baseline for any regression problem. Fast, interpretable, and establishes a performance floor. If more complex models can’t beat it, revisit the data.\nKNN regression: makes no assumptions about the functional form — can capture non-linear patterns like the quadratic salinity effect without feature engineering.\nDecision tree / random forest regression: handles non-linearities and feature interactions automatically, works with mixed numerical and categorical features, and provides feature importances — useful when the agency wants to understand which site characteristics drive sequestration.\n\nIn practice: fit all candidates with default hyperparameters first, compare CV-based MSE, then invest in tuning the most promising model."
   },
   {
     "objectID": "lab/lab6.html",
@@ -4036,7 +4029,7 @@
     "href": "notes/10_workflows/workflows_draft_notes.html#understand-the-big-picture",
     "title": "End-to-end ML workflows",
     "section": "Understand the big picture",
-    "text": "Understand the big picture\nThis step is all about understanding the framing of your project, you should ask your team questions such as:\n\nWhat is the obbjective of this application?\nHow will the results be used?\nWhat are the current solutions or workarounds (if any)?\nHow should you frame this problem? Classification/regression, supervised/unsupervised?\nHow will performance be measured in the context of the problem?\nWhat ML performance metric will be used?\nWhat would be the minimum performance needed to reach the objective? Is it subject to some minimum performance on another metric?\nWhat are comparable problems? Are there experience or tools we can reuse?\nAre experts in the domain subject available?\nWhat assumptions have been made so far?\nAre there any assumptions we need to verify?\n\nFor simplicity, for the rest of the section we will assume we are in the supervised scenario. But most steps also apply for unsupervised problems.",
+    "text": "Understand the big picture\nThis step is all about understanding the framing of your project, you should ask your team questions such as:\n\nWhat is the objective of this application?\nHow will the results be used?\nWhat are the current solutions or workarounds (if any)?\nHow should you frame this problem? Classification/regression, supervised/unsupervised?\nHow will performance be measured in the context of the problem?\nWhat ML performance metric will be used?\nWhat would be the minimum performance needed to reach the objective? Is it subject to some minimum performance on another metric?\nWhat are comparable problems? Are there experiences or tools we can reuse?\nAre experts in the domain subject available?\nWhat assumptions have been made so far?\nAre there any assumptions we need to verify?\n\nFor simplicity, for the rest of the section we will assume we are in the supervised scenario. But most steps also apply for unsupervised problems.",
     "crumbs": [
       "notes",
       "End-to-end ML workflows"

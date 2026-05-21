@@ -99,11 +99,16 @@ We will walk through the core steps of an end-to-end ML project:
 
 [The end-to-end workflow]{.custom-title}
 
-## {#steps-list data-menu-title="10-step workflow"}
 
-[Core steps for an ML project]{.slide-title}
+## {#exercise-1 data-menu-title="Step 1: Big picture"}
+
+[With your team, order the core steps for a ML workflow
+]{.slide-title}
 
 <hr>
+
+. . .
+
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -124,61 +129,12 @@ We will walk through the core steps of an end-to-end ML project:
 :::
 ::::
 
-## {#step1 data-menu-title="Step 1: Big picture"}
+## {#exercise-2 data-menu-title="Step 1: Big picture"}
 
-[Step 1 — Understand the big picture]{.slide-title}
-
-<hr>
-
-Before opening any data file, align with your team on the fundamentals:
-
-- What is the **objective** of this application? How will results be used?
-- How should we **frame** this problem? (classification / regression, supervised / unsupervised?)
-- What **metric** will be used to measure performance?
-- What is the **minimum acceptable performance** needed to meet the objective?
-- What are the current solutions or **baselines**?
-- Are **domain experts** available?
-- What **assumptions** have been made — and which need to be verified?
-
-## {#step2 data-menu-title="Step 2: Get the data"}
-
-[Step 2 — Get the data and explore]{.slide-title}
+[Discussion about initial steps]{.slide-title}
 
 <hr>
 
-Open the data and get a high-level understanding. Useful pandas methods for tabular data:
-
-`.head()` · `.info()` · `.describe()` · `.value_counts()` · `.hist()`
-
-Key questions to answer:
-
-- What is the data type of each variable?
-- Which variables are **categorical** vs. **numerical**?
-- Which is the **target variable**?
-- Are there **missing values**? In which columns, and how many?
-- Do the distributions make sense? Are there obvious errors or outliers?
-- Do you understand how each variable was computed or measured?
-
-## {#step3 data-menu-title="Step 3: Lock the test set"}
-
-[Step 3 — Create and lock away the test set]{.slide-title}
-
-<hr>
-
-The test set must stay **completely unseen** until the very end. Any decision informed by it — scaling, feature selection, hyperparameter tuning — constitutes data leakage.
-
-Typically we set aside **20–30%** of the data for testing.
-
-```python
-from sklearn.model_selection import train_test_split
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-```
-
-- `random_state` ensures the same split every run
-- For **classification** with imbalanced classes, pass the target to `stratify` to preserve class proportions in both splits
 
 ## {#step4 data-menu-title="Step 4: Explore training data"}
 
@@ -214,6 +170,8 @@ Plot each predictor against the target to uncover noise and correlations. Also c
 - Close to **–1** → strong negative linear correlation
 - Close to **0** → no *linear* correlation (but a non-linear relationship may still exist!)
 
+![](correlations.png){fig-align="center"}
+
 ## {#step5 data-menu-title="Step 5: Attribute combinations"}
 
 [Step 5 — Consider attribute combinations]{.slide-title}
@@ -224,7 +182,6 @@ Sometimes **combining predictors** produces a more informative feature than eith
 
 - Whenever possible, ground decisions in **domain expertise**
 - This is an iterative process — revisit as the model develops
-- Example: `water_depth_cm / tidal_range_cm` captures flooding regime better than either variable independently
 
 ## {background="#047C90"}
 
@@ -250,7 +207,7 @@ Potential fixes for each:
 | Impute (mean, median, KNN…) | Losing observations is costly |
 | Drop the entire feature | Variable has too many missing values or is not useful |
 
-Always keep a **backup of the raw data** before transforming.
+Always keep a **backup of the raw data** before transforming!
 
 ## {#scaling data-menu-title="Scaling"}
 
@@ -262,27 +219,49 @@ Many ML models perform better when features are on **similar scales**.
 
 **Standardization** (`StandardScaler`): subtract the mean, divide by the standard deviation → zero mean, unit variance.
 
-. . .
-
-**Critical:** compute scaling parameters **only on the training set**, then apply the same transformation to both train and test sets.
-
-```python
-from sklearn.preprocessing import StandardScaler
-
-scaler = StandardScaler()
-X_train_sc = scaler.fit_transform(X_train)   # learn + apply
-X_test_sc  = scaler.transform(X_test)        # apply only
-```
-
 The **target variable** does not need to be scaled.
 
-## {#ohe data-menu-title="One-hot encoding"}
+Linear scaling, clipping, and log-scaling are a few other ways you may want to scale your data. You can read a [brief overview about each here](https://developers.google.com/machine-learning/crash-course/numerical-data/normalization).
+
+## {#ohe-1 data-menu-title="One-hot encoding"}
 
 [Step 6 — One-hot encoding]{.slide-title}
 
 <hr>
 
-Most ML algorithms require **numerical** inputs. For a categorical variable `biome` with four categories:
+Applied to categorical predictors. 
+
+Suppose you have a variable called `biome` with categories `savanna`, `rainforest`, `grassland`, and `desert`. 
+
+Most ML algorithms prefer to work with numerical variables, so we can transform this variable into numbers.
+
+. . .
+
+An easy way would be to assign each with a number:
+
+- `savanna` -> 0
+- `rainforest` -> 1
+- `grassland` -> 2
+- `desert` -> 3
+
+. . .
+
+One issue with this approach is that a model would treat the consecutive numbers as a numerical variable that contains information about the relative order between them.
+
+## {#ohe-2 data-menu-title="One-hot encoding"}
+
+[Step 6 — One-hot encoding]{.slide-title}
+
+<hr>
+
+**One-hot encoding** creates a binary feature per class: 
+
+- new feature equals 1 when the observation belongs to the class, 
+- new feature equals 0 if the observation does not belong to the class. 
+
+. . .
+
+For example, the one-hot encoding for the biome classes would look like:
 
 | Observation | `savanna` | `rainforest` | `grassland` | `desert` |
 |:-----------:|:---------:|:------------:|:-----------:|:--------:|
@@ -292,6 +271,8 @@ Most ML algorithms require **numerical** inputs. For a categorical variable `bio
 | biome = desert     | 0 | 0 | 0 | 1 |
 
 Each row has exactly **one 1** and all other values 0.
+
+. . .
 
 For **linear models**, drop one encoded column to avoid perfect multicollinearity (`drop` parameter in `OneHotEncoder`).
 
@@ -315,9 +296,13 @@ The goal is a quick, comparable baseline across model families. Tuning comes lat
 
 ## {#problems-data data-menu-title="Problems with data"}
 
+
 [Step 8 — Problems with the data]{.slide-title}
 
 <hr>
+
+If, at this point, your results are bad, there are generally two things that could have gone wrong: "bad model" or "bad data". 
+
 
 | Problem | Description | Fix |
 |:--------|:------------|:----|
@@ -339,7 +324,7 @@ The goal is a quick, comparable baseline across model families. Tuning comes lat
 
 . . .
 
-Whatever the challenge: go back and **experiment with different feature combinations and models**.
+Whatever the challenge: it's ok to go back and experiment with different feature combinations and models.
 
 ## {#after-selection data-menu-title="After model selection"}
 
@@ -375,13 +360,13 @@ Report the metric value *and* its practical meaning. Document the full pipeline,
 
 <hr>
 
-A state environmental agency in Oregon is developing a **wetland carbon credit program** to incentivize private landowners to restore degraded coastal marshes.
+A state environmental agency in Oregon is developing a wetland carbon credit program to incentivize private landowners to restore degraded coastal marshes.
 
-The agency's field teams surveyed **500 coastal wetland plots**, measuring:
+The agency's field teams surveyed 500 coastal wetland plots, measuring:
 
 :::: {.columns}
 ::: {.column width="50%"}
-- `salinity_ppt` — mean porewater salinity (ppt)
+- `salinity_ppt` — mean salinity (ppt)
 - `water_depth_cm` — mean water column depth (cm)
 - `tidal_range_cm` — mean tidal range (cm)
 - `soil_organic_pct` — soil organic matter (%)
@@ -402,18 +387,21 @@ The agency's field teams surveyed **500 coastal wetland plots**, measuring:
 
 <hr>
 
-Read the scenario carefully. You are about to start working on this project.
+::: {.teal-text}
 
-[List the key questions you would still need to answer before beginning data analysis and model development.]{.teal-text}
+Read the scenario carefully. You are about to start working on this project.
+    
+List some key questions you would still need to answer before beginning data analysis and model development.
+
+:::
 
 . . .
 
-::: {.body-text-s}
 - **What metric will be used?** → MSE penalizes large errors, appropriate here since errors have direct financial consequences.
 - **What is the minimum acceptable performance?** → The model needs a defensible accuracy threshold to be legally used for assigning credits.
 - **What is the current baseline?** → Manual assignment by ecologists sets the bar. How consistent and accurate is that process?
 - **Is over- or under-prediction more costly?** → Over-prediction = invalid credits issued (agency risk); under-prediction = landowners under-compensated. This asymmetry matters for how errors are communicated.
-:::
+
 
 ## {#ex2-data data-menu-title="Exercise 2 – data"}
 
@@ -654,10 +642,8 @@ Your team has cleaned and prepared the training data and is ready to start fitti
 
 . . .
 
-::: {.body-text-s}
 - **Linear regression**: natural first baseline for any regression problem. Fast, interpretable, and establishes a performance floor. If more complex models can't beat it, revisit the data.
 - **KNN regression**: makes no assumptions about the functional form — can capture non-linear patterns like the quadratic salinity effect without feature engineering.
 - **Decision tree / random forest regression**: handles non-linearities and feature interactions automatically, works with mixed numerical and categorical features, and provides feature importances — useful when the agency wants to understand which site characteristics drive sequestration.
 
 In practice: fit all candidates with **default hyperparameters** first, compare CV-based MSE, then invest in tuning the most promising model.
-:::
