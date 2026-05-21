@@ -3618,60 +3618,88 @@
     "text": "Practice 2 — Soil Carbon Classification\nQ1. Recall or precision?\nPrecision. Incorrectly certifying a Low Carbon site as High Carbon (a false positive) has direct financial and credibility consequences. Precision measures how many of the predicted High Carbon sites are truly High Carbon, which directly captures this concern.\nQ2. False positive in context\nA false positive is a site that is truly Low Carbon but is predicted by the model to be High Carbon. From the plot, T2 is a false positive: its true label is Low Carbon (red diamond) but it falls in the High Carbon decision region (green background).\nQ3. False Positive Rate\n\\[FPR = \\frac{FP}{FP + TN} = \\frac{5}{5 + 20} = \\frac{5}{25} = 0.20\\]\nOf all sites that are truly Low Carbon, 20% were incorrectly classified as High Carbon by the model.\nQ4. Overfitting: K = 1 vs K = 9\n\\(K = 1\\) is more likely to overfit. With \\(K = 1\\), the model is maximally flexible: it bases each prediction on a single neighbor, resulting in a highly irregular decision boundary that follows the training data closely. This leads to low bias but high variance. \\(K = 9\\) averages over more neighbors, producing a smoother boundary with higher bias but lower variance, which could generalize better to new data.\nQ5. Logistic regression process\nThe team must select a classification threshold — a cutoff on \\(\\hat{p}(X)\\) above which a site is labeled High Carbon and below which it is labeled Low Carbon. The default is often 0.5, but this is not always appropriate.\nIn this context, setting the threshold too low means more sites get flagged as High Carbon, increasing recall but reducing precision — the program risks certifying Low Carbon sites, which has financial and credibility consequences. Setting it too high means fewer sites are flagged, improving precision but potentially missing truly High Carbon sites. The team should choose a threshold that reflects the relative cost of each type of error.\nQ6. Sign of logistic regression coefficients\nYes, the teammate is correct. In logistic regression, a negative coefficient means that as the predictor increases, the log-odds of belonging to the positive class decrease, which corresponds to a lower predicted probability of being classified as High Carbon. So sites with higher bulk density index are indeed less likely to be flagged as High Carbon by the model, all else held constant.\nQ7. k-fold cross-validation\nThe team member is correct that \\(k\\) models are trained during cross-validation, but CV is not meant to produce the final model — it is used to evaluate performance and/or select hyperparameters (such as \\(K\\) in KNN). Once that evaluation is complete, the final model is refit on the entire training set using the chosen configuration. The CV score estimates how well that final model is expected to generalize to unseen data."
   },
   {
-    "objectID": "assignments/assignment-3.html",
-    "href": "assignments/assignment-3.html",
-    "title": "Assignment 3",
+    "objectID": "assignments/assignment-4.html",
+    "href": "assignments/assignment-4.html",
+    "title": "Assignment 4",
     "section": "",
-    "text": "This assignment covers topics from the course on regularization,PCA, decision trees, random forest,and high dimensional data. Task 1 and Task 2 will each contribute 45% to the total grade and Task 3 will contribute 10%. Review the rubric for this assignment here."
+    "text": "This assignment covers topics from the course on Support Vector Machines. There is only 1 Task, which will make up 100% of the grade. Review the rubric for this assignment here."
   },
   {
-    "objectID": "assignments/assignment-3.html#submission-instructions",
-    "href": "assignments/assignment-3.html#submission-instructions",
-    "title": "Assignment 3",
+    "objectID": "assignments/assignment-4.html#submission-instructions",
+    "href": "assignments/assignment-4.html#submission-instructions",
+    "title": "Assignment 4",
     "section": "Submission Instructions",
-    "text": "Submission Instructions\n\n\n\n\n\n\nThis assignment is submitted as a GitHub repository to Gradescope. Before submitting, make sure you satisfy every item in this checklist:\n\nYour repository is properly forked and all work is committed and pushed to your own GitHub repository.\nYour notebooks must include your code and all required rendered outputs (printed results, plots, tables). Run all cells before committing and verify all outputs are visible.\nAny notebook containing an autograder must include the output from the final grader.check_all() cell.\nThe notebooks you submit must contain your solutions: do not submit the blank template notebooks.\nDouble-check that each file is in the correct folder in your repository and that all code and outputs are visible.\n\nResubmissions after the due date that fail to satisfy one of the checks above will be strictly held to the course’s 50%-regrade resubmission policy (see syllabus).\nIf you have any questions about assignment logistics, please reach out to the instructional team."
+    "text": "Submission Instructions\n\n\n\n\n\n\nThis assignment is submitted as a .ipynb to Gradescope. Before submitting, make sure you satisfy every item in this checklist:\n\nYour notebook must include your code and all required rendered outputs (printed results, plots, tables). Run all cells before committing and verify all outputs are visible.\nThe notebooks you submit must contain your solutions: do not submit the blank template notebooks.\nAfter submitting to Gradescope, double-check that all code and outputs are visible.\n\nResubmissions after the due date that fail to satisfy one of the checks above will be strictly held to the course’s 50%-regrade resubmission policy (see syllabus).\nIf you have any questions about assignment logistics, please reach out to the instructional team."
   },
   {
-    "objectID": "assignments/assignment-3.html#how-to-submit-via-github-to-gradescope",
-    "href": "assignments/assignment-3.html#how-to-submit-via-github-to-gradescope",
-    "title": "Assignment 3",
-    "section": "How to Submit via GitHub to Gradescope",
-    "text": "How to Submit via GitHub to Gradescope\n\n\n\n\n\n\n\nFork this repository from the course GitHub organization.\nClone your forked repository to your local machine or the workbench server.\nComplete the tasks inside your cloned repository. Do not move files out of the repo.\nAs you work, commit and push your changes regularly.\nWhen you are finished, make a final push to ensure your most recent work is on GitHub.\nOn Gradescope, select “GitHub” as your submission method and choose your forked repository and the correct branch (usually main).\n\nYour Gradescope submission will pull directly from whatever is in your GitHub repo at the time of submission, so be sure to submit only once you are completely finished."
+    "objectID": "assignments/assignment-4.html#submitting-to-gradescope",
+    "href": "assignments/assignment-4.html#submitting-to-gradescope",
+    "title": "Assignment 4",
+    "section": "Submitting to Gradescope",
+    "text": "Submitting to Gradescope\n\n\n\n\n\n\nOnce you have finished the assignment, complete the following:\n\nRestart the kernel\nRun all cells\nDownload your .ipynb\nSubmit your completed .ipynb file to the “Assignemnt 4” portal on Gradescope by May 30th at 11:59 PM.\nIn Gradescope, view your submission and make sure all outputs are visible."
   },
   {
-    "objectID": "assignments/assignment-3.html#how-the-otter-grader-works",
-    "href": "assignments/assignment-3.html#how-the-otter-grader-works",
-    "title": "Assignment 3",
-    "section": "How the Otter Grader Works",
-    "text": "How the Otter Grader Works\n\n\n\n\n\n\nNoteExpand to learn how to use the autograder\n\n\n\n\n\nThese notebooks use the otter-grader library to provide instant feedback on your answers as you work. Here is how it works:\n\nStep 1 — Initialize Otter\nThe very first cell of each notebook initializes the grader. Always run this cell first before anything else:\n# Initialize Otter\nimport otter\ngrader = otter.Notebook(\"hw2-task2.ipynb\")\n\n\nStep 2 — Complete the exercises\nFill in code in the cells marked with ... or # Your answer here. Read each question carefully and make sure your variable names match exactly what is asked since the autograder checks specific variable names.\n\n\nStep 3 — Run individual checks\nAfter completing an exercise, run the grader.check(\"qN\") cell immediately following it. This will tell you right away whether your answer is correct:\n\n✅ Passed: You’ll see something like q3 passed!. If so, you’re good to move on.\n❌ Failed: You’ll see a description of what went wrong. Re-read the question, inspect your output, and try again.\n\n\n\n\n\n\n\nStuck? Check that your variable names, data types, and shapes all match what the question asks for. Most failures come from a small mismatch. For example, returning a list instead of a DataFrame.\n\n\n\n\n\nStep 4 — Run grader.check_all() before submitting\nThe very last cell of each notebook runs all checks at once and gives you a summary:\nq3  ✅ passed\nq5  ✅ passed\nq6  ❌ failed\n...\nYou must run this cell and leave its output visible before committing and pushing your notebook. This summary will be used to grade your autograded answers. You will not receive credit for questions that failed in this section. If this cell has not been run, or its output is missing, you may lose points.\n\n\n\n\n\n\n\nDo not modify or delete any grader.check() or grader.check_all() cells.\nPassing all autograder checks does not guarantee full credit on the assignemnt. Some questions are graded manually as well.\nAlways re-run all cells from top to bottom before your final commit to make sure everything still passes in sequence."
-  },
-  {
-    "objectID": "assignments/assignment-3.html#ai-policy",
-    "href": "assignments/assignment-3.html#ai-policy",
-    "title": "Assignment 3",
+    "objectID": "assignments/assignment-4.html#ai-policy",
+    "href": "assignments/assignment-4.html#ai-policy",
+    "title": "Assignment 4",
     "section": "AI Policy",
     "text": "AI Policy\n\n\n\n\n\n\nNoteExpand to read the course AI policy\n\n\n\n\n\nIf you use generative AI on this assignment, you are expected to adhere to the following course policies:\n\n✅ Cultivate understanding: You should be able to fully understand, justify, and explain all the work you submit.\n🤔 Question AI outputs: Assume AI-generated answers may be incorrect and verify all information independently.\n🚫 Academic integrity: Submitting work you don’t understand or cannot explain will be considered plagiarism, regardless of whether AI use was disclosed.\n\nIf there are concerns about AI use in your work, your instructor will ask you to meet and discuss it. If understanding is clearly lacking and this is the first occurrence, you will have the chance to revise and resubmit for 50% of the original maximum grade within two days."
   },
   {
-    "objectID": "assignments/assignment-3.html#predicting-building-heat-load-with-ridge-lasso-and-pca.",
-    "href": "assignments/assignment-3.html#predicting-building-heat-load-with-ridge-lasso-and-pca.",
-    "title": "Assignment 3",
-    "section": "Predicting Building Heat Load with Ridge, Lasso, and PCA.",
-    "text": "Predicting Building Heat Load with Ridge, Lasso, and PCA.\nFollow the instructions in hw3-task1.ipynb to complete this task. You will practice:\n\nPreprocessing data with train/test splits and predictor standardization using StandardScaler\nFitting and evaluating an OLS regression model\nApplying Ridge regression with cross-validated hyperparameter tuning (RidgeCV) and visualizing the coefficient shrinkage path across lambda values\nApplying Lasso regression with cross-validated tuning (LassoCV) and comparing its coefficient-zeroing behavior to Ridge\nComparing OLS, Ridge, and Lasso using test MSE and coefficient bar plots\nPerforming Principal Components Regression (PCR) by fitting PCA on scaled features, selecting the number of components via explained variance (≥90% threshold), and fitting OLS on the projected scores\nSynthesizing all four models in a final summary table and interpreting which approach best fits the building energy efficiency dataset"
+    "objectID": "assignments/assignment-4.html#classifying-sklearns-make_moon-dataset-with-support-vector-machines",
+    "href": "assignments/assignment-4.html#classifying-sklearns-make_moon-dataset-with-support-vector-machines",
+    "title": "Assignment 4",
+    "section": "Classifying sklearn’s make_moon dataset with Support Vector Machines",
+    "text": "Classifying sklearn’s make_moon dataset with Support Vector Machines\nFollow the instructions in lab8.ipynb to complete this task. You will practice:\n\nPreprocessing data with train/test splits and predictor standardization using StandardScaler\nHyperparameter tuning for the following kernels: linear, rbf, and poly\nVisualizing decision boundaries\nReviewing model performance with confusion matrices and ROC Curves"
   },
   {
-    "objectID": "assignments/assignment-3.html#classifying-potable-non-potable-water",
-    "href": "assignments/assignment-3.html#classifying-potable-non-potable-water",
-    "title": "Assignment 3",
-    "section": "Classifying Potable/ Non Potable Water",
-    "text": "Classifying Potable/ Non Potable Water\nFollow the instructions in hw3-task2.ipynb to complete this task. You will practice:\n\nExploring a dataset with class imbalance and missing values, and applying median imputation with stratified train/test splitting\nFitting an unpruned decision tree as a baseline\nTuning tree depth using 5-fold cross-validation and selecting the optimal depth from a CV accuracy plot\nRefitting and evaluating the pruned (tuned) decision tree and visualizing its structure, including interpreting root-node splits, feature thresholds, and Gini impurity\nFitting a Random Forest (200 trees) and comparing its test accuracy to the single-tree models\nVisualizing and comparing feature importances (Gini-based) from both the decision tree and random forest\nInterpreting a confusion matrix for the random forest\nBuilding a final model comparison table/bar chart across all three models (unpruned tree, tuned tree, random forest)"
+    "objectID": "assignments/assignment-2.html",
+    "href": "assignments/assignment-2.html",
+    "title": "Assignment 2",
+    "section": "",
+    "text": "This assignment covers topics from the course on classification, specifically KNN and Logistic Regression. Task 1 will contribute 35% to the total grade and Task 2 will contribute 65%. Review the rubric for this assignment here."
   },
   {
-    "objectID": "assignments/assignment-3.html#rubric",
-    "href": "assignments/assignment-3.html#rubric",
-    "title": "Assignment 3",
+    "objectID": "assignments/assignment-2.html#submission-instructions",
+    "href": "assignments/assignment-2.html#submission-instructions",
+    "title": "Assignment 2",
+    "section": "Submission Instructions",
+    "text": "Submission Instructions\n\n\n\n\n\n\nThis assignment is submitted as a GitHub repository to Gradescope. Before submitting, make sure you satisfy every item in this checklist:\n\nYour repository is properly forked and all work is committed and pushed to your own GitHub repository.\nYour notebooks must include your code and all required rendered outputs (printed results, plots, tables). Run all cells before committing and verify all outputs are visible.\nAny notebook containing an autograder must include the output from the final grader.check_all() cell.\nThe notebooks you submit must contain your solutions: do not submit the blank template notebooks.\nDouble-check that each file is in the correct folder in your repository and that all code and outputs are visible.\n\nResubmissions after the due date that fail to satisfy one of the checks above will be strictly held to the course’s 50%-regrade resubmission policy (see syllabus).\nIf you have any questions about assignment logistics, please reach out to the instructional team."
+  },
+  {
+    "objectID": "assignments/assignment-2.html#how-to-submit-via-github-to-gradescope",
+    "href": "assignments/assignment-2.html#how-to-submit-via-github-to-gradescope",
+    "title": "Assignment 2",
+    "section": "How to Submit via GitHub to Gradescope",
+    "text": "How to Submit via GitHub to Gradescope\n\n\n\n\n\n\n\nFork this repository from the course GitHub organization.\nClone your forked repository to your local machine or the workbench server.\nComplete the tasks inside your cloned repository. Do not move files out of the repo.\nAs you work, commit and push your changes regularly.\nWhen you are finished, make a final push to ensure your most recent work is on GitHub.\nOn Gradescope, select “GitHub” as your submission method and choose your forked repository and the correct branch (usually main).\n\nYour Gradescope submission will pull directly from whatever is in your GitHub repo at the time of submission, so be sure to submit only once you are completely finished."
+  },
+  {
+    "objectID": "assignments/assignment-2.html#how-the-otter-grader-works",
+    "href": "assignments/assignment-2.html#how-the-otter-grader-works",
+    "title": "Assignment 2",
+    "section": "How the Otter Grader Works",
+    "text": "How the Otter Grader Works\n\n\n\n\n\n\nNoteExpand to learn how to use the autograder\n\n\n\n\n\nThese notebooks use the otter-grader library to provide instant feedback on your answers as you work. Here is how it works:\n\nStep 1 — Initialize Otter\nThe very first cell of each notebook initializes the grader. Always run this cell first before anything else:\n# Initialize Otter\nimport otter\ngrader = otter.Notebook(\"hw2-task2.ipynb\")\n\n\nStep 2 — Complete the exercises\nFill in code in the cells marked with ... or # Your answer here. Read each question carefully and make sure your variable names match exactly what is asked since the autograder checks specific variable names.\n\n\nStep 3 — Run individual checks\nAfter completing an exercise, run the grader.check(\"qN\") cell immediately following it. This will tell you right away whether your answer is correct:\n\n✅ Passed: You’ll see something like q3 passed!. If so, you’re good to move on.\n❌ Failed: You’ll see a description of what went wrong. Re-read the question, inspect your output, and try again.\n\n\n\n\n\n\n\nStuck? Check that your variable names, data types, and shapes all match what the question asks for. Most failures come from a small mismatch. For example, returning a list instead of a DataFrame.\n\n\n\n\n\nStep 4 — Run grader.check_all() before submitting\nThe very last cell of each notebook runs all checks at once and gives you a summary:\nq3  ✅ passed\nq5  ✅ passed\nq6  ❌ failed\n...\nYou must run this cell and leave its output visible before committing and pushing your notebook. This summary will be used to grade your autograded answers. You will not receive credit for questions that failed in this section. If this cell has not been run, or its output is missing, you may lose points.\n\n\n\n\n\n\n\nDo not modify or delete any grader.check() or grader.check_all() cells.\nPassing all autograder checks does not guarantee full credit on the assignemnt. Some questions are graded manually as well.\nAlways re-run all cells from top to bottom before your final commit to make sure everything still passes in sequence."
+  },
+  {
+    "objectID": "assignments/assignment-2.html#ai-policy",
+    "href": "assignments/assignment-2.html#ai-policy",
+    "title": "Assignment 2",
+    "section": "AI Policy",
+    "text": "AI Policy\n\n\n\n\n\n\nNoteExpand to read the course AI policy\n\n\n\n\n\nIf you use generative AI on this assignment, you are expected to adhere to the following course policies:\n\n✅ Cultivate understanding: You should be able to fully understand, justify, and explain all the work you submit.\n🤔 Question AI outputs: Assume AI-generated answers may be incorrect and verify all information independently.\n🚫 Academic integrity: Submitting work you don’t understand or cannot explain will be considered plagiarism, regardless of whether AI use was disclosed.\n\nIf there are concerns about AI use in your work, your instructor will ask you to meet and discuss it. If understanding is clearly lacking and this is the first occurrence, you will have the chance to revise and resubmit for 50% of the original maximum grade within two days."
+  },
+  {
+    "objectID": "assignments/assignment-2.html#rubric",
+    "href": "assignments/assignment-2.html#rubric",
+    "title": "Assignment 2",
     "section": "Rubric",
-    "text": "Rubric\n\nSteps 2, 3, 5 and the Title/ Intro will be graded as 1: complete, 0: incomplete."
+    "text": "Rubric\n\nFor each issue you explore, you will be graded on the plots and graphs and conceptual accuracy of your explanations using the course rubric.\nThe answer to step 4 will be graded as 1: complete, 0: incomplete."
+  },
+  {
+    "objectID": "assignments/assignment-2.html#do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk",
+    "href": "assignments/assignment-2.html#do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk",
+    "title": "Assignment 2",
+    "section": "Do Social and Economic Conditions Predict Whether a Community Has Elevated Asthma Risk?",
+    "text": "Do Social and Economic Conditions Predict Whether a Community Has Elevated Asthma Risk?\nFollow the instructions in hw2-task2.ipynb to complete this task. You will practice:\n\nVisualizing class imbalance\nPreparing features for classification: selecting predictors, dropping missing values, and performing a stratified train/test split\nFitting a K-Nearest Neighbors (KNN) classifier and evaluating test-set accuracy\nSelecting the optimal value of k using 5-fold cross-validation withcross_val_score\n\nFitting a Logistic Regression model with built-in cross-validation using LogisticRegressionCV\n\nComputing and interpretting a confusion matrix\nCalculating accuracy, precision, recall and F1 score using sklearn.metrics\n\nComparring KNN and Logistic Regression model performance\nEvaluating a classifier with an ROC Curve and AUC score"
   },
   {
     "objectID": "assignments/assignment-1.html",
@@ -3730,53 +3758,60 @@
     "text": "Task 3: Statistical Learning Concepts (20%)\nThis task tests your conceptual understanding of foundational ideas from An Introduction to Statistical Learning with Applications in Python, Chapter 2.\nComplete your answers directly in hw1-task3.md."
   },
   {
-    "objectID": "assignments/assignment-2.html",
-    "href": "assignments/assignment-2.html",
-    "title": "Assignment 2",
+    "objectID": "assignments/assignment-3.html",
+    "href": "assignments/assignment-3.html",
+    "title": "Assignment 3",
     "section": "",
-    "text": "This assignment covers topics from the course on classification, specifically KNN and Logistic Regression. Task 1 will contribute 35% to the total grade and Task 2 will contribute 65%. Review the rubric for this assignment here."
+    "text": "This assignment covers topics from the course on regularization,PCA, decision trees, random forest,and high dimensional data. Task 1 and Task 2 will each contribute 45% to the total grade and Task 3 will contribute 10%. Review the rubric for this assignment here."
   },
   {
-    "objectID": "assignments/assignment-2.html#submission-instructions",
-    "href": "assignments/assignment-2.html#submission-instructions",
-    "title": "Assignment 2",
+    "objectID": "assignments/assignment-3.html#submission-instructions",
+    "href": "assignments/assignment-3.html#submission-instructions",
+    "title": "Assignment 3",
     "section": "Submission Instructions",
     "text": "Submission Instructions\n\n\n\n\n\n\nThis assignment is submitted as a GitHub repository to Gradescope. Before submitting, make sure you satisfy every item in this checklist:\n\nYour repository is properly forked and all work is committed and pushed to your own GitHub repository.\nYour notebooks must include your code and all required rendered outputs (printed results, plots, tables). Run all cells before committing and verify all outputs are visible.\nAny notebook containing an autograder must include the output from the final grader.check_all() cell.\nThe notebooks you submit must contain your solutions: do not submit the blank template notebooks.\nDouble-check that each file is in the correct folder in your repository and that all code and outputs are visible.\n\nResubmissions after the due date that fail to satisfy one of the checks above will be strictly held to the course’s 50%-regrade resubmission policy (see syllabus).\nIf you have any questions about assignment logistics, please reach out to the instructional team."
   },
   {
-    "objectID": "assignments/assignment-2.html#how-to-submit-via-github-to-gradescope",
-    "href": "assignments/assignment-2.html#how-to-submit-via-github-to-gradescope",
-    "title": "Assignment 2",
+    "objectID": "assignments/assignment-3.html#how-to-submit-via-github-to-gradescope",
+    "href": "assignments/assignment-3.html#how-to-submit-via-github-to-gradescope",
+    "title": "Assignment 3",
     "section": "How to Submit via GitHub to Gradescope",
     "text": "How to Submit via GitHub to Gradescope\n\n\n\n\n\n\n\nFork this repository from the course GitHub organization.\nClone your forked repository to your local machine or the workbench server.\nComplete the tasks inside your cloned repository. Do not move files out of the repo.\nAs you work, commit and push your changes regularly.\nWhen you are finished, make a final push to ensure your most recent work is on GitHub.\nOn Gradescope, select “GitHub” as your submission method and choose your forked repository and the correct branch (usually main).\n\nYour Gradescope submission will pull directly from whatever is in your GitHub repo at the time of submission, so be sure to submit only once you are completely finished."
   },
   {
-    "objectID": "assignments/assignment-2.html#how-the-otter-grader-works",
-    "href": "assignments/assignment-2.html#how-the-otter-grader-works",
-    "title": "Assignment 2",
+    "objectID": "assignments/assignment-3.html#how-the-otter-grader-works",
+    "href": "assignments/assignment-3.html#how-the-otter-grader-works",
+    "title": "Assignment 3",
     "section": "How the Otter Grader Works",
     "text": "How the Otter Grader Works\n\n\n\n\n\n\nNoteExpand to learn how to use the autograder\n\n\n\n\n\nThese notebooks use the otter-grader library to provide instant feedback on your answers as you work. Here is how it works:\n\nStep 1 — Initialize Otter\nThe very first cell of each notebook initializes the grader. Always run this cell first before anything else:\n# Initialize Otter\nimport otter\ngrader = otter.Notebook(\"hw2-task2.ipynb\")\n\n\nStep 2 — Complete the exercises\nFill in code in the cells marked with ... or # Your answer here. Read each question carefully and make sure your variable names match exactly what is asked since the autograder checks specific variable names.\n\n\nStep 3 — Run individual checks\nAfter completing an exercise, run the grader.check(\"qN\") cell immediately following it. This will tell you right away whether your answer is correct:\n\n✅ Passed: You’ll see something like q3 passed!. If so, you’re good to move on.\n❌ Failed: You’ll see a description of what went wrong. Re-read the question, inspect your output, and try again.\n\n\n\n\n\n\n\nStuck? Check that your variable names, data types, and shapes all match what the question asks for. Most failures come from a small mismatch. For example, returning a list instead of a DataFrame.\n\n\n\n\n\nStep 4 — Run grader.check_all() before submitting\nThe very last cell of each notebook runs all checks at once and gives you a summary:\nq3  ✅ passed\nq5  ✅ passed\nq6  ❌ failed\n...\nYou must run this cell and leave its output visible before committing and pushing your notebook. This summary will be used to grade your autograded answers. You will not receive credit for questions that failed in this section. If this cell has not been run, or its output is missing, you may lose points.\n\n\n\n\n\n\n\nDo not modify or delete any grader.check() or grader.check_all() cells.\nPassing all autograder checks does not guarantee full credit on the assignemnt. Some questions are graded manually as well.\nAlways re-run all cells from top to bottom before your final commit to make sure everything still passes in sequence."
   },
   {
-    "objectID": "assignments/assignment-2.html#ai-policy",
-    "href": "assignments/assignment-2.html#ai-policy",
-    "title": "Assignment 2",
+    "objectID": "assignments/assignment-3.html#ai-policy",
+    "href": "assignments/assignment-3.html#ai-policy",
+    "title": "Assignment 3",
     "section": "AI Policy",
     "text": "AI Policy\n\n\n\n\n\n\nNoteExpand to read the course AI policy\n\n\n\n\n\nIf you use generative AI on this assignment, you are expected to adhere to the following course policies:\n\n✅ Cultivate understanding: You should be able to fully understand, justify, and explain all the work you submit.\n🤔 Question AI outputs: Assume AI-generated answers may be incorrect and verify all information independently.\n🚫 Academic integrity: Submitting work you don’t understand or cannot explain will be considered plagiarism, regardless of whether AI use was disclosed.\n\nIf there are concerns about AI use in your work, your instructor will ask you to meet and discuss it. If understanding is clearly lacking and this is the first occurrence, you will have the chance to revise and resubmit for 50% of the original maximum grade within two days."
   },
   {
-    "objectID": "assignments/assignment-2.html#rubric",
-    "href": "assignments/assignment-2.html#rubric",
-    "title": "Assignment 2",
-    "section": "Rubric",
-    "text": "Rubric\n\nFor each issue you explore, you will be graded on the plots and graphs and conceptual accuracy of your explanations using the course rubric.\nThe answer to step 4 will be graded as 1: complete, 0: incomplete."
+    "objectID": "assignments/assignment-3.html#predicting-building-heat-load-with-ridge-lasso-and-pca.",
+    "href": "assignments/assignment-3.html#predicting-building-heat-load-with-ridge-lasso-and-pca.",
+    "title": "Assignment 3",
+    "section": "Predicting Building Heat Load with Ridge, Lasso, and PCA.",
+    "text": "Predicting Building Heat Load with Ridge, Lasso, and PCA.\nFollow the instructions in hw3-task1.ipynb to complete this task. You will practice:\n\nPreprocessing data with train/test splits and predictor standardization using StandardScaler\nFitting and evaluating an OLS regression model\nApplying Ridge regression with cross-validated hyperparameter tuning (RidgeCV) and visualizing the coefficient shrinkage path across lambda values\nApplying Lasso regression with cross-validated tuning (LassoCV) and comparing its coefficient-zeroing behavior to Ridge\nComparing OLS, Ridge, and Lasso using test MSE and coefficient bar plots\nPerforming Principal Components Regression (PCR) by fitting PCA on scaled features, selecting the number of components via explained variance (≥90% threshold), and fitting OLS on the projected scores\nSynthesizing all four models in a final summary table and interpreting which approach best fits the building energy efficiency dataset"
   },
   {
-    "objectID": "assignments/assignment-2.html#do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk",
-    "href": "assignments/assignment-2.html#do-social-and-economic-conditions-predict-whether-a-community-has-elevated-asthma-risk",
-    "title": "Assignment 2",
-    "section": "Do Social and Economic Conditions Predict Whether a Community Has Elevated Asthma Risk?",
-    "text": "Do Social and Economic Conditions Predict Whether a Community Has Elevated Asthma Risk?\nFollow the instructions in hw2-task2.ipynb to complete this task. You will practice:\n\nVisualizing class imbalance\nPreparing features for classification: selecting predictors, dropping missing values, and performing a stratified train/test split\nFitting a K-Nearest Neighbors (KNN) classifier and evaluating test-set accuracy\nSelecting the optimal value of k using 5-fold cross-validation withcross_val_score\n\nFitting a Logistic Regression model with built-in cross-validation using LogisticRegressionCV\n\nComputing and interpretting a confusion matrix\nCalculating accuracy, precision, recall and F1 score using sklearn.metrics\n\nComparring KNN and Logistic Regression model performance\nEvaluating a classifier with an ROC Curve and AUC score"
+    "objectID": "assignments/assignment-3.html#classifying-potable-non-potable-water",
+    "href": "assignments/assignment-3.html#classifying-potable-non-potable-water",
+    "title": "Assignment 3",
+    "section": "Classifying Potable/ Non Potable Water",
+    "text": "Classifying Potable/ Non Potable Water\nFollow the instructions in hw3-task2.ipynb to complete this task. You will practice:\n\nExploring a dataset with class imbalance and missing values, and applying median imputation with stratified train/test splitting\nFitting an unpruned decision tree as a baseline\nTuning tree depth using 5-fold cross-validation and selecting the optimal depth from a CV accuracy plot\nRefitting and evaluating the pruned (tuned) decision tree and visualizing its structure, including interpreting root-node splits, feature thresholds, and Gini impurity\nFitting a Random Forest (200 trees) and comparing its test accuracy to the single-tree models\nVisualizing and comparing feature importances (Gini-based) from both the decision tree and random forest\nInterpreting a confusion matrix for the random forest\nBuilding a final model comparison table/bar chart across all three models (unpruned tree, tuned tree, random forest)"
+  },
+  {
+    "objectID": "assignments/assignment-3.html#rubric",
+    "href": "assignments/assignment-3.html#rubric",
+    "title": "Assignment 3",
+    "section": "Rubric",
+    "text": "Rubric\n\nSteps 2, 3, 5 and the Title/ Intro will be graded as 1: complete, 0: incomplete."
   },
   {
     "objectID": "exams/exam1_study_guide.html",
