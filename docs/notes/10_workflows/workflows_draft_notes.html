@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>workflows_draft_notes – EDS 232 - Machine Learning for Environmental Science</title>
+<title>End-to-end ML workflows – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,7 +23,7 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -67,6 +67,9 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -199,120 +202,814 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#end-to-end-workflows" id="toc-end-to-end-workflows" class="nav-link active" data-scroll-target="#end-to-end-workflows">End-to-end workflows</a></li>
   <li><a href="#understand-the-big-picture" id="toc-understand-the-big-picture" class="nav-link" data-scroll-target="#understand-the-big-picture">Understand the big picture</a></li>
-  <li><a href="#get-the-data-and-do-a-preliminary-exploration" id="toc-get-the-data-and-do-a-preliminary-exploration" class="nav-link" data-scroll-target="#get-the-data-and-do-a-preliminary-exploration">Get the data and do a preliminary exploration</a></li>
+  <li><a href="#get-the-data-and-do-preliminary-exploration" id="toc-get-the-data-and-do-preliminary-exploration" class="nav-link" data-scroll-target="#get-the-data-and-do-preliminary-exploration">Get the data and do preliminary exploration</a></li>
   <li><a href="#create-a-representative-test-set-and-lock-it-away" id="toc-create-a-representative-test-set-and-lock-it-away" class="nav-link" data-scroll-target="#create-a-representative-test-set-and-lock-it-away">Create a representative test set and lock it away</a></li>
   <li><a href="#explore-the-train-data-to-gain-insights" id="toc-explore-the-train-data-to-gain-insights" class="nav-link" data-scroll-target="#explore-the-train-data-to-gain-insights">Explore the train data to gain insights</a></li>
-  <li><a href="#experiment-with-attirbute-combinations" id="toc-experiment-with-attirbute-combinations" class="nav-link" data-scroll-target="#experiment-with-attirbute-combinations">Experiment with attirbute combinations</a></li>
-  <li><a href="#garbage-in-garbage-out" id="toc-garbage-in-garbage-out" class="nav-link" data-scroll-target="#garbage-in-garbage-out">Garbage in, garbage out</a></li>
-  <li><a href="#problems-with-algorithms" id="toc-problems-with-algorithms" class="nav-link" data-scroll-target="#problems-with-algorithms">Problems with algorithms</a></li>
+  <li><a href="#consider-feature-combinations" id="toc-consider-feature-combinations" class="nav-link" data-scroll-target="#consider-feature-combinations">Consider feature combinations</a></li>
+  <li><a href="#prepare-train-data-for-ml-algorithms" id="toc-prepare-train-data-for-ml-algorithms" class="nav-link" data-scroll-target="#prepare-train-data-for-ml-algorithms">Prepare train data for ML algorithms</a>
+  <ul class="collapse">
+  <li><a href="#scrubbing" id="toc-scrubbing" class="nav-link" data-scroll-target="#scrubbing">Scrubbing</a></li>
+  <li><a href="#scaling" id="toc-scaling" class="nav-link" data-scroll-target="#scaling">Scaling</a></li>
+  <li><a href="#one-hot-encoding" id="toc-one-hot-encoding" class="nav-link" data-scroll-target="#one-hot-encoding">One-hot encoding</a></li>
+  </ul></li>
+  <li><a href="#try-out-different-candidate-models-and-estimate-accuracy-metrics-with-cv" id="toc-try-out-different-candidate-models-and-estimate-accuracy-metrics-with-cv" class="nav-link" data-scroll-target="#try-out-different-candidate-models-and-estimate-accuracy-metrics-with-cv">Try out different candidate models and estimate accuracy metrics with CV</a></li>
+  <li><a href="#go-back-to-the-drawing-board-if-needed" id="toc-go-back-to-the-drawing-board-if-needed" class="nav-link" data-scroll-target="#go-back-to-the-drawing-board-if-needed">Go back to the drawing board if needed</a>
+  <ul class="collapse">
+  <li><a href="#problems-with-the-data" id="toc-problems-with-the-data" class="nav-link" data-scroll-target="#problems-with-the-data">Problems with the data</a></li>
+  <li><a href="#problems-with-models" id="toc-problems-with-models" class="nav-link" data-scroll-target="#problems-with-models">Problems with models</a></li>
+  </ul></li>
+  <li><a href="#after-model-selection" id="toc-after-model-selection" class="nav-link" data-scroll-target="#after-model-selection">After model selection</a></li>
+  <li><a href="#exercise-wetland-carbon-credit-modeling" id="toc-exercise-wetland-carbon-credit-modeling" class="nav-link" data-scroll-target="#exercise-wetland-carbon-credit-modeling">Exercise: Wetland carbon credit modeling</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">End-to-end ML workflows</h1>
+</div>
 
 
 
+<div class="quarto-title-meta">
 
-<p>This lesson is based on <em>Chapter 2: End-to-End Machine Learning Project</em> from the Hands-On Machine Learning with Scikit-Learn, Keras &amp; TensorFlow book.</p>
-<p>This lesson builds on, adapts and includes excerpts from the ML Project Checklist by Aurélien Géron publicly avaiblable through their <a href="https://github.com/ageron/handson-ml3/blob/main/ml-project-checklist.md"><code>handson-ml3</code> GitHub repository</a>.</p>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><a href="../../notes/10_workflows/workflows_draft_notes-SLIDES.html">📊 Slides</a></p>
+<p>This lesson builds on, adapts and includes excerpts from the ML Project Checklist by Aurélien Géron publicly available through their <a href="https://github.com/ageron/handson-ml3/blob/main/ml-project-checklist.md"><code>handson-ml3</code> GitHub repository</a> and on topics covered in <em>Chapter 2: End-to-End Machine Learning Project</em> from the Hands-On Machine Learning with Scikit-Learn, Keras &amp; TensorFlow book. All example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.</p>
+<!--
+RESOURCES:
+- https://developers.google.com/machine-learning/crash-course/numerical-data/scrubbing
+- https://developers.google.com/machine-learning/crash-course/numerical-data/binning
+ -->
 <section id="end-to-end-workflows" class="level2">
 <h2 class="anchored" data-anchor-id="end-to-end-workflows">End-to-end workflows</h2>
-<p>The main steps we shouold go through when implementing a ML project are:</p>
+<p>Some core steps we should go through when implementing a ML project are:</p>
 <ol type="1">
 <li>Understand the big picture</li>
 <li>Get the data and do a preliminary exploration</li>
 <li>Create a representative test set and lock it away</li>
-<li>Explore the train data to gain insights</li>
-<li>Experiment with attirbute combinations</li>
+<li>Explore the train data to gain insights.</li>
+<li>Consider feature combinations</li>
 <li>Prepare train data for ML algorithms</li>
 <li>Try out different candidate models and estimate accuracy metrics with CV</li>
 <li>Go back to the drawing board if needed</li>
 <li>Select a model and fine-tune it</li>
 <li>Evaluate model on test set</li>
-<li>Present your results!</li>
 </ol>
+<p>🌟. Present your results!</p>
 <p>We’ll dive deeper into some of these steps.</p>
 </section>
 <section id="understand-the-big-picture" class="level2">
 <h2 class="anchored" data-anchor-id="understand-the-big-picture">Understand the big picture</h2>
 <p>This step is all about understanding the framing of your project, you should ask your team questions such as:</p>
 <ul>
-<li>Clearly define the objective</li>
+<li>What is the obbjective of this application?</li>
 <li>How will the results be used?</li>
 <li>What are the current solutions or workarounds (if any)?</li>
-<li>How should you frame this problem? Classification/regression, supervised/unsupervised.</li>
+<li>How should you frame this problem? Classification/regression, supervised/unsupervised?</li>
 <li>How will performance be measured in the context of the problem?</li>
-<li>What would be the minimum performance needed to reach the objective?</li>
-<li>What ML performance metric will be used to measure performance?</li>
-<li>What are comparable problems? Can you reuse experience or tools?</li>
-<li>Is human expertise available?</li>
+<li>What ML performance metric will be used?</li>
+<li>What would be the minimum performance needed to reach the objective? Is it subject to some minimum performance on another metric?</li>
+<li>What are comparable problems? Are there experience or tools we can reuse?</li>
+<li>Are experts in the domain subject available?</li>
 <li>What assumptions have been made so far?</li>
-<li>Verify the assumptions if possible.</li>
+<li>Are there any assumptions we need to verify?</li>
 </ul>
 <p>For simplicity, for the rest of the section we will assume we are in the supervised scenario. But most steps also apply for unsupervised problems.</p>
-<p>[IDEA: maybe I want this to be a scenario where people have to extract some of this information.]</p>
-<p>[CLAUDE: add some examples of objectives for ML workflows in env science and management]</p>
 </section>
-<section id="get-the-data-and-do-a-preliminary-exploration" class="level2">
-<h2 class="anchored" data-anchor-id="get-the-data-and-do-a-preliminary-exploration">Get the data and do a preliminary exploration</h2>
-<p>After you get the data, we can open it and do some superficial exploration. If you are wroking with tabular data, this can be done using <code>pandas.DataFrame</code> methods such as <code>head()</code>, <code>info()</code>, <code>value_counts()</code>, <code>describe()</code>, and <code>hist()</code>. The goal here is to get a high-level understanding of the variables in your dataset and answer questions such as: - What is the data type of each variable? - Which are categorical and which numerical? - If this is a supervised problem, which is the target variable? - If there are target classes, are any of them rare? - Are there any variables with a lot of missing values? - Do the data distributions make sense? - Do you understand how each variable was computed?</p>
+<section id="get-the-data-and-do-preliminary-exploration" class="level2">
+<h2 class="anchored" data-anchor-id="get-the-data-and-do-preliminary-exploration">Get the data and do preliminary exploration</h2>
+<p>After you get the data, the next step is to open it and do some preliminary exploration. If you are working with tabular data, this can be done using <code>pandas.DataFrame</code> methods such as <code>head()</code>, <code>info()</code>, <code>value_counts()</code>, <code>describe()</code>, and <code>hist()</code>. The goal here is to get a high-level understanding of the variables in your dataset and answer questions such as:</p>
+<ul>
+<li>What is the data type of each variable?</li>
+<li>Which variables are categorical and which numerical?</li>
+<li>Which is the target variable?</li>
+<li>If the target variable is categorical, is there a class imbalance?</li>
+<li>Are there any variables with a lot of missing values?</li>
+<li>Do the distributions for each variable make sense?</li>
+<li>Do you understand how each variable was computed?</li>
+</ul>
 </section>
 <section id="create-a-representative-test-set-and-lock-it-away" class="level2">
 <h2 class="anchored" data-anchor-id="create-a-representative-test-set-and-lock-it-away">Create a representative test set and lock it away</h2>
-<p>We have previously discussed the importance of keeping the test set unseen and locked away to prevent data leakage (inadvertently tuning our model to the test set). The test set should only be used to assess the final performance of our model and not to influence any modeling decisions. This way, the test set it is truly representative of how our model will perform on new, unseen data.</p>
-<p>Typically, we set aside 20% or 30% of the data for testing, but if your dataset is massive a smaller percentage will probably be ok.</p>
-<p>For the implementation, we usually use the function <code>train_test_split</code> from <code>sklearn</code>. Setting a <code>random_state</code> in this function ensures that we can always reproduce the same train-test split. If there are rare target classes or you want certain features to be proportionally represented in the test set, you can indicate so through the <code>stratify</code> parameter.</p>
-<p>[CLAUDE: we need here an example of the distribution of the target class in the test set with and without the stratified parameter]</p>
+<p>We have previously discussed the importance of keeping the test set unseen and locked away to prevent data leakage (inadvertently tuning our model to the test set). The test set should only be used to assess the final performance of our model and not to influence any modeling decisions. This way, the test set it is truly representative of how the final model will perform on new, unseen data.</p>
+<p>Typically, we set aside 20% or 30% of the data for testing. If your dataset is massive, a smaller percentage will probably be ok.</p>
+<p>For the implementation, we usually use the function <code>train_test_split</code> from <code>sklearn</code>. Setting a <code>random_state</code> in this function ensures that we can always reproduce the same train-test split. For classification problems with imbalanced classes, you can pass the target vector to the <code>stratify</code> parameter to ensure class proportions are preserved in both splits.</p>
 </section>
 <section id="explore-the-train-data-to-gain-insights" class="level2">
 <h2 class="anchored" data-anchor-id="explore-the-train-data-to-gain-insights">Explore the train data to gain insights</h2>
-<p>The main goals for this step are to (1) identify any transformations or cleaning that may be needed for the data and (2) identify any promising predictors, and (3) brainstorm if there are additional features we may want to compute.</p>
+<p>The main goals for this step are to</p>
+<ol type="1">
+<li>identify any transformations or cleaning that may be needed for the data,</li>
+<li>identify any promising predictors, and</li>
+<li>brainstorm if there are additional features we may want to compute.</li>
+</ol>
 <p>For each variable, we should start by studying its characteristics:</p>
 <ul>
 <li>Name</li>
 <li>Type (categorical, int/float, bounded/unbounded, text, structured, etc.)</li>
 <li>% of missing values</li>
-<li>Noisiness and type of noise (stochastic, outliers, rounding errors, etc.)</li>
+<li>Noisiness and type of noise (outliers, rounding errors, etc.)</li>
 <li>Possibly useful for the task?</li>
-<li>Type of distribution (Gaussian, uniform, logarithmic, etc.)</li>
+<li>Type of distribution</li>
 </ul>
-<p>If there are not too many predictors, it can be useful to plot each one (or at least the most promising ones) against the target variable. This may uncover noise or errors in the data and iluminate whether data cleaning or transformation is needed. Plots may also show strong correlations that can give us an idea of which predictors might be best to keep.</p>
-<p>In addition, we may also want to study the correlations between the predictors and target variables using the <code>corr()</code> method. The correlation coefficient ranges from -1 to 1 and</p>
+<p>If there are not too many predictors, it can be useful to plot each one (or at least the most promising ones) against the target variable. This may uncover noise or errors in the data and illuminate whether data cleaning or transformation is needed. Plots may also show strong correlations that can give us an idea of which predictors might be best to keep.</p>
+<p>In addition, we may also want to study the correlations between the predictors and target variables using the <code>corr()</code> method. Note that <code>corr()</code> only works for numerical variables. The correlation coefficient ranges from -1 to 1 and</p>
 <ul>
 <li>when it is close to 1, there is a strong positive linear correlation,</li>
 <li>when it is close to -1, there is a strong negative linear correlation.</li>
 <li>when it is close to 0, there is no linear correlation.</li>
 </ul>
 <p>Remember the correlation here is linear! There may be other kinds of correlations that may not be captured.</p>
-<p>[CLAUDE: we need here an exercise with results from plots and correlations where we have students look at them and come up with takeaways]</p>
+<!-- — for categorical predictors, a quick alternative is to compare the mean (or distribution) of the target within each category using box plots or group means -->
 </section>
-<section id="experiment-with-attirbute-combinations" class="level2">
-<h2 class="anchored" data-anchor-id="experiment-with-attirbute-combinations">Experiment with attirbute combinations</h2>
-<p>In this step we consider</p>
-<p>[CLAUDE: we also need here ]</p>
-<p>Generally, two things can go wrong when we implement an ML model: “bad algorithm” or “bad data”. Let’s see some of the challenges that you can encounter in these two categories:</p>
+<section id="consider-feature-combinations" class="level2">
+<h2 class="anchored" data-anchor-id="consider-feature-combinations">Consider feature combinations</h2>
+<p>In this step we consider if there are any combinations of our predictors that could produce a more informative feature. This is not a “one and done” process: as we are developing the model, we may come back and reassess whether there are new features that are worth including. Whenever possible, make sure your decisions are backed up by domain expertise.</p>
 </section>
-<section id="garbage-in-garbage-out" class="level2">
-<h2 class="anchored" data-anchor-id="garbage-in-garbage-out">Garbage in, garbage out</h2>
-<p>Training dataset is…</p>
+<section id="prepare-train-data-for-ml-algorithms" class="level2">
+<h2 class="anchored" data-anchor-id="prepare-train-data-for-ml-algorithms">Prepare train data for ML algorithms</h2>
+<p>Before doing any transformation, recall that you should always keep a backup of your raw data.</p>
+<section id="scrubbing" class="level3">
+<h3 class="anchored" data-anchor-id="scrubbing">Scrubbing</h3>
+<p>Having high quality training data is crucial. A few common issues in your observations may be:</p>
 <ul>
-<li><strong>too small</strong>: It is not always easy or cheap to get extra training data but always, but generally more high-quality training data will make your models perform better. Potential solution: collect more high-quality training data.</li>
-<li><strong>nonrepresentative</strong>: the training data must be representative of the cases you want to generalize to. If the sample is too small, you will have <em>sampling noise</em>, but even if it’s large, if it’s not representative you will have <em>sampling bias</em>. Potential solutions: if possible, collect more data with better sampling.</li>
-<li><strong>poor quality</strong>: has too many outliers, errors, and missing data, making it harder for the algorithm to detect the underlying pattern. Potential solutions: remove outliers or correct errors, for observations missing features, decide whether to remove these features, remove the observations, fill in the missing value, or compare multiple approaches.</li>
-<li><strong>full of irrelevant features</strong>: irrelevant features can add too much noise for the model to work well. Potential solutions: select the most useful features to train on among existing ones (feature selection); combine existing features to produce more useful ones (feature extraction); gather new data to add features</li>
+<li>omitted values,</li>
+<li>duplicate observations,</li>
+<li>outliers.</li>
+</ul>
+<p>Potential solutions include:</p>
+<ul>
+<li>remove the individual observations;</li>
+<li>replace the missing or outlier values to some value (Imputation: use zero, median, mean, KNN value, etc);</li>
+<li>get rid of the predictor, instead of modifying or deleting observations.</li>
 </ul>
 </section>
-<section id="problems-with-algorithms" class="level2">
-<h2 class="anchored" data-anchor-id="problems-with-algorithms">Problems with algorithms</h2>
+<section id="scaling" class="level3">
+<h3 class="anchored" data-anchor-id="scaling">Scaling</h3>
+<!-- https://developers.google.com/machine-learning/crash-course/numerical-data/normalization -->
+<p>Many ML models perform better when the features are on similar ranges. Since we are moving towards comparing performance from a few different models, it can be useful to scale the features. The target value does not need to be scaled.</p>
+<p>There are different methods for scaling, we have generally been using <strong>standardization</strong> (<code>StandardScaler</code> in <code>sklearn</code>), where values are transformed by subtracting the mean (so standardized values always have zero mean) and dividing by the standard deviation (so standardized values have unit variance). It does not bound values to a specific range.</p>
+<p>Linear scaling, clipping, and log-scaling are a few other ways you may want to scale your data. You can read a <a href="https://developers.google.com/machine-learning/crash-course/numerical-data/normalization">brief overview about each here</a>.</p>
+</section>
+<section id="one-hot-encoding" class="level3">
+<h3 class="anchored" data-anchor-id="one-hot-encoding">One-hot encoding</h3>
+<p>This is a transformation applied to categorical predictors. Suppose you have a variable called <code>biome</code> with categories <code>savanna</code>, <code>rainforest</code>, <code>grassland</code>, and <code>desert</code>. Most ML algorithms prefer to work with numerical variables, so we can transform this variable into numbers.</p>
+<p>An easy way would be to assign each with a number:</p>
 <ul>
-<li><strong>Overfitting</strong>: when the model starts detecting patterns in the noise itself, fitting the trainiing data too closely and resulting in poor generalization.</li>
+<li><code>savanna</code> -&gt; 0</li>
+<li><code>rainforest</code> -&gt; 1</li>
+<li><code>grassland</code> -&gt; 2</li>
+<li><code>desert</code> -&gt; 3</li>
 </ul>
-<p>Potential solutions: - choose a less flexible model (e.g.&nbsp;a linear model instead of a high-degree polynomial) - Collect more training data - Reduce the noise in the training data - Adjust the hyperparameters in the model to reduce variance</p>
+<p>One issue with this approach is that a model would treat the consecutive numbers as a numerical variable that contains information about the relative order between them. Instead, we create a binary feature per class: the new feature equals 1 when the observation belongs to the class, and 0 if the observation does not belong to the class. This process is called <strong>one-hot encoding</strong>.</p>
+<p>For example, the one-hot encoding for the biome classes would look like:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Observation</th>
+<th style="text-align: center;"><code>savanna</code></th>
+<th style="text-align: center;"><code>rainforest</code></th>
+<th style="text-align: center;"><code>grassland</code></th>
+<th style="text-align: center;"><code>desert</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">biome = savanna</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">biome = rainforest</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">biome = grassland</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">biome = desert</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+</tbody>
+</table>
+<p>Note that for linear models, one of the encoded columns should be dropped to avoid perfect multicollinearity; <code>OneHotEncoder</code> handles this via the <code>drop</code> parameter.</p>
+<p>When a categorical variable has many categories, the resulting one-hot matrix can be very large and contain mostly zeros (only one 1 per row). In those cases, sklearn stores the result in a memory-efficient <strong>sparse</strong> format that records only the positions of the 1s rather than all the zeros.</p>
+<p>If a categorical variable has <em>many</em> possible values for its classes, then one-hot encoding will produce a large number of features. In this case, you can consider whether replacing some of it with a numerical alternative is more convenient.</p>
+</section>
+</section>
+<section id="try-out-different-candidate-models-and-estimate-accuracy-metrics-with-cv" class="level2">
+<h2 class="anchored" data-anchor-id="try-out-different-candidate-models-and-estimate-accuracy-metrics-with-cv">Try out different candidate models and estimate accuracy metrics with CV</h2>
+<p>For real-world datasets, data pre-processing may take a long time! More so, when you are considering adding or removing features, you may need to go back to the previous steps and assess whether your dataset is robust, clean, and informative enough. But once you have a solid training set foundation, you can move on with the next steps:</p>
+<ol type="1">
+<li>select a few candidate models that make sense with the problem set-up</li>
+<li>train them without spending too much time tweaking the hyperparameters (you may even want to use it with the default parameters)</li>
+<li>estimate your accuracy metrics with CV or explore ROC curves</li>
+</ol>
+</section>
+<section id="go-back-to-the-drawing-board-if-needed" class="level2">
+<h2 class="anchored" data-anchor-id="go-back-to-the-drawing-board-if-needed">Go back to the drawing board if needed</h2>
+<p>If, at this point, your results are bad, there are generally two things that could have gone wrong: “bad model” or “bad data”. Let’s see some of the challenges that you can encounter in these two categories.</p>
+<section id="problems-with-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="problems-with-the-data">Problems with the data</h3>
+<p>Consider if the poor performance of the model may be coming from a training set that may have some of these problems.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 30%">
+<col style="width: 48%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Problem</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Potential solutions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Too small</strong></td>
+<td style="text-align: left;">More high-quality training data generally improves model performance, but it is not always easy or cheap to acquire.</td>
+<td style="text-align: left;">Collect more high-quality training data.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Nonrepresentative</strong></td>
+<td style="text-align: left;">The training data must reflect the cases you want to generalize to. A small sample may have <em>sampling noise</em>; even a large sample can have <em>sampling bias</em> if it is not representative.</td>
+<td style="text-align: left;">If possible, collect more data using better sampling strategies.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Poor quality</strong></td>
+<td style="text-align: left;">Too many outliers, errors, or missing values can prevent the algorithm from detecting the underlying pattern.</td>
+<td style="text-align: left;">Remove outliers or correct errors; for observations with missing features, decide whether to drop those observations, drop the feature, or fill in the missing values.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Full of irrelevant features</strong></td>
+<td style="text-align: left;">Irrelevant features add noise that can prevent the model from working well.</td>
+<td style="text-align: left;">Select the most informative features (feature selection); combine existing features into more useful ones (feature extraction); or gather new, more relevant data.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="problems-with-models" class="level3">
+<h3 class="anchored" data-anchor-id="problems-with-models">Problems with models</h3>
+<p>Consider if the poor performance of the model may be coming from a model that may have some of these problems.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 30%">
+<col style="width: 48%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Problem</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Potential solutions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Overfitting</strong></td>
+<td style="text-align: left;">The model detects patterns in noise, fitting the training data too closely and generalizing poorly to new data.</td>
+<td style="text-align: left;">Choose a less flexible model; collect more training data; reduce noise in the training data; adjust hyperparameters to reduce model variance.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Underfitting</strong></td>
+<td style="text-align: left;">The model is too simple or rigid to capture the structure of the data.</td>
+<td style="text-align: left;">Choose a more flexible model; add more informative features to the data; adjust hyperparameters to allow more model variance.</td>
+</tr>
+</tbody>
+</table>
+<p>Whatever the challenge is, you can go back and experiment with different feature combinations and models.</p>
+</section>
+</section>
+<section id="after-model-selection" class="level2">
+<h2 class="anchored" data-anchor-id="after-model-selection">After model selection</h2>
+<p>Finally, after you have selected one or a couple of target models the steps to the finish line are:</p>
+<ol start="9" type="1">
+<li><strong>Select a model and fine-tune it.</strong></li>
+</ol>
+<p>Use cross-validation on the training set to search over hyperparameter combinations (e.g., with <code>GridSearchCV</code> ). All tuning decisions must be made using the training data only — the test set stays locked away!</p>
+<ol start="10" type="1">
+<li><strong>Evaluate on the test set.</strong></li>
+</ol>
+<p>Once hyperparameters are finalized, evaluate the model on the test set exactly once. This single number is your honest estimate of generalization performance. If it is much worse than your CV estimate, the model likely overfit during tuning.</p>
+<p>🌟 <strong>Present your results.</strong></p>
+<p>Report both the metric value and its practical meaning in context: what does a MSE of X actually imply in the context of the problem? Also document the full pipeline, the choices made at each step, and any caveats about where the model may not generalize.</p>
+</section>
+<section id="exercise-wetland-carbon-credit-modeling" class="level2">
+<h2 class="anchored" data-anchor-id="exercise-wetland-carbon-credit-modeling">Exercise: Wetland carbon credit modeling</h2>
+<p><em>Note: the dataset and scenario below are synthetic and designed for pedagogical purposes. The variable relationships do not necessarily reflect real ecological dynamics.</em></p>
+<p>A state environmental agency in Oregon is developing a <strong>wetland carbon credit program</strong> to incentivize private landowners to restore degraded coastal marshes. Under the program, landowners receive financial credits proportional to the carbon their restored wetlands sequester. Predictions of sequestered carbon directly affect how much money flows to each participant. The agency wants to build a model that predicts annual carbon sequestration from measurable site characteristics.</p>
+<p>The agency’s field teams spent three seasons surveying 500 coastal wetland plots. For each plot they recorded:</p>
 <ul>
-<li><strong>Underfitting</strong>: when the model is too rigid or simple to detect the structure of the data:</li>
+<li><code>salinity_ppt</code>: mean porewater salinity (parts per thousand, ppt)</li>
+<li><code>water_depth_cm</code>: mean water column depth (cm)</li>
+<li><code>tidal_range_cm</code>: mean tidal range at the nearest gauge station (cm) (average difference in water level between high tide and low tide)</li>
+<li><code>soil_organic_pct</code>: soil organic matter content (%)</li>
+<li><code>bulk_density_gcm3</code>: soil bulk density (g/cm³)</li>
+<li><code>vegetation_type</code>: dominant plant guild (<code>cordgrass</code>, <code>bulrush</code>, <code>pickleweed</code>, or <code>sedges</code>)</li>
 </ul>
-<p>Potential solutions: - choose a more flexible model - Add better features to you data - Adjust the hyperparameters in the model to allow more variance</p>
+<p>The response variable is <code>carbon_seq_tco2</code>, the measured annual carbon sequestration rate in metric tons of CO₂-equivalent per hectare per year (tCO₂-eq/ha/yr).</p>
+<p>No existing predictive model is in place: credit values are currently assigned manually by ecologists, a process that is slow and inconsistent across reviewers.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise 1
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Read the scenario above carefully. You are about to start working on this project. List any questions you would still need to answer before beginning data analysis and model development.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The scenario is missing several key pieces of information about performance:</p>
+<ul>
+<li><strong>What metric should be used?</strong> We need to confirm which metric the agency wants to optimize. For this regression problem we will use <strong>mean squared error (MSE)</strong>, which penalizes larger prediction errors more heavily — an important property when errors have direct financial consequences.</li>
+<li><strong>What is the minimum acceptable performance?</strong> A model must meet some accuracy threshold to be scientifically and legally defensible for assigning credits. Without a benchmark, we cannot know when the model is “good enough.”</li>
+<li><strong>What is the current baseline performance?</strong> Manual assignment by ecologists is the current approach. We should know how consistent and accurate that process is, since it sets the bar the model needs to beat.</li>
+</ul>
+<p>Another question worth considering:</p>
+<ul>
+<li><strong>Is over- or under-prediction more costly?</strong> Over-predicting sequestration could mean issuing invalid credits (financial and reputational risk to the agency); under-predicting means landowners are under-compensated. This asymmetry may inform how we communicate and interpret model errors.</li>
+</ul>
+</div>
+</div>
+</div>
+<p>After consulting with the agency, your team decides that the MSE will be used to evaluate model performance and an MSE of at less than 9 (tCO₂-eq/ha/yr)² will be considered an improvement on the reviewer estimates.</p>
+<!-- 
+- **Performance metric**: MSE will be used to evaluate model performance.
+- **Minimum acceptable performance**: The current manual assignment process has an estimated inter-reviewer MSE of approximately 9 (tCO₂-eq/ha/yr)² across previously monitored plots. The model should improve on this to be useful.
+- **Error asymmetry**: The agency considers over- and under-prediction roughly equally costly — both cause financial harm, in opposite directions.
+
+With these answers in hand, we proceed to load and explore the data. -->
+<p>We initiate data exploration. After loading the data, the table below shows the output for <code>df.info()</code>.</p>
+<div id="ex-info" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 500 entries, 0 to 499
+Data columns (total 7 columns):
+ #   Column             Non-Null Count  Dtype  
+---  ------             --------------  -----  
+ 0   salinity_ppt       500 non-null    float64
+ 1   water_depth_cm     500 non-null    float64
+ 2   tidal_range_cm     500 non-null    float64
+ 3   soil_organic_pct   400 non-null    float64
+ 4   bulk_density_gcm3  500 non-null    float64
+ 5   vegetation_type    500 non-null    object 
+ 6   carbon_seq_tco2    500 non-null    float64
+dtypes: float64(6), object(1)
+memory usage: 27.5+ KB</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise 2
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Based on the outputs:</p>
+<ol type="a">
+<li>How many numerical and how many categorical features are there?</li>
+<li>Are there any variables with a concerning amount of missing data? Which one(s), and roughly what percentage of observations are missing?</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="a">
+<li><p>There are <strong>5 numerical</strong> features (<code>salinity_ppt</code>, <code>water_depth_cm</code>, <code>tidal_range_cm</code>, <code>soil_organic_pct</code>, <code>bulk_density_gcm3</code>) and <strong>1 categorical</strong> feature (<code>vegetation_type</code>, shown as <code>object</code> dtype in <code>df.info()</code>).</p></li>
+<li><p><code>soil_organic_pct</code> has approximately 100 missing values out of 500 rows (~20%), as visible from both <code>df.info()</code> (which shows 400 non-null entries) and <code>df.describe()</code> (which reports a count of 400). This is a substantial proportion — it warrants a deliberate decision about how to handle it rather than a default fix.</p></li>
+</ol>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise 3
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Before fitting any models, a teammate opens the shared notebook and suggests the next step is to standardize the entire dataset so that all numerical features have zero mean and unit variance. What is the problem with this approach?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>This causes <strong>data leakage</strong>. Standardization requires computing the mean and standard deviation from the data. If those statistics are computed on the full dataset (including those that will become the held-out test rows), information from the test set contaminates the training process.</p>
+<p>The correct procedure is:</p>
+<ol type="1">
+<li>Split the data into train and test sets first.</li>
+<li>Compute the mean and standard deviation <strong>only on the training set</strong>.</li>
+<li>Apply those same values to scale both the training and test sets.</li>
+</ol>
+<p>This ensures that the test set remains a clean simulation of data the model has never seen.</p>
+</div>
+</div>
+</div>
+<p>Your team creates a test set on the raw data and stores it away and decides the next step is to do further exploration for the training data. The plots below show the histograms for each of the predictors.</p>
+<div id="cell-ex-hist" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="workflows_draft_notes_files/figure-html/ex-hist-output-1.png" id="ex-hist" width="988" height="544" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise 6
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Looking at the distributions of the numerical predictors above, should you plan on scaling the data before fitting your models? Which predictors would most benefit from scaling, and why?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Yes, scaling is needed. The predictors operate on very different numeric scales:</p>
+<ul>
+<li><code>salinity_ppt</code>: roughly 0.5–35,</li>
+<li><code>water_depth_cm</code>: roughly 5–150,</li>
+<li><code>tidal_range_cm</code>: roughly 5–300,</li>
+<li><code>soil_organic_pct</code>: roughly 2–40</li>
+<li><code>bulk_density_gcm3</code>: roughly 0.1–1.5</li>
+</ul>
+<p>Without scaling, models sensitive to feature magnitude (e.g., SVMs, KNN) would give disproportionate weight to variables with larger numeric ranges like <code>tidal_range_cm</code> and <code>water_depth_cm</code>, regardless of their actual predictive value. Three of the five predictors are also right-skewed, meaning a handful of extreme observations could have an outsized influence. Standardization (zero mean, unit variance) addresses both issues.</p>
+<p>Remember: the target variable <code>carbon_seq_tco2</code> does not need to be scaled.</p>
+</div>
+</div>
+</div>
+<div id="cell-ex-scatter" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="workflows_draft_notes_files/figure-html/ex-scatter-output-1.png" id="ex-scatter" width="1387" height="348" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Next, the plots below show scatter plots of how the response changes with each predictor and a table of the correlation between each of these pairs.</p>
+<div id="cell-ex-corr" class="cell" data-execution_count="5">
+<div id="ex-corr" class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Correlation with target</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">salinity_ppt</td>
+<td>-0.236</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">water_depth_cm</td>
+<td>0.115</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">tidal_range_cm</td>
+<td>0.053</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">soil_organic_pct</td>
+<td>0.456</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">bulk_density_gcm3</td>
+<td>0.010</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise 4
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Based on the scatter plots and correlation table above:</p>
+<ol type="a">
+<li><p>Which predictor(s) would you flag as candidates for removal because they appear to add noise without contributing useful signal? What evidence supports this?</p></li>
+<li><p>Is there a predictor that has a low linear correlation with <code>carbon_seq_tco2</code> but whose scatter plot suggests a meaningful non-linear relationship? Describe what you see.</p></li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="a">
+<li><p><strong><code>bulk_density_gcm3</code></strong> is the strongest candidate for removal. Its scatter plot shows no discernible pattern and its correlation with the target is near zero. This is consistent with a variable that possibly adds noise without contributing predictive information.</p></li>
+<li><p><strong><code>salinity_ppt</code></strong> appears to have a non-linear (inverted-U) relationship with <code>carbon_seq_tco2</code>: sequestration is highest at intermediate, brackish salinity values (~15–20 ppt) and drops off at both very low and very high salinity. This reflects a well-known ecological pattern — freshwater conditions accelerate organic matter decomposition, while high salinity stresses plant productivity — but the symmetric shape means the positive and negative deviations cancel in a linear correlation, producing a near-zero coefficient. The scatter plot reveals what the correlation hides.</p></li>
+</ol>
+<!-- *Note on attribute combinations*: `water_depth_cm` and `tidal_range_cm` both have positive linear associations with the target when examined individually, but their **ratio** (`water_depth_cm / tidal_range_cm`) captures the flooding regime more directly — a plot where water depth greatly exceeds tidal range is permanently submerged, while a low ratio indicates regular tidal exposure. This kind of domain-knowledge-driven combination is worth exploring in the feature engineering step. -->
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise 5
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>soil_organic_pct</code> has approximately 20% missing values.</p>
+<ol type="1">
+<li><p>What are some questions you could ask to the environmental agency to better inform how to work with this data?</p></li>
+<li><p>Consider the three approaches below for handling this. For each, briefly discuss at least one advantage and one disadvantage.</p></li>
+</ol>
+<ol type="a">
+<li>Remove all observations where <code>soil_organic_pct</code> is missing.</li>
+<li>Impute missing values with the mean of the non-missing observations.</li>
+<li>Drop <code>soil_organic_pct</code> as a feature entirely.</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="a">
+<li><p><strong>Remove observations with missing values.</strong> <em>Advantage</em>: Simple to implement; keeps the feature in the model with no artificial values introduced. <em>Disadvantage</em>: Loses ~20% of training observations, reducing the effective sample size. If missingness is non-random (e.g., inaccessible plots may be in particularly remote or ecologically distinct areas), removing them could introduce sampling bias.</p></li>
+<li><p><strong>Impute with the mean.</strong> <em>Advantage</em>: Preserves all observations and keeps the feature available for modeling. <em>Disadvantage</em>: Replaces a meaningful measurement with an invented value, which can distort the distribution and reduce model accuracy, especially if the missing plots are systematically different from those with measurements.</p></li>
+<li><p><strong>Drop the feature entirely.</strong> <em>Advantage</em>: Completely sidesteps the missing data problem and avoids introducing imputed values. <em>Disadvantage</em>: <code>soil_organic_pct</code> shows one of the stronger positive correlations with the target. Removing it discards real predictive signal and is likely to hurt model performance.</p></li>
+</ol>
+<p>There is no universally correct answer here. In practice, a reasonable strategy is to start with mean imputation (option b) and compare model performance against the two other options using cross-validation.</p>
+</div>
+</div>
+</div>
+<p>The table below shows three observations from the training set, each from a different vegetation type:</p>
+<div id="cell-ex-ohe-display" class="cell" data-execution_count="6">
+<div id="ex-ohe-display" class="cell-output cell-output-display" data-execution_count="6">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">vegetation_type</th>
+<th data-quarto-table-cell-role="th">salinity_ppt</th>
+<th data-quarto-table-cell-role="th">water_depth_cm</th>
+<th data-quarto-table-cell-role="th">tidal_range_cm</th>
+<th data-quarto-table-cell-role="th">soil_organic_pct</th>
+<th data-quarto-table-cell-role="th">bulk_density_gcm3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>cordgrass</td>
+<td>10.06</td>
+<td>29.3</td>
+<td>139.7</td>
+<td>16.8</td>
+<td>0.645</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>sedges</td>
+<td>33.50</td>
+<td>16.1</td>
+<td>19.7</td>
+<td>32.1</td>
+<td>0.791</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>pickleweed</td>
+<td>21.34</td>
+<td>12.6</td>
+<td>47.5</td>
+<td>10.6</td>
+<td>1.033</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise 7
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>One-hot encode the <code>vegetation_type</code> column for the three observations shown above. Write out what the encoded columns would look like. What are the names of the new columns, and what value (0 or 1) does each observation get in each column?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>One-hot encoding <code>vegetation_type</code> creates one binary column per category. With four categories in the full dataset (<code>bulrush</code>, <code>cordgrass</code>, <code>pickleweed</code>, <code>sedges</code>), the encoding produces four new columns, typically named in alphabetical order:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 4%">
+<col style="width: 17%">
+<col style="width: 18%">
+<col style="width: 20%">
+<col style="width: 21%">
+<col style="width: 17%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">obs</th>
+<th style="text-align: center;"><code>vegetation_type</code></th>
+<th style="text-align: center;"><code>veg_type_bulrush</code></th>
+<th style="text-align: center;"><code>veg_type_cordgrass</code></th>
+<th style="text-align: center;"><code>veg_type_pickleweed</code></th>
+<th style="text-align: center;"><code>veg_type_sedges</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">cordgrass</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">sedges</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">pickleweed</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<p>Each row has exactly one 1 and three 0s. The original <code>vegetation_type</code> column is dropped and replaced by these four binary columns. Note that <code>bulrush</code> does not appear in this particular subset, but the column is still created.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise 8
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Your team has cleaned and prepared the training data and is ready to start fitting models. Looking back at the wetland carbon sequestration problem, brainstorm at least three candidate models you could try as a starting point. For each, briefly justify why it is a reasonable choice for this problem.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-16" class="callout-16-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Any of the following would be reasonable starting points:</p>
+<ul>
+<li><strong>Linear regression</strong>: a natural first baseline for any regression problem. It is fast to fit, easy to interpret, and its performance sets a floor. If more complex models cannot beat it, that is a signal to revisit the data rather than the model.</li>
+<li><strong>K-nearest neighbors (KNN) regression</strong>: makes no assumption about the functional form of the relationship between predictors and target, so it can capture non-linear patterns like the quadratic salinity effect without any feature engineering.</li>
+<li><strong>Decision tree / random forest regression</strong>: handles non-linearities and interactions automatically, works well with mixed numerical and categorical features, and provides feature importances — useful here because the agency may want to know which site characteristics drive sequestration. <!-- - **Support vector regression (SVR)**: with an RBF kernel, it can capture non-linear relationships and is robust to outliers, though it requires careful scaling (which we have already planned for). --></li>
+</ul>
+<p>In practice, you would fit all candidates with default hyperparameters first and compare their cross-validated MSE on the training set before investing time in tuning any single model.</p>
+</div>
+</div>
+</div>
 
 
 </section>

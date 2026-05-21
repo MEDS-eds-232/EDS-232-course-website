@@ -183,11 +183,11 @@ A guiding example
 <h2></h2>
 <p><span class="slide-title">Data overview</span></p>
 <hr>
-<div id="a549d24d" class="cell" data-execution_count="2">
+<div id="d22090f2" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-revealjs/cell-3-output-1.png" class="quarto-figure quarto-figure-center" width="1265" height="529"></p>
+<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-html/cell-3-output-1.png" class="quarto-figure quarto-figure-center" width="1265" height="529"></p>
 </figure>
 </div>
 </div>
@@ -373,11 +373,11 @@ so all predictors have mean 0 and standard deviation 1, and the penalty applies 
 <h2></h2>
 <p><span class="slide-title">Ridge coefficient profiles</span></p>
 <hr>
-<div id="4994b45a" class="cell" data-execution_count="3">
+<div id="974d399e" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-revealjs/cell-4-output-1.png" class="quarto-figure quarto-figure-center" width="1106" height="435"></p>
+<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-html/cell-4-output-1.png" class="quarto-figure quarto-figure-center" width="1106" height="435"></p>
 </figure>
 </div>
 </div>
@@ -389,11 +389,11 @@ so all predictors have mean 0 and standard deviation 1, and the penalty applies 
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="f1d843ca" class="cell" data-execution_count="4">
+<div id="9ac73b49" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-revealjs/cell-5-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="435"></p>
+<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-html/cell-5-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="435"></p>
 </figure>
 </div>
 </div>
@@ -401,7 +401,7 @@ so all predictors have mean 0 and standard deviation 1, and the penalty applies 
 </div><div class="column" style="width:45%;">
 <div class="teal-text body-text-m">
 <ol type="1">
-<li><p>Which predictors appear most important (retain the largest coefficients as <span class="math inline">\(\lambda\)</span> increases, i.e.&nbsp;are most resistant to shrinkage)?</p></li>
+<li><p>Which predictors appear most important (largest absolute coefficient at low <span class="math inline">\(\lambda\)</span>)?</p></li>
 <li><p>You have fit ridge at a grid of <span class="math inline">\(\lambda\)</span> values and obtained a different set of coefficient estimates for each. What method would you use to select a good <span class="math inline">\(\lambda\)</span>?</p></li>
 </ol>
 </div>
@@ -413,25 +413,25 @@ so all predictors have mean 0 and standard deviation 1, and the penalty applies 
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="df3f27fc" class="cell" data-execution_count="5">
+<div id="4ed504f0" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-revealjs/cell-6-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="435"></p>
+<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-html/cell-6-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="435"></p>
 </figure>
 </div>
 </div>
 </div>
 </div><div class="column" style="width:45%;">
-<div class="teal-text">
+<div class="teal-text body-text-m">
 <ol type="1">
-<li><p>Which predictors appear most important (coefficient’s magnitude remains large as <span class="math inline">\(\lambda\)</span> increases, i.e.&nbsp;are most resistant to shrinkage)?</p></li>
-<li><p>You have fit ridge at a grid of <span class="math inline">\(\lambda\)</span> values and obtained a different set of coefficient estimates for each. What method would you use to select a good <span class="math inline">\(\lambda\)</span>?</p></li>
+<li>Most important predictors?</li>
+<li>How to select <span class="math inline">\(\lambda\)</span>?</li>
 </ol>
 </div>
 <div class="body-text-s">
 <ol type="1">
-<li><p><code>precip</code>, and <code>temp</code> retain the largest coefficients as <span class="math inline">\(\lambda\)</span> increases, so they appear to be the most important predictors. <code>aspect</code> and <code>canopy</code> seem to be irrelevant as they stay near zero across the entire range.</p></li>
+<li><p><code>precip</code>, <code>temp</code>, <code>forest_cover</code>, and <code>soil_N</code> have the largest magnitudes at low <span class="math inline">\(\lambda\)</span>. <code>aspect</code> and <code>canopy</code> stay near zero across the entire range, likely irrelevant.</p></li>
 <li><p>Use <span class="math inline">\(k\)</span>-fold cross-validation!</p></li>
 </ol>
 </div>
@@ -441,11 +441,11 @@ so all predictors have mean 0 and standard deviation 1, and the penalty applies 
 <h2></h2>
 <p><span class="slide-title">Selecting the tuning parameter</span></p>
 <hr>
-<div id="e4efe61b" class="cell" data-execution_count="6">
+<div id="1c3ec2b4" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-revealjs/cell-7-output-1.png" class="quarto-figure quarto-figure-center" width="1026" height="386"></p>
+<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-html/cell-7-output-1.png" class="quarto-figure quarto-figure-center" width="1026" height="386"></p>
 </figure>
 </div>
 </div>
@@ -508,11 +508,11 @@ The lasso
 <h2></h2>
 <p><span class="slide-title">Lasso coefficient profiles</span></p>
 <hr>
-<div id="ab8c1845" class="cell" data-execution_count="7">
+<div id="6c75ef4e" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-revealjs/cell-8-output-1.png" class="quarto-figure quarto-figure-center" width="1106" height="435"></p>
+<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-html/cell-8-output-1.png" class="quarto-figure quarto-figure-center" width="1106" height="435"></p>
 </figure>
 </div>
 </div>
@@ -524,11 +524,11 @@ The lasso
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="c04b7f11" class="cell" data-execution_count="8">
+<div id="87d25977" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-revealjs/cell-9-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="435"></p>
+<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-html/cell-9-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="435"></p>
 </figure>
 </div>
 </div>
@@ -545,11 +545,11 @@ The lasso
 <hr>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div id="63768144" class="cell" data-execution_count="9">
+<div id="3e27fa31" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-revealjs/cell-10-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="435"></p>
+<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-html/cell-10-output-1.png" class="quarto-figure quarto-figure-center" width="706" height="435"></p>
 </figure>
 </div>
 </div>
@@ -567,11 +567,11 @@ The lasso
 <h2></h2>
 <p><span class="slide-title">Selecting the tuning parameter</span></p>
 <hr>
-<div id="7e320026" class="cell" data-execution_count="10">
+<div id="003a2363" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-revealjs/cell-11-output-1.png" class="quarto-figure quarto-figure-center" width="1026" height="386"></p>
+<p><img data-src="6_linear_model_selection_and_regularization-BLANK_files/figure-html/cell-11-output-1.png" class="quarto-figure quarto-figure-center" width="1026" height="386"></p>
 </figure>
 </div>
 </div>
@@ -613,7 +613,7 @@ Comparing lasso and ridge
 <hr>
 <div class="columns">
 <div class="column" style="width:70%;">
-<div id="af19d015" class="cell" data-execution_count="11">
+<div id="088e571d" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-stdout">
 <pre><code>   Predictor  True β    OLS  Ridge (CV λ)  Lasso (CV λ)
       precip    2.50  2.442         2.323         2.283
@@ -641,7 +641,7 @@ forest_cover    1.50  1.391         1.335         1.284
 <hr>
 <div class="columns">
 <div class="column" style="width:70%;">
-<div id="702a59af" class="cell" data-execution_count="12">
+<div id="a791feb0" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-stdout">
 <pre><code>   Predictor  True β    OLS  Ridge (CV λ)  Lasso (CV λ)
       precip    2.50  2.442         2.323         2.283

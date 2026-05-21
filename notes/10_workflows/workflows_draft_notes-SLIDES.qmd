@@ -1,0 +1,663 @@
+---
+format:
+    revealjs:
+        theme: ../../styles/meds-slides-styles.scss
+        slide-number: true
+        chalkboard: true
+        title-slide: false
+jupyter: eds232-env
+---
+
+```{python}
+#| label: slides-setup
+#| echo: false
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 11
+
+np.random.seed(42)
+n = 500
+
+salinity_ppt      = np.clip(np.random.gamma(3, 6, n), 0.5, 35)
+water_depth_cm    = np.clip(np.random.lognormal(2.8, 0.6, n), 5, 150)
+tidal_range_cm    = np.clip(np.random.lognormal(3.5, 0.8, n), 5, 300)
+bulk_density_gcm3 = np.random.uniform(0.1, 1.5, n)
+vegetation_type   = np.random.choice(
+    ['cordgrass', 'bulrush', 'pickleweed', 'sedges'],
+    size=n, p=[0.35, 0.30, 0.25, 0.10])
+
+soil_organic_raw = np.random.uniform(2, 40, n)
+soil_organic_pct = soil_organic_raw.copy().astype(float)
+soil_organic_pct[np.random.choice(n, int(0.20 * n), replace=False)] = np.nan
+soil_organic_filled = np.where(
+    np.isnan(soil_organic_pct), np.nanmean(soil_organic_pct), soil_organic_pct)
+
+_veg_map = {'cordgrass': 1.5, 'bulrush': 0.5, 'pickleweed': -0.8, 'sedges': 0.3}
+_veg_num  = np.array([_veg_map[v] for v in vegetation_type])
+_salinity_curve = -0.018 * (salinity_ppt - 18) ** 2
+
+carbon_seq_tco2 = (
+    5.8
+    + 0.010 * water_depth_cm
+    + 0.005 * tidal_range_cm
+    + 0.08  * soil_organic_filled
+    + _salinity_curve
+    + _veg_num
+    + np.random.normal(0, 0.4, n)
+)
+carbon_seq_tco2 = np.clip(carbon_seq_tco2, 0, None)
+
+df = pd.DataFrame({
+    'salinity_ppt'     : np.round(salinity_ppt, 2),
+    'water_depth_cm'   : np.round(water_depth_cm, 1),
+    'tidal_range_cm'   : np.round(tidal_range_cm, 1),
+    'soil_organic_pct' : np.round(soil_organic_pct, 1),
+    'bulk_density_gcm3': np.round(bulk_density_gcm3, 3),
+    'vegetation_type'  : vegetation_type,
+    'carbon_seq_tco2'  : np.round(carbon_seq_tco2, 3),
+})
+
+X_train, X_test, y_train, y_test = train_test_split(
+    df.drop(columns='carbon_seq_tco2'), df['carbon_seq_tco2'],
+    test_size=0.2, random_state=42)
+
+df_train = X_train.copy()
+df_train['carbon_seq_tco2'] = y_train
+```
+
+## {#title-slide data-menu-title="Title Slide" background="#053660"}
+
+[End-to-End ML Workflows]{.custom-title}
+
+[EDS 232 · Machine Learning in Environmental Science]{.custom-subtitle}
+
+## {#overview data-menu-title="Overview"}
+
+[In this lesson]{.slide-title}
+
+<hr>
+
+We will walk through the core steps of an end-to-end ML project:
+
+- Framing the problem and understanding the big picture
+- Getting the data and doing preliminary exploration
+- Creating and locking away a test set
+- Exploring and cleaning the training data
+- Preparing data for ML (scrubbing, scaling, encoding)
+- Trying candidate models and evaluating with CV
+- Diagnosing what went wrong and going back to the drawing board
+- Final model selection, tuning, and evaluation
+
+## {background="#047C90"}
+
+[The end-to-end workflow]{.custom-title}
+
+## {#steps-list data-menu-title="10-step workflow"}
+
+[Core steps for an ML project]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+::: {.column width="50%"}
+1. Understand the big picture
+2. Get the data and do a preliminary exploration
+3. Create a representative test set and lock it away
+4. Explore the train data to gain insights
+5. Consider attribute combinations
+:::
+::: {.column width="50%"}
+6. Prepare train data for ML algorithms
+7. Try out different candidate models and estimate accuracy metrics with CV
+8. Go back to the drawing board if needed
+9. Select a model and fine-tune it
+10. Evaluate model on test set
+
+🌟 Present your results!
+:::
+::::
+
+## {#step1 data-menu-title="Step 1: Big picture"}
+
+[Step 1 — Understand the big picture]{.slide-title}
+
+<hr>
+
+Before opening any data file, align with your team on the fundamentals:
+
+- What is the **objective** of this application? How will results be used?
+- How should we **frame** this problem? (classification / regression, supervised / unsupervised?)
+- What **metric** will be used to measure performance?
+- What is the **minimum acceptable performance** needed to meet the objective?
+- What are the current solutions or **baselines**?
+- Are **domain experts** available?
+- What **assumptions** have been made — and which need to be verified?
+
+## {#step2 data-menu-title="Step 2: Get the data"}
+
+[Step 2 — Get the data and explore]{.slide-title}
+
+<hr>
+
+Open the data and get a high-level understanding. Useful pandas methods for tabular data:
+
+`.head()` · `.info()` · `.describe()` · `.value_counts()` · `.hist()`
+
+Key questions to answer:
+
+- What is the data type of each variable?
+- Which variables are **categorical** vs. **numerical**?
+- Which is the **target variable**?
+- Are there **missing values**? In which columns, and how many?
+- Do the distributions make sense? Are there obvious errors or outliers?
+- Do you understand how each variable was computed or measured?
+
+## {#step3 data-menu-title="Step 3: Lock the test set"}
+
+[Step 3 — Create and lock away the test set]{.slide-title}
+
+<hr>
+
+The test set must stay **completely unseen** until the very end. Any decision informed by it — scaling, feature selection, hyperparameter tuning — constitutes data leakage.
+
+Typically we set aside **20–30%** of the data for testing.
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+```
+
+- `random_state` ensures the same split every run
+- For **classification** with imbalanced classes, pass the target to `stratify` to preserve class proportions in both splits
+
+## {#step4 data-menu-title="Step 4: Explore training data"}
+
+[Step 4 — Explore the training data]{.slide-title}
+
+<hr>
+
+Goals of this step:
+
+1. Identify any **cleaning or transformations** needed
+2. Identify **promising predictors**
+3. Brainstorm **new features** worth computing
+
+For each variable, study:
+
+- Type (categorical, int/float, bounded/unbounded)
+- % of missing values
+- Noisiness (outliers, rounding errors)
+- Type of distribution
+- Whether it is plausibly useful for the task
+
+## {#step4-corr data-menu-title="Step 4: Correlations"}
+
+[Step 4 — Correlations]{.slide-title}
+
+<hr>
+
+Plot each predictor against the target to uncover noise and correlations. Also compute pairwise correlations using `.corr()`.
+
+**Important:** `.corr()` only works for **numerical variables** and only measures **linear** association.
+
+- Close to **+1** → strong positive linear correlation
+- Close to **–1** → strong negative linear correlation
+- Close to **0** → no *linear* correlation (but a non-linear relationship may still exist!)
+
+## {#step5 data-menu-title="Step 5: Attribute combinations"}
+
+[Step 5 — Consider attribute combinations]{.slide-title}
+
+<hr>
+
+Sometimes **combining predictors** produces a more informative feature than either one alone.
+
+- Whenever possible, ground decisions in **domain expertise**
+- This is an iterative process — revisit as the model develops
+- Example: `water_depth_cm / tidal_range_cm` captures flooding regime better than either variable independently
+
+## {background="#047C90"}
+
+[Preparing data for ML]{.custom-title}
+
+## {#scrubbing data-menu-title="Scrubbing"}
+
+[Step 6 — Scrubbing]{.slide-title}
+
+<hr>
+
+High-quality training data is critical. Common issues:
+
+- **Omitted values** (missing data)
+- **Duplicate observations**
+- **Outliers**
+
+Potential fixes for each:
+
+| Approach | When to use |
+|:---------|:------------|
+| Remove the observation | Missingness is random and n is large |
+| Impute (mean, median, KNN…) | Losing observations is costly |
+| Drop the entire feature | Variable has too many missing values or is not useful |
+
+Always keep a **backup of the raw data** before transforming.
+
+## {#scaling data-menu-title="Scaling"}
+
+[Step 6 — Scaling]{.slide-title}
+
+<hr>
+
+Many ML models perform better when features are on **similar scales**.
+
+**Standardization** (`StandardScaler`): subtract the mean, divide by the standard deviation → zero mean, unit variance.
+
+. . .
+
+**Critical:** compute scaling parameters **only on the training set**, then apply the same transformation to both train and test sets.
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+X_train_sc = scaler.fit_transform(X_train)   # learn + apply
+X_test_sc  = scaler.transform(X_test)        # apply only
+```
+
+The **target variable** does not need to be scaled.
+
+## {#ohe data-menu-title="One-hot encoding"}
+
+[Step 6 — One-hot encoding]{.slide-title}
+
+<hr>
+
+Most ML algorithms require **numerical** inputs. For a categorical variable `biome` with four categories:
+
+| Observation | `savanna` | `rainforest` | `grassland` | `desert` |
+|:-----------:|:---------:|:------------:|:-----------:|:--------:|
+| biome = savanna    | 1 | 0 | 0 | 0 |
+| biome = rainforest | 0 | 1 | 0 | 0 |
+| biome = grassland  | 0 | 0 | 1 | 0 |
+| biome = desert     | 0 | 0 | 0 | 1 |
+
+Each row has exactly **one 1** and all other values 0.
+
+For **linear models**, drop one encoded column to avoid perfect multicollinearity (`drop` parameter in `OneHotEncoder`).
+
+## {#candidate-models data-menu-title="Step 7: Try models"}
+
+[Step 7 — Try candidate models]{.slide-title}
+
+<hr>
+
+Once you have a solid, clean training set:
+
+1. Select a few **candidate models** appropriate for the problem setup
+2. Train with **default hyperparameters** — don't over-invest yet
+3. Estimate performance with **cross-validation** (or ROC curves for classification)
+
+The goal is a quick, comparable baseline across model families. Tuning comes later.
+
+## {background="#047C90"}
+
+[Evaluating and refining]{.custom-title}
+
+## {#problems-data data-menu-title="Problems with data"}
+
+[Step 8 — Problems with the data]{.slide-title}
+
+<hr>
+
+| Problem | Description | Fix |
+|:--------|:------------|:----|
+| **Too small** | More high-quality data generally helps | Collect more data |
+| **Nonrepresentative** | Sampling noise or bias | Better sampling strategy |
+| **Poor quality** | Outliers, errors, missing values obscure signal | Drop, correct, or impute |
+| **Irrelevant features** | Noise prevents the algorithm from finding signal | Feature selection or extraction |
+
+## {#problems-model data-menu-title="Problems with models"}
+
+[Step 8 — Problems with models]{.slide-title}
+
+<hr>
+
+| Problem | Description | Fix |
+|:--------|:------------|:----|
+| **Overfitting** | Model memorizes training noise; poor generalization | Simpler model; more data; reduce variance via hyperparameters |
+| **Underfitting** | Model too simple to capture data structure | More flexible model; more informative features |
+
+. . .
+
+Whatever the challenge: go back and **experiment with different feature combinations and models**.
+
+## {#after-selection data-menu-title="After model selection"}
+
+[Steps 9–10 — After model selection]{.slide-title}
+
+<hr>
+
+**9. Fine-tune the selected model.**
+
+Use cross-validation on the training set to search over hyperparameter combinations (e.g., `GridSearchCV`). All tuning decisions must use **training data only** — the test set stays locked!
+
+. . .
+
+**10. Evaluate on the test set.**
+
+Evaluate exactly **once**. If test performance is much worse than your CV estimate, the model likely overfit during tuning.
+
+. . .
+
+🌟 **Present your results.**
+
+Report the metric value *and* its practical meaning. Document the full pipeline, decisions made at each step, and any caveats about where the model may not generalize.
+
+## {background="#047C90"}
+
+[Exercise]{.custom-title}
+
+[Wetland carbon credit modeling]{.custom-subtitle}
+
+## {#scenario data-menu-title="Scenario"}
+
+[Scenario]{.slide-title}
+
+<hr>
+
+A state environmental agency in Oregon is developing a **wetland carbon credit program** to incentivize private landowners to restore degraded coastal marshes.
+
+The agency's field teams surveyed **500 coastal wetland plots**, measuring:
+
+:::: {.columns}
+::: {.column width="50%"}
+- `salinity_ppt` — mean porewater salinity (ppt)
+- `water_depth_cm` — mean water column depth (cm)
+- `tidal_range_cm` — mean tidal range (cm)
+- `soil_organic_pct` — soil organic matter (%)
+:::
+::: {.column width="50%"}
+- `bulk_density_gcm3` — soil bulk density (g/cm³)
+- `vegetation_type` — dominant plant guild (cordgrass / bulrush / pickleweed / sedges)
+
+**Target:** `carbon_seq_tco2` — annual carbon sequestration (tCO₂-eq/ha/yr)
+:::
+::::
+
+*No existing model in place. Credits currently assigned manually by ecologists.*
+
+## {#ex1 data-menu-title="Exercise 1"}
+
+[Exercise 1]{.slide-title}
+
+<hr>
+
+Read the scenario carefully. You are about to start working on this project.
+
+[List the key questions you would still need to answer before beginning data analysis and model development.]{.teal-text}
+
+. . .
+
+::: {.body-text-s}
+- **What metric will be used?** → MSE penalizes large errors, appropriate here since errors have direct financial consequences.
+- **What is the minimum acceptable performance?** → The model needs a defensible accuracy threshold to be legally used for assigning credits.
+- **What is the current baseline?** → Manual assignment by ecologists sets the bar. How consistent and accurate is that process?
+- **Is over- or under-prediction more costly?** → Over-prediction = invalid credits issued (agency risk); under-prediction = landowners under-compensated. This asymmetry matters for how errors are communicated.
+:::
+
+## {#ex2-data data-menu-title="Exercise 2 – data"}
+
+[Exercise 2 — `df.info()` output]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: slides-info
+#| echo: false
+
+df.info()
+```
+
+## {#ex2 data-menu-title="Exercise 2"}
+
+[Exercise 2]{.slide-title}
+
+<hr>
+
+Based on the `df.info()` output:
+
+[a) How many numerical and how many categorical features are there?]{.teal-text}
+
+[b) Are there any variables with a concerning amount of missing data? Which one(s), and roughly what percentage?]{.teal-text}
+
+. . .
+
+::: {.body-text-s}
+**a)** 5 numerical (`salinity_ppt`, `water_depth_cm`, `tidal_range_cm`, `soil_organic_pct`, `bulk_density_gcm3`) and 1 categorical (`vegetation_type`, dtype `object`).
+
+**b)** `soil_organic_pct` has ~100 missing values out of 500 rows (~20%), visible from the non-null count in `df.info()`. This is substantial — it warrants a deliberate decision, not a default fix.
+:::
+
+## {#ex3 data-menu-title="Exercise 3"}
+
+[Exercise 3]{.slide-title}
+
+<hr>
+
+A teammate suggests the next step is to standardize the **entire dataset** before fitting any models.
+
+[What is the problem with this approach?]{.teal-text}
+
+. . .
+
+::: {.body-text-s}
+**Data leakage.** Standardization requires computing the mean and standard deviation from the data. If those statistics are computed on the full dataset, information from future test rows contaminates the training process.
+
+Correct procedure:
+
+1. Split into train and test sets **first**
+2. Compute mean and SD **only on the training set**
+3. Apply those same values to scale **both** train and test
+
+This ensures the test set remains a clean simulation of unseen data.
+:::
+
+## {#ex6-hist data-menu-title="Exercise 6 – histograms"}
+
+[Exercise 6 — Predictor distributions]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: slides-hist
+#| echo: false
+
+_num_cols = ['salinity_ppt', 'water_depth_cm', 'tidal_range_cm',
+             'soil_organic_pct', 'bulk_density_gcm3', 'carbon_seq_tco2']
+
+fig, axes = plt.subplots(2, 3, figsize=(fig_size_x, fig_size_y + 1))
+axes = axes.flatten()
+for ax, col in zip(axes, _num_cols):
+    ax.hist(df[col].dropna(), bins=30, color='steelblue', edgecolor='white', linewidth=0.4)
+    ax.set_title(col, fontsize=9)
+    ax.grid(True, alpha=0.3)
+plt.suptitle('Histograms of all numerical variables', fontsize=11)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+## {#ex6 data-menu-title="Exercise 6"}
+
+[Exercise 6]{.slide-title}
+
+<hr>
+
+Looking at the distributions above:
+
+[Should you plan on scaling the data before fitting models? Which predictors would benefit most from scaling, and why?]{.teal-text}
+
+. . .
+
+::: {.body-text-s}
+**Yes.** The predictors span very different numeric ranges (salinity ~0.5–35 ppt; tidal range ~5–300 cm). Without scaling, models sensitive to feature magnitude (SVMs, KNN) would give disproportionate weight to variables with larger ranges regardless of their actual predictive value. Three of the five predictors are also right-skewed, so extreme observations could have outsized influence. **Standardization** addresses both issues. The target variable does not need to be scaled.
+:::
+
+## {#ex4-scatter data-menu-title="Exercise 4 – scatter plots"}
+
+[Exercise 4 — Scatter plots & correlations]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: slides-scatter
+#| echo: false
+
+_num_preds = ['salinity_ppt', 'water_depth_cm', 'tidal_range_cm',
+              'soil_organic_pct', 'bulk_density_gcm3']
+
+fig, axes = plt.subplots(1, 5, figsize=(fig_size_x + 4, fig_size_y - 0.5), sharey=True)
+for ax, col in zip(axes, _num_preds):
+    ax.scatter(df_train[col], y_train, s=8, alpha=0.30, color='steelblue')
+    ax.set_xlabel(col, fontsize=8)
+    ax.grid(True, alpha=0.3)
+axes[0].set_ylabel('carbon_seq_tco2', fontsize=9)
+plt.suptitle('Carbon sequestration vs. each numerical predictor (training set)', fontsize=10)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+```{python}
+#| label: slides-corr
+#| echo: false
+
+_corr = (df_train[_num_preds + ['carbon_seq_tco2']]
+         .corr()[['carbon_seq_tco2']]
+         .drop('carbon_seq_tco2')
+         .rename(columns={'carbon_seq_tco2': 'Correlation with target'})
+         .round(3))
+_corr
+```
+
+## {#ex4 data-menu-title="Exercise 4"}
+
+[Exercise 4]{.slide-title}
+
+<hr>
+
+:::: {.columns}
+::: {.column width="55%"}
+[a) Which predictor(s) would you flag as candidates for removal because they add noise without contributing useful signal?]{.teal-text}
+
+. . .
+
+::: {.body-text-s}
+**`bulk_density_gcm3`**: scatter plot shows no pattern; correlation near zero. Consistent with a variable that adds noise without predictive information.
+:::
+:::
+::: {.column width="45%"}
+[b) Is there a predictor with low linear correlation but a meaningful non-linear relationship in the scatter plot?]{.teal-text}
+
+. . .
+
+::: {.body-text-s}
+**`salinity_ppt`**: shows an inverted-U arch — sequestration peaks at brackish values (~15–20 ppt) and drops at both extremes. Positive and negative deviations cancel in the linear correlation, producing near-zero correlation. The scatter plot reveals what the correlation hides.
+:::
+:::
+::::
+
+## {#ex5 data-menu-title="Exercise 5"}
+
+[Exercise 5]{.slide-title}
+
+<hr>
+
+`soil_organic_pct` has approximately **20% missing values**.
+
+[1. What questions would you ask the agency to better inform how to handle the missing data?]{.teal-text}
+
+[2. For each approach below, discuss one advantage and one disadvantage:]{.teal-text}
+*a) Remove observations with missing values. b) Impute with the mean. c) Drop the feature entirely.*
+
+. . .
+
+::: {.body-text-s}
+**a) Remove:** Simple; no artificial values. *But* loses ~20% of observations; may introduce bias if missingness is non-random.
+
+**b) Impute with mean:** Preserves all observations. *But* distorts the distribution; imputed value may be misleading if missing plots are systematically different.
+
+**c) Drop the feature:** Sidesteps missing data entirely. *But* `soil_organic_pct` shows one of the stronger correlations with the target — dropping it discards real predictive signal.
+:::
+
+## {#ex7-data data-menu-title="Exercise 7 – OHE data"}
+
+[Exercise 7 — One-hot encoding]{.slide-title}
+
+<hr>
+
+Three observations from the training set, each from a different vegetation type:
+
+```{python}
+#| label: slides-ohe-display
+#| echo: false
+
+_ohe_examples = (
+    df_train.groupby('vegetation_type', sort=True)
+    .first()
+    .loc[['cordgrass', 'sedges', 'pickleweed']]
+    .reset_index()
+    [['vegetation_type', 'salinity_ppt', 'water_depth_cm',
+      'tidal_range_cm', 'soil_organic_pct', 'bulk_density_gcm3']]
+)
+_ohe_examples.index = [1, 2, 3]
+_ohe_examples
+```
+
+[One-hot encode the `vegetation_type` column for these three observations. What are the column names, and what value (0 or 1) does each observation get in each column?]{.teal-text}
+
+## {#ex7 data-menu-title="Exercise 7 – answer"}
+
+[Exercise 7 — Answer]{.slide-title}
+
+<hr>
+
+Four categories in the full dataset → four binary columns (alphabetical order):
+
+| obs | `vegetation_type` | `veg_bulrush` | `veg_cordgrass` | `veg_pickleweed` | `veg_sedges` |
+|:---:|:-----------------:|:-------------:|:---------------:|:----------------:|:------------:|
+| 1 | cordgrass  | 0 | 1 | 0 | 0 |
+| 2 | sedges     | 0 | 0 | 0 | 1 |
+| 3 | pickleweed | 0 | 0 | 1 | 0 |
+
+Each row has exactly **one 1** and three 0s. The original column is dropped. Note that `bulrush` doesn't appear in this subset, but the column is still created.
+
+## {#ex8 data-menu-title="Exercise 8"}
+
+[Exercise 8]{.slide-title}
+
+<hr>
+
+Your team has cleaned and prepared the training data and is ready to start fitting models.
+
+[Brainstorm at least three candidate models you could try as a starting point for this regression problem. For each, briefly justify why it is a reasonable choice.]{.teal-text}
+
+. . .
+
+::: {.body-text-s}
+- **Linear regression**: natural first baseline for any regression problem. Fast, interpretable, and establishes a performance floor. If more complex models can't beat it, revisit the data.
+- **KNN regression**: makes no assumptions about the functional form — can capture non-linear patterns like the quadratic salinity effect without feature engineering.
+- **Decision tree / random forest regression**: handles non-linearities and feature interactions automatically, works with mixed numerical and categorical features, and provides feature importances — useful when the agency wants to understand which site characteristics drive sequestration.
+
+In practice: fit all candidates with **default hyperparameters** first, compare CV-based MSE, then invest in tuning the most promising model.
+:::
