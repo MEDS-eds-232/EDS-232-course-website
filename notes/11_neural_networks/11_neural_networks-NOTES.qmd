@@ -166,7 +166,7 @@ x_in, x_hid, x_out = 1.5, 5.0, 8.5
 in_ys  = np.linspace(1.5, 6.5, 4)
 hid_ys = np.linspace(0.8, 7.2, 5)
 out_y  = 4.0
-r = 0.28
+r = 0.45
 
 # Connections input → hidden
 for iy in in_ys:
@@ -182,17 +182,17 @@ for hy in hid_ys:
 # Input nodes
 for i, iy in enumerate(in_ys):
     ax.add_patch(plt.Circle((x_in, iy), r, color='#4A90D9', zorder=3))
-    ax.text(x_in - 0.65, iy, f'$X_{i+1}$', ha='right', va='center', fontsize=9)
+    ax.text(x_in - 0.75, iy, f'$X_{i+1}$', ha='right', va='center', fontsize=9)
 
 # Hidden nodes
 for k, hy in enumerate(hid_ys):
     ax.add_patch(plt.Circle((x_hid, hy), r, color='#E8A838', zorder=3))
-    ax.text(x_hid, hy, f'$A_{k+1}$', ha='center', va='center', fontsize=7.5,
+    ax.text(x_hid, hy, f'$A_{k+1}$', ha='center', va='center', fontsize=9,
             color='white', fontweight='bold')
 
 # Output node
 ax.add_patch(plt.Circle((x_out, out_y), r, color='#5BAD6F', zorder=3))
-ax.text(x_out + 0.65, out_y, r'$F(\mathbf{X})$', ha='left', va='center', fontsize=9)
+ax.text(x_out + 0.75, out_y, r'$F(\mathbf{X})$', ha='left', va='center', fontsize=9)
 
 # Layer labels
 ax.text(x_in,  -0.3, 'Input\nlayer',  ha='center', va='top', fontsize=8, color='#4A90D9')
@@ -361,15 +361,87 @@ The input layer is still the same: the features $X_1, \ldots, X_p$.
 
 The **first hidden layer** has $K_1$ neurons. The $k$-th neuron in the first layer receives all $p$ inputs and computes an activation
 
-$$A_k^{(1)} = g\!\left(w_{k0}^{(1)} + w_{k1}^{(1)} X_1 + \cdots + w_{kp}^{(1)} X_p\right),$$
- 
-where $w_{k0}^{(1)}$ and $w_{ki}^{(1)} are, respectively, the bias and weights for the activation of $k$-th neuron in the first layer.
+$$\begin{aligned}
+A_k^{(1)} &= g\!\left(w_{k0}^{(1)} + w_{k1}^{(1)} X_1 + \cdots + w_{kp}^{(1)} X_p\right) \\
+           &= g\!\left(w_{k0}^{(1)} + \sum_{j=1}^{p} w_{kj}^{(1)} X_j\right),
+\end{aligned}$$
+
+where $w_{k0}^{(1)}$ and $w_{kj}^{(1)}$ are, respectively, the bias and weights for the $k$-th neuron in the first layer.
 
 The **second hidden layer** now takes the $K_1$ activations from the first hidden layer as *its* inputs and computes new activations:
 
-$$A_k^{(2)} = g\!\left(w_{k0}^{(2)} + w_{k1}^{(2)} X_1 + \cdots + w_{kK_1}^{(2)} X_{K_1}\right).$$
+$$\begin{aligned}
+A_k^{(2)} &= g\!\left(w_{k0}^{(2)} + w_{k1}^{(2)} A_1^{(1)} + \cdots + w_{kK_1}^{(2)} A_{K_1}^{(1)}\right) \\
+           &= g\!\left(w_{k0}^{(2)} + \sum_{j=1}^{K_1} w_{kj}^{(2)} A_j^{(1)}\right).
+\end{aligned}$$
 
 This process continues layer by layer. The **output layer** is a final linear combination of the last hidden layer's activations.
+
+```{python}
+#| label: multilayer-nn-diagram
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.1, fig_size_y * 1.6))
+ax.set_xlim(0, 12)
+ax.set_ylim(-0.5, 9.0)
+ax.axis('off')
+
+x_in, x_h1, x_h2, x_out = 1.5, 4.0, 7.5, 10.5
+in_ys  = np.linspace(1.5, 7.5, 4)   # 4 input nodes
+h1_ys  = np.linspace(0.8, 8.2, 5)   # 5 neurons in hidden layer 1
+h2_ys  = np.linspace(1.5, 7.5, 4)   # 4 neurons in hidden layer 2
+out_y  = 4.5
+r = 0.45
+
+# Connections input → hidden layer 1
+for iy in in_ys:
+    for hy in h1_ys:
+        ax.annotate('', xy=(x_h1 - r, hy), xytext=(x_in + r, iy),
+                    arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
+
+# Connections hidden layer 1 → hidden layer 2
+for h1y in h1_ys:
+    for h2y in h2_ys:
+        ax.annotate('', xy=(x_h2 - r, h2y), xytext=(x_h1 + r, h1y),
+                    arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
+
+# Connections hidden layer 2 → output
+for h2y in h2_ys:
+    ax.annotate('', xy=(x_out - r, out_y), xytext=(x_h2 + r, h2y),
+                arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
+
+# Input nodes
+for i, iy in enumerate(in_ys):
+    ax.add_patch(plt.Circle((x_in, iy), r, color='#4A90D9', zorder=3))
+    ax.text(x_in - 0.75, iy, f'$X_{i+1}$', ha='right', va='center', fontsize=9)
+
+# Hidden layer 1 nodes
+for k, hy in enumerate(h1_ys):
+    ax.add_patch(plt.Circle((x_h1, hy), r, color='#E8A838', zorder=3))
+    ax.text(x_h1, hy, f'$A_{k+1}^{{(1)}}$', ha='center', va='center', fontsize=7.5,
+            color='white', fontweight='bold')
+
+# Hidden layer 2 nodes
+for k, hy in enumerate(h2_ys):
+    ax.add_patch(plt.Circle((x_h2, hy), r, color='#E06C3A', zorder=3))
+    ax.text(x_h2, hy, f'$A_{k+1}^{{(2)}}$', ha='center', va='center', fontsize=7.5,
+            color='white', fontweight='bold')
+
+# Output node
+ax.add_patch(plt.Circle((x_out, out_y), r, color='#5BAD6F', zorder=3))
+ax.text(x_out + 0.75, out_y, r'$F(\mathbf{X})$', ha='left', va='center', fontsize=9)
+
+# Layer labels
+ax.text(x_in,  -0.3, 'Input\nlayer',     ha='center', va='top', fontsize=8, color='#4A90D9')
+ax.text(x_h1,  -0.3, 'Hidden\nlayer 1',  ha='center', va='top', fontsize=8, color='#E8A838')
+ax.text(x_h2,  -0.3, 'Hidden\nlayer 2',  ha='center', va='top', fontsize=8, color='#E06C3A')
+ax.text(x_out, -0.3, 'Output\nlayer',    ha='center', va='top', fontsize=8, color='#5BAD6F')
+
+ax.set_title('Multilayer neural network (two hidden layers)', fontsize=10, pad=10)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
 As the network grows deeper, it can represent increasingly complex functions. Early layers tend to capture simple, low-level patterns; deeper layers combine them into progressively abstract representations.
 
