@@ -1,0 +1,558 @@
+---
+title: Neural Networks
+jupyter: eds232-env
+echo: false
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 10
+
+# ── HAB Synthetic Dataset ─────────────────────────────────────────────────────
+# 400 coastal monitoring stations, each characterized by:
+#   sst         – sea surface temperature anomaly (°C)
+#   chlorophyll – chlorophyll-a concentration (mg/m³)
+#   bloom       – harmful algal bloom detected (1) or not (0)
+#
+# True data-generating model (nonlinear):
+#   log-odds(bloom) = -2 + 1.5·sst + 0.4·chl - 1.0·phos + 0.8·sst·chl - 0.5·sst²
+# ─────────────────────────────────────────────────────────────────────────────
+np.random.seed(42)
+n = 400
+
+sst  = np.random.normal(0.5, 1.2, n)
+chl  = np.random.normal(5.0, 2.0, n)
+phos = np.random.normal(1.5, 0.5, n)
+
+log_odds   = -2 + 1.5*sst + 0.4*chl - 1.0*phos + 0.8*sst*chl - 0.5*sst**2
+prob_bloom = 1 / (1 + np.exp(-log_odds))
+bloom      = np.random.binomial(1, prob_bloom, n)
+
+df = pd.DataFrame({
+    'sst':         sst,
+    'chlorophyll': chl,
+    'bloom':       bloom,
+    'bloom_label': np.where(bloom == 1, 'bloom', 'no bloom'),
+})
+
+from sklearn.preprocessing import StandardScaler
+X       = df[['sst', 'chlorophyll']].values
+y       = df['bloom'].values
+scaler  = StandardScaler()
+X_sc    = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_sc, y, test_size=0.25, random_state=42, stratify=y
+)
+
+col_map   = {1: 'tomato', 0: 'steelblue'}
+label_map = {1: 'bloom', 0: 'no bloom'}
+
+# Decision boundary grid
+x1_r = np.linspace(X_sc[:,0].min()-0.5, X_sc[:,0].max()+0.5, 300)
+x2_r = np.linspace(X_sc[:,1].min()-0.5, X_sc[:,1].max()+0.5, 300)
+xx1, xx2 = np.meshgrid(x1_r, x2_r)
+```
+
+<!-- [📊 Slides](11_neural_networks-SLIDES.qmd) / [📊 Blank slides](11_neural_networks-SLIDES-BLANK.qmd) -->
+
+In this lesson we introduce:
+
+- A brief history of neural networks and why they are relevant today
+- The structure of a single-layer neural network: input layer, hidden layer, and output layer
+- How activations are computed and what activation functions do
+- Multilayer (deep) neural networks and how they extend the single-layer idea
+- Convolutional neural networks (CNNs) for image data
+
+These notes are based on chapter 10 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
+
+## A brief history
+
+Neural networks have a long history in machine learning:
+
+- **Early excitement**: Neural networks appeared early in the history of machine learning, generating significant enthusiasm and active research.
+- **Decline**: Over time, the methodology became overshadowed. Support Vector Machines, random forests, and other methods often outperformed neural networks — especially on structured tabular data.
+- **The 2010s revival**: Neural networks reemerged in the 2010s, fueled by two forces: *new architectures* (particularly deep networks with many hidden layers) and *massive datasets* that made it feasible to train those architectures. This resurgence is what we now call **deep learning**.
+
+## Environmental applications
+
+Deep learning and neural networks have found many high-impact applications in environmental science, including:
+
+- **Species distribution modeling**: learning complex, nonlinear relationships between environmental conditions and species occurrence
+- **Remote sensing and land cover classification**: identifying vegetation types, urban areas, and deforestation patterns in satellite imagery
+- **Climate downscaling**: generating fine-resolution climate projections from coarser global climate models
+- **Ecological forecasting**: predicting population dynamics, harmful algal blooms, or wildfire risk from historical sensor data
+
+## Single-layer neural network
+
+We now develop the core idea of a neural network. Given a vector of features $\mathbf{X} = (X_1, \ldots, X_p)$ and a response variable $Y$, our goal is to learn a function $F(\mathbf{X})$ to predict $Y$ — the same goal we have had throughout the course.
+
+### A guiding example: harmful algal bloom prediction
+
+In this lesson we use a synthetic dataset representing 400 coastal monitoring stations. For each station we record:
+
+- **`sst`** — sea surface temperature anomaly (°C); positive values indicate warmer-than-average conditions
+- **`chlorophyll`** — chlorophyll-a concentration (mg/m³); high values indicate dense phytoplankton
+- **`bloom`** — whether a harmful algal bloom (HAB) was detected: *bloom* (1) or *no bloom* (0)
+
+The central question is: *can we predict whether a HAB will occur from these oceanographic conditions?*
+
+```{python}
+#| label: hab-data-plot
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.75, fig_size_y + 0.5))
+
+for label_val, col in col_map.items():
+    mask = y == label_val
+    ax.scatter(
+        df.loc[mask, 'sst'], df.loc[mask, 'chlorophyll'],
+        c=col, s=20, alpha=0.5, edgecolors='none',
+        label=label_map[label_val]
+    )
+
+ax.set_xlabel('SST anomaly (°C)')
+ax.set_ylabel('Chlorophyll-a (mg/m³)')
+ax.set_title(
+    'Harmful algal bloom vs. oceanographic conditions\n'
+    '*Synthetic data generated for educational purposes only*'
+)
+ax.legend(title='Status', fontsize=9)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+Notice that the boundary between bloom and no-bloom observations is curved and nonlinear — this is exactly the kind of pattern that neural networks are designed to capture.
+
+### The architecture
+
+A **single-layer neural network** (a network with one hidden layer) processes the input features through an intermediate set of artificial neurons before producing a final prediction. Figure 10.1 in ISLP shows the architecture; the diagram below recreates its essential structure.
+
+```{python}
+#| label: nn-diagram
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y * 1.5))
+ax.set_xlim(0, 10)
+ax.set_ylim(-0.5, 8.5)
+ax.axis('off')
+
+x_in, x_hid, x_out = 1.5, 5.0, 8.5
+in_ys  = np.linspace(1.5, 6.5, 4)
+hid_ys = np.linspace(0.8, 7.2, 5)
+out_y  = 4.0
+r = 0.28
+
+# Connections input → hidden
+for iy in in_ys:
+    for hy in hid_ys:
+        ax.annotate('', xy=(x_hid - r, hy), xytext=(x_in + r, iy),
+                    arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
+
+# Connections hidden → output
+for hy in hid_ys:
+    ax.annotate('', xy=(x_out - r, out_y), xytext=(x_hid + r, hy),
+                arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
+
+# Input nodes
+for i, iy in enumerate(in_ys):
+    ax.add_patch(plt.Circle((x_in, iy), r, color='#4A90D9', zorder=3))
+    ax.text(x_in - 0.65, iy, f'$X_{i+1}$', ha='right', va='center', fontsize=9)
+
+# Hidden nodes
+for k, hy in enumerate(hid_ys):
+    ax.add_patch(plt.Circle((x_hid, hy), r, color='#E8A838', zorder=3))
+    ax.text(x_hid, hy, f'$A_{k+1}$', ha='center', va='center', fontsize=7.5,
+            color='white', fontweight='bold')
+
+# Output node
+ax.add_patch(plt.Circle((x_out, out_y), r, color='#5BAD6F', zorder=3))
+ax.text(x_out + 0.65, out_y, r'$F(\mathbf{X})$', ha='left', va='center', fontsize=9)
+
+# Layer labels
+ax.text(x_in,  -0.3, 'Input\nlayer',  ha='center', va='top', fontsize=8, color='#4A90D9')
+ax.text(x_hid, -0.3, 'Hidden\nlayer', ha='center', va='top', fontsize=8, color='#E8A838')
+ax.text(x_out, -0.3, 'Output\nlayer', ha='center', va='top', fontsize=8, color='#5BAD6F')
+
+ax.set_title('Single-layer neural network (p = 4 inputs, K = 5 hidden neurons)',
+             fontsize=10, pad=10)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The process is as follows:
+
+1. **Input layer.** The $p$ features $X_1, \ldots, X_p$ form the input layer. An observation $(X_1, \ldots, X_p)$ is "put through" the network from left to right.
+
+2. **Hidden layer.** There are $K$ neurons in the hidden layer. Each neuron $k$ takes in all $p$ input features and computes an **activation** $A_k$. We will compute $K$ activations $A_1, \ldots, A_K$.
+
+3. **Output layer.** The final model is a linear combination of all activations:
+
+$$F(X_1, \ldots, X_p) = \beta_0 + \beta_1 A_1 + \cdots + \beta_K A_K,$$
+
+where $\beta_0, \beta_1, \ldots, \beta_K$ are an additional set of $K + 1$ parameters to be estimated.
+
+### Computing the activations
+
+Each activation $A_k$ is computed in two steps.
+
+**First**, a linear combination of all input features is formed using a **bias** $w_{k0}^{(1)}$ and **weights** $w_{k1}^{(1)}, \ldots, w_{kp}^{(1)}$ — one weight per feature:
+
+$$z_k = w_{k0}^{(1)} + w_{k1}^{(1)} X_1 + \cdots + w_{kp}^{(1)} X_p.$$
+
+**Second**, $z_k$ is passed through a nonlinear **activation function** $g(\cdot)$:
+
+$$A_k = g(z_k) = g\!\left(w_{k0}^{(1)} + \sum_{j=1}^{p} w_{kj}^{(1)} X_j\right).$$
+
+So the activation at neuron $k$ depends on $p + 1$ parameters: $p$ weights and one bias.
+
+### Activation functions
+
+The activation function introduces the nonlinearity that gives neural networks their modeling power. Without it, the entire network would collapse to a linear model regardless of depth. Two of the most common choices are:
+
+- **Sigmoid**: $\displaystyle g(z) = \frac{e^z}{1 + e^z}$ — squashes any input to the interval $(0, 1)$.
+- **ReLU** (Rectified Linear Unit): $g(z) = \max(0, z)$ — outputs $0$ for negative inputs and the input itself for non-negative inputs.
+
+```{python}
+#| label: activation-functions
+#| fig-align: center
+
+z       = np.linspace(-4, 4, 300)
+sigmoid = 1 / (1 + np.exp(-z))
+relu    = np.maximum(0, z)
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 0.85, fig_size_y))
+
+axes[0].plot(z, sigmoid, color='steelblue', linewidth=2)
+axes[0].axhline(0, color='gray', linewidth=0.5)
+axes[0].axvline(0, color='gray', linewidth=0.5)
+axes[0].set_title('Sigmoid: $g(z) = e^z\\,/\\,(1 + e^z)$')
+axes[0].set_xlabel('$z$')
+axes[0].set_ylabel('$g(z)$')
+axes[0].set_ylim(-0.1, 1.1)
+axes[0].grid(True, alpha=0.3)
+
+axes[1].plot(z, relu, color='tomato', linewidth=2)
+axes[1].axhline(0, color='gray', linewidth=0.5)
+axes[1].axvline(0, color='gray', linewidth=0.5)
+axes[1].set_title('ReLU: $g(z) = \\max(0,\\, z)$')
+axes[1].set_xlabel('$z$')
+axes[1].set_ylabel('$g(z)$')
+axes[1].grid(True, alpha=0.3)
+
+plt.suptitle('Common activation functions', y=1.01)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Check-in
+What would happen to a neural network if we used the *identity* activation $g(z) = z$ (a linear function) throughout the network?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+If every activation were a linear function of its inputs, then the composition of all layers would also be linear. No matter how many hidden layers we added, the network would be equivalent to a single linear model — we would gain no additional modeling power. The activation function is precisely what gives neural networks their capacity to represent nonlinear relationships.
+:::
+
+### Fitting a neural network
+
+Fitting a neural network means estimating all the weights $w_{kj}^{(1)}$ and biases $w_{k0}^{(1)}$ for each hidden neuron, as well as the output coefficients $\beta_0, \beta_1, \ldots, \beta_K$, from the training data. We minimize a loss function (e.g., cross-entropy for classification or mean squared error for regression) by adjusting all parameters simultaneously. This is done using **stochastic gradient descent** together with the **backpropagation** algorithm, which efficiently computes gradients of the loss with respect to every parameter in the network.
+
+### Counting parameters
+
+Before fitting, it is useful to know the total number of parameters a network has.
+
+For a single-layer network with $p$ input features and $K$ hidden neurons:
+
+- **Hidden layer**: each of the $K$ neurons has $p$ weights + 1 bias $= p + 1$ parameters. Total: $K(p + 1)$.
+- **Output layer**: $K$ weights (one per activation) + 1 intercept ($\beta_0$). Total: $K + 1$.
+
+$$\text{Total parameters} = K(p + 1) + (K + 1).$$
+
+:::{.callout-tip}
+## Check-in
+How many parameters does a single-layer neural network with **4 input features** and **5 hidden neurons** have?
+
+1. How many parameters are in the hidden layer?
+2. How many parameters are in the output layer?
+3. What is the total?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+1. Hidden layer: $K(p + 1) = 5 \times (4 + 1) = 25$ parameters.
+2. Output layer: $K + 1 = 5 + 1 = 6$ parameters.
+3. Total: $25 + 6 = \mathbf{31}$ parameters.
+:::
+
+Below we fit a single-layer neural network with 5 hidden neurons to our HAB dataset using ReLU activations and visualize the resulting decision boundary on the test data.
+
+```{python}
+#| label: single-layer-fit
+
+mlp1 = MLPClassifier(hidden_layer_sizes=(5,), activation='relu',
+                     max_iter=1000, random_state=42)
+mlp1.fit(X_train, y_train)
+
+grid_prob1 = mlp1.predict_proba(np.c_[xx1.ravel(), xx2.ravel()])[:, 1].reshape(xx1.shape)
+acc1 = accuracy_score(y_test, mlp1.predict(X_test))
+```
+
+```{python}
+#| label: single-layer-plot
+#| echo: false
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y + 0.5))
+
+cf = ax.contourf(xx1, xx2, grid_prob1, levels=50, cmap='RdBu_r', alpha=0.6, vmin=0, vmax=1)
+ax.contour(xx1, xx2, grid_prob1, levels=[0.5], colors='gray', linewidths=1.5)
+
+for label_val, col in col_map.items():
+    mask = y_test == label_val
+    ax.scatter(X_test[mask, 0], X_test[mask, 1],
+               c=col, s=20, alpha=0.7, edgecolors='none', label=label_map[label_val])
+
+ax.set_xlabel('SST anomaly (scaled)')
+ax.set_ylabel('Chlorophyll-a (scaled)')
+ax.set_title(f'Single-layer NN (K=5, ReLU) — test accuracy: {acc1:.3f}')
+ax.legend(title='True status', fontsize=9)
+ax.grid(True, alpha=0.3)
+fig.colorbar(cf, ax=ax, label='P(bloom)', shrink=0.8)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+## Multilayer neural networks
+
+In practice, neural networks typically have **more than one hidden layer** and many neurons per layer (often hundreds or more). This is what makes them *deep* neural networks.
+
+The input layer is still the same: the features $X_1, \ldots, X_p$.
+
+**First hidden layer**: each of the $K_1$ neurons receives all $p$ inputs and computes an activation:
+
+$$A_k^{(1)} = g\!\left(w_{k0}^{(1)} + \sum_{j=1}^{p} w_{kj}^{(1)} X_j\right), \quad k = 1, \ldots, K_1.$$
+
+**Second hidden layer**: takes the $K_1$ activations from the first hidden layer as *its* inputs and computes new activations:
+
+$$A_k^{(2)} = g\!\left(w_{k0}^{(2)} + \sum_{j=1}^{K_1} w_{kj}^{(2)} A_j^{(1)}\right), \quad k = 1, \ldots, K_2.$$
+
+This process continues layer by layer. The **output layer** is a final linear combination of the last hidden layer's activations.
+
+As the network grows deeper, it can represent increasingly complex functions. Early layers tend to capture simple, low-level patterns; deeper layers combine them into progressively abstract representations.
+
+To build an intuitive understanding of how a deep network works, watch [this video by 3Blue1Brown](https://www.youtube.com/watch?v=aircAruvnKk). As you watch, try to answer the following questions:
+
+:::{.callout-tip}
+## Check-in: 3Blue1Brown video
+1. How does the network represent a handwritten digit as an input?
+2. What does each neuron in a hidden layer conceptually "detect"?
+3. Why can depth (more layers) capture more complex patterns than width (more neurons in a single layer)?
+:::
+
+The code below fits a two-hidden-layer network on our HAB dataset and compares its decision boundary to the single-layer model.
+
+```{python}
+#| label: multilayer-fit
+
+mlp2 = MLPClassifier(hidden_layer_sizes=(20, 10), activation='relu',
+                     max_iter=2000, random_state=42)
+mlp2.fit(X_train, y_train)
+
+grid_prob2 = mlp2.predict_proba(np.c_[xx1.ravel(), xx2.ravel()])[:, 1].reshape(xx1.shape)
+acc2 = accuracy_score(y_test, mlp2.predict(X_test))
+```
+
+```{python}
+#| label: multilayer-comparison
+#| echo: false
+#| fig-align: center
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.1, fig_size_y + 0.5))
+
+for ax, probs, title in zip(
+    axes,
+    [grid_prob1, grid_prob2],
+    [f'Single-layer NN (K=5)\nTest acc: {acc1:.3f}',
+     f'Two-layer NN (20→10)\nTest acc: {acc2:.3f}']
+):
+    cf = ax.contourf(xx1, xx2, probs, levels=50, cmap='RdBu_r', alpha=0.6, vmin=0, vmax=1)
+    ax.contour(xx1, xx2, probs, levels=[0.5], colors='gray', linewidths=1.5)
+    for label_val, col in col_map.items():
+        mask = y_test == label_val
+        ax.scatter(X_test[mask, 0], X_test[mask, 1],
+                   c=col, s=15, alpha=0.7, edgecolors='none', label=label_map[label_val])
+    ax.set_xlabel('SST anomaly (scaled)')
+    ax.set_ylabel('Chlorophyll-a (scaled)')
+    ax.set_title(title, fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+:::{.callout-tip}
+## Check-in
+Compare the two decision boundaries above. What do you notice about the complexity of the boundary as the network gets deeper? What is the potential downside of adding more capacity?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+The two-layer network produces a more complex, curved boundary that can capture finer structure in the data. The single-layer network's boundary is simpler and may miss some patterns. Adding more capacity (layers + neurons) allows the network to fit more intricate decision surfaces — but it also increases the risk of **overfitting**, especially when training data are limited. Regularization techniques (dropout, weight decay) and cross-validation are used to manage this tradeoff.
+:::
+
+## Convolutional neural networks
+
+The neural networks we have studied so far treat the input as a flat vector of features. This works well for tabular data, but it discards important **spatial structure** when the input is an image. Every pixel is treated independently, with no awareness of which pixels are neighbors.
+
+**Convolutional Neural Networks (CNNs)** are architectures designed specifically for image data. Rather than connecting every input directly to every neuron, CNNs perform additional work to identify **low-level features** within the image — small edges, patches of color, and textures. These low-level features are then combined into **higher-level features** (shapes, objects, patterns) in later layers. The presence or absence of these high-level features ultimately determines the predicted class.
+
+### Convolution filters and the convolution layer
+
+A **convolution filter** (also called a *kernel*) is a small matrix that acts as a feature detector. We slide this filter across the image, computing a dot product between the filter and each overlapping patch of pixels. The result is a **feature map** that highlights regions of the image that closely resemble the filter.
+
+```{python}
+#| label: convolution-example
+#| fig-align: center
+
+image = np.array([
+    [1, 1, 1, 0, 0],
+    [0, 1, 1, 1, 0],
+    [0, 0, 1, 1, 1],
+    [0, 0, 1, 1, 0],
+    [0, 1, 1, 0, 0],
+], dtype=float)
+
+kernel = np.array([
+    [1, 0, 1],
+    [0, 1, 0],
+    [1, 0, 1],
+], dtype=float)
+
+# Compute feature map (valid convolution, no padding)
+h, w   = image.shape
+kh, kw = kernel.shape
+out_h, out_w = h - kh + 1, w - kw + 1
+feature_map  = np.zeros((out_h, out_w))
+for i in range(out_h):
+    for j in range(out_w):
+        feature_map[i, j] = np.sum(image[i:i+kh, j:j+kw] * kernel)
+
+fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 0.9, fig_size_y * 0.85))
+
+axes[0].imshow(image, cmap='Blues', vmin=0, vmax=1)
+for i in range(h):
+    for j in range(w):
+        axes[0].text(j, i, int(image[i, j]), ha='center', va='center', fontsize=12)
+axes[0].set_title('Input image (5×5)', fontsize=9)
+axes[0].axis('off')
+
+axes[1].imshow(kernel, cmap='Oranges', vmin=0, vmax=1)
+for i in range(kh):
+    for j in range(kw):
+        axes[1].text(j, i, int(kernel[i, j]), ha='center', va='center', fontsize=12)
+axes[1].set_title('Convolution filter (3×3)', fontsize=9)
+axes[1].axis('off')
+
+im = axes[2].imshow(feature_map, cmap='Greens')
+for i in range(out_h):
+    for j in range(out_w):
+        axes[2].text(j, i, int(feature_map[i, j]), ha='center', va='center', fontsize=12)
+axes[2].set_title('Feature map (3×3)', fontsize=9)
+axes[2].axis('off')
+fig.colorbar(im, ax=axes[2], shrink=0.7, label='activation')
+
+plt.suptitle('Convolution: sliding a filter over the image', fontsize=9)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+The feature map highlights regions in the input image that most closely resemble the filter — higher values (darker green) indicate a stronger match. A **convolution layer** applies many such filters simultaneously, each one detecting a different low-level feature. Crucially, **the filters are learned from the training data** rather than defined by hand — the network discovers the most useful features for the task automatically.
+
+### Pooling layer
+
+A **pooling layer** reduces the spatial dimensions of the feature maps, making the representation more compact and less sensitive to small shifts in the position of a feature. The most common approach is **max pooling**: the feature map is divided into non-overlapping blocks (typically 2×2), and only the maximum value within each block is retained.
+
+```{python}
+#| label: max-pooling-example
+#| fig-align: center
+
+fm = np.array([
+    [1, 3, 2, 4],
+    [5, 6, 1, 2],
+    [3, 2, 4, 1],
+    [1, 0, 5, 3],
+], dtype=float)
+
+pool_out = np.zeros((2, 2))
+for i in range(2):
+    for j in range(2):
+        pool_out[i, j] = fm[i*2:i*2+2, j*2:j*2+2].max()
+
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 0.55, fig_size_y * 0.75))
+
+axes[0].imshow(fm, cmap='Greens', vmin=0, vmax=6)
+for i in range(4):
+    for j in range(4):
+        axes[0].text(j, i, int(fm[i, j]), ha='center', va='center', fontsize=12)
+axes[0].axhline(1.5, color='tomato', lw=2)
+axes[0].axvline(1.5, color='tomato', lw=2)
+axes[0].set_title('Feature map (4×4)', fontsize=9)
+axes[0].axis('off')
+
+axes[1].imshow(pool_out, cmap='Greens', vmin=0, vmax=6)
+for i in range(2):
+    for j in range(2):
+        axes[1].text(j, i, int(pool_out[i, j]), ha='center', va='center',
+                     fontsize=13, fontweight='bold')
+axes[1].set_title('After max pooling (2×2)', fontsize=9)
+axes[1].axis('off')
+
+plt.suptitle('Max pooling: retain the maximum in each 2×2 block', fontsize=9)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+### Full CNN architecture
+
+A complete CNN typically consists of:
+
+1. **Convolution layers** — learn low-level features (edges, textures, patches of color).
+2. **Pooling layers** — progressively reduce spatial dimensions.
+3. **Flattening** — converts the final feature maps into a flat vector.
+4. **Fully connected layers** — standard neural network layers that combine the high-level features to produce the final prediction.
+
+In environmental science, CNNs are particularly well suited for:
+
+- Classifying land cover types from satellite or aerial imagery
+- Detecting deforestation, burn scars, or flooding in remote sensing data
+- Identifying species in camera-trap images or acoustic recordings
+
+:::{.callout-tip}
+## Check-in
+1. Why does a CNN use *learned* filters rather than hand-crafted ones?
+2. What role does the pooling layer play in making a CNN more robust to small shifts in the position of an object in the image?
+3. How does the convolution layer differ from a standard fully connected hidden layer?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+1. Learned filters adapt to the specific patterns that matter for the training task. The network can discover features that a human might not think to specify — especially in high-dimensional image data with complex structure.
+2. Max pooling takes the maximum value in each block. If a feature shifts slightly, it may still fall within the same pooling block and yield the same pooled value. This makes the representation approximately **translation-invariant**.
+3. In a fully connected layer, each neuron receives *all* inputs and has a separate weight for each one. In a convolution layer, a single small filter is shared (slid) across all positions of the image. This **weight sharing** drastically reduces the number of parameters and exploits the fact that useful features (edges, textures) can appear anywhere in an image.
+:::
