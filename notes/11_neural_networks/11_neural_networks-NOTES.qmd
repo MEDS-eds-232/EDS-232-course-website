@@ -93,6 +93,8 @@ In the realm of environmental applications, these are some that have occurred in
 - [Wunsch et al. 2022](https://www.nature.com/articles/s41467-022-28770-2): Investigating projected groundwater leves due to climate change in Germany.
 - [Hopkinson et al. 2020](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0230671): Calssifying 3D models of coral reefs into different species and substrates.
 
+<!-- https://www.nature.com/articles/s41586-023-06825-8 -->
+
 In this lesson we will take a high-level view at neural networks to understand their structure and basic mechanisms.
 
 ## Single-layer neural network
@@ -227,7 +229,7 @@ $$F(X_1, \ldots, X_p) = \beta_0 + \beta_1 A_1 + \cdots + \beta_K A_K,$$
 
 where $\beta_0, \beta_1, \ldots, \beta_K$ are an additional set of $K + 1$ parameters to be estimated.
 
-Fitting a neural network means using the training data to find the weights $w_{kj}$ and biases $w_{k0}$ for each neuron and the output coefficients $\beta_0, \beta_1, \ldots, \beta_K$ that minimize a loss function (e.g., cross-entropy for classification or mean squared error for regression). The fitting process is out of the scope of what we will cover, but we recommend the textbook chapter 10.7 as further reading on this topic. 
+Fitting a neural network means using the training data to find the weights $w_{kj}$ and biases $w_{k0}$ for each neuron and the output coefficients $\beta_0, \beta_1, \ldots, \beta_K$ that minimize a **loss function** which is a measure of the error. The mean squared error loss is used for regression and [cross-entropy](https://en.wikipedia.org/wiki/Cross-entropy) is used for classification tasks. The fitting process is out of the scope of what we will cover, but we recommend the textbook chapter 10.7 as further reading on this topic. 
 
 
 <!-- This is done using **stochastic gradient descent** together with the **backpropagation** algorithm, which efficiently computes gradients of the loss with respect to every parameter in the network. -->
@@ -353,17 +355,19 @@ plt.close()
 
 ## Multilayer neural networks
 
-In practice, neural networks typically have **more than one hidden layer** and many neurons per layer (often hundreds or more). This is what makes them *deep* neural networks.
+In practice, neural networks typically have more than one hidden layer and many neurons per layer (often hundreds or more). This is what makes them *deep* neural networks.
 
 The input layer is still the same: the features $X_1, \ldots, X_p$.
 
-**First hidden layer**: each of the $K_1$ neurons receives all $p$ inputs and computes an activation:
+The **first hidden layer** has $K_1$ neurons. The $k$-th neuron in the first layer receives all $p$ inputs and computes an activation
 
-$$A_k^{(1)} = g\!\left(w_{k0}^{(1)} + \sum_{j=1}^{p} w_{kj}^{(1)} X_j\right), \quad k = 1, \ldots, K_1.$$
+$$A_k^{(1)} = g\!\left(w_{k0}^{(1)} + w_{k1}^{(1)} X_1 + \cdots + w_{kp}^{(1)} X_p\right),$$
+ 
+where $w_{k0}^{(1)}$ and $w_{ki}^{(1)} are, respectively, the bias and weights for the activation of $k$-th neuron in the first layer.
 
-**Second hidden layer**: takes the $K_1$ activations from the first hidden layer as *its* inputs and computes new activations:
+The **second hidden layer** now takes the $K_1$ activations from the first hidden layer as *its* inputs and computes new activations:
 
-$$A_k^{(2)} = g\!\left(w_{k0}^{(2)} + \sum_{j=1}^{K_1} w_{kj}^{(2)} A_j^{(1)}\right), \quad k = 1, \ldots, K_2.$$
+$$A_k^{(2)} = g\!\left(w_{k0}^{(2)} + w_{k1}^{(2)} X_1 + \cdots + w_{kK_1}^{(2)} X_{K_1}\right).$$
 
 This process continues layer by layer. The **output layer** is a final linear combination of the last hidden layer's activations.
 
@@ -380,6 +384,7 @@ To build an intuitive understanding of how a deep network works, watch [this vid
 
 The code below fits a two-hidden-layer network on our HAB dataset and compares its decision boundary to the single-layer model.
 
+<!-- 
 ```{python}
 #| label: multilayer-fit
 
@@ -418,8 +423,11 @@ for ax, probs, title in zip(
 plt.tight_layout()
 plt.show()
 plt.close()
-```
+``` 
+-->
 
+
+<!-- 
 :::{.callout-tip}
 ## Check-in
 Compare the two decision boundaries above. What do you notice about the complexity of the boundary as the network gets deeper? What is the potential downside of adding more capacity?
@@ -427,17 +435,18 @@ Compare the two decision boundaries above. What do you notice about the complexi
 :::{.callout-tip collapse="true"}
 ## Discussion
 The two-layer network produces a more complex, curved boundary that can capture finer structure in the data. The single-layer network's boundary is simpler and may miss some patterns. Adding more capacity (layers + neurons) allows the network to fit more intricate decision surfaces — but it also increases the risk of **overfitting**, especially when training data are limited. Regularization techniques (dropout, weight decay) and cross-validation are used to manage this tradeoff.
-:::
+::: 
+-->
 
 ## Convolutional neural networks
 
 The neural networks we have studied so far treat the input as a flat vector of features. This works well for tabular data, but it discards important **spatial structure** when the input is an image. Every pixel is treated independently, with no awareness of which pixels are neighbors.
 
-**Convolutional Neural Networks (CNNs)** are architectures designed specifically for image data. Rather than connecting every input directly to every neuron, CNNs perform additional work to identify **low-level features** within the image — small edges, patches of color, and textures. These low-level features are then combined into **higher-level features** (shapes, objects, patterns) in later layers. The presence or absence of these high-level features ultimately determines the predicted class.
+**Convolutional Neural Networks (CNNs)** are architectures that have great performance in image data. Intuitively, rather than connecting every input directly to every neuron, CNNs perform additional work to identify **low-level features** within the image — small edges, patches of color, and textures. These low-level features are then combined into **higher-level features** (shapes, objects, patterns) in later layers. The presence or absence of these high-level features ultimately determines the predicted class.
 
 ### Convolution filters and the convolution layer
 
-A **convolution filter** (also called a *kernel*) is a small matrix that acts as a feature detector. We slide this filter across the image, computing a dot product between the filter and each overlapping patch of pixels. The result is a **feature map** that highlights regions of the image that closely resemble the filter.
+A **convolution filter** (also called a *kernel*) is a small matrix that acts as a feature detector. We slide this filter across the image, computing a dot product between the filter and each overlapping patch of pixels. The result  highlights regions of the image that closely resemble the filter.
 
 ```{python}
 #| label: convolution-example
@@ -486,7 +495,7 @@ im = axes[2].imshow(feature_map, cmap='Greens')
 for i in range(out_h):
     for j in range(out_w):
         axes[2].text(j, i, int(feature_map[i, j]), ha='center', va='center', fontsize=12)
-axes[2].set_title('Feature map (3×3)', fontsize=9)
+axes[2].set_title('Output(3×3)', fontsize=9)
 axes[2].axis('off')
 fig.colorbar(im, ax=axes[2], shrink=0.7, label='activation')
 
@@ -496,7 +505,7 @@ plt.show()
 plt.close()
 ```
 
-The feature map highlights regions in the input image that most closely resemble the filter — higher values (darker green) indicate a stronger match. A **convolution layer** applies many such filters simultaneously, each one detecting a different low-level feature. Crucially, **the filters are learned from the training data** rather than defined by hand — the network discovers the most useful features for the task automatically.
+The feature map highlights regions in the input image that most closely resemble the filter — higher values (darker green) indicate a stronger match. A **convolution layer** applies many such filters simultaneously, each one detecting a different low-level feature. Crucially, **the filters are learned from the training data** rather than defined by hand, this means the network discovers the most useful features for the task automatically during training.
 
 ### Pooling layer
 
@@ -547,18 +556,16 @@ plt.close()
 
 A complete CNN typically consists of:
 
-1. **Convolution layers** — learn low-level features (edges, textures, patches of color).
-2. **Pooling layers** — progressively reduce spatial dimensions.
-3. **Flattening** — converts the final feature maps into a flat vector.
-4. **Fully connected layers** — standard neural network layers that combine the high-level features to produce the final prediction.
+1. **Convolution layers**: learn low-level features (edges, textures, patches of color).
+2. **Pooling layers**: progressively reduce spatial dimensions.
+3. **Fully connected layers**: standard neural network layers that combine the high-level features to produce the final prediction.
+4. **Flattening**: converts the final feature maps into a flat vector.
 
-In environmental science, CNNs are particularly well suited for:
 
-- Classifying land cover types from satellite or aerial imagery
-- Detecting deforestation, burn scars, or flooding in remote sensing data
-- Identifying species in camera-trap images or acoustic recordings
+![Adapted from [What is the Convolutional Neural Network Architecture?
+](https://www.analyticsvidhya.com/blog/2020/10/what-is-the-convolutional-neural-network-architecture/)](CNN-edited.jpeg)
 
-:::{.callout-tip}
+<!-- :::{.callout-tip}
 ## Check-in
 1. Why does a CNN use *learned* filters rather than hand-crafted ones?
 2. What role does the pooling layer play in making a CNN more robust to small shifts in the position of an object in the image?
@@ -569,4 +576,4 @@ In environmental science, CNNs are particularly well suited for:
 1. Learned filters adapt to the specific patterns that matter for the training task. The network can discover features that a human might not think to specify — especially in high-dimensional image data with complex structure.
 2. Max pooling takes the maximum value in each block. If a feature shifts slightly, it may still fall within the same pooling block and yield the same pooled value. This makes the representation approximately **translation-invariant**.
 3. In a fully connected layer, each neuron receives *all* inputs and has a separate weight for each one. In a convolution layer, a single small filter is shared (slid) across all positions of the image. This **weight sharing** drastically reduces the number of parameters and exploits the fact that useful features (edges, textures) can appear anywhere in an image.
-:::
+::: -->
