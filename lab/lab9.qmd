@@ -1,0 +1,480 @@
+---
+title: "Lab 9: Deep Learning for Bird Species Classification"
+jupyter: eds232-cnn-env
+---
+
+::: {.callout-important collapse="true"}
+## Environment Setup
+
+This lab requires a **different environment** than the rest of the course due to its deep learning dependencies (PyTorch, torchvision, pytorch-lightning, ISLP).
+
+**Step 1:** Copy the following and paste it into your `eds232-env.yml` , replacing all the text that was there before
+
+```yaml
+name: eds232-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - setuptools<71
+  - xgboost=2.0.3
+  - pandas=2.1.4
+  - seaborn=0.13.0
+  - spotipy=2.23.0
+  - ipykernel=6.29.3
+  - scipy=1.11.4
+  - librosa=0.10.1
+  - openpyxl=3.1.2
+  - python=3.10
+  - numpy=1.24.3
+  - ipython=8.18.1
+  - ipywidgets=8.1.1
+  - conda-forge::otter-grader=6.0.4
+  - scikit-learn=1.3.2
+  - matplotlib=3.8.0
+  - keras=2.15.0
+  - kagglehub=0.3.5
+  - conda-forge::ucimlrepo=0.0.7
+  - statsmodels=0.14.1
+  - tensorflow=2.15.0
+  - islp=0.4.0
+  - pip
+  - pip:
+    - setuptools<71
+    - mglearn==0.2.0
+    - torch==2.1.2
+    - torchvision==0.16.2
+    - torchinfo==1.8.0
+    - pytorch-lightning==2.1.4
+    - torchmetrics==1.2.1
+
+
+
+```
+
+**Step 2:** Rebuild the environment from the updated file:
+
+```bash
+conda deactivate
+conda env remove --name eds232-env
+conda env create --name eds232-env --file eds232-env.yml
+conda activate eds232-env
+python -m ipykernel install --user --name eds232-env --display-name "eds232-env"
+```
+
+**Step 3:** Restart VS Code (or your Jupyter client) and select the `eds232-env` kernel before running this lab.
+:::
+
+::: {.callout-tip}
+## Download the Lab Template
+Download the lab notebook [here](https://github.com/MEDS-eds-232/weekly-lab-templates/blob/main/lab9/lab9.ipynb) and move to your `eds232-labs` repository.
+:::
+
+## Background
+
+**Data source:** iNaturalist API (research-grade observations, California species)
+
+In this lab we demonstrate how to fit a convolutional neural network (CNN) for image classification using PyTorch, following the approach in Section 10.9 of the textbook. Rather than the CIFAR100 benchmark, we work with real biodiversity data: photographs of 10 California bird species downloaded directly from the **iNaturalist** API.
+
+iNaturalist hosts over 200 million research-grade wildlife observations contributed by citizen scientists.
+
+We start with several standard imports that we have seen before, and some new ones.
+
+```{python}
+import os
+import time
+import numpy as np
+import pandas as pd
+from matplotlib.pyplot import subplots
+import requests                                    # HTTP requests to the iNaturalist API
+from io import BytesIO                             # Hold image bytes in memory without saving to disk first
+from PIL import Image                              # Open and convert downloaded images
+from concurrent.futures import ThreadPoolExecutor  # Download multiple images simultaneously
+```
+
+### New Deep Learning libraries! Let's review what they do:
+- `torchinfo` provides a useful `summary()` function that neatly summarizes the layers of a model.
+- `ImageFolder` from `torchvision` loads an image dataset organized as a directory of class-labeled subdirectories.
+- `Compose`, `Resize`, `ToTensor`, and `Normalize` transforms are applied to each image as it is loaded.
+- `random_split` partitions a dataset into non-overlapping subsets.
+- `SimpleDataModule`, `SimpleModule`, `ErrorTracker`, and `rec_num_workers` from `ISLP.torch` handle data loading, training, and validation following the textbook pattern.
+- `Trainer` from `pytorch_lightning` orchestrates the full training loop; `CSVLogger` records metrics to a CSV file.
+- `RMSprop` is the optimizer used for image data (experiments show a lower learning rate performs better than the default).
+
+```{python}
+import torch
+from torch import nn
+from torch.utils.data import random_split, Subset
+from torch.optim import RMSprop
+from torchinfo import summary
+from torchvision.datasets import ImageFolder
+from torchvision.transforms import (Resize, ToTensor, Normalize, Compose,
+                                    RandomHorizontalFlip, ColorJitter)
+from ISLP.torch import (SimpleDataModule,
+                        SimpleModule,
+                        ErrorTracker,
+                        rec_num_workers)
+from pytorch_lightning import Trainer
+from pytorch_lightning.loggers import CSVLogger
+
+torch.manual_seed(0)
+```
+
+## Step 1: Downloading Bird Images from iNaturalist
+
+The iNaturalist open API allows anyone to query millions of georeferenced species observations. We filter for **research-grade** records, the highest-quality tier, where multiple community members have agreed on the species identification.
+
+We define a dictionary mapping folder names (used as class labels) to scientific taxon names. For each species we make one API call to retrieve up to 200 observation records, extract the photo URL from each, then download the images in parallel using `ThreadPoolExecutor` to significantly reduce the download time.
+
+Photos are saved to `data/inat_birds/<species>/`.
+
+```{python}
+SPECIES = {
+    'annas_hummingbird':     'Calypte anna',
+    'california_scrub_jay':  'Aphelocoma californica',
+    'acorn_woodpecker':      'Melanerpes formicivorus',
+    'great_blue_heron':      'Ardea herodias',
+    'red_tailed_hawk':       'Buteo jamaicensis',
+    'mallard':               'Anas platyrhynchos',
+    'brown_pelican':         'Pelecanus occidentalis',
+    'common_raven':          'Corvus corax',
+    'american_robin':        'Turdus migratorius',
+    'white_crowned_sparrow': 'Zonotrichia leucophrys'
+}
+
+SAVE_ROOT     = 'data/inat_birds'
+N_PER_SPECIES = 200
+
+
+def fetch_photo_urls(taxon_name, n=200):
+    params = {
+        'taxon_name':    taxon_name,
+        'photos':        'true',
+        'quality_grade': 'research',
+        'license':       'cc-by,cc-by-nc,cc-by-sa,cc-by-nc-sa',
+        'per_page':      min(n, 200),
+        'page':          1
+    }
+    resp    = requests.get('https://api.inaturalist.org/v1/observations', params=params, timeout=30)
+    results = resp.json().get('results', [])
+    return [(obs['photos'][0]['url'].replace('square', 'medium'), obs['id'])
+            for obs in results if obs.get('photos')]
+
+
+def download_one(args):
+    url, save_path = args
+    if os.path.exists(save_path):
+        return True
+    try:
+        resp = requests.get(url, timeout=15)
+        if resp.status_code == 200:
+            Image.open(BytesIO(resp.content)).convert('RGB').save(save_path)
+            return True
+    except Exception:
+        pass
+    return False
+
+
+for folder_name, taxon_name in SPECIES.items():
+    save_dir = os.path.join(SAVE_ROOT, folder_name)
+    os.makedirs(save_dir, exist_ok=True)
+    tasks = [(url, os.path.join(save_dir, f"{obs_id}.jpg"))
+             for url, obs_id in fetch_photo_urls(taxon_name, n=N_PER_SPECIES)]
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        results = list(executor.map(download_one, tasks))
+    print(f"{folder_name}: {sum(results)}/{len(tasks)} images")
+```
+
+## Step 2: Loading the Image Data
+
+We define two separate transform pipelines — one for training and one for test/validation. Both resize images to 64×64 and apply the standard ImageNet normalization, but the **training transform adds data augmentation**: random horizontal flips and small color jitter. Augmentation artificially expands the effective size of our small dataset by showing the model slightly different versions of each image each epoch, which reduces overfitting.
+
+It is important that augmentation is applied **only to training data**. Randomly flipping or recoloring test images would add noise to our evaluation and give us an unreliable measure of how the model actually performs. To enforce this, we load the dataset twice and then assign the augmented version to the training split and the clean version to the test split.
+
+```{python}
+train_transform = Compose([
+    Resize((64, 64)),
+    RandomHorizontalFlip(),                                            # Randomly mirror ~50% of images
+    ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2),        # Small random color shifts
+    ToTensor(),
+    Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+test_transform = Compose([
+    Resize((64, 64)),
+    ToTensor(),
+    Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+# Load the dataset twice: once with each transform
+train_aug_dataset = ImageFolder(root=SAVE_ROOT, transform=train_transform)
+full_dataset      = ImageFolder(root=SAVE_ROOT, transform=test_transform)
+
+print(f'Total images: {len(full_dataset)}')
+print(f'Classes ({len(full_dataset.classes)}): {full_dataset.classes}')
+```
+
+We generate a fixed random index permutation to split the data 85/15 into train and test. We then create two `Subset` objects using those same indices — one pointing at the augmented dataset for training, and one pointing at the clean dataset for test. `SimpleDataModule` handles the internal 20% validation split from the training subset.
+
+```{python}
+n_total = len(full_dataset)
+n_test  = int(0.15 * n_total)
+n_train = n_total - n_test
+
+# Fixed permutation so the same images always end up in the same split
+all_indices   = torch.randperm(n_total, generator=torch.Generator().manual_seed(0)).tolist()
+train_indices = all_indices[n_test:]
+test_indices  = all_indices[:n_test]
+
+# Training uses augmented transforms; test uses clean transforms
+bird_train = Subset(train_aug_dataset, train_indices)
+bird_test  = Subset(full_dataset,      test_indices)
+
+max_num_workers = rec_num_workers()
+bird_dm = SimpleDataModule(bird_train,
+                           bird_test,
+                           validation=0.2,
+                           num_workers=max_num_workers,
+                           batch_size=32)
+
+print(f'Train: {len(bird_train)}  |  Test: {len(bird_test)}')
+```
+
+Let's take a look at the data that will get fed into our network. We loop through the first two batches of the training data loader, breaking after 2 batches:
+
+```{python}
+for idx, (X_, Y_) in enumerate(bird_dm.train_dataloader()):
+    print('X: ', X_.shape)  # [batch_size, channels, height, width]
+    print('Y: ', Y_.shape)  # [batch_size]; one integer class label per image
+    if idx >= 1:
+        break
+```
+
+We see that the `X` for each batch consists of 32 images of size 3×64×64. Here the 3 indicates three RGB color channels (the same structure as CIFAR100 images in the textbook). The `Y` tensor holds one integer class label per image.
+
+Before we start building the network, lets look at some sample images from the dataset. So that images look normal to us, we will reverse the normalization we performed earlier and store the results in `bird_display`.
+
+```{python}
+# Load images without Normalize so pixel values stay in [0, 1] (normalized images look washed out)
+bird_display = ImageFolder(root=SAVE_ROOT,
+                           transform=Compose([Resize((64, 64)), ToTensor()]))
+
+fig, axes = subplots(5, 5, figsize=(10, 12))
+rng     = np.random.default_rng(4)
+indices = rng.choice(np.arange(len(bird_display)), 25,
+                     replace=False).reshape((5, 5))
+
+for i in range(5):
+    for j in range(5):
+        idx = indices[i, j]
+        img, label = bird_display[idx]
+        axes[i, j].imshow(np.transpose(img, [1, 2, 0]), interpolation=None)
+        axes[i, j].set_title(bird_display.classes[label].replace('_', ' ').title(),
+                              fontsize=8)
+        axes[i, j].set_xticks([])
+        axes[i, j].set_yticks([])
+
+fig.tight_layout()
+```
+
+## Step 3: Specifying a Network: Classes and Inheritance
+
+To fit the neural network, we first set up a model structure that describes the network. Doing so requires us to define new classes specific to the model we wish to fit. Typically this is done in PyTorch by sub-classing a generic representation of a network, `nn.Module`, which is the approach we take here.
+
+Indented beneath the `class` statement are two methods: `__init__` and `forward`. The `__init__` method is called when an instance of the class is created. In the methods, `self` always refers to an instance of the class. In `__init__`, we attach objects to `self` as attributes; these are used in the `forward` method to describe the map that this module implements.
+
+There is one additional line in `__init__`: a call to `super()`. This function allows subclasses to access methods of the class they inherit from. For torch models, we will always make this `super()` call, as it is necessary for the model to be properly interpreted by torch.
+
+We specify a moderately-sized CNN, similar in structure to Figure 10.8 in the textbook. We use several layers, each consisting of convolution, ReLU, and max-pooling steps. We first define a module that defines one of these layers, a `BuildingBlock`.
+
+```{python}
+class BuildingBlock(nn.Module): # Define custom Neural Network module
+    def __init__(self, in_channels, out_channels):
+        super(BuildingBlock, self).__init__() # Initialize parent NN module
+        # Padding='same' keeps spatial dimensions unchanged after convolution
+        self.conv = nn.Conv2d(in_channels=in_channels,
+                              out_channels=out_channels,
+                              kernel_size=(3, 3), # 3 x 3 filter
+                              padding='same') # Add padding so the input height and width match the output ( only depth changes)
+        self.activation = nn.ReLU() # ReLU Activation function: zeros out negative values, allowing network to learn complex patterns
+        self.pool = nn.MaxPool2d(kernel_size=(2, 2))  # Pooling layer that slides 2 x 2 window over the feature map and keeps only the largest value in each window
+
+    def forward(self, x): # Defines data flow: Conv2D -> ReLU -> MaxPool2d
+        return self.pool(self.activation(self.conv(x)))
+```
+
+Each `BuildingBlock` learns to detect visual features (edges, textures, color patterns) in its input, then uses max-pooling to shrink the image by half. After stacking three blocks, our 64×64 image has been compressed down to an 8×8 grid with 128 feature channels. We then flatten that into a single vector of 8,192 values and pass it through two fully-connected layers to produce a score for each of the 10 bird species.
+
+```{python}
+class BirdModel(nn.Module):
+    def __init__(self):
+        super(BirdModel, self).__init__()
+        # Three blocks: channels grow 3→32→64→128; spatial dims shrink 64→32→16→8
+        sizes = [(3, 32), (32, 64), (64, 128)]
+        self.conv = nn.Sequential(*[BuildingBlock(in_, out_) # x → BuildingBlock(3,32) → BuildingBlock(32,64) → BuildingBlock(64,128) → output
+                                    for in_, out_ in sizes])
+        self.output = nn.Sequential(
+            nn.Dropout(0.5), # Randomly zeros out 50% of neurons during training to reduce overfitting
+            nn.Linear(128 * 8 * 8, 512),  # 128 feature maps of size 8×8 → 8,192 inputs
+            nn.ReLU(),
+            nn.Linear(512, 10)
+        )
+
+    def forward(self, x):
+        val = self.conv(x)
+        val = torch.flatten(val, start_dim=1)
+        return self.output(val)
+
+bird_model = BirdModel()
+```
+
+We can check that the model produces output of expected size by passing a batch through it, and use the `summary()` function to neatly display the shape and parameter count of each layer. We specify the size of the input and see the size of each tensor as it passes through the layers of the network.
+
+```{python}
+# Pass the same batch shape we saw earlier to verify output sizes at each layer
+summary(bird_model,
+        input_size=X_.shape,
+        col_names=['input_size', 'output_size', 'num_params'])
+```
+
+The `summary()` output is a layer-by-layer map of everything that happens to your data as it flows through the network. Here's how to read it:
+
+**Columns**
+
+- **Input Shape** — the tensor shape entering that layer (including the batch size of 32 as the first dimension)
+- **Output Shape** — the tensor shape leaving that layer
+- **Param #** — the number of learnable weights inside that layer
+
+**What the rows tell us**
+
+The indented tree mirrors how we built the model. Each `BuildingBlock` contains three sub-layers (Conv2d → ReLU → MaxPool2d), which are shown indented beneath it.
+
+- **Conv2d** — applies learned filters to detect visual features (edges, textures). Notice the spatial size stays the same after convolution (64→64, 32→32, etc.) because we used `padding='same'`, but the number of channels grows (3→32→64→128) as the network learns increasingly complex features.
+- **ReLU** — a simple activation function; shapes don't change.
+- **MaxPool2d** — this is where the spatial shrinking happens. Each block's max-pool halves both height and width: 64→32→16→8. No parameters are learned here; it just summarizes the most active feature in each 2×2 patch.
+- **Dropout** — randomly zeros out neurons during training to prevent overfitting. No parameters; shapes don't change.
+- **Linear `[32, 8192] → [32, 512]`** — after the three blocks, the 128 feature maps of size 8×8 are flattened into a single vector of 128×8×8 = 8,192 values, then mapped to 512. This is the largest layer: 8,192 × 512 = **4,194,816 parameters**, which is ~97% of the entire model.
+- **Linear `[32, 512] → [32, 10]`** — the final layer produces one score per bird species. The class with the highest score is the model's prediction.
+
+## Step 4: Training the Model
+
+We use the RMSprop optimizer with a learning rate of 0.001. Experiments show that a smaller learning rate performs better than the default for image data. The optimizer takes the model's parameters as its first argument, which informs it which values are involved in stochastic gradient descent (SGD).
+
+`SimpleModule.classification()` wraps our `BirdModel` and automatically uses cross-entropy loss (the standard loss for multi-class classification) and tracks accuracy as a metric. `CSVLogger` records training and validation metrics to a CSV file after each epoch, which we will read back to plot training curves.
+
+We define a `summary_plot()` helper (following the textbook) that plots training and validation curves for any logged metric over epochs. CSVLogger logs train and validation metrics at different steps, so the CSV contains NaN rows for each; `dropna` filters these before plotting.
+
+```{python}
+def summary_plot(results,
+                 ax,
+                 col='loss',
+                 valid_legend='Validation',
+                 training_legend='Training',
+                 ylabel='Loss',
+                 fontsize=20):
+    # Training accuracy is logged as train_{col}_epoch; loss as train_{col}
+    train_col = (f'train_{col}_epoch'
+                 if f'train_{col}_epoch' in results.columns
+                 else f'train_{col}')
+    for (column, color, label) in zip(
+        [train_col, f'valid_{col}'],
+        ['black', 'red'],
+        [training_legend, valid_legend]
+    ):
+        results.dropna(subset=[column]).plot(x='epoch',
+                                             y=column,
+                                             label=label,
+                                             marker='o',
+                                             color=color,
+                                             ax=ax)
+    ax.set_xlabel('Epoch')
+    ax.set_ylabel(ylabel)
+    return ax
+```
+
+`SimpleModule.classification()` uses cross-entropy loss. We supply our `RMSprop` optimizer with a learning rate of 0.001 rather than the default, since experiments show it performs better on image data. The `ErrorTracker` callback records per-epoch metrics so we can inspect them after training.
+
+```{python}
+bird_optimizer = RMSprop(bird_model.parameters(), lr=0.001)
+bird_module    = SimpleModule.classification(bird_model, num_classes=10, optimizer=bird_optimizer)
+bird_logger    = CSVLogger('logs', name='Birds')
+
+bird_trainer = Trainer(deterministic=True,
+                       max_epochs=30,
+                       logger=bird_logger,
+                       callbacks=[ErrorTracker()])
+bird_trainer.fit(bird_module, datamodule=bird_dm)
+```
+
+Recall from Section 10.7 of the textbook that an epoch amounts to the number of SGD steps required to process all $n$ training observations. Since our training set has 1,400 observations and we specified `batch_size=32`, an epoch corresponds to roughly $1{,}400 / 32 \approx 44$ gradient steps.
+
+## Step 5: Evaluating the Model
+
+After fitting, we read the logged metrics from the CSV file and plot training and validation curves. Then we evaluate final performance on the held-out test data using `trainer.test()`, which runs the model in evaluation mode.
+
+```{python}
+bird_trainer.test(bird_module, datamodule=bird_dm)
+```
+
+We can visualize what the model is actually doing by showing sample test images alongside its top-3 predicted species and their probabilities. The `→` marks the top prediction; titles are **green** if the model's top prediction is correct and **red** if not. Probabilities come from applying `softmax` to the raw output scores, which converts them into values that sum to 1 across all 10 classes.
+
+```{python}
+bird_model.eval()
+n_show = 12
+rng = np.random.default_rng(42)
+sample_idx = rng.choice(len(bird_test), n_show, replace=False)
+
+fig, axes = subplots(3, 4, figsize=(14, 10))
+
+with torch.no_grad():
+    for ax, i in zip(axes.flat, sample_idx):
+        X, true_label = bird_test[i]
+        probs = torch.softmax(bird_model(X.unsqueeze(0)), dim=1).squeeze()
+        top3_probs, top3_classes = probs.topk(3)
+
+        # use bird_display for the un-normalized image
+        img, _ = bird_display[bird_test.indices[i]]
+
+        true_name = full_dataset.classes[true_label].replace('_', ' ').title()
+        correct = true_label == top3_classes[0].item()
+        pred_text = '\n'.join(
+            f"{'→ ' if j == 0 else '   '}{full_dataset.classes[c].replace('_', ' ').title()}: {p:.2f}"
+            for j, (c, p) in enumerate(zip(top3_classes, top3_probs))
+        )
+
+        ax.imshow(np.transpose(img, [1, 2, 0]))
+        ax.set_title(f"True: {true_name}\n{pred_text}",
+                     fontsize=7, loc='left',
+                     color='green' if correct else 'red')
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+fig.tight_layout()
+```
+
+We now create plots of loss and accuracy as a function of the number of epochs. The training curve (black) reflects how well the model fits the training data. The validation curve (red) reflects generalization to unseen data. A growing gap between the two is the signature of overfitting, where the model is memorizing training examples rather than learning features that generalize to new images.
+
+```{python}
+bird_results = pd.read_csv(bird_logger.experiment.metrics_file_path)
+
+fig, axes = subplots(1, 2, figsize=(13, 5))
+
+# loss curves: a growing gap between training (black) and validation (red) signals overfitting
+ax = summary_plot(bird_results, axes[0], col='loss', ylabel='Loss')
+ax.set_xticks(np.linspace(0, 30, 7).astype(int))
+
+# accuracy curves
+ax = summary_plot(bird_results, axes[1], col='accuracy', ylabel='Accuracy')
+ax.set_ylim([0, 1])
+ax.set_xticks(np.linspace(0, 30, 7).astype(int))
+```
+
+### Cleanup
+
+We delete the objects we created above to free memory.
+
+```{python}
+del(full_dataset, train_aug_dataset, bird_train, bird_test,
+    bird_dm, bird_model, bird_optimizer,
+    bird_module, bird_trainer, bird_results)
+```
