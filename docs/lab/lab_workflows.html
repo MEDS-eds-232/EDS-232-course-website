@@ -58,7 +58,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -103,6 +103,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -194,6 +197,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../lab/lab8.html">
  <span class="dropdown-text">Lab 8: Support Vector Machines</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../lab/lab9.html">
+ <span class="dropdown-text">Lab 9: Deep Learning for Bird Species Classification</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -247,30 +254,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#pipelines" id="toc-pipelines" class="nav-link" data-scroll-target="#pipelines">Pipelines</a>
   <ul class="collapse">
   <li><a href="#why-use-a-pipeline" id="toc-why-use-a-pipeline" class="nav-link" data-scroll-target="#why-use-a-pipeline">Why use a Pipeline?</a></li>
-  <li><a href="#building-a-pipeline" id="toc-building-a-pipeline" class="nav-link" data-scroll-target="#building-a-pipeline">Building a Pipeline</a></li>
-  <li><a href="#handling-mixed-feature-types-with-columntransformer" id="toc-handling-mixed-feature-types-with-columntransformer" class="nav-link" data-scroll-target="#handling-mixed-feature-types-with-columntransformer">Handling mixed feature types with ColumnTransformer</a></li>
-  <li><a href="#combining-the-preprocessor-with-a-model" id="toc-combining-the-preprocessor-with-a-model" class="nav-link" data-scroll-target="#combining-the-preprocessor-with-a-model">Combining the preprocessor with a model</a></li>
+  <li><a href="#how-a-pipeline-works-step-by-step" id="toc-how-a-pipeline-works-step-by-step" class="nav-link" data-scroll-target="#how-a-pipeline-works-step-by-step">How a Pipeline Works Step by Step</a></li>
+  <li><a href="#building-a-numeric-pipeline" id="toc-building-a-numeric-pipeline" class="nav-link" data-scroll-target="#building-a-numeric-pipeline">Building a Numeric Pipeline</a></li>
+  <li><a href="#one-hot-encoding-categorical-features" id="toc-one-hot-encoding-categorical-features" class="nav-link" data-scroll-target="#one-hot-encoding-categorical-features">One-Hot Encoding Categorical Features</a></li>
+  <li><a href="#handling-mixed-feature-types-with-columntransformer" id="toc-handling-mixed-feature-types-with-columntransformer" class="nav-link" data-scroll-target="#handling-mixed-feature-types-with-columntransformer">Handling Mixed Feature Types with ColumnTransformer</a></li>
+  <li><a href="#example-building-a-preprocessing-pipeline" id="toc-example-building-a-preprocessing-pipeline" class="nav-link" data-scroll-target="#example-building-a-preprocessing-pipeline">Example: Building a Preprocessing Pipeline</a></li>
   </ul></li>
   <li><a href="#the-datasets" id="toc-the-datasets" class="nav-link" data-scroll-target="#the-datasets">The Datasets</a>
   <ul class="collapse">
-  <li><a href="#option-1-global-air-pollution-kaggle" id="toc-option-1-global-air-pollution-kaggle" class="nav-link" data-scroll-target="#option-1-global-air-pollution-kaggle">Option 1: Global Air Pollution — Kaggle</a></li>
-  <li><a href="#option-2-coral-reef-bleaching-kaggle" id="toc-option-2-coral-reef-bleaching-kaggle" class="nav-link" data-scroll-target="#option-2-coral-reef-bleaching-kaggle">Option 2: Coral Reef Bleaching — Kaggle</a></li>
-  <li><a href="#option-3-palmer-penguins" id="toc-option-3-palmer-penguins" class="nav-link" data-scroll-target="#option-3-palmer-penguins">Option 3: Palmer Penguins</a></li>
-  <li><a href="#option-4-water-potability" id="toc-option-4-water-potability" class="nav-link" data-scroll-target="#option-4-water-potability">Option 4: Water Potability</a></li>
-  <li><a href="#option-5-drought-prediction-us-meteorological-data" id="toc-option-5-drought-prediction-us-meteorological-data" class="nav-link" data-scroll-target="#option-5-drought-prediction-us-meteorological-data">Option 5: Drought Prediction — US Meteorological Data</a></li>
+  <li><a href="#option-1-global-air-pollution" id="toc-option-1-global-air-pollution" class="nav-link" data-scroll-target="#option-1-global-air-pollution">Option 1: Global Air Pollution</a></li>
+  <li><a href="#option-2-coral-reef-bleaching" id="toc-option-2-coral-reef-bleaching" class="nav-link" data-scroll-target="#option-2-coral-reef-bleaching">Option 2: Coral Reef Bleaching</a></li>
+  <li><a href="#option-3-drought-prediction-us-meteorological-data" id="toc-option-3-drought-prediction-us-meteorological-data" class="nav-link" data-scroll-target="#option-3-drought-prediction-us-meteorological-data">Option 3: Drought Prediction — US Meteorological Data</a></li>
   </ul></li>
   <li><a href="#your-workflow" id="toc-your-workflow" class="nav-link" data-scroll-target="#your-workflow">Your Workflow</a>
   <ul class="collapse">
   <li><a href="#step-1-understand-the-big-picture" id="toc-step-1-understand-the-big-picture" class="nav-link" data-scroll-target="#step-1-understand-the-big-picture">Step 1: Understand the Big Picture</a></li>
   <li><a href="#step-2-preliminary-exploration" id="toc-step-2-preliminary-exploration" class="nav-link" data-scroll-target="#step-2-preliminary-exploration">Step 2: Preliminary Exploration</a></li>
-  <li><a href="#step-3-train-test-split" id="toc-step-3-train-test-split" class="nav-link" data-scroll-target="#step-3-train-test-split">Step 3: Train-Test Split</a></li>
-  <li><a href="#step-4-explore-the-training-data" id="toc-step-4-explore-the-training-data" class="nav-link" data-scroll-target="#step-4-explore-the-training-data">Step 4: Explore the Training Data</a></li>
+  <li><a href="#step-3-create-a-representative-test-set-and-lock-it-away" id="toc-step-3-create-a-representative-test-set-and-lock-it-away" class="nav-link" data-scroll-target="#step-3-create-a-representative-test-set-and-lock-it-away">Step 3: Create a representative test set and lock it away</a></li>
+  <li><a href="#step-4-explore-the-train-data-to-gain-insights" id="toc-step-4-explore-the-train-data-to-gain-insights" class="nav-link" data-scroll-target="#step-4-explore-the-train-data-to-gain-insights">Step 4: Explore the train data to gain insights</a></li>
   <li><a href="#step-5-consider-feature-combinations" id="toc-step-5-consider-feature-combinations" class="nav-link" data-scroll-target="#step-5-consider-feature-combinations">Step 5: Consider Feature Combinations</a></li>
-  <li><a href="#step-6-build-your-pipeline-and-preprocess" id="toc-step-6-build-your-pipeline-and-preprocess" class="nav-link" data-scroll-target="#step-6-build-your-pipeline-and-preprocess">Step 6: Build Your Pipeline and Preprocess</a></li>
-  <li><a href="#step-7-fit-candidate-models-with-cross-validation" id="toc-step-7-fit-candidate-models-with-cross-validation" class="nav-link" data-scroll-target="#step-7-fit-candidate-models-with-cross-validation">Step 7: Fit Candidate Models with Cross-Validation</a></li>
-  <li><a href="#step-8-fine-tune-the-best-model" id="toc-step-8-fine-tune-the-best-model" class="nav-link" data-scroll-target="#step-8-fine-tune-the-best-model">Step 8: Fine-Tune the Best Model</a></li>
-  <li><a href="#step-9-evaluate-on-the-test-set" id="toc-step-9-evaluate-on-the-test-set" class="nav-link" data-scroll-target="#step-9-evaluate-on-the-test-set">Step 9: Evaluate on the Test Set</a></li>
-  <li><a href="#step-10-interpret-and-communicate" id="toc-step-10-interpret-and-communicate" class="nav-link" data-scroll-target="#step-10-interpret-and-communicate">Step 10: Interpret and Communicate</a></li>
+  <li><a href="#step-6-build-your-preprocessing-pipeline" id="toc-step-6-build-your-preprocessing-pipeline" class="nav-link" data-scroll-target="#step-6-build-your-preprocessing-pipeline">Step 6: Build Your Preprocessing Pipeline</a></li>
+  <li><a href="#step-7-try-candidate-models-with-cross-validation" id="toc-step-7-try-candidate-models-with-cross-validation" class="nav-link" data-scroll-target="#step-7-try-candidate-models-with-cross-validation">Step 7: Try Candidate Models with Cross-Validation</a></li>
+  <li><a href="#step-8-go-back-to-the-drawing-board-if-needed" id="toc-step-8-go-back-to-the-drawing-board-if-needed" class="nav-link" data-scroll-target="#step-8-go-back-to-the-drawing-board-if-needed">Step 8: Go Back to the Drawing Board if Needed</a></li>
+  <li><a href="#step-9-fine-tune-the-best-model" id="toc-step-9-fine-tune-the-best-model" class="nav-link" data-scroll-target="#step-9-fine-tune-the-best-model">Step 9: Fine-Tune the Best Model</a></li>
+  <li><a href="#step-10-evaluate-on-the-test-set" id="toc-step-10-evaluate-on-the-test-set" class="nav-link" data-scroll-target="#step-10-evaluate-on-the-test-set">Step 10: Evaluate on the Test Set</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -299,7 +306,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>This lab puts the full ML workflow in your hands. Rather than walking through a guided example, you will apply each step to a dataset of your choice. The one concept we will walk through in detail before you begin is <strong>pipelines</strong> — the scikit-learn tool that keeps your workflow clean and prevents data leakage.</p>
+<p>This lab focuses on the preprocessing stage of the ML workflow. You will apply each step to a dataset of your choice, with the goal of producing a clean, properly preprocessed feature matrix ready for modeling. The one concept we will walk through in detail before you begin is <strong>pipelines</strong> — the scikit-learn tool that keeps your preprocessing clean and prevents data leakage.</p>
 <p>The steps you will follow:</p>
 <ol type="1">
 <li>Understand the big picture</li>
@@ -307,10 +314,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Create a representative test set and lock it away</li>
 <li>Explore the training data to gain insights</li>
 <li>Consider feature combinations</li>
-<li>Prepare training data using a Pipeline</li>
-<li>Try candidate models and estimate performance with CV</li>
-<li>Select a model and fine-tune it</li>
-<li>Evaluate on the test set</li>
+<li>Build your preprocessing pipeline</li>
 </ol>
 <hr>
 </section>
@@ -318,149 +322,491 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="pipelines">Pipelines</h2>
 <section id="why-use-a-pipeline" class="level3">
 <h3 class="anchored" data-anchor-id="why-use-a-pipeline">Why use a Pipeline?</h3>
-<p>When you preprocess data, there is a tempting shortcut: fit the scaler (or imputer, or encoder) on the <em>entire</em> dataset before splitting. Don’t do this. Doing so leaks test-set statistics into training and produces an overly optimistic performance estimate — called <strong>data leakage</strong>.</p>
-<p>A scikit-learn <code>Pipeline</code> chains transformers and a final estimator into a single object. When you call <code>.fit()</code> on a pipeline, each transformer is fit on training data and then used to transform it before passing the result to the next step. When you call <code>.predict()</code> or <code>.transform()</code> on new data, the pipeline applies the already-fit transformers in sequence. The test set is never seen during fitting.</p>
+<p>When you preprocess data, there is a tempting shortcut: fit the scaler (or imputer, or encoder) on the <em>entire</em> dataset before splitting. Hoever, doing so leaks test-set statistics into training and produces an overly optimistic performance estimate.</p>
+<p>A scikit-learn <code>Pipeline</code> chains transformers into a single object. When you call <code>.fit()</code> on a pipeline, each transformer is fit on training data only and then used to transform it before passing the result to the next step. When you call <code>.transform()</code> on new data, the pipeline applies the already-fit transformers in sequence. This all happens without the test set influencing what was learned.</p>
 </section>
-<section id="building-a-pipeline" class="level3">
-<h3 class="anchored" data-anchor-id="building-a-pipeline">Building a Pipeline</h3>
-<p>The simplest pipeline chains steps in a list of <code>(name, object)</code> tuples:</p>
-<div id="352d9219" class="cell" data-execution_count="1">
+<section id="how-a-pipeline-works-step-by-step" class="level3">
+<h3 class="anchored" data-anchor-id="how-a-pipeline-works-step-by-step">How a Pipeline Works Step by Step</h3>
+<p>Consider a two-step pipeline: impute missing values, then scale. Here is what happens at each stage:</p>
+<p><strong>Fitting on training data (<code>pipeline.fit(X_train)</code>):</strong></p>
+<ol type="1">
+<li><code>SimpleImputer</code> sees <code>X_train</code>, computes the median of each column, stores them, and fills missing values in <code>X_train</code></li>
+<li><code>StandardScaler</code> sees the imputed <code>X_train</code>, computes the mean and standard deviation of each column, stores them, and standardizes</li>
+</ol>
+<p><strong>Transforming new data (<code>pipeline.transform(X_test)</code>):</strong></p>
+<ol type="1">
+<li><code>SimpleImputer</code> uses the <em>training medians</em> to fill missing values in <code>X_test</code></li>
+<li><code>StandardScaler</code> uses the <em>training mean and std</em> to standardize <code>X_test</code></li>
+</ol>
+<p>The test set never touches the fitting step. If you had fit the imputer and scaler on all data first, the test medians and variances would have influenced the transformation.</p>
+<p>You can also inspect or retrieve any fitted step by name:</p>
+<div id="c0bf5efa" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>numeric_pipeline <span class="op">=</span> Pipeline([</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'imputer'</span>, SimpleImputer(strategy<span class="op">=</span><span class="st">'median'</span>)),  <span class="co"># fill missing values</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'scaler'</span>,  StandardScaler())                   <span class="co"># standardize</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># After fitting, access a step's learned parameters</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pipeline.named_steps[<span class="st">'scaler'</span>].mean_</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>pipeline.named_steps[<span class="st">'imputer'</span>].statistics_</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>Each step name (the first element of each tuple) is arbitrary but must be unique. You can access any step later via <code>pipeline.named_steps['step_name']</code>.</p>
+</section>
+<section id="building-a-numeric-pipeline" class="level3">
+<h3 class="anchored" data-anchor-id="building-a-numeric-pipeline">Building a Numeric Pipeline</h3>
+<p>The simplest pipeline chains steps in a list of <code>(name, object)</code> tuples:</p>
+<div id="50952137" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>numeric_pipeline <span class="op">=</span> Pipeline([</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'imputer'</span>, SimpleImputer(strategy<span class="op">=</span><span class="st">'median'</span>)),  <span class="co"># fill missing values with column median</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'scaler'</span>,  StandardScaler())                   <span class="co"># standardize to zero mean, unit variance</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Each step name (the first element of each tuple) is arbitrary but must be unique within the pipeline.</p>
+<hr>
+</section>
+<section id="one-hot-encoding-categorical-features" class="level3">
+<h3 class="anchored" data-anchor-id="one-hot-encoding-categorical-features">One-Hot Encoding Categorical Features</h3>
+<p>Machine learning models require numeric inputs. Categorical columns like <code>'land_use'</code> or <code>'species'</code> must be converted to numbers before training. The standard approach is <strong>one-hot encoding</strong>: replace a column with <em>k</em> categories with <em>k</em> binary columns, one per category, where exactly one column is 1 for each row.</p>
+<p><strong>Example:</strong> A <code>land_use</code> column with three categories becomes:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>land_use</th>
+<th>forest</th>
+<th>urban</th>
+<th>wetland</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>forest</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>urban</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>wetland</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>forest</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>In code:</p>
+<div id="b06312f7" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> OneHotEncoder</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>sample <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'land_use'</span>: [<span class="st">'forest'</span>, <span class="st">'urban'</span>, <span class="st">'wetland'</span>, <span class="st">'forest'</span>, <span class="st">'urban'</span>]</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>enc <span class="op">=</span> OneHotEncoder(sparse_output<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>encoded <span class="op">=</span> enc.fit_transform(sample[[<span class="st">'land_use'</span>]])</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(encoded, columns<span class="op">=</span>enc.get_feature_names_out())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<hr>
 </section>
 <section id="handling-mixed-feature-types-with-columntransformer" class="level3">
-<h3 class="anchored" data-anchor-id="handling-mixed-feature-types-with-columntransformer">Handling mixed feature types with ColumnTransformer</h3>
+<h3 class="anchored" data-anchor-id="handling-mixed-feature-types-with-columntransformer">Handling Mixed Feature Types with ColumnTransformer</h3>
 <p>Real datasets usually have a mix of numerical and categorical columns that need different preprocessing. <code>ColumnTransformer</code> applies different pipelines to different column subsets and concatenates the results:</p>
-<div id="82fa016f" class="cell" data-execution_count="2">
+<div id="021c4902" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.compose <span class="im">import</span> ColumnTransformer</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> OneHotEncoder</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>num_features <span class="op">=</span> [<span class="st">'temp'</span>, <span class="st">'humidity'</span>, <span class="st">'wind_speed'</span>]</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>cat_features <span class="op">=</span> [<span class="st">'land_use'</span>]</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>categorical_pipeline <span class="op">=</span> Pipeline([</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'encoder'</span>, OneHotEncoder(drop<span class="op">=</span><span class="st">'first'</span>, sparse_output<span class="op">=</span><span class="va">False</span>))</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>preprocessor <span class="op">=</span> ColumnTransformer([</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'num'</span>, numeric_pipeline, num_features),</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'cat'</span>, categorical_pipeline, cat_features)</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.compose <span class="im">import</span> ColumnTransformer</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> OneHotEncoder</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>num_features <span class="op">=</span> [<span class="st">'temp'</span>, <span class="st">'humidity'</span>, <span class="st">'wind_speed'</span>]</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>cat_features <span class="op">=</span> [<span class="st">'land_use'</span>]</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>categorical_pipeline <span class="op">=</span> Pipeline([</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'imputer'</span>, SimpleImputer(strategy<span class="op">=</span><span class="st">'most_frequent'</span>)),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'encoder'</span>, OneHotEncoder(sparse_output<span class="op">=</span><span class="va">False</span>, handle_unknown<span class="op">=</span><span class="st">'ignore'</span>))</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>preprocessor <span class="op">=</span> ColumnTransformer([</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'num'</span>, numeric_pipeline, num_features),</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'cat'</span>, categorical_pipeline, cat_features)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-</section>
-<section id="combining-the-preprocessor-with-a-model" class="level3">
-<h3 class="anchored" data-anchor-id="combining-the-preprocessor-with-a-model">Combining the preprocessor with a model</h3>
-<p>The cleanest approach is to wrap the preprocessor <em>and</em> the final model together in one top-level pipeline. This means you can pass raw <code>X_train</code> and <code>X_test</code> directly — the pipeline handles all transformations internally:</p>
-<div id="c7c87972" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>full_pipeline <span class="op">=</span> Pipeline([</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'preprocessor'</span>, preprocessor),</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'model'</span>,        RandomForestClassifier(random_state<span class="op">=</span><span class="dv">42</span>))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit on raw training data — transformers only see X_train</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>full_pipeline.fit(X_train, y_train)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict on raw test data — transformers apply saved statistics</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> full_pipeline.predict(X_test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-<p>This also makes cross-validation and grid search straightforward, because <code>GridSearchCV</code> will refit the whole pipeline (including the preprocessor) on each fold:</p>
-<div id="b962466e" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> GridSearchCV</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'model__n_estimators'</span>: [<span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>],</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'model__max_depth'</span>:    [<span class="va">None</span>, <span class="dv">5</span>, <span class="dv">10</span>],</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>grid_search <span class="op">=</span> GridSearchCV(full_pipeline, param_grid, cv<span class="op">=</span><span class="dv">5</span>,</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>                           scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>)</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>grid_search.fit(X_train, y_train)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-<p>Note the double-underscore syntax: <code>'model__n_estimators'</code> means the <code>n_estimators</code> parameter of the step named <code>'model'</code> in the pipeline.</p>
+<p>The output of <code>preprocessor.fit_transform(X_train)</code> is a single numeric array: the scaled numerical columns followed by the one-hot encoded categorical columns, all learned from training data only.</p>
 <hr>
+</section>
+<section id="example-building-a-preprocessing-pipeline" class="level3">
+<h3 class="anchored" data-anchor-id="example-building-a-preprocessing-pipeline">Example: Building a Preprocessing Pipeline</h3>
+<p>The fake dataset below mimics a simple environmental monitoring table with numerical features (some missing) and a categorical feature. Here is how to build a full preprocessing pipeline, fit it on training data only, and inspect every step.</p>
+<div id="7005083c" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.compose <span class="im">import</span> ColumnTransformer</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler, OneHotEncoder</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">120</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>fake_env <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'temperature'</span>: np.random.normal(<span class="dv">15</span>, <span class="dv">5</span>, n),</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">'humidity'</span>:    np.random.uniform(<span class="dv">30</span>, <span class="dv">90</span>, n),</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">'wind_speed'</span>:  np.random.exponential(<span class="dv">5</span>, n),</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'land_use'</span>:    np.random.choice([<span class="st">'forest'</span>, <span class="st">'urban'</span>, <span class="st">'wetland'</span>, <span class="st">'grassland'</span>], n),</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">'aqi'</span>:         np.random.randint(<span class="dv">20</span>, <span class="dv">200</span>, n)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Introduce realistic missingness</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>fake_env.loc[np.random.choice(n, <span class="dv">12</span>, replace<span class="op">=</span><span class="va">False</span>), <span class="st">'humidity'</span>]   <span class="op">=</span> np.nan</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>fake_env.loc[np.random.choice(n, <span class="dv">6</span>,  replace<span class="op">=</span><span class="va">False</span>), <span class="st">'wind_speed'</span>] <span class="op">=</span> np.nan</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>fake_env.loc[np.random.choice(n, <span class="dv">4</span>,  replace<span class="op">=</span><span class="va">False</span>), <span class="st">'land_use'</span>]   <span class="op">=</span> np.nan</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(fake_env.shape)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(fake_env.isnull().<span class="bu">sum</span>())</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>fake_env.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>(120, 5)
+temperature     0
+humidity       12
+wind_speed      6
+land_use        4
+aqi             0
+dtype: int64</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">temperature</th>
+<th data-quarto-table-cell-role="th">humidity</th>
+<th data-quarto-table-cell-role="th">wind_speed</th>
+<th data-quarto-table-cell-role="th">land_use</th>
+<th data-quarto-table-cell-role="th">aqi</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>17.483571</td>
+<td>44.258253</td>
+<td>6.052753</td>
+<td>forest</td>
+<td>77</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>14.308678</td>
+<td>NaN</td>
+<td>7.943097</td>
+<td>wetland</td>
+<td>167</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>18.238443</td>
+<td>52.066988</td>
+<td>11.036617</td>
+<td>forest</td>
+<td>80</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>22.615149</td>
+<td>67.938350</td>
+<td>2.062412</td>
+<td>wetland</td>
+<td>146</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>13.829233</td>
+<td>68.011783</td>
+<td>2.354684</td>
+<td>forest</td>
+<td>124</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>We split first so the pipeline is only ever fit on training data:</p>
+<div id="268f8043" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> fake_env.drop(columns<span class="op">=</span><span class="st">'aqi'</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> fake_env[<span class="st">'aqi'</span>]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Input columns:"</span>, <span class="bu">list</span>(X_train.columns))</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"X_train shape before preprocessing: </span><span class="sc">{</span>X_train<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Input columns: ['temperature', 'humidity', 'wind_speed', 'land_use']
+X_train shape before preprocessing: (96, 4)</code></pre>
+</div>
+</div>
+<p>Now we define the feature lists and build the pipeline. <code>X_train</code> has 4 columns: 3 numeric and 1 categorical.</p>
+<div id="e2c9e742" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>num_features <span class="op">=</span> [<span class="st">'temperature'</span>, <span class="st">'humidity'</span>, <span class="st">'wind_speed'</span>]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>cat_features <span class="op">=</span> [<span class="st">'land_use'</span>]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>numeric_pipeline <span class="op">=</span> Pipeline([</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'imputer'</span>, SimpleImputer(strategy<span class="op">=</span><span class="st">'median'</span>)),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'scaler'</span>,  StandardScaler())</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>categorical_pipeline <span class="op">=</span> Pipeline([</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'imputer'</span>, SimpleImputer(strategy<span class="op">=</span><span class="st">'most_frequent'</span>)),</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'encoder'</span>, OneHotEncoder(sparse_output<span class="op">=</span><span class="va">False</span>, handle_unknown<span class="op">=</span><span class="st">'ignore'</span>))</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>preprocessor <span class="op">=</span> ColumnTransformer([</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'num'</span>, numeric_pipeline, num_features),</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'cat'</span>, categorical_pipeline, cat_features)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>X_train_processed <span class="op">=</span> preprocessor.fit_transform(X_train)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>X_test_processed  <span class="op">=</span> preprocessor.transform(X_test)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"X_train shape after preprocessing: </span><span class="sc">{</span>X_train_processed<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"X_test  shape after preprocessing: </span><span class="sc">{</span>X_test_processed<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>X_train shape after preprocessing: (96, 7)
+X_test  shape after preprocessing: (24, 7)</code></pre>
+</div>
+</div>
+<p><strong>Why 7 columns?</strong> The 3 numeric columns stay as 3 scaled columns. <code>land_use</code> has 4 categories, each becoming its own binary column. Total: 3 + 4 = <strong>7</strong>.</p>
+<section id="column-names-after-preprocessing" class="level4">
+<h4 class="anchored" data-anchor-id="column-names-after-preprocessing">Column names after preprocessing</h4>
+<p><code>ColumnTransformer</code> returns a plain numpy array, so the column names are not carried through automatically. We can reconstruct them:</p>
+<div id="5f6b0885" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>num_out_cols <span class="op">=</span> num_features</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>cat_out_cols <span class="op">=</span> <span class="bu">list</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    preprocessor.named_transformers_[<span class="st">'cat'</span>]</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                .named_steps[<span class="st">'encoder'</span>]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                .get_feature_names_out(cat_features)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>all_cols <span class="op">=</span> num_out_cols <span class="op">+</span> cat_out_cols</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Output column names:"</span>, all_cols)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Output column names: ['temperature', 'humidity', 'wind_speed', 'land_use_forest', 'land_use_grassland', 'land_use_urban', 'land_use_wetland']</code></pre>
+</div>
+</div>
+<p>We can then wrap the processed array in a DataFrame to make it easy to inspect:</p>
+<div id="218dc548" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>X_train_df <span class="op">=</span> pd.DataFrame(X_train_processed, columns<span class="op">=</span>all_cols)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>X_train_df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">temperature</th>
+<th data-quarto-table-cell-role="th">humidity</th>
+<th data-quarto-table-cell-role="th">wind_speed</th>
+<th data-quarto-table-cell-role="th">land_use_forest</th>
+<th data-quarto-table-cell-role="th">land_use_grassland</th>
+<th data-quarto-table-cell-role="th">land_use_urban</th>
+<th data-quarto-table-cell-role="th">land_use_wetland</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>0.024230</td>
+<td>0.329350</td>
+<td>-0.121396</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>0.412646</td>
+<td>0.075692</td>
+<td>-0.995871</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>-0.460885</td>
+<td>-1.208293</td>
+<td>-0.521291</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>-0.059091</td>
+<td>1.162086</td>
+<td>-0.499985</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>0.244386</td>
+<td>-1.323940</td>
+<td>-0.947675</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>0.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Let’s compare this to our original dataframe to see what our pipeline achieved:</p>
+<div id="c7603132" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fake_env.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="24">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">temperature</th>
+<th data-quarto-table-cell-role="th">humidity</th>
+<th data-quarto-table-cell-role="th">wind_speed</th>
+<th data-quarto-table-cell-role="th">land_use</th>
+<th data-quarto-table-cell-role="th">aqi</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>17.483571</td>
+<td>44.258253</td>
+<td>6.052753</td>
+<td>forest</td>
+<td>77</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>14.308678</td>
+<td>NaN</td>
+<td>7.943097</td>
+<td>wetland</td>
+<td>167</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>18.238443</td>
+<td>52.066988</td>
+<td>11.036617</td>
+<td>forest</td>
+<td>80</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>22.615149</td>
+<td>67.938350</td>
+<td>2.062412</td>
+<td>wetland</td>
+<td>146</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>13.829233</td>
+<td>68.011783</td>
+<td>2.354684</td>
+<td>forest</td>
+<td>124</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Notice that <code>temperature</code>, <code>humidity</code>, and <code>wind_speed</code> are now standardized, and <code>land_use</code> has been split into four binary columns (one for each category).</p>
+<hr>
+</section>
 </section>
 </section>
 <section id="the-datasets" class="level2">
 <h2 class="anchored" data-anchor-id="the-datasets">The Datasets</h2>
 <p>Choose one of the datasets below. Each is publicly available, contains a mix of feature types, and has a clear environmental prediction target. Load the data, read the documentation for each column, and then follow the workflow template in the next section.</p>
-<section id="option-1-global-air-pollution-kaggle" class="level3">
-<h3 class="anchored" data-anchor-id="option-1-global-air-pollution-kaggle">Option 1: Global Air Pollution — Kaggle</h3>
+<section id="option-1-global-air-pollution" class="level3">
+<h3 class="anchored" data-anchor-id="option-1-global-air-pollution">Option 1: Global Air Pollution</h3>
 <p>City-level air quality data from ~23,000 locations worldwide, sourced from government monitoring agencies and aggregated by AQI category. Features include country, city, CO AQI value, Ozone AQI value, NO2 AQI value, and PM2.5 AQI value.</p>
 <ul>
-<li><strong>Task:</strong> Regression — predict overall AQI value, or classification — predict AQI category (Good / Moderate / Unhealthy / etc.)</li>
-<li><strong>Interesting challenge:</strong> Strong multicollinearity among pollutant columns; some cities have very sparse records</li>
 <li><strong>Access:</strong> Download from <a href="https://www.kaggle.com/datasets/hasibalmuzdadid/global-air-pollution-dataset">Kaggle</a></li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'global_air_pollution_dataset.csv'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
-<section id="option-2-coral-reef-bleaching-kaggle" class="level3">
-<h3 class="anchored" data-anchor-id="option-2-coral-reef-bleaching-kaggle">Option 2: Coral Reef Bleaching — Kaggle</h3>
+<section id="option-2-coral-reef-bleaching" class="level3">
+<h3 class="anchored" data-anchor-id="option-2-coral-reef-bleaching">Option 2: Coral Reef Bleaching</h3>
 <p>Reef-level observations compiled from global monitoring surveys spanning 1980–2020. Each row is one survey visit; features include year, ocean region, depth, sea surface temperature anomaly, Oceanic Niño Index, and local stressor scores.</p>
 <ul>
-<li><strong>Task:</strong> Regression — predict bleaching severity percentage, or classification — predict bleaching presence/absence</li>
-<li><strong>Interesting challenge:</strong> Surveys are spatially and temporally clustered; the target is zero-inflated with occasional extreme values</li>
 <li><strong>Access:</strong> Download from <a href="https://www.kaggle.com/datasets/oasisdata/coral-reef-bleaching-data">Kaggle</a></li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'CoralBleaching.csv'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
-<section id="option-3-palmer-penguins" class="level3">
-<h3 class="anchored" data-anchor-id="option-3-palmer-penguins">Option 3: Palmer Penguins</h3>
-<p>Morphological measurements of 344 penguins from three species (Adelie, Chinstrap, Gentoo) collected at Palmer Station, Antarctica. Features include bill length and depth, flipper length, body mass, sex, and island.</p>
-<ul>
-<li><strong>Task:</strong> Classification — predict penguin species, or regression to predict body mass</li>
-<li><strong>Interesting challenge:</strong> Small dataset; missing values in sex and some measurements</li>
-<li><strong>Access:</strong> Install the Python package</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install palmerpenguins</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> palmerpenguins <span class="im">import</span> load_penguins</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> load_penguins()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="option-4-water-potability" class="level3">
-<h3 class="anchored" data-anchor-id="option-4-water-potability">Option 4: Water Potability</h3>
-<p>Chemical measurements of 3,276 water samples. Features include pH, hardness, dissolved solids, chloramines, sulfate, conductivity, organic carbon, trihalomethanes, and turbidity.</p>
-<ul>
-<li><strong>Task:</strong> Classification — predict whether a water sample is safe to drink (binary)</li>
-<li><strong>Interesting challenge:</strong> Class imbalance; significant missing values in several columns</li>
-<li><strong>Access:</strong> Download the CSV from <a href="https://www.kaggle.com/datasets/adityakadiwal/water-potability">Kaggle</a> or the mirror on the course data page</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'water_potability.csv'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-<section id="option-5-drought-prediction-us-meteorological-data" class="level3">
-<h3 class="anchored" data-anchor-id="option-5-drought-prediction-us-meteorological-data">Option 5: Drought Prediction — US Meteorological Data</h3>
+<section id="option-3-drought-prediction-us-meteorological-data" class="level3">
+<h3 class="anchored" data-anchor-id="option-3-drought-prediction-us-meteorological-data">Option 3: Drought Prediction — US Meteorological Data</h3>
 <p>Weekly meteorological summaries (temperature, precipitation, soil moisture, wind, humidity, and more) for US counties paired with the U.S. Drought Monitor category (None, D0–D4). Contains ~100,000 rows spanning 2000–2020.</p>
 <ul>
-<li><strong>Task:</strong> Classification — predict drought severity category</li>
-<li><strong>Interesting challenge:</strong> Temporal autocorrelation; class imbalance across drought levels</li>
 <li><strong>Access:</strong> Download from <a href="https://www.kaggle.com/datasets/cdminix/us-drought-meteorological-data">Kaggle</a></li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'train_timeseries.csv'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
 </section>
@@ -482,7 +828,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="callout-body-container callout-body">
 <p>Before touching the data, answer the following:</p>
 <ol type="a">
-<li>What is the prediction target? Is this a regression or classification problem?</li>
+<li>What is the response variable? Is this a regression or classification problem?</li>
 <li>What performance metric will you use, and why is it appropriate?</li>
 <li>What is a sensible baseline to beat (e.g., predicting the mean, a simple rule, a published benchmark)?</li>
 <li>Are there any domain-specific constraints on errors — is over-prediction or under-prediction more costly?</li>
@@ -494,21 +840,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="step-2-preliminary-exploration" class="level3">
 <h3 class="anchored" data-anchor-id="step-2-preliminary-exploration">Step 2: Preliminary Exploration</h3>
 <p>Load your dataset and run the cells below.</p>
-<div id="758ba9aa" class="cell" data-execution_count="5">
+<div id="b7fca306" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'your_dataset.csv'</span>)  <span class="co"># replace with your actual load command</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>df.info()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'your_dataset.csv'</span>)  <span class="co"># replace with your actual load command</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>df.info()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="0b12ff4e" class="cell" data-execution_count="6">
+<div id="ba7c513f" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df.describe()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df.describe()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -530,36 +876,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <hr>
 </section>
-<section id="step-3-train-test-split" class="level3">
-<h3 class="anchored" data-anchor-id="step-3-train-test-split">Step 3: Train-Test Split</h3>
-<div id="02922b65" class="cell" data-execution_count="7">
+<section id="step-3-create-a-representative-test-set-and-lock-it-away" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-create-a-representative-test-set-and-lock-it-away">Step 3: Create a representative test set and lock it away</h3>
+<div id="5352c421" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>target_col <span class="op">=</span> <span class="st">'your_target'</span>   <span class="co"># replace</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df.drop(columns<span class="op">=</span>target_col)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[target_col]</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Training   : </span><span class="sc">{</span>X_train<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> rows'</span>)</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test       : </span><span class="sc">{</span>X_test<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> rows'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>response_var <span class="op">=</span> <span class="st">'your_response'</span>   <span class="co"># replace</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df.drop(columns<span class="op">=</span>response_var)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[response_var]</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Training   : </span><span class="sc">{</span>X_train<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> rows'</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test       : </span><span class="sc">{</span>X_test<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> rows'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Lock the test set away. Do not use it again until Step 9.</p>
 <hr>
 </section>
-<section id="step-4-explore-the-training-data" class="level3">
-<h3 class="anchored" data-anchor-id="step-4-explore-the-training-data">Step 4: Explore the Training Data</h3>
-<p>Build your own exploratory analysis on the training set. At minimum:</p>
+<section id="step-4-explore-the-train-data-to-gain-insights" class="level3">
+<h3 class="anchored" data-anchor-id="step-4-explore-the-train-data-to-gain-insights">Step 4: Explore the train data to gain insights</h3>
+<p>Build your own exploratory analysis on the training set. Explore the following for each variable:</p>
 <ul>
-<li>Histograms of all numerical features</li>
-<li>Scatter plots or box plots of each predictor vs.&nbsp;the target</li>
-<li>A correlation table (for regression problems)</li>
+<li>Name</li>
+<li>Type (categorical, int/float, bounded/unbounded, text, structured, etc.)</li>
+<li>% of missing values</li>
+<li>Noisiness and type of noise (outliers, rounding errors, etc.)</li>
+<li>Possibly useful for the task?</li>
+<li>Type of distribution</li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -572,9 +921,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="callout-body-container callout-body">
 <ol type="a">
-<li>Which predictors appear most strongly related to the target? Describe the direction.</li>
-<li>Are there any predictors you would flag for removal based on weak signal?</li>
-<li>For categorical predictors: do different categories show meaningfully different target distributions?</li>
+<li>Which predictors appear most strongly related to the target? You can use <code>corr()</code> to find out. Describe the direction.</li>
+<li>Are there too many predictors?</li>
 </ol>
 </div>
 </div>
@@ -582,6 +930,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="step-5-consider-feature-combinations" class="level3">
 <h3 class="anchored" data-anchor-id="step-5-consider-feature-combinations">Step 5: Consider Feature Combinations</h3>
+<p>In this step we consider if there are any combinations of our predictors that could produce a more informative feature. This is not a “one and done” process: as we are developing the model, we may come back and reassess whether there are new features that are worth including. Whenever possible, make sure your decisions are backed up by domain expertise.</p>
+<hr>
+</section>
+<section id="step-6-build-your-preprocessing-pipeline" class="level3">
+<h3 class="anchored" data-anchor-id="step-6-build-your-preprocessing-pipeline">Step 6: Build Your Preprocessing Pipeline</h3>
+<p>Identify your numerical and categorical columns, then construct a <code>ColumnTransformer</code> + <code>Pipeline</code> as shown in the review section above. Fit it on training data only, then apply it to both splits.</p>
+<div id="80c99a05" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.compose <span class="im">import</span> ColumnTransformer</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler, OneHotEncoder</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>num_features <span class="op">=</span> [...]  <span class="co"># fill in</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>cat_features <span class="op">=</span> [...]  <span class="co"># fill in (empty list if none)</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>numeric_pipeline <span class="op">=</span> Pipeline([</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'imputer'</span>, SimpleImputer(strategy<span class="op">=</span><span class="st">'median'</span>)),</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'scaler'</span>,  StandardScaler())</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>categorical_pipeline <span class="op">=</span> Pipeline([</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'imputer'</span>, SimpleImputer(strategy<span class="op">=</span><span class="st">'most_frequent'</span>)),</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'encoder'</span>, OneHotEncoder(sparse_output<span class="op">=</span><span class="va">False</span>, handle_unknown<span class="op">=</span><span class="st">'ignore'</span>))</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>preprocessor <span class="op">=</span> ColumnTransformer([</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'num'</span>, numeric_pipeline, num_features),</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'cat'</span>, categorical_pipeline, cat_features)</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>X_train_processed <span class="op">=</span> preprocessor.fit_transform(X_train)</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>X_test_processed  <span class="op">=</span> preprocessor.transform(X_test)</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Processed training shape: </span><span class="sc">{</span>X_train_processed<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Processed test shape    : </span><span class="sc">{</span>X_test_processed<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -592,40 +979,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Propose at least one new feature derived from existing columns (a ratio, difference, product, or binning). Explain in 2–3 sentences why you expect it to add predictive value beyond the raw features.</p>
+<ol type="a">
+<li>How will you handle missing values in your dataset? Justify your choice of imputation strategy.</li>
+<li>If you one-hot encode a categorical column with <em>k</em> categories, how many new columns does it produce?</li>
+<li>How many total columns does your processed feature matrix have? Is this different from the number of columns in the raw data?</li>
+</ol>
 </div>
 </div>
 <hr>
 </section>
-<section id="step-6-build-your-pipeline-and-preprocess" class="level3">
-<h3 class="anchored" data-anchor-id="step-6-build-your-pipeline-and-preprocess">Step 6: Build Your Pipeline and Preprocess</h3>
-<p>Identify your numerical and categorical columns, then construct a <code>ColumnTransformer</code> + <code>Pipeline</code> as shown in the review section above.</p>
-<div id="124733f1" class="cell" data-execution_count="8">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.compose <span class="im">import</span> ColumnTransformer</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler, OneHotEncoder</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>num_features <span class="op">=</span> [...]  <span class="co"># fill in</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>cat_features <span class="op">=</span> [...]  <span class="co"># fill in (empty list if none)</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>numeric_pipeline <span class="op">=</span> Pipeline([</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'imputer'</span>, SimpleImputer(strategy<span class="op">=</span><span class="st">'median'</span>)),</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'scaler'</span>,  StandardScaler())</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>categorical_pipeline <span class="op">=</span> Pipeline([</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'encoder'</span>, OneHotEncoder(drop<span class="op">=</span><span class="st">'first'</span>, sparse_output<span class="op">=</span><span class="va">False</span>))</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>preprocessor <span class="op">=</span> ColumnTransformer([</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'num'</span>, numeric_pipeline, num_features),</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'cat'</span>, categorical_pipeline, cat_features)</span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
+<section id="step-7-try-candidate-models-with-cross-validation" class="level3">
+<h3 class="anchored" data-anchor-id="step-7-try-candidate-models-with-cross-validation">Step 7: Try Candidate Models with Cross-Validation</h3>
+<p>Select at least three candidate models appropriate for your problem type (regression or classification). Fit each one on <code>X_train_processed</code> using 5-fold cross-validation — no need to tune hyperparameters yet, defaults are fine.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -637,41 +1002,79 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="callout-body-container callout-body">
 <ol type="a">
-<li>How will you handle missing values in your dataset? Justify your choice of imputation strategy.</li>
-<li>If you one-hot encode a categorical column with <em>k</em> categories using <code>drop='first'</code>, how many new columns does it produce? Why is one category dropped?</li>
+<li>Which model performs best based on mean CV score?</li>
 </ol>
 </div>
 </div>
 <hr>
 </section>
-<section id="step-7-fit-candidate-models-with-cross-validation" class="level3">
-<h3 class="anchored" data-anchor-id="step-7-fit-candidate-models-with-cross-validation">Step 7: Fit Candidate Models with Cross-Validation</h3>
-<p>Combine your preprocessor and at least three candidate models into full pipelines. Evaluate with 5-fold CV.</p>
-<div id="815db344" class="cell" data-execution_count="9">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_val_score</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression       <span class="co"># swap for LogisticRegression if classifying</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> KNeighborsRegressor       <span class="co"># or KNeighborsClassifier</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestRegressor      <span class="co"># or RandomForestClassifier</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>scoring_metric <span class="op">=</span> <span class="st">'neg_mean_squared_error'</span>  <span class="co"># change to 'accuracy' or 'f1' for classification</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>candidates <span class="op">=</span> {</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Linear'</span>        : LinearRegression(),</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'KNN (k=5)'</span>     : KNeighborsRegressor(n_neighbors<span class="op">=</span><span class="dv">5</span>),</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Random Forest'</span> : RandomForestRegressor(n_estimators<span class="op">=</span><span class="dv">100</span>, random_state<span class="op">=</span><span class="dv">42</span>),</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> {}</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, model <span class="kw">in</span> candidates.items():</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    pipe <span class="op">=</span> Pipeline([(<span class="st">'preprocessor'</span>, preprocessor), (<span class="st">'model'</span>, model)])</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> cross_val_score(pipe, X_train, y_train, cv<span class="op">=</span><span class="dv">5</span>, scoring<span class="op">=</span>scoring_metric)</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    results[name] <span class="op">=</span> {<span class="st">'Mean CV score'</span>: scores.mean(), <span class="st">'Std'</span>: scores.std()}</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(results).T.<span class="bu">round</span>(<span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
+<section id="step-8-go-back-to-the-drawing-board-if-needed" class="level3">
+<h3 class="anchored" data-anchor-id="step-8-go-back-to-the-drawing-board-if-needed">Step 8: Go Back to the Drawing Board if Needed</h3>
+<p>If your results are poor, the problem usually falls into one of two categories: <strong>bad data</strong> or <strong>bad model</strong>.</p>
+<p><strong>Problems with the data:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Problem</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Potential solutions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Too small</strong></td>
+<td style="text-align: left;">More high-quality training data generally improves model performance.</td>
+<td style="text-align: left;">Collect more data.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Nonrepresentative</strong></td>
+<td style="text-align: left;">Training data must reflect the cases you want to generalize to.</td>
+<td style="text-align: left;">Improve sampling strategies.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Poor quality</strong></td>
+<td style="text-align: left;">Too many outliers, errors, or missing values hide the underlying pattern.</td>
+<td style="text-align: left;">Remove outliers, correct errors, or revisit imputation.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Irrelevant features</strong></td>
+<td style="text-align: left;">Noisy features can prevent the model from working well.</td>
+<td style="text-align: left;">Remove low-signal features; engineer more informative ones.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Problems with the model:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Problem</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Potential solutions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Overfitting</strong></td>
+<td style="text-align: left;">Model fits noise in training data and generalizes poorly.</td>
+<td style="text-align: left;">Use a simpler model; collect more data; tune hyperparameters to reduce variance.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Underfitting</strong></td>
+<td style="text-align: left;">Model is too simple to capture the structure of the data.</td>
+<td style="text-align: left;">Use a more flexible model; add informative features; tune hyperparameters to allow more variance.</td>
+</tr>
+</tbody>
+</table>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -682,44 +1085,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<ol type="a">
-<li>Which model performs best based on mean CV score?</li>
-<li>Does any model beat your baseline from Step 1?</li>
-<li>Which model shows the most variability across folds? What might that suggest?</li>
-</ol>
+<p>Reflect on your CV results from Step 7. Do you suspect a data problem, a model problem, or neither? What would your next step be if performance were unsatisfactory?</p>
 </div>
 </div>
 <hr>
 </section>
-<section id="step-8-fine-tune-the-best-model" class="level3">
-<h3 class="anchored" data-anchor-id="step-8-fine-tune-the-best-model">Step 8: Fine-Tune the Best Model</h3>
-<p>Use <code>GridSearchCV</code> on the full pipeline (preprocessor + model). Note the <code>model__</code> prefix for accessing hyperparameters inside the pipeline.</p>
-<div id="a49766d0" class="cell" data-execution_count="10">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> GridSearchCV</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>best_model_name <span class="op">=</span> <span class="st">'Random Forest'</span>  <span class="co"># replace with your choice</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>best_model      <span class="op">=</span> RandomForestRegressor(random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>full_pipeline <span class="op">=</span> Pipeline([</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'preprocessor'</span>, preprocessor),</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'model'</span>,        best_model)</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'model__n_estimators'</span>: [<span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>],</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'model__max_depth'</span>:    [<span class="va">None</span>, <span class="dv">5</span>, <span class="dv">10</span>],</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>grid_search <span class="op">=</span> GridSearchCV(full_pipeline, param_grid, cv<span class="op">=</span><span class="dv">5</span>,</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>                           scoring<span class="op">=</span>scoring_metric, n_jobs<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>grid_search.fit(X_train, y_train)</span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Best params:'</span>, grid_search.best_params_)</span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Best CV score: </span><span class="sc">{</span>grid_search<span class="sc">.</span>best_score_<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
+<section id="step-9-fine-tune-the-best-model" class="level3">
+<h3 class="anchored" data-anchor-id="step-9-fine-tune-the-best-model">Step 9: Fine-Tune the Best Model</h3>
+<p>Use <code>GridSearchCV</code> directly on your chosen model and the processed training data to search over hyperparameter combinations.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -735,21 +1108,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <hr>
 </section>
-<section id="step-9-evaluate-on-the-test-set" class="level3">
-<h3 class="anchored" data-anchor-id="step-9-evaluate-on-the-test-set">Step 9: Evaluate on the Test Set</h3>
+<section id="step-10-evaluate-on-the-test-set" class="level3">
+<h3 class="anchored" data-anchor-id="step-10-evaluate-on-the-test-set">Step 10: Evaluate on the Test Set</h3>
 <p>Use the locked-away test set exactly once.</p>
-<div id="6420f0d3" class="cell" data-execution_count="11">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error  <span class="co"># or accuracy_score, etc.</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>y_pred   <span class="op">=</span> grid_search.best_estimator_.predict(X_test)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>test_mse <span class="op">=</span> mean_squared_error(y_test, y_pred)</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test MSE  : </span><span class="sc">{</span>test_mse<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Test RMSE : </span><span class="sc">{</span>np<span class="sc">.</span>sqrt(test_mse)<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -761,32 +1122,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="callout-body-container callout-body">
 <ol type="a">
-<li>Does your test performance beat the baseline from Step 1?</li>
 <li>Is the test score close to your best CV score, or is there a large gap? What would a large gap indicate?</li>
 <li>Visualize predicted vs.&nbsp;actual values (regression) or a confusion matrix (classification). Describe any patterns you observe.</li>
 </ol>
-</div>
-</div>
-<hr>
-</section>
-<section id="step-10-interpret-and-communicate" class="level3">
-<h3 class="anchored" data-anchor-id="step-10-interpret-and-communicate">Step 10: Interpret and Communicate</h3>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Question 9
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Write a 3–5 sentence summary of your results as if reporting to a non-technical stakeholder:</p>
-<ul>
-<li>Which model did you select and how accurate is it in plain terms?</li>
-<li>What are the most important predictors?</li>
-<li>What is one key caveat or limitation of your model?</li>
-</ul>
 </div>
 </div>
 

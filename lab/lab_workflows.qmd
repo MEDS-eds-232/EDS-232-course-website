@@ -1,0 +1,494 @@
+---
+title: "Lab 10: End-to-End ML Workflows"
+jupyter: eds232-env
+---
+
+## Overview
+
+This lab focuses on the preprocessing stage of the ML workflow. You will apply each step to a dataset of your choice, with the goal of producing a clean, properly preprocessed feature matrix ready for modeling. The one concept we will walk through in detail before you begin is **pipelines** — the scikit-learn tool that keeps your preprocessing clean and prevents data leakage.
+
+The steps you will follow:
+
+1. Understand the big picture
+2. Get the data and do a preliminary exploration
+3. Create a representative test set and lock it away
+4. Explore the training data to gain insights
+5. Consider feature combinations
+6. Build your preprocessing pipeline
+
+---
+
+## Pipelines
+
+### Why use a Pipeline?
+
+When you preprocess data, there is a tempting shortcut: fit the scaler (or imputer, or encoder) on the *entire* dataset before splitting. Hoever, doing so leaks test-set statistics into training and produces an overly optimistic performance estimate.
+
+A scikit-learn `Pipeline` chains transformers into a single object. When you call `.fit()` on a pipeline, each transformer is fit on training data only and then used to transform it before passing the result to the next step. When you call `.transform()` on new data, the pipeline applies the already-fit transformers in sequence. This all happens without the test set influencing what was learned.
+
+### How a Pipeline Works Step by Step
+
+Consider a two-step pipeline: impute missing values, then scale. Here is what happens at each stage:
+
+**Fitting on training data (`pipeline.fit(X_train)`):**
+
+1. `SimpleImputer` sees `X_train`, computes the median of each column, stores them, and fills missing values in `X_train`
+2. `StandardScaler` sees the imputed `X_train`, computes the mean and standard deviation of each column, stores them, and standardizes
+
+**Transforming new data (`pipeline.transform(X_test)`):**
+
+1. `SimpleImputer` uses the *training medians* to fill missing values in `X_test`
+2. `StandardScaler` uses the *training mean and std* to standardize `X_test`
+
+The test set never touches the fitting step. If you had fit the imputer and scaler on all data first, the test medians and variances would have influenced the transformation.
+
+You can also inspect or retrieve any fitted step by name:
+
+```{python}
+#| eval: false
+# After fitting, access a step's learned parameters
+pipeline.named_steps['scaler'].mean_
+pipeline.named_steps['imputer'].statistics_
+```
+
+### Building a Numeric Pipeline
+
+The simplest pipeline chains steps in a list of `(name, object)` tuples:
+
+```{python}
+#| eval: false
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
+
+numeric_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy='median')),  # fill missing values with column median
+    ('scaler',  StandardScaler())                   # standardize to zero mean, unit variance
+])
+```
+
+Each step name (the first element of each tuple) is arbitrary but must be unique within the pipeline.
+
+
+---
+
+### One-Hot Encoding Categorical Features
+
+Machine learning models require numeric inputs. Categorical columns like `'land_use'` or `'species'` must be converted to numbers before training. The standard approach is **one-hot encoding**: replace a column with *k* categories with *k* binary columns, one per category, where exactly one column is 1 for each row.
+
+**Example:** A `land_use` column with three categories becomes:
+
+| land_use | forest | urban | wetland |
+|----------|--------|-------|---------|
+| forest   | 1      | 0     | 0       |
+| urban    | 0      | 1     | 0       |
+| wetland  | 0      | 0     | 1       |
+| forest   | 1      | 0     | 0       |
+
+In code:
+
+```{python}
+#| eval: false
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
+
+sample = pd.DataFrame({
+    'land_use': ['forest', 'urban', 'wetland', 'forest', 'urban']
+})
+
+enc = OneHotEncoder(sparse_output=False)
+encoded = enc.fit_transform(sample[['land_use']])
+pd.DataFrame(encoded, columns=enc.get_feature_names_out())
+```
+
+
+---
+
+### Handling Mixed Feature Types with ColumnTransformer
+
+Real datasets usually have a mix of numerical and categorical columns that need different preprocessing. `ColumnTransformer` applies different pipelines to different column subsets and concatenates the results:
+
+```{python}
+#| eval: false
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+
+num_features = ['temp', 'humidity', 'wind_speed']
+cat_features = ['land_use']
+
+categorical_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('encoder', OneHotEncoder(sparse_output=False, handle_unknown='ignore'))
+])
+
+preprocessor = ColumnTransformer([
+    ('num', numeric_pipeline, num_features),
+    ('cat', categorical_pipeline, cat_features)
+])
+```
+
+The output of `preprocessor.fit_transform(X_train)` is a single numeric array: the scaled numerical columns followed by the one-hot encoded categorical columns, all learned from training data only.
+
+---
+
+### Example: Building a Preprocessing Pipeline
+
+The fake dataset below mimics a simple environmental monitoring table with numerical features (some missing) and a categorical feature. Here is how to build a full preprocessing pipeline, fit it on training data only, and inspect every step.
+
+```{python}
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+
+np.random.seed(42)
+n = 120
+
+fake_env = pd.DataFrame({
+    'temperature': np.random.normal(15, 5, n),
+    'humidity':    np.random.uniform(30, 90, n),
+    'wind_speed':  np.random.exponential(5, n),
+    'land_use':    np.random.choice(['forest', 'urban', 'wetland', 'grassland'], n),
+    'aqi':         np.random.randint(20, 200, n)
+})
+
+# Introduce realistic missingness
+fake_env.loc[np.random.choice(n, 12, replace=False), 'humidity']   = np.nan
+fake_env.loc[np.random.choice(n, 6,  replace=False), 'wind_speed'] = np.nan
+fake_env.loc[np.random.choice(n, 4,  replace=False), 'land_use']   = np.nan
+
+print(fake_env.shape)
+print(fake_env.isnull().sum())
+fake_env.head()
+```
+
+We split first so the pipeline is only ever fit on training data:
+
+```{python}
+X = fake_env.drop(columns='aqi')
+y = fake_env['aqi']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+print("Input columns:", list(X_train.columns))
+print(f"X_train shape before preprocessing: {X_train.shape}")
+```
+
+Now we define the feature lists and build the pipeline. `X_train` has 4 columns: 3 numeric and 1 categorical.
+
+```{python}
+num_features = ['temperature', 'humidity', 'wind_speed']
+cat_features = ['land_use']
+
+numeric_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy='median')),
+    ('scaler',  StandardScaler())
+])
+
+categorical_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('encoder', OneHotEncoder(sparse_output=False, handle_unknown='ignore'))
+])
+
+preprocessor = ColumnTransformer([
+    ('num', numeric_pipeline, num_features),
+    ('cat', categorical_pipeline, cat_features)
+])
+
+X_train_processed = preprocessor.fit_transform(X_train)
+X_test_processed  = preprocessor.transform(X_test)
+
+print(f"X_train shape after preprocessing: {X_train_processed.shape}")
+print(f"X_test  shape after preprocessing: {X_test_processed.shape}")
+```
+
+**Why 7 columns?** The 3 numeric columns stay as 3 scaled columns. `land_use` has 4 categories, each becoming its own binary column. Total: 3 + 4 = **7**.
+
+#### Column names after preprocessing
+
+`ColumnTransformer` returns a plain numpy array, so the column names are not carried through automatically. We can reconstruct them:
+
+```{python}
+num_out_cols = num_features
+cat_out_cols = list(
+    preprocessor.named_transformers_['cat']
+                .named_steps['encoder']
+                .get_feature_names_out(cat_features)
+)
+
+all_cols = num_out_cols + cat_out_cols
+print("Output column names:", all_cols)
+```
+
+We can then wrap the processed array in a DataFrame to make it easy to inspect:
+
+```{python}
+X_train_df = pd.DataFrame(X_train_processed, columns=all_cols)
+X_train_df.head()
+```
+
+Let's compare this to our original dataframe to see what our pipeline achieved: 
+
+```{python}
+
+fake_env.head()
+
+```
+
+
+Notice that `temperature`, `humidity`, and `wind_speed` are now standardized, and `land_use` has been split into four binary columns (one for each category).
+
+
+---
+
+## The Datasets
+
+Choose one of the datasets below. Each is publicly available, contains a mix of feature types, and has a clear environmental prediction target. Load the data, read the documentation for each column, and then follow the workflow template in the next section.
+
+### Option 1: Global Air Pollution 
+
+City-level air quality data from ~23,000 locations worldwide, sourced from government monitoring agencies and aggregated by AQI category. Features include country, city, CO AQI value, Ozone AQI value, NO2 AQI value, and PM2.5 AQI value.
+
+- **Access:** Download from [Kaggle](https://www.kaggle.com/datasets/hasibalmuzdadid/global-air-pollution-dataset)
+
+
+---
+
+### Option 2: Coral Reef Bleaching 
+
+Reef-level observations compiled from global monitoring surveys spanning 1980–2020. Each row is one survey visit; features include year, ocean region, depth, sea surface temperature anomaly, Oceanic Niño Index, and local stressor scores.
+
+- **Access:** Download from [Kaggle](https://www.kaggle.com/datasets/oasisdata/coral-reef-bleaching-data)
+
+
+
+---
+
+
+
+### Option 3: Drought Prediction — US Meteorological Data
+
+Weekly meteorological summaries (temperature, precipitation, soil moisture, wind, humidity, and more) for US counties paired with the U.S. Drought Monitor category (None, D0–D4). Contains ~100,000 rows spanning 2000–2020.
+
+- **Access:** Download from [Kaggle](https://www.kaggle.com/datasets/cdminix/us-drought-meteorological-data)
+
+
+
+---
+
+## Your Workflow
+
+Use this section as a template. Fill in code and answers as you go. Each step either has a scaffold for you to complete or a question to answer.
+
+---
+
+### Step 1: Understand the Big Picture
+
+::: {.callout-note}
+## Question 1
+
+Before touching the data, answer the following:
+
+a) What is the response variable? Is this a regression or classification problem?
+b) What performance metric will you use, and why is it appropriate?
+c) What is a sensible baseline to beat (e.g., predicting the mean, a simple rule, a published benchmark)?
+d) Are there any domain-specific constraints on errors — is over-prediction or under-prediction more costly?
+:::
+
+---
+
+### Step 2: Preliminary Exploration
+
+Load your dataset and run the cells below.
+
+```{python}
+#| eval: false
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('your_dataset.csv')  # replace with your actual load command
+df.info()
+```
+
+```{python}
+#| eval: false
+df.describe()
+```
+
+::: {.callout-note}
+## Question 2
+
+a) How many numerical features and how many categorical features are there?
+b) Which columns (if any) have missing values? What percentage of observations are missing in each?
+c) Do the ranges in `df.describe()` look physically reasonable? Flag anything surprising.
+:::
+
+---
+
+### Step 3: Create a representative test set and lock it away
+
+```{python}
+#| eval: false
+from sklearn.model_selection import train_test_split
+
+response_var = 'your_response'   # replace
+
+X = df.drop(columns=response_var)
+y = df[response_var]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+print(f'Training   : {X_train.shape[0]} rows')
+print(f'Test       : {X_test.shape[0]} rows')
+```
+
+Lock the test set away. Do not use it again until Step 9.
+
+---
+
+### Step 4: Explore the train data to gain insights
+
+Build your own exploratory analysis on the training set. Explore the following for each variable: 
+
+- Name
+- Type (categorical, int/float, bounded/unbounded, text, structured, etc.)
+- % of missing values
+- Noisiness and type of noise (outliers, rounding errors, etc.)
+- Possibly useful for the task?
+- Type of distribution
+
+
+::: {.callout-note}
+## Question 3
+
+a) Which predictors appear most strongly related to the target? You can use `corr()` to find out.  Describe the direction. 
+b) Are there too many predictors?
+:::
+
+---
+
+### Step 5: Consider Feature Combinations
+
+In this step we consider if there are any combinations of our predictors that could produce a more informative feature. This is not a “one and done” process: as we are developing the model, we may come back and reassess whether there are new features that are worth including. Whenever possible, make sure your decisions are backed up by domain expertise.
+
+
+---
+
+### Step 6: Build Your Preprocessing Pipeline
+
+Identify your numerical and categorical columns, then construct a `ColumnTransformer` + `Pipeline` as shown in the review section above. Fit it on training data only, then apply it to both splits.
+
+```{python}
+#| eval: false
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+
+num_features = [...]  # fill in
+cat_features = [...]  # fill in (empty list if none)
+
+numeric_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy='median')),
+    ('scaler',  StandardScaler())
+])
+
+categorical_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('encoder', OneHotEncoder(sparse_output=False, handle_unknown='ignore'))
+])
+
+preprocessor = ColumnTransformer([
+    ('num', numeric_pipeline, num_features),
+    ('cat', categorical_pipeline, cat_features)
+])
+
+X_train_processed = preprocessor.fit_transform(X_train)
+X_test_processed  = preprocessor.transform(X_test)
+
+print(f'Processed training shape: {X_train_processed.shape}')
+print(f'Processed test shape    : {X_test_processed.shape}')
+```
+
+::: {.callout-note}
+## Question 4
+
+a) How will you handle missing values in your dataset? Justify your choice of imputation strategy.
+b) If you one-hot encode a categorical column with *k* categories, how many new columns does it produce?
+c) How many total columns does your processed feature matrix have? Is this different from the number of columns in the raw data?
+:::
+
+---
+
+### Step 7: Try Candidate Models with Cross-Validation
+
+Select at least three candidate models appropriate for your problem type (regression or classification). Fit each one on `X_train_processed` using 5-fold cross-validation — no need to tune hyperparameters yet, defaults are fine.
+
+
+
+::: {.callout-note}
+## Question 5
+
+a) Which model performs best based on mean CV score?
+:::
+
+---
+
+### Step 8: Go Back to the Drawing Board if Needed
+
+If your results are poor, the problem usually falls into one of two categories: **bad data** or **bad model**.
+
+**Problems with the data:**
+
+| Problem | Description | Potential solutions |
+|:---|:---|:---|
+| **Too small** | More high-quality training data generally improves model performance. | Collect more data. |
+| **Nonrepresentative** | Training data must reflect the cases you want to generalize to. | Improve sampling strategies. |
+| **Poor quality** | Too many outliers, errors, or missing values hide the underlying pattern. | Remove outliers, correct errors, or revisit imputation. |
+| **Irrelevant features** | Noisy features can prevent the model from working well. | Remove low-signal features; engineer more informative ones. |
+
+**Problems with the model:**
+
+| Problem | Description | Potential solutions |
+|:---|:---|:---|
+| **Overfitting** | Model fits noise in training data and generalizes poorly. | Use a simpler model; collect more data; tune hyperparameters to reduce variance. |
+| **Underfitting** | Model is too simple to capture the structure of the data. | Use a more flexible model; add informative features; tune hyperparameters to allow more variance. |
+
+::: {.callout-note}
+## Question 6
+
+Reflect on your CV results from Step 7. Do you suspect a data problem, a model problem, or neither? What would your next step be if performance were unsatisfactory?
+:::
+
+---
+
+### Step 9: Fine-Tune the Best Model
+
+Use `GridSearchCV` directly on your chosen model and the processed training data to search over hyperparameter combinations.
+
+
+::: {.callout-note}
+## Question 7
+
+Report the best hyperparameter combination. Does the tuned model improve over the default hyperparameters from Step 7?
+:::
+
+---
+
+### Step 10: Evaluate on the Test Set
+
+Use the locked-away test set exactly once.
+
+
+::: {.callout-note}
+## Question 8
+
+a) Is the test score close to your best CV score, or is there a large gap? What would a large gap indicate?
+b) Visualize predicted vs. actual values (regression) or a confusion matrix (classification). Describe any patterns you observe.
+:::
