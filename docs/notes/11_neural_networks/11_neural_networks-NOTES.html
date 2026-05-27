@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.33">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Neural Networks – EDS 232 - Machine Learning for Environmental Science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c1fac2584b48ed01fb6e278e36375074.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">EDS 232 - Machine Learning for Environmental Science</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../../notes/week-by-week/week-by-week.html" aria-current="page"> 
+<span class="menu-text">notes</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">assignments</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-assignments">    
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-1.html">
+ <span class="dropdown-text">Assignment 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-2.html">
+ <span class="dropdown-text">Assignment 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-3.html">
+ <span class="dropdown-text">Assignment 3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../assignments/assignment-4.html">
+ <span class="dropdown-text">Assignment 4</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-weekly-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">weekly labs</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-weekly-labs">    
+        <li>
+    <a class="dropdown-item" href="../../lab/lab1.html">
+ <span class="dropdown-text">Lab 01: Introduction to Machine Learning in Python</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab2.html">
+ <span class="dropdown-text">Lab 2: No lab this week!</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab3.html">
+ <span class="dropdown-text">Lab 3: Classification</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab4.html">
+ <span class="dropdown-text">Lab 4: Polynomial Regression and Cross-Validation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab5.html">
+ <span class="dropdown-text">Lab 5: Regularized Regression</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab6.html">
+ <span class="dropdown-text">Lab 6: Decision Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab7.html">
+ <span class="dropdown-text">Lab 7: Ensemble Methods</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab8.html">
+ <span class="dropdown-text">Lab 8: Support Vector Machines</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lab/lab9.html">
+ <span class="dropdown-text">Lab 9: Deep Learning for Bird Species Classification</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-study-guides" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">study guides</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-study-guides">    
+        <li>
+    <a class="dropdown-item" href="../../exams/exam1_study_guide.html">
+ <span class="dropdown-text">Midterm Exam Study Guide</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website">
+ <span class="dropdown-text">Source code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/MEDS-eds-232/EDS-232-course-website/issues">
+ <span class="dropdown-text">Report a bug</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/11_neural_networks/11_neural_networks-NOTES.html">Neural Networks</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+  <div id="quarto-announcement" data-announcement-id="c7b7782e967bb59a093245536bfed491" class="alert alert-primary hidden"><i class="bi bi-hammer quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p>This wesbite is under construction.</p>
+</div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/week-by-week/week-by-week.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Week by week</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/setup/setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What is machine learning?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/2_1_what_is_statistical_learning/2_1_what_is_statistical_learning-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Learning from data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/2_2_assessing_model_accuracy/2_2_assessing_model_accuracy-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Training and test errors, and model flexibility</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Linear regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/3_1_simple_linear_regression/3_1_simple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simple linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/3_2_multiple_linear_regression/3_2_multiple_linear_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple linear regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Classification</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/4_1_classification/4_1_knn_accuracy_metrics-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">KNN and accuracy metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/4_3_logistic_regression/4_3_logistic_regression-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Logistic regression and ROC curves</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Resampling Methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/5_1_cross_validation/5_1_cross_validation-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Cross-validation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Linear Model Selection &amp; Regularization</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linear model selection and regularization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/7_pca/7_pca-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Principal Component Analysis</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Tree-Based Methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/8_tree_based_methods/8_tree_based_methods-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Decision Trees</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/8_2_bagging_random_forest/8_2_bagging_random_forest-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bagging and Random Forests</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Support Vector Machines</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/9_support_vector_machines/9_1_support_vector_classifier/9_1_support_vector_classifier-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support vector classifier</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/9_support_vector_machines/9_2_support_vector_machines/9_2_support_vector_machines-NOTES.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support vector machines</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/10_workflows/workflows_draft_notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">End-to-end ML workflows</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notes/11_neural_networks/11_neural_networks-NOTES.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Neural Networks</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#neural-network-applications" id="toc-neural-network-applications" class="nav-link active" data-scroll-target="#neural-network-applications">Neural network applications</a></li>
+  <li><a href="#single-layer-neural-network" id="toc-single-layer-neural-network" class="nav-link" data-scroll-target="#single-layer-neural-network">Single-layer neural network</a>
+  <ul class="collapse">
+  <li><a href="#the-architecture" id="toc-the-architecture" class="nav-link" data-scroll-target="#the-architecture">The architecture</a></li>
+  <li><a href="#activation-functions" id="toc-activation-functions" class="nav-link" data-scroll-target="#activation-functions">Activation functions</a></li>
+  </ul></li>
+  <li><a href="#multilayer-neural-networks" id="toc-multilayer-neural-networks" class="nav-link" data-scroll-target="#multilayer-neural-networks">Multilayer neural networks</a></li>
+  <li><a href="#convolutional-neural-networks" id="toc-convolutional-neural-networks" class="nav-link" data-scroll-target="#convolutional-neural-networks">Convolutional neural networks</a>
+  <ul class="collapse">
+  <li><a href="#convolution-filters-and-the-convolution-layer" id="toc-convolution-filters-and-the-convolution-layer" class="nav-link" data-scroll-target="#convolution-filters-and-the-convolution-layer">Convolution filters and the convolution layer</a></li>
+  <li><a href="#pooling-layer" id="toc-pooling-layer" class="nav-link" data-scroll-target="#pooling-layer">Pooling layer</a></li>
+  <li><a href="#full-cnn-architecture" id="toc-full-cnn-architecture" class="nav-link" data-scroll-target="#full-cnn-architecture">Full CNN architecture</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Neural Networks</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- [📊 Slides](11_neural_networks-SLIDES.qmd) / [📊 Blank slides](11_neural_networks-SLIDES-BLANK.qmd) -->
+<p>In this lesson we introduce:</p>
+<ul>
+<li>A brief history of neural networks and why they are relevant today</li>
+<li>The structure of a single-layer neural network: input layer, hidden layer, and output layer</li>
+<li>How activations are computed and what activation functions do</li>
+<li>Multilayer (deep) neural networks and how they extend the single-layer idea</li>
+<li>Convolutional neural networks (CNNs) for image data</li>
+</ul>
+<p>These notes are based on chapter 10 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.</p>
+<section id="neural-network-applications" class="level2">
+<h2 class="anchored" data-anchor-id="neural-network-applications">Neural network applications</h2>
+<p>Neural networks appeared appeared early in the history of machine learning (going back to the 1960s) generated significant enthusiasm and research, and then interest in them declined as other methods such as support vector machines and random forests emerged. It was until the 2010s that they remerged: <em>new architectures</em> (particularly deep networks with many hidden layers) and <em>massive datasets</em> that made it feasible to train those architectures. And the <em>deep learning</em> era initiated!</p>
+<p>Deep neural networks are at the heart of many contemporary technological adlvancements:</p>
+<ul>
+<li><p><strong>Large language models</strong>: used for text and code generation through platforms such as ChatGPT and Claude are neural network models with likely trillions of parameters (the exact number and values are clealry an industry secret!).</p></li>
+<li><p><strong>Image recognition</strong>: used to identify objects in images uses neural networks and has applications from autonomous vehicles to medical imaging.</p></li>
+</ul>
+<p>In the realm of environmental applications, these are some that have occurred in the past year (selected for student interest):</p>
+<ul>
+<li><a href="https://www.nature.com/articles/s41467-025-60091-y">Yu et al.&nbsp;2025</a>: Discovering inequities for disadvantaged communities in access and performance of electric vehicle charging stations.</li>
+<li><a href="https://www.nature.com/articles/s41467-022-28770-2">Wunsch et al.&nbsp;2022</a>: Investigating projected groundwater leves due to climate change in Germany.</li>
+<li><a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0230671">Hopkinson et al.&nbsp;2020</a>: Calssifying 3D models of coral reefs into different species and substrates.</li>
+</ul>
+<!-- https://www.nature.com/articles/s41586-023-06825-8 -->
+<p>In this lesson we will take a high-level view at neural networks to understand their structure and basic mechanisms.</p>
+</section>
+<section id="single-layer-neural-network" class="level2">
+<h2 class="anchored" data-anchor-id="single-layer-neural-network">Single-layer neural network</h2>
+<p>Given a vector of features <span class="math inline">\(\mathbf{X} = (X_1, \ldots, X_p)\)</span> and a qualitative response variable <span class="math inline">\(Y\)</span>, our goal is to learn a function <span class="math inline">\(F(\mathbf{X})\)</span> to predict <span class="math inline">\(Y\)</span>: this is the same goal we have had throughout the course.</p>
+<!-- ### A guiding example: harmful algal bloom prediction
+
+In this lesson we use a synthetic dataset representing 400 coastal monitoring stations. For each station we record:
+
+- **`sst`** — sea surface temperature anomaly (°C); positive values indicate warmer-than-average conditions
+- **`chlorophyll`** — chlorophyll-a concentration (mg/m³); high values indicate dense phytoplankton
+- **`bloom`** — whether a harmful algal bloom (HAB) was detected: *bloom* (1) or *no bloom* (0)
+
+The central question is: *can we predict whether a HAB will occur from these oceanographic conditions?*
+
+::: {#cell-hab-data-plot .cell execution_count=2}
+
+::: {.cell-output .cell-output-display}
+![](11_neural_networks-NOTES_files/figure-html/hab-data-plot-output-1.png){#hab-data-plot width=589 height=442 fig-align='center'}
+:::
+:::
+
+
+Notice that the boundary between bloom and no-bloom observations is curved and nonlinear — this is exactly the kind of pattern that neural networks are designed to capture.
+
+ -->
+<section id="the-architecture" class="level3">
+<h3 class="anchored" data-anchor-id="the-architecture">The architecture</h3>
+<p>A <strong>single-layer neural network</strong> (a network with one hidden layer) has three core components:</p>
+<ol type="1">
+<li><p><strong>Input layer.</strong> The <span class="math inline">\(p\)</span> features <span class="math inline">\(X_1, \ldots, X_p\)</span> form the input layer.</p></li>
+<li><p><strong>Hidden layer.</strong> There are <span class="math inline">\(K\)</span> <strong>neurons</strong> in the hidden layer (yellow circles).</p></li>
+<li><p><strong>Output layer.</strong> The final model output for the model (green circle).</p></li>
+</ol>
+<div id="cell-nn-diagram" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="11_neural_networks-NOTES_files/figure-html/nn-diagram-output-1.png" id="nn-diagram" class="quarto-figure quarto-figure-center anchored figure-img" width="710" height="591"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The process is as follows:</p>
+<ol type="1">
+<li><p><strong>Start with the input layer.</strong> An observation <span class="math inline">\((X_1, \ldots, X_p)\)</span> is “put through” the network from left to right.</p></li>
+<li><p><strong>All features go into a neuron and an activation is calculated.</strong> Each neuron takes in all <span class="math inline">\(p\)</span> input features and computes an <strong>activation</strong> <span class="math inline">\(A_k\)</span>. Each activation <span class="math inline">\(A_k\)</span> is computed in two steps:</p>
+<ul>
+<li><p><strong>First</strong>, a linear combination of all input features is formed using a <strong>bias</strong> <span class="math inline">\(w_{k0}\)</span> and <span class="math inline">\(p\)</span> <strong>weights</strong> <span class="math inline">\(w_{k1}, \ldots, w_{kp}\)</span>: <span class="math display">\[w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p.\]</span></p></li>
+<li><p><strong>Second</strong>, this quantity is passed through a nonlinear <strong>activation function</strong> <span class="math inline">\(g(z)\)</span>: <span class="math display">\[A_k = g(w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p).\]</span></p></li>
+</ul>
+<p>So the activation at neuron <span class="math inline">\(k\)</span> depends on a choice of activation function and <span class="math inline">\(p + 1\)</span> parameters: <span class="math inline">\(p\)</span> weights and one bias.</p></li>
+<li><p><strong>The hidden layer computes <span class="math inline">\(K\)</span> activations <span class="math inline">\(A_1, \ldots, A_K\)</span>, one per neuron.</strong></p></li>
+<li><p><strong>Output layer.</strong> The final model is a linear combination of all activations:</p></li>
+</ol>
+<p><span class="math display">\[F(X_1, \ldots, X_p) = \beta_0 + \beta_1 A_1 + \cdots + \beta_K A_K,\]</span></p>
+<p>where <span class="math inline">\(\beta_0, \beta_1, \ldots, \beta_K\)</span> are an additional set of <span class="math inline">\(K + 1\)</span> parameters to be estimated.</p>
+<p>Fitting a neural network means using the training data to find the weights <span class="math inline">\(w_{kj}\)</span> and biases <span class="math inline">\(w_{k0}\)</span> for each neuron and the output coefficients <span class="math inline">\(\beta_0, \beta_1, \ldots, \beta_K\)</span> that minimize a <strong>loss function</strong> which is a measure of the error. The mean squared error loss is used for regression and <a href="https://en.wikipedia.org/wiki/Cross-entropy">cross-entropy</a> is used for classification tasks. The fitting process is out of the scope of what we will cover, but we recommend the textbook chapter 10.7 as further reading on this topic.</p>
+<!-- This is done using **stochastic gradient descent** together with the **backpropagation** algorithm, which efficiently computes gradients of the loss with respect to every parameter in the network. -->
+</section>
+<section id="activation-functions" class="level3">
+<h3 class="anchored" data-anchor-id="activation-functions">Activation functions</h3>
+<p>The activation function introduces the nonlinearity that gives neural networks their modeling power. Without it, the Two of the most common choices are:</p>
+<ul>
+<li><strong>Sigmoid</strong>: <span class="math inline">\(\displaystyle g(z) = \frac{e^z}{1 + e^z}\)</span>: squashes any input to the interval <span class="math inline">\((0, 1)\)</span>.</li>
+<li><strong>ReLU</strong> (Rectified Linear Unit): <span class="math inline">\(g(z) = \max(0, z)\)</span>: outputs <span class="math inline">\(0\)</span> for negative inputs and the input itself for non-negative inputs.</li>
+</ul>
+<div id="cell-activation-functions" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="11_neural_networks-NOTES_files/figure-html/activation-functions-output-1.png" id="activation-functions" class="quarto-figure quarto-figure-center anchored figure-img" width="667" height="409"></p>
+</figure>
+</div>
+</div>
+</div>
+<!-- 
+:::{.callout-tip}
+## Check-in
+What would happen to a neural network if we used the *identity* activation $g(z) = z$ (a linear function) throughout the network?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+If every activation were a linear function of its inputs, then the composition of all layers would also be linear. No matter how many hidden layers we added, the network would be equivalent to a single linear model — we would gain no additional modeling power. The activation function is precisely what gives neural networks their capacity to represent nonlinear relationships.
+::: -->
+<!-- 
+### Counting parameters
+
+Before fitting, it is useful to know the total number of parameters a network has.
+
+For a single-layer network with $p$ input features and $K$ hidden neurons:
+
+- **Hidden layer**: each of the $K$ neurons has $p$ weights + 1 bias $= p + 1$ parameters. Total: $K(p + 1)$.
+- **Output layer**: $K$ weights (one per activation) + 1 intercept ($\beta_0$). Total: $K + 1$.
+
+$$\text{Total parameters} = K(p + 1) + (K + 1).$$
+
+:::{.callout-tip}
+## Check-in
+How many parameters does a single-layer neural network with **4 input features** and **5 hidden neurons** have?
+
+1. How many parameters are in the hidden layer?
+2. How many parameters are in the output layer?
+3. What is the total?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+1. Hidden layer: $K(p + 1) = 5 \times (4 + 1) = 25$ parameters.
+2. Output layer: $K + 1 = 5 + 1 = 6$ parameters.
+3. Total: $25 + 6 = \mathbf{31}$ parameters.
+:::
+
+Below we fit a single-layer neural network with 5 hidden neurons to our HAB dataset using ReLU activations and visualize the resulting decision boundary on the test data.
+
+
+
+::: {#cell-single-layer-plot .cell execution_count=6}
+
+::: {.cell-output .cell-output-display}
+![](11_neural_networks-NOTES_files/figure-html/single-layer-plot-output-1.png){#single-layer-plot width=688 height=441 fig-align='center'}
+:::
+:::
+
+
+-->
+</section>
+</section>
+<section id="multilayer-neural-networks" class="level2">
+<h2 class="anchored" data-anchor-id="multilayer-neural-networks">Multilayer neural networks</h2>
+<p>In practice, neural networks typically have more than one hidden layer and many neurons per layer (often hundreds or more). This is what makes them <em>deep</em> neural networks.</p>
+<p>The input layer is still the same: the features <span class="math inline">\(X_1, \ldots, X_p\)</span>.</p>
+<p>The <strong>first hidden layer</strong> has <span class="math inline">\(K_1\)</span> neurons. The <span class="math inline">\(k\)</span>-th neuron in the first layer receives all <span class="math inline">\(p\)</span> inputs and computes an activation</p>
+<p><span class="math display">\[\begin{aligned}
+A_k^{(1)} &amp;= g\!\left(w_{k0}^{(1)} + w_{k1}^{(1)} X_1 + \cdots + w_{kp}^{(1)} X_p\right) \\
+           &amp;= g\!\left(w_{k0}^{(1)} + \sum_{j=1}^{p} w_{kj}^{(1)} X_j\right),
+\end{aligned}\]</span></p>
+<p>where <span class="math inline">\(w_{k0}^{(1)}\)</span> and <span class="math inline">\(w_{kj}^{(1)}\)</span> are, respectively, the bias and weights for the <span class="math inline">\(k\)</span>-th neuron in the first layer.</p>
+<p>The <strong>second hidden layer</strong> now takes the <span class="math inline">\(K_1\)</span> activations from the first hidden layer as <em>its</em> inputs and computes new activations:</p>
+<p><span class="math display">\[\begin{aligned}
+A_k^{(2)} &amp;= g\!\left(w_{k0}^{(2)} + w_{k1}^{(2)} A_1^{(1)} + \cdots + w_{kK_1}^{(2)} A_{K_1}^{(1)}\right) \\
+           &amp;= g\!\left(w_{k0}^{(2)} + \sum_{j=1}^{K_1} w_{kj}^{(2)} A_j^{(1)}\right).
+\end{aligned}\]</span></p>
+<p>This process continues layer by layer. The <strong>output layer</strong> is a final linear combination of the last hidden layer’s activations.</p>
+<div id="cell-multilayer-nn-diagram" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="11_neural_networks-NOTES_files/figure-html/multilayer-nn-diagram-output-1.png" id="multilayer-nn-diagram" class="quarto-figure quarto-figure-center anchored figure-img" width="869" height="631"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As the network grows deeper, it can represent increasingly complex functions. Early layers tend to capture simple, low-level patterns; deeper layers combine them into progressively abstract representations.</p>
+<p>To build an intuitive understanding of how a deep network works, watch <a href="https://www.youtube.com/watch?v=aircAruvnKk">this video by 3Blue1Brown</a>. As you watch, try to answer the following questions:</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Check-in: 3Blue1Brown video
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>How does the network represent a handwritten digit as an input?</li>
+<li>What does each neuron in a hidden layer conceptually “detect”?</li>
+<li>Why can depth (more layers) capture more complex patterns than width (more neurons in a single layer)?</li>
+</ol>
+</div>
+</div>
+<p>The code below fits a two-hidden-layer network on our HAB dataset and compares its decision boundary to the single-layer model.</p>
+<!-- 
+
+
+
+::: {#cell-multilayer-comparison .cell execution_count=9}
+
+::: {.cell-output .cell-output-display}
+![](11_neural_networks-NOTES_files/figure-html/multilayer-comparison-output-1.png){#multilayer-comparison width=869 height=438 fig-align='center'}
+:::
+:::
+
+
+-->
+<!-- 
+:::{.callout-tip}
+## Check-in
+Compare the two decision boundaries above. What do you notice about the complexity of the boundary as the network gets deeper? What is the potential downside of adding more capacity?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+The two-layer network produces a more complex, curved boundary that can capture finer structure in the data. The single-layer network's boundary is simpler and may miss some patterns. Adding more capacity (layers + neurons) allows the network to fit more intricate decision surfaces — but it also increases the risk of **overfitting**, especially when training data are limited. Regularization techniques (dropout, weight decay) and cross-validation are used to manage this tradeoff.
+::: 
+-->
+</section>
+<section id="convolutional-neural-networks" class="level2">
+<h2 class="anchored" data-anchor-id="convolutional-neural-networks">Convolutional neural networks</h2>
+<p>The neural networks we have studied so far treat the input as a flat vector of features. This works well for tabular data, but it discards important <strong>spatial structure</strong> when the input is an image. Every pixel is treated independently, with no awareness of which pixels are neighbors.</p>
+<p><strong>Convolutional Neural Networks (CNNs)</strong> are architectures that have great performance in image data. Intuitively, rather than connecting every input directly to every neuron, CNNs perform additional work to identify <strong>low-level features</strong> within the image — small edges, patches of color, and textures. These low-level features are then combined into <strong>higher-level features</strong> (shapes, objects, patterns) in later layers. The presence or absence of these high-level features ultimately determines the predicted class.</p>
+<section id="convolution-filters-and-the-convolution-layer" class="level3">
+<h3 class="anchored" data-anchor-id="convolution-filters-and-the-convolution-layer">Convolution filters and the convolution layer</h3>
+<p>A <strong>convolution filter</strong> (also called a <em>kernel</em>) is a small matrix that acts as a feature detector. We slide this filter across the image, computing a dot product between the filter and each overlapping patch of pixels. The result highlights regions of the image that closely resemble the filter.</p>
+<div id="cell-convolution-example" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="11_neural_networks-NOTES_files/figure-html/convolution-example-output-1.png" id="convolution-example" class="quarto-figure quarto-figure-center anchored figure-img" width="704" height="304"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The feature map highlights regions in the input image that most closely resemble the filter — higher values (darker green) indicate a stronger match. A <strong>convolution layer</strong> applies many such filters simultaneously, each one detecting a different low-level feature. Crucially, <strong>the filters are learned from the training data</strong> rather than defined by hand, this means the network discovers the most useful features for the task automatically during training.</p>
+</section>
+<section id="pooling-layer" class="level3">
+<h3 class="anchored" data-anchor-id="pooling-layer">Pooling layer</h3>
+<p>A <strong>pooling layer</strong> reduces the spatial dimensions of the feature maps, making the representation more compact and less sensitive to small shifts in the position of a feature. The most common approach is <strong>max pooling</strong>: the feature map is divided into non-overlapping blocks (typically 2×2), and only the maximum value within each block is retained.</p>
+<div id="cell-max-pooling-example" class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="11_neural_networks-NOTES_files/figure-html/max-pooling-example-output-1.png" id="max-pooling-example" class="quarto-figure quarto-figure-center anchored figure-img" width="430" height="276"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="full-cnn-architecture" class="level3">
+<h3 class="anchored" data-anchor-id="full-cnn-architecture">Full CNN architecture</h3>
+<p>A complete CNN typically consists of:</p>
+<ol type="1">
+<li><strong>Convolution layers</strong>: learn low-level features (edges, textures, patches of color).</li>
+<li><strong>Pooling layers</strong>: progressively reduce spatial dimensions.</li>
+<li><strong>Fully connected layers</strong>: standard neural network layers that combine the high-level features to produce the final prediction.</li>
+<li><strong>Flattening</strong>: converts the final feature maps into a flat vector.</li>
+</ol>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="CNN-edited.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Adapted from <a href="https://www.analyticsvidhya.com/blog/2020/10/what-is-the-convolutional-neural-network-architecture/">What is the Convolutional Neural Network Architecture?</a></figcaption>
+</figure>
+</div>
+<!-- :::{.callout-tip}
+## Check-in
+1. Why does a CNN use *learned* filters rather than hand-crafted ones?
+2. What role does the pooling layer play in making a CNN more robust to small shifts in the position of an object in the image?
+3. How does the convolution layer differ from a standard fully connected hidden layer?
+:::
+:::{.callout-tip collapse="true"}
+## Discussion
+1. Learned filters adapt to the specific patterns that matter for the training task. The network can discover features that a human might not think to specify — especially in high-dimensional image data with complex structure.
+2. Max pooling takes the maximum value in each block. If a feature shifts slightly, it may still fall within the same pooling block and yield the same pooled value. This makes the representation approximately **translation-invariant**.
+3. In a fully connected layer, each neuron receives *all* inputs and has a separate weight for each one. In a convolution layer, a single small filter is shared (slid) across all positions of the image. This **weight sharing** drastically reduces the number of parameters and exploits the fact that useful features (edges, textures) can appear anywhere in an image.
+::: -->
+
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-islp_2023" class="csl-entry" role="listitem">
+James, Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani, and Jonathan E. Taylor. 2023. <em>An Introduction to Statistical Learning: With Applications in <span>Python</span></em>. Springer Texts in Statistics. Cham: Springer.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>This work is licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License</a></p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This website is built with <a href="https://quarto.org/">Quarto</a> and <a href="https://github.com/MEDS-eds-220/MEDS-eds-220-course">GitHub pages</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
