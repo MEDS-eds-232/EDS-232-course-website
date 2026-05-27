@@ -76,28 +76,30 @@ In this lesson we introduce:
 
 These notes are based on chapter 10 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.
 
-## A brief history
+## Neural network applications
 
-Neural networks have a long history in machine learning:
+Neural networks appeared appeared early in the history of machine learning (going back to the 1960s) generated significant enthusiasm and research, and then interest in them declined as other methods such as support vector machines and random forests emerged. 
+It was until the 2010s that they remerged: *new architectures* (particularly deep networks with many hidden layers) and *massive datasets* that made it feasible to train those architectures. And the *deep learning* era initiated!
 
-- **Early excitement**: Neural networks appeared early in the history of machine learning, generating significant enthusiasm and active research.
-- **Decline**: Over time, the methodology became overshadowed. Support Vector Machines, random forests, and other methods often outperformed neural networks — especially on structured tabular data.
-- **The 2010s revival**: Neural networks reemerged in the 2010s, fueled by two forces: *new architectures* (particularly deep networks with many hidden layers) and *massive datasets* that made it feasible to train those architectures. This resurgence is what we now call **deep learning**.
+Deep neural networks are at the heart of many contemporary technological adlvancements:
 
-## Environmental applications
+- **Large language models**: used for text and code generation through platforms such as ChatGPT and Claude are neural network models with likely trillions of parameters (the exact number and values are clealry an industry secret!).
 
-Deep learning and neural networks have found many high-impact applications in environmental science, including:
+- **Image recognition**: used to identify objects in images uses neural networks and has applications from autonomous vehicles to medical imaging.
 
-- **Species distribution modeling**: learning complex, nonlinear relationships between environmental conditions and species occurrence
-- **Remote sensing and land cover classification**: identifying vegetation types, urban areas, and deforestation patterns in satellite imagery
-- **Climate downscaling**: generating fine-resolution climate projections from coarser global climate models
-- **Ecological forecasting**: predicting population dynamics, harmful algal blooms, or wildfire risk from historical sensor data
+In the realm of environmental applications, these are some that have occurred in the past year (selected for student interest):
+
+- [Yu et al. 2025](https://www.nature.com/articles/s41467-025-60091-y): Discovering inequities for disadvantaged communities in access and performance of electric vehicle charging stations.
+- [Wunsch et al. 2022](https://www.nature.com/articles/s41467-022-28770-2): Investigating projected groundwater leves due to climate change in Germany.
+- [Hopkinson et al. 2020](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0230671): Calssifying 3D models of coral reefs into different species and substrates.
+
+In this lesson we will take a high-level view at neural networks to understand their structure and basic mechanisms.
 
 ## Single-layer neural network
 
-We now develop the core idea of a neural network. Given a vector of features $\mathbf{X} = (X_1, \ldots, X_p)$ and a response variable $Y$, our goal is to learn a function $F(\mathbf{X})$ to predict $Y$ — the same goal we have had throughout the course.
+Given a vector of features $\mathbf{X} = (X_1, \ldots, X_p)$ and a qualitative response variable $Y$, our goal is to learn a function $F(\mathbf{X})$ to predict $Y$: this is the same goal we have had throughout the course.
 
-### A guiding example: harmful algal bloom prediction
+<!-- ### A guiding example: harmful algal bloom prediction
 
 In this lesson we use a synthetic dataset representing 400 coastal monitoring stations. For each station we record:
 
@@ -136,9 +138,18 @@ plt.close()
 
 Notice that the boundary between bloom and no-bloom observations is curved and nonlinear — this is exactly the kind of pattern that neural networks are designed to capture.
 
+ -->
+
 ### The architecture
 
-A **single-layer neural network** (a network with one hidden layer) processes the input features through an intermediate set of artificial neurons before producing a final prediction. Figure 10.1 in ISLP shows the architecture; the diagram below recreates its essential structure.
+A **single-layer neural network** (a network with one hidden layer) has three core components: 
+
+1. **Input layer.** The $p$ features $X_1, \ldots, X_p$ form the input layer. 
+
+2. **Hidden layer.** There are $K$ **neurons** in the hidden layer (yellow circles).
+
+3. **Output layer.** The final model output for the model (green circle).
+
 
 ```{python}
 #| label: nn-diagram
@@ -195,9 +206,20 @@ plt.close()
 
 The process is as follows:
 
-1. **Input layer.** The $p$ features $X_1, \ldots, X_p$ form the input layer. An observation $(X_1, \ldots, X_p)$ is "put through" the network from left to right.
+1. **Start with the input layer.** An observation $(X_1, \ldots, X_p)$ is "put through" the network from left to right.
 
-2. **Hidden layer.** There are $K$ neurons in the hidden layer. Each neuron $k$ takes in all $p$ input features and computes an **activation** $A_k$. We will compute $K$ activations $A_1, \ldots, A_K$.
+2. **All features go into a neuron and an activation is calculated.** Each neuron takes in all $p$ input features and computes an **activation** $A_k$. Each activation $A_k$ is computed in two steps:
+
+    - **First**, a linear combination of all input features is formed using a **bias** $w_{k0}$ and $p$ **weights** $w_{k1}, \ldots, w_{kp}$:
+    $$w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p.$$
+
+
+    - **Second**, this quantity is passed through a nonlinear **activation function** $g(z)$:
+        $$A_k = g(w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p).$$
+
+    So the activation at neuron $k$ depends on a choice of activation function and $p + 1$ parameters: $p$ weights and one bias.
+
+3. **The hidden layer computes $K$ activations $A_1, \ldots, A_K$, one per neuron.**
 
 3. **Output layer.** The final model is a linear combination of all activations:
 
@@ -205,26 +227,19 @@ $$F(X_1, \ldots, X_p) = \beta_0 + \beta_1 A_1 + \cdots + \beta_K A_K,$$
 
 where $\beta_0, \beta_1, \ldots, \beta_K$ are an additional set of $K + 1$ parameters to be estimated.
 
-### Computing the activations
+Fitting a neural network means using the training data to find the weights $w_{kj}$ and biases $w_{k0}$ for each neuron and the output coefficients $\beta_0, \beta_1, \ldots, \beta_K$ that minimize a loss function (e.g., cross-entropy for classification or mean squared error for regression). The fitting process is out of the scope of what we will cover, but we recommend the textbook chapter 10.7 as further reading on this topic. 
 
-Each activation $A_k$ is computed in two steps.
 
-**First**, a linear combination of all input features is formed using a **bias** $w_{k0}^{(1)}$ and **weights** $w_{k1}^{(1)}, \ldots, w_{kp}^{(1)}$ — one weight per feature:
+<!-- This is done using **stochastic gradient descent** together with the **backpropagation** algorithm, which efficiently computes gradients of the loss with respect to every parameter in the network. -->
 
-$$z_k = w_{k0}^{(1)} + w_{k1}^{(1)} X_1 + \cdots + w_{kp}^{(1)} X_p.$$
 
-**Second**, $z_k$ is passed through a nonlinear **activation function** $g(\cdot)$:
-
-$$A_k = g(z_k) = g\!\left(w_{k0}^{(1)} + \sum_{j=1}^{p} w_{kj}^{(1)} X_j\right).$$
-
-So the activation at neuron $k$ depends on $p + 1$ parameters: $p$ weights and one bias.
 
 ### Activation functions
 
-The activation function introduces the nonlinearity that gives neural networks their modeling power. Without it, the entire network would collapse to a linear model regardless of depth. Two of the most common choices are:
+The activation function introduces the nonlinearity that gives neural networks their modeling power. Without it, the Two of the most common choices are:
 
-- **Sigmoid**: $\displaystyle g(z) = \frac{e^z}{1 + e^z}$ — squashes any input to the interval $(0, 1)$.
-- **ReLU** (Rectified Linear Unit): $g(z) = \max(0, z)$ — outputs $0$ for negative inputs and the input itself for non-negative inputs.
+- **Sigmoid**: $\displaystyle g(z) = \frac{e^z}{1 + e^z}$: squashes any input to the interval $(0, 1)$.
+- **ReLU** (Rectified Linear Unit): $g(z) = \max(0, z)$: outputs $0$ for negative inputs and the input itself for non-negative inputs.
 
 ```{python}
 #| label: activation-functions
@@ -258,7 +273,7 @@ plt.tight_layout()
 plt.show()
 plt.close()
 ```
-
+<!-- 
 :::{.callout-tip}
 ## Check-in
 What would happen to a neural network if we used the *identity* activation $g(z) = z$ (a linear function) throughout the network?
@@ -266,12 +281,9 @@ What would happen to a neural network if we used the *identity* activation $g(z)
 :::{.callout-tip collapse="true"}
 ## Discussion
 If every activation were a linear function of its inputs, then the composition of all layers would also be linear. No matter how many hidden layers we added, the network would be equivalent to a single linear model — we would gain no additional modeling power. The activation function is precisely what gives neural networks their capacity to represent nonlinear relationships.
-:::
+::: -->
 
-### Fitting a neural network
-
-Fitting a neural network means estimating all the weights $w_{kj}^{(1)}$ and biases $w_{k0}^{(1)}$ for each hidden neuron, as well as the output coefficients $\beta_0, \beta_1, \ldots, \beta_K$, from the training data. We minimize a loss function (e.g., cross-entropy for classification or mean squared error for regression) by adjusting all parameters simultaneously. This is done using **stochastic gradient descent** together with the **backpropagation** algorithm, which efficiently computes gradients of the loss with respect to every parameter in the network.
-
+<!-- 
 ### Counting parameters
 
 Before fitting, it is useful to know the total number of parameters a network has.
@@ -335,7 +347,9 @@ fig.colorbar(cf, ax=ax, label='P(bloom)', shrink=0.8)
 plt.tight_layout()
 plt.show()
 plt.close()
-```
+``` 
+
+-->
 
 ## Multilayer neural networks
 
