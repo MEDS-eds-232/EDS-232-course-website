@@ -115,10 +115,9 @@ for i in range(2):
 
 <br>
 
-- A brief history of neural networks and why they are relevant today
-- The structure of a single-layer neural network: input layer, hidden layer, and output layer
-- How activations are computed and what activation functions do
-- Multilayer (deep) neural networks and how they extend the single-layer idea
+- The structure of a single-layer neural network
+- How activations are computed (weights, biases, and activation functions)
+- How multilayer (deep) neural networks work
 - Convolutional neural networks (CNNs) for image data
 
 ---
@@ -141,7 +140,7 @@ for i in range(2):
 
 . . .
 
-- **Decline**: interest waned as other methods — SVMs, random forests — outperformed them, especially on structured tabular data
+- **Decline**: interest faded as other methods (SVMs, random forest)— outperformed them on structured tasks.
 
 . . .
 
@@ -149,10 +148,8 @@ for i in range(2):
     - *New architectures* (deep networks with many hidden layers)
     - *Massive datasets* that made training those architectures feasible
 
-. . .
-
 ::: {.center-text .teal-text .body-text-m}
-This resurgence is what we now call **deep learning**
+This comeback is what brought up the field of **deep learning**
 :::
 
 ---
@@ -165,23 +162,19 @@ This resurgence is what we now call **deep learning**
 
 Deep neural networks are at the heart of many contemporary technological advancements:
 
-<br>
-
-- **Large language models**: used for text and code generation (ChatGPT, Claude) — neural networks with likely *trillions* of parameters
+- **Large language models**: used for text and code generation (ChatGPT, Claude). These are neural networks with likely *trillions* of parameters
 
 - **Image recognition**: identifying objects in images, with applications from autonomous vehicles to medical imaging
 
 . . .
 
-<br>
-
 ::: {.body-text-m}
-In the realm of **environmental applications**:
+Myriad of **environmental applications**: anywhere regression, classification, text analysis, or image processing can be applied.
+:::
 
 - [Yu et al. 2025](https://www.nature.com/articles/s41467-025-60091-y): inequities in EV charging station access for disadvantaged communities
-- [Wunsch et al. 2022](https://www.nature.com/articles/s41467-022-28770-2): projected groundwater levels under climate change
+- [Wunsch et al. 2022](https://www.nature.com/articles/s41467-022-28770-2): projected groundwater levels under climate change in Germany
 - [Hopkinson et al. 2020](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0230671): classifying coral reef 3D models into species and substrates
-:::
 
 ---
 
@@ -195,115 +188,119 @@ In the realm of **environmental applications**:
 
 ## {#nn-setup data-menu-title="Setup"}
 
-[Setup]{.slide-title}
+[Single-layer Neural Network]{.slide-title}
 
 <hr>
 
-Given a vector of features $\mathbf{X} = (X_1, \ldots, X_p)$ and a response variable $Y$, our goal is to learn a function $F(\mathbf{X})$ to predict $Y$ — same goal as throughout the course.
+Given a vector of features $\mathbf{X} = (X_1, \ldots, X_p)$ and a response variable $Y$, our goal is to learn a function $F(\mathbf{X})$ to predict $Y$: same goal as throughout the course.
+
+For now, $Y$ is quantitative, so we will think first about the regression scenario. 
 
 . . .
 
-<br>
 
+:::: {.columns}
+
+::: {.column width="40%"}
+
+::: {.body-text-s}
 A **single-layer neural network** (a network with one hidden layer) has three core components:
 
-<br>
 
-::: {.body-text-m}
-1. **Input layer** — the $p$ features $X_1, \ldots, X_p$
+1. **Input layer**: the $p$ features $X_1, \ldots, X_p$ form the input layer
 
-2. **Hidden layer** — $K$ **neurons**, each computing an **activation**
+2. **Hidden layer**: made up of $K$ **neurons**
 
-3. **Output layer** — the final model output $F(\mathbf{X})$
+3. **Output layer**: the final model output $F(\mathbf{X})$
+:::
 :::
 
----
 
-## {#nn-diagram-slide data-menu-title="Architecture diagram"}
+::: {.column width="60%"}
+![](one-layer-nn.png)
+:::
 
-[Architecture]{.slide-title}
 
-<hr>
+:::
 
-```{python}
-#| label: nn-diagram-slides
-#| echo: false
-#| fig-align: center
-#| out-width: "80%"
-
-fig, ax = plt.subplots(figsize=(fig_size_x * 1.1, fig_size_y * 1.5))
-ax.set_xlim(0, 10)
-ax.set_ylim(-0.5, 8.5)
-ax.axis('off')
-
-x_in, x_hid, x_out = 1.5, 5.0, 8.5
-in_ys  = np.linspace(1.5, 6.5, 4)
-hid_ys = np.linspace(0.8, 7.2, 5)
-out_y  = 4.0
-r = 0.45
-
-for iy in in_ys:
-    for hy in hid_ys:
-        ax.annotate('', xy=(x_hid - r, hy), xytext=(x_in + r, iy),
-                    arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
-for hy in hid_ys:
-    ax.annotate('', xy=(x_out - r, out_y), xytext=(x_hid + r, hy),
-                arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
-
-for i, iy in enumerate(in_ys):
-    ax.add_patch(plt.Circle((x_in, iy), r, color='#4A90D9', zorder=3))
-    ax.text(x_in - 0.75, iy, f'$X_{i+1}$', ha='right', va='center', fontsize=11)
-
-for k, hy in enumerate(hid_ys):
-    ax.add_patch(plt.Circle((x_hid, hy), r, color='#E8A838', zorder=3))
-    ax.text(x_hid, hy, f'$A_{k+1}$', ha='center', va='center', fontsize=9,
-            color='white', fontweight='bold')
-
-ax.add_patch(plt.Circle((x_out, out_y), r, color='#5BAD6F', zorder=3))
-ax.text(x_out + 0.75, out_y, r'$F(\mathbf{X})$', ha='left', va='center', fontsize=11)
-
-ax.text(x_in,  -0.3, 'Input\nlayer',  ha='center', va='top', fontsize=10, color='#4A90D9')
-ax.text(x_hid, -0.3, 'Hidden\nlayer', ha='center', va='top', fontsize=10, color='#E8A838')
-ax.text(x_out, -0.3, 'Output\nlayer', ha='center', va='top', fontsize=10, color='#5BAD6F')
-
-ax.set_title('Single-layer neural network (p = 4 inputs, K = 5 hidden neurons)',
-             fontsize=11, pad=10)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
 
 ---
 
 ## {#nn-process data-menu-title="The process"}
 
-[The process]{.slide-title}
+[The prediction process]{.slide-title}
 
 <hr>
 
-::: {.body-text-m}
+**Step 1: Input layer.** An observation $(X_1, \ldots, X_p)$ is fed through the network left to right.
 
-**Step 1 — Input layer.** An observation $(X_1, \ldots, X_p)$ is fed through the network left to right.
 
-. . .
-
-**Step 2 — Hidden layer.** Each neuron $k$ computes an activation $A_k$ in two steps:
+**Step 2: Hidden layer.** Each neuron computes an activation $A_k$ in two steps:
 
 - Form a linear combination using a **bias** $w_{k0}$ and **weights** $w_{k1}, \ldots, w_{kp}$:
 $$w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p$$
 
-- Pass through a nonlinear **activation function** $g(z)$:
+
+- Pass through an **activation function** $g(z)$:
+
 $$A_k = g(w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p)$$
 
-Each neuron has $p + 1$ parameters ($p$ weights + 1 bias).
 
-. . .
-
-**Step 3 — Output layer.** Final prediction is a linear combination of all $K$ activations:
+**Step 3: Output layer.** Final prediction is a linear combination of all $K$ activations:
 
 $$F(X_1, \ldots, X_p) = \beta_0 + \beta_1 A_1 + \cdots + \beta_K A_K$$
 
-:::
+---
+
+## {#nn-process-step1 data-menu-title="The process"}
+
+[Step 1: Input layer]{.slide-title}
+
+<hr>
+
+An observation $(X_1, \ldots, X_p)$ is fed through the network left to right.
+
+. 
+
+![](one-layer-nn-1.jpg)
+
+---
+
+## {#nn-process-step2 data-menu-title="The process"}
+
+[Step 2: Activations at each neuron]{.slide-title}
+
+<hr>
+
+Form a linear combination of the features $X_i$ using a **bias** and **weights**, and pass it through an **activation function**.
+
+![](one-layer-nn-2.jpg)
+
+---
+
+## {#nn-process-step25 data-menu-title="The process"}
+
+[Step 2: Activations at each neuron]{.slide-title}
+
+<hr>
+
+Form a linear combination of the features $X_i$ using a **bias** and **weights**, and pass it through an **activation function**.
+
+![](one-layer-nn-3.jpg)
+
+---
+
+## {#nn-process-step3 data-menu-title="The process"}
+
+[Step 3: Output layer]{.slide-title}
+
+<hr>
+
+Final prediction is a linear combination of all $K$ activations.
+
+. 
+
+![](one-layer-nn.png)
 
 ---
 
@@ -328,7 +325,7 @@ We minimize a **loss function** that measures prediction error:
 
 <br>
 
-This is done via **stochastic gradient descent** + **backpropagation**, which efficiently computes gradients of the loss with respect to every parameter.
+This is done via **stochastic gradient descent** + **backpropagation**. We'll treat this as a black box.
 
 ::: {.body-text-s .center-text}
 *(See ISLP §10.7 for details on the fitting algorithm)*
