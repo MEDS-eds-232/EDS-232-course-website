@@ -141,10 +141,9 @@
 <hr>
 <p><br></p>
 <ul>
-<li>A brief history of neural networks and why they are relevant today</li>
-<li>The structure of a single-layer neural network: input layer, hidden layer, and output layer</li>
-<li>How activations are computed and what activation functions do</li>
-<li>Multilayer (deep) neural networks and how they extend the single-layer idea</li>
+<li>The structure of a single-layer neural network</li>
+<li>How activations are computed (weights, biases, and activation functions)</li>
+<li>How multilayer (deep) neural networks work</li>
 <li>Convolutional neural networks (CNNs) for image data</li>
 </ul>
 </section>
@@ -165,7 +164,7 @@ Neural network applications
 </ul>
 <div class="fragment">
 <ul>
-<li><strong>Decline</strong>: interest waned as other methods — SVMs, random forests — outperformed them, especially on structured tabular data</li>
+<li><strong>Decline</strong>: interest faded as other methods (SVMs, random forest)— outperformed them on structured tasks.</li>
 </ul>
 </div>
 <div class="fragment">
@@ -176,10 +175,8 @@ Neural network applications
 <li><em>Massive datasets</em> that made training those architectures feasible</li>
 </ul></li>
 </ul>
-</div>
-<div class="fragment">
 <div class="center-text teal-text body-text-m">
-<p>This resurgence is what we now call <strong>deep learning</strong></p>
+<p>This comeback is what brought up the field of <strong>deep learning</strong></p>
 </div>
 </div>
 </section>
@@ -188,21 +185,19 @@ Neural network applications
 <p><span class="slide-title">Applications</span></p>
 <hr>
 <p>Deep neural networks are at the heart of many contemporary technological advancements:</p>
-<p><br></p>
 <ul>
-<li><p><strong>Large language models</strong>: used for text and code generation (ChatGPT, Claude) — neural networks with likely <em>trillions</em> of parameters</p></li>
+<li><p><strong>Large language models</strong>: used for text and code generation (ChatGPT, Claude). These are neural networks with likely <em>trillions</em> of parameters</p></li>
 <li><p><strong>Image recognition</strong>: identifying objects in images, with applications from autonomous vehicles to medical imaging</p></li>
 </ul>
 <div class="fragment">
-<p><br></p>
 <div class="body-text-m">
-<p>In the realm of <strong>environmental applications</strong>:</p>
+<p>Many <strong>environmental applications</strong>: anywhere regression, classification, text analysis, or image processing can be applied.</p>
+</div>
 <ul>
 <li><a href="https://www.nature.com/articles/s41467-025-60091-y">Yu et al.&nbsp;2025</a>: inequities in EV charging station access for disadvantaged communities</li>
-<li><a href="https://www.nature.com/articles/s41467-022-28770-2">Wunsch et al.&nbsp;2022</a>: projected groundwater levels under climate change</li>
+<li><a href="https://www.nature.com/articles/s41467-022-28770-2">Wunsch et al.&nbsp;2022</a>: projected groundwater levels under climate change in Germany</li>
 <li><a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0230671">Hopkinson et al.&nbsp;2020</a>: classifying coral reef 3D models into species and substrates</li>
 </ul>
-</div>
 </div>
 </section>
 <section id="section-single" class="slide level2" data-menu-title="# Single-layer neural network #" data-background="#047C90">
@@ -215,114 +210,110 @@ Single-layer neural network
 </section>
 <section id="nn-setup" class="slide level2" data-menu-title="Setup">
 <h2></h2>
-<p><span class="slide-title">Setup</span></p>
+<p><span class="slide-title">Single-layer Neural Network</span></p>
 <hr>
-<p>Given a vector of features <span class="math inline">\(\mathbf{X} = (X_1, \ldots, X_p)\)</span> and a response variable <span class="math inline">\(Y\)</span>, our goal is to learn a function <span class="math inline">\(F(\mathbf{X})\)</span> to predict <span class="math inline">\(Y\)</span> — same goal as throughout the course.</p>
+<p>Given a vector of features <span class="math inline">\(\mathbf{X} = (X_1, \ldots, X_p)\)</span> and a response variable <span class="math inline">\(Y\)</span>, our goal is to learn a function <span class="math inline">\(F(\mathbf{X})\)</span> to predict <span class="math inline">\(Y\)</span>: same goal as throughout the course.</p>
+<p>For now, <span class="math inline">\(Y\)</span> is quantitative, so we will think first about the regression scenario.</p>
 <div class="fragment">
-<p><br></p>
+<div class="columns">
+<div class="column" style="width:40%;">
+<div class="body-text-s">
 <p>A <strong>single-layer neural network</strong> (a network with one hidden layer) has three core components:</p>
-<p><br></p>
-<div class="body-text-m">
 <ol type="1">
-<li><p><strong>Input layer</strong> — the <span class="math inline">\(p\)</span> features <span class="math inline">\(X_1, \ldots, X_p\)</span></p></li>
-<li><p><strong>Hidden layer</strong> — <span class="math inline">\(K\)</span> <strong>neurons</strong>, each computing an <strong>activation</strong></p></li>
-<li><p><strong>Output layer</strong> — the final model output <span class="math inline">\(F(\mathbf{X})\)</span></p></li>
+<li><p><strong>Input layer</strong>: the <span class="math inline">\(p\)</span> features <span class="math inline">\(X_1, \ldots, X_p\)</span> form the input layer</p></li>
+<li><p><strong>Hidden layer</strong>: made up of <span class="math inline">\(K\)</span> <strong>neurons</strong></p></li>
+<li><p><strong>Output layer</strong>: the final model output <span class="math inline">\(F(\mathbf{X})\)</span></p></li>
 </ol>
+<p>In the diagram, <span class="math inline">\(p=4\)</span> and <span class="math inline">\(K=5\)</span>.</p>
 </div>
-</div>
-</section>
-<section id="nn-diagram-slide" class="slide level2" data-menu-title="Architecture diagram">
-<h2></h2>
-<p><span class="slide-title">Architecture</span></p>
-<hr>
-<div id="cell-nn-diagram-slides" class="cell" data-execution_count="2">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="11_neural_networks-SLIDES_files/figure-revealjs/nn-diagram-slides-output-1.png" id="nn-diagram-slides" class="quarto-figure quarto-figure-center" width="867" height="585"></p>
-</figure>
-</div>
-</div>
+</div><div class="column" style="width:60%;">
+<p><img data-src="one-layer-nn.png"></p>
+</div></div>
 </div>
 </section>
 <section id="nn-process" class="slide level2" data-menu-title="The process">
 <h2></h2>
-<p><span class="slide-title">The process</span></p>
+<p><span class="slide-title">The prediction process</span></p>
 <hr>
-<div class="body-text-m">
-<p><strong>Step 1 — Input layer.</strong> An observation <span class="math inline">\((X_1, \ldots, X_p)\)</span> is fed through the network left to right.</p>
-<p>. . .</p>
-<p><strong>Step 2 — Hidden layer.</strong> Each neuron <span class="math inline">\(k\)</span> computes an activation <span class="math inline">\(A_k\)</span> in two steps:</p>
+<p><strong>Step 1: Input layer.</strong> An observation <span class="math inline">\((X_1, \ldots, X_p)\)</span> is fed through the network left to right.</p>
+<p><strong>Step 2: Hidden layer.</strong> Each neuron computes an <strong>activation</strong> <span class="math inline">\(A_k\)</span> in two steps:</p>
 <ul>
-<li><p>Form a linear combination using a <strong>bias</strong> <span class="math inline">\(w_{k0}\)</span> and <strong>weights</strong> <span class="math inline">\(w_{k1}, \ldots, w_{kp}\)</span>: <span class="math display">\[w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p\]</span></p></li>
-<li><p>Pass through a nonlinear <strong>activation function</strong> <span class="math inline">\(g(z)\)</span>: <span class="math display">\[A_k = g(w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p)\]</span></p></li>
+<li><p>Form a linear combination using a <strong>bias</strong> <span class="math inline">\(w_{k0}\)</span> and <strong>weights</strong> <span class="math inline">\(w_{k1}, \ldots, w_{kp}\)</span>: <span class="math display">\[w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p.\]</span></p></li>
+<li><p>Pass through an <strong>activation function</strong> <span class="math inline">\(g(z)\)</span>:</p></li>
 </ul>
-<p>Each neuron has <span class="math inline">\(p + 1\)</span> parameters (<span class="math inline">\(p\)</span> weights + 1 bias).</p>
-<p>. . .</p>
-<p><strong>Step 3 — Output layer.</strong> Final prediction is a linear combination of all <span class="math inline">\(K\)</span> activations:</p>
+<p><span class="math display">\[A_k = g(w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p).\]</span></p>
+<p><strong>Step 3: Output layer.</strong> Final prediction is a linear combination of all <span class="math inline">\(K\)</span> activations:</p>
 <p><span class="math display">\[F(X_1, \ldots, X_p) = \beta_0 + \beta_1 A_1 + \cdots + \beta_K A_K\]</span></p>
-</div>
+<p>using <span class="math inline">\(K+1\)</span> new parameters <span class="math inline">\(\beta_0, \ldots, \beta_K\)</span>.</p>
 </section>
+<section id="nn-process-step1" class="slide level2" data-menu-title="The process">
+<h2></h2>
+<p><span class="slide-title">Step 1: Input layer</span></p>
+<hr>
+<p>An observation <span class="math inline">\((X_1, \ldots, X_p)\)</span> is fed through the network left to right.</p>
+<p>.</p>
+
+<img data-src="one-layer-nn-1.jpg" class="r-stretch"></section>
+<section id="nn-process-step2" class="slide level2" data-menu-title="The process">
+<h2></h2>
+<p><span class="slide-title">Step 2: Activations at each neuron</span></p>
+<hr>
+<p>At each neuron, form a linear combination of the features <span class="math inline">\(X_i\)</span> using a <strong>bias</strong> and <strong>weights</strong>, and pass it through an <strong>activation function</strong>.</p>
+
+<img data-src="one-layer-nn-2.jpg" class="r-stretch"></section>
+<section id="nn-process-step25" class="slide level2" data-menu-title="The process">
+<h2></h2>
+<p><span class="slide-title">Step 2: Activations at each neuron</span></p>
+<hr>
+<p>At each neuron, form a linear combination of the features <span class="math inline">\(X_i\)</span> using a <strong>bias</strong> and <strong>weights</strong>, and pass it through an <strong>activation function</strong>. Each neuron in the layer gives an <strong>activation</strong>.</p>
+
+<img data-src="one-layer-nn-3.jpg" class="r-stretch"></section>
+<section id="nn-process-step3" class="slide level2" data-menu-title="The process">
+<h2></h2>
+<p><span class="slide-title">Step 3: Output layer</span></p>
+<hr>
+<p>Final prediction is a linear combination of all <span class="math inline">\(K\)</span> activations.</p>
+<p>.</p>
+
+<img data-src="one-layer-nn.png" class="r-stretch"></section>
 <section id="nn-fitting" class="slide level2" data-menu-title="Fitting">
 <h2></h2>
 <p><span class="slide-title">Fitting a neural network</span></p>
 <hr>
-<p>Fitting means estimating all weights <span class="math inline">\(w_{kj}\)</span>, biases <span class="math inline">\(w_{k0}\)</span>, and output coefficients <span class="math inline">\(\beta_0, \ldots, \beta_K\)</span> from the training data.</p>
+<p><strong>Fitting a neural network</strong> means estimating all weights <span class="math inline">\(w_{kj}\)</span>, biases <span class="math inline">\(w_{k0}\)</span>, and output coefficients <span class="math inline">\(\beta_0, \ldots, \beta_K\)</span> from the training data.</p>
 <div class="fragment">
 <p><br></p>
-<p>We minimize a <strong>loss function</strong> that measures prediction error:</p>
+<p>To find these parameters we look for the parameters that minimize a <strong>loss function</strong> that measures prediction error:</p>
 <ul>
-<li><strong>Regression</strong>: mean squared error</li>
+<li><strong>Regression</strong>: commonly mean squared error.</li>
 <li><strong>Classification</strong>: <a href="https://en.wikipedia.org/wiki/Cross-entropy">cross-entropy</a></li>
 </ul>
 </div>
 <div class="fragment">
 <p><br></p>
-<p>This is done via <strong>stochastic gradient descent</strong> + <strong>backpropagation</strong>, which efficiently computes gradients of the loss with respect to every parameter.</p>
+<p>This is done via <strong>stochastic gradient descent</strong> + <strong>backpropagation</strong>.</p>
+<p>We’ll treat this as a black box.</p>
 <div class="body-text-s center-text">
 <p><em>(See ISLP §10.7 for details on the fitting algorithm)</em></p>
 </div>
 </div>
 </section>
-<section id="section-activations" class="slide level2" data-menu-title="# Activation functions #" data-background="#047C90">
-<h2></h2>
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">
-Activation functions
-</p>
-</div>
-</section>
 <section id="activation-intro" class="slide level2" data-menu-title="Why activation functions?">
 <h2></h2>
-<p><span class="slide-title">Why activation functions?</span></p>
+<p><span class="slide-title">What about the activation function?</span></p>
 <hr>
-<p>The activation function introduces the <strong>nonlinearity</strong> that gives neural networks their modeling power.</p>
-<div class="fragment">
-<p><br></p>
-<div class="center-text teal-text body-text-m">
-<p>Without it, the entire network would collapse to a <strong>linear model</strong> — regardless of how many layers it has.</p>
-</div>
-</div>
-<div class="fragment">
-<p><br></p>
-<p>Two of the most common choices:</p>
-<div class="body-text-m">
+<p>The activation function introduces the <strong>nonlinearity</strong> that gives neural networks their modeling power. Two of the most common choices:</p>
+<div class="body-text-s">
 <ul>
-<li><p><strong>Sigmoid</strong>: <span class="math inline">\(\displaystyle g(z) = \frac{e^z}{1 + e^z}\)</span> — squashes any input to <span class="math inline">\((0, 1)\)</span></p></li>
-<li><p><strong>ReLU</strong> (Rectified Linear Unit): <span class="math inline">\(g(z) = \max(0, z)\)</span> — zero for negative inputs, identity for positive</p></li>
+<li><p><strong>Sigmoid</strong>: <span class="math inline">\(\displaystyle g(z) = \frac{e^z}{1 + e^z}\)</span>: squashes any input to <span class="math inline">\((0, 1)\)</span></p></li>
+<li><p><strong>ReLU</strong> (Rectified Linear Unit): <span class="math inline">\(g(z) = \max(0, z)\)</span>: zero for negative inputs, identity for positive (most commonly used)</p></li>
 </ul>
 </div>
-</div>
-</section>
-<section id="activation-plot" class="slide level2" data-menu-title="Activation functions">
-<h2></h2>
-<p><span class="slide-title">Activation functions</span></p>
-<hr>
-<div id="cell-activation-functions-slides" class="cell" data-execution_count="3">
+<div id="cell-activation-functions-slides" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="11_neural_networks-SLIDES_files/figure-revealjs/activation-functions-slides-output-1.png" id="activation-functions-slides" class="quarto-figure quarto-figure-center" width="1104" height="434"></p>
+<p><img data-src="11_neural_networks-SLIDES_files/figure-revealjs/activation-functions-slides-output-1.png" id="activation-functions-slides" class="quarto-figure quarto-figure-center" width="880" height="344"></p>
 </figure>
 </div>
 </div>
@@ -340,32 +331,84 @@ Multilayer neural networks
 <h2></h2>
 <p><span class="slide-title">Multilayer neural networks</span></p>
 <hr>
-<p>In practice, neural networks have <strong>more than one hidden layer</strong> and many neurons per layer (often hundreds). This is what makes them <em>deep</em> networks.</p>
+<p>In practice, neural networks have <strong>more than one hidden layer</strong> and many neurons per layer (often hundreds). This is what makes them <em>deep</em> networks. As the network grows deeper, it can represent increasingly complex functions.</p>
 <div class="fragment">
-<p><br></p>
-<p><strong>First hidden layer</strong> (<span class="math inline">\(K_1\)</span> neurons):</p>
-<p><span class="math display">\[\begin{aligned}
-A_k^{(1)} &amp;= g\!\left(w_{k0}^{(1)} + w_{k1}^{(1)} X_1 + \cdots + w_{kp}^{(1)} X_p\right) \\
-           &amp;= g\!\left(w_{k0}^{(1)} + \sum_{j=1}^{p} w_{kj}^{(1)} X_j\right)
-\end{aligned}\]</span></p>
+<div class="columns">
+<div class="column" style="width:40%;">
+<div class="body-text-s">
+<p>The multilayer network now has:</p>
+<ol type="1">
+<li><p><strong>Input layer</strong>: the <span class="math inline">\(p\)</span> features <span class="math inline">\(X_1, \ldots, X_p\)</span> form the input layer</p></li>
+<li><p><strong>Multiple hidden layer</strong>: made up of a constant or decreasing number of <strong>neurons</strong></p></li>
+<li><p><strong>Output layer</strong>: the final model output <span class="math inline">\(F(\mathbf{X})\)</span></p></li>
+</ol>
 </div>
-<div class="fragment">
-<p><strong>Second hidden layer</strong> (<span class="math inline">\(K_2\)</span> neurons) — takes the previous layer’s activations as input:</p>
-<p><span class="math display">\[\begin{aligned}
-A_k^{(2)} &amp;= g\!\left(w_{k0}^{(2)} + w_{k1}^{(2)} A_1^{(1)} + \cdots + w_{kK_1}^{(2)} A_{K_1}^{(1)}\right) \\
-           &amp;= g\!\left(w_{k0}^{(2)} + \sum_{j=1}^{K_1} w_{kj}^{(2)} A_j^{(1)}\right)
-\end{aligned}\]</span></p>
+</div><div class="column" style="width:60%;">
+<p><img data-src="deep-nn-5.png"></p>
+</div></div>
 </div>
 </section>
-<section id="multilayer-diagram-slide" class="slide level2" data-menu-title="Multilayer architecture diagram">
+<section id="multilayer-prediction" class="slide level2" data-menu-title="Multilayer neural networks">
 <h2></h2>
-<p><span class="slide-title">Multilayer architecture</span></p>
+<p><span class="slide-title">The prediction process</span></p>
 <hr>
-<div id="cell-multilayer-nn-diagram-slides" class="cell" data-execution_count="4">
+<p><strong>Step 1: Input layer.</strong> An observation <span class="math inline">\((X_1, \ldots, X_p)\)</span> is fed through the network left to right.</p>
+<p><strong>Step 2: First hidden layer.</strong> There are <span class="math inline">\(K_1\)</span> neurons in it. Each neuron computes an <strong>activation</strong> <span class="math inline">\(A^{(1)}_k\)</span> using the fatures as input (same as before):</p>
+<p><span class="math display">\[A_k^{(1)} = g\!\left(w_{k0}^{(1)} + \sum_{j=1}^{p} w_{kj}^{(1)} X_j\right)\]</span></p>
+<p><strong>Step 3: Second hidden layer</strong> There are <span class="math inline">\(K_2\)</span> neurons in it. Each neuron takes the previous layer’s activations as input to compute its activations:</p>
+<p><span class="math display">\[A_k^{(2)} = g\!\left(w_{k0}^{(2)} + \sum_{j=1}^{K_1} w_{kj}^{(2)} A_j^{(1)}\right)\]</span></p>
+<p><strong>Step 4: Output layer.</strong> Final prediction is a linear combination of all <span class="math inline">\(K\)</span> activations:</p>
+<p><span class="math display">\[F(X_1, \ldots, X_p) = \beta_0 + \beta_1 A^{(2)}_1 + \cdots + \beta_{K_2} A^{(2)}_{K_2}\]</span></p>
+</section>
+<section id="dnn-process-step1" class="slide level2" data-menu-title="The process">
+<h2></h2>
+<p><span class="slide-title">Step 1: Input layer</span></p>
+<hr>
+<p>An observation <span class="math inline">\((X_1, \ldots, X_p)\)</span> is fed through the network left to right.</p>
+<p>.</p>
+
+<img data-src="deep-nn-1.jpg" class="r-stretch"></section>
+<section id="dnn-process-step2" class="slide level2" data-menu-title="The process">
+<h2></h2>
+<p><span class="slide-title">Step 2: Activations in the first layer</span></p>
+<hr>
+<p>Each neuron in the first layer computes an <strong>activation</strong> <span class="math inline">\(A^{(1)}_k\)</span> using the fatures as input (same as before).</p>
+
+<img data-src="deep-nn-2.jpg" class="r-stretch"></section>
+<section id="dnn-process-step3" class="slide level2" data-menu-title="The process">
+<h2></h2>
+<p><span class="slide-title">Step 3: Activations in the second layer</span></p>
+<hr>
+<p>Each neuron in the second layer takes the first layer’s activations as input to compute its activations <span class="math inline">\(A^{(2)}_k\)</span>.</p>
+
+<img data-src="deep-nn-3.jpg" class="r-stretch"></section>
+<section id="dnn-process-step4" class="slide level2" data-menu-title="The process">
+<h2></h2>
+<p><span class="slide-title">Step 3: Activations in the second layer</span></p>
+<hr>
+<p>Each neuron in the second layer takes the first layer’s activations as input to compute its activations <span class="math inline">\(A^{(2)}_k\)</span>.</p>
+
+<img data-src="deep-nn-4.jpg" class="r-stretch"></section>
+<section id="dnn-process-step5" class="slide level2" data-menu-title="The process">
+<h2></h2>
+<p><span class="slide-title">Step 4: Output layer</span></p>
+<hr>
+<p>Final prediction is a linear combination of all activations in the last layer.</p>
+<p>.</p>
+
+<img data-src="deep-nn-5.png" class="r-stretch"></section>
+<section id="classification" class="slide level2" data-menu-title="Depth and representations">
+<h2></h2>
+<p><span class="slide-title">Classification</span></p>
+<hr>
+<div class="body-text-s">
+<p>For <strong>classification</strong> with <span class="math inline">\(C\)</span> classes, the output layer produces <span class="math inline">\(C\)</span> raw scores <span class="math inline">\(Z_1, \ldots, Z_C\)</span> (one per class), then applies the <strong><a href="https://en.wikipedia.org/wiki/Softmax_function">softmax</a></strong> function to convert them to the probability of belonging to a given class.</p>
+</div>
+<div id="cell-classification-diagram-slides" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="11_neural_networks-SLIDES_files/figure-revealjs/multilayer-nn-diagram-slides-output-1.png" id="multilayer-nn-diagram-slides" class="quarto-figure quarto-figure-center" width="1027" height="585"></p>
+<p><img data-src="11_neural_networks-SLIDES_files/figure-revealjs/classification-diagram-slides-output-1.png" id="classification-diagram-slides" class="quarto-figure quarto-figure-center" width="1347" height="583"></p>
 </figure>
 </div>
 </div>
@@ -375,28 +418,12 @@ A_k^{(2)} &amp;= g\!\left(w_{k0}^{(2)} + w_{k1}^{(2)} A_1^{(1)} + \cdots + w_{kK
 <h2></h2>
 <p><span class="slide-title">Depth and representations</span></p>
 <hr>
-<p>As the network grows deeper, it can represent increasingly complex functions.</p>
-<p><br></p>
-<div class="body-text-m">
-<ul>
-<li><strong>Early layers</strong> tend to capture simple, low-level patterns</li>
-<li><strong>Deeper layers</strong> combine them into progressively abstract representations</li>
-</ul>
-</div>
-<div class="fragment">
-<p><br></p>
-<p>To build an intuitive understanding of how deep networks work, watch:</p>
-<div class="center-text body-text-m">
+<p><strong>Early layers</strong> tend to capture simple, low-level patterns.</p>
+<p><strong>Deeper layers</strong> combine them into higher-level, more concrete features.</p>
+
+<img data-src="tiger-cnn.png" class="r-stretch quarto-figure-center"><p class="caption">ISLP FIGURE 10.6</p><div class="center-text">
+<p>This resource visually explains how the layers and activations capture features:</p>
 <p><a href="https://www.youtube.com/watch?v=aircAruvnKk">3Blue1Brown — <em>But what is a neural network?</em></a></p>
-</div>
-<div class="body-text-s">
-<p>As you watch, think about:</p>
-<ol type="1">
-<li>How does the network represent a handwritten digit as an input?</li>
-<li>What does each neuron in a hidden layer conceptually “detect”?</li>
-<li>Why can depth capture more complex patterns than a single very wide layer?</li>
-</ol>
-</div>
 </div>
 </section>
 <section id="section-cnn" class="slide level2" data-menu-title="# Convolutional neural networks #" data-background="#047C90">
@@ -411,52 +438,63 @@ Convolutional neural networks
 <h2></h2>
 <p><span class="slide-title">Convolutional neural networks</span></p>
 <hr>
-<p>The networks we have studied treat the input as a <strong>flat vector of features</strong> — this discards spatial structure when the input is an image.</p>
-<div class="fragment">
-<p><br></p>
-<p><strong>CNNs</strong> are designed specifically for image data:</p>
-<div class="body-text-m">
+<p>The networks we have studied treat the input as a <strong>flat vector of features</strong>, where each pixel goes through the network independntly wihtout using the spatial structure when the input is an image.</p>
+<p><strong>CNNs</strong> are designed specifically for image data. Intuitively:</p>
 <ul>
-<li>Rather than connecting every input to every neuron, CNNs first identify <strong>low-level features</strong> — small edges, patches of color, textures</li>
+<li>Rather than connecting every input to every neuron, CNNs first identify <strong>low-level features</strong> (small edges, patches of color, textures)</li>
 <li>These are combined into <strong>higher-level features</strong> (shapes, objects, patterns) in later layers</li>
 <li>The presence of high-level features determines the predicted class</li>
 </ul>
-</div>
-</div>
 <div class="fragment">
 <p><br></p>
 <div class="center-text teal-text">
-<p>In environmental science: land cover classification, deforestation detection, species identification in camera traps</p>
+<p>In environmental science CNN applications come usually from image classification and analysis of remotely sensed data.</p>
 </div>
 </div>
 </section>
+<section id="cnn-architecture" class="slide level2" data-menu-title="CNNs: motivation">
+<h2></h2>
+<p><span class="slide-title">CNN architecture</span></p>
+<hr>
+<div class="body-text-s">
+<p>A complete CNN combines:</p>
+<ol type="1">
+<li><strong>Convolution layers</strong>: learn low-level features (edges, textures, patches of color)</li>
+<li><strong>Pooling layers</strong>: progressively reduce spatial dimensions</li>
+<li><strong>Flattening</strong>: convert final feature maps into a flat vector</li>
+<li><strong>Fully connected layers</strong>: combine high-level features to produce the final prediction</li>
+</ol>
+</div>
+
+<img data-src="CNN-edited.jpeg" class="r-stretch quarto-figure-center"><p class="caption">Adapted from <a href="https://www.analyticsvidhya.com/blog/2020/10/what-is-the-convolutional-neural-network-architecture/">What is the Convolutional Neural Network Architecture?</a></p></section>
 <section id="convolution-filter" class="slide level2" data-menu-title="Convolution filters">
 <h2></h2>
 <p><span class="slide-title">Convolution filters</span></p>
 <hr>
 <p>A <strong>convolution filter</strong> (kernel) is a small matrix that acts as a feature detector.</p>
-<p>We slide it across the image, computing a dot product at each position → <strong>feature map</strong>.</p>
-<div id="cell-convolution-example-slides" class="cell" data-execution_count="5">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="11_neural_networks-SLIDES_files/figure-revealjs/convolution-example-slides-output-1.png" id="convolution-example-slides" class="quarto-figure quarto-figure-center" width="1015" height="385"></p>
-</figure>
-</div>
-</div>
-</div>
+<p>We slide the filter across the image, computing a convolution product at each position.</p>
+<p><a href="https://docs.google.com/presentation/d/1kKWaRg8aVLyWXAJ6a_TBbRW7h7LRaG-hN86gwTwOGMg/edit?usp=sharing">Convolution diagrams</a> <!-- 
+
+::: {#cell-convolution-example-slides .cell execution_count=4}
+
+::: {.cell-output .cell-output-display}
+![](11_neural_networks-SLIDES_files/figure-revealjs/convolution-example-slides-output-1.png){#convolution-example-slides width=1015 height=385 fig-align='center'}
+:::
+:::
+
+
+ --></p>
 <div class="body-text-s center-text">
-<p>Higher values (darker green) = region closely resembles the filter.</p>
-<p>Filters are <strong>learned from training data</strong> — the network discovers the most useful features automatically.</p>
+<p>Filters are <strong>learned from training data</strong>, the network discovers the most useful features automatically.</p>
 </div>
 </section>
 <section id="pooling-slide" class="slide level2" data-menu-title="Pooling layer">
 <h2></h2>
 <p><span class="slide-title">Pooling layer</span></p>
 <hr>
-<p>A <strong>pooling layer</strong> reduces the spatial size of feature maps — more compact and less sensitive to small shifts in feature position.</p>
-<p><strong>Max pooling</strong>: divide into non-overlapping blocks, retain only the <strong>maximum</strong> value per block.</p>
-<div id="cell-max-pooling-slides" class="cell" data-execution_count="6">
+<p>A <strong>pooling layer</strong> reduces the spatial size of feature maps making the fatures more compact.</p>
+<p><strong>Generally use max pooling</strong>: divide into non-overlapping blocks, retain only the <strong>maximum</strong> value per block.</p>
+<div id="cell-max-pooling-slides" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -466,24 +504,14 @@ Convolutional neural networks
 </div>
 </div>
 </section>
-<section id="full-cnn" class="slide level2" data-menu-title="Full CNN architecture">
+<section id="cnn-architecture-bis" class="slide level2" data-menu-title="CNNs: motivation">
 <h2></h2>
-<p><span class="slide-title">Full CNN architecture</span></p>
+<p><span class="slide-title">CNN architecture</span></p>
 <hr>
-<p>A complete CNN combines:</p>
-<div class="body-text-m">
-<ol type="1">
-<li><strong>Convolution layers</strong> — learn low-level features (edges, textures, patches of color)</li>
-<li><strong>Pooling layers</strong> — progressively reduce spatial dimensions</li>
-<li><strong>Flattening</strong> — convert final feature maps into a flat vector</li>
-<li><strong>Fully connected layers</strong> — combine high-level features to produce the final prediction</li>
-</ol>
-</div>
-<p><br></p>
 
 
 
-<img data-src="CNN-edited.jpeg" style="width:90.0%" class="r-stretch quarto-figure-center"><p class="caption">Adapted from <a href="https://www.analyticsvidhya.com/blog/2020/10/what-is-the-convolutional-neural-network-architecture/">What is the Convolutional Neural Network Architecture?</a></p></section>
+<img data-src="CNN-edited.jpeg" class="r-stretch quarto-figure-center"><p class="caption">Adapted from <a href="https://www.analyticsvidhya.com/blog/2020/10/what-is-the-convolutional-neural-network-architecture/">What is the Convolutional Neural Network Architecture?</a></p></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">

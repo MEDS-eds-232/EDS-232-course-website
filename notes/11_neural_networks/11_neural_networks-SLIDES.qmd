@@ -360,15 +360,15 @@ Two of the most common choices:
 #| label: activation-functions-slides
 #| echo: false
 #| fig-align: center
-#| out-width: "50%"
+#| out-width: "40%"
 
 z       = np.linspace(-4, 4, 300)
 sigmoid = 1 / (1 + np.exp(-z))
 relu    = np.maximum(0, z)
 
-fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.4, fig_size_y + 0.5))
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.12, (fig_size_y + 0.5) * 0.8))
 
-axes[0].plot(z, sigmoid, color='steelblue', linewidth=2.5)
+axes[0].plot(z, sigmoid, color='steelblue', linewidth=4)
 axes[0].axhline(0, color='gray', linewidth=0.5)
 axes[0].axvline(0, color='gray', linewidth=0.5)
 axes[0].set_title('Sigmoid: $g(z) = e^z\\,/\\,(1 + e^z)$', fontsize=12)
@@ -377,7 +377,7 @@ axes[0].set_ylabel('$g(z)$')
 axes[0].set_ylim(-0.1, 1.1)
 axes[0].grid(True, alpha=0.3)
 
-axes[1].plot(z, relu, color='tomato', linewidth=2.5)
+axes[1].plot(z, relu, color='tomato', linewidth=4)
 axes[1].axhline(0, color='gray', linewidth=0.5)
 axes[1].axvline(0, color='gray', linewidth=0.5)
 axes[1].set_title('ReLU: $g(z) = \\max(0,\\, z)$', fontsize=12)
@@ -525,6 +525,117 @@ Final prediction is a linear combination of all activations in the last layer.
 
 ---
 
+## {#classification data-menu-title="Depth and representations"}
+
+[Classification]{.slide-title}
+
+<hr>
+
+::: {.body-text-s}
+For **classification** with $C$ classes, the output layer produces $C$ raw scores $Z_1, \ldots, Z_C$ (one per class), then applies the **[softmax](https://en.wikipedia.org/wiki/Softmax_function)** function to convert them to the probability of belonging to a given class.
+:::
+
+```{python}
+#| label: classification-diagram-slides
+#| echo: false
+#| fig-align: center
+#| out-width: "68%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.7, fig_size_y * 1.5))
+ax.set_xlim(0, 16)
+ax.set_ylim(-0.5, 9.0)
+ax.axis('off')
+
+x_in, x_h1, x_h2, x_z, x_out = 1.2, 3.5, 6.0, 8.5, 13.5
+in_ys  = np.linspace(1.5, 7.5, 4)   # 4 input nodes
+h1_ys  = np.linspace(0.8, 8.2, 5)   # 5 neurons in hidden layer 1
+h2_ys  = np.linspace(0.8, 8.2, 5)   # 5 neurons in hidden layer 2
+out_ys = np.linspace(2.0, 7.0, 3)   # 3 output classes
+r = 0.38
+
+# Connections input → hidden layer 1
+for iy in in_ys:
+    for hy in h1_ys:
+        ax.annotate('', xy=(x_h1 - r, hy), xytext=(x_in + r, iy),
+                    arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
+
+# Connections hidden layer 1 → hidden layer 2
+for h1y in h1_ys:
+    for h2y in h2_ys:
+        ax.annotate('', xy=(x_h2 - r, h2y), xytext=(x_h1 + r, h1y),
+                    arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
+
+# Connections hidden layer 2 → output scores
+for h2y in h2_ys:
+    for oy in out_ys:
+        ax.annotate('', xy=(x_z - r, oy), xytext=(x_h2 + r, h2y),
+                    arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
+
+# Softmax box (smaller)
+box_x0 = x_z + r + 0.2
+box_x1 = x_out - r - 0.2
+box_yc = 4.5
+box_h  = 0.9
+rect = plt.Rectangle((box_x0, box_yc - box_h/2), box_x1 - box_x0, box_h,
+                      linewidth=1.5, edgecolor='#666666', facecolor='#f5f5f5', zorder=2)
+ax.add_patch(rect)
+ax.text((box_x0 + box_x1) / 2, box_yc, 'Softmax', ha='center', va='center',
+        fontsize=8.5, color='#333333', fontstyle='italic')
+
+# Lines from output score nodes → softmax box
+for oy in out_ys:
+    ax.annotate('', xy=(box_x0, box_yc), xytext=(x_z + r, oy),
+                arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.7))
+
+# Lines from softmax box → probability labels (top node = class 1)
+for c, oy in enumerate(out_ys):
+    idx = len(out_ys) - c
+    ax.annotate('', xy=(x_out - 0.1, oy), xytext=(box_x1, box_yc),
+                arrowprops=dict(arrowstyle='->', color='#5BAD6F', lw=1.0))
+    ax.text(x_out + 0.1, oy, f'$P(Y={idx}\\mid\\mathbf{{X}})$',
+            ha='left', va='center', fontsize=9)
+
+# Input nodes (top = X1)
+for i, iy in enumerate(in_ys):
+    idx = len(in_ys) - i
+    ax.add_patch(plt.Circle((x_in, iy), r, color='#4A90D9', zorder=3))
+    ax.text(x_in - 0.6, iy, f'$X_{idx}$', ha='right', va='center', fontsize=10)
+
+# Hidden layer 1 nodes (top = A1^(1))
+for k, hy in enumerate(h1_ys):
+    idx = len(h1_ys) - k
+    ax.add_patch(plt.Circle((x_h1, hy), r, color='#E8A838', zorder=3))
+    ax.text(x_h1, hy, f'$A_{idx}^{{(1)}}$', ha='center', va='center', fontsize=7,
+            color='white', fontweight='bold')
+
+# Hidden layer 2 nodes (top = A1^(2))
+for k, hy in enumerate(h2_ys):
+    idx = len(h2_ys) - k
+    ax.add_patch(plt.Circle((x_h2, hy), r, color='#E06C3A', zorder=3))
+    ax.text(x_h2, hy, f'$A_{idx}^{{(2)}}$', ha='center', va='center', fontsize=7,
+            color='white', fontweight='bold')
+
+# Output score nodes (top = Z1)
+for c, oy in enumerate(out_ys):
+    idx = len(out_ys) - c
+    ax.add_patch(plt.Circle((x_z, oy), r, color='#9B59B6', zorder=3))
+    ax.text(x_z, oy, f'$Z_{idx}$', ha='center', va='center', fontsize=9,
+            color='white', fontweight='bold')
+
+# Layer labels
+ax.text(x_in,  -0.3, 'Input\nlayer',    ha='center', va='top', fontsize=9, color='#4A90D9')
+ax.text(x_h1,  -0.3, 'Hidden\nlayer 1', ha='center', va='top', fontsize=9, color='#E8A838')
+ax.text(x_h2,  -0.3, 'Hidden\nlayer 2', ha='center', va='top', fontsize=9, color='#E06C3A')
+ax.text(x_z,   -0.3, 'Output\nscores',  ha='center', va='top', fontsize=9, color='#9B59B6')
+
+ax.set_title('Neural network for classification (C = 3 classes)', fontsize=11, pad=10)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
 ## {#multilayer-depth data-menu-title="Depth and representations"}
 
 [Depth and representations]{.slide-title}
@@ -534,11 +645,13 @@ Final prediction is a linear combination of all activations in the last layer.
 
 **Early layers** tend to capture simple, low-level patterns.
 
-**Deeper layers** combine them into progressively abstract representations.
+**Deeper layers** combine them into higher-level, more concrete features.
 
-To build an intuitive understanding of how deep networks work and cover the classification case we will, watch:
+![ISLP FIGURE 10.6](tiger-cnn.png)
 
-::: {.center-text .body-text-m}
+::: {.center-text}
+This resource visually explains how the layers and activations capture features: 
+
 [3Blue1Brown — *But what is a neural network?*](https://www.youtube.com/watch?v=aircAruvnKk)
 :::
 
