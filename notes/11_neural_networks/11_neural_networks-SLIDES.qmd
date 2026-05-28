@@ -536,7 +536,7 @@ Final prediction is a linear combination of all activations in the last layer.
 
 **Deeper layers** combine them into progressively abstract representations.
 
-To build an intuitive understanding of how deep networks work, watch:
+To build an intuitive understanding of how deep networks work and cover the classification case we will, watch:
 
 ::: {.center-text .body-text-m}
 [3Blue1Brown — *But what is a neural network?*](https://www.youtube.com/watch?v=aircAruvnKk)
@@ -558,27 +558,43 @@ To build an intuitive understanding of how deep networks work, watch:
 
 <hr>
 
-The networks we have studied treat the input as a **flat vector of features** — this discards spatial structure when the input is an image.
+The networks we have studied treat the input as a **flat vector of features**, where each pixel goes through the network independntly wihtout using the  spatial structure when the input is an image.
 
-. . .
 
-<br>
+**CNNs** are designed specifically for image data. Intuitively:
 
-**CNNs** are designed specifically for image data:
-
-::: {.body-text-m}
-- Rather than connecting every input to every neuron, CNNs first identify **low-level features** — small edges, patches of color, textures
+- Rather than connecting every input to every neuron, CNNs first identify **low-level features** (small edges, patches of color, textures)
 - These are combined into **higher-level features** (shapes, objects, patterns) in later layers
 - The presence of high-level features determines the predicted class
-:::
 
 . . .
 
 <br>
 
 ::: {.center-text .teal-text}
-In environmental science: land cover classification, deforestation detection, species identification in camera traps
+In environmental science CNN applications come usually from image classification and analysis of remotely sensed data. 
 :::
+
+---
+
+## {#cnn-architecture data-menu-title="CNNs: motivation"}
+
+[CNN architecture]{.slide-title}
+
+<hr>
+
+::: {.body-text-s}
+
+A complete CNN combines:
+
+1. **Convolution layers**: learn low-level features (edges, textures, patches of color)
+2. **Pooling layers**: progressively reduce spatial dimensions
+3. **Flattening**: convert final feature maps into a flat vector
+4. **Fully connected layers**: combine high-level features to produce the final prediction
+:::
+
+![Adapted from [What is the Convolutional Neural Network Architecture?](https://www.analyticsvidhya.com/blog/2020/10/what-is-the-convolutional-neural-network-architecture/)](CNN-edited.jpeg)
+
 
 ---
 
@@ -590,8 +606,10 @@ In environmental science: land cover classification, deforestation detection, sp
 
 A **convolution filter** (kernel) is a small matrix that acts as a feature detector.
 
-We slide it across the image, computing a dot product at each position → **feature map**.
+We slide the filter across the image, computing a convolution product at each position.
 
+[Convolution diagrams](https://docs.google.com/presentation/d/1kKWaRg8aVLyWXAJ6a_TBbRW7h7LRaG-hN86gwTwOGMg/edit?usp=sharing)
+<!-- 
 ```{python}
 #| label: convolution-example-slides
 #| echo: false
@@ -628,10 +646,10 @@ plt.show()
 plt.close()
 ```
 
-::: {.body-text-s .center-text}
-Higher values (darker green) = region closely resembles the filter.
+ -->
 
-Filters are **learned from training data** — the network discovers the most useful features automatically.
+::: {.body-text-s .center-text}
+Filters are **learned from training data**, the network discovers the most useful features automatically.
 :::
 
 ---
@@ -642,9 +660,9 @@ Filters are **learned from training data** — the network discovers the most us
 
 <hr>
 
-A **pooling layer** reduces the spatial size of feature maps — more compact and less sensitive to small shifts in feature position.
+A **pooling layer** reduces the spatial size of feature maps making the fatures more compact.
 
-**Max pooling**: divide into non-overlapping blocks, retain only the **maximum** value per block.
+**Generally use max pooling**: divide into non-overlapping blocks, retain only the **maximum** value per block.
 
 ```{python}
 #| label: max-pooling-slides
@@ -677,23 +695,14 @@ plt.show()
 plt.close()
 ```
 
+
 ---
 
-## {#full-cnn data-menu-title="Full CNN architecture"}
+## {#cnn-architecture-bis data-menu-title="CNNs: motivation"}
 
-[Full CNN architecture]{.slide-title}
+[CNN architecture]{.slide-title}
 
 <hr>
 
-A complete CNN combines:
 
-::: {.body-text-m}
-1. **Convolution layers** — learn low-level features (edges, textures, patches of color)
-2. **Pooling layers** — progressively reduce spatial dimensions
-3. **Flattening** — convert final feature maps into a flat vector
-4. **Fully connected layers** — combine high-level features to produce the final prediction
-:::
-
-<br>
-
-![Adapted from [What is the Convolutional Neural Network Architecture?](https://www.analyticsvidhya.com/blog/2020/10/what-is-the-convolutional-neural-network-architecture/)](CNN-edited.jpeg){width=90%}
+![Adapted from [What is the Convolutional Neural Network Architecture?](https://www.analyticsvidhya.com/blog/2020/10/what-is-the-convolutional-neural-network-architecture/)](CNN-edited.jpeg)
