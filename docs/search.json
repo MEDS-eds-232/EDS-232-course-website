@@ -3260,104 +3260,6 @@
     "text": "Steps 9–10 — After model selection\n\n9. Fine-tune the selected model.\nUse cross-validation on the training set to search over hyperparameter combinations (e.g., GridSearchCV). All tuning decisions must use training data only — the test set stays locked!\n\n10. Evaluate on the test set.\nEvaluate exactly once. If test performance is much worse than your CV estimate, the model likely overfit during tuning.\n\n\n🌟 Present your results.\nReport the metric value and its practical meaning. Document the full pipeline, decisions made at each step, and any caveats about where the model may not generalize."
   },
   {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#section-3",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#section-3",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise\nWetland carbon credit modeling"
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#scenario",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#scenario",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Scenario\n\nA state environmental agency in Oregon is developing a wetland carbon credit program to incentivize private landowners to restore degraded coastal marshes.\nThe agency’s field teams surveyed 500 coastal wetland plots, measuring:\n\n\n\nsalinity_ppt — mean salinity (ppt)\nwater_depth_cm — mean water column depth (cm)\ntidal_range_cm — mean tidal range (cm)\nsoil_organic_pct — soil organic matter (%)\n\n\n\nbulk_density_gcm3 — soil bulk density (g/cm³)\nvegetation_type — dominant plant guild (cordgrass / bulrush / pickleweed / sedges)\n\nTarget: carbon_seq_tco2 — annual carbon sequestration (tCO₂-eq/ha/yr)\n\nNo existing model in place. Credits currently assigned manually by ecologists."
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex1",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex1",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 1\n\n\nRead the scenario carefully. You are about to start working on this project.\nList some key questions you would still need to answer before beginning data analysis and model development.\n\n\n\nWhat metric will be used? → MSE penalizes large errors, appropriate here since errors have direct financial consequences.\nWhat is the minimum acceptable performance? → The model needs a defensible accuracy threshold to be legally used for assigning credits.\nWhat is the current baseline? → Manual assignment by ecologists sets the bar. How consistent and accurate is that process?\nIs over- or under-prediction more costly? → Over-prediction = invalid credits issued (agency risk); under-prediction = landowners under-compensated. This asymmetry matters for how errors are communicated."
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex2-data",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex2-data",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 2 — df.info() output\n\n\n\n&lt;class 'pandas.core.frame.DataFrame'&gt;\nRangeIndex: 500 entries, 0 to 499\nData columns (total 7 columns):\n #   Column             Non-Null Count  Dtype  \n---  ------             --------------  -----  \n 0   salinity_ppt       500 non-null    float64\n 1   water_depth_cm     500 non-null    float64\n 2   tidal_range_cm     500 non-null    float64\n 3   soil_organic_pct   400 non-null    float64\n 4   bulk_density_gcm3  500 non-null    float64\n 5   vegetation_type    500 non-null    object \n 6   carbon_seq_tco2    500 non-null    float64\ndtypes: float64(6), object(1)\nmemory usage: 27.5+ KB"
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex2",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex2",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 2\n\nBased on the df.info() output:\na) How many numerical and how many categorical features are there?\nb) Are there any variables with a concerning amount of missing data? Which one(s), and roughly what percentage?\n\n\na) 5 numerical (salinity_ppt, water_depth_cm, tidal_range_cm, soil_organic_pct, bulk_density_gcm3) and 1 categorical (vegetation_type, dtype object).\nb) soil_organic_pct has ~100 missing values out of 500 rows (~20%), visible from the non-null count in df.info(). This is substantial — it warrants a deliberate decision, not a default fix."
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex3",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex3",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 3\n\nA teammate suggests the next step is to standardize the entire dataset before fitting any models.\nWhat is the problem with this approach?\n\n\nData leakage. Standardization requires computing the mean and standard deviation from the data. If those statistics are computed on the full dataset, information from future test rows contaminates the training process.\nCorrect procedure:\n\nSplit into train and test sets first\nCompute mean and SD only on the training set\nApply those same values to scale both train and test\n\nThis ensures the test set remains a clean simulation of unseen data."
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex6-hist",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex6-hist",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 6 — Predictor distributions"
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex6",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex6",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 6\n\nLooking at the distributions above:\nShould you plan on scaling the data before fitting models? Which predictors would benefit most from scaling, and why?\n\n\nYes. The predictors span very different numeric ranges (salinity ~0.5–35 ppt; tidal range ~5–300 cm). Without scaling, models sensitive to feature magnitude (SVMs, KNN) would give disproportionate weight to variables with larger ranges regardless of their actual predictive value. Three of the five predictors are also right-skewed, so extreme observations could have outsized influence. Standardization addresses both issues. The target variable does not need to be scaled."
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex4-scatter",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex4-scatter",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 4 — Scatter plots & correlations\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCorrelation with target\n\n\n\n\nsalinity_ppt\n-0.236\n\n\nwater_depth_cm\n0.115\n\n\ntidal_range_cm\n0.053\n\n\nsoil_organic_pct\n0.456\n\n\nbulk_density_gcm3\n0.010"
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex4",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex4",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 4\n\n\n\na) Which predictor(s) would you flag as candidates for removal because they add noise without contributing useful signal?\n. . .\n\nbulk_density_gcm3: scatter plot shows no pattern; correlation near zero. Consistent with a variable that adds noise without predictive information.\n\n\nb) Is there a predictor with low linear correlation but a meaningful non-linear relationship in the scatter plot?\n. . .\n\nsalinity_ppt: shows an inverted-U arch — sequestration peaks at brackish values (~15–20 ppt) and drops at both extremes. Positive and negative deviations cancel in the linear correlation, producing near-zero correlation. The scatter plot reveals what the correlation hides."
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex5",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex5",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 5\n\nsoil_organic_pct has approximately 20% missing values.\n1. What questions would you ask the agency to better inform how to handle the missing data?\n2. For each approach below, discuss one advantage and one disadvantage: a) Remove observations with missing values. b) Impute with the mean. c) Drop the feature entirely.\n\n\na) Remove: Simple; no artificial values. But loses ~20% of observations; may introduce bias if missingness is non-random.\nb) Impute with mean: Preserves all observations. But distorts the distribution; imputed value may be misleading if missing plots are systematically different.\nc) Drop the feature: Sidesteps missing data entirely. But soil_organic_pct shows one of the stronger correlations with the target — dropping it discards real predictive signal."
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex7-data",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex7-data",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 7 — One-hot encoding\n\nThree observations from the training set, each from a different vegetation type:\n\n\n\n\n\n\n\n\n\nvegetation_type\nsalinity_ppt\nwater_depth_cm\ntidal_range_cm\nsoil_organic_pct\nbulk_density_gcm3\n\n\n\n\n1\ncordgrass\n10.06\n29.3\n139.7\n16.8\n0.645\n\n\n2\nsedges\n33.50\n16.1\n19.7\n32.1\n0.791\n\n\n3\npickleweed\n21.34\n12.6\n47.5\n10.6\n1.033\n\n\n\n\n\n\n\nOne-hot encode the vegetation_type column for these three observations. What are the column names, and what value (0 or 1) does each observation get in each column?"
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex7",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex7",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 7 — Answer\n\nFour categories in the full dataset → four binary columns (alphabetical order):\n\n\n\n\n\n\n\n\n\n\n\nobs\nvegetation_type\nveg_bulrush\nveg_cordgrass\nveg_pickleweed\nveg_sedges\n\n\n\n\n1\ncordgrass\n0\n1\n0\n0\n\n\n2\nsedges\n0\n0\n0\n1\n\n\n3\npickleweed\n0\n0\n1\n0\n\n\n\nEach row has exactly one 1 and three 0s. The original column is dropped. Note that bulrush doesn’t appear in this subset, but the column is still created."
-  },
-  {
-    "objectID": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex8",
-    "href": "notes/10_workflows/workflows_draft_notes-SLIDES.html#ex8",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Exercise 8\n\nYour team has cleaned and prepared the training data and is ready to start fitting models.\nBrainstorm at least three candidate models you could try as a starting point for this regression problem. For each, briefly justify why it is a reasonable choice.\n\n\nLinear regression: natural first baseline for any regression problem. Fast, interpretable, and establishes a performance floor. If more complex models can’t beat it, revisit the data.\nKNN regression: makes no assumptions about the functional form — can capture non-linear patterns like the quadratic salinity effect without feature engineering.\nDecision tree / random forest regression: handles non-linearities and feature interactions automatically, works with mixed numerical and categorical features, and provides feature importances — useful when the agency wants to understand which site characteristics drive sequestration.\n\nIn practice: fit all candidates with default hyperparameters first, compare CV-based MSE, then invest in tuning the most promising model."
-  },
-  {
     "objectID": "lab/lab8.html",
     "href": "lab/lab8.html",
     "title": "Lab 8: Support Vector Machines",
@@ -4330,18 +4232,39 @@
     "text": "Single-layer Neural Network\n\nGiven a vector of features \\(\\mathbf{X} = (X_1, \\ldots, X_p)\\) and a response variable \\(Y\\), our goal is to learn a function \\(F(\\mathbf{X})\\) to predict \\(Y\\): same goal as throughout the course.\nFor now, \\(Y\\) is quantitative, so we will think first about the regression scenario.\n\n\n\n\nA single-layer neural network (a network with one hidden layer) has three core components:\n\nInput layer: the \\(p\\) features \\(X_1, \\ldots, X_p\\) form the input layer\nHidden layer: made up of \\(K\\) neurons\nOutput layer: the final model output \\(F(\\mathbf{X})\\)\n\nIn the diagram, \\(p=4\\) and \\(K=5\\)."
   },
   {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-diagram-slide",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-diagram-slide",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Architecture"
-  },
-  {
     "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process",
     "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
     "text": "The prediction process\n\nStep 1: Input layer. An observation \\((X_1, \\ldots, X_p)\\) is fed through the network left to right.\nStep 2: Hidden layer. Each neuron computes an activation \\(A_k\\) in two steps:\n\nForm a linear combination using a bias \\(w_{k0}\\) and weights \\(w_{k1}, \\ldots, w_{kp}\\): \\[w_{k0} + w_{k1} X_1 + \\cdots + w_{kp} X_p.\\]\nPass through an activation function \\(g(z)\\):\n\n\\[A_k = g(w_{k0} + w_{k1} X_1 + \\cdots + w_{kp} X_p).\\]\nStep 3: Output layer. Final prediction is a linear combination of all \\(K\\) activations:\n\\[F(X_1, \\ldots, X_p) = \\beta_0 + \\beta_1 A_1 + \\cdots + \\beta_K A_K\\]\nusing \\(K+1\\) new parameters \\(\\beta_0, \\ldots, \\beta_K\\)."
+  },
+  {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step1",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Step 1: Input layer\n\nAn observation \\((X_1, \\ldots, X_p)\\) is fed through the network left to right.\n."
+  },
+  {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step2",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step2",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Step 2: Activations at each neuron\n\nAt each neuron, form a linear combination of the features \\(X_i\\) using a bias and weights, and pass it through an activation function."
+  },
+  {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step25",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step25",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Step 2: Activations at each neuron\n\nAt each neuron, form a linear combination of the features \\(X_i\\) using a bias and weights, and pass it through an activation function. Each neuron in the layer gives an activation."
+  },
+  {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step3",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step3",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Step 3: Output layer\n\nFinal prediction is a linear combination of all \\(K\\) activations.\n."
   },
   {
     "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-fitting",
@@ -4351,25 +4274,11 @@
     "text": "Fitting a neural network\n\nFitting a neural network means estimating all weights \\(w_{kj}\\), biases \\(w_{k0}\\), and output coefficients \\(\\beta_0, \\ldots, \\beta_K\\) from the training data.\n\n\nTo find these parameters we look for the parameters that minimize a loss function that measures prediction error:\n\nRegression: commonly mean squared error.\nClassification: cross-entropy\n\n\n\n\nThis is done via stochastic gradient descent + backpropagation.\nWe’ll treat this as a black box.\n\n(See ISLP §10.7 for details on the fitting algorithm)"
   },
   {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#section-activations",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#section-activations",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Activation functions"
-  },
-  {
     "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#activation-intro",
     "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#activation-intro",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
     "text": "What about the activation function?\n\nThe activation function introduces the nonlinearity that gives neural networks their modeling power. Two of the most common choices:\n\n\nSigmoid: \\(\\displaystyle g(z) = \\frac{e^z}{1 + e^z}\\): squashes any input to \\((0, 1)\\)\nReLU (Rectified Linear Unit): \\(g(z) = \\max(0, z)\\): zero for negative inputs, identity for positive (most commonly used)"
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#activation-plot",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#activation-plot",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Activation functions"
   },
   {
     "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#section-multilayer",
@@ -4386,18 +4295,67 @@
     "text": "Multilayer neural networks\n\nIn practice, neural networks have more than one hidden layer and many neurons per layer (often hundreds). This is what makes them deep networks. As the network grows deeper, it can represent increasingly complex functions.\n\n\n\n\nThe multilayer network now has:\n\nInput layer: the \\(p\\) features \\(X_1, \\ldots, X_p\\) form the input layer\nMultiple hidden layer: made up of a constant or decreasing number of neurons\nOutput layer: the final model output \\(F(\\mathbf{X})\\)"
   },
   {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#multilayer-diagram-slide",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#multilayer-diagram-slide",
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#multilayer-prediction",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#multilayer-prediction",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Multilayer architecture"
+    "text": "The prediction process\n\nStep 1: Input layer. An observation \\((X_1, \\ldots, X_p)\\) is fed through the network left to right.\nStep 2: First hidden layer. There are \\(K_1\\) neurons in it. Each neuron computes an activation \\(A^{(1)}_k\\) using the fatures as input (same as before):\n\\[A_k^{(1)} = g\\!\\left(w_{k0}^{(1)} + \\sum_{j=1}^{p} w_{kj}^{(1)} X_j\\right)\\]\nStep 3: Second hidden layer There are \\(K_2\\) neurons in it. Each neuron takes the previous layer’s activations as input to compute its activations:\n\\[A_k^{(2)} = g\\!\\left(w_{k0}^{(2)} + \\sum_{j=1}^{K_1} w_{kj}^{(2)} A_j^{(1)}\\right)\\]\nStep 4: Output layer. Final prediction is a linear combination of all \\(K\\) activations:\n\\[F(X_1, \\ldots, X_p) = \\beta_0 + \\beta_1 A^{(2)}_1 + \\cdots + \\beta_{K_2} A^{(2)}_{K_2}\\]"
+  },
+  {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step1",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Step 1: Input layer\n\nAn observation \\((X_1, \\ldots, X_p)\\) is fed through the network left to right.\n."
+  },
+  {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step2",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step2",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Step 2: Activations in the first layer\n\nEach neuron in the first layer computes an activation \\(A^{(1)}_k\\) using the fatures as input (same as before)."
+  },
+  {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step3",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step3",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Step 3: Activations in the second layer\n\nEach neuron in the second layer takes the first layer’s activations as input to compute its activations \\(A^{(2)}_k\\)."
+  },
+  {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step4",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step4",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Step 3: Activations in the second layer\n\nEach neuron in the second layer takes the first layer’s activations as input to compute its activations \\(A^{(2)}_k\\)."
+  },
+  {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step5",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step5",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Step 4: Output layer\n\nFinal prediction is a linear combination of all activations in the last layer.\n."
+  },
+  {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#classification",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#classification",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Classification\n\n\nFor classification with \\(C\\) classes, the output layer produces \\(C\\) raw scores \\(Z_1, \\ldots, Z_C\\) (one per class), then applies the softmax function to convert them to the probability of belonging to a given class."
   },
   {
     "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#multilayer-depth",
     "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#multilayer-depth",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Depth and representations\n\nEarly layers tend to capture simple, low-level patterns.\nDeeper layers combine them into higher-level, more concrete features.\n\nISLP FIGURE 10.6\nThis resource visually explains how the layers and activations capture features:\n3Blue1Brown — But what is a neural network?"
+    "text": "Depth and representations\n\n\n\nEarly layers tend to capture simple, low-level patterns.\nDeeper layers combine them into higher-level, more concrete features.\n\n\n\n\nISLP FIGURE 10.6"
+  },
+  {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#multilayer-depth-video",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#multilayer-depth-video",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Depth and representations\n\n\nThis resource visually explains how the layers and activations capture features:\n3Blue1Brown — But what is a neural network?\n\n\n\nHow do the activations in the first layer relate to the activations in the second layer?\nExplain the motivation between the using multiple layers of neurons to recognize patterns in the input data.\nHow do the weights capture specific patterns in the input data?\nThe video uses an example of classifying hand-written digits. What would be the difference between classifying these images of handwritten images, and a color image with RGB bands?"
   },
   {
     "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#section-cnn",
@@ -4414,6 +4372,13 @@
     "text": "Convolutional neural networks\n\nThe networks we have studied treat the input as a flat vector of features, where each pixel goes through the network independntly wihtout using the spatial structure when the input is an image.\nCNNs are designed specifically for image data. Intuitively:\n\nRather than connecting every input to every neuron, CNNs first identify low-level features (small edges, patches of color, textures)\nThese are combined into higher-level features (shapes, objects, patterns) in later layers\nThe presence of high-level features determines the predicted class\n\n\n\n\nIn environmental science CNN applications come usually from image classification and analysis of remotely sensed data."
   },
   {
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#cnn-architecture",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#cnn-architecture",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "CNN architecture\n\n\nA complete CNN combines:\n\nConvolution layers: learn low-level features (edges, textures, patches of color)\nPooling layers: progressively reduce spatial dimensions\nFlattening: convert final feature maps into a flat vector\nFully connected layers: combine high-level features to produce the final prediction\n\n\n\nAdapted from What is the Convolutional Neural Network Architecture?"
+  },
+  {
     "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#convolution-filter",
     "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#convolution-filter",
     "title": "EDS 232 - Machine Learning for Environmental Science",
@@ -4428,11 +4393,11 @@
     "text": "Pooling layer\n\nA pooling layer reduces the spatial size of feature maps making the fatures more compact.\nGenerally use max pooling: divide into non-overlapping blocks, retain only the maximum value per block."
   },
   {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#full-cnn",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#full-cnn",
+    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#cnn-architecture-bis",
+    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#cnn-architecture-bis",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Full CNN architecture\n\nA complete CNN combines:\n\n\nConvolution layers — learn low-level features (edges, textures, patches of color)\nPooling layers — progressively reduce spatial dimensions\nFlattening — convert final feature maps into a flat vector\nFully connected layers — combine high-level features to produce the final prediction\n\n\n\n\n\n\nAdapted from What is the Convolutional Neural Network Architecture?"
+    "text": "CNN architecture\n\n\n\n\nAdapted from What is the Convolutional Neural Network Architecture?"
   },
   {
     "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#title-slide",
@@ -8004,96 +7969,5 @@
       "notes",
       "Setup"
     ]
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step1",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step1",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Step 1: Input layer\n\nAn observation \\((X_1, \\ldots, X_p)\\) is fed through the network left to right.\n."
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step2",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step2",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Step 2: Activations at each neuron\n\nAt each neuron, form a linear combination of the features \\(X_i\\) using a bias and weights, and pass it through an activation function."
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step3",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step3",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Step 3: Output layer\n\nFinal prediction is a linear combination of all \\(K\\) activations.\n."
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step25",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#nn-process-step25",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Step 2: Activations at each neuron\n\nAt each neuron, form a linear combination of the features \\(X_i\\) using a bias and weights, and pass it through an activation function. Each neuron in the layer gives an activation."
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#multilayer-prediction",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#multilayer-prediction",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "The prediction process\n\nStep 1: Input layer. An observation \\((X_1, \\ldots, X_p)\\) is fed through the network left to right.\nStep 2: First hidden layer. There are \\(K_1\\) neurons in it. Each neuron computes an activation \\(A^{(1)}_k\\) using the fatures as input (same as before):\n\\[A_k^{(1)} = g\\!\\left(w_{k0}^{(1)} + \\sum_{j=1}^{p} w_{kj}^{(1)} X_j\\right)\\]\nStep 3: Second hidden layer There are \\(K_2\\) neurons in it. Each neuron takes the previous layer’s activations as input to compute its activations:\n\\[A_k^{(2)} = g\\!\\left(w_{k0}^{(2)} + \\sum_{j=1}^{K_1} w_{kj}^{(2)} A_j^{(1)}\\right)\\]\nStep 4: Output layer. Final prediction is a linear combination of all \\(K\\) activations:\n\\[F(X_1, \\ldots, X_p) = \\beta_0 + \\beta_1 A^{(2)}_1 + \\cdots + \\beta_{K_2} A^{(2)}_{K_2}\\]"
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step1",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step1",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Step 1: Input layer\n\nAn observation \\((X_1, \\ldots, X_p)\\) is fed through the network left to right.\n."
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step2",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step2",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Step 2: Activations in the first layer\n\nEach neuron in the first layer computes an activation \\(A^{(1)}_k\\) using the fatures as input (same as before)."
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step3",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step3",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Step 3: Activations in the second layer\n\nEach neuron in the second layer takes the first layer’s activations as input to compute its activations \\(A^{(2)}_k\\)."
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step4",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step4",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Step 3: Activations in the second layer\n\nEach neuron in the second layer takes the first layer’s activations as input to compute its activations \\(A^{(2)}_k\\)."
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step5",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#dnn-process-step5",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Step 4: Output layer\n\nFinal prediction is a linear combination of all activations in the last layer.\n."
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#cnn-architecture",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#cnn-architecture",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "CNN architecture\n\n\nA complete CNN combines:\n\nConvolution layers: learn low-level features (edges, textures, patches of color)\nPooling layers: progressively reduce spatial dimensions\nFlattening: convert final feature maps into a flat vector\nFully connected layers: combine high-level features to produce the final prediction\n\n\n\nAdapted from What is the Convolutional Neural Network Architecture?"
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#cnn-architecture-bis",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#cnn-architecture-bis",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "CNN architecture\n\n\n\n\nAdapted from What is the Convolutional Neural Network Architecture?"
-  },
-  {
-    "objectID": "notes/11_neural_networks/11_neural_networks-SLIDES.html#classification",
-    "href": "notes/11_neural_networks/11_neural_networks-SLIDES.html#classification",
-    "title": "EDS 232 - Machine Learning for Environmental Science",
-    "section": "",
-    "text": "Classification\n\n\nFor classification with \\(C\\) classes, the output layer produces \\(C\\) raw scores \\(Z_1, \\ldots, Z_C\\) (one per class), then applies the softmax function to convert them to the probability of belonging to a given class."
   }
 ]

@@ -404,26 +404,40 @@ Multilayer neural networks
 <div class="body-text-s">
 <p>For <strong>classification</strong> with <span class="math inline">\(C\)</span> classes, the output layer produces <span class="math inline">\(C\)</span> raw scores <span class="math inline">\(Z_1, \ldots, Z_C\)</span> (one per class), then applies the <strong><a href="https://en.wikipedia.org/wiki/Softmax_function">softmax</a></strong> function to convert them to the probability of belonging to a given class.</p>
 </div>
-<div id="cell-classification-diagram-slides" class="cell" data-execution_count="3">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="11_neural_networks-SLIDES_files/figure-revealjs/classification-diagram-slides-output-1.png" id="classification-diagram-slides" class="quarto-figure quarto-figure-center" width="1347" height="583"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
+
+<img data-src="classification-nn.png" class="r-stretch"></section>
 <section id="multilayer-depth" class="slide level2" data-menu-title="Depth and representations">
 <h2></h2>
 <p><span class="slide-title">Depth and representations</span></p>
 <hr>
+<div class="columns">
+<div class="column" style="width:50%;">
 <p><strong>Early layers</strong> tend to capture simple, low-level patterns.</p>
 <p><strong>Deeper layers</strong> combine them into higher-level, more concrete features.</p>
-
-<img data-src="tiger-cnn.png" class="r-stretch quarto-figure-center"><p class="caption">ISLP FIGURE 10.6</p><div class="center-text">
+</div><div class="column" style="width:50%;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="tiger-cnn.png"></p>
+<figcaption>ISLP FIGURE 10.6</figcaption>
+</figure>
+</div>
+</div></div>
+</section>
+<section id="multilayer-depth-video" class="slide level2" data-menu-title="Depth and representations">
+<h2></h2>
+<p><span class="slide-title">Depth and representations</span></p>
+<hr>
+<div class="center-text">
 <p>This resource visually explains how the layers and activations capture features:</p>
 <p><a href="https://www.youtube.com/watch?v=aircAruvnKk">3Blue1Brown — <em>But what is a neural network?</em></a></p>
+</div>
+<div class="teal-text">
+<ul>
+<li><p>How do the activations in the first layer relate to the activations in the second layer?</p></li>
+<li><p>Explain the motivation between the using multiple layers of neurons to recognize patterns in the input data.</p></li>
+<li><p>How do the weights capture specific patterns in the input data?</p></li>
+<li><p>The video uses an example of classifying hand-written digits. What would be the difference between classifying these images of handwritten images, and a color image with RGB bands?</p></li>
+</ul>
 </div>
 </section>
 <section id="section-cnn" class="slide level2" data-menu-title="# Convolutional neural networks #" data-background="#047C90">
@@ -475,7 +489,7 @@ Convolutional neural networks
 <p>We slide the filter across the image, computing a convolution product at each position.</p>
 <p><a href="https://docs.google.com/presentation/d/1kKWaRg8aVLyWXAJ6a_TBbRW7h7LRaG-hN86gwTwOGMg/edit?usp=sharing">Convolution diagrams</a> <!-- 
 
-::: {#cell-convolution-example-slides .cell execution_count=4}
+::: {#cell-convolution-example-slides .cell execution_count=3}
 
 ::: {.cell-output .cell-output-display}
 ![](11_neural_networks-SLIDES_files/figure-revealjs/convolution-example-slides-output-1.png){#convolution-example-slides width=1015 height=385 fig-align='center'}
@@ -494,7 +508,7 @@ Convolutional neural networks
 <hr>
 <p>A <strong>pooling layer</strong> reduces the spatial size of feature maps making the fatures more compact.</p>
 <p><strong>Generally use max pooling</strong>: divide into non-overlapping blocks, retain only the <strong>maximum</strong> value per block.</p>
-<div id="cell-max-pooling-slides" class="cell" data-execution_count="5">
+<div id="cell-max-pooling-slides" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
