@@ -169,7 +169,7 @@ Deep neural networks are at the heart of many contemporary technological advance
 . . .
 
 ::: {.body-text-m}
-Myriad of **environmental applications**: anywhere regression, classification, text analysis, or image processing can be applied.
+Many **environmental applications**: anywhere regression, classification, text analysis, or image processing can be applied.
 :::
 
 - [Yu et al. 2025](https://www.nature.com/articles/s41467-025-60091-y): inequities in EV charging station access for disadvantaged communities
@@ -212,14 +212,17 @@ A **single-layer neural network** (a network with one hidden layer) has three co
 2. **Hidden layer**: made up of $K$ **neurons**
 
 3. **Output layer**: the final model output $F(\mathbf{X})$
+
+In the diagram, $p=4$ and $K=5$. 
 :::
+
+
 :::
 
 
 ::: {.column width="60%"}
 ![](one-layer-nn.png)
 :::
-
 
 :::
 
@@ -235,20 +238,22 @@ A **single-layer neural network** (a network with one hidden layer) has three co
 **Step 1: Input layer.** An observation $(X_1, \ldots, X_p)$ is fed through the network left to right.
 
 
-**Step 2: Hidden layer.** Each neuron computes an activation $A_k$ in two steps:
+**Step 2: Hidden layer.** Each neuron computes an **activation** $A_k$ in two steps:
 
 - Form a linear combination using a **bias** $w_{k0}$ and **weights** $w_{k1}, \ldots, w_{kp}$:
-$$w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p$$
+$$w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p.$$
 
 
 - Pass through an **activation function** $g(z)$:
 
-$$A_k = g(w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p)$$
+$$A_k = g(w_{k0} + w_{k1} X_1 + \cdots + w_{kp} X_p).$$
 
 
 **Step 3: Output layer.** Final prediction is a linear combination of all $K$ activations:
 
 $$F(X_1, \ldots, X_p) = \beta_0 + \beta_1 A_1 + \cdots + \beta_K A_K$$
+
+using $K+1$ new parameters $\beta_0, \ldots, \beta_K$. 
 
 ---
 
@@ -272,7 +277,7 @@ An observation $(X_1, \ldots, X_p)$ is fed through the network left to right.
 
 <hr>
 
-Form a linear combination of the features $X_i$ using a **bias** and **weights**, and pass it through an **activation function**.
+At each neuron, form a linear combination of the features $X_i$ using a **bias** and **weights**, and pass it through an **activation function**.
 
 ![](one-layer-nn-2.jpg)
 
@@ -284,7 +289,7 @@ Form a linear combination of the features $X_i$ using a **bias** and **weights**
 
 <hr>
 
-Form a linear combination of the features $X_i$ using a **bias** and **weights**, and pass it through an **activation function**.
+At each neuron, form a linear combination of the features $X_i$ using a **bias** and **weights**, and pass it through an **activation function**. Each neuron in the layer gives an **activation**. 
 
 ![](one-layer-nn-3.jpg)
 
@@ -310,22 +315,24 @@ Final prediction is a linear combination of all $K$ activations.
 
 <hr>
 
-Fitting means estimating all weights $w_{kj}$, biases $w_{k0}$, and output coefficients $\beta_0, \ldots, \beta_K$ from the training data.
+**Fitting a neural network** means estimating all weights $w_{kj}$, biases $w_{k0}$, and output coefficients $\beta_0, \ldots, \beta_K$ from the training data.
 
 . . .
 
 <br>
 
-We minimize a **loss function** that measures prediction error:
+To find these parameters we look for the parameters that minimize a **loss function** that measures prediction error:
 
-- **Regression**: mean squared error
+- **Regression**: commonly mean squared error.
 - **Classification**: [cross-entropy](https://en.wikipedia.org/wiki/Cross-entropy)
 
 . . .
 
 <br>
 
-This is done via **stochastic gradient descent** + **backpropagation**. We'll treat this as a black box.
+This is done via **stochastic gradient descent** + **backpropagation**. 
+
+We'll treat this as a black box.
 
 ::: {.body-text-s .center-text}
 *(See ISLP §10.7 for details on the fitting algorithm)*
@@ -333,55 +340,27 @@ This is done via **stochastic gradient descent** + **backpropagation**. We'll tr
 
 ---
 
-## {#section-activations data-menu-title="# Activation functions #" background="#047C90"}
-
-<div class="page-center vertical-center">
-<p class="custom-subtitle bottombr">Activation functions</p>
-</div>
-
----
-
 ## {#activation-intro data-menu-title="Why activation functions?"}
 
-[Why activation functions?]{.slide-title}
+[What about the activation function?]{.slide-title}
 
 <hr>
 
 The activation function introduces the **nonlinearity** that gives neural networks their modeling power.
-
-. . .
-
-<br>
-
-::: {.center-text .teal-text .body-text-m}
-Without it, the entire network would collapse to a **linear model** — regardless of how many layers it has.
-:::
-
-. . .
-
-<br>
-
 Two of the most common choices:
 
-::: {.body-text-m}
-- **Sigmoid**: $\displaystyle g(z) = \frac{e^z}{1 + e^z}$ — squashes any input to $(0, 1)$
+::: {.body-text-s}
+- **Sigmoid**: $\displaystyle g(z) = \frac{e^z}{1 + e^z}$: squashes any input to $(0, 1)$
 
-- **ReLU** (Rectified Linear Unit): $g(z) = \max(0, z)$ — zero for negative inputs, identity for positive
+- **ReLU** (Rectified Linear Unit): $g(z) = \max(0, z)$: zero for negative inputs, identity for positive (most commonly used)
+
 :::
-
----
-
-## {#activation-plot data-menu-title="Activation functions"}
-
-[Activation functions]{.slide-title}
-
-<hr>
 
 ```{python}
 #| label: activation-functions-slides
 #| echo: false
 #| fig-align: center
-#| out-width: "90%"
+#| out-width: "50%"
 
 z       = np.linspace(-4, 4, 300)
 sigmoid = 1 / (1 + np.exp(-z))
@@ -427,93 +406,122 @@ plt.close()
 
 <hr>
 
-In practice, neural networks have **more than one hidden layer** and many neurons per layer (often hundreds). This is what makes them *deep* networks.
+In practice, neural networks have **more than one hidden layer** and many neurons per layer (often hundreds). This is what makes them *deep* networks. As the network grows deeper, it can represent increasingly complex functions.
+
 
 . . .
 
-<br>
+:::: {.columns}
 
-**First hidden layer** ($K_1$ neurons):
+::: {.column width="40%"}
 
-$$\begin{aligned}
-A_k^{(1)} &= g\!\left(w_{k0}^{(1)} + w_{k1}^{(1)} X_1 + \cdots + w_{kp}^{(1)} X_p\right) \\
-           &= g\!\left(w_{k0}^{(1)} + \sum_{j=1}^{p} w_{kj}^{(1)} X_j\right)
-\end{aligned}$$
+::: {.body-text-s}
+The multilayer network now has:
 
-. . .
+1. **Input layer**: the $p$ features $X_1, \ldots, X_p$ form the input layer
 
-**Second hidden layer** ($K_2$ neurons) — takes the previous layer's activations as input:
+2. **Multiple hidden layer**: made up of a constant or decreasing number of **neurons**
 
-$$\begin{aligned}
-A_k^{(2)} &= g\!\left(w_{k0}^{(2)} + w_{k1}^{(2)} A_1^{(1)} + \cdots + w_{kK_1}^{(2)} A_{K_1}^{(1)}\right) \\
-           &= g\!\left(w_{k0}^{(2)} + \sum_{j=1}^{K_1} w_{kj}^{(2)} A_j^{(1)}\right)
-\end{aligned}$$
+3. **Output layer**: the final model output $F(\mathbf{X})$
+:::
+
+
+:::
+
+
+::: {.column width="60%"}
+![](deep-nn-5.png)
+:::
+
+:::
 
 ---
 
-## {#multilayer-diagram-slide data-menu-title="Multilayer architecture diagram"}
+## {#multilayer-prediction data-menu-title="Multilayer neural networks"}
 
-[Multilayer architecture]{.slide-title}
+[The prediction process]{.slide-title}
 
 <hr>
 
-```{python}
-#| label: multilayer-nn-diagram-slides
-#| echo: false
-#| fig-align: center
-#| out-width: "85%"
+**Step 1: Input layer.** An observation $(X_1, \ldots, X_p)$ is fed through the network left to right.
 
-fig, ax = plt.subplots(figsize=(fig_size_x * 1.3, fig_size_y * 1.5))
-ax.set_xlim(0, 12)
-ax.set_ylim(-0.5, 9.0)
-ax.axis('off')
 
-x_in, x_h1, x_h2, x_out = 1.5, 4.0, 7.5, 10.5
-in_ys  = np.linspace(1.5, 7.5, 4)
-h1_ys  = np.linspace(0.8, 8.2, 5)
-h2_ys  = np.linspace(1.5, 7.5, 4)
-out_y  = 4.5
-r = 0.45
+**Step 2: First hidden layer.** There are $K_1$ neurons in it. Each neuron computes an **activation** $A^{(1)}_k$ using the fatures as input (same as before):
 
-for iy in in_ys:
-    for hy in h1_ys:
-        ax.annotate('', xy=(x_h1 - r, hy), xytext=(x_in + r, iy),
-                    arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
-for h1y in h1_ys:
-    for h2y in h2_ys:
-        ax.annotate('', xy=(x_h2 - r, h2y), xytext=(x_h1 + r, h1y),
-                    arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
-for h2y in h2_ys:
-    ax.annotate('', xy=(x_out - r, out_y), xytext=(x_h2 + r, h2y),
-                arrowprops=dict(arrowstyle='-', color='#aaaaaa', lw=0.5))
+$$A_k^{(1)} = g\!\left(w_{k0}^{(1)} + \sum_{j=1}^{p} w_{kj}^{(1)} X_j\right)$$
 
-for i, iy in enumerate(in_ys):
-    ax.add_patch(plt.Circle((x_in, iy), r, color='#4A90D9', zorder=3))
-    ax.text(x_in - 0.75, iy, f'$X_{i+1}$', ha='right', va='center', fontsize=11)
+**Step 3: Second hidden layer** There are $K_2$ neurons in it. Each neuron takes the previous layer's activations as input to compute its activations:
 
-for k, hy in enumerate(h1_ys):
-    ax.add_patch(plt.Circle((x_h1, hy), r, color='#E8A838', zorder=3))
-    ax.text(x_h1, hy, f'$A_{k+1}^{{(1)}}$', ha='center', va='center', fontsize=8,
-            color='white', fontweight='bold')
+$$A_k^{(2)} = g\!\left(w_{k0}^{(2)} + \sum_{j=1}^{K_1} w_{kj}^{(2)} A_j^{(1)}\right)$$
 
-for k, hy in enumerate(h2_ys):
-    ax.add_patch(plt.Circle((x_h2, hy), r, color='#E06C3A', zorder=3))
-    ax.text(x_h2, hy, f'$A_{k+1}^{{(2)}}$', ha='center', va='center', fontsize=8,
-            color='white', fontweight='bold')
 
-ax.add_patch(plt.Circle((x_out, out_y), r, color='#5BAD6F', zorder=3))
-ax.text(x_out + 0.75, out_y, r'$F(\mathbf{X})$', ha='left', va='center', fontsize=11)
+**Step 4: Output layer.** Final prediction is a linear combination of all $K$ activations:
 
-ax.text(x_in,  -0.3, 'Input\nlayer',    ha='center', va='top', fontsize=10, color='#4A90D9')
-ax.text(x_h1,  -0.3, 'Hidden\nlayer 1', ha='center', va='top', fontsize=10, color='#E8A838')
-ax.text(x_h2,  -0.3, 'Hidden\nlayer 2', ha='center', va='top', fontsize=10, color='#E06C3A')
-ax.text(x_out, -0.3, 'Output\nlayer',   ha='center', va='top', fontsize=10, color='#5BAD6F')
+$$F(X_1, \ldots, X_p) = \beta_0 + \beta_1 A^{(2)}_1 + \cdots + \beta_{K_2} A^{(2)}_{K_2}$$
 
-ax.set_title('Multilayer neural network (two hidden layers)', fontsize=11, pad=10)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
+---
+
+## {#dnn-process-step1 data-menu-title="The process"}
+
+[Step 1: Input layer]{.slide-title}
+
+<hr>
+
+An observation $(X_1, \ldots, X_p)$ is fed through the network left to right.
+
+. 
+
+![](deep-nn-1.jpg)
+
+---
+
+## {#dnn-process-step2 data-menu-title="The process"}
+
+[Step 2: Activations in the first layer]{.slide-title}
+
+<hr>
+
+Each neuron in the first layer computes an **activation** $A^{(1)}_k$ using the fatures as input (same as before).
+
+![](deep-nn-2.jpg)
+
+---
+
+## {#dnn-process-step3 data-menu-title="The process"}
+
+[Step 3: Activations in the second layer]{.slide-title}
+
+<hr>
+
+Each neuron in the second layer takes the first layer's activations as input to compute its activations  $A^{(2)}_k$.
+
+![](deep-nn-3.jpg)
+
+---
+
+## {#dnn-process-step4 data-menu-title="The process"}
+
+[Step 3: Activations in the second layer]{.slide-title}
+
+<hr>
+
+Each neuron in the second layer takes the first layer's activations as input to compute its activations  $A^{(2)}_k$.
+
+![](deep-nn-4.jpg)
+
+---
+
+## {#dnn-process-step5 data-menu-title="The process"}
+
+[Step 4: Output layer]{.slide-title}
+
+<hr>
+
+Final prediction is a linear combination of all activations in the last layer.
+
+. 
+
+![](deep-nn-5.png)
 
 ---
 
@@ -523,31 +531,15 @@ plt.close()
 
 <hr>
 
-As the network grows deeper, it can represent increasingly complex functions.
 
-<br>
+**Early layers** tend to capture simple, low-level patterns.
 
-::: {.body-text-m}
-- **Early layers** tend to capture simple, low-level patterns
-- **Deeper layers** combine them into progressively abstract representations
-:::
-
-. . .
-
-<br>
+**Deeper layers** combine them into progressively abstract representations.
 
 To build an intuitive understanding of how deep networks work, watch:
 
 ::: {.center-text .body-text-m}
 [3Blue1Brown — *But what is a neural network?*](https://www.youtube.com/watch?v=aircAruvnKk)
-:::
-
-::: {.body-text-s}
-As you watch, think about:
-
-1. How does the network represent a handwritten digit as an input?
-2. What does each neuron in a hidden layer conceptually "detect"?
-3. Why can depth capture more complex patterns than a single very wide layer?
 :::
 
 ---
