@@ -1,5 +1,5 @@
 ---
-title: "Midterm 2 Study Guide"
+title: "Second Midterm Study Guide"
 jupyter: eds232-env
 format:
   html:
@@ -19,7 +19,7 @@ format:
 1. Being able to abstract from a data scenario
    - 1.1 What are the predictors: $X_1, \ldots, X_p$
    - 1.2 What is the response variable: $Y$
-   - 1.3 Observation data points for one and multiple predictors: $(x_1, y_1), \ldots, (x_p, y_p)$
+   - 1.3 Observation data points
    - 1.4 Whether inference or prediction is the main goal
    - 1.5 Whether the problem is a regression or classification task
    <!-- - 1.6 Whether the problem is a supervised or unsupervised task -->
@@ -46,82 +46,84 @@ format:
 
 ## Models
 
-### 12. Ridge and Lasso Regression
+### 10. Ridge and Lasso Regression
 
-12.1 Explain, in general terms, the effect of adding a penalty term to regularize the fitting of a multiple linear regression.
+10.1 Explain, in general terms, the effect of adding a penalty term to regularize the fitting of a multiple linear regression.
 
-12.2 Explain the difference in the penalty terms between lasso and ridge regression, referencing formulas and understanding all notation in them.
+10.2 Explain the difference in the penalty terms between lasso and ridge regression, referencing formulas and understanding all notation in them.
 
-12.3 Explain the effect the tuning parameter $\lambda$ has on the regression coefficients when $\lambda = 0$ and as $\lambda$ values increase for ridge and lasso regression.
+10.3 Explain the effect the tuning parameter $\lambda$ has on the regression coefficients when $\lambda = 0$ and as $\lambda$ values increase for ridge and lasso regression.
 
-12.4 Identify potential scenarios in which ridge or lasso could have better performance relative to each other. 
+10.4 Identify potential scenarios in which ridge or lasso could have better performance relative to each other.
 
-### 13. Principal Component Analysis and Regression
+10.5 Use coefficient profile plots to assess relative coefficient importance.
 
-13.1 Explain, in general terms and with diagrams, how the process of finding the principal components for a dataset works.
+### 11. Principal Component Analysis and Regression
 
-13.2 Interpret principal components as ranked directions of maximum variance within a dataset.
+11.1 Explain, in general terms and with diagrams, how the process of finding the principal components for a dataset works.
 
-13.3 Interpret scree plots to identify principal components with maximum proportion of variance explained.
+11.2 Interpret principal components as ranked directions of maximum variance within a dataset.
 
-13.4 Explain how PCA can be used as a dimensionality reduction method.
+11.3 Interpret scree plots to identify principal components with maximum proportion of variance explained.
 
-13.5 Explain how PCA and multiple linear regression can be combined into principal component regression to generate simpler predictive models.
+11.4 Explain how PCA can be used as a dimensionality reduction method.
 
-13.6 Use metrics, statistics, and results from a fitted model to solve prediction questions.
+11.5 Explain how PCA and multiple linear regression can be combined into principal component regression to generate simpler predictive models.
 
-### 14. Decision Trees
+11.6 Interpret PCR model results, including components selected and variance explained, and use them to make predictions for new observations.
 
-14.1 Use a decision tree to make predictions for new data.
+### 12. Decision Trees
 
-14.2 Translate a given prediction tree into partitions of the feature space for regression and classification.
+12.1 Use a decision tree to make predictions for new data.
 
-14.3 Explain, in general terms, how a decision tree is fitted, including metrics used to determine the node splits.
+12.2 Translate a given prediction tree into partitions of the feature space for regression and classification.
 
-14.4 Explain the drawbacks of a fully grown decision tree and methods to avoid overfitting.
+12.3 Explain, in general terms, how a decision tree is fitted, including metrics used to determine the node splits.
+
+12.4 Explain the drawbacks of a fully grown decision tree and methods to avoid overfitting.
+
+12.5 Use metrics, statistics, and results from a fitted model to solve prediction questions.
+
+### 13. Tree-Based Ensemble Methods
+
+13.1 Define what an ensemble method is and how it may reduce error due to variance.
+
+13.2 Explain what bootstrap sampling is and how it can be used to reduce variance in ensemble methods.
+
+13.3 Explain the bagging method used to construct a forest of decision trees, both in the regression and classification scenarios.
+
+13.4 Explain how random forests construct a forest of decision trees, both in the regression and classification scenarios.
+
+13.5 Identify which hyperparameters for random forest can be tuned to reduce variance (avoid overfitting).
+
+13.6 Explain how Out-of-Bag error estimation is calculated.
+
+13.7 Use metrics, statistics, and results from a fitted model to solve prediction questions and identify variables with higher predictive power.
+
+### 14. Support Vector Machines
+
+14.1 Explain, in general terms, how the support vector classifier improves upon the maximal margin classifier.
+
+14.2 Explain, in general terms, how the support vector machine improves upon the support vector classifier.
+
+14.3 Explain, in general terms, how feature space augmentation works and how it can be used to create non-linear decision boundaries.
+
+14.4 Explain what the parameter C (as used by `sklearn`) controls and how large or small values of it relate to margin width, variance, bias, and overfitting.
 
 14.5 Use metrics, statistics, and results from a fitted model to solve prediction questions.
 
-### 15. Tree-Based Ensemble Methods
+### 15. End-to-End Workflows
 
-15.1 Define what an ensemble method is and how it may reduce error due to variance. 
+15.1 For a given scenario, evaluate (come up with) questions that may strengthen the understanding of the problem's context before starting data analysis.
 
-15.2 Explain what bootstrap sampling is and how it can be used to reduce variance in ensemble methods.
+15.2 Plan out what kind of preliminary information needs to be extracted programatically about the data before creating ML models.
 
-15.3 Explain the bagging method used to construct a forest of decision trees, both in the regression and classification scenarios.
+15.3 Identify the appropriate time to create a training set and whether "data leakage" may be occurring.
 
-15.4 Explain how random forests construct a forest of decision trees, both in the regression and classification scenarios.
+15.4 Identify data transformations that may be needed for numerical and categorical variables in order to use models.
 
-15.5 Identify which hyperparameters for random forest can be tuned to reduce variance (avoid overfitting).
+15.5 Suggest potential solutions to poor model performance due to issues with the training data.
 
-15.6 Explain how Out-of-Bag error estimation is calculated.
+15.6 Suggest potential solutions to poor model performance due to issues with the model.
 
-15.7 Use metrics, statistics, and results from a fitted model to solve prediction questions.
-
-### 16. Support Vector Machines
-
-16.1 Explain, in general terms, how the support vector classifier improves upon the maximal margin classifier.
-
-16.2 Explain, in general terms, how the support vector machine improves upon the support vector classifier.
-
-16.3 Explain, in general terms, how feature space augmentation works and how it can be used to create non-linear decision boundaries.
-
-16.4 Explain what the parameter C controls and how large or small values of it relate to margin width, variance, bias, and overfitting.
-
-16.5 Use metrics, statistics, and results from a fitted model to solve prediction questions.
-
-## 17. End-to-End Workflows
-
-17.1 For a given scenario, evaluate (come up with) questions that may strengthen the understanding of the problem's context before starting data analysis.
-
-17.2 Plan out what kind of preliminary information needs to be extracted programatically about the data before creating ML models.
-
-17.3 Identify the appropriate time to create a training set and whether "data leakage" may be occurring.
-
-17.4 Identify data transformations that may be needed for numerical and categorical variables in order to use models.
-
-17.5 Suggest potential solutions to poor model performance due to issues with the training data.
-
-17.6 Suggest potential solutions to poor model performance due to issues with the model.
-
-17.7 Suggest appropriate candidate models for a given classification or regression task.
+15.7 Suggest appropriate candidate models for a given classification or regression task.

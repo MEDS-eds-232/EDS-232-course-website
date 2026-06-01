@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-06-01">
 
-<title>Assignment 3 – EDS 232 - Machine Learning for Environmental Science</title>
+<title>Second Midterm Study Guide – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,41 +19,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -104,6 +68,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -253,21 +246,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#submission-instructions" id="toc-submission-instructions" class="nav-link active" data-scroll-target="#submission-instructions">Submission Instructions</a></li>
-  <li><a href="#how-to-submit-via-github-to-gradescope" id="toc-how-to-submit-via-github-to-gradescope" class="nav-link" data-scroll-target="#how-to-submit-via-github-to-gradescope">How to Submit via GitHub to Gradescope</a></li>
-  <li><a href="#how-the-otter-grader-works" id="toc-how-the-otter-grader-works" class="nav-link" data-scroll-target="#how-the-otter-grader-works">How the Otter Grader Works</a></li>
-  <li><a href="#ai-policy" id="toc-ai-policy" class="nav-link" data-scroll-target="#ai-policy">AI Policy</a></li>
-  <li><a href="#task-1-regularization" id="toc-task-1-regularization" class="nav-link" data-scroll-target="#task-1-regularization">Task 1: Regularization</a>
+  <li><a href="#day-of-instructions" id="toc-day-of-instructions" class="nav-link active" data-scroll-target="#day-of-instructions">Day-of instructions</a></li>
+  <li><a href="#general-concepts" id="toc-general-concepts" class="nav-link" data-scroll-target="#general-concepts">General Concepts</a></li>
+  <li><a href="#models" id="toc-models" class="nav-link" data-scroll-target="#models">Models</a>
   <ul class="collapse">
-  <li><a href="#predicting-building-heat-load-with-ridge-lasso-and-pca." id="toc-predicting-building-heat-load-with-ridge-lasso-and-pca." class="nav-link" data-scroll-target="#predicting-building-heat-load-with-ridge-lasso-and-pca.">Predicting Building Heat Load with Ridge, Lasso, and PCA.</a></li>
-  </ul></li>
-  <li><a href="#task-2-decision-trees-and-random-forests" id="toc-task-2-decision-trees-and-random-forests" class="nav-link" data-scroll-target="#task-2-decision-trees-and-random-forests">Task 2: Decision Trees and Random Forests</a>
-  <ul class="collapse">
-  <li><a href="#classifying-potable-non-potable-water" id="toc-classifying-potable-non-potable-water" class="nav-link" data-scroll-target="#classifying-potable-non-potable-water">Classifying Potable/ Non Potable Water</a></li>
-  </ul></li>
-  <li><a href="#task-3-considerations-in-high-dimensions" id="toc-task-3-considerations-in-high-dimensions" class="nav-link" data-scroll-target="#task-3-considerations-in-high-dimensions">Task 3: Considerations in High Dimensions</a>
-  <ul class="collapse">
-  <li><a href="#rubric" id="toc-rubric" class="nav-link" data-scroll-target="#rubric">Rubric</a></li>
+  <li><a href="#ridge-and-lasso-regression" id="toc-ridge-and-lasso-regression" class="nav-link" data-scroll-target="#ridge-and-lasso-regression">10. Ridge and Lasso Regression</a></li>
+  <li><a href="#principal-component-analysis-and-regression" id="toc-principal-component-analysis-and-regression" class="nav-link" data-scroll-target="#principal-component-analysis-and-regression">11. Principal Component Analysis and Regression</a></li>
+  <li><a href="#decision-trees" id="toc-decision-trees" class="nav-link" data-scroll-target="#decision-trees">12. Decision Trees</a></li>
+  <li><a href="#tree-based-ensemble-methods" id="toc-tree-based-ensemble-methods" class="nav-link" data-scroll-target="#tree-based-ensemble-methods">13. Tree-Based Ensemble Methods</a></li>
+  <li><a href="#support-vector-machines" id="toc-support-vector-machines" class="nav-link" data-scroll-target="#support-vector-machines">14. Support Vector Machines</a></li>
+  <li><a href="#end-to-end-workflows" id="toc-end-to-end-workflows" class="nav-link" data-scroll-target="#end-to-end-workflows">15. End-to-End Workflows</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -277,8 +265,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Assignment 3</h1>
-<p class="subtitle lead">Regularization and Decision Trees</p>
+<h1 class="title">Second Midterm Study Guide</h1>
 </div>
 
 
@@ -286,12 +273,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="quarto-title-meta">
 
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">June 1, 2026</p>
-    </div>
-  </div>
   
     
   </div>
@@ -301,239 +282,99 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This assignment covers topics from the course on regularization,PCA, decision trees, random forest,and high dimensional data. Task 1 and Task 2 will each contribute 45% to the total grade and Task 3 will contribute 10%. Review the rubric for this assignment <a href="https://docs.google.com/document/d/1a5_Eu_RZ24BMorTcvYepYpxLLjZdb79rRsCvU7LMaFQ/edit?tab=t.0#heading=h.kx0dpavp3fk4">here</a>.</p>
-<hr>
-<section id="submission-instructions" class="level2">
-<h2 class="anchored" data-anchor-id="submission-instructions">Submission Instructions</h2>
-<div class="callout callout-style-simple callout-warning no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<p>This assignment is submitted as a <strong>GitHub repository</strong> to Gradescope. Before submitting, make sure you satisfy every item in this checklist:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Your repository is properly forked and all work is committed and pushed to <strong>your own GitHub repository</strong>.</label></li>
-<li><label><input type="checkbox">Your notebooks must include your code <strong>and</strong> all required rendered outputs (printed results, plots, tables). <strong>Run all cells before committing</strong> and verify all outputs are visible.</label></li>
-<li><label><input type="checkbox">Any notebook containing an autograder must include the output from the final <code>grader.check_all()</code> cell.</label></li>
-<li><label><input type="checkbox">The notebooks you submit must contain <strong>your solutions</strong>: do not submit the blank template notebooks.</label></li>
-<li><label><input type="checkbox">Double-check that each file is in the correct folder in your repository and that all code and outputs are visible.</label></li>
+<section id="day-of-instructions" class="level2">
+<h2 class="anchored" data-anchor-id="day-of-instructions">Day-of instructions</h2>
+<ul>
+<li>The midterm will take place in our usual classroom during class time.</li>
+<li>This is a closed-book, individual exam.</li>
+<li>No electronics are allowed.</li>
+<li>You can bring a 3”x5” notecard with study notes on both sides</li>
+<li>You will be provided a calculator for any small computations you may need to do.</li>
 </ul>
-<p><strong>Resubmissions after the due date that fail to satisfy one of the checks above will be strictly held to the course’s 50%-regrade resubmission policy (see syllabus).</strong></p>
-<p>If you have any questions about assignment logistics, please reach out to the instructional team.</p>
-</div>
-</div>
-</div>
-<hr>
 </section>
-<section id="how-to-submit-via-github-to-gradescope" class="level2">
-<h2 class="anchored" data-anchor-id="how-to-submit-via-github-to-gradescope">How to Submit via GitHub to Gradescope</h2>
-<div class="callout callout-style-simple callout-tip no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
+<section id="general-concepts" class="level2">
+<h2 class="anchored" data-anchor-id="general-concepts">General Concepts</h2>
 <ol type="1">
-<li><strong>Fork</strong> <a href="https://github.com/MEDS-eds-232/assignment-3">this repository</a> from the course GitHub organization.</li>
-<li><strong>Clone</strong> your forked repository to your local machine or the workbench server.</li>
-<li>Complete the tasks inside your cloned repository. Do not move files out of the repo.</li>
-<li>As you work, <strong>commit and push</strong> your changes regularly.</li>
-<li>When you are finished, <strong>make a final push</strong> to ensure your most recent work is on GitHub.</li>
-<li>On Gradescope, select “GitHub” as your submission method and choose your forked repository and the correct branch (usually <code>main</code>).</li>
-</ol>
-<p><strong>Your Gradescope submission will pull directly from whatever is in your GitHub repo at the time of submission, so be sure to submit only once you are completely finished.</strong></p>
-</div>
-</div>
-</div>
-<hr>
-</section>
-<section id="how-the-otter-grader-works" class="level2">
-<h2 class="anchored" data-anchor-id="how-the-otter-grader-works">How the Otter Grader Works</h2>
-<div class="callout callout-style-simple callout-note no-icon callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Expand to learn how to use the autograder
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>These notebooks use the <code>otter-grader</code> library to provide instant feedback on your answers as you work. Here is how it works:</p>
-<section id="step-1-initialize-otter" class="level3">
-<h3 class="anchored" data-anchor-id="step-1-initialize-otter">Step 1 — Initialize Otter</h3>
-<p>The very first cell of each notebook initializes the grader. <strong>Always run this cell first before anything else</strong>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize Otter</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> otter</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>grader <span class="op">=</span> otter.Notebook(<span class="st">"hw2-task2.ipynb"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="step-2-complete-the-exercises" class="level3">
-<h3 class="anchored" data-anchor-id="step-2-complete-the-exercises">Step 2 — Complete the exercises</h3>
-<p>Fill in code in the cells marked with <code>...</code> or <code># Your answer here</code>. Read each question carefully and make sure your variable names match exactly what is asked since the autograder checks specific variable names.</p>
-</section>
-<section id="step-3-run-individual-checks" class="level3">
-<h3 class="anchored" data-anchor-id="step-3-run-individual-checks">Step 3 — Run individual checks</h3>
-<p>After completing an exercise, run the <code>grader.check("qN")</code> cell immediately following it. This will tell you right away whether your answer is correct:</p>
+<li><p>Being able to abstract from a data scenario</p>
 <ul>
-<li>✅ <strong>Passed:</strong> You’ll see something like <code>q3 passed!</code>. If so, you’re good to move on.</li>
-<li>❌ <strong>Failed:</strong> You’ll see a description of what went wrong. Re-read the question, inspect your output, and try again.</li>
-</ul>
-<div class="callout callout-style-simple callout-tip no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<p><strong>Stuck?</strong> Check that your variable names, data types, and shapes all match what the question asks for. Most failures come from a small mismatch. For example, returning a list instead of a DataFrame.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="step-4-run-grader.check_all-before-submitting" class="level3">
-<h3 class="anchored" data-anchor-id="step-4-run-grader.check_all-before-submitting">Step 4 — Run <code>grader.check_all()</code> before submitting</h3>
-<p>The <strong>very last cell</strong> of each notebook runs all checks at once and gives you a summary:</p>
-<pre><code>q3  ✅ passed
-q5  ✅ passed
-q6  ❌ failed
-...</code></pre>
-<p><strong>You must run this cell and leave its output visible before committing and pushing your notebook.</strong> This summary will be used to grade your autograded answers. You will not receive credit for questions that failed in this section. If this cell has not been run, or its output is missing, you may lose points.</p>
-<div class="callout callout-style-simple callout-warning no-icon">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-body-container">
-<ul>
-<li><strong>Do not modify or delete</strong> any <code>grader.check()</code> or <code>grader.check_all()</code> cells.</li>
-<li>Passing all autograder checks does <strong>not</strong> guarantee full credit on the assignemnt. Some questions are graded manually as well.</li>
-<li>Always re-run all cells from top to bottom before your final commit to make sure everything still passes in sequence.</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
-</div>
-</div>
-</div>
-<hr>
-</section>
-<section id="ai-policy" class="level2">
-<h2 class="anchored" data-anchor-id="ai-policy">AI Policy</h2>
-<div class="callout callout-style-simple callout-note no-icon callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Expand to read the course AI policy
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>If you use generative AI on this assignment, you are expected to adhere to the following course policies:</p>
-<ul>
-<li>✅ <strong>Cultivate understanding:</strong> You should be able to fully understand, justify, and explain all the work you submit.</li>
-<li>🤔 <strong>Question AI outputs:</strong> Assume AI-generated answers may be incorrect and verify all information independently.</li>
-<li>🚫 <strong>Academic integrity:</strong> Submitting work you don’t understand or cannot explain will be considered plagiarism, regardless of whether AI use was disclosed.</li>
-</ul>
-<p>If there are concerns about AI use in your work, your instructor will ask you to meet and discuss it. If understanding is clearly lacking and this is the first occurrence, you will have the chance to revise and resubmit for 50% of the original maximum grade within two days.</p>
-</div>
-</div>
-</div>
-<hr>
-</section>
-<section id="task-1-regularization" class="level1">
-<h1>Task 1: Regularization</h1>
-<section id="predicting-building-heat-load-with-ridge-lasso-and-pca." class="level2">
-<h2 class="anchored" data-anchor-id="predicting-building-heat-load-with-ridge-lasso-and-pca.">Predicting Building Heat Load with Ridge, Lasso, and PCA.</h2>
-<p><strong>Follow the instructions in <code>hw3-task1.ipynb</code> to complete this task.</strong> You will practice:</p>
-<ul>
-<li>Preprocessing data with train/test splits and predictor standardization using <code>StandardScaler</code></li>
-<li>Fitting and evaluating an OLS regression model</li>
-<li>Applying <strong>Ridge regression</strong> with cross-validated hyperparameter tuning (<code>RidgeCV</code>) and visualizing the coefficient shrinkage path across lambda values</li>
-<li>Applying <strong>Lasso regression</strong> with cross-validated tuning (<code>LassoCV</code>) and comparing its coefficient-zeroing behavior to Ridge</li>
-<li>Comparing OLS, Ridge, and Lasso using test MSE and coefficient bar plots</li>
-<li>Performing <strong>Principal Components Regression (PCR)</strong> by fitting PCA on scaled features, selecting the number of components via explained variance (≥90% threshold), and fitting OLS on the projected scores</li>
-<li>Synthesizing all four models in a final summary table and interpreting which approach best fits the building energy efficiency dataset</li>
-</ul>
-<hr>
-</section>
-</section>
-<section id="task-2-decision-trees-and-random-forests" class="level1">
-<h1>Task 2: Decision Trees and Random Forests</h1>
-<section id="classifying-potable-non-potable-water" class="level2">
-<h2 class="anchored" data-anchor-id="classifying-potable-non-potable-water">Classifying Potable/ Non Potable Water</h2>
-<p><strong>Follow the instructions in <code>hw3-task2.ipynb</code> to complete this task.</strong> You will practice:</p>
-<ul>
-<li>Exploring a dataset with class imbalance and missing values, and applying <strong>median imputation</strong> with stratified train/test splitting</li>
-<li>Fitting an <strong>unpruned decision tree</strong> as a baseline</li>
-<li>Tuning <strong>tree depth</strong> using 5-fold cross-validation and selecting the optimal depth from a CV accuracy plot</li>
-<li>Refitting and evaluating the <strong>pruned (tuned) decision tree</strong> and visualizing its structure, including interpreting root-node splits, feature thresholds, and Gini impurity</li>
-<li>Fitting a <strong>Random Forest</strong> (200 trees) and comparing its test accuracy to the single-tree models</li>
-<li>Visualizing and comparing <strong>feature importances</strong> (Gini-based) from both the decision tree and random forest</li>
-<li>Interpreting a <strong>confusion matrix</strong> for the random forest</li>
-<li>Building a final <strong>model comparison table/bar chart</strong> across all three models (unpruned tree, tuned tree, random forest)</li>
-</ul>
-<hr>
-</section>
-</section>
-<section id="task-3-considerations-in-high-dimensions" class="level1">
-<h1>Task 3: Considerations in High Dimensions</h1>
-<p>In this task you will explore common problems that may arise in <em>high-dimensional</em> datasets, in which the number of features is larger than the number of observations and use generative AI to aid in your understanding on this setting.</p>
-<p>Your final submission will include: a concept from the reading you wanted clarification on, the initial prompt you used to get clarification from a genAI chatbot, and a short reflection on how you used genAI.</p>
-<ol type="1">
-<li><p>Read section 6.4 <em>Considerations in High Dimensions</em> in the course textbook: <a href="https://www.statlearning.com">An Introduction to Statistical Learning with applications in Python</a>. The section covers challenges to fitting regression models and interpreting results on high-dimensional data.</p></li>
-<li><p>While reading, identify <strong>one concept or claim from the section that you did not fully understand</strong>.</p></li>
-<li><p><em>This step is designeed to help you write more detailed prompts.</em> Use a generative AI tool (such as ChatGPT or Claude) to help clarify the concept you did not fully understand. Save your prompt so you can report it in this task. Your prompt should go beyond <em>“explain X to me.”</em> and should include at least two of the following elements:</p>
-<ul>
-<li>Your background (For example: <em>“I am X who knows Y and is learning about Z</em>, <em>I am reading X for my course on Y</em>, etc)</li>
-<li>The specific source of confusion</li>
-<li>A requested format or approach (e.g.: <em>“use a concrete numerical example”</em> or <em>create an analogy</em>)</li>
-<li>A constraint or comparison (<em>“explain how Z method differs from Y method”</em> or <em>“avoid matrix notation”</em>)</li>
+<li>1.1 What are the predictors: <span class="math inline">\(X_1, \ldots, X_p\)</span></li>
+<li>1.2 What is the response variable: <span class="math inline">\(Y\)</span></li>
+<li>1.3 Observation data points</li>
+<li>1.4 Whether inference or prediction is the main goal</li>
+<li>1.5 Whether the problem is a regression or classification task <!-- - 1.6 Whether the problem is a supervised or unsupervised task --></li>
 </ul></li>
-<li><p>If the response didn’t fully resolve your confusion, iterate: refine your next prompt and try again.</p></li>
-<li><p>In a short paragraph (4–6 sentences), reflect on your use of generative AI in this task: which tool did you use, what prompts did you give it, and how many iterations did it take to get it to clarify your question? Did the response match the information given in the textbook? <em>This short reflection should be independently written by you, with no AI assistance.</em></p></li>
-</ol>
-<p>Your submission should be a Quarto document, named <code>hwk3-task3.qmd</code>, (inside your forked repo) with the following structure:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Section</th>
-<th>Content</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Title + intro</strong></td>
-<td>Title + one sentence explaining the content of the document</td>
-</tr>
-<tr class="even">
-<td><strong>Concept to clarify</strong></td>
-<td>The concept or claim that you looked clarification for</td>
-</tr>
-<tr class="odd">
-<td><strong>Prompt</strong></td>
-<td>The initial prompt you wrote to gain understanding</td>
-</tr>
-<tr class="even">
-<td><strong>Generative AI reflection</strong></td>
-<td>Answer to step 5</td>
-</tr>
-</tbody>
-</table>
-<section id="rubric" class="level2">
-<h2 class="anchored" data-anchor-id="rubric">Rubric</h2>
+<li><p>Identify which accuracy metrics are appropriate to use in classification and regression applications for a given scenario.</p></li>
+<li><p>For the regression accuracy metrics MSE, <span class="math inline">\(R^2\)</span>, adjusted <span class="math inline">\(R^2\)</span>, being able to:</p>
 <ul>
-<li>Steps 2, 3, 5 and the Title/ Intro will be graded as 1: complete, 0: incomplete.</li>
-</ul>
+<li>3.1 Explain what each metric is measuring</li>
+<li>3.2 Explain how a set of observed data points <span class="math inline">\((x_i, y_i)\)</span> and their predicted values <span class="math inline">\(\hat{y}_i = \hat{f}(x_i)\)</span> fit into the formulas</li>
+</ul></li>
+<li><p>Being able to define false positives/negatives and true positives/negatives and interpret confusion matrices.</p></li>
+<li><p>For the classification accuracy metrics error rate, accuracy, precision, recall, TPR, FPR; being able to:</p>
+<ul>
+<li>5.1 Define each metric in terms of TP, FP, TN, and FN</li>
+<li>5.2 Discuss what metric might be more appropriate to prioritize in specific applied scenarios</li>
+</ul></li>
+<li><p>Identify and discuss overfitting in classification and regression scenarios, particularly in relation to test and training errors.</p></li>
+<li><p>Define model variance and bias, compare model results (plots) and discuss their relative bias and variance; explain the bias-variance tradeoff and the challenges it poses to minimizing the test error.</p></li>
+<li><p>Discuss how class imbalance may affect classification results.</p></li>
+<li><p>Identify when cross-validation should be used to estimate test error, tune hyperparameters, and select across different models.</p></li>
+</ol>
+</section>
+<section id="models" class="level2">
+<h2 class="anchored" data-anchor-id="models">Models</h2>
+<section id="ridge-and-lasso-regression" class="level3">
+<h3 class="anchored" data-anchor-id="ridge-and-lasso-regression">10. Ridge and Lasso Regression</h3>
+<p>10.1 Explain, in general terms, the effect of adding a penalty term to regularize the fitting of a multiple linear regression.</p>
+<p>10.2 Explain the difference in the penalty terms between lasso and ridge regression, referencing formulas and understanding all notation in them.</p>
+<p>10.3 Explain the effect the tuning parameter <span class="math inline">\(\lambda\)</span> has on the regression coefficients when <span class="math inline">\(\lambda = 0\)</span> and as <span class="math inline">\(\lambda\)</span> values increase for ridge and lasso regression.</p>
+<p>10.4 Identify potential scenarios in which ridge or lasso could have better performance relative to each other.</p>
+<p>10.5 Use coefficient profile plots to assess relative coefficient importance.</p>
+</section>
+<section id="principal-component-analysis-and-regression" class="level3">
+<h3 class="anchored" data-anchor-id="principal-component-analysis-and-regression">11. Principal Component Analysis and Regression</h3>
+<p>11.1 Explain, in general terms and with diagrams, how the process of finding the principal components for a dataset works.</p>
+<p>11.2 Interpret principal components as ranked directions of maximum variance within a dataset.</p>
+<p>11.3 Interpret scree plots to identify principal components with maximum proportion of variance explained.</p>
+<p>11.4 Explain how PCA can be used as a dimensionality reduction method.</p>
+<p>11.5 Explain how PCA and multiple linear regression can be combined into principal component regression to generate simpler predictive models.</p>
+<p>11.6 Interpret PCR model results, including components selected and variance explained, and use them to make predictions for new observations.</p>
+</section>
+<section id="decision-trees" class="level3">
+<h3 class="anchored" data-anchor-id="decision-trees">12. Decision Trees</h3>
+<p>12.1 Use a decision tree to make predictions for new data.</p>
+<p>12.2 Translate a given prediction tree into partitions of the feature space for regression and classification.</p>
+<p>12.3 Explain, in general terms, how a decision tree is fitted, including metrics used to determine the node splits.</p>
+<p>12.4 Explain the drawbacks of a fully grown decision tree and methods to avoid overfitting.</p>
+<p>12.5 Use metrics, statistics, and results from a fitted model to solve prediction questions.</p>
+</section>
+<section id="tree-based-ensemble-methods" class="level3">
+<h3 class="anchored" data-anchor-id="tree-based-ensemble-methods">13. Tree-Based Ensemble Methods</h3>
+<p>13.1 Define what an ensemble method is and how it may reduce error due to variance.</p>
+<p>13.2 Explain what bootstrap sampling is and how it can be used to reduce variance in ensemble methods.</p>
+<p>13.3 Explain the bagging method used to construct a forest of decision trees, both in the regression and classification scenarios.</p>
+<p>13.4 Explain how random forests construct a forest of decision trees, both in the regression and classification scenarios.</p>
+<p>13.5 Identify which hyperparameters for random forest can be tuned to reduce variance (avoid overfitting).</p>
+<p>13.6 Explain how Out-of-Bag error estimation is calculated.</p>
+<p>13.7 Use metrics, statistics, and results from a fitted model to solve prediction questions and identify variables with higher predictive power.</p>
+</section>
+<section id="support-vector-machines" class="level3">
+<h3 class="anchored" data-anchor-id="support-vector-machines">14. Support Vector Machines</h3>
+<p>14.1 Explain, in general terms, how the support vector classifier improves upon the maximal margin classifier.</p>
+<p>14.2 Explain, in general terms, how the support vector machine improves upon the support vector classifier.</p>
+<p>14.3 Explain, in general terms, how feature space augmentation works and how it can be used to create non-linear decision boundaries.</p>
+<p>14.4 Explain what the parameter C (as used by <code>sklearn</code>) controls and how large or small values of it relate to margin width, variance, bias, and overfitting.</p>
+<p>14.5 Use metrics, statistics, and results from a fitted model to solve prediction questions.</p>
+</section>
+<section id="end-to-end-workflows" class="level3">
+<h3 class="anchored" data-anchor-id="end-to-end-workflows">15. End-to-End Workflows</h3>
+<p>15.1 For a given scenario, evaluate (come up with) questions that may strengthen the understanding of the problem’s context before starting data analysis.</p>
+<p>15.2 Plan out what kind of preliminary information needs to be extracted programatically about the data before creating ML models.</p>
+<p>15.3 Identify the appropriate time to create a training set and whether “data leakage” may be occurring.</p>
+<p>15.4 Identify data transformations that may be needed for numerical and categorical variables in order to use models.</p>
+<p>15.5 Suggest potential solutions to poor model performance due to issues with the training data.</p>
+<p>15.6 Suggest potential solutions to poor model performance due to issues with the model.</p>
+<p>15.7 Suggest appropriate candidate models for a given classification or regression task.</p>
 
 
 </section>
