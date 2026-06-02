@@ -108,7 +108,7 @@ lbls_3  = _assign(data, cents_2)
 
 <hr>
 
-Consider Amanda from our first lesson. She records **dive depth** (meters) and **dive duration** (minutes) for a large number of northern elephant seals — with no prior labels:
+Consider Amanda from our first lesson. She records **dive depth** (meters) and **dive duration** (minutes) for a large number of northern elephant seals. The question she investigates is:
 
 ::: {.center-text .teal-text .body-text-m}
 *Are there distinct foraging strategies among these seals?*
@@ -143,17 +143,14 @@ plt.close()
 
 . . .
 
-Unlike classification, there is no response variable $Y$ — no prior labels, no "correct answer."
+Unlike classification, there is **no response variable $Y$**: no prior labels, no "correct answer."
 
-. . .
 
 Clustering is a type of **unsupervised** method: we discover structure within the data rather than predicting a known outcome.
 
 . . .
 
-::: {.body-text-s}
 PCA is another unsupervised method we have studied: it finds a low-dimensional representation of the observations that explains a large fraction of the variance.
-:::
 
 ---
 
@@ -171,11 +168,8 @@ PCA is another unsupervised method we have studied: it finds a low-dimensional r
 
 <hr>
 
-A **centroid** is the average position of a set of points — the "center of mass" of the group.
+A **centroid** is the average position of a set of points: the "center of mass" of the group.
 
-:::: {.columns}
-
-::: {.column width="42%"}
 
 | Obs. | Depth $x_1$ | Duration $x_2$ | Cluster |
 |------|:---:|:---:|:---:|
@@ -186,25 +180,20 @@ A **centroid** is the average position of a set of points — the "center of mas
 | 5    | 330 | 11  | B |
 | 6    | 360 | 29  | B |
 
-:::
-
-::: {.column width="58%"}
-
 . . .
+
+::: {.body-text-s}
 
 **Centroid of cluster A:**
 
 $$\bar{x}^{(A)} = \left(\frac{60 + 210 + 150}{3},\; \frac{18 + 6 + 15}{3}\right) = (140,\; 13)$$
 
-. . .
 
 **Centroid of cluster B:**
 
 $$\bar{x}^{(B)} = \left(\frac{240 + 330 + 360}{3},\; \frac{26 + 11 + 29}{3}\right) = (310,\; 22)$$
 
 :::
-
-::::
 
 ---
 
@@ -255,7 +244,7 @@ For a good clustering, observations within each cluster should be as similar as 
 $$W(C_k) = \frac{1}{|C_k|} \sum_{i,\, i' \in C_k} \;\sum_{j=1}^{p} (x_{ij} - x_{i'j})^2$$
 
 ::: {.body-text-s}
-$|C_k|$ = number of observations in cluster $C_k$ — $p$ = number of features
+$|C_k|$ = number of observations in cluster $C_k$. $p$ = number of features
 :::
 
 ```{python}
@@ -331,8 +320,80 @@ The $K$-means algorithm finds an approximate solution to this minimization throu
 <br>
 
 ::: {.body-text-s}
-Every iteration is guaranteed to decrease (or maintain) the total within-cluster variation, so the algorithm always converges. However, it does not always converge to the global minimum.
+Every iteration is guaranteed to decrease (or maintain) the total within-cluster variation, so the algorithm always converges. However, it does not always converge to the global minimum!
 :::
+
+---
+
+## {#algorithm-1 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_1.jpg)
+
+---
+
+## {#algorithm-2 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_2.jpg)
+
+---
+
+## {#algorithm-3 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_3.jpg)
+
+---
+
+## {#algorithm-4 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_4.jpg)
+
+---
+
+## {#algorithm-5 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_5.jpg)
+
+---
+
+## {#algorithm-6 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_6.jpg)
+
+---
+
+## {#algorithm-7 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_7.jpg)
+
+---
+
+## {#algorithm-8 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_8.jpg)
+
+---
+
+## {#algorithm-9 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_9.jpg)
+
+---
+
+## {#algorithm-10 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_10.jpg)
+
+---
+
+## {#algorithm-11 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_11.jpg)
+
+---
+
+## {#algorithm-12 data-menu-title="Algorithm"}
+
+![](allison_horst_clustering/clustering_12.jpg)
 
 ---
 
