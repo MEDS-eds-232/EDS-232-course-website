@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Principal Component Analysis – EDS 232 - Machine Learning for Environmental Science</title>
+<title>K-Means Clustering – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -258,7 +258,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html">Linear Model Selection &amp; Regularization</a></li><li class="breadcrumb-item"><a href="../../notes/7_pca/7_pca-NOTES.html">Principal Component Analysis</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/12_k_means_clustering/12_k_means_clustering-NOTES.html">K-Means Clustering</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -394,7 +394,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../notes/7_pca/7_pca-NOTES.html" class="sidebar-item-text sidebar-link active">
+  <a href="../../notes/7_pca/7_pca-NOTES.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Principal Component Analysis</span></a>
   </div>
 </li>
@@ -460,7 +460,7 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../notes/12_k_means_clustering/12_k_means_clustering-NOTES.html" class="sidebar-item-text sidebar-link">
+  <a href="../../notes/12_k_means_clustering/12_k_means_clustering-NOTES.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">K-Means Clustering</span></a>
   </div>
 </li>
@@ -474,20 +474,18 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#principal-component-analysis" id="toc-principal-component-analysis" class="nav-link active" data-scroll-target="#principal-component-analysis">Principal Component Analysis</a>
+  <li><a href="#a-guiding-example-investigating-elephant-seal-diving-strategies" id="toc-a-guiding-example-investigating-elephant-seal-diving-strategies" class="nav-link active" data-scroll-target="#a-guiding-example-investigating-elephant-seal-diving-strategies">A guiding example: investigating elephant seal diving strategies</a></li>
+  <li><a href="#the-algorithm" id="toc-the-algorithm" class="nav-link" data-scroll-target="#the-algorithm">The algorithm</a>
   <ul class="collapse">
-  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation">Motivation</a></li>
-  <li><a href="#axes-coordinates-and-projections" id="toc-axes-coordinates-and-projections" class="nav-link" data-scroll-target="#axes-coordinates-and-projections">Axes, coordinates, and projections</a></li>
-  <li><a href="#what-are-principal-components" id="toc-what-are-principal-components" class="nav-link" data-scroll-target="#what-are-principal-components">What are principal components?</a></li>
+  <li><a href="#what-is-a-centroid" id="toc-what-is-a-centroid" class="nav-link" data-scroll-target="#what-is-a-centroid">What is a centroid?</a></li>
+  <li><a href="#measuring-within-cluster-variation" id="toc-measuring-within-cluster-variation" class="nav-link" data-scroll-target="#measuring-within-cluster-variation">Measuring within-cluster variation</a></li>
+  <li><a href="#the-algorithm-1" id="toc-the-algorithm-1" class="nav-link" data-scroll-target="#the-algorithm-1">The algorithm</a></li>
   </ul></li>
-  <li><a href="#proportion-of-variance-explained" id="toc-proportion-of-variance-explained" class="nav-link" data-scroll-target="#proportion-of-variance-explained">Proportion of variance explained</a></li>
-  <li><a href="#principal-component-regression" id="toc-principal-component-regression" class="nav-link" data-scroll-target="#principal-component-regression">Principal Component Regression</a></li>
-  <li><a href="#general-setup" id="toc-general-setup" class="nav-link" data-scroll-target="#general-setup">General setup</a></li>
-  <li><a href="#exercise-meadow-plant-diversity" id="toc-exercise-meadow-plant-diversity" class="nav-link" data-scroll-target="#exercise-meadow-plant-diversity">Exercise: meadow plant diversity</a>
+  <li><a href="#considerations" id="toc-considerations" class="nav-link" data-scroll-target="#considerations">Considerations</a>
   <ul class="collapse">
-  <li><a href="#check-in-proportion-of-variance-explained" id="toc-check-in-proportion-of-variance-explained" class="nav-link" data-scroll-target="#check-in-proportion-of-variance-explained">Check-in: Proportion of variance explained</a></li>
-  <li><a href="#check-in-selecting-m-via-cross-validation" id="toc-check-in-selecting-m-via-cross-validation" class="nav-link" data-scroll-target="#check-in-selecting-m-via-cross-validation">Check-in: Selecting M via cross-validation</a></li>
-  <li><a href="#check-in-comparing-pcr-ridge-and-lasso" id="toc-check-in-comparing-pcr-ridge-and-lasso" class="nav-link" data-scroll-target="#check-in-comparing-pcr-ridge-and-lasso">Check-in: Comparing PCR, ridge, and lasso</a></li>
+  <li><a href="#local-optima" id="toc-local-optima" class="nav-link" data-scroll-target="#local-optima">Local optima</a></li>
+  <li><a href="#how-to-choose-k" id="toc-how-to-choose-k" class="nav-link" data-scroll-target="#how-to-choose-k">How to choose <span class="math inline">\(K\)</span></a></li>
+  <li><a href="#interpreting-results" id="toc-interpreting-results" class="nav-link" data-scroll-target="#interpreting-results">Interpreting results</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -495,9 +493,9 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notes/6_linear_model_selection_and_regularization/6_linear_model_selection_and_regularization-NOTES.html">Linear Model Selection &amp; Regularization</a></li><li class="breadcrumb-item"><a href="../../notes/7_pca/7_pca-NOTES.html">Principal Component Analysis</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Principal Component Analysis</h1>
+<h1 class="title">K-Means Clustering</h1>
 </div>
 
 
@@ -514,625 +512,176 @@ window.Quarto = {
 </header>
 
 
-<!-- 
-NICE REFERENCES:
-- https://stats.stackexchange.com/questions/222/what-are-principal-component-scores 
-- https://geostatisticslessons.com/lessons/principalcomponentanalysis
-- https://cran.r-project.org/web/packages/LearnPCA/vignettes/Vig_04_Scores_Loadings.pdf
--->
-<p><a href="../../notes/7_pca/7_pca-SLIDES.html">📊 Slides</a> <!--  / [📊 Blank slides](7_pca-BLANK.qmd) --></p>
+<p><a href="../../notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html">📊 Slides</a></p>
+<p><em>Clustering</em> is a broad set of techniques for finding <em>subgroups</em>, or <em>clusters</em>, in a dataset. The goal is for observations within a cluster to be as similar to each other as possible, while observations in different clusters are as different as possible.</p>
 <p>In this lesson we introduce:</p>
 <ul>
-<li><strong>Principal Component Analysis (PCA)</strong> as a technique for dimensionality reduction</li>
-<li>Principal components as directions of maximum variance in multivariate data <!-- - **Loadings** and **scores**: how PCA re-expresses observations in a new coordinate system
-- The **scree plot** and proportion of variance explained (PVE) for choosing how many components to retain --></li>
-<li><strong>Principal Component Regression (PCR)</strong>: fitting a regression model on PC scores instead of the original predictors</li>
-<li><strong>Cross-validation</strong> to select the optimal number of components in PCR</li>
+<li><strong>Clustering</strong> as an unsupervised method for finding subgroups in data</li>
+<li>The concept of a <strong>centroid</strong> and <strong>within-cluster variation</strong></li>
+<li>The <strong><span class="math inline">\(K\)</span>-means algorithm</strong> and how it minimizes within-cluster variation iteratively</li>
+<li>Practical considerations: local optima, choosing <span class="math inline">\(K\)</span>, and interpreting results</li>
 </ul>
-<p>These notes are based on chapter 6.3 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson.</p>
-<section id="principal-component-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="principal-component-analysis">Principal Component Analysis</h2>
-<section id="motivation" class="level3">
-<h3 class="anchored" data-anchor-id="motivation">Motivation</h3>
-<p>Imagine you are a whale shark approaching a dense cluster of krill. How would you align yourself to capture as much krill as possible in a single pass?</p>
-<div class="quarto-layout-panel" data-layout-ncol="2">
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div class="quarto-figure quarto-figure-center">
+<p>These notes are based on chapter 12.4 of <em>An Introduction to Statistical Learning with Applications in Python</em> <span class="citation" data-cites="islp_2023">(<a href="#ref-islp_2023" role="doc-biblioref">James et al. 2023</a>)</span>. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson. The clustering illustrations in the slides were made by <a href="https://allisonhorst.com/k-means-clustering">Dr.&nbsp;Allison Horst</a>.</p>
+<section id="a-guiding-example-investigating-elephant-seal-diving-strategies" class="level2">
+<h2 class="anchored" data-anchor-id="a-guiding-example-investigating-elephant-seal-diving-strategies">A guiding example: investigating elephant seal diving strategies</h2>
+<p>Consider Amanda form our first lesson in this course. She is a marine ecologist who records <strong>dive depth</strong> (meters) and <strong>dive duration</strong> (minutes) for a large number of northern elephant seals. She has no prior labels — she simply wants to ask: <em>are there distinct foraging strategies among these seals?</em></p>
+<div id="acd0590f" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div>
 <figure class="figure">
-<p><img src="allison_horst_PCA_1.png" class="img-fluid figure-img" alt="Illustration of a whale shark, with the face directly facing the viewer. There are subtle x and y axes overlaid onto the illustration. The whale shark’s oblong mouth is oriented horizontally along the x-axis. The whale shark looks friendly and has a slight smile on its face."></p>
-<figcaption>Artwork by <a href="https://allisonhorst.com/everything-else">Dr.&nbsp;Allison Horst</a></figcaption>
+<p><img src="12_k_means_clustering-NOTES_files/figure-html/cell-3-output-1.png" width="789" height="390" class="figure-img"></p>
 </figure>
 </div>
 </div>
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="allison_horst_PCA_2.png" class="img-fluid" data-fig-lat="A swarm of illustrated krill in an oblong shape extending from the lower left corner upward toward the top right corner. The longest axis of the krill swarm at about a 45 degree angle. A subtle x and y axis are overlaid onto the krill swarm."></p>
 </div>
-</div>
-</div>
-<p>You would probably align yourself with the <strong>direction of greatest spread</strong> in the krill cloud, the axis along which the krill are most dispersed. The same intuition applies to data. When we have many correlated predictors, some directions in the data capture a great deal of the variation while others capture very little. <strong>Principal Component Analysis (PCA)</strong> finds those directions automatically.</p>
-<p>The core idea is: with many predictor variables, sometimes it can be useful to simplify our view of our coordiante system to capture <em>as much about the data as possible in as few dimensions as possible</em>.</p>
+<p>Unlike the classification problems we have studied, there is no response variable <span class="math inline">\(Y\)</span> here: no prior labels, no “correct answer.” Clustering is a type of <strong>unsupervised</strong> method because we are discovering structure within the data rather than predicting a known outcome. PCA is another unsupervised method we have studied: it finds a low-dimensional representation of the observations that explains a large fraction of the variance.</p>
 </section>
-<section id="axes-coordinates-and-projections" class="level3">
-<h3 class="anchored" data-anchor-id="axes-coordinates-and-projections">Axes, coordinates, and projections</h3>
-<p>A key concept in this lesson is that we are in control of changing the axes we use to present our data. Suppose that we start with our usual axes defined by <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> and we have two ponts with the following coordinates:</p>
+<section id="the-algorithm" class="level2">
+<h2 class="anchored" data-anchor-id="the-algorithm">The algorithm</h2>
+<section id="what-is-a-centroid" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-a-centroid">What is a centroid?</h3>
+<p>Before jumping into the <span class="math inline">\(K\)</span>-means algorithm, we need to understand what a <strong>centroid</strong> is. A centroid is the average position of a set of points, the “center of mass” of the group.</p>
+<p>Suppose Amanda takes a small subset of six observations and tentatively groups them into two clusters:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
-<th style="text-align: center;">Point</th>
-<th style="text-align: center;">Coordinates in <span class="math inline">\(X_1, X_2\)</span></th>
+<th>Obs.</th>
+<th style="text-align: center;">Depth <span class="math inline">\(x_1\)</span> (m)</th>
+<th style="text-align: center;">Duration <span class="math inline">\(x_2\)</span> (min)</th>
+<th style="text-align: center;">Cluster</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td>1</td>
+<td style="text-align: center;">60</td>
+<td style="text-align: center;">18</td>
 <td style="text-align: center;">A</td>
-<td style="text-align: center;">(1,1)</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">B</td>
-<td style="text-align: center;">(-1,0)</td>
+<td>2</td>
+<td style="text-align: center;">210</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">A</td>
 </tr>
-</tbody>
-</table>
-<p>Visually they look like:</p>
-<div id="cell-axes-original" class="cell" data-execution_count="2">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="7_pca-NOTES_files/figure-html/axes-original-output-1.png" id="axes-original" class="quarto-figure quarto-figure-center anchored figure-img" width="325" height="318"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Say now we use a different set of coordinate axes, now given by the green lines <span class="math inline">\(\tilde{X}_1\)</span> and <span class="math inline">\(\tilde{X}_2\)</span>:</p>
-<div id="cell-axes-new-coords" class="cell" data-execution_count="3">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="7_pca-NOTES_files/figure-html/axes-new-coords-output-1.png" id="axes-new-coords" class="quarto-figure quarto-figure-center anchored figure-img" width="325" height="318"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Our points then change coordinates accordingly:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: center;">Point</th>
-<th style="text-align: center;">Coordinates in <span class="math inline">\(X_1, X_2\)</span></th>
-<th style="text-align: center;">Coordinates in <span class="math inline">\(\tilde{X}_1, \tilde{X}_2\)</span></th>
-</tr>
-</thead>
-<tbody>
 <tr class="odd">
+<td>3</td>
+<td style="text-align: center;">150</td>
+<td style="text-align: center;">15</td>
 <td style="text-align: center;">A</td>
-<td style="text-align: center;">(1,1)</td>
-<td style="text-align: center;">(<span class="math inline">\(\sqrt{2}\)</span>,0)</td>
 </tr>
 <tr class="even">
+<td>4</td>
+<td style="text-align: center;">240</td>
+<td style="text-align: center;">26</td>
 <td style="text-align: center;">B</td>
-<td style="text-align: center;">(-1,0)</td>
-<td style="text-align: center;">(-0.71, 0.71)</td>
 </tr>
-</tbody>
-</table>
-<p>Same points, different ways of representing them.</p>
-<p>Finally, another core idea in this lesson is that of projecting onto a coordinate, which essentially means only keeping the coordinates for the axes we are interested in. If we project our points onto the <span class="math inline">\(\tilde{X}_1\)</span> axes the we obtain the following:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: center;">Point</th>
-<th style="text-align: center;">Coordinates in <span class="math inline">\(X_1, X_2\)</span></th>
-<th style="text-align: center;">Coordinates in <span class="math inline">\(\tilde{X}_1, \tilde{X}_2\)</span></th>
-<th style="text-align: center;">Projection onto <span class="math inline">\(\tilde{X}_2\)</span></th>
-</tr>
-</thead>
-<tbody>
 <tr class="odd">
-<td style="text-align: center;">A</td>
-<td style="text-align: center;">(1,1)</td>
-<td style="text-align: center;">(<span class="math inline">\(\sqrt{2}\)</span>,0)</td>
-<td style="text-align: center;">proj(A) = <span class="math inline">\(\sqrt{2}\)</span></td>
+<td>5</td>
+<td style="text-align: center;">330</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">B</td>
 </tr>
 <tr class="even">
+<td>6</td>
+<td style="text-align: center;">360</td>
+<td style="text-align: center;">29</td>
 <td style="text-align: center;">B</td>
-<td style="text-align: center;">(-1,0)</td>
-<td style="text-align: center;">(-0.71, 0.71)</td>
-<td style="text-align: center;">proj(B) = -0.71</td>
 </tr>
 </tbody>
 </table>
-<div id="cell-axes-projection" class="cell" data-execution_count="4">
+<p>The <strong>centroid of cluster A is the mean across its observations</strong>:</p>
+<p><span class="math display">\[\bar{x}^{(A)} = \left(\frac{60 + 210 + 150}{3},\; \frac{18 + 6 + 15}{3}\right) = (140,\; 13)\]</span></p>
+<p>And for cluster B:</p>
+<p><span class="math display">\[\bar{x}^{(B)} = \left(\frac{240 + 330 + 360}{3},\; \frac{26 + 11 + 29}{3}\right) = (310,\; 22)\]</span></p>
+<div id="f2ea7924" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
+<div>
 <figure class="figure">
-<p><img src="7_pca-NOTES_files/figure-html/axes-projection-output-1.png" id="axes-projection" class="quarto-figure quarto-figure-center anchored figure-img" width="325" height="318"></p>
+<p><img src="12_k_means_clustering-NOTES_files/figure-html/cell-4-output-1.png" width="509" height="390" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>We will keep using these ideas of changing coordinate systems and projecting througout.</p>
 </section>
-<section id="what-are-principal-components" class="level3">
-<h3 class="anchored" data-anchor-id="what-are-principal-components">What are principal components?</h3>
-<p><strong>Principal Component Analaysis (PCA)</strong> creates a new set of axes so that:</p>
-<ul>
-<li><strong>PC1</strong> points in the direction of <strong>maximum variance</strong> in the data</li>
-<li><strong>PC2</strong> points in the direction of maximum remaining variance, <strong>orthogonal to PC1</strong></li>
-<li><strong>PC3</strong> is orthogonal to both PC1 and PC2 and explains the most remaining variance, and so on.</li>
-</ul>
-<p>There are always as many principal components as original variables. But, if PC1 and PC2 explain most of the variance, we’d still be seeing most of the important things about our data if we just use PC1 and PC2 to analyze it. This is the core idea of <strong>dimensionality reduction</strong>: converting complex multivariate data into fewer dimensions while retaining as much information as possible.</p>
-<p>Let’s see an example with three variables:</p>
-<p>We generate 600 observations from three variables (x, y, z) with very high pairwise correlations. We can see from the figure below that most of the variation is concentrated along a single dominant axis, with very little spread perpendicular to it.</p>
-<div id="cell-pca-3d-data-only" class="cell" data-execution_count="5">
+<section id="measuring-within-cluster-variation" class="level3">
+<h3 class="anchored" data-anchor-id="measuring-within-cluster-variation">Measuring within-cluster variation</h3>
+<p>For a clustering to be good, the observations within each cluster should be as similar to each other as possible. We measure this with <strong>within-cluster variation</strong>.</p>
+<p>For the <span class="math inline">\(k\)</span>-th cluster <span class="math inline">\(C_k\)</span>, within-cluster variation is the average pairwise squared Euclidean distance between all observations in the cluster:</p>
+<p><span class="math display">\[W(C_k) = \frac{1}{|C_k|} \sum_{i,\, i' \in C_k} \;\sum_{j=1}^{p} (x_{ij} - x_{i'j})^2,\]</span></p>
+<p>where <span class="math inline">\(|C_k|\)</span> is the number of observations in cluster <span class="math inline">\(C_k\)</span> and <span class="math inline">\(p\)</span> is the number of features. Clusters with small within-cluster variation <span class="math inline">\(W(C_k)\)</span> have tightly packed observations; clusters with large within-cluster variation <span class="math inline">\(W(C_k)\)</span> have scattered ones.</p>
+<div id="55edcf1f" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
+<div>
 <figure class="figure">
-<p><img src="7_pca-NOTES_files/figure-html/pca-3d-data-only-output-1.png" id="pca-3d-data-only" class="quarto-figure quarto-figure-center anchored figure-img" width="447" height="430"></p>
+<p><img src="12_k_means_clustering-NOTES_files/figure-html/cell-5-output-1.png" width="789" height="389" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Check-in
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Recall that PC1 will be an axis in the direction of maximum variance in the data. Where would you place PC1? What about PC2?</p>
-</div>
-</div>
-<p>The figure below overlays the three PC directions as full lines through the center of the cloud.</p>
-<div id="cell-pca-3d-scatter" class="cell" data-execution_count="6">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="7_pca-NOTES_files/figure-html/pca-3d-scatter-output-1.png" id="pca-3d-scatter" class="quarto-figure quarto-figure-center anchored figure-img" width="428" height="430"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Notice that <strong>PC1 (yellow)</strong> runs along the long axis of the data cloud, this is direction where the data varies the most. <strong>PC2 (salmon)</strong> is perpendicular to PC1 and captures the remaining spread. <strong>PC3 (lavender)</strong> points through the thinest dimension of the cloud and explains almost no variance.</p>
-<p><strong>PCA gives us a new coordinate system</strong> whose axes are these three PC directions. If we re-express every data point in thie new coordinates given by the principal components (using PC scores instead of x/y/z coordinates), the data cloud becomes axis-aligned. The plot below shows the data in that new PC coordinate system: the cloud is stretched along PC1 and very flat along PC2 and PC3.</p>
-<div id="cell-pca-3d-aligned" class="cell" data-execution_count="7">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="7_pca-NOTES_files/figure-html/pca-3d-aligned-output-1.png" id="pca-3d-aligned" class="quarto-figure quarto-figure-center anchored figure-img" width="411" height="432"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>For each data point <span class="math inline">\((x, y, z)\)</span> the <strong>scores</strong> will be the new coordinates of the point in the new cartesian system defined by the principal componentes PC1, PC2, PC3.</p>
-<p>Because PC1 alone captures 95 % of the variance, if we project onto two dimensions by keeping only PC1 and PC2, we retain almost all of the structure in the data. The PC3 dimension, which we drop, contains only 1.1 % of the variance, so very little information is lost.</p>
-<div id="cell-pca-3d-projection" class="cell" data-execution_count="8">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="7_pca-NOTES_files/figure-html/pca-3d-projection-output-1.png" id="pca-3d-projection" class="quarto-figure quarto-figure-center anchored figure-img" width="509" height="392"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Through this example we can see that <strong>PCA</strong> creates a new set of axes ,the <strong>principal components (PCs)</strong> and each of our observations gets a new coordinate in this new system. By projecting our observations onto a subset of the principal components, we can get a simpler view of our data without (hopefully) losing much infromation.</p>
+<p>The overall objective is to find <span class="math inline">\(K\)</span> clusters that minimize the <strong>total</strong> within-cluster variation across all clusters:</p>
+<p><span class="math display">\[\underset{C_1, \ldots, C_K}{\text{minimize}} \left\{ \sum_{k=1}^{K} W(C_k) \right\}.\]</span></p>
 </section>
-</section>
-<section id="proportion-of-variance-explained" class="level2">
-<h2 class="anchored" data-anchor-id="proportion-of-variance-explained">Proportion of variance explained</h2>
-<p>Every PC captures a certain share of the total variance in the data, this is the <strong>proportion of variance explained (PVE) by <span class="math inline">\(m\)</span>-th PC</strong>. The PVE values always sum to 1 across all <span class="math inline">\(p\)</span> components, since together the PCs account for all the variance in the original data. We are usually interested in how much of that total is concentrated in the first few components. For our example data, we can visualize the PVE for each principal component in a <strong>scree plot</strong> such as the one on the left-hand side, or see the cumulate PVE as in the right-hand side plot.</p>
-<div id="cell-pve-3d" class="cell" data-execution_count="9">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="7_pca-NOTES_files/figure-html/pve-3d-output-1.png" id="pve-3d" class="quarto-figure quarto-figure-center anchored figure-img" width="756" height="310"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>We see that PC1 alone captures 95.1 % of all the variance in the three variables. PC2 accounts for 3.8 % and PC3 for only 1.1 %. Together, PC1 and PC2 retain 98.9 % of the total variance, which is why the 2D projection we showed earlier preserved the structure of the data so well.</p>
-<p>This is the key decision in any PCA workflow: <strong>how many components do we keep?</strong> A common heuristic is to keep enough components to explain 90–95% of the total variance, or to look for an “elbow” in the individual PVE bar chart where the bars drop sharply. We will revisit this decision with a more challenging dataset in the next section.</p>
-<!-- ### General setup
-
-In math terms, these principal components are linear combinations of the original variables $X_1, \ldots, X_p$:
-
-$$Z_m = \phi_{1m} X_1 + \phi_{2m} X_2 + \cdots + \phi_{pm} X_p,$$
-
-where the $\phi_{jm}$ are numbers called **loadings** that are chosen to have each PC capture the variance as explained. 
-
-For each data point $(x_1, \ldots, x_n)$ the **scores** will be the new coordinates of the point in the new cartesian system defined by the principal componentes PC1, ,..., PC$m$.  -->
-</section>
-<section id="principal-component-regression" class="level2">
-<h2 class="anchored" data-anchor-id="principal-component-regression">Principal Component Regression</h2>
-<p>Notice that so far we have not referenced the response variable. PCA summarizes the variability structure of the predictors without reference to the response. <strong>Principal Component Regression (PCR)</strong> connects that structure to the response variable to obtain simple models and better predictions. The guiding idea is that the directions in which the predictors show the most variation are often also the directions most strongly associated with the response. This is an assumption, but it is a reasonable in many real settings.</p>
-<p>Let’s see this with a concrete example using our 3D <span class="math inline">\(x\)</span>/<span class="math inline">\(y\)</span>/<span class="math inline">\(z\)</span> data. Suppose we observe a response variable <span class="math inline">\(Y\)</span> that depends on all three predictors. In our data, the variable <span class="math inline">\(Y\)</span> is generated by:</p>
-<p><span class="math display">\[Y = 2x + 2y + 2z + \varepsilon.\]</span></p>
-<p>So the true coefficients are 2 for all predictors.</p>
-<p>If we decided to model <span class="math inline">\(Y\)</span> using the three predictors <span class="math inline">\(x\)</span>/<span class="math inline">\(y\)</span>/<span class="math inline">\(z\)</span> and a standard multiple linear regression fit by OLS then, our model would be:</p>
-<p><span class="math display">\[\hat{Y} = \hat{\beta}_0 + \hat{\beta}_x \cdot x + \hat{\beta}_y \cdot y + \hat{\beta}_z \cdot z\]</span></p>
-<p>A standard multiple linear regression (OLS) must then estimate three separate coefficients, one for each predictor:</p>
-<!-- But fitting three parameters on highly correlated predictors is unstable: small perturbations in the data can cause the individual coefficients to swing dramatically, a problem called **multicollinearity**.-->
-<div id="pcr-ols-coefs-3d" class="cell" data-execution_count="10">
-<div class="cell-output cell-output-stdout">
-<pre><code>Predictor  OLS coefficient
-        x            2.039
-        y            1.884
-        z            2.127
-
-OLS intercept: -0.072   |   OLS R²: 0.944</code></pre>
-</div>
-</div>
-<p>Instead of using all three variables, we can instead replace all three predictors with PC1 as our single variable. Since PC1 captures 95.1 % of the variance in <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span>, and <span class="math inline">\(z\)</span>, it summarizes almost all information in the three variables with one number. The regression model becomes then a simple linear regression:</p>
-<p><span class="math display">\[\hat{Y} = \hat{\alpha}_0 + \hat{\alpha}_1 \cdot \text{PC1}\]</span></p>
-<div id="cell-pcr-1comp-3d" class="cell" data-execution_count="11">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="7_pca-NOTES_files/figure-html/pcr-1comp-3d-output-1.png" id="pcr-1comp-3d" class="quarto-figure quarto-figure-center anchored figure-img" width="664" height="351"></p>
-</figure>
-</div>
-</div>
-</div>
-<div id="pcr-comparison-3d" class="cell" data-execution_count="12">
-<div class="cell-output cell-output-stdout">
-<pre><code>                       Model  Parameters  Train R²  Test MSE
-OLS  (3 predictors: x, y, z)           3     0.944     2.112
-      PCR  (M = 1 component)           1     0.944     2.095
-     PCR  (M = 2 components)           2     0.944     2.110</code></pre>
-</div>
-</div>
-<p>Train R² and Test MSE tell different stories. Train R² is computed on the 450 observations used to fit each model. Test MSE is evaluated on the 150 held-out observations OLS has never seen. PCR with just 1 component achieves nearly the same test MSE as OLS despite using only a single predictor, confirming that almost all predictive signal lives in PC1.</p>
-</section>
-<section id="general-setup" class="level2">
-<h2 class="anchored" data-anchor-id="general-setup">General setup</h2>
-<p>We apply <span class="math inline">\(PCA\)</span> and <span class="math inline">\(PCR\)</span> when we are in the context of multiple linear regression. This is, we have <span class="math inline">\(p\)</span> predictors <span class="math inline">\(X_1, \ldots, X_p\)</span> and a response variable <span class="math inline">\(Y\)</span> that we assume are related by</p>
-<p><span class="math display">\[Y = \hat{\beta}_0 + \hat{\beta}_1 X_1 + \cdots + \hat{\beta}_p X_p.\]</span></p>
-<p><span class="math inline">\(PCA\)</span> replaces the original coordinates for our data: instead of using the predictors <span class="math inline">\(X_1, \ldots, X_p\)</span>, are our new axes are the principal components PC1, …, PC<span class="math inline">\(p\)</span>. We can then project our data onto a small number of principal components to simplify our set of observations data.</p>
-<p>The response variable <span class="math inline">\(Y\)</span> comes in when we replace the original <span class="math inline">\(p\)</span> predictors with <span class="math inline">\(M \leq p\)</span> principal components before fitting the regression using OLS on the projected observations.</p>
-<p>Concretely, PCR works by doing the following steps:</p>
+<section id="the-algorithm-1" class="level3">
+<h3 class="anchored" data-anchor-id="the-algorithm-1">The algorithm</h3>
+<p>The <span class="math inline">\(K\)</span>-means algorithm finds an approximate solution to this minimization through a simple iterative procedure:</p>
 <ol type="1">
-<li><strong>Standardize</strong> the predictors (mean 0, SD 1)</li>
-<li><strong>Compute the principal components</strong> of the standardized predictors</li>
-<li><strong>Project</strong> each observation onto the first <span class="math inline">\(M\)</span> components.</li>
-<li><strong>Fit ordinary least squares</strong> of <span class="math inline">\(Y\)</span> on this new data.</li>
+<li><strong>Initialize:</strong> randomly select <span class="math inline">\(K\)</span> observations from the dataset as the initial centroids.</li>
+<li><strong>Assign:</strong> assign each observation to the cluster whose centroid is nearest (smallest Euclidean distance).</li>
+<li><strong>Update centroids:</strong> compute the new centroid (mean) of each cluster.</li>
+<li><strong>Repeat</strong> steps 2–3 until assignments no longer change.</li>
 </ol>
-<p>The key tuning parameter is <span class="math inline">\(M\)</span>. When <span class="math inline">\(M = p\)</span> (meaning you are using all the principal components), PCR is equivalent to OLS. <span class="math inline">\(M\)</span> is chosen by cross-validation, in the same way as <span class="math inline">\(\lambda\)</span> for ridge and lasso.</p>
-<!-- When $M < p$, the model has fewer degrees of freedom and lower variance, at the cost of some bias. -->
-</section>
-<section id="exercise-meadow-plant-diversity" class="level2">
-<h2 class="anchored" data-anchor-id="exercise-meadow-plant-diversity">Exercise: meadow plant diversity</h2>
-<p>We now apply PCA and PCR to the EcoRich dataset from the previous lesson: 200 mountain meadow survey plots with 8 environmental predictors (<code>precip</code>, <code>temp</code>, <code>forest_cover</code>, <code>soil_N</code>, <code>elevation</code>, <code>slope</code>, <code>aspect</code>, <code>canopy</code>) and response <code>species_richness</code>. Work through each check-in before expanding the discussion.</p>
-<!-- 
-### The biplot: loadings and scores together
-
-The **biplot** is the standard visualization for PCA results. It overlays two things on the same plot:
-
-- **Points** — each observation plotted at its PC1 and PC2 scores (its location in the new coordinate system)
-- **Loading arrows** — one arrow per variable, showing how strongly and in which direction that variable contributes to PC1 and PC2
-
-The length of an arrow reflects how well that variable is captured by these two components. The angle between arrows reflects correlation: arrows pointing in the same direction indicate positively correlated variables; opposite directions indicate negative correlation.
-
-Let's build intuition with our simple x/y/z example before moving to the full EcoRich dataset. Recall that all three variables were highly correlated (ρ ≈ 0.91–0.97), so we expect their arrows to all point in roughly the same direction.
-
-::: {#cell-pca-biplot-3d-example .cell execution_count=13}
-
-::: {.cell-output .cell-output-stderr}
-```
-/var/folders/g8/f3j5vysd4pn88krh3zc0qv_h0000gn/T/ipykernel_52062/2308861650.py:25: UserWarning: Tight layout not applied. The bottom and top margins cannot be made large enough to accommodate all axes decorations.
-  plt.tight_layout()
-```
-:::
-
-::: {.cell-output .cell-output-display}
-![](7_pca-NOTES_files/figure-html/pca-biplot-3d-example-output-2.png){#pca-biplot-3d-example width=587 height=729 fig-align='center'}
-:::
-:::
-
-
-The three arrows point in nearly the same direction along PC1, confirming that x, y, and z are all positively correlated with each other and all load heavily onto PC1. The spread of the points along PC1 is very wide — consistent with PC1 capturing 95 % of the variance — while the spread along PC2 is much narrower. Because this is a simple 3-variable case, the biplot is easy to read. With more variables the picture becomes richer, as we'll see next.
-
-Now let's apply the same idea to the full EcoRich dataset with all 8 predictors.
-
-::: {#cell-pca-biplot .cell execution_count=14}
-
-::: {.cell-output .cell-output-display}
-![](7_pca-NOTES_files/figure-html/pca-biplot-output-1.png){#pca-biplot width=661 height=462 fig-align='center'}
-:::
-:::
-
-
-How to read a biplot:
-
-- **Arrow direction**: shows how each variable relates to PC1 (horizontal) and PC2 (vertical)
-- **Arrows pointing the same direction**: those variables are positively correlated
-- **Arrows pointing opposite directions**: those variables are negatively correlated
-- **Arrow length**: reflects how well the variable is captured in this 2D projection — longer means better represented
-
-The loading values for the first two PCs are:
-
-::: {#loading-table .cell execution_count=15}
-
-::: {.cell-output .cell-output-stdout}
-```
-              PC1 loading  PC2 loading
-precip             -0.127       -0.625
-temp               -0.179       -0.349
-forest_cover        0.179       -0.090
-soil_N             -0.591        0.172
-elevation          -0.462        0.165
-slope               0.431       -0.031
-aspect              0.341        0.487
-canopy              0.233       -0.430
-```
-:::
-:::
-
-
-:::{.callout-tip}
-## Check-in
-
-1. Which predictors have the largest absolute loadings on PC1? What environmental gradient might PC1 be representing?
-
-2. Looking at the point colors in the biplot, does species richness appear to increase or decrease along the PC1 axis? Is this consistent with the loading directions and with what we know about the true data-generating model?
-
-3. `aspect` and `canopy` have true coefficients of zero in the data-generating model. Where do their loading arrows tend to fall in the biplot? What does this suggest about how PCA treats irrelevant variables?
-:::
-
-:::{.callout-tip collapse="true"}
-## Discussion
-
-1. `precip`, `temp`, `forest_cover`, and `soil_N` tend to load most strongly on PC1 — consistent with these being the four strongest true predictors. PC1 captures a composite gradient of site productivity and moisture conditions.
-
-2. Plots with higher species richness (darker green points) cluster on the side of PC1 where `precip` and `soil_N` arrows point (positive precipitation and soil nutrients → higher richness). This is consistent with the true model coefficients.
-
-3. `aspect` and `canopy` have smaller loading magnitudes and their arrows do not strongly align with either axis — reflecting that they carry little systematic signal. However, PCA does not set their loadings to exactly zero; it just assigns them small values because they don't explain much variance. This is different from the lasso, which can set coefficients to exactly zero. It is a known limitation of PCR: it cannot perform variable selection.
-::: -->
-<section id="check-in-proportion-of-variance-explained" class="level3">
-<h3 class="anchored" data-anchor-id="check-in-proportion-of-variance-explained">Check-in: Proportion of variance explained</h3>
-<div id="cell-scree-plot" class="cell" data-execution_count="16">
+<p>Every iteration is guaranteed to decrease (or maintain) the total within-cluster variation, so the algorithm always converges. However, it does not always converge to the global minimum — see <a href="#local-optima">Local optima</a> below.</p>
+<p>See slides for a step-by-step visual walkthrough of the algorithm.</p>
+<p>The figure below traces the first few iterations on the elephant seal dataset, starting from one random initialization:</p>
+<div id="dd43d15a" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
+<div>
 <figure class="figure">
-<p><img src="7_pca-NOTES_files/figure-html/scree-plot-output-1.png" id="scree-plot" class="quarto-figure quarto-figure-center anchored figure-img" width="756" height="310"></p>
+<p><img src="12_k_means_clustering-NOTES_files/figure-html/cell-6-output-1.png" width="1189" height="869" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Check-in
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Looking at the scree plot above:</p>
-<p>How many components are needed to explain at least 90% of the total variance in the 8 predictors?</p>
-</div>
-</div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Discussion
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-3" class="callout-3-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>Seven components are needed to explain at least 90% variance in the predictors.</p>
-</div>
-</div>
-</div>
 </section>
-<section id="check-in-selecting-m-via-cross-validation" class="level3">
-<h3 class="anchored" data-anchor-id="check-in-selecting-m-via-cross-validation">Check-in: Selecting M via cross-validation</h3>
-<p>The figure below shows the 10-fold CV-MSE for each value of <span class="math inline">\(M\)</span> from 1 to 8.</p>
-<div id="cell-pcr-cv-plot" class="cell" data-execution_count="17">
+</section>
+<section id="considerations" class="level2">
+<h2 class="anchored" data-anchor-id="considerations">Considerations</h2>
+<section id="local-optima" class="level3">
+<h3 class="anchored" data-anchor-id="local-optima">Local optima</h3>
+<p>Because the initial cluster assignments in step 1 are random, different starting points can lead to different final clusterings. The algorithm finds a <em>local</em> minimum of the objective, not necessarily the global one.</p>
+<p>The three panels below show what can happen when the same dataset is clustered with <span class="math inline">\(K = 3\)</span> but different random initializations:</p>
+<div id="130e0b5d" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
+<div>
 <figure class="figure">
-<p><img src="7_pca-NOTES_files/figure-html/pcr-cv-plot-output-1.png" id="pcr-cv-plot" class="quarto-figure quarto-figure-center anchored figure-img" width="565" height="310"></p>
+<p><img src="12_k_means_clustering-NOTES_files/figure-html/cell-7-output-1.png" width="1189" height="413" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Check-in
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<ol type="1">
-<li>What is the optimal number of components selected by cross-validation?</li>
-<li>At <span class="math inline">\(M =\)</span> 8 (all components), what is the relationship between PCR and OLS? How are their CV-MSE related?</li>
-</ol>
-</div>
-</div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Discussion
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-5" class="callout-5-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="1">
-<li><p>The optimal <span class="math inline">\(M\)</span> selected by CV is 8, meaning retaining 8 principal component(s) gives the best out-of-sample prediction accuracy.</p></li>
-<li><p>When <span class="math inline">\(M = p\)</span>, the <span class="math inline">\(p\)</span> PC scores span exactly the same space as the <span class="math inline">\(p\)</span> original predictors — PCA is a rotation, not a reduction. So PCR at <span class="math inline">\(M = p\)</span> is identical to OLS. The CV-MSE at the rightmost point in the plot is therefore the OLS CV-MSE.</p></li>
-</ol>
-</div>
-</div>
-</div>
+<p>To reduce the chance of converging to a poor local minimum, it is standard practice to run <span class="math inline">\(K\)</span>-means many times with different random initializations and keep the solution with the lowest total within-cluster variation. The <code>sklearn</code> parameter <code>n_init</code> controls how many restarts are performed (default: 10).</p>
+<p>More generally, clustering methods are not very robust to perturbations in the data.</p>
 </section>
-<section id="check-in-comparing-pcr-ridge-and-lasso" class="level3">
-<h3 class="anchored" data-anchor-id="check-in-comparing-pcr-ridge-and-lasso">Check-in: Comparing PCR, ridge, and lasso</h3>
-<div id="method-comparison" class="cell" data-execution_count="18">
-<div class="cell-output cell-output-stdout">
-<pre><code>                Method CV-MSE
-OLS (all 8 predictors) 14.664
-           PCR (M = 8) 14.664
-  Ridge (CV-optimal λ) 14.628
-  Lasso (CV-optimal λ) 14.496</code></pre>
-</div>
-</div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Check-in
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<ol type="1">
-<li>Which method performs best? Does this make sense given the structure of the true data-generating model?</li>
-<li>What is a limitation of PCR compared to lasso?</li>
-</ol>
-</div>
-</div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Discussion
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-7" class="callout-7-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="1">
-<li><p><strong>Lasso</strong> tends to perform best because it can exactly zero out the two truly irrelevant predictors (<code>aspect</code> and <code>canopy</code>), directly matching the structure of the true model.</p></li>
-<li><p><strong>PCR cannot perform variable selection and lasso can</strong>. PCR is still taking into account all variables when forming linear combinations of the predictors to create the principal components. PCR works best when the signal is spread across many predictors that may have correlation across them.</p></li>
-</ol>
+<section id="how-to-choose-k" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-choose-k">How to choose <span class="math inline">\(K\)</span></h3>
+<p><span class="math inline">\(K\)</span> is a hyperparameter we must choose before running the algorithm. One common approach is the <strong>elbow method</strong>: fit <span class="math inline">\(K\)</span>-means for a range of <span class="math inline">\(K\)</span> values and plot the total within-cluster variation (WCSS) against <span class="math inline">\(K\)</span>. The total variation will always decrease as <span class="math inline">\(K\)</span> increases, but the gains become smaller after the “true” number of clusters is reached. The <em>elbow</em> in the curve, where the rate of decrease flattens, suggests a reasonable value of <span class="math inline">\(K\)</span>.</p>
+<div id="f70eeefc" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="12_k_means_clustering-NOTES_files/figure-html/cell-8-output-1.png" width="589" height="390" class="figure-img"></p>
+</figure>
 </div>
 </div>
 </div>
-<!-- 
-## Exercise: when PCR actually reduces dimension
-
-The following exercise uses a dataset where PCR with far fewer than $p$ components outperforms OLS on held-out data.
-
-**Setup**: 300 observations, 6 predictors. Three of them (`u1`, `u2`, `u3`) share a single latent signal and are highly correlated with each other. The remaining three (`v1`, `v2`, `v3`) are independent noise. The response depends only on the latent signal, so the first PC should capture almost everything that matters for prediction.
-
-### Check-in: Scree plot
-
-::: {#cell-ex2-scree .cell execution_count=19}
-
-::: {.cell-output .cell-output-display}
-![](7_pca-NOTES_files/figure-html/ex2-scree-output-1.png){#ex2-scree width=756 height=310 fig-align='center'}
-:::
-:::
-
-
-:::{.callout-tip}
-## Check-in
-
-How many components does it take to reach 90% cumulative PVE?
-:::
-
-:::{.callout-tip collapse="true"}
-## Discussion
-
-::: {#ex2-pve-vals .cell execution_count=20}
-
-::: {.cell-output .cell-output-stdout}
-```
-Components needed for ≥90% PVE: 4
-  PC1: individual = 48.7%,  cumulative = 48.7%
-  PC2: individual = 18.3%,  cumulative = 66.9%
-  PC3: individual = 16.5%,  cumulative = 83.5%
-  PC4: individual = 15.2%,  cumulative = 98.6%
-  PC5: individual = 0.7%,  cumulative = 99.3%
-  PC6: individual = 0.7%,  cumulative = 100.0%
-```
-:::
-:::
-
-
-PC1 dominates because `u1`, `u2`, `u3` all load onto the same latent direction — their shared variance is concentrated in one component. The remaining PCs capture either tiny residuals within that group or the independent variance of `v1`, `v2`, `v3`. 
-:::
-
-### Check-in: Cross-validation to select M
-
-::: {#cell-ex2-cv-plot .cell execution_count=21}
-
-::: {.cell-output .cell-output-display}
-![](7_pca-NOTES_files/figure-html/ex2-cv-plot-output-1.png){#ex2-cv-plot width=565 height=310 fig-align='center'}
-:::
-:::
-
-
-:::{.callout-tip}
-## Check-in
-
-What is the optimal M you would select by cross-validation? Is this what you expected from the scree plot?
-:::
-
-:::{.callout-tip collapse="true"}
-## Discussion
-
-CV selects M = 1, meaning one  component captures most of the predictive signal. Adding more PCs beyond the optimum increases test error because those PCs carry only noise.
-:::
-
-### Check-in: Does PCR outperform OLS here?
-
-::: {#ex2-comparison .cell execution_count=22}
-
-::: {.cell-output .cell-output-stdout}
-```
-                       Model  10-fold CV-MSE
-OLS  (M = 6, all components)           5.147
-    PCR  (M = 1, CV-optimal)           5.142
-```
-:::
-:::
-
-
-:::{.callout-tip}
-## Check-in
-
-1. Does PCR at the CV-optimal M improve on OLS? By how much?
-2. Why is PCR with M = 6 equivalent to OLS here?
-:::
-
-:::{.callout-tip collapse="true"}
-## Discussion
-
-1. Yes: CV-MSE at M = 1 is lower than at M = 6 (OLS).
-
-2. PCR at M = 6 uses all six PC scores, which span exactly the same column space as the six original predictors, so it is mathematically identical to OLS.
-
-::: -->
+<p>The elbow at <span class="math inline">\(K = 3\)</span> suggests three foraging strategies is a sensible grouping. Note that the elbow can sometimes be ambiguous. <strong>Choosing <span class="math inline">\(K\)</span> also depends on what is practically meaningful or interpretable in the applied context.</strong></p>
+<p>Additionally, we may look for the number of clusters that provides the most useful or actionable solution for the scientific question at hand.</p>
+</section>
+<section id="interpreting-results" class="level3">
+<h3 class="anchored" data-anchor-id="interpreting-results">Interpreting results</h3>
+<p>Clusters will always be found: the algorithm is designed to partition observations regardless of whether true subgroups exist. Clustering with different parameter choices —different <span class="math inline">\(K\)</span>, different initializations— will produce variable results. <strong>The output should not be taken as absolute truth about the dataset, but rather as a starting point for generating hypotheses and guiding further study.</strong></p>
+<p>In Amanda’s case, the clusters may well correspond to real foraging strategies, but they could also reflect individual variation, seasonal patterns, or artifacts of data collection. The clusters are an invitation to investigate further, not a definitive answer!</p>
 
 
 
