@@ -162,7 +162,7 @@ PCA is another unsupervised method we have studied: it finds a low-dimensional r
 
 ---
 
-## {#centroid-definition data-menu-title="What is a centroid?"}
+## {#centroid-definition-1 data-menu-title="What is a centroid?"}
 
 [What is a centroid?]{.slide-title}
 
@@ -170,6 +170,7 @@ PCA is another unsupervised method we have studied: it finds a low-dimensional r
 
 A **centroid** is the average position of a set of points: the "center of mass" of the group.
 
+**Example**
 
 | Obs. | Depth $x_1$ | Duration $x_2$ | Cluster |
 |------|:---:|:---:|:---:|
@@ -180,7 +181,28 @@ A **centroid** is the average position of a set of points: the "center of mass" 
 | 5    | 330 | 11  | B |
 | 6    | 360 | 29  | B |
 
-. . .
+
+---
+
+## {#centroid-definition-2 data-menu-title="What is a centroid?"}
+
+[What is a centroid?]{.slide-title}
+
+<hr>
+
+A **centroid** is the average position of a set of points: the "center of mass" of the group.
+
+**Example**
+
+| Obs. | Depth $x_1$ | Duration $x_2$ | Cluster |
+|------|:---:|:---:|:---:|
+| 1    |  60 | 18  | A |
+| 2    | 210 |  6  | A |
+| 3    | 150 | 15  | A |
+| 4    | 240 | 26  | B |
+| 5    | 330 | 11  | B |
+| 6    | 360 | 29  | B |
+
 
 ::: {.body-text-s}
 
@@ -233,6 +255,15 @@ plt.close()
 
 ---
 
+## {#within-cluster-variation-blank data-menu-title="Within-cluster variation"}
+
+[Within-cluster variation]{.slide-title}
+
+<hr>
+
+
+---
+
 ## {#within-cluster-variation data-menu-title="Within-cluster variation"}
 
 [Within-cluster variation]{.slide-title}
@@ -281,7 +312,7 @@ plt.close()
 
 <br>
 
-We want to find $K$ clusters that minimize the **total** within-cluster variation across all clusters:
+We want to find $K$ clusters that minimize the **total within-cluster variation** across all clusters:
 
 $$\underset{C_1, \ldots, C_K}{\text{minimize}} \left\{ \sum_{k=1}^{K} W(C_k) \right\}$$
 
@@ -303,24 +334,26 @@ The $K$-means algorithm finds an approximate solution to this minimization throu
 
 1. **Initialize:** randomly select $K$ observations from the dataset as the initial centroids.
 
-. . .
 
 2. **Assign:** assign each observation to the cluster whose centroid is nearest (smallest Euclidean distance).
 
-. . .
 
 3. **Update centroids:** compute the new centroid (mean) of each cluster.
 
-. . .
 
 4. **Repeat** steps 2–3 until assignments no longer change.
 
-. . .
-
-<br>
 
 ::: {.body-text-s}
 Every iteration is guaranteed to decrease (or maintain) the total within-cluster variation, so the algorithm always converges. However, it does not always converge to the global minimum!
+:::
+
+<br>
+
+. . . 
+
+::: {.body-text-s .teal-text .center-text}
+The clustering illustrations in the following slides were created by [Dr. Allison Horst](https://allisonhorst.com/k-means-clustering).
 :::
 
 ---
@@ -397,50 +430,64 @@ Every iteration is guaranteed to decrease (or maintain) the total within-cluster
 
 ---
 
-## {#algorithm-iterations data-menu-title="K-means iterations"}
+## {#algorithm-iterations-1 data-menu-title="K-means iterations"}
 
 [K-means in action]{.slide-title}
 
 <hr>
 
-```{python}
-#| label: algorithm-iterations
-#| echo: false
-#| fig-align: center
-#| out-width: "100%"
 
-iter_panels = [
-    ('Step 1: Select initial centroids',  None,   cents_0),
-    ('Iteration 1: Assign to nearest',    lbls_1, cents_0),
-    ('Iteration 1: Update centroids',     lbls_1, cents_1),
-    ('Iteration 2: Assign to nearest',    lbls_2, cents_1),
-    ('Iteration 2: Update centroids',     lbls_2, cents_2),
-    ('Iteration 3: Assign (converged)',   lbls_3, cents_2),
-]
+![](images/algorithm_iterations_1.png)
 
-fig, axes = plt.subplots(2, 3, figsize=(fig_size_x * 1.7, fig_size_y * 2.1))
-axes = axes.flatten()
+---
 
-for ax, (title, lbls, cents) in zip(axes, iter_panels):
-    if lbls is None:
-        ax.scatter(data[:, 0], data[:, 1], c='lightgray', s=20, alpha=0.6, zorder=2)
-    else:
-        for k in range(K_demo):
-            ax.scatter(data[lbls == k, 0], data[lbls == k, 1],
-                       c=cluster_colors[k], s=20, alpha=0.6, zorder=2)
-    for k in range(K_demo):
-        ax.scatter(cents[k, 0], cents[k, 1],
-                   c=cluster_colors[k], marker='X', s=160,
-                   edgecolors='black', linewidth=1.2, zorder=4)
-    ax.set_xlabel('Dive depth (m)')
-    ax.set_ylabel('Dive duration (min)')
-    ax.set_title(title, fontsize=9)
-    ax.grid(True, alpha=0.3)
+## {#algorithm-iterations-2 data-menu-title="K-means iterations"}
 
-plt.tight_layout()
-plt.show()
-plt.close()
-```
+[K-means in action]{.slide-title}
+
+<hr>
+
+![](images/algorithm_iterations_2.png)
+
+---
+
+## {#algorithm-iterations-3 data-menu-title="K-means iterations"}
+
+[K-means in action]{.slide-title}
+
+<hr>
+
+![](images/algorithm_iterations_3.png)
+
+---
+
+## {#algorithm-iterations-4 data-menu-title="K-means iterations"}
+
+[K-means in action]{.slide-title}
+
+<hr>
+
+![](images/algorithm_iterations_4.png)
+
+---
+
+## {#algorithm-iterations-5 data-menu-title="K-means iterations"}
+
+[K-means in action]{.slide-title}
+
+<hr>
+
+![](images/algorithm_iterations_5.png)
+
+---
+
+## {#algorithm-iterations-6 data-menu-title="K-means iterations"}
+
+[K-means in action]{.slide-title}
+
+<hr>
+
+![](images/algorithm_iterations_6.png)
 
 ---
 
@@ -460,36 +507,10 @@ plt.close()
 
 Different random initializations can lead to **different final clusterings** — the algorithm finds a *local* minimum, not necessarily the global one.
 
-```{python}
-#| label: local-optima
-#| echo: false
-#| fig-align: center
-#| out-width: "100%"
-
-seeds = [0, 5, 99]
-fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.7, fig_size_y))
-
-for ax, seed in zip(axes, seeds):
-    km = KMeans(n_clusters=3, n_init=1, random_state=seed)
-    km.fit(data)
-    for k in range(3):
-        mask = km.labels_ == k
-        ax.scatter(data[mask, 0], data[mask, 1], c=cluster_colors[k], alpha=0.55, s=30)
-        ax.scatter(km.cluster_centers_[k, 0], km.cluster_centers_[k, 1],
-                   c=cluster_colors[k], marker='X', s=160, edgecolors='black', linewidth=1)
-    ax.set_xlabel('Dive depth (m)')
-    ax.set_ylabel('Dive duration (min)')
-    ax.set_title(f'Seed = {seed}  |  WCSS = {km.inertia_:.0f}')
-    ax.grid(True, alpha=0.3)
-
-plt.suptitle('$K = 3$ with three different random initializations', y=1.02)
-plt.tight_layout()
-plt.show()
-plt.close()
-```
+![](images/local_optima.png)
 
 ::: {.body-text-s .center-text}
-Run $K$-means many times with different initializations and keep the solution with the lowest WCSS. In `sklearn`: `n_init` parameter (default: 10).
+Run $K$-means several times with different initializations and keep the solution with the lowest within cluster variation. 
 :::
 
 ---
@@ -500,7 +521,8 @@ Run $K$-means many times with different initializations and keep the solution wi
 
 <hr>
 
-$K$ is a hyperparameter chosen before running the algorithm. The **elbow method**: fit $K$-means for a range of $K$ values and plot WCSS vs. $K$. The *elbow* — where the rate of decrease flattens — suggests a reasonable value of $K$.
+$K$ is a hyperparameter chosen before running the algorithm. 
+The **elbow method**: fit $K$-means for a range of $K$ values and plot within-cluster variation vs. $K$. The *elbow* (where the rate of decrease flattens) suggests a reasonable value of $K$.
 
 ```{python}
 #| label: elbow-method
@@ -517,8 +539,7 @@ fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y))
 ax.plot(range(1, 9), wcss, 'o-', color='steelblue', linewidth=2, markersize=7)
 ax.axvline(x=3, color='tomato', linestyle='--', linewidth=1.5, label='Elbow at $K = 3$')
 ax.set_xlabel('Number of clusters $K$')
-ax.set_ylabel('Total within-cluster variation (WCSS)')
-ax.set_title('Elbow method')
+ax.set_ylabel('Total within-cluster variation')
 ax.legend()
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -526,8 +547,8 @@ plt.show()
 plt.close()
 ```
 
-::: {.body-text-s .center-text}
-Choosing $K$ also depends on what is practically meaningful or interpretable in the applied context.
+::: {.center-text .body-text-s}
+Choosing $K$ also depends on what is **practically meaningful or interpretable** in the applied context.
 :::
 
 ---
@@ -538,27 +559,34 @@ Choosing $K$ also depends on what is practically meaningful or interpretable in 
 
 <hr>
 
-::: {.body-text-m}
-- Clusters will **always** be found — the algorithm partitions observations regardless of whether true subgroups exist.
+- Clusters will **always** be found. The algorithm partitions observations regardless of whether true subgroups exist!
 
 - Clustering with different parameter choices (different $K$, different initializations) will produce variable results.
 
 - **The output should not be taken as absolute truth**, but rather as a starting point for generating hypotheses and guiding further study.
-:::
 
 . . .
 
 <br>
 
 ::: {.body-text-m .teal-text}
-In Amanda's case, the clusters may correspond to real foraging strategies — but they could also reflect individual variation, seasonal patterns, or artifacts of data collection.
+In Amanda's case, the clusters may correspond to real foraging strategies, but they could also reflect individual variation, seasonal patterns, or even artifacts of data collection.
 :::
+
+---
+
+## {#wrap-up data-menu-title="# Considerations #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">That's it for EDS 232!</p>
+</div>
+
 
 ---
 
 ## {#course-recap data-menu-title="Course recap"}
 
-[Everything we covered]{.slide-title}
+[Everything we covered!]{.slide-title}
 
 <hr>
 
@@ -571,9 +599,9 @@ In Amanda's case, the clusters may correspond to real foraging strategies — bu
 - <span style="color:#E65100;">📊 **Data fundamentals** — predictors, response variable, training set, test set</span>
 - <span style="color:#C8A000;">🔮 **Inference vs prediction** — parametric vs non-parametric models</span>
 - <span style="color:#2E7D32;">🗂️ **Problem types** — supervised vs unsupervised; regression vs classification</span>
-- <span style="color:#00695C;">📈 **Linear regression** — simple & multiple; least squares estimation</span>
-- <span style="color:#1565C0;">🧮 **Hypothesis testing** — t-statistic, p-values, F-statistic, confidence intervals</span>
-- <span style="color:#6A1B9A;">📏 **Regression metrics** — MSE, R², adjusted R², RSE</span>
+- <span style="color:#00695C;">📈 **Linear regression** — simple & multiple; least squares estimation, polynomial</span>
+- <span style="color:#1565C0;">🧮 **Hypothesis testing** — t-statistic, p-values, confidence intervals</span>
+- <span style="color:#6A1B9A;">📏 **Regression metrics** — RSS, MSE, R², adjusted R², RSE</span>
 - <span style="color:#AD1457;">⚖️ **Bias-variance tradeoff** — overfitting, model flexibility, training vs test error</span>
 
 </div>
@@ -582,14 +610,14 @@ In Amanda's case, the clusters may correspond to real foraging strategies — bu
 ::: {.column width="33%"}
 <div style="font-size: 0.50em; line-height: 1.7;">
 
-- <span style="color:#C62828;">🔄 **Cross-validation** — k-fold CV, LOOCV, hyperparameter tuning, model selection</span>
+- <span style="color:#C62828;">🔄 **Cross-validation** — k-fold CV, hyperparameter tuning, model selection</span>
 - <span style="color:#E65100;">🏘️ **K-nearest neighbors (KNN)** — non-parametric classification, choosing K</span>
 - <span style="color:#C8A000;">🎭 **Confusion matrix** — true/false positives and negatives</span>
 - <span style="color:#2E7D32;">🎯 **Classification metrics** — precision, recall, F₁, accuracy, error rate</span>
-- <span style="color:#00695C;">🌊 **Logistic regression** — logistic function, log-odds, MLE, decision boundary</span>
+- <span style="color:#00695C;">🌊 **Logistic regression** — logistic function, log-odds, decision boundary</span>
 - <span style="color:#1565C0;">📡 **ROC curves & AUC** — TPR, FPR, classification threshold tradeoffs</span>
 - <span style="color:#6A1B9A;">🏔️ **Ridge & lasso** — regularization, penalty term λ, coefficient shrinkage</span>
-- <span style="color:#AD1457;">🔭 **PCA** — principal components, loadings, scores, scree plots, variance explained</span>
+- <span style="color:#AD1457;">🔭 **PCA** — principal components, scree plots, variance explained</span>
 
 </div>
 :::
@@ -598,14 +626,13 @@ In Amanda's case, the clusters may correspond to real foraging strategies — bu
 <div style="font-size: 0.50em; line-height: 1.7;">
 
 - <span style="color:#C62828;">🗜️ **PCR** — principal component regression, dimensionality reduction</span>
-- <span style="color:#E65100;">🌳 **Decision trees** — recursive binary splitting, RSS, Gini impurity, pruning</span>
+- <span style="color:#E65100;">🌳 **Decision trees** — recursive binary splitting, pruning, leaves, nodes, Gini impurity, pruning</span>
 - <span style="color:#C8A000;">🌲 **Bagging** — bootstrap sampling, ensemble methods, out-of-bag error</span>
 - <span style="color:#2E7D32;">🌲🌲 **Random forests** — feature subsampling, variable importance</span>
 - <span style="color:#00695C;">⚔️ **Support vector machines** — margins, support vectors, kernels, C parameter</span>
-- <span style="color:#1565C0;">🧠 **Neural networks** — layers, activation functions, backpropagation, CNNs</span>
-- <span style="color:#6A1B9A;">🎲 **K-means clustering** — centroids, within-cluster variation, WCSS, elbow method</span>
+- <span style="color:#1565C0;">🧠 **Neural networks** — layers, activation functions, convolutions, pooling, CNNs</span>
+- <span style="color:#6A1B9A;">🎲 **K-means clustering** — centroids, within-cluster variation, elbow method</span>
 
 </div>
-:::
 
-::::
+:::

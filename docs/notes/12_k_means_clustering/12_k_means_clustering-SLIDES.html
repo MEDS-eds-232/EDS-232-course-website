@@ -159,7 +159,7 @@ A guiding example
 <h2></h2>
 <p><span class="slide-title">Investigating elephant seal diving strategies</span></p>
 <hr>
-<p>Consider Amanda from our first lesson. She records <strong>dive depth</strong> (meters) and <strong>dive duration</strong> (minutes) for a large number of northern elephant seals — with no prior labels:</p>
+<p>Consider Amanda from our first lesson. She records <strong>dive depth</strong> (meters) and <strong>dive duration</strong> (minutes) for a large number of northern elephant seals. The question she investigates is:</p>
 <div class="center-text teal-text body-text-m">
 <p><em>Are there distinct foraging strategies among these seals?</em></p>
 </div>
@@ -179,15 +179,11 @@ A guiding example
 <hr>
 <p><em>Clustering</em> finds <strong>subgroups</strong> in a dataset so that observations within a cluster are similar to each other and different from observations in other clusters.</p>
 <div class="fragment">
-<p>Unlike classification, there is no response variable <span class="math inline">\(Y\)</span> — no prior labels, no “correct answer.”</p>
-</div>
-<div class="fragment">
+<p>Unlike classification, there is <strong>no response variable <span class="math inline">\(Y\)</span></strong>: no prior labels, no “correct answer.”</p>
 <p>Clustering is a type of <strong>unsupervised</strong> method: we discover structure within the data rather than predicting a known outcome.</p>
 </div>
 <div class="fragment">
-<div class="body-text-s">
 <p>PCA is another unsupervised method we have studied: it finds a low-dimensional representation of the observations that explains a large fraction of the variance.</p>
-</div>
 </div>
 </section>
 <section id="section-algorithm" class="slide level2" data-menu-title="# The algorithm #" data-background="#047C90">
@@ -198,13 +194,12 @@ The algorithm
 </p>
 </div>
 </section>
-<section id="centroid-definition" class="slide level2" data-menu-title="What is a centroid?">
+<section id="centroid-definition-1" class="slide level2" data-menu-title="What is a centroid?">
 <h2></h2>
 <p><span class="slide-title">What is a centroid?</span></p>
 <hr>
-<p>A <strong>centroid</strong> is the average position of a set of points — the “center of mass” of the group.</p>
-<div class="columns">
-<div class="column" style="width:42%;">
+<p>A <strong>centroid</strong> is the average position of a set of points: the “center of mass” of the group.</p>
+<p><strong>Example</strong></p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -253,14 +248,67 @@ The algorithm
 </tr>
 </tbody>
 </table>
-</div><div class="column" style="width:58%;">
-<p>. . .</p>
+</section>
+<section id="centroid-definition-2" class="slide level2" data-menu-title="What is a centroid?">
+<h2></h2>
+<p><span class="slide-title">What is a centroid?</span></p>
+<hr>
+<p>A <strong>centroid</strong> is the average position of a set of points: the “center of mass” of the group.</p>
+<p><strong>Example</strong></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Obs.</th>
+<th style="text-align: center;">Depth <span class="math inline">\(x_1\)</span></th>
+<th style="text-align: center;">Duration <span class="math inline">\(x_2\)</span></th>
+<th style="text-align: center;">Cluster</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td style="text-align: center;">60</td>
+<td style="text-align: center;">18</td>
+<td style="text-align: center;">A</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td style="text-align: center;">210</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">A</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td style="text-align: center;">150</td>
+<td style="text-align: center;">15</td>
+<td style="text-align: center;">A</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td style="text-align: center;">240</td>
+<td style="text-align: center;">26</td>
+<td style="text-align: center;">B</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td style="text-align: center;">330</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">B</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td style="text-align: center;">360</td>
+<td style="text-align: center;">29</td>
+<td style="text-align: center;">B</td>
+</tr>
+</tbody>
+</table>
+<div class="body-text-s">
 <p><strong>Centroid of cluster A:</strong></p>
 <p><span class="math display">\[\bar{x}^{(A)} = \left(\frac{60 + 210 + 150}{3},\; \frac{18 + 6 + 15}{3}\right) = (140,\; 13)\]</span></p>
-<p>. . .</p>
 <p><strong>Centroid of cluster B:</strong></p>
 <p><span class="math display">\[\bar{x}^{(B)} = \left(\frac{240 + 330 + 360}{3},\; \frac{26 + 11 + 29}{3}\right) = (310,\; 22)\]</span></p>
-</div></div>
+</div>
 </section>
 <section id="centroid-plot" class="slide level2" data-menu-title="Centroid plot">
 <h2></h2>
@@ -276,6 +324,11 @@ The algorithm
 </div>
 </div>
 </section>
+<section id="within-cluster-variation-blank" class="slide level2" data-menu-title="Within-cluster variation">
+<h2></h2>
+<p><span class="slide-title">Within-cluster variation</span></p>
+<hr>
+</section>
 <section id="within-cluster-variation" class="slide level2" data-menu-title="Within-cluster variation">
 <h2></h2>
 <p><span class="slide-title">Within-cluster variation</span></p>
@@ -283,7 +336,7 @@ The algorithm
 <p>For a good clustering, observations within each cluster should be as similar as possible. We measure this with <strong>within-cluster variation</strong>:</p>
 <p><span class="math display">\[W(C_k) = \frac{1}{|C_k|} \sum_{i,\, i' \in C_k} \;\sum_{j=1}^{p} (x_{ij} - x_{i'j})^2\]</span></p>
 <div class="body-text-s">
-<p><span class="math inline">\(|C_k|\)</span> = number of observations in cluster <span class="math inline">\(C_k\)</span> — <span class="math inline">\(p\)</span> = number of features</p>
+<p><span class="math inline">\(|C_k|\)</span> = number of observations in cluster <span class="math inline">\(C_k\)</span>. <span class="math inline">\(p\)</span> = number of features</p>
 </div>
 <div id="cell-within-cluster-variation" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
@@ -300,7 +353,7 @@ The algorithm
 <p><span class="slide-title">The K-means objective</span></p>
 <hr>
 <p><br></p>
-<p>We want to find <span class="math inline">\(K\)</span> clusters that minimize the <strong>total</strong> within-cluster variation across all clusters:</p>
+<p>We want to find <span class="math inline">\(K\)</span> clusters that minimize the <strong>total within-cluster variation</strong> across all clusters:</p>
 <p><span class="math display">\[\underset{C_1, \ldots, C_K}{\text{minimize}} \left\{ \sum_{k=1}^{K} W(C_k) \right\}\]</span></p>
 <p><br></p>
 <div class="fragment">
@@ -313,44 +366,105 @@ The algorithm
 <hr>
 <p><br></p>
 <ol type="1">
-<li><strong>Initialize:</strong> randomly select <span class="math inline">\(K\)</span> observations from the dataset as the initial centroids.</li>
+<li><p><strong>Initialize:</strong> randomly select <span class="math inline">\(K\)</span> observations from the dataset as the initial centroids.</p></li>
+<li><p><strong>Assign:</strong> assign each observation to the cluster whose centroid is nearest (smallest Euclidean distance).</p></li>
+<li><p><strong>Update centroids:</strong> compute the new centroid (mean) of each cluster.</p></li>
+<li><p><strong>Repeat</strong> steps 2–3 until assignments no longer change.</p></li>
 </ol>
-<div class="fragment">
-<ol start="2" type="1">
-<li><strong>Assign:</strong> assign each observation to the cluster whose centroid is nearest (smallest Euclidean distance).</li>
-</ol>
-</div>
-<div class="fragment">
-<ol start="3" type="1">
-<li><strong>Update centroids:</strong> compute the new centroid (mean) of each cluster.</li>
-</ol>
-</div>
-<div class="fragment">
-<ol start="4" type="1">
-<li><strong>Repeat</strong> steps 2–3 until assignments no longer change.</li>
-</ol>
-</div>
-<div class="fragment">
-<p><br></p>
 <div class="body-text-s">
-<p>Every iteration is guaranteed to decrease (or maintain) the total within-cluster variation, so the algorithm always converges. However, it does not always converge to the global minimum.</p>
+<p>Every iteration is guaranteed to decrease (or maintain) the total within-cluster variation, so the algorithm always converges. However, it does not always converge to the global minimum!</p>
+</div>
+<p><br></p>
+<div class="fragment">
+<div class="body-text-s teal-text center-text">
+<p>The clustering illustrations in the following slides were created by <a href="https://allisonhorst.com/k-means-clustering">Dr.&nbsp;Allison Horst</a>.</p>
 </div>
 </div>
 </section>
-<section id="algorithm-iterations" class="slide level2" data-menu-title="K-means iterations">
+<section id="algorithm-1" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_1.jpg" class="r-stretch"></section>
+<section id="algorithm-2" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_2.jpg" class="r-stretch"></section>
+<section id="algorithm-3" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_3.jpg" class="r-stretch"></section>
+<section id="algorithm-4" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_4.jpg" class="r-stretch"></section>
+<section id="algorithm-5" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_5.jpg" class="r-stretch"></section>
+<section id="algorithm-6" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_6.jpg" class="r-stretch"></section>
+<section id="algorithm-7" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_7.jpg" class="r-stretch"></section>
+<section id="algorithm-8" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_8.jpg" class="r-stretch"></section>
+<section id="algorithm-9" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_9.jpg" class="r-stretch"></section>
+<section id="algorithm-10" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_10.jpg" class="r-stretch"></section>
+<section id="algorithm-11" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_11.jpg" class="r-stretch"></section>
+<section id="algorithm-12" class="slide level2" data-menu-title="Algorithm">
+<h2></h2>
+
+<img data-src="allison_horst_clustering/clustering_12.jpg" class="r-stretch"></section>
+<section id="algorithm-iterations-1" class="slide level2" data-menu-title="K-means iterations">
 <h2></h2>
 <p><span class="slide-title">K-means in action</span></p>
 <hr>
-<div id="cell-algorithm-iterations" class="cell" data-execution_count="5">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="12_k_means_clustering-SLIDES_files/figure-revealjs/algorithm-iterations-output-1.png" id="algorithm-iterations" class="quarto-figure quarto-figure-center" width="1350" height="825"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
+
+<img data-src="images/algorithm_iterations_1.png" class="r-stretch"></section>
+<section id="algorithm-iterations-2" class="slide level2" data-menu-title="K-means iterations">
+<h2></h2>
+<p><span class="slide-title">K-means in action</span></p>
+<hr>
+
+<img data-src="images/algorithm_iterations_2.png" class="r-stretch"></section>
+<section id="algorithm-iterations-3" class="slide level2" data-menu-title="K-means iterations">
+<h2></h2>
+<p><span class="slide-title">K-means in action</span></p>
+<hr>
+
+<img data-src="images/algorithm_iterations_3.png" class="r-stretch"></section>
+<section id="algorithm-iterations-4" class="slide level2" data-menu-title="K-means iterations">
+<h2></h2>
+<p><span class="slide-title">K-means in action</span></p>
+<hr>
+
+<img data-src="images/algorithm_iterations_4.png" class="r-stretch"></section>
+<section id="algorithm-iterations-5" class="slide level2" data-menu-title="K-means iterations">
+<h2></h2>
+<p><span class="slide-title">K-means in action</span></p>
+<hr>
+
+<img data-src="images/algorithm_iterations_5.png" class="r-stretch"></section>
+<section id="algorithm-iterations-6" class="slide level2" data-menu-title="K-means iterations">
+<h2></h2>
+<p><span class="slide-title">K-means in action</span></p>
+<hr>
+
+<img data-src="images/algorithm_iterations_6.png" class="r-stretch"></section>
 <section id="section-considerations" class="slide level2" data-menu-title="# Considerations #" data-background="#047C90">
 <h2></h2>
 <div class="page-center vertical-center">
@@ -364,58 +478,56 @@ Considerations
 <p><span class="slide-title">Local optima</span></p>
 <hr>
 <p>Different random initializations can lead to <strong>different final clusterings</strong> — the algorithm finds a <em>local</em> minimum, not necessarily the global one.</p>
-<div id="cell-local-optima" class="cell" data-execution_count="6">
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="12_k_means_clustering-SLIDES_files/figure-revealjs/local-optima-output-1.png" id="local-optima" class="quarto-figure quarto-figure-center" width="1350" height="410"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="body-text-s center-text">
-<p>Run <span class="math inline">\(K\)</span>-means many times with different initializations and keep the solution with the lowest WCSS. In <code>sklearn</code>: <code>n_init</code> parameter (default: 10).</p>
+
+<img data-src="images/local_optima.png" class="r-stretch"><div class="body-text-s center-text">
+<p>Run <span class="math inline">\(K\)</span>-means several times with different initializations and keep the solution with the lowest within cluster variation.</p>
 </div>
 </section>
 <section id="choosing-k" class="slide level2" data-menu-title="How to choose K">
 <h2></h2>
 <p><span class="slide-title">How to choose <span class="math inline">\(K\)</span></span></p>
 <hr>
-<p><span class="math inline">\(K\)</span> is a hyperparameter chosen before running the algorithm. The <strong>elbow method</strong>: fit <span class="math inline">\(K\)</span>-means for a range of <span class="math inline">\(K\)</span> values and plot WCSS vs.&nbsp;<span class="math inline">\(K\)</span>. The <em>elbow</em> — where the rate of decrease flattens — suggests a reasonable value of <span class="math inline">\(K\)</span>.</p>
-<div id="cell-elbow-method" class="cell" data-execution_count="7">
+<p><span class="math inline">\(K\)</span> is a hyperparameter chosen before running the algorithm. The <strong>elbow method</strong>: fit <span class="math inline">\(K\)</span>-means for a range of <span class="math inline">\(K\)</span> values and plot within-cluster variation vs.&nbsp;<span class="math inline">\(K\)</span>. The <em>elbow</em> (where the rate of decrease flattens) suggests a reasonable value of <span class="math inline">\(K\)</span>.</p>
+<div id="cell-elbow-method" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="12_k_means_clustering-SLIDES_files/figure-revealjs/elbow-method-output-1.png" id="elbow-method" class="quarto-figure quarto-figure-center" width="706" height="385"></p>
+<p><img data-src="12_k_means_clustering-SLIDES_files/figure-revealjs/elbow-method-output-1.png" id="elbow-method" class="quarto-figure quarto-figure-center" width="706" height="384"></p>
 </figure>
 </div>
 </div>
 </div>
-<div class="body-text-s center-text">
-<p>Choosing <span class="math inline">\(K\)</span> also depends on what is practically meaningful or interpretable in the applied context.</p>
+<div class="center-text body-text-s">
+<p>Choosing <span class="math inline">\(K\)</span> also depends on what is <strong>practically meaningful or interpretable</strong> in the applied context.</p>
 </div>
 </section>
 <section id="interpreting-results" class="slide level2" data-menu-title="Interpreting results">
 <h2></h2>
 <p><span class="slide-title">Interpreting results</span></p>
 <hr>
-<div class="body-text-m">
 <ul>
-<li><p>Clusters will <strong>always</strong> be found — the algorithm partitions observations regardless of whether true subgroups exist.</p></li>
+<li><p>Clusters will <strong>always</strong> be found. The algorithm partitions observations regardless of whether true subgroups exist!</p></li>
 <li><p>Clustering with different parameter choices (different <span class="math inline">\(K\)</span>, different initializations) will produce variable results.</p></li>
 <li><p><strong>The output should not be taken as absolute truth</strong>, but rather as a starting point for generating hypotheses and guiding further study.</p></li>
 </ul>
-</div>
 <div class="fragment">
 <p><br></p>
 <div class="body-text-m teal-text">
-<p>In Amanda’s case, the clusters may correspond to real foraging strategies — but they could also reflect individual variation, seasonal patterns, or artifacts of data collection.</p>
+<p>In Amanda’s case, the clusters may correspond to real foraging strategies, but they could also reflect individual variation, seasonal patterns, or even artifacts of data collection.</p>
 </div>
+</div>
+</section>
+<section id="wrap-up" class="slide level2" data-menu-title="# Considerations #" data-background="#047C90">
+<h2></h2>
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">
+That’s it for EDS 232!
+</p>
 </div>
 </section>
 <section id="course-recap" class="slide level2" data-menu-title="Course recap">
 <h2></h2>
-<p><span class="slide-title">Everything we covered</span></p>
+<p><span class="slide-title">Everything we covered!</span></p>
 <hr>
 <div class="columns">
 <div class="column" style="width:33%;">
@@ -425,40 +537,38 @@ Considerations
 <li><span style="color:#E65100;">📊 <strong>Data fundamentals</strong> — predictors, response variable, training set, test set</span></li>
 <li><span style="color:#C8A000;">🔮 <strong>Inference vs prediction</strong> — parametric vs non-parametric models</span></li>
 <li><span style="color:#2E7D32;">🗂️ <strong>Problem types</strong> — supervised vs unsupervised; regression vs classification</span></li>
-<li><span style="color:#00695C;">📈 <strong>Linear regression</strong> — simple &amp; multiple; least squares estimation</span></li>
-<li><span style="color:#1565C0;">🧮 <strong>Hypothesis testing</strong> — t-statistic, p-values, F-statistic, confidence intervals</span></li>
-<li><span style="color:#6A1B9A;">📏 <strong>Regression metrics</strong> — MSE, R², adjusted R², RSE</span></li>
+<li><span style="color:#00695C;">📈 <strong>Linear regression</strong> — simple &amp; multiple; least squares estimation, polynomial</span></li>
+<li><span style="color:#1565C0;">🧮 <strong>Hypothesis testing</strong> — t-statistic, p-values, confidence intervals</span></li>
+<li><span style="color:#6A1B9A;">📏 <strong>Regression metrics</strong> — RSS, MSE, R², adjusted R², RSE</span></li>
 <li><span style="color:#AD1457;">⚖️ <strong>Bias-variance tradeoff</strong> — overfitting, model flexibility, training vs test error</span></li>
 </ul>
 </div>
 </div><div class="column" style="width:33%;">
 <div style="font-size: 0.50em; line-height: 1.7;">
 <ul>
-<li><span style="color:#C62828;">🔄 <strong>Cross-validation</strong> — k-fold CV, LOOCV, hyperparameter tuning, model selection</span></li>
+<li><span style="color:#C62828;">🔄 <strong>Cross-validation</strong> — k-fold CV, hyperparameter tuning, model selection</span></li>
 <li><span style="color:#E65100;">🏘️ <strong>K-nearest neighbors (KNN)</strong> — non-parametric classification, choosing K</span></li>
 <li><span style="color:#C8A000;">🎭 <strong>Confusion matrix</strong> — true/false positives and negatives</span></li>
 <li><span style="color:#2E7D32;">🎯 <strong>Classification metrics</strong> — precision, recall, F₁, accuracy, error rate</span></li>
-<li><span style="color:#00695C;">🌊 <strong>Logistic regression</strong> — logistic function, log-odds, MLE, decision boundary</span></li>
+<li><span style="color:#00695C;">🌊 <strong>Logistic regression</strong> — logistic function, log-odds, decision boundary</span></li>
 <li><span style="color:#1565C0;">📡 <strong>ROC curves &amp; AUC</strong> — TPR, FPR, classification threshold tradeoffs</span></li>
 <li><span style="color:#6A1B9A;">🏔️ <strong>Ridge &amp; lasso</strong> — regularization, penalty term λ, coefficient shrinkage</span></li>
-<li><span style="color:#AD1457;">🔭 <strong>PCA</strong> — principal components, loadings, scores, scree plots, variance explained</span></li>
+<li><span style="color:#AD1457;">🔭 <strong>PCA</strong> — principal components, scree plots, variance explained</span></li>
 </ul>
 </div>
 </div><div class="column" style="width:34%;">
 <div style="font-size: 0.50em; line-height: 1.7;">
 <ul>
 <li><span style="color:#C62828;">🗜️ <strong>PCR</strong> — principal component regression, dimensionality reduction</span></li>
-<li><span style="color:#E65100;">🌳 <strong>Decision trees</strong> — recursive binary splitting, RSS, Gini impurity, pruning</span></li>
+<li><span style="color:#E65100;">🌳 <strong>Decision trees</strong> — recursive binary splitting, pruning, leaves, nodes, Gini impurity, pruning</span></li>
 <li><span style="color:#C8A000;">🌲 <strong>Bagging</strong> — bootstrap sampling, ensemble methods, out-of-bag error</span></li>
 <li><span style="color:#2E7D32;">🌲🌲 <strong>Random forests</strong> — feature subsampling, variable importance</span></li>
 <li><span style="color:#00695C;">⚔️ <strong>Support vector machines</strong> — margins, support vectors, kernels, C parameter</span></li>
-<li><span style="color:#1565C0;">🧠 <strong>Neural networks</strong> — layers, activation functions, backpropagation, CNNs</span></li>
-<li><span style="color:#6A1B9A;">🎲 <strong>K-means clustering</strong> — centroids, within-cluster variation, WCSS, elbow method</span></li>
+<li><span style="color:#1565C0;">🧠 <strong>Neural networks</strong> — layers, activation functions, convolutions, pooling, CNNs</span></li>
+<li><span style="color:#6A1B9A;">🎲 <strong>K-means clustering</strong> — centroids, within-cluster variation, elbow method</span></li>
 </ul>
 </div>
 </div></div>
-
-
 </section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">

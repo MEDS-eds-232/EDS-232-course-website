@@ -4532,14 +4532,14 @@
     "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#example-unlabeled",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Investigating elephant seal diving strategies\n\nConsider Amanda from our first lesson. She records dive depth (meters) and dive duration (minutes) for a large number of northern elephant seals — with no prior labels:\n\nAre there distinct foraging strategies among these seals?"
+    "text": "Investigating elephant seal diving strategies\n\nConsider Amanda from our first lesson. She records dive depth (meters) and dive duration (minutes) for a large number of northern elephant seals. The question she investigates is:\n\nAre there distinct foraging strategies among these seals?"
   },
   {
     "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#unsupervised",
     "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#unsupervised",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Clustering as unsupervised learning\n\nClustering finds subgroups in a dataset so that observations within a cluster are similar to each other and different from observations in other clusters.\n\nUnlike classification, there is no response variable \\(Y\\) — no prior labels, no “correct answer.”\n\n\nClustering is a type of unsupervised method: we discover structure within the data rather than predicting a known outcome.\n\n\n\nPCA is another unsupervised method we have studied: it finds a low-dimensional representation of the observations that explains a large fraction of the variance."
+    "text": "Clustering as unsupervised learning\n\nClustering finds subgroups in a dataset so that observations within a cluster are similar to each other and different from observations in other clusters.\n\nUnlike classification, there is no response variable \\(Y\\): no prior labels, no “correct answer.”\nClustering is a type of unsupervised method: we discover structure within the data rather than predicting a known outcome.\n\n\nPCA is another unsupervised method we have studied: it finds a low-dimensional representation of the observations that explains a large fraction of the variance."
   },
   {
     "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#section-algorithm",
@@ -4549,11 +4549,18 @@
     "text": "The algorithm"
   },
   {
-    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#centroid-definition",
-    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#centroid-definition",
+    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#centroid-definition-1",
+    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#centroid-definition-1",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "What is a centroid?\n\nA centroid is the average position of a set of points — the “center of mass” of the group.\n\n\n\n\n\nObs.\nDepth \\(x_1\\)\nDuration \\(x_2\\)\nCluster\n\n\n\n\n1\n60\n18\nA\n\n\n2\n210\n6\nA\n\n\n3\n150\n15\nA\n\n\n4\n240\n26\nB\n\n\n5\n330\n11\nB\n\n\n6\n360\n29\nB\n\n\n\n\n. . .\nCentroid of cluster A:\n\\[\\bar{x}^{(A)} = \\left(\\frac{60 + 210 + 150}{3},\\; \\frac{18 + 6 + 15}{3}\\right) = (140,\\; 13)\\]\n. . .\nCentroid of cluster B:\n\\[\\bar{x}^{(B)} = \\left(\\frac{240 + 330 + 360}{3},\\; \\frac{26 + 11 + 29}{3}\\right) = (310,\\; 22)\\]"
+    "text": "What is a centroid?\n\nA centroid is the average position of a set of points: the “center of mass” of the group.\nExample\n\n\n\nObs.\nDepth \\(x_1\\)\nDuration \\(x_2\\)\nCluster\n\n\n\n\n1\n60\n18\nA\n\n\n2\n210\n6\nA\n\n\n3\n150\n15\nA\n\n\n4\n240\n26\nB\n\n\n5\n330\n11\nB\n\n\n6\n360\n29\nB"
+  },
+  {
+    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#centroid-definition-2",
+    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#centroid-definition-2",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "What is a centroid?\n\nA centroid is the average position of a set of points: the “center of mass” of the group.\nExample\n\n\n\nObs.\nDepth \\(x_1\\)\nDuration \\(x_2\\)\nCluster\n\n\n\n\n1\n60\n18\nA\n\n\n2\n210\n6\nA\n\n\n3\n150\n15\nA\n\n\n4\n240\n26\nB\n\n\n5\n330\n11\nB\n\n\n6\n360\n29\nB\n\n\n\n\nCentroid of cluster A:\n\\[\\bar{x}^{(A)} = \\left(\\frac{60 + 210 + 150}{3},\\; \\frac{18 + 6 + 15}{3}\\right) = (140,\\; 13)\\]\nCentroid of cluster B:\n\\[\\bar{x}^{(B)} = \\left(\\frac{240 + 330 + 360}{3},\\; \\frac{26 + 11 + 29}{3}\\right) = (310,\\; 22)\\]"
   },
   {
     "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#centroid-plot",
@@ -4563,11 +4570,18 @@
     "text": "What is a centroid?"
   },
   {
+    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#within-cluster-variation-blank",
+    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#within-cluster-variation-blank",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "Within-cluster variation"
+  },
+  {
     "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#within-cluster-variation",
     "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#within-cluster-variation",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Within-cluster variation\n\nFor a good clustering, observations within each cluster should be as similar as possible. We measure this with within-cluster variation:\n\\[W(C_k) = \\frac{1}{|C_k|} \\sum_{i,\\, i' \\in C_k} \\;\\sum_{j=1}^{p} (x_{ij} - x_{i'j})^2\\]\n\n\\(|C_k|\\) = number of observations in cluster \\(C_k\\) — \\(p\\) = number of features"
+    "text": "Within-cluster variation\n\nFor a good clustering, observations within each cluster should be as similar as possible. We measure this with within-cluster variation:\n\\[W(C_k) = \\frac{1}{|C_k|} \\sum_{i,\\, i' \\in C_k} \\;\\sum_{j=1}^{p} (x_{ij} - x_{i'j})^2\\]\n\n\\(|C_k|\\) = number of observations in cluster \\(C_k\\). \\(p\\) = number of features"
   },
   {
     "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#objective",
@@ -4581,11 +4595,46 @@
     "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-steps",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "The K-means algorithm\n\n\n\nInitialize: randomly select \\(K\\) observations from the dataset as the initial centroids.\n\n\n\nAssign: assign each observation to the cluster whose centroid is nearest (smallest Euclidean distance).\n\n\n\n\nUpdate centroids: compute the new centroid (mean) of each cluster.\n\n\n\n\nRepeat steps 2–3 until assignments no longer change.\n\n\n\n\n\nEvery iteration is guaranteed to decrease (or maintain) the total within-cluster variation, so the algorithm always converges. However, it does not always converge to the global minimum."
+    "text": "The K-means algorithm\n\n\n\nInitialize: randomly select \\(K\\) observations from the dataset as the initial centroids.\nAssign: assign each observation to the cluster whose centroid is nearest (smallest Euclidean distance).\nUpdate centroids: compute the new centroid (mean) of each cluster.\nRepeat steps 2–3 until assignments no longer change.\n\n\nEvery iteration is guaranteed to decrease (or maintain) the total within-cluster variation, so the algorithm always converges. However, it does not always converge to the global minimum!\n\n\n\n\nThe clustering illustrations in the following slides were created by Dr. Allison Horst."
   },
   {
-    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations",
-    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations",
+    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-1",
+    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-1",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "K-means in action"
+  },
+  {
+    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-2",
+    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-2",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "K-means in action"
+  },
+  {
+    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-3",
+    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-3",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "K-means in action"
+  },
+  {
+    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-4",
+    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-4",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "K-means in action"
+  },
+  {
+    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-5",
+    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-5",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "K-means in action"
+  },
+  {
+    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-6",
+    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#algorithm-iterations-6",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
     "text": "K-means in action"
@@ -4602,28 +4651,35 @@
     "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#local-optima",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Local optima\n\nDifferent random initializations can lead to different final clusterings — the algorithm finds a local minimum, not necessarily the global one.\n\n\n\n\n\n\n\n\n\n\nRun \\(K\\)-means many times with different initializations and keep the solution with the lowest WCSS. In sklearn: n_init parameter (default: 10)."
+    "text": "Local optima\n\nDifferent random initializations can lead to different final clusterings — the algorithm finds a local minimum, not necessarily the global one.\n\n\nRun \\(K\\)-means several times with different initializations and keep the solution with the lowest within cluster variation."
   },
   {
     "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#choosing-k",
     "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#choosing-k",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "How to choose \\(K\\)\n\n\\(K\\) is a hyperparameter chosen before running the algorithm. The elbow method: fit \\(K\\)-means for a range of \\(K\\) values and plot WCSS vs. \\(K\\). The elbow — where the rate of decrease flattens — suggests a reasonable value of \\(K\\).\n\n\n\n\n\n\n\n\n\n\nChoosing \\(K\\) also depends on what is practically meaningful or interpretable in the applied context."
+    "text": "How to choose \\(K\\)\n\n\\(K\\) is a hyperparameter chosen before running the algorithm. The elbow method: fit \\(K\\)-means for a range of \\(K\\) values and plot within-cluster variation vs. \\(K\\). The elbow (where the rate of decrease flattens) suggests a reasonable value of \\(K\\).\n\n\n\n\n\n\n\n\n\n\nChoosing \\(K\\) also depends on what is practically meaningful or interpretable in the applied context."
   },
   {
     "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#interpreting-results",
     "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#interpreting-results",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Interpreting results\n\n\n\nClusters will always be found — the algorithm partitions observations regardless of whether true subgroups exist.\nClustering with different parameter choices (different \\(K\\), different initializations) will produce variable results.\nThe output should not be taken as absolute truth, but rather as a starting point for generating hypotheses and guiding further study.\n\n\n\n\n\nIn Amanda’s case, the clusters may correspond to real foraging strategies — but they could also reflect individual variation, seasonal patterns, or artifacts of data collection."
+    "text": "Interpreting results\n\n\nClusters will always be found. The algorithm partitions observations regardless of whether true subgroups exist!\nClustering with different parameter choices (different \\(K\\), different initializations) will produce variable results.\nThe output should not be taken as absolute truth, but rather as a starting point for generating hypotheses and guiding further study.\n\n\n\n\nIn Amanda’s case, the clusters may correspond to real foraging strategies, but they could also reflect individual variation, seasonal patterns, or even artifacts of data collection."
+  },
+  {
+    "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#wrap-up",
+    "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#wrap-up",
+    "title": "EDS 232 - Machine Learning for Environmental Science",
+    "section": "",
+    "text": "That’s it for EDS 232!"
   },
   {
     "objectID": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#course-recap",
     "href": "notes/12_k_means_clustering/12_k_means_clustering-SLIDES.html#course-recap",
     "title": "EDS 232 - Machine Learning for Environmental Science",
     "section": "",
-    "text": "Everything we covered\n\n\n\n\n\n🤖 Machine learning — AI vs ML vs deep learning, learning from data, limitations\n📊 Data fundamentals — predictors, response variable, training set, test set\n🔮 Inference vs prediction — parametric vs non-parametric models\n🗂️ Problem types — supervised vs unsupervised; regression vs classification\n📈 Linear regression — simple & multiple; least squares estimation\n🧮 Hypothesis testing — t-statistic, p-values, F-statistic, confidence intervals\n📏 Regression metrics — MSE, R², adjusted R², RSE\n⚖️ Bias-variance tradeoff — overfitting, model flexibility, training vs test error\n\n\n\n\n\n🔄 Cross-validation — k-fold CV, LOOCV, hyperparameter tuning, model selection\n🏘️ K-nearest neighbors (KNN) — non-parametric classification, choosing K\n🎭 Confusion matrix — true/false positives and negatives\n🎯 Classification metrics — precision, recall, F₁, accuracy, error rate\n🌊 Logistic regression — logistic function, log-odds, MLE, decision boundary\n📡 ROC curves & AUC — TPR, FPR, classification threshold tradeoffs\n🏔️ Ridge & lasso — regularization, penalty term λ, coefficient shrinkage\n🔭 PCA — principal components, loadings, scores, scree plots, variance explained\n\n\n\n\n\n🗜️ PCR — principal component regression, dimensionality reduction\n🌳 Decision trees — recursive binary splitting, RSS, Gini impurity, pruning\n🌲 Bagging — bootstrap sampling, ensemble methods, out-of-bag error\n🌲🌲 Random forests — feature subsampling, variable importance\n⚔️ Support vector machines — margins, support vectors, kernels, C parameter\n🧠 Neural networks — layers, activation functions, backpropagation, CNNs\n🎲 K-means clustering — centroids, within-cluster variation, WCSS, elbow method"
+    "text": "Everything we covered!\n\n\n\n\n\n🤖 Machine learning — AI vs ML vs deep learning, learning from data, limitations\n📊 Data fundamentals — predictors, response variable, training set, test set\n🔮 Inference vs prediction — parametric vs non-parametric models\n🗂️ Problem types — supervised vs unsupervised; regression vs classification\n📈 Linear regression — simple & multiple; least squares estimation, polynomial\n🧮 Hypothesis testing — t-statistic, p-values, confidence intervals\n📏 Regression metrics — RSS, MSE, R², adjusted R², RSE\n⚖️ Bias-variance tradeoff — overfitting, model flexibility, training vs test error\n\n\n\n\n\n🔄 Cross-validation — k-fold CV, hyperparameter tuning, model selection\n🏘️ K-nearest neighbors (KNN) — non-parametric classification, choosing K\n🎭 Confusion matrix — true/false positives and negatives\n🎯 Classification metrics — precision, recall, F₁, accuracy, error rate\n🌊 Logistic regression — logistic function, log-odds, decision boundary\n📡 ROC curves & AUC — TPR, FPR, classification threshold tradeoffs\n🏔️ Ridge & lasso — regularization, penalty term λ, coefficient shrinkage\n🔭 PCA — principal components, scree plots, variance explained\n\n\n\n\n\n🗜️ PCR — principal component regression, dimensionality reduction\n🌳 Decision trees — recursive binary splitting, pruning, leaves, nodes, Gini impurity, pruning\n🌲 Bagging — bootstrap sampling, ensemble methods, out-of-bag error\n🌲🌲 Random forests — feature subsampling, variable importance\n⚔️ Support vector machines — margins, support vectors, kernels, C parameter\n🧠 Neural networks — layers, activation functions, convolutions, pooling, CNNs\n🎲 K-means clustering — centroids, within-cluster variation, elbow method"
   },
   {
     "objectID": "notes/1_0_what_is_machine_learning/1_0_what_is_machine_learning-SLIDES.html#title-slide",
