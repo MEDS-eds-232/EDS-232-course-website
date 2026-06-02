@@ -1,0 +1,494 @@
+---
+format:
+    revealjs:
+        theme: ../../styles/meds-slides-styles.scss
+        slide-number: true
+        chalkboard: true
+        title-slide: false
+jupyter: eds232-env
+---
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+
+plt.style.use('default')
+fig_size_x = 8
+fig_size_y = 4
+plt.rcParams['font.size'] = 11
+plt.rcParams['legend.fontsize'] = 'large'
+
+# ── Elephant seal foraging dataset ─────────────────────────────────────────
+np.random.seed(7)
+n = 40
+
+deep_long     = np.random.multivariate_normal([520, 43], [[6500, 180], [180, 70]], n)
+shallow_short = np.random.multivariate_normal([190, 14], [[5500, 150], [150, 55]], n)
+moderate      = np.random.multivariate_normal([340, 27], [[6000, 170], [170, 65]], n)
+
+data = np.vstack([deep_long, shallow_short, moderate])
+data[:, 0] = np.clip(data[:, 0], 30, 800)
+data[:, 1] = np.clip(data[:, 1], 2,  65)
+
+# ── Small six-point centroid example ───────────────────────────────────────
+small_pts = np.array([
+    [ 60, 18],
+    [210,  6],
+    [150, 15],
+    [240, 26],
+    [330, 11],
+    [360, 29],
+], dtype=float)
+small_labels = np.array([0, 0, 0, 1, 1, 1])
+centroids_small = np.array([
+    small_pts[small_labels == 0].mean(axis=0),
+    small_pts[small_labels == 1].mean(axis=0),
+])
+
+cluster_colors = ['tomato', 'steelblue', 'seagreen']
+
+# ── Algorithm iteration snapshots ──────────────────────────────────────────
+def _assign(X, cents):
+    return np.linalg.norm(X[:, None] - cents[None], axis=2).argmin(axis=1)
+
+def _update(X, lbls, K):
+    return np.array([X[lbls == k].mean(axis=0) for k in range(K)])
+
+K_demo = 3
+rng_demo = np.random.RandomState(3)
+cents_0 = data[rng_demo.choice(len(data), K_demo, replace=False)].copy()
+
+lbls_1  = _assign(data, cents_0)
+cents_1 = _update(data, lbls_1, K_demo)
+lbls_2  = _assign(data, cents_1)
+cents_2 = _update(data, lbls_2, K_demo)
+lbls_3  = _assign(data, cents_2)
+```
+
+## {#title-slide data-menu-title="Title Slide" background="#053660"}
+
+[EDS 232]{.custom-title}
+
+<hr class="hr-teal">
+
+[Lesson 12]{.custom-subtitle}
+
+[*K-Means Clustering*]{.custom-subtitle}
+
+---
+
+## {#in-this-lesson data-menu-title="In this lesson"}
+
+[In this lesson]{.slide-title}
+
+<hr>
+
+<br>
+
+- Clustering as an unsupervised method for finding subgroups in data
+- The concept of a **centroid** and **within-cluster variation**
+- The **$K$-means algorithm** and how it minimizes within-cluster variation iteratively
+- Practical considerations: local optima, choosing $K$, and interpreting results
+
+---
+
+## {#section-example data-menu-title="# A guiding example #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">A guiding example</p>
+</div>
+
+---
+
+## {#example-unlabeled data-menu-title="Elephant seal dive measurements"}
+
+[Investigating elephant seal diving strategies]{.slide-title}
+
+<hr>
+
+Consider Amanda from our first lesson. She records **dive depth** (meters) and **dive duration** (minutes) for a large number of northern elephant seals — with no prior labels:
+
+::: {.center-text .teal-text .body-text-m}
+*Are there distinct foraging strategies among these seals?*
+:::
+
+```{python}
+#| label: unlabeled-data
+#| echo: false
+#| fig-align: center
+#| out-width: "85%"
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 1.3, fig_size_y))
+ax.scatter(data[:, 0], data[:, 1], c='steelblue', alpha=0.55, s=40)
+ax.set_xlabel('Dive depth (m)')
+ax.set_ylabel('Dive duration (min)')
+ax.set_title('Elephant seal dive measurements')
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#unsupervised data-menu-title="Clustering as unsupervised learning"}
+
+[Clustering as unsupervised learning]{.slide-title}
+
+<hr>
+
+*Clustering* finds **subgroups** in a dataset so that observations within a cluster are similar to each other and different from observations in other clusters.
+
+. . .
+
+Unlike classification, there is no response variable $Y$ — no prior labels, no "correct answer."
+
+. . .
+
+Clustering is a type of **unsupervised** method: we discover structure within the data rather than predicting a known outcome.
+
+. . .
+
+::: {.body-text-s}
+PCA is another unsupervised method we have studied: it finds a low-dimensional representation of the observations that explains a large fraction of the variance.
+:::
+
+---
+
+## {#section-algorithm data-menu-title="# The algorithm #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">The algorithm</p>
+</div>
+
+---
+
+## {#centroid-definition data-menu-title="What is a centroid?"}
+
+[What is a centroid?]{.slide-title}
+
+<hr>
+
+A **centroid** is the average position of a set of points — the "center of mass" of the group.
+
+:::: {.columns}
+
+::: {.column width="42%"}
+
+| Obs. | Depth $x_1$ | Duration $x_2$ | Cluster |
+|------|:---:|:---:|:---:|
+| 1    |  60 | 18  | A |
+| 2    | 210 |  6  | A |
+| 3    | 150 | 15  | A |
+| 4    | 240 | 26  | B |
+| 5    | 330 | 11  | B |
+| 6    | 360 | 29  | B |
+
+:::
+
+::: {.column width="58%"}
+
+. . .
+
+**Centroid of cluster A:**
+
+$$\bar{x}^{(A)} = \left(\frac{60 + 210 + 150}{3},\; \frac{18 + 6 + 15}{3}\right) = (140,\; 13)$$
+
+. . .
+
+**Centroid of cluster B:**
+
+$$\bar{x}^{(B)} = \left(\frac{240 + 330 + 360}{3},\; \frac{26 + 11 + 29}{3}\right) = (310,\; 22)$$
+
+:::
+
+::::
+
+---
+
+## {#centroid-plot data-menu-title="Centroid plot"}
+
+[What is a centroid?]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: centroid-example
+#| echo: false
+#| fig-align: center
+#| out-width: "70%"
+
+labels_str = ['Cluster A', 'Cluster B']
+fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y + 0.5))
+
+for k in range(2):
+    pts = small_pts[small_labels == k]
+    ax.scatter(pts[:, 0], pts[:, 1],
+               c=cluster_colors[k], s=110, zorder=3, label=labels_str[k])
+    ax.scatter(centroids_small[k, 0], centroids_small[k, 1],
+               c=cluster_colors[k], marker='X', s=260,
+               edgecolors='black', linewidth=1.2, zorder=4,
+               label=f'Centroid {labels_str[k]}')
+
+ax.set_xlabel('Dive depth (m)')
+ax.set_ylabel('Dive duration (min)')
+ax.set_title('Six observations and their centroids')
+ax.legend(fontsize=10)
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#within-cluster-variation data-menu-title="Within-cluster variation"}
+
+[Within-cluster variation]{.slide-title}
+
+<hr>
+
+For a good clustering, observations within each cluster should be as similar as possible. We measure this with **within-cluster variation**:
+
+$$W(C_k) = \frac{1}{|C_k|} \sum_{i,\, i' \in C_k} \;\sum_{j=1}^{p} (x_{ij} - x_{i'j})^2$$
+
+::: {.body-text-s}
+$|C_k|$ = number of observations in cluster $C_k$ — $p$ = number of features
+:::
+
+```{python}
+#| label: within-cluster-variation
+#| echo: false
+#| fig-align: center
+#| out-width: "80%"
+
+np.random.seed(1)
+fig, axes = plt.subplots(1, 2, figsize=(fig_size_x * 1.3, fig_size_y))
+
+for ax, spread, title in zip(axes, [0.05, 0.7], ['Small $W(C_k)$', 'Large $W(C_k)$']):
+    for k, (cx, cy) in enumerate([[1.5, 1.5], [4.5, 4.5]]):
+        pts = np.random.multivariate_normal([cx, cy], [[spread, 0], [0, spread]], 15)
+        ax.scatter(pts[:, 0], pts[:, 1], c=cluster_colors[k], alpha=0.7, s=40)
+        ax.scatter(cx, cy, c=cluster_colors[k], marker='X', s=180, edgecolors='black', linewidth=1)
+    ax.set_xlim(0, 6); ax.set_ylim(0, 6)
+    ax.set_xlabel('$x_1$'); ax.set_ylabel('$x_2$')
+    ax.set_title(title)
+    ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#objective data-menu-title="The K-means objective"}
+
+[The K-means objective]{.slide-title}
+
+<hr>
+
+<br>
+
+We want to find $K$ clusters that minimize the **total** within-cluster variation across all clusters:
+
+$$\underset{C_1, \ldots, C_K}{\text{minimize}} \left\{ \sum_{k=1}^{K} W(C_k) \right\}$$
+
+<br>
+
+. . .
+
+The $K$-means algorithm finds an approximate solution to this minimization through a simple iterative procedure.
+
+---
+
+## {#algorithm-steps data-menu-title="K-means algorithm steps"}
+
+[The K-means algorithm]{.slide-title}
+
+<hr>
+
+<br>
+
+1. **Initialize:** randomly select $K$ observations from the dataset as the initial centroids.
+
+. . .
+
+2. **Assign:** assign each observation to the cluster whose centroid is nearest (smallest Euclidean distance).
+
+. . .
+
+3. **Update centroids:** compute the new centroid (mean) of each cluster.
+
+. . .
+
+4. **Repeat** steps 2–3 until assignments no longer change.
+
+. . .
+
+<br>
+
+::: {.body-text-s}
+Every iteration is guaranteed to decrease (or maintain) the total within-cluster variation, so the algorithm always converges. However, it does not always converge to the global minimum.
+:::
+
+---
+
+## {#algorithm-iterations data-menu-title="K-means iterations"}
+
+[K-means in action]{.slide-title}
+
+<hr>
+
+```{python}
+#| label: algorithm-iterations
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+iter_panels = [
+    ('Step 1: Select initial centroids',  None,   cents_0),
+    ('Iteration 1: Assign to nearest',    lbls_1, cents_0),
+    ('Iteration 1: Update centroids',     lbls_1, cents_1),
+    ('Iteration 2: Assign to nearest',    lbls_2, cents_1),
+    ('Iteration 2: Update centroids',     lbls_2, cents_2),
+    ('Iteration 3: Assign (converged)',   lbls_3, cents_2),
+]
+
+fig, axes = plt.subplots(2, 3, figsize=(fig_size_x * 1.7, fig_size_y * 2.1))
+axes = axes.flatten()
+
+for ax, (title, lbls, cents) in zip(axes, iter_panels):
+    if lbls is None:
+        ax.scatter(data[:, 0], data[:, 1], c='lightgray', s=20, alpha=0.6, zorder=2)
+    else:
+        for k in range(K_demo):
+            ax.scatter(data[lbls == k, 0], data[lbls == k, 1],
+                       c=cluster_colors[k], s=20, alpha=0.6, zorder=2)
+    for k in range(K_demo):
+        ax.scatter(cents[k, 0], cents[k, 1],
+                   c=cluster_colors[k], marker='X', s=160,
+                   edgecolors='black', linewidth=1.2, zorder=4)
+    ax.set_xlabel('Dive depth (m)')
+    ax.set_ylabel('Dive duration (min)')
+    ax.set_title(title, fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+---
+
+## {#section-considerations data-menu-title="# Considerations #" background="#047C90"}
+
+<div class="page-center vertical-center">
+<p class="custom-subtitle bottombr">Considerations</p>
+</div>
+
+---
+
+## {#local-optima data-menu-title="Local optima"}
+
+[Local optima]{.slide-title}
+
+<hr>
+
+Different random initializations can lead to **different final clusterings** — the algorithm finds a *local* minimum, not necessarily the global one.
+
+```{python}
+#| label: local-optima
+#| echo: false
+#| fig-align: center
+#| out-width: "100%"
+
+seeds = [0, 5, 99]
+fig, axes = plt.subplots(1, 3, figsize=(fig_size_x * 1.7, fig_size_y))
+
+for ax, seed in zip(axes, seeds):
+    km = KMeans(n_clusters=3, n_init=1, random_state=seed)
+    km.fit(data)
+    for k in range(3):
+        mask = km.labels_ == k
+        ax.scatter(data[mask, 0], data[mask, 1], c=cluster_colors[k], alpha=0.55, s=30)
+        ax.scatter(km.cluster_centers_[k, 0], km.cluster_centers_[k, 1],
+                   c=cluster_colors[k], marker='X', s=160, edgecolors='black', linewidth=1)
+    ax.set_xlabel('Dive depth (m)')
+    ax.set_ylabel('Dive duration (min)')
+    ax.set_title(f'Seed = {seed}  |  WCSS = {km.inertia_:.0f}')
+    ax.grid(True, alpha=0.3)
+
+plt.suptitle('$K = 3$ with three different random initializations', y=1.02)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s .center-text}
+Run $K$-means many times with different initializations and keep the solution with the lowest WCSS. In `sklearn`: `n_init` parameter (default: 10).
+:::
+
+---
+
+## {#choosing-k data-menu-title="How to choose K"}
+
+[How to choose $K$]{.slide-title}
+
+<hr>
+
+$K$ is a hyperparameter chosen before running the algorithm. The **elbow method**: fit $K$-means for a range of $K$ values and plot WCSS vs. $K$. The *elbow* — where the rate of decrease flattens — suggests a reasonable value of $K$.
+
+```{python}
+#| label: elbow-method
+#| echo: false
+#| fig-align: center
+#| out-width: "60%"
+
+wcss = [
+    KMeans(n_clusters=k, n_init=20, random_state=42).fit(data).inertia_
+    for k in range(1, 9)
+]
+
+fig, ax = plt.subplots(figsize=(fig_size_x * 0.9, fig_size_y))
+ax.plot(range(1, 9), wcss, 'o-', color='steelblue', linewidth=2, markersize=7)
+ax.axvline(x=3, color='tomato', linestyle='--', linewidth=1.5, label='Elbow at $K = 3$')
+ax.set_xlabel('Number of clusters $K$')
+ax.set_ylabel('Total within-cluster variation (WCSS)')
+ax.set_title('Elbow method')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+::: {.body-text-s .center-text}
+Choosing $K$ also depends on what is practically meaningful or interpretable in the applied context.
+:::
+
+---
+
+## {#interpreting-results data-menu-title="Interpreting results"}
+
+[Interpreting results]{.slide-title}
+
+<hr>
+
+::: {.body-text-m}
+- Clusters will **always** be found — the algorithm partitions observations regardless of whether true subgroups exist.
+
+- Clustering with different parameter choices (different $K$, different initializations) will produce variable results.
+
+- **The output should not be taken as absolute truth**, but rather as a starting point for generating hypotheses and guiding further study.
+:::
+
+. . .
+
+<br>
+
+::: {.body-text-m .teal-text}
+In Amanda's case, the clusters may correspond to real foraging strategies — but they could also reflect individual variation, seasonal patterns, or artifacts of data collection.
+:::

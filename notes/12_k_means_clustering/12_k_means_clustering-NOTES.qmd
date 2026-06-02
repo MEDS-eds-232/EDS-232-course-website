@@ -18,9 +18,9 @@ plt.rcParams['font.size'] = 10
 np.random.seed(7)
 n = 40
 
-deep_long     = np.random.multivariate_normal([480, 38], [[4000, 150], [150, 60]], n)
-shallow_short = np.random.multivariate_normal([200, 16], [[3000, 100], [100, 40]], n)
-moderate      = np.random.multivariate_normal([330, 27], [[3500, 120], [120, 50]], n)
+deep_long     = np.random.multivariate_normal([520, 43], [[6500, 180], [180, 70]], n)
+shallow_short = np.random.multivariate_normal([190, 14], [[5500, 150], [150, 55]], n)
+moderate      = np.random.multivariate_normal([340, 27], [[6000, 170], [170, 65]], n)
 
 data = np.vstack([deep_long, shallow_short, moderate])
 data[:, 0] = np.clip(data[:, 0], 30, 800)   # depth: 30–800 m
@@ -28,12 +28,12 @@ data[:, 1] = np.clip(data[:, 1], 2,  65)    # duration: 2–65 min
 
 # ── Small six-point centroid example ──────────────────────────────────────
 small_pts = np.array([
-    [120,  8],
-    [160, 11],
-    [140, 10],
-    [520, 42],
-    [480, 38],
-    [550, 44],
+    [ 60, 18],
+    [210,  6],
+    [150, 15],
+    [240, 26],
+    [330, 11],
+    [360, 29],
 ], dtype=float)
 small_labels = np.array([0, 0, 0, 1, 1, 1])
 centroids_small = np.array([
@@ -44,11 +44,24 @@ centroids_small = np.array([
 cluster_colors = ['tomato', 'steelblue', 'seagreen']
 ```
 
-## Clustering in ecology
+[📊 Slides](12_k_means_clustering-SLIDES.qmd)
 
 *Clustering* is a broad set of techniques for finding *subgroups*, or *clusters*, in a dataset. The goal is for observations within a cluster to be as similar to each other as possible, while observations in different clusters are as different as possible.
 
-Consider Amanda, a marine ecologist who records **dive depth** (meters) and **dive duration** (minutes) for a large number of northern elephant seals. She has no prior labels — she simply wants to ask: *are there distinct foraging strategies among these seals?*
+In this lesson we introduce:
+
+- **Clustering** as an unsupervised method for finding subgroups in data
+- The concept of a **centroid** and **within-cluster variation**
+- The **$K$-means algorithm** and how it minimizes within-cluster variation iteratively
+- Practical considerations: local optima, choosing $K$, and interpreting results
+
+These notes are based on chapter 12.4 of *An Introduction to Statistical Learning with Applications in Python* [@islp_2023]. The example data is synthetic and was generated with the aid of Claude Code for the purpose of this lesson. The clustering illustrations in the slides were made by [Dr. Allison Horst](https://allisonhorst.com/k-means-clustering).
+
+
+## A guiding example: investigating elephant seal diving strategies
+
+
+Consider Amanda form our first lesson in this course. She is a marine ecologist who records **dive depth** (meters) and **dive duration** (minutes) for a large number of northern elephant seals. She has no prior labels — she simply wants to ask: *are there distinct foraging strategies among these seals?*
 
 ```{python}
 fig, ax = plt.subplots(figsize=(fig_size_x, fig_size_y))
@@ -62,32 +75,32 @@ plt.show()
 plt.close()
 ```
 
-Unlike the classification problems we have studied, there is no response variable $Y$ here — no prior labels, no "correct answer." Clustering is a type of **unsupervised** method because we are discovering structure within the data rather than predicting a known outcome. PCA is another unsupervised method we have studied: it finds a low-dimensional representation of the observations that explains a large fraction of the variance.
+Unlike the classification problems we have studied, there is no response variable $Y$ here: no prior labels, no "correct answer." Clustering is a type of **unsupervised** method because we are discovering structure within the data rather than predicting a known outcome. PCA is another unsupervised method we have studied: it finds a low-dimensional representation of the observations that explains a large fraction of the variance.
 
 ## The algorithm
 
 ### What is a centroid?
 
-Before jumping into the $K$-means algorithm, we need to understand what a **centroid** is. A centroid is the average position of a set of points — the "center of mass" of the group.
+Before jumping into the $K$-means algorithm, we need to understand what a **centroid** is. A centroid is the average position of a set of points, the "center of mass" of the group.
 
 Suppose Amanda takes a small subset of six observations and tentatively groups them into two clusters:
 
 | Obs. | Depth $x_1$ (m) | Duration $x_2$ (min) | Cluster |
 |------|:---:|:---:|:-------:|
-| 1    | 120 |  8  | A |
-| 2    | 160 | 11  | A |
-| 3    | 140 | 10  | A |
-| 4    | 520 | 42  | B |
-| 5    | 480 | 38  | B |
-| 6    | 550 | 44  | B |
+| 1    |  60 | 18  | A |
+| 2    | 210 |  6  | A |
+| 3    | 150 | 15  | A |
+| 4    | 240 | 26  | B |
+| 5    | 330 | 11  | B |
+| 6    | 360 | 29  | B |
 
-The centroid of cluster A is the mean across its observations:
+The **centroid of cluster A is the mean across its observations**:
 
-$$\bar{x}^{(A)} = \left(\frac{120 + 160 + 140}{3},\; \frac{8 + 11 + 10}{3}\right) = (140,\; 9.7)$$
+$$\bar{x}^{(A)} = \left(\frac{60 + 210 + 150}{3},\; \frac{18 + 6 + 15}{3}\right) = (140,\; 13)$$
 
 And for cluster B:
 
-$$\bar{x}^{(B)} = \left(\frac{520 + 480 + 550}{3},\; \frac{42 + 38 + 44}{3}\right) = (516.7,\; 41.3)$$
+$$\bar{x}^{(B)} = \left(\frac{240 + 330 + 360}{3},\; \frac{26 + 11 + 29}{3}\right) = (310,\; 22)$$
 
 ```{python}
 labels_str = ['Cluster A', 'Cluster B']
@@ -116,11 +129,11 @@ plt.close()
 
 For a clustering to be good, the observations within each cluster should be as similar to each other as possible. We measure this with **within-cluster variation**.
 
-For cluster $C_k$, within-cluster variation is the average pairwise squared Euclidean distance between all observations in the cluster:
+For the $k$-th cluster $C_k$, within-cluster variation is the average pairwise squared Euclidean distance between all observations in the cluster:
 
-$$W(C_k) = \frac{1}{|C_k|} \sum_{i,\, i' \in C_k} \;\sum_{j=1}^{p} (x_{ij} - x_{i'j})^2$$
+$$W(C_k) = \frac{1}{|C_k|} \sum_{i,\, i' \in C_k} \;\sum_{j=1}^{p} (x_{ij} - x_{i'j})^2,$$
 
-where $|C_k|$ is the number of observations in cluster $C_k$ and $p$ is the number of features. Clusters with small $W(C_k)$ have tightly packed observations; clusters with large $W(C_k)$ have scattered ones.
+where $|C_k|$ is the number of observations in cluster $C_k$ and $p$ is the number of features. Clusters with small within-cluster variation $W(C_k)$ have tightly packed observations; clusters with large within-cluster variation $W(C_k)$ have scattered ones.
 
 ```{python}
 np.random.seed(1)
@@ -129,7 +142,7 @@ fig, axes = plt.subplots(1, 2, figsize=(fig_size_x, fig_size_y))
 for ax, spread, title in zip(
     axes,
     [0.05, 0.7],
-    ['Small $W(C_k)$  ✓', 'Large $W(C_k)$  ✗']
+    ['Small $W(C_k)$', 'Large $W(C_k)$']
 ):
     for k, (cx, cy) in enumerate([[1.5, 1.5], [4.5, 4.5]]):
         pts = np.random.multivariate_normal(
@@ -151,20 +164,72 @@ plt.close()
 
 The overall objective is to find $K$ clusters that minimize the **total** within-cluster variation across all clusters:
 
-$$\underset{C_1, \ldots, C_K}{\text{minimize}} \left\{ \sum_{k=1}^{K} W(C_k) \right\}$$
+$$\underset{C_1, \ldots, C_K}{\text{minimize}} \left\{ \sum_{k=1}^{K} W(C_k) \right\}.$$
 
 ### The algorithm
 
 The $K$-means algorithm finds an approximate solution to this minimization through a simple iterative procedure:
 
-1. **Initialize:** randomly assign each observation to one of $K$ clusters.
-2. **Update centroids:** compute the centroid (mean) of each cluster.
-3. **Reassign:** move each observation to the cluster whose centroid is nearest (smallest Euclidean distance).
+1. **Initialize:** randomly select $K$ observations from the dataset as the initial centroids.
+2. **Assign:** assign each observation to the cluster whose centroid is nearest (smallest Euclidean distance).
+3. **Update centroids:** compute the new centroid (mean) of each cluster.
 4. **Repeat** steps 2–3 until assignments no longer change.
 
 Every iteration is guaranteed to decrease (or maintain) the total within-cluster variation, so the algorithm always converges. However, it does not always converge to the global minimum — see [Local optima] below.
 
 See slides for a step-by-step visual walkthrough of the algorithm.
+
+The figure below traces the first few iterations on the elephant seal dataset, starting from one random initialization:
+
+```{python}
+def _assign(X, cents):
+    return np.linalg.norm(X[:, None] - cents[None], axis=2).argmin(axis=1)
+
+def _update(X, lbls, K):
+    return np.array([X[lbls == k].mean(axis=0) for k in range(K)])
+
+K_demo = 3
+rng_demo = np.random.RandomState(3)
+cents_0 = data[rng_demo.choice(len(data), K_demo, replace=False)].copy()
+
+lbls_1  = _assign(data, cents_0)
+cents_1 = _update(data, lbls_1, K_demo)
+lbls_2  = _assign(data, cents_1)
+cents_2 = _update(data, lbls_2, K_demo)
+lbls_3  = _assign(data, cents_2)
+
+iter_panels = [
+    ('Step 1: Select initial centroids', None,   cents_0),
+    ('Iteration 1: Assign to nearest',   lbls_1, cents_0),
+    ('Iteration 1: Update centroids',    lbls_1, cents_1),
+    ('Iteration 2: Assign to nearest',   lbls_2, cents_1),
+    ('Iteration 2: Update centroids',    lbls_2, cents_2),
+    ('Iteration 3: Assign (converged)',  lbls_3, cents_2),
+]
+
+fig, axes = plt.subplots(2, 3, figsize=(fig_size_x * 1.5, fig_size_y * 2.2))
+axes = axes.flatten()
+
+for ax, (title, lbls, cents) in zip(axes, iter_panels):
+    if lbls is None:
+        ax.scatter(data[:, 0], data[:, 1], c='lightgray', s=20, alpha=0.6, zorder=2)
+    else:
+        for k in range(K_demo):
+            ax.scatter(data[lbls == k, 0], data[lbls == k, 1],
+                       c=cluster_colors[k], s=20, alpha=0.6, zorder=2)
+    for k in range(K_demo):
+        ax.scatter(cents[k, 0], cents[k, 1],
+                   c=cluster_colors[k], marker='X', s=160,
+                   edgecolors='black', linewidth=1.2, zorder=4)
+    ax.set_xlabel('Dive depth (m)')
+    ax.set_ylabel('Dive duration (min)')
+    ax.set_title(title, fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+plt.close()
+```
 
 ## Considerations
 
@@ -207,7 +272,7 @@ More generally, clustering methods are not very robust to perturbations in the d
 
 ### How to choose $K$
 
-$K$ is a hyperparameter we must choose before running the algorithm. One common approach is the **elbow method**: fit $K$-means for a range of $K$ values and plot the total within-cluster variation (WCSS) against $K$. The total variation will always decrease as $K$ increases — but the gains become smaller after the "true" number of clusters is reached. The *elbow* in the curve, where the rate of decrease flattens, suggests a reasonable value of $K$.
+$K$ is a hyperparameter we must choose before running the algorithm. One common approach is the **elbow method**: fit $K$-means for a range of $K$ values and plot the total within-cluster variation (WCSS) against $K$. The total variation will always decrease as $K$ increases,  but the gains become smaller after the "true" number of clusters is reached. The *elbow* in the curve, where the rate of decrease flattens, suggests a reasonable value of $K$.
 
 ```{python}
 wcss = [
@@ -228,12 +293,12 @@ plt.show()
 plt.close()
 ```
 
-The elbow at $K = 3$ suggests three foraging strategies is a sensible grouping. Note that the elbow can sometimes be ambiguous — choosing $K$ also depends on what is practically meaningful or interpretable in the applied context.
+The elbow at $K = 3$ suggests three foraging strategies is a sensible grouping. Note that the elbow can sometimes be ambiguous. **Choosing $K$ also depends on what is practically meaningful or interpretable in the applied context.**
 
 Additionally, we may look for the number of clusters that provides the most useful or actionable solution for the scientific question at hand.
 
 ### Interpreting results
 
-Clusters will always be found: the algorithm is designed to partition observations regardless of whether true subgroups exist. Clustering with different parameter choices — different $K$, different initializations — will produce variable results. The output should not be taken as absolute truth about the dataset, but rather as a starting point for generating hypotheses and guiding further study.
+Clusters will always be found: the algorithm is designed to partition observations regardless of whether true subgroups exist. Clustering with different parameter choices —different $K$, different initializations— will produce variable results. **The output should not be taken as absolute truth about the dataset, but rather as a starting point for generating hypotheses and guiding further study.**
 
-In Amanda's case, the clusters may well correspond to real foraging strategies — but they could also reflect individual variation, seasonal patterns, or artifacts of data collection. The clusters are an invitation to investigate further, not a definitive answer.
+In Amanda's case, the clusters may well correspond to real foraging strategies, but they could also reflect individual variation, seasonal patterns, or artifacts of data collection. The clusters are an invitation to investigate further, not a definitive answer!
