@@ -1,0 +1,237 @@
+---
+title: "Agentic Coding with Cursor"
+jupyter: eds232-env
+format:
+  html:
+    code-copy: true
+---
+
+
+## What is Agentic Coding?
+
+Traditional AI code tools (GitHub Copilot, ChatGPT) work in a **request–response** loop: you ask, they suggest, you paste.
+
+**Agentic coding** is different. An agentic AI assistant can:
+
+- Understand a high-level goal ("explore this dataset and summarize what you find")
+- Break it into steps on its own
+- Create and edit files
+- Run terminal commands and read their output
+- Observe the result and course-correct before finishing
+
+---
+
+## Python IDE Setup  
+
+### Step 1: Navigate to your EDS 232 Lab Repo
+
+Open your EDS 232 lab Repo in the IDE of your choice. 
+
+### Step 2: Select eds232-env kernel 
+
+If you are on workbench, select the `ml-env`environment from the kernel. If working locally, select the `eds232-env` environment from the kernel. 
+
+
+## Cursor Setup 
+
+### Step 1: Download and Install Cursor
+
+Go to [cursor.com](https://www.cursor.com) and download the installer for your operating system. Cursor is built on VS Code, so the interface should feel familiar.
+
+### Step 2: Open Your Project Folder
+
+Once installed, open Cursor and choose **New Agent**. From the dropdown arrow, select the directory where you keep your EDS 232 lab notebooks (`eds232-labs/`).
+
+### Step 3: Prompt your agent
+
+
+## Test Use Case: Exploring the Palmer Penguins Dataset
+
+Your MEDS coding joruney will now come full circle by using the Palmer Penguins dataset once last time. We will use Cursor's Agent mode to explore body measurements recorded for three penguin species across three islands in the Antarctic Palmer Archipelago. 
+
+The goal: understand how body measurements differ across species and islands through summary statistics and visualizations.
+
+
+
+
+```default
+I want to explore the Palmer Penguins dataset to understand how body
+measurements vary across species and islands.
+
+Do the following in a single Python script called `penguin_eda.ipynb`. Store it in a new folder called `agentic_coding`.:
+
+1. Load the dataset with seaborn: sns.load_dataset("penguins")
+2. Print the shape, column names, and data types
+3. Print a summary of missing values per column
+4. Drop rows with missing values and print how many rows remain
+5. Print grouped summary statistics (mean and std) for bill_length_mm,
+   bill_depth_mm, flipper_length_mm, and body_mass_g — grouped by species
+6. Create a 2x2 grid of boxplots showing the distribution of each numeric
+   measurement broken down by species. Use a color palette that distinguishes
+   the three species clearly. Save as boxplots.png
+7. Create a scatterplot of bill_length_mm vs. flipper_length_mm, colored
+   by species, with a legend. Save as scatter.png
+```
+
+
+Cursor will create `penguin_eda.ipynb`. Navigate to VS Code (or whichever IDE you chose). You should see `agentic_coding/penguin_eda.ipynb` in your EDS 232 lab repo.
+
+### Step 4: Review the Output
+
+Naviate to the notebook Cursor just created and view its outputs. How did it do? Did it achieve all 7 steps? Can you think of a faster way to achieve the same output? 
+
+
+### Step 5: Iterate with Follow-Up Prompts
+
+Try these follow-up prompts in Agent mode after the starter script is working:
+
+::: {.callout-note}
+## Follow-Up Prompt 1 — Add an Island Breakdown
+
+```default
+Update penguin_eda.ipynb to also print a counts table showing how many
+penguins of each species were observed on each island. Then add a
+grouped bar chart of those counts and save it as island_counts.png.
+```
+:::
+
+
+::: {.callout-note}
+## Follow-Up Prompt 2 — Sex Differences
+
+```default
+Add a section to penguin_eda.py that compares mean body_mass_g between
+male and female penguins within each species. Show the results as a
+grouped bar chart with error bars representing standard deviation.
+Save it as sex_comparison.png.
+```
+:::
+
+After each prompt, check that Cursor's changes make sense before accepting the diff. Agentic tools can make mistakes! Your job is to be a thoughtful reviewer, not a passive user.
+
+---
+
+## Visualizing Your MEDS GitHub Journey
+
+Over the last 10 months, you have used GitHub to house all of the hard work you have created. Use Cursor's Agent mode to query the GitHub API and build a personal report of your coding activity across that entire period: which repos you worked in, how often you pushed, and how your activity evolved over time.
+
+### Step 1: Authenticate with GitHub
+
+Open Cursor's integrated terminal (`Ctrl+\``) and run:
+
+```bash
+gh auth login
+```
+
+Follow the interactive prompts:
+
+- Select **GitHub.com**
+- Select **HTTPS**
+- When asked whether to authenticate with a browser, choose **Yes**
+- Complete the browser login flow
+
+
+
+### Step 2: Open Agent Mode and Give Your Goal
+
+
+
+
+```default
+Create `github_stats.ipynb` that retrieves my GitHub auth token automatically 
+via subprocess calling gh auth token (I have already run gh auth login), then 
+fetches my contribution calendar for August 1, 2025 through today using a single
+GraphQL query against https://api.github.com/graphql, with JSON caching at
+.github_stats_cache.json to avoid redundant requests. Using that daily contribution
+data, generate six matplotlib visualizations: a weekly line chart, a monthly bar chart,
+a day-of-week bar chart, an active-vs-inactive pie chart, a cumulative contributions area 
+chart, and a GitHub-style green heatmap grid (days × weeks), plus a weekly bar chart with
+a 4-week rolling average overlay; then print a plain-text summary of my total contributions,
+active days, most active month, and most active day of the week.
+```
+
+
+
+
+---
+
+
+## Tips for Effective Agentic Coding
+
+Getting good output from Cursor's Agent mode is a skill. These habits will save you significant debugging time.
+
+### Be Specific About File Names and Locations
+
+Vague prompts produce vague file placement. If you do not name the file, Cursor might not place it where you expect.
+
+| Instead of... | Say... |
+|---------------|--------|
+| "Save the plot" | "Save the plot as `outputs/boxplots.png`" |
+| "Create a script" | "Create a script at `scripts/penguin_eda.ipynb`" |
+| "Write the results to a file" | "Write the summary table to `results/species_summary.csv`" |
+
+Always include the **relative path from your project root**, not just the filename.
+
+### Constrain the Scope Up Front
+
+If you only want Cursor to edit one file, say so. Without a constraint, it may create helper modules, restructure your directory, or add dependencies you did not ask for.
+
+> "Make all changes inside `penguin_eda.ipynb` only. Do not create any new files."
+
+### Give It the Output Format
+
+Cursor makes assumptions about how to display results. If you have a preference, state it in the prompt:
+
+> "Print the summary table with `to_string()` so that all columns are visible, not truncated."
+
+> "Use a consistent color palette across all plots — teal `#047C90` for Adelie, gold `#D4A017` for Chinstrap, dark blue `#003660` for Gentoo."
+
+### Break Large Tasks into Steps
+
+A single prompt asking for ten things might not get all of them right. It is faster overall to prompt in stages and then run and verify each step before moving on than to debug a long script all at once.
+
+### Tell It What You Already Have
+
+If you have written part of the code yourself, tell Cursor explicitly so it does not rewrite it:
+
+> "I have already loaded and cleaned the data in `penguin_eda.ipynb`. Add only the plotting section below the existing code."
+
+
+---
+
+## Using Cursor with GitHub
+
+Cursor sits on top of VS Code and inherits its full Git integration, so your normal GitHub workflow works without any extra configuration.
+
+### Viewing Changes Before You Commit
+
+The **Changes panel** (on the top bar)  shows every modified file. Click any file to open a side-by-side diff. You can see exactly what Cursor added, changed, or deleted before you decide to keep it.
+
+This is especially important after Agent mode runs: **always review the diff before staging**.
+
+### Committing from Inside Cursor
+
+1. Open the Source Control panel
+2. Stage the files you want (`+` next to each file, or `+` at the top to stage all)
+3. Click "Create branch commit"
+4. Click "Push"
+5. Navigate to your remote repository to review the newly pushed branch and create a pull request if everthing loooks good)
+
+
+### Asking Cursor About Git
+
+The Chat panel understands Git questions in context. For example:
+
+> "What files have I changed since the last commit?"
+
+> "Write a commit message summarizing the changes I just made to `penguin_eda.ipynb`."
+
+> "I accidentally edited the wrong file — how do I discard just those changes?"
+
+Cursor will answer or execute the appropriate `git` command for you.
+
+
+
+---
+
+
