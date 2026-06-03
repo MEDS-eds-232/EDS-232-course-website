@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>First Midterm Study Guide – EDS 232 - Machine Learning for Environmental Science</title>
+<title>Agentic Coding with Cursor – EDS 232 - Machine Learning for Environmental Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -40,7 +75,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a8976c3e89df70b272bdfba3d2fda974.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -69,35 +104,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 </head>
 
@@ -196,6 +202,10 @@ window.Quarto = {
     <a class="dropdown-item" href="../lab/lab_workflows.html">
  <span class="dropdown-text">Pipelines and ML Workflows</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../lab/lab_agentic_coding.html">
+ <span class="dropdown-text">Agentic Coding with Cursor</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -249,19 +259,41 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#day-of-instructions" id="toc-day-of-instructions" class="nav-link active" data-scroll-target="#day-of-instructions">Day-of instructions</a></li>
-  <li><a href="#general-concepts" id="toc-general-concepts" class="nav-link" data-scroll-target="#general-concepts">General Concepts</a></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <li><a href="#what-is-agentic-coding" id="toc-what-is-agentic-coding" class="nav-link active" data-scroll-target="#what-is-agentic-coding">What is Agentic Coding?</a></li>
+  <li><a href="#python-ide-setup" id="toc-python-ide-setup" class="nav-link" data-scroll-target="#python-ide-setup">Python IDE Setup</a>
   <ul class="collapse">
-  <li><a href="#simple-linear-regression" id="toc-simple-linear-regression" class="nav-link" data-scroll-target="#simple-linear-regression">13. Simple Linear Regression</a></li>
-  <li><a href="#multiple-linear-regression" id="toc-multiple-linear-regression" class="nav-link" data-scroll-target="#multiple-linear-regression">14. Multiple Linear Regression</a></li>
-  <li><a href="#k-nearest-neighbors-classifier" id="toc-k-nearest-neighbors-classifier" class="nav-link" data-scroll-target="#k-nearest-neighbors-classifier">15. K-Nearest Neighbors Classifier</a></li>
-  <li><a href="#logistic-regression" id="toc-logistic-regression" class="nav-link" data-scroll-target="#logistic-regression">16. Logistic Regression</a></li>
+  <li><a href="#step-1-navigate-to-your-eds-232-lab-repo" id="toc-step-1-navigate-to-your-eds-232-lab-repo" class="nav-link" data-scroll-target="#step-1-navigate-to-your-eds-232-lab-repo">Step 1: Navigate to your EDS 232 Lab Repo</a></li>
+  <li><a href="#step-2-select-eds232-env-kernel" id="toc-step-2-select-eds232-env-kernel" class="nav-link" data-scroll-target="#step-2-select-eds232-env-kernel">Step 2: Select eds232-env kernel</a></li>
   </ul></li>
-  <li><a href="#practice-scenarios" id="toc-practice-scenarios" class="nav-link" data-scroll-target="#practice-scenarios">Practice Scenarios</a>
+  <li><a href="#cursor-setup" id="toc-cursor-setup" class="nav-link" data-scroll-target="#cursor-setup">Cursor Setup</a>
   <ul class="collapse">
-  <li><a href="#practice-1-salmon-survival-study" id="toc-practice-1-salmon-survival-study" class="nav-link" data-scroll-target="#practice-1-salmon-survival-study">Practice 1 — Salmon Survival Study</a></li>
-  <li><a href="#practice-2-soil-carbon-classification" id="toc-practice-2-soil-carbon-classification" class="nav-link" data-scroll-target="#practice-2-soil-carbon-classification">Practice 2 — Soil Carbon Classification</a></li>
+  <li><a href="#step-1-download-and-install-cursor" id="toc-step-1-download-and-install-cursor" class="nav-link" data-scroll-target="#step-1-download-and-install-cursor">Step 1: Download and Install Cursor</a></li>
+  <li><a href="#step-2-open-your-project-folder" id="toc-step-2-open-your-project-folder" class="nav-link" data-scroll-target="#step-2-open-your-project-folder">Step 2: Open Your Project Folder</a></li>
+  <li><a href="#step-3-prompt-your-agent" id="toc-step-3-prompt-your-agent" class="nav-link" data-scroll-target="#step-3-prompt-your-agent">Step 3: Prompt your agent</a></li>
+  </ul></li>
+  <li><a href="#test-use-case-exploring-the-palmer-penguins-dataset" id="toc-test-use-case-exploring-the-palmer-penguins-dataset" class="nav-link" data-scroll-target="#test-use-case-exploring-the-palmer-penguins-dataset">Test Use Case: Exploring the Palmer Penguins Dataset</a>
+  <ul class="collapse">
+  <li><a href="#step-4-review-the-output" id="toc-step-4-review-the-output" class="nav-link" data-scroll-target="#step-4-review-the-output">Step 4: Review the Output</a></li>
+  <li><a href="#step-5-iterate-with-follow-up-prompts" id="toc-step-5-iterate-with-follow-up-prompts" class="nav-link" data-scroll-target="#step-5-iterate-with-follow-up-prompts">Step 5: Iterate with Follow-Up Prompts</a></li>
+  </ul></li>
+  <li><a href="#visualizing-your-meds-github-journey" id="toc-visualizing-your-meds-github-journey" class="nav-link" data-scroll-target="#visualizing-your-meds-github-journey">Visualizing Your MEDS GitHub Journey</a>
+  <ul class="collapse">
+  <li><a href="#step-1-authenticate-with-github" id="toc-step-1-authenticate-with-github" class="nav-link" data-scroll-target="#step-1-authenticate-with-github">Step 1: Authenticate with GitHub</a></li>
+  <li><a href="#step-2-open-agent-mode-and-give-your-goal" id="toc-step-2-open-agent-mode-and-give-your-goal" class="nav-link" data-scroll-target="#step-2-open-agent-mode-and-give-your-goal">Step 2: Open Agent Mode and Give Your Goal</a></li>
+  </ul></li>
+  <li><a href="#tips-for-effective-agentic-coding" id="toc-tips-for-effective-agentic-coding" class="nav-link" data-scroll-target="#tips-for-effective-agentic-coding">Tips for Effective Agentic Coding</a>
+  <ul class="collapse">
+  <li><a href="#be-specific-about-file-names-and-locations" id="toc-be-specific-about-file-names-and-locations" class="nav-link" data-scroll-target="#be-specific-about-file-names-and-locations">Be Specific About File Names and Locations</a></li>
+  <li><a href="#constrain-the-scope-up-front" id="toc-constrain-the-scope-up-front" class="nav-link" data-scroll-target="#constrain-the-scope-up-front">Constrain the Scope Up Front</a></li>
+  <li><a href="#give-it-the-output-format" id="toc-give-it-the-output-format" class="nav-link" data-scroll-target="#give-it-the-output-format">Give It the Output Format</a></li>
+  <li><a href="#break-large-tasks-into-steps" id="toc-break-large-tasks-into-steps" class="nav-link" data-scroll-target="#break-large-tasks-into-steps">Break Large Tasks into Steps</a></li>
+  <li><a href="#tell-it-what-you-already-have" id="toc-tell-it-what-you-already-have" class="nav-link" data-scroll-target="#tell-it-what-you-already-have">Tell It What You Already Have</a></li>
+  </ul></li>
+  <li><a href="#using-cursor-with-github" id="toc-using-cursor-with-github" class="nav-link" data-scroll-target="#using-cursor-with-github">Using Cursor with GitHub</a>
+  <ul class="collapse">
+  <li><a href="#viewing-changes-before-you-commit" id="toc-viewing-changes-before-you-commit" class="nav-link" data-scroll-target="#viewing-changes-before-you-commit">Viewing Changes Before You Commit</a></li>
+  <li><a href="#committing-from-inside-cursor" id="toc-committing-from-inside-cursor" class="nav-link" data-scroll-target="#committing-from-inside-cursor">Committing from Inside Cursor</a></li>
+  <li><a href="#asking-cursor-about-git" id="toc-asking-cursor-about-git" class="nav-link" data-scroll-target="#asking-cursor-about-git">Asking Cursor About Git</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -271,7 +303,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">First Midterm Study Guide</h1>
+<h1 class="title">Agentic Coding with Cursor</h1>
 </div>
 
 
@@ -288,309 +320,233 @@ window.Quarto = {
 </header>
 
 
-<section id="day-of-instructions" class="level2">
-<h2 class="anchored" data-anchor-id="day-of-instructions">Day-of instructions</h2>
+<section id="what-is-agentic-coding" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-agentic-coding">What is Agentic Coding?</h2>
+<p>Traditional AI code tools (GitHub Copilot, ChatGPT) work in a <strong>request–response</strong> loop: you ask, they suggest, you paste.</p>
+<p><strong>Agentic coding</strong> is different. An agentic AI assistant can:</p>
 <ul>
-<li>The midterm will take place in our usual classroom during class time.</li>
-<li>This is a closed-book, individual exam.</li>
-<li>No electronics are allowed.</li>
-<li>You can bring a 3x5 notecard with study notes on both sides</li>
-<li>You will be provided a calculator for any small computations you may need to do.</li>
-</ul>
-</section>
-<section id="general-concepts" class="level2">
-<h2 class="anchored" data-anchor-id="general-concepts">General Concepts</h2>
-<ol type="1">
-<li><p>Being able to abstract from a data scenario</p>
-<ul>
-<li>1.1 What are the predictors: <span class="math inline">\(X_1, \ldots, X_p\)</span></li>
-<li>1.2 What is the response variable: <span class="math inline">\(Y\)</span></li>
-<li>1.3 Observation data points</li>
-<li>1.4 Whether inference or prediction is the main goal</li>
-<li>1.5 Whether the problem is a regression or classification task <!-- - 1.6 Whether the problem is a supervised or unsupervised task --></li>
-</ul></li>
-<li><p>Provide examples for parametric and non-parametric methods and potential advantages and drawbacks.</p></li>
-<li><p>Identify which accuracy metrics are appropriate to use in classification and regression applications for a given scenario.</p></li>
-<li><p>For the regression accuracy metrics MSE, <span class="math inline">\(R^2\)</span>, adjusted <span class="math inline">\(R^2\)</span>, being able to:</p>
-<ul>
-<li>4.1 Explain what each metric is measuring</li>
-<li>4.2 Explain how a set of observed data points <span class="math inline">\((x_i, y_i)\)</span> and their predicted values <span class="math inline">\(\hat{y}_i = \hat{f}(x_i)\)</span> fit into the formulas</li>
-</ul></li>
-<li><p>Being able to identify false positives/negatives and true positives/negatives given classification results in visual and tabular formats and create confusion matrices.</p></li>
-<li><p>For the classification accuracy metrics error rate, accuracy, precision, recall, TPR, FPR; being able to:</p>
-<ul>
-<li>6.1 Define each metric in terms of TP, FP, TN, and FN</li>
-<li>6.2 Calculate metrics given confusion matrices</li>
-<li>6.3 Explain how <span class="math inline">\(F_1\)</span> is computed from precision and recall and how to interpret it<br>
-</li>
-<li>6.4 Discuss what metric might be more appropriate to prioritize in specific applied scenarios</li>
-</ul></li>
-<li><p>Discuss how precision and recall change as a classifier correctly predicts more or less true positives.</p></li>
-<li><p>Identify and discuss overfitting in classification and regression scenarios, particularly in relation to test and training errors.</p></li>
-<li><p>Define model variance and bias, compare model results (plots) and discuss their relative bias and variance; explain the bias-variance tradeoff and the challenges it poses to minimizing the test error.</p></li>
-<li><p>Explain what “data leakage” is and identify whether it is occurring in different scenarios.</p></li>
-<li><p>Discuss how class imbalance may affect classification results.</p></li>
-<li><p>Explain how the cross-validation process for estimating test error is implemented, and how it can be used to tune hyperparameters and select across different models.</p></li>
-</ol>
-</section>
-<section id="methods" class="level2">
-<h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<section id="simple-linear-regression" class="level3">
-<h3 class="anchored" data-anchor-id="simple-linear-regression">13. Simple Linear Regression</h3>
-<ul>
-<li>13.1 In the model’s formula <span class="math inline">\(Y \approx \beta_0 + \beta_1 X\)</span>, being able to interpret the coefficients <span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span> abstractly and in specific data scenarios</li>
-<li>13.2 Generally explain the process via which the coefficients <span class="math inline">\(\hat{\beta}\)</span> are estimated</li>
-<li>13.3 Interpret standard errors and confidence intervals in plain language</li>
-<li>13.4 Explain the hypothesis testing process and interpret p-values</li>
-<li>13.5 Apply metrics, statistics, and results from a fitted model to solve inference and prediction questions</li>
-</ul>
-</section>
-<section id="multiple-linear-regression" class="level3">
-<h3 class="anchored" data-anchor-id="multiple-linear-regression">14. Multiple Linear Regression</h3>
-<ul>
-<li>14.1 In the model’s formula <span class="math inline">\(Y \approx \beta_0 + \beta_1 X_1 + \ldots + \beta_p X_p\)</span>, being able to interpret the coefficients <span class="math inline">\(\beta_0, \beta_1, \ldots, \beta_p\)</span> abstractly and in specific data scenarios</li>
-<li>14.2 Generally explain the process via which the coefficients <span class="math inline">\(\hat{\beta}\)</span> are estimated</li>
-<li>14.3 For <span class="math inline">\(p\)</span> predictors and one response variable, discuss the difference between fitting <span class="math inline">\(p\)</span> separate simple linear regressions</li>
-<li>14.4 Explain the hypothesis testing process and interpret p-values</li>
-<li>14.5 Apply metrics, statistics, and results from a fitted model to solve inference and prediction questions</li>
-</ul>
-</section>
-<section id="k-nearest-neighbors-classifier" class="level3">
-<h3 class="anchored" data-anchor-id="k-nearest-neighbors-classifier">15. K-Nearest Neighbors Classifier</h3>
-<ul>
-<li>15.1 Explain the procedure used to get a classification using KNN</li>
-<li>15.2 Relate the K hyperparameter to variance, bias, and potential overfitting</li>
-</ul>
-</section>
-<section id="logistic-regression" class="level3">
-<h3 class="anchored" data-anchor-id="logistic-regression">16. Logistic Regression</h3>
-<ul>
-<li>16.1 Explain how the process of using a logistic regression model to perform binary classification tasks (modeling <span class="math inline">\(p(X)\)</span> with the logistic function using the training data to fit it using maximum likelihood estimation; once the model <span class="math inline">\(p(X)\)</span> has been fitted, select a classification threshold)</li>
-<li>16.2 Interpret how the sign of the coefficients relates to the probability of belonging to the positive class</li>
-<li>16.3 Explain the hypothesis testing process and interpret p-values</li>
-<li>16.4 Apply metrics, statistics, and results from a fitted model to solve inference and prediction questions</li>
-<li>16.5 Understand how an ROC curve is constructed and rank models according to their ROC curves and AUCs</li>
+<li>Understand a high-level goal (“explore this dataset and summarize what you find”)</li>
+<li>Break it into steps on its own</li>
+<li>Create and edit files</li>
+<li>Run terminal commands and read their output</li>
+<li>Observe the result and course-correct before finishing</li>
 </ul>
 <hr>
 </section>
+<section id="python-ide-setup" class="level2">
+<h2 class="anchored" data-anchor-id="python-ide-setup">Python IDE Setup</h2>
+<section id="step-1-navigate-to-your-eds-232-lab-repo" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-navigate-to-your-eds-232-lab-repo">Step 1: Navigate to your EDS 232 Lab Repo</h3>
+<p>Open your EDS 232 lab Repo in the IDE of your choice.</p>
 </section>
-<section id="practice-scenarios" class="level2">
-<h2 class="anchored" data-anchor-id="practice-scenarios">Practice Scenarios</h2>
+<section id="step-2-select-eds232-env-kernel" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-select-eds232-env-kernel">Step 2: Select eds232-env kernel</h3>
+<p>If you are on workbench, select the <code>ml-env</code>environment from the kernel. If working locally, select the <code>eds232-env</code> environment from the kernel.</p>
+</section>
+</section>
+<section id="cursor-setup" class="level2">
+<h2 class="anchored" data-anchor-id="cursor-setup">Cursor Setup</h2>
+<section id="step-1-download-and-install-cursor" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-download-and-install-cursor">Step 1: Download and Install Cursor</h3>
+<p>Go to <a href="https://www.cursor.com">cursor.com</a> and download the installer for your operating system. Cursor is built on VS Code, so the interface should feel familiar.</p>
+</section>
+<section id="step-2-open-your-project-folder" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-open-your-project-folder">Step 2: Open Your Project Folder</h3>
+<p>Once installed, open Cursor and choose <strong>New Agent</strong>. From the dropdown arrow, select the directory where you keep your EDS 232 lab notebooks (<code>eds232-labs/</code>).</p>
+</section>
+<section id="step-3-prompt-your-agent" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-prompt-your-agent">Step 3: Prompt your agent</h3>
+</section>
+</section>
+<section id="test-use-case-exploring-the-palmer-penguins-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="test-use-case-exploring-the-palmer-penguins-dataset">Test Use Case: Exploring the Palmer Penguins Dataset</h2>
+<p>Your MEDS coding joruney will now come full circle by using the Palmer Penguins dataset once last time. We will use Cursor’s Agent mode to explore body measurements recorded for three penguin species across three islands in the Antarctic Palmer Archipelago.</p>
+<p>The goal: understand how body measurements differ across species and islands through summary statistics and visualizations.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>I want to explore the Palmer Penguins dataset to understand how body</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>measurements vary across species and islands.</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>Do the following in a single Python script called `penguin_eda.ipynb`. Store it in a new folder called `agentic_coding`.:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>1. Load the dataset with seaborn: sns.load_dataset("penguins")</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>2. Print the shape, column names, and data types</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>3. Print a summary of missing values per column</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>4. Drop rows with missing values and print how many rows remain</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>5. Print grouped summary statistics (mean and std) for bill_length_mm,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>   bill_depth_mm, flipper_length_mm, and body_mass_g — grouped by species</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>6. Create a 2x2 grid of boxplots showing the distribution of each numeric</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>   measurement broken down by species. Use a color palette that distinguishes</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>   the three species clearly. Save as boxplots.png</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>7. Create a scatterplot of bill_length_mm vs. flipper_length_mm, colored</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>   by species, with a legend. Save as scatter.png</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cursor will create <code>penguin_eda.ipynb</code>. Navigate to VS Code (or whichever IDE you chose). You should see <code>agentic_coding/penguin_eda.ipynb</code> in your EDS 232 lab repo.</p>
+<section id="step-4-review-the-output" class="level3">
+<h3 class="anchored" data-anchor-id="step-4-review-the-output">Step 4: Review the Output</h3>
+<p>Naviate to the notebook Cursor just created and view its outputs. How did it do? Did it achieve all 7 steps? Can you think of a faster way to achieve the same output?</p>
+</section>
+<section id="step-5-iterate-with-follow-up-prompts" class="level3">
+<h3 class="anchored" data-anchor-id="step-5-iterate-with-follow-up-prompts">Step 5: Iterate with Follow-Up Prompts</h3>
+<p>Try these follow-up prompts in Agent mode after the starter script is working:</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Please read
+<span class="screen-reader-only">Note</span>Follow-Up Prompt 1 — Add an Island Breakdown
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<ul>
-<li>These are <em>examples for the kind of questions the exam will have</em> and the format of the exam, not necessarily these exact topics.</li>
-<li>The exam will have two scenarios (10 questions each) in which you are requested to interpret results and discuss statements.</li>
-<li>The exam will cover all models discussed in the course, including but not limited to those in these practice exercises.”</li>
-</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Update penguin_eda.ipynb to also print a counts table showing how many</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>penguins of each species were observed on each island. Then add a</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>grouped bar chart of those counts and save it as island_counts.png.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
-<p><a href="../exams/practice_answer_key.html">✅ <strong>Solutions to practice exercises</strong></a></p>
-<p>The answers presented are quite comprehensive, so they can help you study and clarify any misconceptions.</p>
-<section id="practice-1-salmon-survival-study" class="level3">
-<h3 class="anchored" data-anchor-id="practice-1-salmon-survival-study">Practice 1 — Salmon Survival Study</h3>
-<p>A team is studying the relationship between ocean conditions and juvenile salmon survival in a coastal estuary. They collect data from 45 monitoring sites and are interested in understanding whether ocean temperature can predict how many juvenile salmon survive. The following variables are recorded at each site:</p>
-<ul>
-<li><strong>Sea surface temperature (SST)</strong>: water temperature (°C) at each monitoring site</li>
-<li><strong>Juvenile salmon survival rate</strong>: percentage (%) of juvenile salmon that survived to a given life stage at each site</li>
-</ul>
-<p><strong>Q1.</strong> What is the predictor variable in this study? What is the response variable?</p>
-<p><strong>Q2.</strong> Is this a regression or a classification problem? Justify your answer in one sentence.</p>
-<p><strong>Q3.</strong> Is this a supervised or unsupervised learning task? Justify your answer.</p>
-<p>Before fitting a model, the team is planning to use the following workflow:</p>
-<ol type="1">
-<li>Collect all 45 observations and split into a training set (80%) and a test set (20%).</li>
-<li>Fit three candidate models on the training set: simple linear regression with SST, simple linear regression with log(SST), and a polynomial regression.</li>
-<li>Evaluate all three models on the test set and choose the one with the lowest test MSE.</li>
-<li>Report the test MSE of the chosen model as its performance estimate.</li>
-</ol>
-<p><strong>Q4.</strong> Identify the problem in this workflow. How can it be corrected?</p>
-<p>The team fits a simple linear regression model on the training set:</p>
-<p><span class="math display">\[\widehat{\text{survival rate}} = \hat{\beta}_0 + \hat{\beta}_1 \times \text{SST}\]</span></p>
-<p>The model output and summary statistics are shown below.</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: left;"></th>
-<th style="text-align: center;">Estimate</th>
-<th style="text-align: center;">Std. Error</th>
-<th style="text-align: center;"><span class="math inline">\(t\)</span>-statistic</th>
-<th style="text-align: center;"><span class="math inline">\(p\)</span>-value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Intercept (<span class="math inline">\(\hat{\beta}_0\)</span>)</td>
-<td style="text-align: center;">82.4</td>
-<td style="text-align: center;">6.3</td>
-<td style="text-align: center;">13.08</td>
-<td style="text-align: center;">&lt; 0.001</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">SST (<span class="math inline">\(\hat{\beta}_1\)</span>)</td>
-<td style="text-align: center;">−3.1</td>
-<td style="text-align: center;">0.8</td>
-<td style="text-align: center;">−3.88</td>
-<td style="text-align: center;">&lt; 0.001</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>95% confidence interval for <span class="math inline">\(\hat{\beta}_1\)</span>: <span class="math inline">\([-4.7,\ -1.5]\)</span></li>
-<li><span class="math inline">\(R^2 = 0.25\)</span></li>
-</ul>
-<p><strong>Q5.</strong> Interpret the slope coefficient <span class="math inline">\(\hat{\beta}_1 = -3.1\)</span> in the context of this study.</p>
-<p><strong>Q6.</strong> Use the <span class="math inline">\(p\)</span>-value to draw a conclusion about whether SST is a statistically significant predictor of survival rate.</p>
-<p><strong>Q7.</strong> One team member states:</p>
-<blockquote class="blockquote">
-<p><em>“An <span class="math inline">\(R^2\)</span> of 0.25 means the model is incorrect 75% of the time.”</em></p>
-</blockquote>
-<p>Is this statement true or false? Explain your reasoning.</p>
-<p><strong>Q8.</strong> Another team member suggests:</p>
-<blockquote class="blockquote">
-<p><em>“Let’s calculate the AUC to get a metric on the model’s performance.”</em></p>
-</blockquote>
-<p>Is AUC an appropriate metric here? Explain.</p>
-<p>The team expands their model to include two additional predictors: salinity (parts per thousand) and river discharge (m³/s):</p>
-<p><span class="math display">\[\widehat{\text{survival rate}} = \hat{\beta}_0 + \hat{\beta}_1 \times  \text{SST} + \hat{\beta}_2 \times \text{salinity} + \hat{\beta}_3 \times  \text{discharge}\]</span></p>
-<p><strong>Q9.</strong> Interpret what the coefficient for salinity represents in this multiple regression model.</p>
-<p>The expanded model produces the following results:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: left;"></th>
-<th style="text-align: center;">Estimate</th>
-<th style="text-align: center;">Std. Error</th>
-<th style="text-align: center;"><span class="math inline">\(t\)</span>-statistic</th>
-<th style="text-align: center;"><span class="math inline">\(p\)</span>-value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Intercept</td>
-<td style="text-align: center;">78.1</td>
-<td style="text-align: center;">7.2</td>
-<td style="text-align: center;">10.85</td>
-<td style="text-align: center;">&lt; 0.001</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">SST</td>
-<td style="text-align: center;">−2.8</td>
-<td style="text-align: center;">0.9</td>
-<td style="text-align: center;">−3.11</td>
-<td style="text-align: center;">0.003</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Salinity</td>
-<td style="text-align: center;">0.4</td>
-<td style="text-align: center;">0.6</td>
-<td style="text-align: center;">0.67</td>
-<td style="text-align: center;">0.510</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Discharge</td>
-<td style="text-align: center;">1.2</td>
-<td style="text-align: center;">0.3</td>
-<td style="text-align: center;">4.00</td>
-<td style="text-align: center;">&lt; 0.001</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Q10.</strong> Based on the p-value for salinity, what conclusion do you draw about its relationship with survival rate? Explain.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Follow-Up Prompt 2 — Sex Differences
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Add a section to penguin_eda.py that compares mean body_mass_g between</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>male and female penguins within each species. Show the results as a</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>grouped bar chart with error bars representing standard deviation.</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>Save it as sex_comparison.png.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<p>After each prompt, check that Cursor’s changes make sense before accepting the diff. Agentic tools can make mistakes! Your job is to be a thoughtful reviewer, not a passive user.</p>
 <hr>
 </section>
-<section id="practice-2-soil-carbon-classification" class="level3">
-<h3 class="anchored" data-anchor-id="practice-2-soil-carbon-classification">Practice 2 — Soil Carbon Classification</h3>
-<p>A team of soil scientists is building a classifier to label soil samples according to carbon status. The samples are labeled as <em>High Carbon</em> or <em>Low Carbon</em> based on two soil measurements:</p>
+</section>
+<section id="visualizing-your-meds-github-journey" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing-your-meds-github-journey">Visualizing Your MEDS GitHub Journey</h2>
+<p>Over the last 10 months, you have used GitHub to house all of the hard work you have created. Use Cursor’s Agent mode to query the GitHub API and build a personal report of your coding activity across that entire period: which repos you worked in, how often you pushed, and how your activity evolved over time.</p>
+<section id="step-1-authenticate-with-github" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-authenticate-with-github">Step 1: Authenticate with GitHub</h3>
+<p>Open Cursor’s integrated terminal (`Ctrl+``) and run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> auth login</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Follow the interactive prompts:</p>
 <ul>
-<li><strong>Bulk density index (<span class="math inline">\(X_1\)</span>)</strong>: normalized bulk density of the soil sample, on a 0–10 scale</li>
-<li><strong>Clay content index (<span class="math inline">\(X_2\)</span>)</strong>: normalized clay content of the soil sample, on a 0–10 scale</li>
+<li>Select <strong>GitHub.com</strong></li>
+<li>Select <strong>HTTPS</strong></li>
+<li>When asked whether to authenticate with a browser, choose <strong>Yes</strong></li>
+<li>Complete the browser login flow</li>
 </ul>
-<p>The team will be using <em>High Carbon</em> as the positive class.</p>
-<p>Soil samples flagged as <em>High Carbon</em> will be published in a public database and used to certify land for carbon credit markets. Incorrectly certifying a <em>Low Carbon</em> site as <em>High Carbon</em> would undermine the program’s credibility and have financial consequences.</p>
-<p><strong>Q1.</strong> Which metric should the team prioritize recall or precision? Explain why.</p>
-<p>The team applies their KNN classifier (<span class="math inline">\(K = 3\)</span>) to a test set of 37 soil samples.</p>
-<p>The figure below shows the KNN decision boundary (<span class="math inline">\(K = 3\)</span>) fitted on the training data . Four test points (T1, T2, T3, T4) have been plotted. Their true labels are shown in the table.</p>
-<p><strong>Q2.</strong> Explain to the team what a false positive is in the context of this problem and identify one from the test points in the plot.</p>
-<div id="6b9fd1a1" class="cell" data-execution_count="1">
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="exam1_study_guide_files/figure-html/cell-2-output-1.png" width="517" height="467" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
+</section>
+<section id="step-2-open-agent-mode-and-give-your-goal" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-open-agent-mode-and-give-your-goal">Step 2: Open Agent Mode and Give Your Goal</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Create `github_stats.ipynb` that retrieves my GitHub auth token automatically </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>via subprocess calling gh auth token (I have already run gh auth login), then </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>fetches my contribution calendar for August 1, 2025 through today using a single</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>GraphQL query against https://api.github.com/graphql, with JSON caching at</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>.github_stats_cache.json to avoid redundant requests. Using that daily contribution</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>data, generate six matplotlib visualizations: a weekly line chart, a monthly bar chart,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>a day-of-week bar chart, an active-vs-inactive pie chart, a cumulative contributions area </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>chart, and a GitHub-style green heatmap grid (days × weeks), plus a weekly bar chart with</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>a 4-week rolling average overlay; then print a plain-text summary of my total contributions,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>active days, most active month, and most active day of the week.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+</section>
+<section id="tips-for-effective-agentic-coding" class="level2">
+<h2 class="anchored" data-anchor-id="tips-for-effective-agentic-coding">Tips for Effective Agentic Coding</h2>
+<p>Getting good output from Cursor’s Agent mode is a skill. These habits will save you significant debugging time.</p>
+<section id="be-specific-about-file-names-and-locations" class="level3">
+<h3 class="anchored" data-anchor-id="be-specific-about-file-names-and-locations">Be Specific About File Names and Locations</h3>
+<p>Vague prompts produce vague file placement. If you do not name the file, Cursor might not place it where you expect.</p>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 65%">
+<col style="width: 34%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: center;">Test Point</th>
-<th style="text-align: center;">True Label</th>
+<th>Instead of…</th>
+<th>Say…</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;">T1</td>
-<td style="text-align: center;">Low Carbon</td>
+<td>“Save the plot”</td>
+<td>“Save the plot as <code>outputs/boxplots.png</code>”</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">T2</td>
-<td style="text-align: center;">Low Carbon</td>
+<td>“Create a script”</td>
+<td>“Create a script at <code>scripts/penguin_eda.ipynb</code>”</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">T3</td>
-<td style="text-align: center;">High Carbon</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">T4</td>
-<td style="text-align: center;">High Carbon</td>
+<td>“Write the results to a file”</td>
+<td>“Write the summary table to <code>results/species_summary.csv</code>”</td>
 </tr>
 </tbody>
 </table>
-<p>The confusion matrix below shows the results.</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: left;"></th>
-<th style="text-align: center;">Predicted: High</th>
-<th style="text-align: center;">Predicted: Low</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><strong>Actual: High</strong></td>
-<td style="text-align: center;">9</td>
-<td style="text-align: center;">3</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><strong>Actual: Low</strong></td>
-<td style="text-align: center;">5</td>
-<td style="text-align: center;">20</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Q3.</strong> Calculate the False Positive Rate (FPR). Explain in plain language what this value means. Use the class names, not “positive” and “negative.”</p>
-<p><strong>Q4.</strong> The team considers using <span class="math inline">\(K = 1\)</span> versus <span class="math inline">\(K = 9\)</span>. Which value of <span class="math inline">\(K\)</span> is more likely to overfit the training data? Explain using the concepts of model flexibility, bias, and variance.</p>
-<p>Instead of KNN, the team decides to fit a logistic regression model to predict carbon status.</p>
-<p><strong>Q5.</strong> Once the logistic regression model is fitted, what additional decision must the team make before it can output class labels? What are the tradeoffs of setting this value too high or too low in the context of the carbon certification program?</p>
-<p><strong>Q6.</strong> The coefficient for bulk density index (<span class="math inline">\(X_1\)</span>) is <span class="math inline">\(-0.9\)</span>. A teammate says:</p>
+<p>Always include the <strong>relative path from your project root</strong>, not just the filename.</p>
+</section>
+<section id="constrain-the-scope-up-front" class="level3">
+<h3 class="anchored" data-anchor-id="constrain-the-scope-up-front">Constrain the Scope Up Front</h3>
+<p>If you only want Cursor to edit one file, say so. Without a constraint, it may create helper modules, restructure your directory, or add dependencies you did not ask for.</p>
 <blockquote class="blockquote">
-<p><em>“This means sites with higher bulk density are less likely to be classified as High Carbon, given all else is held fixed.”</em></p>
+<p>“Make all changes inside <code>penguin_eda.ipynb</code> only. Do not create any new files.”</p>
 </blockquote>
-<p>Are they correct? Explain.</p>
-<p><strong>Q7.</strong> Someone else suggests:</p>
+</section>
+<section id="give-it-the-output-format" class="level3">
+<h3 class="anchored" data-anchor-id="give-it-the-output-format">Give It the Output Format</h3>
+<p>Cursor makes assumptions about how to display results. If you have a preference, state it in the prompt:</p>
 <blockquote class="blockquote">
-<p><em>“When we apply <span class="math inline">\(k\)</span>-fold cross-validation to evaluate a single model, we end up with <span class="math inline">\(k\)</span> different intermediate trained models. We need to choose one of these to actually use to get the final predictions.”</em></p>
+<p>“Print the summary table with <code>to_string()</code> so that all columns are visible, not truncated.”</p>
 </blockquote>
-<p>Is this statement true or false? Explain.</p>
+<blockquote class="blockquote">
+<p>“Use a consistent color palette across all plots — teal <code>#047C90</code> for Adelie, gold <code>#D4A017</code> for Chinstrap, dark blue <code>#003660</code> for Gentoo.”</p>
+</blockquote>
+</section>
+<section id="break-large-tasks-into-steps" class="level3">
+<h3 class="anchored" data-anchor-id="break-large-tasks-into-steps">Break Large Tasks into Steps</h3>
+<p>A single prompt asking for ten things might not get all of them right. It is faster overall to prompt in stages and then run and verify each step before moving on than to debug a long script all at once.</p>
+</section>
+<section id="tell-it-what-you-already-have" class="level3">
+<h3 class="anchored" data-anchor-id="tell-it-what-you-already-have">Tell It What You Already Have</h3>
+<p>If you have written part of the code yourself, tell Cursor explicitly so it does not rewrite it:</p>
+<blockquote class="blockquote">
+<p>“I have already loaded and cleaned the data in <code>penguin_eda.ipynb</code>. Add only the plotting section below the existing code.”</p>
+</blockquote>
+<hr>
+</section>
+</section>
+<section id="using-cursor-with-github" class="level2">
+<h2 class="anchored" data-anchor-id="using-cursor-with-github">Using Cursor with GitHub</h2>
+<p>Cursor sits on top of VS Code and inherits its full Git integration, so your normal GitHub workflow works without any extra configuration.</p>
+<section id="viewing-changes-before-you-commit" class="level3">
+<h3 class="anchored" data-anchor-id="viewing-changes-before-you-commit">Viewing Changes Before You Commit</h3>
+<p>The <strong>Changes panel</strong> (on the top bar) shows every modified file. Click any file to open a side-by-side diff. You can see exactly what Cursor added, changed, or deleted before you decide to keep it.</p>
+<p>This is especially important after Agent mode runs: <strong>always review the diff before staging</strong>.</p>
+</section>
+<section id="committing-from-inside-cursor" class="level3">
+<h3 class="anchored" data-anchor-id="committing-from-inside-cursor">Committing from Inside Cursor</h3>
+<ol type="1">
+<li>Open the Source Control panel</li>
+<li>Stage the files you want (<code>+</code> next to each file, or <code>+</code> at the top to stage all)</li>
+<li>Click “Create branch commit”</li>
+<li>Click “Push”</li>
+<li>Navigate to your remote repository to review the newly pushed branch and create a pull request if everthing loooks good)</li>
+</ol>
+</section>
+<section id="asking-cursor-about-git" class="level3">
+<h3 class="anchored" data-anchor-id="asking-cursor-about-git">Asking Cursor About Git</h3>
+<p>The Chat panel understands Git questions in context. For example:</p>
+<blockquote class="blockquote">
+<p>“What files have I changed since the last commit?”</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>“Write a commit message summarizing the changes I just made to <code>penguin_eda.ipynb</code>.”</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>“I accidentally edited the wrong file — how do I discard just those changes?”</p>
+</blockquote>
+<p>Cursor will answer or execute the appropriate <code>git</code> command for you.</p>
+<hr>
 
 
 </section>
