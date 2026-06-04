@@ -295,6 +295,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#committing-from-inside-cursor" id="toc-committing-from-inside-cursor" class="nav-link" data-scroll-target="#committing-from-inside-cursor">Committing from Inside Cursor</a></li>
   <li><a href="#asking-cursor-about-git" id="toc-asking-cursor-about-git" class="nav-link" data-scroll-target="#asking-cursor-about-git">Asking Cursor About Git</a></li>
   </ul></li>
+  <li><a href="#keeping-your-data-safe-with-agentic-tools" id="toc-keeping-your-data-safe-with-agentic-tools" class="nav-link" data-scroll-target="#keeping-your-data-safe-with-agentic-tools">Keeping Your Data Safe with Agentic Tools</a>
+  <ul class="collapse">
+  <li><a href="#confine-agent-access-to-one-repository" id="toc-confine-agent-access-to-one-repository" class="nav-link" data-scroll-target="#confine-agent-access-to-one-repository">Confine Agent Access to One Repository</a></li>
+  </ul></li>
+  <li><a href="#use-ai-tools-as-a-tutor-not-a-problem-solver." id="toc-use-ai-tools-as-a-tutor-not-a-problem-solver." class="nav-link" data-scroll-target="#use-ai-tools-as-a-tutor-not-a-problem-solver.">Use AI tools as a tutor, not a problem-solver.</a></li>
   </ul>
 </nav>
     </div>
@@ -322,7 +327,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="what-is-agentic-coding" class="level2">
 <h2 class="anchored" data-anchor-id="what-is-agentic-coding">What is Agentic Coding?</h2>
-<p>Traditional AI code tools (GitHub Copilot, ChatGPT) work in a <strong>request–response</strong> loop: you ask, they suggest, you paste.</p>
+<p>Traditional AI code tools (ChatGPT) work in a <strong>request–response</strong> loop: you ask, they suggest, you paste.</p>
 <p><strong>Agentic coding</strong> is different. An agentic AI assistant can:</p>
 <ul>
 <li>Understand a high-level goal (“explore this dataset and summarize what you find”)</li>
@@ -331,13 +336,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Run terminal commands and read their output</li>
 <li>Observe the result and course-correct before finishing</li>
 </ul>
+<p>Tools like <strong>Cursor</strong>, <strong>GitHub Copilot</strong> (Agent mode), and <strong>Claude Code</strong> all support agentic workflows.</p>
 <hr>
 </section>
 <section id="python-ide-setup" class="level2">
 <h2 class="anchored" data-anchor-id="python-ide-setup">Python IDE Setup</h2>
 <section id="step-1-navigate-to-your-eds-232-lab-repo" class="level3">
 <h3 class="anchored" data-anchor-id="step-1-navigate-to-your-eds-232-lab-repo">Step 1: Navigate to your EDS 232 Lab Repo</h3>
-<p>Open your EDS 232 lab Repo in the IDE of your choice.</p>
+<p>Open your EDS 232 lab repo in the IDE of your choice.</p>
 </section>
 <section id="step-2-select-eds232-env-kernel" class="level3">
 <h3 class="anchored" data-anchor-id="step-2-select-eds232-env-kernel">Step 2: Select eds232-env kernel</h3>
@@ -362,6 +368,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="test-use-case-exploring-the-palmer-penguins-dataset">Test Use Case: Exploring the Palmer Penguins Dataset</h2>
 <p>Your MEDS coding joruney will now come full circle by using the Palmer Penguins dataset once last time. We will use Cursor’s Agent mode to explore body measurements recorded for three penguin species across three islands in the Antarctic Palmer Archipelago.</p>
 <p>The goal: understand how body measurements differ across species and islands through summary statistics and visualizations.</p>
+<p>Copy the following prompt and paste it in the chat window on Cursor.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>I want to explore the Palmer Penguins dataset to understand how body</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>measurements vary across species and islands.</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -381,7 +388,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Cursor will create <code>penguin_eda.ipynb</code>. Navigate to VS Code (or whichever IDE you chose). You should see <code>agentic_coding/penguin_eda.ipynb</code> in your EDS 232 lab repo.</p>
 <section id="step-4-review-the-output" class="level3">
 <h3 class="anchored" data-anchor-id="step-4-review-the-output">Step 4: Review the Output</h3>
-<p>Naviate to the notebook Cursor just created and view its outputs. How did it do? Did it achieve all 7 steps? Can you think of a faster way to achieve the same output?</p>
+<p>Navigate to the notebook Cursor just created and view its outputs. How did it do? Did it achieve all 7 steps? Can you think of a faster way to achieve the same output?</p>
 </section>
 <section id="step-5-iterate-with-follow-up-prompts" class="level3">
 <h3 class="anchored" data-anchor-id="step-5-iterate-with-follow-up-prompts">Step 5: Iterate with Follow-Up Prompts</h3>
@@ -417,7 +424,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>Save it as sex_comparison.png.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
-<p>After each prompt, check that Cursor’s changes make sense before accepting the diff. Agentic tools can make mistakes! Your job is to be a thoughtful reviewer, not a passive user.</p>
+<p>After each prompt, check that Cursor’s changes make sense. Agentic tools can make mistakes! Your job is to be a thoughtful reviewer, not a passive user.</p>
 <hr>
 </section>
 </section>
@@ -521,7 +528,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="viewing-changes-before-you-commit" class="level3">
 <h3 class="anchored" data-anchor-id="viewing-changes-before-you-commit">Viewing Changes Before You Commit</h3>
 <p>The <strong>Changes panel</strong> (on the top bar) shows every modified file. Click any file to open a side-by-side diff. You can see exactly what Cursor added, changed, or deleted before you decide to keep it.</p>
-<p>This is especially important after Agent mode runs: <strong>always review the diff before staging</strong>.</p>
 </section>
 <section id="committing-from-inside-cursor" class="level3">
 <h3 class="anchored" data-anchor-id="committing-from-inside-cursor">Committing from Inside Cursor</h3>
@@ -530,7 +536,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Stage the files you want (<code>+</code> next to each file, or <code>+</code> at the top to stage all)</li>
 <li>Click “Create branch commit”</li>
 <li>Click “Push”</li>
-<li>Navigate to your remote repository to review the newly pushed branch and create a pull request if everthing loooks good)</li>
+<li>Navigate to your remote repository to review the newly pushed branch and create a pull request if everthing loooks good.</li>
 </ol>
 </section>
 <section id="asking-cursor-about-git" class="level3">
@@ -547,9 +553,51 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </blockquote>
 <p>Cursor will answer or execute the appropriate <code>git</code> command for you.</p>
 <hr>
-
-
 </section>
+</section>
+<section id="keeping-your-data-safe-with-agentic-tools" class="level2">
+<h2 class="anchored" data-anchor-id="keeping-your-data-safe-with-agentic-tools">Keeping Your Data Safe with Agentic Tools</h2>
+<p>Agentic tools are powerful in that they can read files, run commands, and browse your project. That same access makes it important to be deliberate about what you expose to them.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Never put sensitive data in context
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Do <strong>not</strong> paste or reference any of the following in a prompt or in any file your agent can read:</p>
+<ul>
+<li>API keys or tokens</li>
+<li>Passwords or credentials</li>
+<li>Personally identifiable information</li>
+</ul>
+</div>
+</div>
+<section id="confine-agent-access-to-one-repository" class="level3">
+<h3 class="anchored" data-anchor-id="confine-agent-access-to-one-repository">Confine Agent Access to One Repository</h3>
+<p>When you launch Agent mode, only open the specific project folder the agent needs. Do <strong>not</strong> point an agent at:</p>
+<ul>
+<li><code>/</code> (your entire filesystem)</li>
+<li><code>/Users/your-username/</code> (your home directory)</li>
+<li>Any folder that contains credentials, private data, or unrelated projects</li>
+</ul>
+<p>Giving an agent a narrow working directory limits what it can accidentally read, modify, or send upstream.</p>
+</section>
+</section>
+<section id="use-ai-tools-as-a-tutor-not-a-problem-solver." class="level2">
+<h2 class="anchored" data-anchor-id="use-ai-tools-as-a-tutor-not-a-problem-solver.">Use AI tools as a tutor, not a problem-solver.</h2>
+<ul>
+<li>Ask clarifying questions</li>
+<li>Ask for explanations at different skill levels</li>
+<li>Analyze the code it gave you and decide if there is an easier/ simpler way to go about it</li>
+<li>Push back when you aren’t confident about the code/ methods used</li>
+</ul>
+<hr>
+
+
 </section>
 
 </main> <!-- /main -->
